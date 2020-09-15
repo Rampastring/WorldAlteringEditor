@@ -1,0 +1,29 @@
+﻿namespace TSMapEditor.Models
+{
+    public enum RTTIType
+    {
+        None,
+        Unit,
+        Aircraft,
+        AircraftType,
+        Anim,
+        Building,
+        BuildingType,
+        Bullet,
+        Cell,
+        Factory,
+        HouseType,
+        Infantry,
+        InfantryType,
+        IsoTileType,
+        Side,
+        Smudge,
+        Terrain,
+        TerrainType,
+        UnitType,
+        Event,
+        TaskForce,
+        ScriptType,
+        TeamType
+    }
+}
