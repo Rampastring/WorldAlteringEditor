@@ -6,11 +6,5 @@
     /// </summary>
     public abstract class GameObject : AbstractObject
     {
-        public GameObject(string iniName)
-        {
-            ININame = iniName;
-        }
-
-        public string ININame { get; }
     }
 }

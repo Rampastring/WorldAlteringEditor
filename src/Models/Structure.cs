@@ -7,10 +7,6 @@
 
         public const int MaxUpgradeCount = 3;
 
-        public Structure(string iniName) : base(iniName)
-        {
-        }
-
         public override RTTIType WhatAmI() => RTTIType.Building;
 
         public bool AISellable { get; set; }

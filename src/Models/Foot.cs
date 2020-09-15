@@ -9,9 +9,6 @@
         public const int VeterancyVeteran = 100;
         public const int VeterancyElite = 200;
 
-        public Foot(string iniName) : base(iniName)
-        {
-        }
 
         public Mission Mission { get; set; }
         public bool High { get; set; }
