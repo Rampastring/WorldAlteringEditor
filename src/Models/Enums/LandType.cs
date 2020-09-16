@@ -8,11 +8,15 @@ namespace TSMapEditor.Models.Enums
 {
     public enum LandType
     {
+        Clear,
         Beach,
         Rough,
         Road,
         Railroad,
         Tiberium,
-        // TODO What other values are there?
+        Rock,
+        Weeds,
+        Tunnel,
+        Water
     }
 }

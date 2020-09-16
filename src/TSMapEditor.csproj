@@ -56,19 +56,25 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="GameMath\Point2D.cs" />
+    <Compile Include="Initialization\IInitializer.cs" />
+    <Compile Include="Initialization\Initializer.cs" />
     <Compile Include="Models\AbstractObject.cs" />
+    <Compile Include="Models\Aircraft.cs" />
     <Compile Include="Models\AircraftType.cs" />
     <Compile Include="Models\BuildingType.cs" />
     <Compile Include="Models\Enums\AITriggerConditionType.cs" />
     <Compile Include="Models\AITriggerType.cs" />
     <Compile Include="Models\Enums\LandType.cs" />
     <Compile Include="Models\Enums\TerrainOccupation.cs" />
+    <Compile Include="Models\Enums\TheaterType.cs" />
     <Compile Include="Models\Foot.cs" />
     <Compile Include="Models\GameObject.cs" />
     <Compile Include="Models\GameObjectType.cs" />
     <Compile Include="Models\House.cs" />
+    <Compile Include="Initialization\IMap.cs" />
     <Compile Include="Models\Infantry.cs" />
     <Compile Include="Models\InfantryType.cs" />
+    <Compile Include="Models\INIDefined.cs" />
     <Compile Include="Models\Map.cs" />
     <Compile Include="Models\Mission.cs" />
     <Compile Include="Models\Enums\RTTIType.cs" />
@@ -82,9 +88,11 @@
     <Compile Include="Models\TeamType.cs" />
     <Compile Include="Models\Techno.cs" />
     <Compile Include="Models\TechnoType.cs" />
+    <Compile Include="Models\TerrainObject.cs" />
     <Compile Include="Models\TerrainType.cs" />
     <Compile Include="Models\Unit.cs" />
     <Compile Include="Models\UnitType.cs" />
+    <Compile Include="Models\Waypoint.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">

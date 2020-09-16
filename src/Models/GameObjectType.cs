@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TSMapEditor.Models
 {
-    public abstract class GameObjectType : AbstractObject
+    public abstract class GameObjectType : AbstractObject, INIDefined
     {
         public GameObjectType(string iniName)
         {

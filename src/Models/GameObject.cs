@@ -1,4 +1,6 @@
-﻿namespace TSMapEditor.Models
+﻿using TSMapEditor.GameMath;
+
+namespace TSMapEditor.Models
 {
     /// <summary>
     /// A base class for game objects.
@@ -6,5 +8,6 @@
     /// </summary>
     public abstract class GameObject : AbstractObject
     {
+        public Point2D Position { get; set; }
     }
 }

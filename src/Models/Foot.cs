@@ -13,7 +13,7 @@
         public Mission Mission { get; set; }
         public bool High { get; set; }
         public int Veterancy { get; set; }
-        public int Group { get; set; }
+        public int Group { get; set; } = -1;
 
         /// <summary>
         /// Is this unit available for recruitment for TeamTypes that have Autocreate=no?
