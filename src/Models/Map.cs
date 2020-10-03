@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using TSMapEditor.GameMath;
 using TSMapEditor.Initialization;
 using TSMapEditor.Models.Enums;
+using TSMapEditor.Models.MapFormat;
 
 namespace TSMapEditor.Models
 {
@@ -16,6 +17,7 @@ namespace TSMapEditor.Models
 
         public Rules Rules { get; private set; }
 
+        public IsoMapPack5Tile[][] Tiles = new IsoMapPack5Tile[300][]; // for now
 
         public List<Aircraft> Aircraft { get; } = new List<Aircraft>();
         public List<Infantry> Infantry { get; } = new List<Infantry>();
@@ -29,6 +31,11 @@ namespace TSMapEditor.Models
 
         public Map()
         {
+            for (int i = 0; i < Tiles.Length; i++)
+            {
+                Tiles[i] = new IsoMapPack5Tile[300];
+            }
+
             initializer = new Initializer(this);
         }
 
@@ -38,7 +45,16 @@ namespace TSMapEditor.Models
 
             LoadedINI = mapIni ?? throw new ArgumentNullException(nameof(mapIni));
             Rules.InitFromINI(mapIni, initializer);
-        } 
+            initializer.ReadIsoMapPack(this, mapIni);
+        }
+
+        public void SetTileData(List<IsoMapPack5Tile> tiles)
+        {
+            foreach (var tile in tiles)
+            {
+                Tiles[tile.Y][tile.X] = tile;
+            }
+        }
 
         public void StartNew(IniFile rulesIni, IniFile firestormIni, TheaterType theaterType, Point2D size)
         {
