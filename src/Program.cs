@@ -3,6 +3,7 @@ using System;
 using System.Text;
 using System.Windows.Forms;
 using TSMapEditor.Models;
+using TSMapEditor.Rendering;
 
 namespace TSMapEditor
 {
@@ -16,7 +17,9 @@ namespace TSMapEditor
         {
             Logger.WriteToConsole = true;
 
-            Test();
+            new GameClass().Run();
+
+            //Test();
             return;
 
             Application.EnableVisualStyles();

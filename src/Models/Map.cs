@@ -17,7 +17,7 @@ namespace TSMapEditor.Models
 
         public Rules Rules { get; private set; }
 
-        public IsoMapPack5Tile[][] Tiles = new IsoMapPack5Tile[300][]; // for now
+        public IsoMapPack5Tile[][] Tiles = new IsoMapPack5Tile[600][]; // for now
 
         public List<Aircraft> Aircraft { get; } = new List<Aircraft>();
         public List<Infantry> Infantry { get; } = new List<Infantry>();
@@ -27,13 +27,15 @@ namespace TSMapEditor.Models
         public List<TerrainObject> TerrainObjects { get; } = new List<TerrainObject>();
         public List<Waypoint> Waypoints { get; } = new List<Waypoint>();
 
+        public Point2D Size { get; set; }
+
         private readonly Initializer initializer;
 
         public Map()
         {
             for (int i = 0; i < Tiles.Length; i++)
             {
-                Tiles[i] = new IsoMapPack5Tile[300];
+                Tiles[i] = new IsoMapPack5Tile[600];
             }
 
             initializer = new Initializer(this);
@@ -45,6 +47,7 @@ namespace TSMapEditor.Models
 
             LoadedINI = mapIni ?? throw new ArgumentNullException(nameof(mapIni));
             Rules.InitFromINI(mapIni, initializer);
+            initializer.ReadMapSection(this, mapIni);
             initializer.ReadIsoMapPack(this, mapIni);
         }
 
@@ -53,6 +56,34 @@ namespace TSMapEditor.Models
             foreach (var tile in tiles)
             {
                 Tiles[tile.Y][tile.X] = tile;
+            }
+
+            // Check for uninitialized tiles within the map bounds
+            // Begin from the top-left corner and proceed row by row
+            int ox = 1;
+            int oy = Size.Y;
+            while (ox <= Size.Y)
+            {
+                int tx = ox;
+                int ty = oy;
+                while (tx < Size.X + ox)
+                {
+                    if (Tiles[ty][tx] == null)
+                    {
+                        Tiles[ty][tx] = new IsoMapPack5Tile() { X = (short)tx, Y = (short)ty };
+                    }
+
+                    if (tx < Size.X && Tiles[ty][tx + 1] == null)
+                    {
+                        Tiles[ty][tx + 1] = new IsoMapPack5Tile() { X = (short)(tx + 1), Y = (short)ty };
+                    }
+
+                    tx++;
+                    ty--;
+                }
+
+                ox++;
+                oy++;
             }
         }
 

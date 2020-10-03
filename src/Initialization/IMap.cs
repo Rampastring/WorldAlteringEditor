@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Rampastring.Tools;
+using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Models.MapFormat;
 
@@ -16,6 +17,7 @@ namespace TSMapEditor.Initialization
         List<TerrainObject> TerrainObjects { get; }
         List<Unit> Units { get; }
         List<Waypoint> Waypoints { get; }
+        Point2D Size { get; set; }
         void SetTileData(List<IsoMapPack5Tile> tiles);
     }
 }

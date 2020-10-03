@@ -10,6 +10,8 @@ namespace TSMapEditor.Models.MapFormat
     {
         public const int Size = 11;
 
+        public IsoMapPack5Tile() { }
+
         public IsoMapPack5Tile(byte[] data)
         {
             X = BitConverter.ToInt16(data, 0);

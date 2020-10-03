@@ -10,6 +10,13 @@ using TSMapEditor.Models.MapFormat;
 
 namespace TSMapEditor.Initialization
 {
+    public class MapLoadException : Exception
+    {
+        public MapLoadException(string message) : base(message)
+        {
+        }
+    }
+
     /// <summary>
     /// Initializes all different object types.
     /// </summary>
@@ -42,6 +49,24 @@ namespace TSMapEditor.Initialization
 
             if (objectTypeInitializers.TryGetValue(typeof(T), out Action<AbstractObject, IniFile, IniSection> action))
                 action(obj, iniFile, objectSection);
+        }
+
+        public void ReadMapSection(IMap map, IniFile mapIni)
+        {
+            var section = mapIni.GetSection("Map");
+            if (section == null)
+                throw new MapLoadException("[Map] does not exist in the loaded file!");
+
+            string size = section.GetStringValue("Size", null);
+            if (size == null)
+                throw new MapLoadException("Invalid [Map] Size=");
+            string[] parts = size.Split(',');
+            if (parts.Length != 4)
+                throw new MapLoadException("Invalid [Map] Size=");
+
+            int width = int.Parse(parts[2]);
+            int height = int.Parse(parts[3]);
+            map.Size = new GameMath.Point2D(width, height);
         }
 
         public void ReadIsoMapPack(IMap map, IniFile mapIni)
