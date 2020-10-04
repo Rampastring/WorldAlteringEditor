@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Models.MapFormat;
@@ -30,7 +31,7 @@ namespace TSMapEditor.Rendering
         private bool mapInvalidated = true;
         private Point2D cameraTopLeftPoint = new Point2D(0, 0);
 
-        private int scrollRate = 10;
+        private int scrollRate = 20;
 
         public override void Initialize()
         {
@@ -119,6 +120,45 @@ namespace TSMapEditor.Rendering
             base.Update(gameTime);
         }
 
+        private void DrawCursorTile()
+        {
+            Point cursorPoint = GetCursorPoint();
+            Point2D cursorMapPoint = new Point2D(cameraTopLeftPoint.X + cursorPoint.X - Constants.CellSizeX / 2,
+                cameraTopLeftPoint.Y + cursorPoint.Y - Constants.CellSizeY / 2);
+
+            DrawStringWithShadow("Cursor coord: " + cursorMapPoint.X + ", " + cursorMapPoint.Y, 0, new Vector2(0f, 0f), Color.White);
+
+            Point2D tileCoords = CellMath.CellCoordsFromPixelCoords(cursorMapPoint, Map.Size);
+
+            DrawStringWithShadow(tileCoords.X + ", " + tileCoords.Y, 0, new Vector2(0f, 20f), Color.White);
+
+            if (tileCoords.X >= 1 && tileCoords.Y >= 1 && tileCoords.Y < Map.Tiles.Length && tileCoords.X < Map.Tiles[tileCoords.Y].Length)
+            {
+                var tile = Map.Tiles[tileCoords.Y][tileCoords.X];
+
+                if (tile == null)
+                {
+                    DrawString("Null tile", 0, new Vector2(0f, 40f), Color.White);
+                }
+                else
+                {
+                    Point2D drawPoint = CellMath.CellTopLeftPoint(new Point2D(tile.X, tile.Y), Map.Size.X);
+
+                    FillRectangle(new Rectangle(drawPoint.X - cameraTopLeftPoint.X,
+                        drawPoint.Y - cameraTopLeftPoint.Y,
+                        Constants.CellSizeX, Constants.CellSizeY),
+                        new Color(128, 128, 128, 128));
+
+                    TileImage tileGraphics = TheaterGraphics.GetTileGraphics(tile.TileIndex);
+                    TileSet tileSet = TheaterGraphics.Theater.TileSets[tileGraphics.TileSetId];
+                    DrawStringWithShadow("TileSet: " + tileSet.SetName + " (" + tileGraphics.TileSetId + ")", 0,
+                        new Vector2(0f, 40f), Color.White);
+                    DrawStringWithShadow("Tile ID: " + tileGraphics.TileIndex, 0, new Vector2(0f, 60f), Color.White);
+                    DrawStringWithShadow("Sub-tile ID: " + tile.SubTileIndex, 0, new Vector2(0f, 80f), Color.White);
+                }
+            }
+        }
+
         public override void Draw(GameTime gameTime)
         {
             if (mapInvalidated)
@@ -129,6 +169,8 @@ namespace TSMapEditor.Rendering
 
             DrawTexture(renderTarget, new Rectangle(cameraTopLeftPoint.X, cameraTopLeftPoint.Y,
                 Width, Height), new Rectangle(0, 0, Width, Height), Color.White);
+
+            DrawCursorTile();
 
             base.Draw(gameTime);
         }

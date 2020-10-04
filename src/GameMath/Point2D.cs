@@ -1,4 +1,6 @@
-﻿namespace TSMapEditor.GameMath
+﻿using Microsoft.Xna.Framework;
+
+namespace TSMapEditor.GameMath
 {
     public struct Point2D
     {
@@ -15,5 +17,8 @@
         {
             return new Point2D(p1.X + p2.X, p1.Y + p2.Y);
         }
+
+        public static Point2D FromXNAPoint(Point point)
+            => new Point2D(point.X, point.Y);
     }
 }
