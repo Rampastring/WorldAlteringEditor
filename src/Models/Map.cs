@@ -61,7 +61,7 @@ namespace TSMapEditor.Models
             // Check for uninitialized tiles within the map bounds
             // Begin from the top-left corner and proceed row by row
             int ox = 1;
-            int oy = Size.Y;
+            int oy = Size.X;
             while (ox <= Size.Y)
             {
                 int tx = ox;
@@ -73,7 +73,7 @@ namespace TSMapEditor.Models
                         Tiles[ty][tx] = new IsoMapPack5Tile() { X = (short)tx, Y = (short)ty };
                     }
 
-                    if (tx < Size.X && Tiles[ty][tx + 1] == null)
+                    if (tx < Size.X + ox - 2 && Tiles[ty][tx + 1] == null)
                     {
                         Tiles[ty][tx + 1] = new IsoMapPack5Tile() { X = (short)(tx + 1), Y = (short)ty };
                     }
