@@ -65,6 +65,7 @@
     <Compile Include="CCEngine\MixFile.cs" />
     <Compile Include="CCEngine\Palette.cs" />
     <Compile Include="CCEngine\RGBColor.cs" />
+    <Compile Include="CCEngine\ShpFile.cs" />
     <Compile Include="CCEngine\Theater.cs" />
     <Compile Include="CCEngine\TileSet.cs" />
     <Compile Include="CCEngine\TmpFile.cs" />

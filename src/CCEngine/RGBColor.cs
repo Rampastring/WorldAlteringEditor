@@ -15,8 +15,15 @@ namespace TSMapEditor.CCEngine
             B = (byte)(buffer[offset + 2] << 2);
         }
 
-        public byte R { get; set; }
-        public byte G { get; set; }
-        public byte B { get; set; }
+        public RGBColor(byte r, byte g, byte b)
+        {
+            R = r;
+            G = g;
+            B = b;
+        }
+
+        public byte R;
+        public byte G;
+        public byte B;
     }
 }
