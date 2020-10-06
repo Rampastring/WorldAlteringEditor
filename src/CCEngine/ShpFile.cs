@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace TSMapEditor.CCEngine
 
     struct ShpFileHeader
     {
-        private const int SizeOf = 8;
+        public const int SizeOf = 8;
 
         public ShpFileHeader(byte[] buffer)
         {
@@ -26,14 +27,14 @@ namespace TSMapEditor.CCEngine
             if (Unknown != 0)
                 throw new ArgumentException("Unexpected field value in SHP header");
 
-            SpriteSheetWidth = BitConverter.ToUInt16(buffer, 2);
-            SpriteSheetHeight = BitConverter.ToUInt16(buffer, 4);
+            SpriteWidth = BitConverter.ToUInt16(buffer, 2);
+            SpriteHeight = BitConverter.ToUInt16(buffer, 4);
             FrameCount = BitConverter.ToUInt16(buffer, 6);
         }
 
         public ushort Unknown;
-        public ushort SpriteSheetWidth;
-        public ushort SpriteSheetHeight;
+        public ushort SpriteWidth;
+        public ushort SpriteHeight;
         public ushort FrameCount;
     }
 
@@ -41,21 +42,38 @@ namespace TSMapEditor.CCEngine
     {
         private const int SizeOf = 24;
 
-        public ShpFrameInfo(byte[] buffer)
+        public ShpFrameInfo(Stream stream)
         {
-            if (buffer.Length < SizeOf)
+            if (stream.Length < stream.Position + SizeOf)
                 throw new ArgumentException(nameof(ShpFrameInfo) + ": buffer is not long enough");
 
-            XOffset = BitConverter.ToUInt16(buffer, 0);
-            YOffset = BitConverter.ToUInt16(buffer, 2);
-            Width = BitConverter.ToUInt16(buffer, 4);
-            Height = BitConverter.ToUInt16(buffer, 6);
-            Flags = (ShpCompression)BitConverter.ToUInt32(buffer, 8);
-            AverageColor = new RGBColor(buffer[12], buffer[13], buffer[14]);
-            Unknown1 = buffer[15];
-            Unknown2 = BitConverter.ToUInt32(buffer, 16);
-            DataOffset = BitConverter.ToUInt32(buffer, 20);
+            XOffset = ReadUShortFromStream(stream);
+            YOffset = ReadUShortFromStream(stream);
+            Width = ReadUShortFromStream(stream);
+            Height = ReadUShortFromStream(stream);
+            Flags = (ShpCompression)ReadUIntFromStream(stream);
+            byte r = (byte)stream.ReadByte();
+            byte g = (byte)stream.ReadByte();
+            byte b = (byte)stream.ReadByte();
+            AverageColor = new RGBColor(r, g, b);
+            Unknown1 = (byte)stream.ReadByte();
+            Unknown2 = ReadUIntFromStream(stream);
+            DataOffset = ReadUIntFromStream(stream);
         }
+
+        private ushort ReadUShortFromStream(Stream stream)
+        {
+            stream.Read(buffer, 0, 2);
+            return BitConverter.ToUInt16(buffer, 0);
+        }
+
+        private uint ReadUIntFromStream(Stream stream)
+        {
+            stream.Read(buffer, 0, 4);
+            return BitConverter.ToUInt32(buffer, 0);
+        }
+
+        byte[] buffer = new byte[4];
 
         public ushort XOffset;
         public ushort YOffset;
@@ -70,7 +88,50 @@ namespace TSMapEditor.CCEngine
 
     public class ShpFile
     {
+        private ShpFileHeader shpFileHeader;
+        private List<ShpFrameInfo> shpFrameInfos;
 
+        public int FrameCount => shpFrameInfos.Count;
+
+        public void ParseFromFile(string filePath)
+        {
+            using (FileStream stream = File.OpenRead(filePath))
+            {
+                Parse(stream);
+            }
+        }
+
+        public void Parse(Stream stream)
+        {
+            byte[] buffer = new byte[stream.Length];
+            stream.Position = 0;
+            stream.Read(buffer, 0, buffer.Length);
+            ParseFromBuffer(buffer);
+        }
+
+        public void ParseFromBuffer(byte[] buffer)
+        {
+            shpFileHeader = new ShpFileHeader(buffer);
+            shpFrameInfos = new List<ShpFrameInfo>(shpFileHeader.FrameCount);
+
+            using (var memoryStream = new MemoryStream(buffer))
+            {
+                memoryStream.Position = ShpFileHeader.SizeOf;
+
+                for (int i = 0; i < shpFileHeader.FrameCount; i++)
+                {
+                    var shpFrameInfo = new ShpFrameInfo(memoryStream);
+                    shpFrameInfos.Add(shpFrameInfo);
+                }
+            }
+        }
+
+        public byte[] GetUncompressedFrameData(int frameIndex)
+        {
+            ShpFrameInfo frameInfo = shpFrameInfos[frameIndex];
+
+            throw new NotImplementedException();
+        }
     }
 
 
