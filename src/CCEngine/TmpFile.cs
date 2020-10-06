@@ -49,19 +49,20 @@ namespace TSMapEditor.CCEngine
                 tmpHeaderOffsets.Add(offset);
             }
 
-            MemoryStream memoryStream = new MemoryStream(buffer);
-
-            for (int i = 0; i < tileCount; i++)
+            using (var memoryStream = new MemoryStream(buffer))
             {
-                if (tmpHeaderOffsets[i] == 0)
+                for (int i = 0; i < tileCount; i++)
                 {
-                    tmpImages.Add(null);
-                }
-                else
-                {
-                    memoryStream.Position = tmpHeaderOffsets[i];
-                    TmpImage tmpImage = new TmpImage(memoryStream);
-                    tmpImages.Add(tmpImage);
+                    if (tmpHeaderOffsets[i] == 0)
+                    {
+                        tmpImages.Add(null);
+                    }
+                    else
+                    {
+                        memoryStream.Position = tmpHeaderOffsets[i];
+                        TmpImage tmpImage = new TmpImage(memoryStream);
+                        tmpImages.Add(tmpImage);
+                    }
                 }
             }
         }
