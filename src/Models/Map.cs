@@ -49,6 +49,7 @@ namespace TSMapEditor.Models
             Rules.InitFromINI(mapIni, initializer);
             initializer.ReadMapSection(this, mapIni);
             initializer.ReadIsoMapPack(this, mapIni);
+            initializer.ReadTerrainObjects(this, mapIni);
         }
 
         public void SetTileData(List<IsoMapPack5Tile> tiles)

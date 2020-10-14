@@ -45,21 +45,31 @@ namespace TSMapEditor.Models
             if (sectionKeys == null || sectionKeys.Count == 0)
                 return;
 
+            int i = 0;
+
             foreach (string key in sectionKeys)
             {
                 string typeName = iniFile.GetStringValue(sectionName, key, null);
 
+                var objectType = typeof(T);
+
                 // We assume that the type has a constructor
                 // that takes a single string (ININame) as a parameter
-                var constructor = typeof(T).GetConstructor(new Type[] { typeof(string) });
+                var constructor = objectType.GetConstructor(new Type[] { typeof(string) });
                 if (constructor == null)
                 {
                     throw new InvalidOperationException(typeof(T).FullName +
                         " has no public constructor that takes a single string as an argument!");
                 }
-                
+
                 T objectInstance = (T)constructor.Invoke(new object[] { typeName });
+
+                var indexProperty = objectType.GetProperty("Index");
+                if (indexProperty != null)
+                    indexProperty.SetValue(objectInstance, i);
+
                 targetList.Add(objectInstance);
+                i++;
             }
         }
     }

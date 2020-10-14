@@ -39,8 +39,8 @@ namespace TSMapEditor.Rendering
             windowManager = new WindowManager(this, graphics);
             windowManager.Initialize(Content, Environment.CurrentDirectory + DSC + "Content" + DSC);
 
-            windowManager.InitGraphicsMode(1024, 600, false);
-            windowManager.SetRenderResolution(1024, 600);
+            windowManager.InitGraphicsMode(1600, 900, false);
+            windowManager.SetRenderResolution(1600, 900);
             windowManager.CenterOnScreen();
             windowManager.Cursor.LoadNativeCursor(Environment.CurrentDirectory + DSC + "Content" + DSC + "cursor.cur");
 
@@ -53,7 +53,7 @@ namespace TSMapEditor.Rendering
         {
             IniFile rulesIni = new IniFile("F:/Pelit/DTA Beta/INI/Rules.ini");
             IniFile firestormIni = new IniFile("F:/Pelit/DTA Beta/INI/Enhance.ini");
-            IniFile mapIni = new IniFile("F:/Pelit/DTA Beta/Maps/Default/back_county.map");
+            IniFile mapIni = new IniFile("F:/Pelit/DTA Beta/Maps/Default/a_buoyant_city.map");
             Map map = new Map();
             map.LoadExisting(rulesIni, firestormIni, mapIni);
 
@@ -71,8 +71,8 @@ namespace TSMapEditor.Rendering
             TheaterGraphics theaterGraphics = new TheaterGraphics(GraphicsDevice, theater, ccFileManager, map.Rules);
 
             MapView mapView = new MapView(windowManager, map, theaterGraphics);
-            mapView.Width = 1024;
-            mapView.Height = 600;
+            mapView.Width = windowManager.RenderResolutionX;
+            mapView.Height = windowManager.RenderResolutionY;
             windowManager.AddAndInitializeControl(mapView);
         }
     }

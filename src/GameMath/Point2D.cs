@@ -20,5 +20,7 @@ namespace TSMapEditor.GameMath
 
         public static Point2D FromXNAPoint(Point point)
             => new Point2D(point.X, point.Y);
+
+        public Vector2 ToXNAVector() => new Vector2(X, Y);
     }
 }

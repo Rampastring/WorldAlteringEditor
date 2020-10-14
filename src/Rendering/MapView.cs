@@ -57,7 +57,7 @@ namespace TSMapEditor.Rendering
                     Point2D drawPoint = CellMath.CellTopLeftPoint(new Point2D(i, j), Map.Size.X);
                     if (row[j] == null)
                     {
-                        DrawString("n", 0, new Vector2(drawPoint.X, drawPoint.Y), Color.Red, 0.5f);
+                        DrawString("n", 0, drawPoint.ToXNAVector(), Color.Red, 0.5f);
                         continue;
                     }
 
@@ -66,6 +66,24 @@ namespace TSMapEditor.Rendering
 
                     DrawTerrainTile(row[j]);
                 }
+            }
+
+            for (int i = 0; i < Map.TerrainObjects.Count; i++)
+            {
+                var obj = Map.TerrainObjects[i];
+                Point2D drawPoint = CellMath.CellTopLeftPoint(obj.Position, Map.Size.X);
+                int index = obj.TerrainType.Index;
+                var graphics = TheaterGraphics.TerrainObjectTextures[index];
+                if (graphics == null || graphics.Frames.Length == 0)
+                {
+                    DrawString(obj.TerrainType.ININame, 1, drawPoint.ToXNAVector(), Color.Red, 0.5f);
+                    continue;
+                }
+
+                var texture = graphics.Frames[0];
+                DrawTexture(texture, new Rectangle(drawPoint.X - texture.Width / 2,
+                    drawPoint.Y - texture.Height / 2,
+                    texture.Width, texture.Height), Color.White);
             }
 
             Renderer.PopRenderTarget();
@@ -169,8 +187,6 @@ namespace TSMapEditor.Rendering
 
             DrawTexture(renderTarget, new Rectangle(cameraTopLeftPoint.X, cameraTopLeftPoint.Y,
                 Width, Height), new Rectangle(0, 0, Width, Height), Color.White);
-
-            DrawTexture(TheaterGraphics.TerrainObjectTextures[0].Frames[0], new Point(100, 100), Color.White);
 
             DrawCursorTile();
 

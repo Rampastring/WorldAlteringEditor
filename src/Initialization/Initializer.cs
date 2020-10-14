@@ -36,7 +36,8 @@ namespace TSMapEditor.Initialization
                 { typeof(InfantryType), InitInfantryType },
                 { typeof(UnitType), InitUnitType },
                 { typeof(AircraftType), InitAircraftType },
-                { typeof(OverlayType), InitOverlayType }
+                { typeof(OverlayType), InitOverlayType },
+                { typeof(TerrainType), InitTerrainType }
             };
 
         public void ReadObjectTypePropertiesFromINI<T>(T obj, IniFile iniFile) where T : AbstractObject, INIDefined
@@ -114,11 +115,42 @@ namespace TSMapEditor.Initialization
             position = 0;
             while (position < uncompressedData.Count - IsoMapPack5Tile.Size)
             {
-                tiles.Add(new IsoMapPack5Tile(uncompressedData.GetRange(position, IsoMapPack5Tile.Size).ToArray()));
+                // This could be optimized by not creating the tile at all if its tile index is 0xFFFF
+                var isoMapPack5Tile = new IsoMapPack5Tile(uncompressedData.GetRange(position, IsoMapPack5Tile.Size).ToArray());
+                if (isoMapPack5Tile.TileIndex != ushort.MaxValue)
+                {
+                    tiles.Add(isoMapPack5Tile);
+                }
                 position += IsoMapPack5Tile.Size;
             }
 
             map.SetTileData(tiles);
+        }
+
+        public void ReadTerrainObjects(IMap map, IniFile mapIni)
+        {
+            IniSection section = mapIni.GetSection("Terrain");
+            if (section == null)
+                return;
+
+            foreach (var kvp in section.Keys)
+            {
+                string coords = kvp.Key;
+                int yLength = coords.Length - 3;
+                int y = Conversions.IntFromString(coords.Substring(0, yLength), -1);
+                int x = Conversions.IntFromString(coords.Substring(yLength), -1);
+                if (y < 0 || x < 0)
+                    continue;
+
+                TerrainType terrainType = map.Rules.TerrainTypes.Find(tt => tt.ININame == kvp.Value);
+                if (terrainType == null)
+                {
+                    Logger.Log($"Skipping loading of terrain type {kvp.Value} because it does not exist in Rules");
+                    continue;
+                }
+
+                map.TerrainObjects.Add(new TerrainObject(terrainType, new GameMath.Point2D(x, y)));
+            }
         }
 
         public void InitArt(IniFile iniFile)

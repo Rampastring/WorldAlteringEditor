@@ -15,6 +15,8 @@ namespace TSMapEditor.Models
 
         public override RTTIType WhatAmI() => RTTIType.TerrainType;
 
+        public int Index { get; set; }
+
         public string Name { get; set; }
         public string FSName { get; set; }
         public TerrainOccupation TemperateOccupationBits { get; set; }
