@@ -10,6 +10,7 @@ namespace TSMapEditor.CCEngine
     [Flags]
     public enum ShpCompression
     {
+        None = 0,
         HasTransparency = 1,
         UsesRle = 2
     }
@@ -126,11 +127,57 @@ namespace TSMapEditor.CCEngine
             }
         }
 
-        public byte[] GetUncompressedFrameData(int frameIndex)
+        public byte[] GetUncompressedFrameData(int frameIndex, byte[] fileData)
         {
             ShpFrameInfo frameInfo = shpFrameInfos[frameIndex];
 
-            throw new NotImplementedException();
+            if (frameInfo.DataOffset == 0)
+                return null;
+
+            byte[] frameData = new byte[frameInfo.Width * frameInfo.Height];
+            if (frameInfo.Flags == ShpCompression.None)
+            {
+                for (int i = 0; i < frameData.Length; i++)
+                {
+                    frameData[i] = fileData[frameInfo.DataOffset + i];
+                }
+            }
+            else
+            {
+                int lineIndex = 0;
+                int dataOffset = 0;
+                while (lineIndex < frameInfo.Height)
+                {
+                    int baseOffset = (int)frameInfo.DataOffset + dataOffset;
+                    int lineDataLength = BitConverter.ToUInt16(fileData, baseOffset);
+                    int currentByteIndex = 2;
+                    int positionOnLine = 0;
+                    while (currentByteIndex < lineDataLength)
+                    {
+                        byte value = fileData[baseOffset + currentByteIndex];
+                        if (value == 0)
+                        {
+                            byte transparentPixelCount = fileData[baseOffset + currentByteIndex + 1];
+                            for (int j = 0; j < transparentPixelCount; j++)
+                            {
+                                frameData[lineIndex * frameInfo.Width + positionOnLine + j] = 0;
+                            }
+                            positionOnLine += transparentPixelCount;
+                            currentByteIndex += 2;
+                        }
+                        else
+                        {
+                            frameData[lineIndex * frameInfo.Width + positionOnLine] = value;
+                            positionOnLine++;
+                            currentByteIndex++;
+                        }
+                    }
+
+                    lineIndex++;
+                }
+            }
+
+            return frameData;
         }
     }
 
