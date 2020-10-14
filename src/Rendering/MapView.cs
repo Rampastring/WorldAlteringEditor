@@ -64,14 +64,14 @@ namespace TSMapEditor.Rendering
                     if (row[j] == null)
                         continue;
 
-                    DrawTerrain(row[j]);
+                    DrawTerrainTile(row[j]);
                 }
             }
 
             Renderer.PopRenderTarget();
         }
 
-        public void DrawTerrain(IsoMapPack5Tile tile)
+        public void DrawTerrainTile(IsoMapPack5Tile tile)
         {
             Point2D drawPoint = CellMath.CellTopLeftPoint(new Point2D(tile.X, tile.Y), Map.Size.X);
             
@@ -169,6 +169,8 @@ namespace TSMapEditor.Rendering
 
             DrawTexture(renderTarget, new Rectangle(cameraTopLeftPoint.X, cameraTopLeftPoint.Y,
                 Width, Height), new Rectangle(0, 0, Width, Height), Color.White);
+
+            DrawTexture(TheaterGraphics.TerrainObjectTextures[0].Frames[0], new Point(100, 100), Color.White);
 
             DrawCursorTile();
 

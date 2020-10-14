@@ -1,8 +1,11 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using TSMapEditor.CCEngine;
+using TSMapEditor.Models;
 
 namespace TSMapEditor.Rendering
 {
@@ -20,20 +23,48 @@ namespace TSMapEditor.Rendering
         public MGTMPImage[] TMPImages { get; set; }
     }
 
+    public class TerrainImage
+    {
+        public TerrainImage(GraphicsDevice graphicsDevice, ShpFile shp, byte[] shpFileData)
+        {
+            Frames = new Texture2D[shp.FrameCount];
+            for (int i = 0; i < shp.FrameCount; i++)
+            {
+                var frameInfo = shp.GetShpFrameInfo(i);
+                var frameData = shp.GetUncompressedFrameData(i, shpFileData);
+                if (frameData == null)
+                    continue;
+
+                var texture = new Texture2D(graphicsDevice, frameInfo.Width, frameInfo.Height, false, SurfaceFormat.Color);
+                texture.SetData<Color>(frameData.Select(b => b == 0 ? Color.Transparent : new Color(b, b, b)).ToArray());
+                Frames[i] = texture;
+            }
+        }
+
+        public Texture2D[] Frames { get; set; }
+    }
+
     /// <summary>
     /// A wrapper for a theater that loads and stores tile graphics.
     /// </summary>
     public class TheaterGraphics
     {
-        public TheaterGraphics(GraphicsDevice graphicsDevice, Theater theater, CCFileManager fileManager)
+        public TheaterGraphics(GraphicsDevice graphicsDevice, Theater theater, CCFileManager fileManager, Rules rules)
         {
             Theater = theater;
             byte[] paletteData = fileManager.LoadFile(theater.PaletteName);
             palette = new Palette(paletteData);
+            this.fileManager = fileManager;
 
-            for (int tsId = 0; tsId < theater.TileSets.Count; tsId++)
+            ReadTileTextures(graphicsDevice);
+            ReadTerrainObjectTextures(graphicsDevice, rules.TerrainTypes);
+        }
+
+        private void ReadTileTextures(GraphicsDevice graphicsDevice)
+        {
+            for (int tsId = 0; tsId < Theater.TileSets.Count; tsId++)
             {
-                TileSet tileSet = theater.TileSets[tsId];
+                TileSet tileSet = Theater.TileSets[tsId];
 
                 Console.WriteLine("Loading " + tileSet.SetName);
 
@@ -51,7 +82,7 @@ namespace TSMapEditor.Rendering
                             baseName = baseName + ((char)('a' + (v - 1)));
                         }
 
-                        byte[] data = fileManager.LoadFile(baseName + theater.FileExtension);
+                        byte[] data = fileManager.LoadFile(baseName + Theater.FileExtension);
 
                         if (data == null)
                         {
@@ -81,7 +112,26 @@ namespace TSMapEditor.Rendering
             }
         }
 
+        public void ReadTerrainObjectTextures(GraphicsDevice graphicsDevice, List<TerrainType> terrainTypes)
+        {
+            TerrainObjectTextures = new TerrainImage[terrainTypes.Count];
+            for (int i = 0; i < terrainTypes.Count; i++)
+            {
+                string shpFileName = terrainTypes[i].ININame + Theater.FileExtension;
+
+                byte[] data = fileManager.LoadFile(shpFileName);
+                if (data == null)
+                    continue;
+
+                var shpFile = new ShpFile();
+                shpFile.ParseFromBuffer(data);
+                TerrainObjectTextures[i] = new TerrainImage(graphicsDevice, shpFile, data);
+            }
+        }
+
         public Theater Theater { get; }
+
+        private CCFileManager fileManager;
 
         private Palette palette;
 
@@ -90,5 +140,8 @@ namespace TSMapEditor.Rendering
         public int TileCount => graphicsList.Count;
 
         public TileImage GetTileGraphics(int id) => graphicsList[id];
+
+
+        public TerrainImage[] TerrainObjectTextures { get; set; }
     }
 }

@@ -53,7 +53,7 @@ namespace TSMapEditor.Rendering
         {
             IniFile rulesIni = new IniFile("F:/Pelit/DTA Beta/INI/Rules.ini");
             IniFile firestormIni = new IniFile("F:/Pelit/DTA Beta/INI/Enhance.ini");
-            IniFile mapIni = new IniFile("F:/Pelit/DTA Beta/Maps/Default/a_buoyant_city.map");
+            IniFile mapIni = new IniFile("F:/Pelit/DTA Beta/Maps/Default/back_county.map");
             Map map = new Map();
             map.LoadExisting(rulesIni, firestormIni, mapIni);
 
@@ -68,7 +68,7 @@ namespace TSMapEditor.Rendering
             ccFileManager.LoadPrimaryMixFile("Cache.mix");
             ccFileManager.LoadPrimaryMixFile(theater.ContentMIXName);
 
-            TheaterGraphics theaterGraphics = new TheaterGraphics(GraphicsDevice, theater, ccFileManager);
+            TheaterGraphics theaterGraphics = new TheaterGraphics(GraphicsDevice, theater, ccFileManager, map.Rules);
 
             MapView mapView = new MapView(windowManager, map, theaterGraphics);
             mapView.Width = 1024;

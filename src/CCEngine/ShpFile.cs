@@ -39,7 +39,7 @@ namespace TSMapEditor.CCEngine
         public ushort FrameCount;
     }
 
-    class ShpFrameInfo
+    public class ShpFrameInfo
     {
         private const int SizeOf = 24;
 
@@ -127,6 +127,8 @@ namespace TSMapEditor.CCEngine
             }
         }
 
+        public ShpFrameInfo GetShpFrameInfo(int frameIndex) => shpFrameInfos[frameIndex];
+
         public byte[] GetUncompressedFrameData(int frameIndex, byte[] fileData)
         {
             ShpFrameInfo frameInfo = shpFrameInfos[frameIndex];
@@ -144,15 +146,14 @@ namespace TSMapEditor.CCEngine
             }
             else
             {
-                int lineIndex = 0;
                 int dataOffset = 0;
-                while (lineIndex < frameInfo.Height)
+                for (int lineIndex = 0; lineIndex < frameInfo.Height; lineIndex++)
                 {
                     int baseOffset = (int)frameInfo.DataOffset + dataOffset;
-                    int lineDataLength = BitConverter.ToUInt16(fileData, baseOffset);
+                    int lineDataLength = fileData[baseOffset];
                     int currentByteIndex = 2;
                     int positionOnLine = 0;
-                    while (currentByteIndex < lineDataLength)
+                    while (currentByteIndex < lineDataLength && positionOnLine < frameInfo.Width)
                     {
                         byte value = fileData[baseOffset + currentByteIndex];
                         if (value == 0)
@@ -173,7 +174,7 @@ namespace TSMapEditor.CCEngine
                         }
                     }
 
-                    lineIndex++;
+                    dataOffset += lineDataLength;
                 }
             }
 
