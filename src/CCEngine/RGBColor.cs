@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,5 +26,7 @@ namespace TSMapEditor.CCEngine
         public byte R;
         public byte G;
         public byte B;
+
+        public Color ToXnaColor() => new Color(R, G, B);
     }
 }

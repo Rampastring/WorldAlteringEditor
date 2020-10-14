@@ -25,7 +25,7 @@ namespace TSMapEditor.Rendering
 
     public class TerrainImage
     {
-        public TerrainImage(GraphicsDevice graphicsDevice, ShpFile shp, byte[] shpFileData)
+        public TerrainImage(GraphicsDevice graphicsDevice, ShpFile shp, byte[] shpFileData, Palette palette)
         {
             Frames = new Texture2D[shp.FrameCount];
             for (int i = 0; i < shp.FrameCount; i++)
@@ -36,7 +36,7 @@ namespace TSMapEditor.Rendering
                     continue;
 
                 var texture = new Texture2D(graphicsDevice, frameInfo.Width, frameInfo.Height, false, SurfaceFormat.Color);
-                texture.SetData<Color>(frameData.Select(b => b == 0 ? Color.Transparent : new Color(b, b, b)).ToArray());
+                texture.SetData<Color>(frameData.Select(b => b == 0 ? Color.Transparent : palette.Data[b].ToXnaColor()).ToArray());
                 Frames[i] = texture;
             }
         }
@@ -114,6 +114,11 @@ namespace TSMapEditor.Rendering
 
         public void ReadTerrainObjectTextures(GraphicsDevice graphicsDevice, List<TerrainType> terrainTypes)
         {
+            byte[] paletteData = fileManager.LoadFile(Theater.PaletteName);
+            if (paletteData == null)
+                throw new KeyNotFoundException(Theater.PaletteName + " not found from loaded MIX files!");
+            var palette = new Palette(paletteData);
+
             TerrainObjectTextures = new TerrainImage[terrainTypes.Count];
             for (int i = 0; i < terrainTypes.Count; i++)
             {
@@ -125,7 +130,7 @@ namespace TSMapEditor.Rendering
 
                 var shpFile = new ShpFile();
                 shpFile.ParseFromBuffer(data);
-                TerrainObjectTextures[i] = new TerrainImage(graphicsDevice, shpFile, data);
+                TerrainObjectTextures[i] = new TerrainImage(graphicsDevice, shpFile, data, palette);
             }
         }
 
