@@ -80,9 +80,10 @@ namespace TSMapEditor.Rendering
                     continue;
                 }
 
-                var texture = graphics.Frames[0];
-                DrawTexture(texture, new Rectangle(drawPoint.X - texture.Width / 2,
-                    drawPoint.Y - texture.Height / 2,
+                var frame = graphics.Frames[0];
+                var texture = frame.Texture;
+                DrawTexture(texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
+                    drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2,
                     texture.Width, texture.Height), Color.White);
             }
 

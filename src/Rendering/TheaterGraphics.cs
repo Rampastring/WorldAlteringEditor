@@ -27,7 +27,7 @@ namespace TSMapEditor.Rendering
     {
         public TerrainImage(GraphicsDevice graphicsDevice, ShpFile shp, byte[] shpFileData, Palette palette)
         {
-            Frames = new Texture2D[shp.FrameCount];
+            Frames = new PositionedTexture[shp.FrameCount];
             for (int i = 0; i < shp.FrameCount; i++)
             {
                 var frameInfo = shp.GetShpFrameInfo(i);
@@ -37,11 +37,29 @@ namespace TSMapEditor.Rendering
 
                 var texture = new Texture2D(graphicsDevice, frameInfo.Width, frameInfo.Height, false, SurfaceFormat.Color);
                 texture.SetData<Color>(frameData.Select(b => b == 0 ? Color.Transparent : palette.Data[b].ToXnaColor()).ToArray());
-                Frames[i] = texture;
+                Frames[i] = new PositionedTexture(shp.Width, shp.Height, frameInfo.XOffset, frameInfo.YOffset, texture);
             }
         }
 
-        public Texture2D[] Frames { get; set; }
+        public PositionedTexture[] Frames { get; set; }
+    }
+
+    public class PositionedTexture
+    {
+        public int ShapeWidth;
+        public int ShapeHeight;
+        public int OffsetX;
+        public int OffsetY;
+        public Texture2D Texture;
+
+        public PositionedTexture(int shapeWidth, int shapeHeight, int offsetX, int offsetY, Texture2D texture)
+        {
+            ShapeWidth = shapeWidth;
+            ShapeHeight = shapeHeight;
+            OffsetX = offsetX;
+            OffsetY = offsetY;
+            Texture = texture;
+        }
     }
 
     /// <summary>

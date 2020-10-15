@@ -94,6 +94,9 @@ namespace TSMapEditor.CCEngine
 
         public int FrameCount => shpFrameInfos.Count;
 
+        public int Width => shpFileHeader.SpriteWidth;
+        public int Height => shpFileHeader.SpriteHeight;
+
         public void ParseFromFile(string filePath)
         {
             using (FileStream stream = File.OpenRead(filePath))
