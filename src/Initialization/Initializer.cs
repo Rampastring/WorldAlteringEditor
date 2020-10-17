@@ -40,6 +40,12 @@ namespace TSMapEditor.Initialization
                 { typeof(TerrainType), InitTerrainType }
             };
 
+        private Dictionary<Type, Action<AbstractObject, IniFile, IniSection>> objectTypeArtInitializers
+            = new Dictionary<Type, Action<AbstractObject, IniFile, IniSection>>()
+            {
+                { typeof(TerrainType), InitTerrainTypeArt }
+            };
+
         public void ReadObjectTypePropertiesFromINI<T>(T obj, IniFile iniFile) where T : AbstractObject, INIDefined
         {
             IniSection objectSection = iniFile.GetSection(obj.ININame);
@@ -48,7 +54,17 @@ namespace TSMapEditor.Initialization
 
             obj.ReadPropertiesFromIniSection(objectSection);
 
-            if (objectTypeInitializers.TryGetValue(typeof(T), out Action<AbstractObject, IniFile, IniSection> action))
+            if (objectTypeInitializers.TryGetValue(typeof(T), out var action))
+                action(obj, iniFile, objectSection);
+        }
+
+        public void ReadObjectTypeArtPropertiesFromINI<T>(T obj, IniFile iniFile) where T : AbstractObject, INIDefined
+        {
+            IniSection objectSection = iniFile.GetSection(obj.ININame);
+            if (objectSection == null)
+                return;
+
+            if (objectTypeArtInitializers.TryGetValue(typeof(T), out var action))
                 action(obj, iniFile, objectSection);
         }
 
@@ -158,34 +174,41 @@ namespace TSMapEditor.Initialization
 
         }
 
-        private static void InitBuildingType(AbstractObject obj, IniFile iniFile, IniSection section)
+        private static void InitBuildingType(AbstractObject obj, IniFile rulesIni, IniSection section)
         {
             var buildingType = (BuildingType)obj;
         }
 
-        private static void InitInfantryType(AbstractObject obj, IniFile iniFile, IniSection section)
+        private static void InitInfantryType(AbstractObject obj, IniFile rulesIni, IniSection section)
         {
         }
 
-        private static void InitUnitType(AbstractObject obj, IniFile iniFile, IniSection section)
+        private static void InitUnitType(AbstractObject obj, IniFile rulesIni, IniSection section)
         {
         }
 
-        private static void InitAircraftType(AbstractObject obj, IniFile iniFile, IniSection section)
+        private static void InitAircraftType(AbstractObject obj, IniFile rulesIni, IniSection section)
         {
         }
 
-        private static void InitOverlayType(AbstractObject obj, IniFile iniFile, IniSection section)
+        private static void InitOverlayType(AbstractObject obj, IniFile rulesIni, IniSection section)
         {
             var overlayType = (OverlayType)obj;
             overlayType.Land = (LandType)Enum.Parse(typeof(LandType), section.GetStringValue("Land", LandType.Clear.ToString()));
         }
 
-        private static void InitTerrainType(AbstractObject obj, IniFile iniFile, IniSection section)
+        private static void InitTerrainType(AbstractObject obj, IniFile rulesIni, IniSection section)
         {
             var terrainType = (TerrainType)obj;
             terrainType.SnowOccupationBits = (TerrainOccupation)section.GetIntValue("SnowOccupationBits", 0);
             terrainType.TemperateOccupationBits = (TerrainOccupation)section.GetIntValue("TemperateOccupationBits", 0);
+        }
+        
+        private static void InitTerrainTypeArt(AbstractObject obj, IniFile artIni, IniSection artSection)
+        {
+            var terrainType = (TerrainType)obj;
+            terrainType.Theater = artSection.GetBooleanValue("Theater", terrainType.Theater);
+            terrainType.Image = artSection.GetStringValue("Image", terrainType.Image);
         }
     }
 }

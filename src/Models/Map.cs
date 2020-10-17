@@ -41,9 +41,9 @@ namespace TSMapEditor.Models
             initializer = new Initializer(this);
         }
 
-        public void LoadExisting(IniFile rulesIni, IniFile firestormIni, IniFile mapIni)
+        public void LoadExisting(IniFile rulesIni, IniFile firestormIni, IniFile artIni, IniFile artFirestormIni, IniFile mapIni)
         {
-            Initialize(rulesIni, firestormIni);
+            Initialize(rulesIni, firestormIni, artIni, artFirestormIni);
 
             LoadedINI = mapIni ?? throw new ArgumentNullException(nameof(mapIni));
             Rules.InitFromINI(mapIni, initializer);
@@ -88,13 +88,13 @@ namespace TSMapEditor.Models
             }
         }
 
-        public void StartNew(IniFile rulesIni, IniFile firestormIni, TheaterType theaterType, Point2D size)
-        {
-            Initialize(rulesIni, firestormIni);
-            LoadedINI = new IniFile();
-        }
+        // public void StartNew(IniFile rulesIni, IniFile firestormIni, TheaterType theaterType, Point2D size)
+        // {
+        //     Initialize(rulesIni, firestormIni);
+        //     LoadedINI = new IniFile();
+        // }
 
-        public void Initialize(IniFile rulesIni, IniFile firestormIni)
+        public void Initialize(IniFile rulesIni, IniFile firestormIni, IniFile artIni, IniFile artFirestormIni)
         {
             if (rulesIni == null)
                 throw new ArgumentNullException(nameof(rulesIni));
@@ -105,6 +105,13 @@ namespace TSMapEditor.Models
             if (firestormIni != null)
             {
                 Rules.InitFromINI(firestormIni, initializer);
+            }
+
+            Rules.InitArt(artIni, initializer);
+
+            if (artFirestormIni != null)
+            {
+                Rules.InitArt(artFirestormIni, initializer);
             }
         }
     }

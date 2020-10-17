@@ -36,6 +36,8 @@ namespace TSMapEditor.Models
         /// </summary>
         public bool Theater { get; set; }
 
+        public string Image { get; set; }
+
         // These ones below don't exist in TS or FinalSun,
         // but they'd be useful in DTA at least
         public bool AvailableOnTemperate { get; set; }

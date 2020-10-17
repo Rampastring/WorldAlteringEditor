@@ -38,6 +38,11 @@ namespace TSMapEditor.Models
             OverlayTypes.ForEach(ut => initializer.ReadObjectTypePropertiesFromINI(ut, iniFile));
         }
 
+        public void InitArt(IniFile iniFile, IInitializer initializer)
+        {
+            TerrainTypes.ForEach(ot => initializer.ReadObjectTypeArtPropertiesFromINI(ot, iniFile));
+        }
+
         private void InitFromTypeSection<T>(IniFile iniFile, string sectionName, List<T> targetList)
         {
             var sectionKeys = iniFile.GetSectionKeys(sectionName);

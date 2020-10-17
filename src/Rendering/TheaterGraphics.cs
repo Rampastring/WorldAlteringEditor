@@ -146,7 +146,11 @@ namespace TSMapEditor.Rendering
             TerrainObjectTextures = new TerrainImage[terrainTypes.Count];
             for (int i = 0; i < terrainTypes.Count; i++)
             {
-                string shpFileName = terrainTypes[i].ININame + Theater.FileExtension;
+                string shpFileName = terrainTypes[i].Image != null ? terrainTypes[i].Image : terrainTypes[i].ININame;
+                if (terrainTypes[i].Theater)
+                    shpFileName += Theater.FileExtension;
+                else
+                    shpFileName += ".SHP";
 
                 byte[] data = fileManager.LoadFile(shpFileName);
                 if (data == null)

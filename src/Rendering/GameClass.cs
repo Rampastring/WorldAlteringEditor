@@ -16,6 +16,7 @@ namespace TSMapEditor.Rendering
     public class GameClass : Microsoft.Xna.Framework.Game
     {
         private GraphicsDeviceManager graphics;
+        private const string GameDirectory = "F:/Pelit/DTA Beta/";
 
         public GameClass()
         {
@@ -51,11 +52,16 @@ namespace TSMapEditor.Rendering
 
         private void InitTest()
         {
-            IniFile rulesIni = new IniFile("F:/Pelit/DTA Beta/INI/Rules.ini");
-            IniFile firestormIni = new IniFile("F:/Pelit/DTA Beta/INI/Enhance.ini");
+            
+            IniFile rulesIni = new IniFile(Path.Combine(GameDirectory, "INI/Rules.ini"));
+            IniFile firestormIni = new IniFile(Path.Combine(GameDirectory, "INI/Enhance.ini"));
+            IniFile artIni = new IniFile(Path.Combine(GameDirectory, "INI/Art.ini"));
+            IniFile artFSIni = new IniFile(Path.Combine(GameDirectory, "INI/ArtE.INI"));
+            IniFile finalSunArtIni = new IniFile(Path.Combine(GameDirectory, "INI/FSA.INI"));
+            IniFile.ConsolidateIniFiles(artFSIni, finalSunArtIni);
             IniFile mapIni = new IniFile("F:/Pelit/DTA Beta/Maps/Default/a_buoyant_city.map");
             Map map = new Map();
-            map.LoadExisting(rulesIni, firestormIni, mapIni);
+            map.LoadExisting(rulesIni, firestormIni, artIni, artFSIni, mapIni);
 
             Console.WriteLine();
             Console.WriteLine("Map loaded.");
@@ -64,9 +70,11 @@ namespace TSMapEditor.Rendering
             theater.ReadConfigINI("F:/Pelit/DTA Beta/");
 
             CCFileManager ccFileManager = new CCFileManager();
-            ccFileManager.AddSearchDirectory("F:/Pelit/DTA Beta/MIX/");
+            ccFileManager.AddSearchDirectory(Path.Combine(GameDirectory, "MIX/"));
+            ccFileManager.AddSearchDirectory(Path.Combine(GameDirectory, "Map Editor/"));
             ccFileManager.LoadPrimaryMixFile("Cache.mix");
             ccFileManager.LoadPrimaryMixFile(theater.ContentMIXName);
+            ccFileManager.LoadSecondaryMixFile("FSCache.mix");
 
             TheaterGraphics theaterGraphics = new TheaterGraphics(GraphicsDevice, theater, ccFileManager, map.Rules);
 
