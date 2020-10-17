@@ -11,11 +11,11 @@ namespace TSMapEditor.Rendering
 {
     public class TileImage
     {
-        public TileImage(int tileSetId, int tileIndex, MGTMPImage[] tMPImages)
+        public TileImage(int tileSetId, int tileIndex, MGTMPImage[] tmpImages)
         {
             TileSetId = tileSetId;
             TileIndex = tileIndex;
-            TMPImages = tMPImages;
+            TMPImages = tmpImages;
         }
 
         public int TileSetId { get; set; }
@@ -91,6 +91,8 @@ namespace TSMapEditor.Rendering
                 {
                     Console.WriteLine("#" + i);
 
+                    var tileGraphics = new List<TileImage>();
+
                     // Handle graphics variation (clear00.tem, clear00a.tem, clear00b.tem etc.)
                     for (int v = 0; v < 'g' - 'a'; v++)
                     {
@@ -107,7 +109,7 @@ namespace TSMapEditor.Rendering
                         {
                             if (v == 0)
                             {
-                                graphicsList.Add(new TileImage(tsId, i, new MGTMPImage[0]));
+                                tileGraphics.Add(new TileImage(tsId, i, new MGTMPImage[0]));
                                 break;
                             }
                             else
@@ -124,9 +126,10 @@ namespace TSMapEditor.Rendering
                         {
                             tmpImages.Add(new MGTMPImage(graphicsDevice, tmpFile.GetImage(img), palette, tsId));
                         }
-                        graphicsList.Add(new TileImage(tsId, i, tmpImages.ToArray()));
-                        break;
+                        tileGraphics.Add(new TileImage(tsId, i, tmpImages.ToArray()));
                     }
+
+                    graphicsList.Add(tileGraphics.ToArray());
                 }
             }
         }
@@ -163,17 +166,19 @@ namespace TSMapEditor.Rendering
             }
         }
 
+        private Random random = new Random();
+
         public Theater Theater { get; }
 
         private CCFileManager fileManager;
 
         private Palette palette;
 
-        private List<TileImage> graphicsList = new List<TileImage>();
+        private List<TileImage[]> graphicsList = new List<TileImage[]>();
 
         public int TileCount => graphicsList.Count;
 
-        public TileImage GetTileGraphics(int id) => graphicsList[id];
+        public TileImage GetTileGraphics(int id) => graphicsList[id][random.Next(graphicsList[id].Length)];
 
 
         public TerrainImage[] TerrainObjectTextures { get; set; }
