@@ -60,7 +60,7 @@ namespace TSMapEditor.Rendering
             Console.WriteLine();
             Console.WriteLine("Map loaded.");
 
-            Theater theater = new Theater("Temperate", "INI/Tem.ini", "IsoTem.mix", "isotem.pal", ".tem");
+            Theater theater = new Theater("Temperate", "INI/Tem.ini", "IsoTem.mix", "isotem.pal", "unittem.pal", ".tem");
             theater.ReadConfigINI("F:/Pelit/DTA Beta/");
 
             CCFileManager ccFileManager = new CCFileManager();

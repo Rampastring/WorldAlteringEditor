@@ -68,6 +68,8 @@ namespace TSMapEditor.Rendering
                 }
             }
 
+            Texture2D debugTexture = null;
+
             for (int i = 0; i < Map.TerrainObjects.Count; i++)
             {
                 var obj = Map.TerrainObjects[i];
@@ -76,18 +78,46 @@ namespace TSMapEditor.Rendering
                 var graphics = TheaterGraphics.TerrainObjectTextures[index];
                 if (graphics == null || graphics.Frames.Length == 0)
                 {
-                    DrawString(obj.TerrainType.ININame, 1, drawPoint.ToXNAVector(), Color.Red, 0.5f);
+                    DrawString(obj.TerrainType.ININame, 1, drawPoint.ToXNAVector(), Color.Red, 1.0f);
                     continue;
                 }
+
+                int yDrawOffset = obj.TerrainType.SpawnsTiberium ? -12 : 0;
 
                 var frame = graphics.Frames[0];
                 var texture = frame.Texture;
                 DrawTexture(texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
-                    drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2,
+                    drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
                     texture.Width, texture.Height), Color.White);
+
+                if (graphics.Frames.Length > 1)
+                {
+                    frame = graphics.Frames[graphics.Frames.Length / 2];
+
+                    if (frame == null)
+                        continue;
+
+                    texture = frame.Texture;
+                    if (texture == null)
+                        continue;
+
+                    DrawTexture(texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
+                        drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
+                        texture.Width, texture.Height), new Color(0, 0, 0, 128));
+                }
             }
 
+            int a = 0;
+
             Renderer.PopRenderTarget();
+
+            if (a == 0)
+                return;
+
+            using (var stream = File.OpenWrite(Environment.CurrentDirectory + "/texture.png"))
+            {
+                debugTexture.SaveAsPng(stream, debugTexture.Width, debugTexture.Height);
+            }
         }
 
         public void DrawTerrainTile(IsoMapPack5Tile tile)
@@ -105,22 +135,11 @@ namespace TSMapEditor.Rendering
                 return;
             }
                 
-
-            int a = 0;
-            
             Texture2D texture = tileImage.TMPImages[tile.SubTileIndex].Texture;
             if (texture != null)
             {
                 DrawTexture(texture, new Rectangle(drawPoint.X, drawPoint.Y,
                     Constants.CellSizeX, Constants.CellSizeY), Color.White);
-            }
-
-            if (a == 0)
-                return;
-
-            using (var stream = File.OpenWrite(Environment.CurrentDirectory + "/texture.png"))
-            {
-                texture.SaveAsPng(stream, texture.Width, texture.Height);
             }
         }
 

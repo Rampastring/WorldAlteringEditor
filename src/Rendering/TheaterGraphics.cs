@@ -133,10 +133,15 @@ namespace TSMapEditor.Rendering
 
         public void ReadTerrainObjectTextures(GraphicsDevice graphicsDevice, List<TerrainType> terrainTypes)
         {
-            byte[] paletteData = fileManager.LoadFile(Theater.PaletteName);
-            if (paletteData == null)
+            byte[] theaterPaletteData = fileManager.LoadFile(Theater.PaletteName);
+            if (theaterPaletteData == null)
                 throw new KeyNotFoundException(Theater.PaletteName + " not found from loaded MIX files!");
-            var palette = new Palette(paletteData);
+            var theaterPalette = new Palette(theaterPaletteData);
+
+            byte[] unitPaletteData = fileManager.LoadFile(Theater.UnitPaletteName);
+            if (unitPaletteData == null)
+                throw new KeyNotFoundException(Theater.UnitPaletteName + " not found from loaded MIX files!");
+            var unitPalette = new Palette(unitPaletteData);
 
             TerrainObjectTextures = new TerrainImage[terrainTypes.Count];
             for (int i = 0; i < terrainTypes.Count; i++)
@@ -149,7 +154,8 @@ namespace TSMapEditor.Rendering
 
                 var shpFile = new ShpFile();
                 shpFile.ParseFromBuffer(data);
-                TerrainObjectTextures[i] = new TerrainImage(graphicsDevice, shpFile, data, palette);
+                TerrainObjectTextures[i] = new TerrainImage(graphicsDevice, shpFile, data, 
+                    terrainTypes[i].SpawnsTiberium ? unitPalette : theaterPalette);
             }
         }
 

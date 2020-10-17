@@ -22,6 +22,20 @@ namespace TSMapEditor.Models
         public TerrainOccupation TemperateOccupationBits { get; set; }
         public TerrainOccupation SnowOccupationBits { get; set; }
 
+        /// <summary>
+        /// If set, this terrain type should be drawn 12 pixels above the 
+        /// usual drawing point and it should use the unit palette instead
+        /// of the terrain palette.
+        /// </summary>
+        public bool SpawnsTiberium { get; set; }
+
+        /// <summary>
+        /// Defined in Art.ini. If set to true,
+        /// the art for this terrain type is terrain-specific;
+        /// if false, the art is a generic .SHP used for every theater.
+        /// </summary>
+        public bool Theater { get; set; }
+
         // These ones below don't exist in TS or FinalSun,
         // but they'd be useful in DTA at least
         public bool AvailableOnTemperate { get; set; }

@@ -8,12 +8,13 @@ namespace TSMapEditor.CCEngine
 {
     public class Theater
     {
-        public Theater(string uiName, string configIniName, string contentMixName, string paletteName, string fileExtension)
+        public Theater(string uiName, string configIniName, string contentMixName, string paletteName, string unitPaletteName, string fileExtension)
         {
             UIName = uiName;
             ConfigININame = configIniName;
             ContentMIXName = contentMixName;
             PaletteName = paletteName;
+            UnitPaletteName = unitPaletteName;
             FileExtension = fileExtension;
         }
 
@@ -21,6 +22,7 @@ namespace TSMapEditor.CCEngine
         public string ConfigININame { get; }
         public string ContentMIXName { get; }
         public string PaletteName { get; }
+        public string UnitPaletteName { get; }
         public string FileExtension { get; }
 
         public void ReadConfigINI(string baseDirectoryPath)
