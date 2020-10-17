@@ -140,7 +140,7 @@ namespace TSMapEditor.CCEngine
                 return null;
 
             byte[] frameData = new byte[frameInfo.Width * frameInfo.Height];
-            if (frameInfo.Flags == ShpCompression.None)
+            if ((frameInfo.Flags & ShpCompression.UsesRle) == ShpCompression.None)
             {
                 for (int i = 0; i < frameData.Length; i++)
                 {
