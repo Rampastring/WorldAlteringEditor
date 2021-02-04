@@ -4,6 +4,7 @@ using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -43,8 +44,11 @@ namespace TSMapEditor.Rendering
                 DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
         }
 
+        Stopwatch sw = new Stopwatch();
         public void DrawWholeMap()
         {
+            sw.Restart();
+
             Renderer.PushRenderTarget(renderTarget);
             GraphicsDevice.Clear(Color.Black);
 
@@ -110,6 +114,9 @@ namespace TSMapEditor.Rendering
             int a = 0;
 
             Renderer.PopRenderTarget();
+
+            sw.Stop();
+            Console.WriteLine("Map render time: " + sw.Elapsed.TotalMilliseconds);
 
             if (a == 0)
                 return;

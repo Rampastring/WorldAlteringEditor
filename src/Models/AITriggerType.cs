@@ -23,7 +23,7 @@ namespace TSMapEditor.Models
         public House Owner { get; set; }
         public int TechLevel { get; set; }
         public AITriggerConditionType ConditionType { get; set; }
-        public Techno ConditionObject { get; set; }
+        public TechnoType ConditionObject { get; set; }
         public string Comparator { get; set; } // TODO structure this
         public double InitialWeight { get; set; }
         public double MinimumWeight { get; set; }

@@ -43,6 +43,31 @@ namespace TSMapEditor.Models
             TerrainTypes.ForEach(ot => initializer.ReadObjectTypeArtPropertiesFromINI(ot, iniFile));
         }
 
+        public List<House> GetStandardHouses(IniFile iniFile)
+        {
+            var housesSection = iniFile.GetSection("Houses");
+            if (housesSection == null)
+                return new List<House>(0);
+
+            var houses = new List<House>();
+
+            foreach (var kvp in housesSection.Keys)
+            {
+                string houseName = kvp.Value;
+                var house = new House() { ININame = houseName };
+                InitHouse(iniFile, house);
+                houses.Add(house);
+            }
+
+            return houses;
+        }
+
+        private void InitHouse(IniFile iniFile, House house)
+        {
+            house.Name = iniFile.GetStringValue(house.ININame, "Name", house.ININame);
+            house.Color = iniFile.GetStringValue(house.ININame, "Color", "Grey");
+        }
+
         private void InitFromTypeSection<T>(IniFile iniFile, string sectionName, List<T> targetList)
         {
             var sectionKeys = iniFile.GetSectionKeys(sectionName);

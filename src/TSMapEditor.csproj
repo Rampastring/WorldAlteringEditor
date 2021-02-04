@@ -101,6 +101,7 @@
     <Compile Include="Models\Map.cs" />
     <Compile Include="Models\MapFormat\IsoMapPack5Tile.cs" />
     <Compile Include="Models\MapFormat\MiniLZO.cs" />
+    <Compile Include="Models\MapTile.cs" />
     <Compile Include="Models\Mission.cs" />
     <Compile Include="Models\Enums\RTTIType.cs" />
     <Compile Include="Models\OverlayType.cs" />

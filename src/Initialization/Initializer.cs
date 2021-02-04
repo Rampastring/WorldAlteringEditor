@@ -169,6 +169,62 @@ namespace TSMapEditor.Initialization
             }
         }
 
+        public void ReadBuildings(IMap map, IniFile mapIni)
+        {
+            IniSection section = mapIni.GetSection("Structures");
+            if (section == null)
+                return;
+
+            // [Structures]
+            // INDEX=OWNER,ID,HEALTH,X,Y,FACING,TAG,AI_SELLABLE,AI_REBUILDABLE,POWERED_ON,UPGRADES,SPOTLIGHT,UPGRADE_1,UPGRADE_2,UPGRADE_3,AI_REPAIRABLE,NOMINAL
+
+            foreach (var kvp in section.Keys)
+            {
+                string[] values = kvp.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                string ownerName = values[0];
+                string buildingTypeId = values[1];
+                int health = Math.Min(Constants.BuildingHealthMax, Math.Max(0, Conversions.IntFromString(values[2], Constants.BuildingHealthMax)));
+                int x = Conversions.IntFromString(values[3], 0);
+                int y = Conversions.IntFromString(values[4], 0);
+                int facing = Math.Min(Constants.FacingMax, Math.Max(0, Conversions.IntFromString(values[5], Constants.FacingMax)));
+                string attachedTag = values[6];
+                bool aiSellable = Conversions.BooleanFromString(values[7], true);
+                // AI_REBUILDABLE is a leftover
+                bool powered = Conversions.BooleanFromString(values[9], true);
+                int upgradeCount = Conversions.IntFromString(values[10], 0);
+                int spotlight = Conversions.IntFromString(values[11], 0);
+                string upgrade1 = values[12];
+                string upgrade2 = values[13];
+                string upgrade3 = values[14];
+                bool aiRepairable = Conversions.BooleanFromString(values[15], false);
+                bool nominal = Conversions.BooleanFromString(values[16], false);
+
+                var buildingType = map.Rules.BuildingTypes.Find(bt => bt.ININame == buildingTypeId);
+                if (buildingType == null)
+                {
+                    Logger.Log($"Unable to find building type {buildingTypeId} - skipping it.");
+                    continue;
+                }
+
+                House owner = map.FindOrMakeHouse(ownerName);
+                var building = new Structure(buildingType)
+                {
+                    HP = health,
+                    Position = new GameMath.Point2D(x, y),
+                    Facing = (byte)facing,
+                    // TODO handle attached tag
+                    AISellable = aiSellable,
+                    Powered = powered,
+                    // TODO handle upgrades
+                    Spotlight = (SpotlightType)spotlight,
+                    AIRepairable = aiRepairable,
+                    Nominal = nominal
+                };
+
+                map.Structures.Add(building);
+            }
+        }
+
         public void InitArt(IniFile iniFile)
         {
 

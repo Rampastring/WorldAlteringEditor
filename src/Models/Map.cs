@@ -23,6 +23,15 @@ namespace TSMapEditor.Models
         public List<Infantry> Infantry { get; } = new List<Infantry>();
         public List<Unit> Units { get; } = new List<Unit>();
         public List<Structure> Structures { get; } = new List<Structure>();
+
+        /// <summary>
+        /// The list of standard houses loaded from Rules.ini.
+        /// Relevant when the map itself has no houses specified.
+        /// New houses might be added to this list if the map has
+        /// objects whose owner does not exist in the map's list of houses
+        /// or in the Rules.ini standard house list.
+        /// </summary>
+        public List<House> StandardHouses { get; set; }
         public List<House> Houses { get; } = new List<House>();
         public List<TerrainObject> TerrainObjects { get; } = new List<TerrainObject>();
         public List<Waypoint> Waypoints { get; } = new List<Waypoint>();
@@ -50,6 +59,28 @@ namespace TSMapEditor.Models
             initializer.ReadMapSection(this, mapIni);
             initializer.ReadIsoMapPack(this, mapIni);
             initializer.ReadTerrainObjects(this, mapIni);
+            initializer.ReadBuildings(this, mapIni);
+        }
+
+        /// <summary>
+        /// Finds a house with the given name from the map's or the game's house lists.
+        /// If no house is found, creates one and adds it to the game's house list.
+        /// Returns the house that was found or created.
+        /// </summary>
+        /// <param name="houseName">The name of the house to find.</param>
+        public House FindOrMakeHouse(string houseName)
+        {
+            var house = Houses.Find(h => h.ININame == houseName);
+            if (house != null)
+                return house;
+
+            house = StandardHouses.Find(h => h.ININame == houseName);
+            if (house != null)
+                return house;
+
+            house = new House() { ININame = houseName };
+            StandardHouses.Add(house);
+            return house;
         }
 
         public void SetTileData(List<IsoMapPack5Tile> tiles)
@@ -101,6 +132,8 @@ namespace TSMapEditor.Models
 
             Rules = new Rules();
             Rules.InitFromINI(rulesIni, initializer);
+
+            StandardHouses = Rules.GetStandardHouses(rulesIni);
 
             if (firestormIni != null)
             {

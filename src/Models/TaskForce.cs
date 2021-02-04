@@ -2,7 +2,7 @@
 {
     public class TaskForceTechnoEntry
     {
-        public Techno Techno { get; set; }
+        public TechnoBase Techno { get; set; }
         public int Count { get; set; }
     }
 
