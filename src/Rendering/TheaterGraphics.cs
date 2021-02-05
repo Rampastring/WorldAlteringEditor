@@ -23,9 +23,9 @@ namespace TSMapEditor.Rendering
         public MGTMPImage[] TMPImages { get; set; }
     }
 
-    public class TerrainImage
+    public class ObjectImage
     {
-        public TerrainImage(GraphicsDevice graphicsDevice, ShpFile shp, byte[] shpFileData, Palette palette)
+        public ObjectImage(GraphicsDevice graphicsDevice, ShpFile shp, byte[] shpFileData, Palette palette)
         {
             Frames = new PositionedTexture[shp.FrameCount];
             for (int i = 0; i < shp.FrameCount; i++)
@@ -146,7 +146,7 @@ namespace TSMapEditor.Rendering
                 throw new KeyNotFoundException(Theater.UnitPaletteName + " not found from loaded MIX files!");
             var unitPalette = new Palette(unitPaletteData);
 
-            TerrainObjectTextures = new TerrainImage[terrainTypes.Count];
+            TerrainObjectTextures = new ObjectImage[terrainTypes.Count];
             for (int i = 0; i < terrainTypes.Count; i++)
             {
                 string shpFileName = terrainTypes[i].Image != null ? terrainTypes[i].Image : terrainTypes[i].ININame;
@@ -161,7 +161,7 @@ namespace TSMapEditor.Rendering
 
                 var shpFile = new ShpFile();
                 shpFile.ParseFromBuffer(data);
-                TerrainObjectTextures[i] = new TerrainImage(graphicsDevice, shpFile, data, 
+                TerrainObjectTextures[i] = new ObjectImage(graphicsDevice, shpFile, data, 
                     terrainTypes[i].SpawnsTiberium ? unitPalette : theaterPalette);
             }
         }
@@ -181,6 +181,6 @@ namespace TSMapEditor.Rendering
         public TileImage GetTileGraphics(int id) => graphicsList[id][random.Next(graphicsList[id].Length)];
 
 
-        public TerrainImage[] TerrainObjectTextures { get; set; }
+        public ObjectImage[] TerrainObjectTextures { get; set; }
     }
 }

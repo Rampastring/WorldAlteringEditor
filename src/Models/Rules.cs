@@ -40,7 +40,10 @@ namespace TSMapEditor.Models
 
         public void InitArt(IniFile iniFile, IInitializer initializer)
         {
-            TerrainTypes.ForEach(ot => initializer.ReadObjectTypeArtPropertiesFromINI(ot, iniFile));
+            TerrainTypes.ForEach(tt => initializer.ReadObjectTypeArtPropertiesFromINI(tt, iniFile));
+
+            BuildingTypes.ForEach(bt => initializer.ReadObjectTypeArtPropertiesFromINI(bt, iniFile,
+                string.IsNullOrWhiteSpace(bt.Image) ? bt.ININame : bt.Image));
         }
 
         public List<House> GetStandardHouses(IniFile iniFile)

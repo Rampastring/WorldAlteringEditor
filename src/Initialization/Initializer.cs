@@ -43,7 +43,8 @@ namespace TSMapEditor.Initialization
         private Dictionary<Type, Action<AbstractObject, IniFile, IniSection>> objectTypeArtInitializers
             = new Dictionary<Type, Action<AbstractObject, IniFile, IniSection>>()
             {
-                { typeof(TerrainType), InitTerrainTypeArt }
+                { typeof(TerrainType), InitTerrainTypeArt },
+                { typeof(BuildingType), InitBuildingTypeArt }
             };
 
         public void ReadObjectTypePropertiesFromINI<T>(T obj, IniFile iniFile) where T : AbstractObject, INIDefined
@@ -61,6 +62,16 @@ namespace TSMapEditor.Initialization
         public void ReadObjectTypeArtPropertiesFromINI<T>(T obj, IniFile iniFile) where T : AbstractObject, INIDefined
         {
             IniSection objectSection = iniFile.GetSection(obj.ININame);
+            if (objectSection == null)
+                return;
+
+            if (objectTypeArtInitializers.TryGetValue(typeof(T), out var action))
+                action(obj, iniFile, objectSection);
+        }
+
+        public void ReadObjectTypeArtPropertiesFromINI<T>(T obj, IniFile iniFile, string sectionName) where T : AbstractObject, INIDefined
+        {
+            IniSection objectSection = iniFile.GetSection(sectionName);
             if (objectSection == null)
                 return;
 
@@ -233,6 +244,12 @@ namespace TSMapEditor.Initialization
         private static void InitBuildingType(AbstractObject obj, IniFile rulesIni, IniSection section)
         {
             var buildingType = (BuildingType)obj;
+        }
+
+        private static void InitBuildingTypeArt(AbstractObject obj, IniFile artIni, IniSection artSection)
+        {
+            var buildingType = (BuildingType)obj;
+            buildingType.ArtData.ReadFromIniSection(artSection);
         }
 
         private static void InitInfantryType(AbstractObject obj, IniFile rulesIni, IniSection section)
