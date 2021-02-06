@@ -74,8 +74,7 @@ namespace TSMapEditor.Rendering
 
             Texture2D debugTexture = null;
 
-            DrawTerrainObjects();
-            DrawBuildings();
+            DrawObjects();
 
             int a = 0;
 
@@ -93,70 +92,65 @@ namespace TSMapEditor.Rendering
             }
         }
 
-        private void DrawTerrainObjects()
+        private void DrawObjects()
         {
-            for (int i = 0; i < Map.TerrainObjects.Count; i++)
-            {
-                var terrainObject = Map.TerrainObjects[i];
-                Point2D drawPoint = CellMath.CellTopLeftPoint(terrainObject.Position, Map.Size.X);
-                int index = terrainObject.TerrainType.Index;
-                var graphics = TheaterGraphics.TerrainObjectTextures[index];
-                if (graphics == null || graphics.Frames.Length == 0)
-                {
-                    DrawString(terrainObject.TerrainType.ININame, 1, drawPoint.ToXNAVector(), Color.Red, 1.0f);
-                    continue;
-                }
-
-                int yDrawOffset = terrainObject.TerrainType.SpawnsTiberium ? (Constants.CellSizeY / -2) : 0;
-
-                var frame = graphics.Frames[0];
-                var texture = frame.Texture;
-                DrawTexture(texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
-                    drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
-                    texture.Width, texture.Height), Color.White);
-
-                if (graphics.Frames.Length > 1)
-                {
-                    frame = graphics.Frames[graphics.Frames.Length / 2];
-
-                    if (frame == null)
-                        continue;
-
-                    texture = frame.Texture;
-                    if (texture == null)
-                        continue;
-
-                    DrawTexture(texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
-                        drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
-                        texture.Width, texture.Height), new Color(0, 0, 0, 128));
-                }
-            }
+            List<GameObject> gameObjects = new List<GameObject>(Map.TerrainObjects);
+            gameObjects.AddRange(Map.Structures);
+            gameObjects = gameObjects.OrderBy(s => s.GetYPositionForDrawOrder())
+                .ThenBy(s => s.GetXPositionForDrawOrder()).ToList();
+            gameObjects.ForEach(go => DrawObject(go));
         }
 
-        private void DrawBuildings()
+        private void DrawObject(GameObject gameObject)
         {
-            var sortedStructures = Map.Structures.OrderBy(s => s.Position.Y).ThenBy(s => s.Position.X).ToList();
-
-            for (int i = 0; i < sortedStructures.Count; i++)
+            Point2D drawPoint = CellMath.CellTopLeftPoint(gameObject.Position, Map.Size.X);
+            
+            ObjectImage graphics = null;
+            Color replacementColor = Color.Red;
+            string iniName = string.Empty;
+            switch (gameObject.WhatAmI())
             {
-                var building = sortedStructures[i];
-                Point2D drawPoint = CellMath.CellTopLeftPoint(building.Position, Map.Size.X);
-                var graphics = TheaterGraphics.BuildingTextures[building.ObjectType.Index];
-                if (graphics == null || graphics.Frames.Length == 0)
-                {
-                    DrawString(building.ObjectType.ININame, 1, drawPoint.ToXNAVector(), Color.Yellow, 1.0f);
-                    continue;
-                }
-
-                var frame = graphics.Frames[0];
-                if (graphics.Frames.Length > 1 && building.HP < Constants.ConditionYellowHP)
-                    frame = graphics.Frames[1];
-
-                var texture = frame.Texture;
-                DrawTexture(texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
-                    drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 - (Constants.CellSizeY / 2),
-                    texture.Width, texture.Height), Color.White);
+                case RTTIType.Terrain:
+                    var terrainObject = (TerrainObject)gameObject;
+                    graphics = TheaterGraphics.TerrainObjectTextures[terrainObject.TerrainType.Index];
+                    replacementColor = Color.Green;
+                    iniName = terrainObject.TerrainType.ININame;
+                    break;
+                case RTTIType.Building:
+                    var structure = (Structure)gameObject;
+                    graphics = TheaterGraphics.BuildingTextures[((Structure)gameObject).ObjectType.Index];
+                    replacementColor = Color.Yellow;
+                    iniName = structure.ObjectType.ININame;
+                    break;
             }
+
+            if (graphics == null || graphics.Frames.Length == 0)
+            {
+                DrawString(iniName, 1, drawPoint.ToXNAVector(), replacementColor, 1.0f);
+                return;
+            }
+
+            int yDrawOffset = gameObject.GetYDrawOffset();
+
+            int shadowFrameIndex = gameObject.GetShadowFrameIndex(graphics.Frames.Length);
+            if (shadowFrameIndex < graphics.Frames.Length)
+            {
+                var shadowFrame = graphics.Frames[shadowFrameIndex];
+                if (shadowFrame != null)
+                {
+                    var shadowTexture = shadowFrame.Texture;
+                    DrawTexture(shadowTexture, new Rectangle(drawPoint.X - shadowFrame.ShapeWidth / 2 + shadowFrame.OffsetX + Constants.CellSizeX / 2,
+                        drawPoint.Y - shadowFrame.ShapeHeight / 2 + shadowFrame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
+                        shadowTexture.Width, shadowTexture.Height), new Color(0, 0, 0, 128));
+                }
+            }
+            
+            int frameIndex = gameObject.GetFrameIndex(graphics.Frames.Length);
+            var frame = graphics.Frames[frameIndex];
+            var texture = frame.Texture;
+            DrawTexture(texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
+                drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
+                texture.Width, texture.Height), Color.White);
         }
 
         public void DrawTerrainTile(IsoMapPack5Tile tile)

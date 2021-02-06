@@ -19,5 +19,20 @@ namespace TSMapEditor.Models
         {
             return 0;
         }
+
+        public virtual int GetShadowFrameIndex(int frameCount)
+        {
+            return 1;
+        }
+
+        public virtual int GetXPositionForDrawOrder()
+        {
+            return Position.X;
+        }
+
+        public virtual int GetYPositionForDrawOrder()
+        {
+            return Position.Y;
+        }
     }
 }

@@ -39,5 +39,20 @@
 
             return 0;
         }
+
+        public override int GetXPositionForDrawOrder()
+        {
+            return Position.X + ObjectType.ArtData.FoundationX - 1;
+        }
+
+        public override int GetYPositionForDrawOrder()
+        {
+            return Position.Y + ObjectType.ArtData.FoundationY - 1;
+        }
+
+        public override int GetShadowFrameIndex(int frameCount)
+        {
+            return 2;
+        }
     }
 }
