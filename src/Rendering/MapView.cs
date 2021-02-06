@@ -124,6 +124,25 @@ namespace TSMapEditor.Rendering
                     break;
             }
 
+            if (gameObject.WhatAmI() == RTTIType.Building)
+            {
+                var structure = (Structure)gameObject;
+                int foundationX = structure.ObjectType.ArtData.FoundationX;
+                int foundationY = structure.ObjectType.ArtData.FoundationY;
+                if (foundationX > 0 && foundationY > 0)
+                {
+                    Point2D p1 = CellMath.CellTopLeftPoint(gameObject.Position, Map.Size.X) + new Point2D(Constants.CellSizeX / 2, 0);
+                    Point2D p2 = CellMath.CellTopLeftPoint(new Point2D(gameObject.Position.X + foundationX, gameObject.Position.Y), Map.Size.X) + new Point2D(Constants.CellSizeX / 2, 0);
+                    Point2D p3 = CellMath.CellTopLeftPoint(new Point2D(gameObject.Position.X, gameObject.Position.Y + foundationY), Map.Size.X) + new Point2D(Constants.CellSizeX / 2, 0);
+                    Point2D p4 = CellMath.CellTopLeftPoint(new Point2D(gameObject.Position.X + foundationX, gameObject.Position.Y + foundationY), Map.Size.X) + new Point2D(Constants.CellSizeX / 2, 0);
+
+                    DrawLine(p1.ToXNAVector(), p2.ToXNAVector(), new Color(128, 128, 128, 255), 1);
+                    DrawLine(p1.ToXNAVector(), p3.ToXNAVector(), new Color(128, 128, 128, 255), 1);
+                    DrawLine(p2.ToXNAVector(), p4.ToXNAVector(), new Color(128, 128, 128, 255), 1);
+                    DrawLine(p3.ToXNAVector(), p4.ToXNAVector(), new Color(128, 128, 128, 255), 1);
+                }
+            }
+
             if (graphics == null || graphics.Frames.Length == 0)
             {
                 DrawString(iniName, 1, drawPoint.ToXNAVector(), replacementColor, 1.0f);
