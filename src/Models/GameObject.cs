@@ -9,5 +9,15 @@ namespace TSMapEditor.Models
     public abstract class GameObject : AbstractObject
     {
         public Point2D Position { get; set; }
+
+        public virtual int GetYDrawOffset()
+        {
+            return 0;
+        }
+
+        public virtual int GetFrameIndex(int frameCount)
+        {
+            return 0;
+        }
     }
 }

@@ -97,6 +97,7 @@ namespace TSMapEditor.Models
 
                 T objectInstance = (T)constructor.Invoke(new object[] { typeName });
 
+                // Set the index property if one exists
                 var indexProperty = objectType.GetProperty("Index");
                 if (indexProperty != null)
                     indexProperty.SetValue(objectInstance, i);

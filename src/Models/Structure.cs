@@ -27,9 +27,17 @@
         public bool AIRepairable { get; set; }
         public bool Nominal { get; set; }
 
-        public void SetAttributesFromINIString(string iniString)
+        public override int GetYDrawOffset()
         {
+            return Constants.CellSizeY / -2;
+        }
 
+        public override int GetFrameIndex(int frameCount)
+        {
+            if (frameCount > 1 && HP < Constants.ConditionYellowHP)
+                return 1;
+
+            return 0;
         }
     }
 }

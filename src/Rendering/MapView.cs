@@ -74,19 +74,40 @@ namespace TSMapEditor.Rendering
 
             Texture2D debugTexture = null;
 
+            DrawTerrainObjects();
+            DrawBuildings();
+
+            int a = 0;
+
+            Renderer.PopRenderTarget();
+
+            sw.Stop();
+            Console.WriteLine("Map render time: " + sw.Elapsed.TotalMilliseconds);
+
+            if (a == 0)
+                return;
+
+            using (var stream = File.OpenWrite(Environment.CurrentDirectory + "/texture.png"))
+            {
+                debugTexture.SaveAsPng(stream, debugTexture.Width, debugTexture.Height);
+            }
+        }
+
+        private void DrawTerrainObjects()
+        {
             for (int i = 0; i < Map.TerrainObjects.Count; i++)
             {
-                var obj = Map.TerrainObjects[i];
-                Point2D drawPoint = CellMath.CellTopLeftPoint(obj.Position, Map.Size.X);
-                int index = obj.TerrainType.Index;
+                var terrainObject = Map.TerrainObjects[i];
+                Point2D drawPoint = CellMath.CellTopLeftPoint(terrainObject.Position, Map.Size.X);
+                int index = terrainObject.TerrainType.Index;
                 var graphics = TheaterGraphics.TerrainObjectTextures[index];
                 if (graphics == null || graphics.Frames.Length == 0)
                 {
-                    DrawString(obj.TerrainType.ININame, 1, drawPoint.ToXNAVector(), Color.Red, 1.0f);
+                    DrawString(terrainObject.TerrainType.ININame, 1, drawPoint.ToXNAVector(), Color.Red, 1.0f);
                     continue;
                 }
 
-                int yDrawOffset = obj.TerrainType.SpawnsTiberium ? -12 : 0;
+                int yDrawOffset = terrainObject.TerrainType.SpawnsTiberium ? (Constants.CellSizeY / -2) : 0;
 
                 var frame = graphics.Frames[0];
                 var texture = frame.Texture;
@@ -110,20 +131,31 @@ namespace TSMapEditor.Rendering
                         texture.Width, texture.Height), new Color(0, 0, 0, 128));
                 }
             }
+        }
 
-            int a = 0;
+        private void DrawBuildings()
+        {
+            var sortedStructures = Map.Structures.OrderBy(s => s.Position.Y).ThenBy(s => s.Position.X).ToList();
 
-            Renderer.PopRenderTarget();
-
-            sw.Stop();
-            Console.WriteLine("Map render time: " + sw.Elapsed.TotalMilliseconds);
-
-            if (a == 0)
-                return;
-
-            using (var stream = File.OpenWrite(Environment.CurrentDirectory + "/texture.png"))
+            for (int i = 0; i < sortedStructures.Count; i++)
             {
-                debugTexture.SaveAsPng(stream, debugTexture.Width, debugTexture.Height);
+                var building = sortedStructures[i];
+                Point2D drawPoint = CellMath.CellTopLeftPoint(building.Position, Map.Size.X);
+                var graphics = TheaterGraphics.BuildingTextures[building.ObjectType.Index];
+                if (graphics == null || graphics.Frames.Length == 0)
+                {
+                    DrawString(building.ObjectType.ININame, 1, drawPoint.ToXNAVector(), Color.Yellow, 1.0f);
+                    continue;
+                }
+
+                var frame = graphics.Frames[0];
+                if (graphics.Frames.Length > 1 && building.HP < Constants.ConditionYellowHP)
+                    frame = graphics.Frames[1];
+
+                var texture = frame.Texture;
+                DrawTexture(texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
+                    drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 - (Constants.CellSizeY / 2),
+                    texture.Width, texture.Height), Color.White);
             }
         }
 

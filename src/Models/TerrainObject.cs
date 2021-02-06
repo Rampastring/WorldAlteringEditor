@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TSMapEditor.GameMath;
+﻿using TSMapEditor.GameMath;
 
 namespace TSMapEditor.Models
 {
@@ -21,5 +16,10 @@ namespace TSMapEditor.Models
         public override RTTIType WhatAmI() => RTTIType.Terrain;
 
         public TerrainType TerrainType { get; private set; }
+
+        public override int GetYDrawOffset()
+        {
+            return base.GetYDrawOffset();
+        }
     }
 }

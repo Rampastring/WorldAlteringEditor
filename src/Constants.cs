@@ -13,5 +13,8 @@ namespace TSMapEditor
 
         public const int BuildingHealthMax = 256;
         public const int FacingMax = 255;
+
+        // TODO parse from Rules.ini
+        public const int ConditionYellowHP = 128;
     }
 }

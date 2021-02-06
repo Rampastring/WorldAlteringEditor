@@ -11,6 +11,8 @@ namespace TSMapEditor.Models.ArtData
         public int FoundationY { get; set; }
         public int Height { get; set; }
         public bool Remapable { get; set; }
+        public bool NewTheater { get; set; }
+        public bool TerrainPalette { get; set; }
 
         public void ReadFromIniSection(IniSection iniSection)
         {
@@ -30,8 +32,10 @@ namespace TSMapEditor.Models.ArtData
                 FoundationY = Conversions.IntFromString(foundationParts[1], 0);
             }
 
-            Height = iniSection.GetIntValue("Height", 0);
-            Remapable = iniSection.GetBooleanValue("Remapable", false);
+            Height = iniSection.GetIntValue(nameof(Height), 0);
+            Remapable = iniSection.GetBooleanValue(nameof(Remapable), false);
+            NewTheater = iniSection.GetBooleanValue(nameof(NewTheater), false);
+            TerrainPalette = iniSection.GetBooleanValue(nameof(TerrainPalette), false);
         }
     }
 }

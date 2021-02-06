@@ -68,15 +68,19 @@ namespace TSMapEditor.Rendering
     /// </summary>
     public class TheaterGraphics
     {
+        private const string SHP_FILE_EXTENSION = ".SHP";
+
         public TheaterGraphics(GraphicsDevice graphicsDevice, Theater theater, CCFileManager fileManager, Rules rules)
         {
             Theater = theater;
-            byte[] paletteData = fileManager.LoadFile(theater.PaletteName);
-            palette = new Palette(paletteData);
             this.fileManager = fileManager;
+
+            theaterPalette = GetPaletteOrFail(theater.PaletteName);
+            unitPalette = GetPaletteOrFail(Theater.UnitPaletteName);
 
             ReadTileTextures(graphicsDevice);
             ReadTerrainObjectTextures(graphicsDevice, rules.TerrainTypes);
+            ReadBuildingTextures(graphicsDevice, rules.BuildingTypes);
         }
 
         private void ReadTileTextures(GraphicsDevice graphicsDevice)
@@ -124,7 +128,7 @@ namespace TSMapEditor.Rendering
                         var tmpImages = new List<MGTMPImage>();
                         for (int img = 0; img < tmpFile.ImageCount; img++)
                         {
-                            tmpImages.Add(new MGTMPImage(graphicsDevice, tmpFile.GetImage(img), palette, tsId));
+                            tmpImages.Add(new MGTMPImage(graphicsDevice, tmpFile.GetImage(img), theaterPalette, tsId));
                         }
                         tileGraphics.Add(new TileImage(tsId, i, tmpImages.ToArray()));
                     }
@@ -136,15 +140,7 @@ namespace TSMapEditor.Rendering
 
         public void ReadTerrainObjectTextures(GraphicsDevice graphicsDevice, List<TerrainType> terrainTypes)
         {
-            byte[] theaterPaletteData = fileManager.LoadFile(Theater.PaletteName);
-            if (theaterPaletteData == null)
-                throw new KeyNotFoundException(Theater.PaletteName + " not found from loaded MIX files!");
-            var theaterPalette = new Palette(theaterPaletteData);
-
-            byte[] unitPaletteData = fileManager.LoadFile(Theater.UnitPaletteName);
-            if (unitPaletteData == null)
-                throw new KeyNotFoundException(Theater.UnitPaletteName + " not found from loaded MIX files!");
-            var unitPalette = new Palette(unitPaletteData);
+            var unitPalette = GetPaletteOrFail(Theater.UnitPaletteName);
 
             TerrainObjectTextures = new ObjectImage[terrainTypes.Count];
             for (int i = 0; i < terrainTypes.Count; i++)
@@ -153,7 +149,7 @@ namespace TSMapEditor.Rendering
                 if (terrainTypes[i].Theater)
                     shpFileName += Theater.FileExtension;
                 else
-                    shpFileName += ".SHP";
+                    shpFileName += SHP_FILE_EXTENSION;
 
                 byte[] data = fileManager.LoadFile(shpFileName);
                 if (data == null)
@@ -166,13 +162,53 @@ namespace TSMapEditor.Rendering
             }
         }
 
+        public void ReadBuildingTextures(GraphicsDevice graphicsDevice, List<BuildingType> buildingTypes)
+        {
+            BuildingTextures = new ObjectImage[buildingTypes.Count];
+            for (int i = 0; i < buildingTypes.Count; i++)
+            {
+                var buildingType = buildingTypes[i];
+
+                string shpFileName = string.IsNullOrWhiteSpace(buildingType.Image) ? buildingType.ININame : buildingType.Image;
+                if (buildingType.ArtData.TerrainPalette)
+                    shpFileName += Theater.FileExtension;
+                else
+                    shpFileName += SHP_FILE_EXTENSION;
+
+                byte[] shpData = null;
+                if (buildingType.ArtData.NewTheater)
+                {
+                    string newTheaterShpName = shpFileName.Substring(0, 1) + Theater.NewTheaterBuildingLetter + shpFileName.Substring(2);
+
+                    shpData = fileManager.LoadFile(newTheaterShpName);
+                }
+
+                // The game can apparently fall back to the non-theater-specific SHP file name
+                // if the theater-specific SHP is not found
+                if (shpData == null)
+                {
+                    shpData = fileManager.LoadFile(shpFileName);
+                    if (shpData == null)
+                    {
+                        continue;
+                    }
+                }
+
+                var shpFile = new ShpFile();
+                shpFile.ParseFromBuffer(shpData);
+                BuildingTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData,
+                    buildingType.ArtData.TerrainPalette ? theaterPalette : unitPalette);
+            }
+        }
+
         private Random random = new Random();
 
         public Theater Theater { get; }
 
         private CCFileManager fileManager;
 
-        private Palette palette;
+        private readonly Palette theaterPalette;
+        private readonly Palette unitPalette;
 
         private List<TileImage[]> graphicsList = new List<TileImage[]>();
 
@@ -182,5 +218,15 @@ namespace TSMapEditor.Rendering
 
 
         public ObjectImage[] TerrainObjectTextures { get; set; }
+        public ObjectImage[] BuildingTextures { get; set; }
+
+
+        private Palette GetPaletteOrFail(string paletteFileName)
+        {
+            byte[] paletteData = fileManager.LoadFile(paletteFileName);
+            if (paletteData == null)
+                throw new KeyNotFoundException(paletteFileName + " not found from loaded MIX files!");
+            return new Palette(paletteData);
+        }
     }
 }

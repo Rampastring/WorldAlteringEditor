@@ -8,7 +8,9 @@ namespace TSMapEditor.CCEngine
 {
     public class Theater
     {
-        public Theater(string uiName, string configIniName, string contentMixName, string paletteName, string unitPaletteName, string fileExtension)
+        public Theater(string uiName, string configIniName, string contentMixName,
+            string paletteName, string unitPaletteName, string fileExtension,
+            char newTheaterBuildingLetter)
         {
             UIName = uiName;
             ConfigININame = configIniName;
@@ -16,6 +18,7 @@ namespace TSMapEditor.CCEngine
             PaletteName = paletteName;
             UnitPaletteName = unitPaletteName;
             FileExtension = fileExtension;
+            NewTheaterBuildingLetter = newTheaterBuildingLetter;
         }
 
         public string UIName { get; }
@@ -24,6 +27,7 @@ namespace TSMapEditor.CCEngine
         public string PaletteName { get; }
         public string UnitPaletteName { get; }
         public string FileExtension { get; }
+        public char NewTheaterBuildingLetter { get; }
 
         public void ReadConfigINI(string baseDirectoryPath)
         {

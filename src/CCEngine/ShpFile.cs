@@ -15,6 +15,9 @@ namespace TSMapEditor.CCEngine
         UsesRle = 2
     }
 
+    /// <summary>
+    /// Represents the header of a SHP file.
+    /// </summary>
     struct ShpFileHeader
     {
         public const int SizeOf = 8;
@@ -39,6 +42,9 @@ namespace TSMapEditor.CCEngine
         public ushort FrameCount;
     }
 
+    /// <summary>
+    /// Represents the information of a single frame in a SHP file.
+    /// </summary>
     public class ShpFrameInfo
     {
         private const int SizeOf = 24;
@@ -87,6 +93,10 @@ namespace TSMapEditor.CCEngine
         public uint DataOffset;
     }
 
+    /// <summary>
+    /// Represents a SHP file. Combines the header and frame information
+    /// and makes it possible to parse the actual graphical data.
+    /// </summary>
     public class ShpFile
     {
         private ShpFileHeader shpFileHeader;

@@ -59,15 +59,15 @@ namespace TSMapEditor.Rendering
             IniFile artFSIni = new IniFile(Path.Combine(GameDirectory, "INI/ArtE.INI"));
             IniFile finalSunArtIni = new IniFile(Path.Combine(GameDirectory, "INI/FSA.INI"));
             IniFile.ConsolidateIniFiles(artFSIni, finalSunArtIni);
-            IniFile mapIni = new IniFile("F:/Pelit/DTA Beta/Maps/Default/a_buoyant_city.map");
+            IniFile mapIni = new IniFile(Path.Combine(GameDirectory, "Maps/Default/a_buoyant_city.map"));
             Map map = new Map();
             map.LoadExisting(rulesIni, firestormIni, artIni, artFSIni, mapIni);
 
             Console.WriteLine();
             Console.WriteLine("Map loaded.");
 
-            Theater theater = new Theater("Temperate", "INI/Tem.ini", "IsoTem.mix", "isotem.pal", "unittem.pal", ".tem");
-            theater.ReadConfigINI("F:/Pelit/DTA Beta/");
+            Theater theater = new Theater("Temperate", "INI/Tem.ini", "IsoTem.mix", "isotem.pal", "unittem.pal", ".tem", 'A');
+            theater.ReadConfigINI(GameDirectory);
 
             CCFileManager ccFileManager = new CCFileManager();
             ccFileManager.AddSearchDirectory(Path.Combine(GameDirectory, "MIX/"));
