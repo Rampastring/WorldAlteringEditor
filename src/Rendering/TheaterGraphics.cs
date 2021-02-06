@@ -170,7 +170,7 @@ namespace TSMapEditor.Rendering
                 var buildingType = buildingTypes[i];
 
                 string shpFileName = string.IsNullOrWhiteSpace(buildingType.Image) ? buildingType.ININame : buildingType.Image;
-                if (buildingType.ArtData.TerrainPalette)
+                if (buildingType.ArtData.Theater)
                     shpFileName += Theater.FileExtension;
                 else
                     shpFileName += SHP_FILE_EXTENSION;

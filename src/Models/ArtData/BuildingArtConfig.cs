@@ -13,6 +13,7 @@ namespace TSMapEditor.Models.ArtData
         public bool Remapable { get; set; }
         public bool NewTheater { get; set; }
         public bool TerrainPalette { get; set; }
+        public bool Theater { get; set; }
 
         public void ReadFromIniSection(IniSection iniSection)
         {
@@ -36,6 +37,7 @@ namespace TSMapEditor.Models.ArtData
             Remapable = iniSection.GetBooleanValue(nameof(Remapable), false);
             NewTheater = iniSection.GetBooleanValue(nameof(NewTheater), false);
             TerrainPalette = iniSection.GetBooleanValue(nameof(TerrainPalette), false);
+            Theater = iniSection.GetBooleanValue(nameof(Theater), false);
         }
     }
 }
