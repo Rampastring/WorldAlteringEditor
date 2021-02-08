@@ -1,9 +1,11 @@
-﻿using Rampastring.Tools;
+﻿using CNCMaps.FileFormats.Encodings;
+using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Models.Enums;
 using TSMapEditor.Models.MapFormat;
@@ -22,6 +24,9 @@ namespace TSMapEditor.Initialization
     /// </summary>
     public class Initializer : IInitializer
     {
+        private const int MAX_MAP_LENGTH_IN_DIMENSION = 512;
+        private const int NO_OVERLAY = 255; // 0xFF
+
         public Initializer(IMap map)
         {
             this.map = map;
@@ -138,15 +143,15 @@ namespace TSMapEditor.Initialization
             // if (uncompressedData.Count % IsoMapPack5Tile.Size != 0)
             //     throw new InvalidOperationException("Decompressed IsoMapPack5 size does not match expected struct size");
 
-            var tiles = new List<IsoMapPack5Tile>(uncompressedData.Count % IsoMapPack5Tile.Size);
+            var tiles = new List<MapTile>(uncompressedData.Count % IsoMapPack5Tile.Size);
             position = 0;
             while (position < uncompressedData.Count - IsoMapPack5Tile.Size)
             {
                 // This could be optimized by not creating the tile at all if its tile index is 0xFFFF
-                var isoMapPack5Tile = new IsoMapPack5Tile(uncompressedData.GetRange(position, IsoMapPack5Tile.Size).ToArray());
-                if (isoMapPack5Tile.TileIndex != ushort.MaxValue)
+                var mapTile = new MapTile(uncompressedData.GetRange(position, IsoMapPack5Tile.Size).ToArray());
+                if (mapTile.TileIndex != ushort.MaxValue)
                 {
-                    tiles.Add(isoMapPack5Tile);
+                    tiles.Add(mapTile);
                 }
                 position += IsoMapPack5Tile.Size;
             }
@@ -233,6 +238,56 @@ namespace TSMapEditor.Initialization
                 };
 
                 map.Structures.Add(building);
+            }
+        }
+
+        public void ReadOverlays(IMap map, IniFile mapIni)
+        {
+            var overlayPackSection = mapIni.GetSection("OverlayPack");
+            var overlayDataPackSection = mapIni.GetSection("OverlayDataPack");
+            if (overlayPackSection == null || overlayDataPackSection == null)
+                return;
+
+            var stringBuilder = new StringBuilder();
+            overlayPackSection.Keys.ForEach(kvp => stringBuilder.Append(kvp.Value));
+            byte[] compressedData = Convert.FromBase64String(stringBuilder.ToString());
+            byte[] uncompressedOverlayPack = new byte[MAX_MAP_LENGTH_IN_DIMENSION * MAX_MAP_LENGTH_IN_DIMENSION];
+            Format5.DecodeInto(compressedData, uncompressedOverlayPack, 80);
+
+            stringBuilder.Clear();
+            overlayDataPackSection.Keys.ForEach(kvp => stringBuilder.Append(kvp.Value));
+            compressedData = Convert.FromBase64String(stringBuilder.ToString());
+            byte[] uncompressedOverlayDataPack = new byte[MAX_MAP_LENGTH_IN_DIMENSION * MAX_MAP_LENGTH_IN_DIMENSION];
+            Format5.DecodeInto(compressedData, uncompressedOverlayDataPack, 80);
+
+            for (int y = 0; y < map.Tiles.Length; y++)
+            {
+                for (int x = 0; x < map.Tiles[y].Length; x++)
+                {
+                    var tile = map.Tiles[y][x];
+                    if (tile == null)
+                        continue;
+
+                    int overlayDataIndex = (tile.Y * MAX_MAP_LENGTH_IN_DIMENSION) + tile.X;
+                    int overlayTypeIndex = uncompressedOverlayPack[overlayDataIndex];
+                    if (overlayTypeIndex == NO_OVERLAY)
+                        continue;
+
+                    if (overlayTypeIndex >= map.Rules.OverlayTypes.Count)
+                    {
+                        Logger.Log("Ignoring overlay on tile at " + x + ", " + y + " because it's out of bounds compared to Rules.ini overlay list");
+                        continue;
+                    }
+
+                    var overlayType = map.Rules.OverlayTypes[overlayTypeIndex];
+                    var overlay = new Overlay()
+                    {
+                        OverlayType = overlayType,
+                        FrameIndex = uncompressedOverlayDataPack[overlayDataIndex],
+                        Position = new Point2D(tile.X, tile.Y)
+                    };
+                    tile.Overlay = overlay;
+                }
             }
         }
 

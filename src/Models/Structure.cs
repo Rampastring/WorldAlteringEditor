@@ -49,10 +49,5 @@
         {
             return Position.Y + ObjectType.ArtData.FoundationY - 1;
         }
-
-        public override int GetShadowFrameIndex(int frameCount)
-        {
-            return 2;
-        }
     }
 }

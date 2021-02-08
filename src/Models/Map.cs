@@ -17,7 +17,7 @@ namespace TSMapEditor.Models
 
         public Rules Rules { get; private set; }
 
-        public IsoMapPack5Tile[][] Tiles = new IsoMapPack5Tile[600][]; // for now
+        public MapTile[][] Tiles { get; private set; } = new MapTile[600][]; // for now
 
         public List<Aircraft> Aircraft { get; } = new List<Aircraft>();
         public List<Infantry> Infantry { get; } = new List<Infantry>();
@@ -44,7 +44,7 @@ namespace TSMapEditor.Models
         {
             for (int i = 0; i < Tiles.Length; i++)
             {
-                Tiles[i] = new IsoMapPack5Tile[600];
+                Tiles[i] = new MapTile[600];
             }
 
             initializer = new Initializer(this);
@@ -60,6 +60,7 @@ namespace TSMapEditor.Models
             initializer.ReadIsoMapPack(this, mapIni);
             initializer.ReadTerrainObjects(this, mapIni);
             initializer.ReadBuildings(this, mapIni);
+            initializer.ReadOverlays(this, mapIni);
         }
 
         /// <summary>
@@ -83,7 +84,7 @@ namespace TSMapEditor.Models
             return house;
         }
 
-        public void SetTileData(List<IsoMapPack5Tile> tiles)
+        public void SetTileData(List<MapTile> tiles)
         {
             foreach (var tile in tiles)
             {
@@ -102,12 +103,12 @@ namespace TSMapEditor.Models
                 {
                     if (Tiles[ty][tx] == null)
                     {
-                        Tiles[ty][tx] = new IsoMapPack5Tile() { X = (short)tx, Y = (short)ty };
+                        Tiles[ty][tx] = new MapTile() { X = (short)tx, Y = (short)ty };
                     }
 
                     if (tx < Size.X + ox - 2 && Tiles[ty][tx + 1] == null)
                     {
-                        Tiles[ty][tx + 1] = new IsoMapPack5Tile() { X = (short)(tx + 1), Y = (short)ty };
+                        Tiles[ty][tx + 1] = new MapTile() { X = (short)(tx + 1), Y = (short)ty };
                     }
 
                     tx++;

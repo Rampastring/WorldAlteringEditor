@@ -201,6 +201,8 @@ namespace TSMapEditor.Rendering
             }
         }
 
+
+
         private Random random = new Random();
 
         public Theater Theater { get; }
@@ -219,7 +221,7 @@ namespace TSMapEditor.Rendering
 
         public ObjectImage[] TerrainObjectTextures { get; set; }
         public ObjectImage[] BuildingTextures { get; set; }
-
+        public ObjectImage[] OverlayTextures { get; set; }
 
         private Palette GetPaletteOrFail(string paletteFileName)
         {

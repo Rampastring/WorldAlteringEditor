@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using TSMapEditor.Models.MapFormat;
 
 namespace TSMapEditor.Models
@@ -11,10 +7,15 @@ namespace TSMapEditor.Models
     {
         private const int SubCellCount = 5;
 
+        public MapTile() { }
+
+        public MapTile(byte[] data) : base(data) { }
+
         public TerrainObject TerrainObject { get; set; }
         public Structure Structure { get; set; }
         public AbstractObject VehicleOrAircraft { get; set; }
         public Infantry[] Infantry { get; set; } = new Infantry[SubCellCount];
+        public Overlay Overlay { get; set; }
 
         /// <summary>
         /// A list of objects that graphically overlap with this tile.

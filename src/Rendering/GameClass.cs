@@ -74,6 +74,12 @@ namespace TSMapEditor.Rendering
             ccFileManager.AddSearchDirectory(Path.Combine(GameDirectory, "Map Editor/"));
             ccFileManager.LoadPrimaryMixFile("Cache.mix");
             ccFileManager.LoadPrimaryMixFile(theater.ContentMIXName);
+            ccFileManager.LoadSecondaryMixFile("ECache00.mix");
+            ccFileManager.LoadSecondaryMixFile("ECache01.mix");
+            ccFileManager.LoadSecondaryMixFile("ECache02.mix");
+            ccFileManager.LoadSecondaryMixFile("ECache03.mix");
+            ccFileManager.LoadSecondaryMixFile("ECache04.mix");
+            ccFileManager.LoadSecondaryMixFile("ECache05.mix");
             ccFileManager.LoadSecondaryMixFile("FSCache.mix");
 
             TheaterGraphics theaterGraphics = new TheaterGraphics(GraphicsDevice, theater, ccFileManager, map.Rules);

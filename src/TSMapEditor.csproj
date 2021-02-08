@@ -100,11 +100,16 @@
     <Compile Include="Models\InfantryType.cs" />
     <Compile Include="Models\INIDefined.cs" />
     <Compile Include="Models\Map.cs" />
+    <Compile Include="Models\MapFormat\Format5.cs" />
+    <Compile Include="Models\MapFormat\Format80.cs" />
     <Compile Include="Models\MapFormat\IsoMapPack5Tile.cs" />
+    <Compile Include="Models\MapFormat\MemoryFile.cs" />
     <Compile Include="Models\MapFormat\MiniLZO.cs" />
+    <Compile Include="Models\MapFormat\VirtualFile.cs" />
     <Compile Include="Models\MapTile.cs" />
     <Compile Include="Models\Mission.cs" />
     <Compile Include="Models\Enums\RTTIType.cs" />
+    <Compile Include="Models\Overlay.cs" />
     <Compile Include="Models\OverlayType.cs" />
     <Compile Include="Models\Rules.cs" />
     <Compile Include="Models\Script.cs" />

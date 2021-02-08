@@ -8,6 +8,7 @@ namespace TSMapEditor.Initialization
 {
     public interface IMap
     {
+        MapTile[][] Tiles { get; }
         List<House> StandardHouses { get; }
         List<Aircraft> Aircraft { get; }
         List<House> Houses { get; }
@@ -19,7 +20,7 @@ namespace TSMapEditor.Initialization
         List<Unit> Units { get; }
         List<Waypoint> Waypoints { get; }
         Point2D Size { get; set; }
-        void SetTileData(List<IsoMapPack5Tile> tiles);
+        void SetTileData(List<MapTile> tiles);
         House FindOrMakeHouse(string houseName);
     }
 }

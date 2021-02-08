@@ -22,7 +22,7 @@ namespace TSMapEditor.Models
 
         public virtual int GetShadowFrameIndex(int frameCount)
         {
-            return 1;
+            return (frameCount / 2);
         }
 
         public virtual int GetXPositionForDrawOrder()

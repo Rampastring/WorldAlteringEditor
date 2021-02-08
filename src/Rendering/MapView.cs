@@ -136,10 +136,12 @@ namespace TSMapEditor.Rendering
                     Point2D p3 = CellMath.CellTopLeftPoint(new Point2D(gameObject.Position.X, gameObject.Position.Y + foundationY), Map.Size.X) + new Point2D(Constants.CellSizeX / 2, 0);
                     Point2D p4 = CellMath.CellTopLeftPoint(new Point2D(gameObject.Position.X + foundationX, gameObject.Position.Y + foundationY), Map.Size.X) + new Point2D(Constants.CellSizeX / 2, 0);
 
-                    DrawLine(p1.ToXNAVector(), p2.ToXNAVector(), new Color(128, 128, 128, 255), 1);
-                    DrawLine(p1.ToXNAVector(), p3.ToXNAVector(), new Color(128, 128, 128, 255), 1);
-                    DrawLine(p2.ToXNAVector(), p4.ToXNAVector(), new Color(128, 128, 128, 255), 1);
-                    DrawLine(p3.ToXNAVector(), p4.ToXNAVector(), new Color(128, 128, 128, 255), 1);
+                    Color foundationLineColor = new Color(128, 128, 128, 255);
+
+                    DrawLine(p1.ToXNAVector(), p2.ToXNAVector(), foundationLineColor, 1);
+                    DrawLine(p1.ToXNAVector(), p3.ToXNAVector(), foundationLineColor, 1);
+                    DrawLine(p2.ToXNAVector(), p4.ToXNAVector(), foundationLineColor, 1);
+                    DrawLine(p3.ToXNAVector(), p4.ToXNAVector(), foundationLineColor, 1);
                 }
             }
 
@@ -152,7 +154,7 @@ namespace TSMapEditor.Rendering
             int yDrawOffset = gameObject.GetYDrawOffset();
 
             int shadowFrameIndex = gameObject.GetShadowFrameIndex(graphics.Frames.Length);
-            if (shadowFrameIndex < graphics.Frames.Length)
+            if (shadowFrameIndex > 0 && shadowFrameIndex < graphics.Frames.Length)
             {
                 var shadowFrame = graphics.Frames[shadowFrameIndex];
                 if (shadowFrame != null)
