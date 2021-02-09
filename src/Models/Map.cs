@@ -101,7 +101,7 @@ namespace TSMapEditor.Models
                         Tiles[ty][tx] = new MapTile() { X = (short)tx, Y = (short)ty };
                     }
 
-                    if (tx < Size.X + ox - 2 && Tiles[ty][tx + 1] == null)
+                    if (tx < Size.X + ox - 1 && Tiles[ty][tx + 1] == null)
                     {
                         Tiles[ty][tx + 1] = new MapTile() { X = (short)(tx + 1), Y = (short)ty };
                     }
