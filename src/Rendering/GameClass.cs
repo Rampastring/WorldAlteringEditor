@@ -80,7 +80,7 @@ namespace TSMapEditor.Rendering
             ccFileManager.LoadSecondaryMixFile("ECache03.mix");
             ccFileManager.LoadSecondaryMixFile("ECache04.mix");
             ccFileManager.LoadSecondaryMixFile("ECache05.mix");
-            ccFileManager.LoadSecondaryMixFile("FSCache.mix");
+            ccFileManager.LoadSecondaryMixFile("RampaCache.mix");
 
             TheaterGraphics theaterGraphics = new TheaterGraphics(GraphicsDevice, theater, ccFileManager, map.Rules);
 

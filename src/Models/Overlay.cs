@@ -12,5 +12,21 @@ namespace TSMapEditor.Models
 
         public OverlayType OverlayType { get; set; }
         public int FrameIndex { get; set; }
+
+
+        public override int GetFrameIndex(int frameCount)
+        {
+            return FrameIndex;
+        }
+
+        public override int GetShadowFrameIndex(int frameCount)
+        {
+            return 100;
+        }
+
+        public override int GetYDrawOffset()
+        {
+            return Constants.CellSizeY / -2;
+        }
     }
 }

@@ -65,12 +65,11 @@ namespace TSMapEditor.Rendering
                         continue;
                     }
 
-                    if (row[j] == null)
-                        continue;
-
                     DrawTerrainTile(row[j]);
                 }
             }
+
+            DrawOverlays();
 
             Texture2D debugTexture = null;
 
@@ -89,6 +88,30 @@ namespace TSMapEditor.Rendering
             using (var stream = File.OpenWrite(Environment.CurrentDirectory + "/texture.png"))
             {
                 debugTexture.SaveAsPng(stream, debugTexture.Width, debugTexture.Height);
+            }
+        }
+
+        private void DrawOverlays()
+        {
+            for (int i = 0; i < Map.Tiles.Length; i++)
+            {
+                var row = Map.Tiles[i];
+
+                for (int j = 0; j < row.Length; j++)
+                {
+                    if (row[j] == null)
+                        continue;
+
+                    Point2D drawPoint = CellMath.CellTopLeftPoint(new Point2D(i, j), Map.Size.X);
+
+                    var tile = row[j];
+                    if (tile.Overlay != null)
+                    {
+                        int overlayIndex = tile.Overlay.OverlayType.Index;
+                        int frameIndex = tile.Overlay.FrameIndex;
+                        DrawObject(tile.Overlay);
+                    }
+                }
             }
         }
 
@@ -118,9 +141,15 @@ namespace TSMapEditor.Rendering
                     break;
                 case RTTIType.Building:
                     var structure = (Structure)gameObject;
-                    graphics = TheaterGraphics.BuildingTextures[((Structure)gameObject).ObjectType.Index];
+                    graphics = TheaterGraphics.BuildingTextures[structure.ObjectType.Index];
                     replacementColor = Color.Yellow;
                     iniName = structure.ObjectType.ININame;
+                    break;
+                case RTTIType.Overlay:
+                    var overlay = (Overlay)gameObject;
+                    graphics = TheaterGraphics.OverlayTextures[overlay.OverlayType.Index];
+                    replacementColor = Color.LimeGreen;
+                    iniName = overlay.OverlayType.ININame;
                     break;
             }
 
@@ -168,6 +197,9 @@ namespace TSMapEditor.Rendering
             
             int frameIndex = gameObject.GetFrameIndex(graphics.Frames.Length);
             var frame = graphics.Frames[frameIndex];
+            if (frame == null)
+                return;
+
             var texture = frame.Texture;
             DrawTexture(texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
                 drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,

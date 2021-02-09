@@ -49,7 +49,8 @@ namespace TSMapEditor.Initialization
             = new Dictionary<Type, Action<AbstractObject, IniFile, IniSection>>()
             {
                 { typeof(TerrainType), InitTerrainTypeArt },
-                { typeof(BuildingType), InitBuildingTypeArt }
+                { typeof(BuildingType), InitBuildingTypeArt },
+                { typeof(OverlayType), InitOverlayTypeArt }
             };
 
         public void ReadObjectTypePropertiesFromINI<T>(T obj, IniFile iniFile) where T : AbstractObject, INIDefined
@@ -305,6 +306,12 @@ namespace TSMapEditor.Initialization
         {
             var buildingType = (BuildingType)obj;
             buildingType.ArtData.ReadFromIniSection(artSection);
+        }
+
+        private static void InitOverlayTypeArt(AbstractObject obj, IniFile artIni, IniSection artSection)
+        {
+            var overlayType = (OverlayType)obj;
+            overlayType.ArtConfig.ReadFromIniSection(artSection);
         }
 
         private static void InitInfantryType(AbstractObject obj, IniFile rulesIni, IniSection section)

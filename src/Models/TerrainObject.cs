@@ -19,7 +19,7 @@ namespace TSMapEditor.Models
 
         public override int GetYDrawOffset()
         {
-            return TerrainType.SpawnsTiberium ? (Constants.CellSizeY / 2) : 0;
+            return TerrainType.SpawnsTiberium ? (Constants.CellSizeY / -2) : 0;
         }
     }
 }

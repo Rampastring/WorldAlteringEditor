@@ -85,6 +85,7 @@
     <Compile Include="Models\Aircraft.cs" />
     <Compile Include="Models\AircraftType.cs" />
     <Compile Include="Models\ArtData\BuildingArtConfig.cs" />
+    <Compile Include="Models\ArtData\OverlayArtConfig.cs" />
     <Compile Include="Models\BuildingType.cs" />
     <Compile Include="Models\Enums\AITriggerConditionType.cs" />
     <Compile Include="Models\AITriggerType.cs" />

@@ -81,6 +81,7 @@ namespace TSMapEditor.Rendering
             ReadTileTextures(graphicsDevice);
             ReadTerrainObjectTextures(graphicsDevice, rules.TerrainTypes);
             ReadBuildingTextures(graphicsDevice, rules.BuildingTypes);
+            ReadOverlayTextures(graphicsDevice, rules.OverlayTypes);
         }
 
         private void ReadTileTextures(GraphicsDevice graphicsDevice)
@@ -201,7 +202,31 @@ namespace TSMapEditor.Rendering
             }
         }
 
+        public void ReadOverlayTextures(GraphicsDevice graphicsDevice, List<OverlayType> overlayTypes)
+        {
+            OverlayTextures = new ObjectImage[overlayTypes.Count];
+            for (int i = 0; i < overlayTypes.Count; i++)
+            {
+                var overlayType = overlayTypes[i];
 
+                string imageName = string.IsNullOrWhiteSpace(overlayType.Image) ? overlayType.ININame : overlayType.Image;
+                string fileExtension = overlayType.ArtConfig.Theater ? Theater.FileExtension : SHP_FILE_EXTENSION;
+                byte[] shpData = fileManager.LoadFile(imageName + fileExtension);
+
+                if (shpData == null)
+                    continue;
+
+                var shpFile = new ShpFile();
+                shpFile.ParseFromBuffer(shpData);
+                Palette palette = theaterPalette;
+                if (overlayType.Wall)
+                    palette = unitPalette;
+                // This should be done in vanilla TS, but not in DTA
+                // if (overlayType.Tiberium)
+                //     palette = unitPalette;
+                OverlayTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, palette);
+            }
+        }
 
         private Random random = new Random();
 
