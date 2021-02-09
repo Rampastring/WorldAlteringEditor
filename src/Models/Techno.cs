@@ -1,6 +1,4 @@
-﻿using TSMapEditor.GameMath;
-
-namespace TSMapEditor.Models
+﻿namespace TSMapEditor.Models
 {
     public abstract class Techno<T> : TechnoBase where T : GameObjectType
     {

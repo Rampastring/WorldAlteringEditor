@@ -13,7 +13,6 @@
 
 using System;
 using System.IO;
-using CNCMaps.FileFormats.VirtualFileSystem;
 
 namespace CNCMaps.FileFormats.Encodings
 {

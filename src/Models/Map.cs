@@ -1,13 +1,8 @@
 ﻿using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TSMapEditor.GameMath;
 using TSMapEditor.Initialization;
-using TSMapEditor.Models.Enums;
-using TSMapEditor.Models.MapFormat;
 
 namespace TSMapEditor.Models
 {

@@ -2,7 +2,6 @@
 using Rampastring.Tools;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
-using TSMapEditor.Models.MapFormat;
 
 namespace TSMapEditor.Initialization
 {

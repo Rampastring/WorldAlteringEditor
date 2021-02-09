@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TSMapEditor.GameMath
+﻿namespace TSMapEditor.GameMath
 {
     /// <summary>
     /// Provides static methods for calculating math related to cells.

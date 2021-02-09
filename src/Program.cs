@@ -1,8 +1,6 @@
 ﻿using Rampastring.Tools;
 using System;
-using System.Text;
 using System.Windows.Forms;
-using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 
 namespace TSMapEditor

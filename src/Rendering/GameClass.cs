@@ -3,11 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Rampastring.Tools;
 using Rampastring.XNAUI;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Models;
 
