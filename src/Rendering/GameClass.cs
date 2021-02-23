@@ -55,7 +55,7 @@ namespace TSMapEditor.Rendering
             IniFile artFSIni = new IniFile(Path.Combine(GameDirectory, "INI/ArtE.INI"));
             IniFile finalSunArtIni = new IniFile(Path.Combine(GameDirectory, "INI/FSA.INI"));
             IniFile.ConsolidateIniFiles(artFSIni, finalSunArtIni);
-            IniFile mapIni = new IniFile(Path.Combine(GameDirectory, "Maps/Default/perfect_storm.map"));
+            IniFile mapIni = new IniFile(Path.Combine(GameDirectory, "Maps/Default/a_buoyant_city.map"));
             Map map = new Map();
             map.LoadExisting(rulesIni, firestormIni, artIni, artFSIni, mapIni);
 
