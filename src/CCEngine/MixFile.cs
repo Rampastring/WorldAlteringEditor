@@ -43,6 +43,8 @@ namespace TSMapEditor.CCEngine
         private int mixStartOffset = 0;
 
 
+        private readonly object locker = new object();
+
         /// <summary>
         /// Reads MIX file information from a MIX file in the given file system path.
         /// </summary>
@@ -174,10 +176,13 @@ namespace TSMapEditor.CCEngine
         /// <returns>A byte array.</returns>
         public byte[] GetSingleFileData(int offset, int count)
         {
-            OpenFile();
-            byte[] buffer = GetFileData(offset, count);
-            CloseFile();
-            return buffer;
+            lock (locker)
+            {
+                OpenFile();
+                byte[] buffer = GetFileData(offset, count);
+                CloseFile();
+                return buffer;
+            }
         }
 
         /// <summary>
