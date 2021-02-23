@@ -1,9 +1,9 @@
-﻿using TSMapEditor.Models.ArtData;
+﻿using TSMapEditor.Models.ArtConfig;
 using TSMapEditor.Models.Enums;
 
 namespace TSMapEditor.Models
 {
-    public class OverlayType : GameObjectType
+    public class OverlayType : GameObjectType, IArtConfigContainer
     {
         public OverlayType(string iniName) : base(iniName)
         {
@@ -12,12 +12,13 @@ namespace TSMapEditor.Models
         public override RTTIType WhatAmI() => RTTIType.OverlayType;
 
         // We might not need all of these properties at least immediately,
-        // but I tried listing them all for possible future convenience
+        // but I listed them all for possible future convenience
 
         public string Name { get; set; }
         public LandType Land { get; set; }
         public string Image { get; set; }
         public OverlayArtConfig ArtConfig { get; } = new OverlayArtConfig();
+        public IArtConfig GetArtConfig() => ArtConfig;
         public bool WaterBound { get; set; }
         public bool Wall { get; set; }
         public bool RadarInvisible { get; set; }

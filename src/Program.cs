@@ -16,13 +16,6 @@ namespace TSMapEditor
             Logger.WriteToConsole = true;
 
             new GameClass().Run();
-
-            //Test();
-            return;
-
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
         }
     }
 }

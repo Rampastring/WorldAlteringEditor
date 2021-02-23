@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
+using TSMapEditor.Models.ArtConfig;
 using TSMapEditor.Models.Enums;
 using TSMapEditor.Models.MapFormat;
 
@@ -24,6 +25,9 @@ namespace TSMapEditor.Initialization
     {
         private const int MAX_MAP_LENGTH_IN_DIMENSION = 512;
         private const int NO_OVERLAY = 255; // 0xFF
+
+        private const int BUILDING_PROPERTY_FIELD_COUNT = 17;
+        private const int UNIT_PROPERTY_FIELD_COUNT = 14;
 
         public Initializer(IMap map)
         {
@@ -47,8 +51,9 @@ namespace TSMapEditor.Initialization
             = new Dictionary<Type, Action<AbstractObject, IniFile, IniSection>>()
             {
                 { typeof(TerrainType), InitTerrainTypeArt },
-                { typeof(BuildingType), InitBuildingTypeArt },
-                { typeof(OverlayType), InitOverlayTypeArt }
+                { typeof(BuildingType), InitArtConfigGeneric },
+                { typeof(OverlayType), InitArtConfigGeneric },
+                { typeof(UnitType), InitArtConfigGeneric }
             };
 
         public void ReadObjectTypePropertiesFromINI<T>(T obj, IniFile iniFile) where T : AbstractObject, INIDefined
@@ -196,9 +201,12 @@ namespace TSMapEditor.Initialization
             foreach (var kvp in section.Keys)
             {
                 string[] values = kvp.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                if (values.Length < BUILDING_PROPERTY_FIELD_COUNT)
+                    continue;
+
                 string ownerName = values[0];
                 string buildingTypeId = values[1];
-                int health = Math.Min(Constants.BuildingHealthMax, Math.Max(0, Conversions.IntFromString(values[2], Constants.BuildingHealthMax)));
+                int health = Math.Min(Constants.ObjectHealthMax, Math.Max(0, Conversions.IntFromString(values[2], Constants.ObjectHealthMax)));
                 int x = Conversions.IntFromString(values[3], 0);
                 int y = Conversions.IntFromString(values[4], 0);
                 int facing = Math.Min(Constants.FacingMax, Math.Max(0, Conversions.IntFromString(values[5], Constants.FacingMax)));
@@ -237,6 +245,62 @@ namespace TSMapEditor.Initialization
                 };
 
                 map.Structures.Add(building);
+            }
+        }
+
+        public void ReadUnits(IMap map, IniFile mapIni)
+        {
+            IniSection section = mapIni.GetSection("Units");
+            if (section == null)
+                return;
+
+            // [Units]
+            // INDEX=OWNER,ID,HEALTH,X,Y,FACING,MISSION,TAG,VETERANCY,GROUP,HIGH,FOLLOWS_INDEX,AUTOCREATE_NO_RECRUITABLE,AUTOCREATE_YES_RECRUITABLE
+
+            foreach (var kvp in section.Keys)
+            {
+                string[] values = kvp.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                if (values.Length < UNIT_PROPERTY_FIELD_COUNT)
+                    continue;
+
+                string ownerName = values[0];
+                string unitTypeId = values[1];
+                int health = Math.Min(Constants.ObjectHealthMax, Math.Max(0, Conversions.IntFromString(values[2], Constants.ObjectHealthMax)));
+                int x = Conversions.IntFromString(values[3], 0);
+                int y = Conversions.IntFromString(values[4], 0);
+                int facing = Math.Min(Constants.FacingMax, Math.Max(0, Conversions.IntFromString(values[5], Constants.FacingMax)));
+                string mission = values[6];
+                string attachedTag = values[7];
+                int veterancy = Conversions.IntFromString(values[8], 0);
+                int group = Conversions.IntFromString(values[9], 0);
+                bool high = Conversions.BooleanFromString(values[10], false);
+                int followsIndex = Conversions.IntFromString(values[11], 0);
+                bool autocreateNoRecruitable = Conversions.BooleanFromString(values[12], false);
+                bool autocreateYesRecruitable = Conversions.BooleanFromString(values[13], false);
+
+                var unitType = map.Rules.UnitTypes.Find(bt => bt.ININame == unitTypeId);
+                if (unitType == null)
+                {
+                    Logger.Log($"Unable to find unit type {unitTypeId} - skipping it.");
+                    continue;
+                }
+
+                var unit = new Unit(unitType)
+                {
+                    HP = health,
+                    Position = new Point2D(x, y),
+                    Facing = (byte)facing,
+                    // TODO Mission
+                    // TODO attached tag
+                    Veterancy = veterancy,
+                    Group = group,
+                    High = high,
+                    FollowsID = followsIndex,
+                    AutocreateNoRecruitable = autocreateNoRecruitable,
+                    AutocreateYesRecruitable = autocreateYesRecruitable
+                };
+
+                map.Units.Add(unit);
             }
         }
 
@@ -300,16 +364,10 @@ namespace TSMapEditor.Initialization
             var buildingType = (BuildingType)obj;
         }
 
-        private static void InitBuildingTypeArt(AbstractObject obj, IniFile artIni, IniSection artSection)
+        private static void InitArtConfigGeneric(AbstractObject obj, IniFile artIni, IniSection artSection)
         {
-            var buildingType = (BuildingType)obj;
-            buildingType.ArtData.ReadFromIniSection(artSection);
-        }
-
-        private static void InitOverlayTypeArt(AbstractObject obj, IniFile artIni, IniSection artSection)
-        {
-            var overlayType = (OverlayType)obj;
-            overlayType.ArtConfig.ReadFromIniSection(artSection);
+            var artConfigContainer = (IArtConfigContainer)obj;
+            artConfigContainer.GetArtConfig().ReadFromIniSection(artSection);
         }
 
         private static void InitInfantryType(AbstractObject obj, IniFile rulesIni, IniSection section)

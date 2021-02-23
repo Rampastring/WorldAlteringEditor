@@ -117,6 +117,7 @@ namespace TSMapEditor.Rendering
         {
             List<GameObject> gameObjects = new List<GameObject>(Map.TerrainObjects);
             gameObjects.AddRange(Map.Structures);
+            gameObjects.AddRange(Map.Units);
             gameObjects = gameObjects.OrderBy(s => s.GetYPositionForDrawOrder())
                 .ThenBy(s => s.GetXPositionForDrawOrder()).ToList();
             gameObjects.ForEach(go => DrawObject(go));
@@ -129,6 +130,9 @@ namespace TSMapEditor.Rendering
             ObjectImage graphics = null;
             Color replacementColor = Color.Red;
             string iniName = string.Empty;
+
+            // TODO refactor this to be more object-oriented
+
             switch (gameObject.WhatAmI())
             {
                 case RTTIType.Terrain:
@@ -143,6 +147,12 @@ namespace TSMapEditor.Rendering
                     replacementColor = Color.Yellow;
                     iniName = structure.ObjectType.ININame;
                     break;
+                case RTTIType.Unit:
+                    var unit = (Unit)gameObject;
+                    graphics = TheaterGraphics.UnitTextures[unit.ObjectType.Index];
+                    replacementColor = Color.Red;
+                    iniName = unit.ObjectType.ININame;
+                    break;
                 case RTTIType.Overlay:
                     var overlay = (Overlay)gameObject;
                     graphics = TheaterGraphics.OverlayTextures[overlay.OverlayType.Index];
@@ -154,8 +164,8 @@ namespace TSMapEditor.Rendering
             if (gameObject.WhatAmI() == RTTIType.Building)
             {
                 var structure = (Structure)gameObject;
-                int foundationX = structure.ObjectType.ArtData.FoundationX;
-                int foundationY = structure.ObjectType.ArtData.FoundationY;
+                int foundationX = structure.ObjectType.ArtConfig.FoundationX;
+                int foundationY = structure.ObjectType.ArtConfig.FoundationY;
                 if (foundationX > 0 && foundationY > 0)
                 {
                     Point2D p1 = CellMath.CellTopLeftPoint(gameObject.Position, Map.Size.X) + new Point2D(Constants.CellSizeX / 2, 0);

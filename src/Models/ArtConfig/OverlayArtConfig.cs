@@ -1,8 +1,8 @@
 ﻿using Rampastring.Tools;
 
-namespace TSMapEditor.Models.ArtData
+namespace TSMapEditor.Models.ArtConfig
 {
-    public class OverlayArtConfig
+    public class OverlayArtConfig : IArtConfig
     {
         public bool Theater { get; set; }
 

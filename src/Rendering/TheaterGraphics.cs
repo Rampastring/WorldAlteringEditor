@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Models;
 
@@ -78,10 +79,12 @@ namespace TSMapEditor.Rendering
             theaterPalette = GetPaletteOrFail(theater.PaletteName);
             unitPalette = GetPaletteOrFail(Theater.UnitPaletteName);
 
-            ReadTileTextures(graphicsDevice);
-            ReadTerrainObjectTextures(graphicsDevice, rules.TerrainTypes);
-            ReadBuildingTextures(graphicsDevice, rules.BuildingTypes);
-            ReadOverlayTextures(graphicsDevice, rules.OverlayTypes);
+            var task1 = Task.Factory.StartNew(() => ReadTileTextures(graphicsDevice));
+            var task2 = Task.Factory.StartNew(() => ReadTerrainObjectTextures(graphicsDevice, rules.TerrainTypes));
+            var task3 = Task.Factory.StartNew(() => ReadBuildingTextures(graphicsDevice, rules.BuildingTypes));
+            var task4 = Task.Factory.StartNew(() => ReadUnitTextures(graphicsDevice, rules.UnitTypes));
+            var task5 = Task.Factory.StartNew(() => ReadOverlayTextures(graphicsDevice, rules.OverlayTypes));
+            Task.WaitAll(task1, task2, task3, task4, task5);
         }
 
         private void ReadTileTextures(GraphicsDevice graphicsDevice)
@@ -171,13 +174,13 @@ namespace TSMapEditor.Rendering
                 var buildingType = buildingTypes[i];
 
                 string shpFileName = string.IsNullOrWhiteSpace(buildingType.Image) ? buildingType.ININame : buildingType.Image;
-                if (buildingType.ArtData.Theater)
+                if (buildingType.ArtConfig.Theater)
                     shpFileName += Theater.FileExtension;
                 else
                     shpFileName += SHP_FILE_EXTENSION;
 
                 byte[] shpData = null;
-                if (buildingType.ArtData.NewTheater)
+                if (buildingType.ArtConfig.NewTheater)
                 {
                     string newTheaterShpName = shpFileName.Substring(0, 1) + Theater.NewTheaterBuildingLetter + shpFileName.Substring(2);
 
@@ -198,7 +201,27 @@ namespace TSMapEditor.Rendering
                 var shpFile = new ShpFile();
                 shpFile.ParseFromBuffer(shpData);
                 BuildingTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData,
-                    buildingType.ArtData.TerrainPalette ? theaterPalette : unitPalette);
+                    buildingType.ArtConfig.TerrainPalette ? theaterPalette : unitPalette);
+            }
+        }
+
+        public void ReadUnitTextures(GraphicsDevice graphicsDevice, List<UnitType> unitTypes)
+        {
+            UnitTextures = new ObjectImage[unitTypes.Count];
+            for (int i = 0; i < unitTypes.Count; i++)
+            {
+                var unitType = unitTypes[i];
+
+                string shpFileName = string.IsNullOrWhiteSpace(unitType.Image) ? unitType.ININame : unitType.Image;
+                shpFileName += SHP_FILE_EXTENSION;
+                byte[] shpData = fileManager.LoadFile(shpFileName);
+
+                if (shpData == null)
+                    continue;
+
+                var shpFile = new ShpFile();
+                shpFile.ParseFromBuffer(shpData);
+                UnitTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, unitPalette);
             }
         }
 
@@ -246,6 +269,7 @@ namespace TSMapEditor.Rendering
 
         public ObjectImage[] TerrainObjectTextures { get; set; }
         public ObjectImage[] BuildingTextures { get; set; }
+        public ObjectImage[] UnitTextures { get; set; }
         public ObjectImage[] OverlayTextures { get; set; }
 
         private Palette GetPaletteOrFail(string paletteFileName)

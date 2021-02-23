@@ -42,12 +42,12 @@
 
         public override int GetXPositionForDrawOrder()
         {
-            return Position.X + ObjectType.ArtData.FoundationX - 1;
+            return Position.X + ObjectType.ArtConfig.FoundationX - 1;
         }
 
         public override int GetYPositionForDrawOrder()
         {
-            return Position.Y + ObjectType.ArtData.FoundationY - 1;
+            return Position.Y + ObjectType.ArtConfig.FoundationY - 1;
         }
     }
 }

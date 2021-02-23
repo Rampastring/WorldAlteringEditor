@@ -1,9 +1,9 @@
 ﻿using Rampastring.Tools;
 using System;
 
-namespace TSMapEditor.Models.ArtData
+namespace TSMapEditor.Models.ArtConfig
 {
-    public class BuildingArtConfig
+    public class BuildingArtConfig : IArtConfig
     {
         public BuildingArtConfig() { }
 

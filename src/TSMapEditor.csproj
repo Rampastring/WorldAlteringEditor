@@ -70,12 +70,6 @@
     <Compile Include="CCEngine\TileSet.cs" />
     <Compile Include="CCEngine\TmpFile.cs" />
     <Compile Include="Constants.cs" />
-    <Compile Include="Form1.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
-    </Compile>
     <Compile Include="GameMath\CellMath.cs" />
     <Compile Include="GameMath\Point2D.cs" />
     <Compile Include="Initialization\IInitializer.cs" />
@@ -84,8 +78,11 @@
     <Compile Include="Models\AbstractObject.cs" />
     <Compile Include="Models\Aircraft.cs" />
     <Compile Include="Models\AircraftType.cs" />
-    <Compile Include="Models\ArtData\BuildingArtConfig.cs" />
-    <Compile Include="Models\ArtData\OverlayArtConfig.cs" />
+    <Compile Include="Models\ArtConfig\BuildingArtConfig.cs" />
+    <Compile Include="Models\ArtConfig\IArtConfig.cs" />
+    <Compile Include="Models\ArtConfig\IArtConfigContainer.cs" />
+    <Compile Include="Models\ArtConfig\OverlayArtConfig.cs" />
+    <Compile Include="Models\ArtConfig\VehicleArtConfig.cs" />
     <Compile Include="Models\BuildingType.cs" />
     <Compile Include="Models\Enums\AITriggerConditionType.cs" />
     <Compile Include="Models\AITriggerType.cs" />
