@@ -207,13 +207,21 @@ namespace TSMapEditor.Rendering
 
         public void ReadUnitTextures(GraphicsDevice graphicsDevice, List<UnitType> unitTypes)
         {
+            Dictionary<string, ObjectImage> loadedTextures = new Dictionary<string, ObjectImage>();
             UnitTextures = new ObjectImage[unitTypes.Count];
+
             for (int i = 0; i < unitTypes.Count; i++)
             {
                 var unitType = unitTypes[i];
 
                 string shpFileName = string.IsNullOrWhiteSpace(unitType.Image) ? unitType.ININame : unitType.Image;
                 shpFileName += SHP_FILE_EXTENSION;
+                if (loadedTextures.TryGetValue(shpFileName, out ObjectImage loadedImage))
+                {
+                    UnitTextures[i] = loadedImage;
+                    continue;
+                }
+
                 byte[] shpData = fileManager.LoadFile(shpFileName);
 
                 if (shpData == null)
@@ -222,6 +230,7 @@ namespace TSMapEditor.Rendering
                 var shpFile = new ShpFile();
                 shpFile.ParseFromBuffer(shpData);
                 UnitTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, unitPalette);
+                loadedTextures[shpFileName] = UnitTextures[i];
             }
         }
 
