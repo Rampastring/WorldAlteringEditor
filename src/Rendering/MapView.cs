@@ -40,6 +40,8 @@ namespace TSMapEditor.Rendering
                 Map.Size.X * Constants.CellSizeX,
                 Map.Size.Y * Constants.CellSizeY, false, SurfaceFormat.Color,
                 DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
+
+            Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
         }
 
         Stopwatch sw = new Stopwatch();
@@ -212,6 +214,25 @@ namespace TSMapEditor.Rendering
             DrawTexture(texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
                 drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
                 texture.Width, texture.Height), Color.White);
+
+            if (gameObject.WhatAmI() == RTTIType.Unit)
+            {
+                var unit = (Unit)gameObject;
+                if (unit.UnitType.Turret)
+                {
+                    int turretFrameIndex = unit.GetTurretFrameIndex();
+                    if (turretFrameIndex > -1 && turretFrameIndex < graphics.Frames.Length)
+                    {
+                        frame = graphics.Frames[turretFrameIndex];
+                        if (frame == null)
+                            return;
+                        texture = frame.Texture;
+                        DrawTexture(texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
+                            drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
+                            texture.Width, texture.Height), Color.White);
+                    }
+                }
+            }
         }
 
         public void DrawTerrainTile(IsoMapPack5Tile tile)
@@ -250,6 +271,37 @@ namespace TSMapEditor.Rendering
                 cameraTopLeftPoint += new Point2D(0, scrollRate);
 
             base.Update(gameTime);
+        }
+
+        private void Keyboard_OnKeyPressed(object sender, Rampastring.XNAUI.Input.KeyPressEventArgs e)
+        {
+            if (!IsActive)
+                return;
+
+            if (e.PressedKey != Microsoft.Xna.Framework.Input.Keys.A)
+                return;
+
+            Point cursorPoint = GetCursorPoint();
+            Point2D cursorMapPoint = new Point2D(cameraTopLeftPoint.X + cursorPoint.X - Constants.CellSizeX / 2,
+                cameraTopLeftPoint.Y + cursorPoint.Y - Constants.CellSizeY / 2);
+            Point2D tileCoords = CellMath.CellCoordsFromPixelCoords(cursorMapPoint, Map.Size);
+
+            if (tileCoords.X >= 1 && tileCoords.Y >= 1 && tileCoords.Y < Map.Tiles.Length && tileCoords.X < Map.Tiles[tileCoords.Y].Length)
+            {
+                var tile = Map.Tiles[tileCoords.Y][tileCoords.X];
+                if (tile == null)
+                    return;
+
+                var unit = Map.Units.Find(u => u.Position.X == tile.X && u.Position.Y == tile.Y);
+                if (unit != null)
+                {
+                    int facing = unit.Facing;
+                    facing += 8;
+                    facing = facing % 256;
+                    unit.Facing = (byte)facing;
+                    mapInvalidated = true;
+                }
+            }
         }
 
         private void DrawCursorTile()

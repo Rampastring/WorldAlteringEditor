@@ -21,6 +21,8 @@ namespace TSMapEditor.Models.ArtConfig
             Remapable = iniSection.GetBooleanValue(nameof(Remapable), Remapable);
             StartStandFrame = iniSection.GetIntValue(nameof(StartStandFrame), StartStandFrame);
             StandingFrames = iniSection.GetIntValue(nameof(StandingFrames), StandingFrames);
+            StartWalkFrame = iniSection.GetIntValue(nameof(StartWalkFrame), StartWalkFrame);
+            WalkFrames = iniSection.GetIntValue(nameof(WalkFrames), WalkFrames);
             Facings = iniSection.GetIntValue(nameof(Facings), Facings);
         }
     }

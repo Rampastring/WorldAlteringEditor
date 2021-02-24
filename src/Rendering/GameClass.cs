@@ -53,8 +53,6 @@ namespace TSMapEditor.Rendering
             IniFile firestormIni = new IniFile(Path.Combine(GameDirectory, "INI/Enhance.ini"));
             IniFile artIni = new IniFile(Path.Combine(GameDirectory, "INI/Art.ini"));
             IniFile artFSIni = new IniFile(Path.Combine(GameDirectory, "INI/ArtE.INI"));
-            IniFile finalSunArtIni = new IniFile(Path.Combine(GameDirectory, "INI/FSA.INI"));
-            IniFile.ConsolidateIniFiles(artFSIni, finalSunArtIni);
             IniFile mapIni = new IniFile(Path.Combine(GameDirectory, "Maps/Missions/stomp.map"));
             //IniFile mapIni = new IniFile(Path.Combine(GameDirectory, "Maps/Default/a_buoyant_city.map"));
             Map map = new Map();

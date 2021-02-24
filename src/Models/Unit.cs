@@ -1,10 +1,14 @@
-﻿namespace TSMapEditor.Models
+﻿using System;
+
+namespace TSMapEditor.Models
 {
     /// <summary>
     /// Could also be called 'vehicle', but let's respect the original game's naming.
     /// </summary>
     public class Unit : Foot<UnitType>
     {
+        private const int STANDARD_STANDING_FRAME_COUNT = 8;
+
         public Unit(UnitType objectType) : base(objectType)
         {
             UnitType = objectType;
@@ -21,11 +25,21 @@
             return GetStandingFrame(frameCount);
         }
 
-        public int GetTurretFrameIndex(int frameCount)
+        public int GetTurretFrameIndex()
         {
-            int facingIndex = GetFacingIndex();
+            int facingIndex = GetTurretFacingIndex();
+            int framesToSkip = UnitType.ArtConfig.WalkFrames;
 
-            return -1;
+            return STANDARD_STANDING_FRAME_COUNT * framesToSkip + facingIndex;
+        }
+
+        private int GetTurretFacingIndex()
+        {
+            // Seems that there is no standard way of doing things with this engine...
+            int facingIndex = Facing / (256 / UnitType.ArtConfig.Facings);
+            facingIndex += 4;
+            facingIndex = facingIndex % UnitType.ArtConfig.Facings;
+            return facingIndex;
         }
 
         private int GetFacingIndex()
