@@ -26,11 +26,14 @@ namespace TSMapEditor.Rendering
 
     public class ObjectImage
     {
-        public ObjectImage(GraphicsDevice graphicsDevice, ShpFile shp, byte[] shpFileData, Palette palette)
+        public ObjectImage(GraphicsDevice graphicsDevice, ShpFile shp, byte[] shpFileData, Palette palette, List<int> framesToLoad = null)
         {
             Frames = new PositionedTexture[shp.FrameCount];
             for (int i = 0; i < shp.FrameCount; i++)
             {
+                if (framesToLoad != null && !framesToLoad.Contains(i))
+                    continue;
+
                 var frameInfo = shp.GetShpFrameInfo(i);
                 var frameData = shp.GetUncompressedFrameData(i, shpFileData);
                 if (frameData == null)
@@ -227,9 +230,20 @@ namespace TSMapEditor.Rendering
                 if (shpData == null)
                     continue;
 
+                // We don't need firing frames and some other stuff,
+                // so we build a list of frames to load to save VRAM
+                var framesToLoad = unitType.GetIdleFrameIndexes();
+                if (unitType.Turret)
+                {
+                    int turretStartFrame = unitType.GetTurretStartFrame();
+                    const int TURRET_FRAME_COUNT = 32;
+                    for (int t = turretStartFrame; t < turretStartFrame + TURRET_FRAME_COUNT; t++)
+                        framesToLoad.Add(t);
+                }
+
                 var shpFile = new ShpFile();
                 shpFile.ParseFromBuffer(shpData);
-                UnitTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, unitPalette);
+                UnitTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, unitPalette, framesToLoad);
                 loadedTextures[shpFileName] = UnitTextures[i];
             }
         }

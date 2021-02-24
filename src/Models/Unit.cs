@@ -7,7 +7,7 @@ namespace TSMapEditor.Models
     /// </summary>
     public class Unit : Foot<UnitType>
     {
-        private const int STANDARD_STANDING_FRAME_COUNT = 8;
+        
 
         public Unit(UnitType objectType) : base(objectType)
         {
@@ -25,13 +25,7 @@ namespace TSMapEditor.Models
             return GetStandingFrame(frameCount);
         }
 
-        public int GetTurretFrameIndex()
-        {
-            int facingIndex = GetTurretFacingIndex();
-            int framesToSkip = UnitType.ArtConfig.WalkFrames;
-
-            return STANDARD_STANDING_FRAME_COUNT * framesToSkip + facingIndex;
-        }
+        public int GetTurretFrameIndex() => UnitType.GetTurretStartFrame() + GetTurretFacingIndex();
 
         private int GetTurretFacingIndex()
         {
