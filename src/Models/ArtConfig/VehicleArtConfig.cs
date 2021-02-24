@@ -6,7 +6,10 @@ namespace TSMapEditor.Models.ArtConfig
     {
         public bool Voxel { get; set; }
         public bool Remapable { get; set; }
-        public int StartStandFrame { get; set; }
+        public int StartStandFrame { get; set; } = -1;
+        public int StandingFrames { get; set; } = 1;
+        public int StartWalkFrame { get; set; } = -1;
+        public int WalkFrames { get; set; } = 1;
         public int Facings { get; set; } = 1;
 
         public void ReadFromIniSection(IniSection iniSection)
@@ -17,6 +20,7 @@ namespace TSMapEditor.Models.ArtConfig
             Voxel = iniSection.GetBooleanValue(nameof(Voxel), Voxel);
             Remapable = iniSection.GetBooleanValue(nameof(Remapable), Remapable);
             StartStandFrame = iniSection.GetIntValue(nameof(StartStandFrame), StartStandFrame);
+            StandingFrames = iniSection.GetIntValue(nameof(StandingFrames), StandingFrames);
             Facings = iniSection.GetIntValue(nameof(Facings), Facings);
         }
     }

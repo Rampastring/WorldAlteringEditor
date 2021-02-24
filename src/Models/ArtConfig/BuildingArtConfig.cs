@@ -33,11 +33,11 @@ namespace TSMapEditor.Models.ArtConfig
                 FoundationY = Conversions.IntFromString(foundationParts[1], 0);
             }
 
-            Height = iniSection.GetIntValue(nameof(Height), 0);
-            Remapable = iniSection.GetBooleanValue(nameof(Remapable), false);
-            NewTheater = iniSection.GetBooleanValue(nameof(NewTheater), false);
-            TerrainPalette = iniSection.GetBooleanValue(nameof(TerrainPalette), false);
-            Theater = iniSection.GetBooleanValue(nameof(Theater), false);
+            Height = iniSection.GetIntValue(nameof(Height), Height);
+            Remapable = iniSection.GetBooleanValue(nameof(Remapable), Remapable);
+            NewTheater = iniSection.GetBooleanValue(nameof(NewTheater), NewTheater);
+            TerrainPalette = iniSection.GetBooleanValue(nameof(TerrainPalette), TerrainPalette);
+            Theater = iniSection.GetBooleanValue(nameof(Theater), Theater);
         }
     }
 }

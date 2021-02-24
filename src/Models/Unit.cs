@@ -18,20 +18,50 @@
 
         public override int GetFrameIndex(int frameCount)
         {
-            if (UnitType.ArtConfig.Facings == 32)
-            {
-                int frame = 1 + Facing / 8;
-                if (frame > 32)
-                    frame = 0;
-                return frame;
-            }
+            return GetStandingFrame(frameCount);
+        }
 
+        public int GetTurretFrameIndex(int frameCount)
+        {
+            int facingIndex = GetFacingIndex();
+
+            return -1;
+        }
+
+        private int GetFacingIndex()
+        {
+            int facingIndex = 0;
             if (UnitType.ArtConfig.Facings == 8)
             {
-                return Facing / 8;
+                facingIndex = Facing / 32;
+            }
+            else if (UnitType.ArtConfig.Facings > 1)
+            {
+                facingIndex = 1 + Facing / (256 / UnitType.ArtConfig.Facings);
+                if (facingIndex > UnitType.ArtConfig.Facings)
+                    facingIndex = 0;
             }
 
-            return 0;
+            return facingIndex;
+        }
+
+        private int GetStandingFrame(int frameCount)
+        {
+            int facingIndex = GetFacingIndex();
+
+            if (UnitType.ArtConfig.StartStandFrame == -1)
+            {
+                if (UnitType.ArtConfig.StartWalkFrame == -1)
+                {
+                    return facingIndex;
+                }
+
+                // Use start walk frames
+                return UnitType.ArtConfig.StartWalkFrame + (UnitType.ArtConfig.WalkFrames * facingIndex);
+            }
+
+            // Use stand frames
+            return UnitType.ArtConfig.StartStandFrame + (facingIndex * UnitType.ArtConfig.StandingFrames);
         }
 
         public override int GetShadowFrameIndex(int frameCount)
