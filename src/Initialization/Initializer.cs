@@ -28,6 +28,7 @@ namespace TSMapEditor.Initialization
 
         private const int BUILDING_PROPERTY_FIELD_COUNT = 17;
         private const int UNIT_PROPERTY_FIELD_COUNT = 14;
+        private const int INFANTRY_PROPERTY_FIELD_COUNT = 14;
 
         public Initializer(IMap map)
         {
@@ -47,13 +48,14 @@ namespace TSMapEditor.Initialization
                 { typeof(TerrainType), InitTerrainType }
             };
 
-        private Dictionary<Type, Action<AbstractObject, IniFile, IniSection>> objectTypeArtInitializers
-            = new Dictionary<Type, Action<AbstractObject, IniFile, IniSection>>()
+        private Dictionary<Type, Action<IMap, AbstractObject, IniFile, IniSection>> objectTypeArtInitializers
+            = new Dictionary<Type, Action<IMap, AbstractObject, IniFile, IniSection>>()
             {
                 { typeof(TerrainType), InitTerrainTypeArt },
                 { typeof(BuildingType), InitArtConfigGeneric },
                 { typeof(OverlayType), InitArtConfigGeneric },
-                { typeof(UnitType), InitArtConfigGeneric }
+                { typeof(UnitType), InitArtConfigGeneric },
+                { typeof(InfantryType), InitInfantryArtConfig }
             };
 
         public void ReadObjectTypePropertiesFromINI<T>(T obj, IniFile iniFile) where T : AbstractObject, INIDefined
@@ -75,7 +77,7 @@ namespace TSMapEditor.Initialization
                 return;
 
             if (objectTypeArtInitializers.TryGetValue(typeof(T), out var action))
-                action(obj, iniFile, objectSection);
+                action(map, obj, iniFile, objectSection);
         }
 
         public void ReadObjectTypeArtPropertiesFromINI<T>(T obj, IniFile iniFile, string sectionName) where T : AbstractObject, INIDefined
@@ -85,7 +87,7 @@ namespace TSMapEditor.Initialization
                 return;
 
             if (objectTypeArtInitializers.TryGetValue(typeof(T), out var action))
-                action(obj, iniFile, objectSection);
+                action(map, obj, iniFile, objectSection);
         }
 
         public void ReadMapSection(IMap map, IniFile mapIni)
@@ -278,7 +280,7 @@ namespace TSMapEditor.Initialization
                 bool autocreateNoRecruitable = Conversions.BooleanFromString(values[12], false);
                 bool autocreateYesRecruitable = Conversions.BooleanFromString(values[13], false);
 
-                var unitType = map.Rules.UnitTypes.Find(bt => bt.ININame == unitTypeId);
+                var unitType = map.Rules.UnitTypes.Find(ut => ut.ININame == unitTypeId);
                 if (unitType == null)
                 {
                     Logger.Log($"Unable to find unit type {unitTypeId} - skipping it.");
@@ -301,6 +303,60 @@ namespace TSMapEditor.Initialization
                 };
 
                 map.Units.Add(unit);
+            }
+        }
+
+        public void ReadInfantry(IMap map, IniFile mapIni)
+        {
+            IniSection section = mapIni.GetSection("Infantry");
+            if (section == null)
+                return;
+
+            // [Infantry]
+            // INDEX=OWNER,ID,HEALTH,X,Y,SUB_CELL,MISSION,FACING,TAG,VETERANCY,GROUP,HIGH,AUTOCREATE_NO_RECRUITABLE,AUTOCREATE_YES_RECRUITABLE
+
+            foreach (var kvp in section.Keys)
+            {
+                string[] values = kvp.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                if (values.Length < INFANTRY_PROPERTY_FIELD_COUNT)
+                    continue;
+
+                string ownerName = values[0];
+                string infantryTypeId = values[1];
+                int health = Math.Min(Constants.ObjectHealthMax, Math.Max(0, Conversions.IntFromString(values[2], Constants.ObjectHealthMax)));
+                int x = Conversions.IntFromString(values[3], 0);
+                int y = Conversions.IntFromString(values[4], 0);
+                SubCell subCell = (SubCell)Conversions.IntFromString(values[5], 0);
+                string mission = values[6];
+                int facing = Math.Min(Constants.FacingMax, Math.Max(0, Conversions.IntFromString(values[7], Constants.FacingMax)));
+                string attachedTag = values[8];
+                int veterancy = Conversions.IntFromString(values[9], 0);
+                int group = Conversions.IntFromString(values[10], 0);
+                bool high = Conversions.BooleanFromString(values[11], false);
+                bool autocreateNoRecruitable = Conversions.BooleanFromString(values[12], false);
+                bool autocreateYesRecruitable = Conversions.BooleanFromString(values[13], false);
+
+                var infantryType = map.Rules.InfantryTypes.Find(it => it.ININame == infantryTypeId);
+                if (infantryType == null)
+                {
+                    Logger.Log($"Unable to find infantry type {infantryTypeId} - skipping it.");
+                    continue;
+                }
+
+                var infantry = new Infantry(infantryType)
+                {
+                    HP = health,
+                    Position = new Point2D(x, y), // TODO handle sub-cell in position?
+                    Facing = (byte)facing,
+                    Veterancy = veterancy,
+                    Group = group,
+                    High = high,
+                    AutocreateNoRecruitable = autocreateNoRecruitable,
+                    AutocreateYesRecruitable = autocreateYesRecruitable,
+                    SubCell = subCell
+                };
+
+                map.Infantry.Add(infantry);
             }
         }
 
@@ -364,10 +420,20 @@ namespace TSMapEditor.Initialization
             var buildingType = (BuildingType)obj;
         }
 
-        private static void InitArtConfigGeneric(AbstractObject obj, IniFile artIni, IniSection artSection)
+        private static void InitArtConfigGeneric(IMap map, AbstractObject obj, IniFile artIni, IniSection artSection)
         {
             var artConfigContainer = (IArtConfigContainer)obj;
             artConfigContainer.GetArtConfig().ReadFromIniSection(artSection);
+        }
+
+        private static void InitInfantryArtConfig(IMap map, AbstractObject obj, IniFile artIni, IniSection artSection)
+        {
+            var infantryType = (InfantryType)obj;
+            infantryType.ArtConfig.ReadFromIniSection(artSection);
+            if (infantryType.ArtConfig.Sequence == null && !string.IsNullOrWhiteSpace(infantryType.ArtConfig.SequenceName))
+            {
+                infantryType.ArtConfig.Sequence = map.Rules.FindOrMakeInfantrySequence(artIni, infantryType.ArtConfig.SequenceName);
+            }
         }
 
         private static void InitInfantryType(AbstractObject obj, IniFile rulesIni, IniSection section)
@@ -395,7 +461,7 @@ namespace TSMapEditor.Initialization
             terrainType.TemperateOccupationBits = (TerrainOccupation)section.GetIntValue("TemperateOccupationBits", 0);
         }
         
-        private static void InitTerrainTypeArt(AbstractObject obj, IniFile artIni, IniSection artSection)
+        private static void InitTerrainTypeArt(IMap map, AbstractObject obj, IniFile artIni, IniSection artSection)
         {
             var terrainType = (TerrainType)obj;
             terrainType.Theater = artSection.GetBooleanValue("Theater", terrainType.Theater);

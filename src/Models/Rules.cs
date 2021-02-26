@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using TSMapEditor.Initialization;
+using TSMapEditor.Models.ArtConfig;
 
 namespace TSMapEditor.Models
 {
@@ -13,6 +14,8 @@ namespace TSMapEditor.Models
         public List<AircraftType> AircraftTypes = new List<AircraftType>();
         public List<TerrainType> TerrainTypes = new List<TerrainType>();
         public List<OverlayType> OverlayTypes = new List<OverlayType>();
+
+        public List<InfantrySequence> InfantrySequences = new List<InfantrySequence>();
 
         /// <summary>
         /// Initializes rules types from an INI file.
@@ -108,6 +111,23 @@ namespace TSMapEditor.Models
                 targetList.Add(objectInstance);
                 i++;
             }
+        }
+
+        public InfantrySequence FindOrMakeInfantrySequence(IniFile artIni, string infantrySequenceName)
+        {
+            var existing = InfantrySequences.Find(seq => seq.ININame == infantrySequenceName);
+            if (existing == null)
+            {
+                existing = new InfantrySequence(infantrySequenceName);
+                var section = artIni.GetSection(infantrySequenceName);
+                if (section == null)
+                    throw new KeyNotFoundException("Infantry sequence not found: " + infantrySequenceName);
+
+                existing.ParseFromINISection(section);
+                InfantrySequences.Add(existing);
+            }
+
+            return existing;
         }
     }
 }

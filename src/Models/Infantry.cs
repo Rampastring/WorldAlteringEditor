@@ -12,5 +12,17 @@
         public override RTTIType WhatAmI() => RTTIType.Infantry;
 
         public SubCell SubCell { get; set; }
+
+        public override int GetFrameIndex(int frameCount)
+        {
+            if (ObjectType.ArtConfig.Sequence == null)
+                return -1;
+
+            var readySequence = ObjectType.ArtConfig.Sequence.Ready;
+            int startFrame = readySequence.StartFrame;
+            int seqFrameCount = readySequence.FrameCount;
+
+            return startFrame + ((Facing / 8) * readySequence.FacingMultiplier * readySequence.FrameCount);
+        }
     }
 }

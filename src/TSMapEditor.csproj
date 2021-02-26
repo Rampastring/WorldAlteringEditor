@@ -81,6 +81,7 @@
     <Compile Include="Models\ArtConfig\BuildingArtConfig.cs" />
     <Compile Include="Models\ArtConfig\IArtConfig.cs" />
     <Compile Include="Models\ArtConfig\IArtConfigContainer.cs" />
+    <Compile Include="Models\ArtConfig\InfantryArtConfig.cs" />
     <Compile Include="Models\ArtConfig\InfantrySequence.cs" />
     <Compile Include="Models\ArtConfig\OverlayArtConfig.cs" />
     <Compile Include="Models\ArtConfig\VehicleArtConfig.cs" />

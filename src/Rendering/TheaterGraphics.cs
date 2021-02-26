@@ -86,8 +86,9 @@ namespace TSMapEditor.Rendering
             var task2 = Task.Factory.StartNew(() => ReadTerrainObjectTextures(graphicsDevice, rules.TerrainTypes));
             var task3 = Task.Factory.StartNew(() => ReadBuildingTextures(graphicsDevice, rules.BuildingTypes));
             var task4 = Task.Factory.StartNew(() => ReadUnitTextures(graphicsDevice, rules.UnitTypes));
-            var task5 = Task.Factory.StartNew(() => ReadOverlayTextures(graphicsDevice, rules.OverlayTypes));
-            Task.WaitAll(task1, task2, task3, task4, task5);
+            var task5 = Task.Factory.StartNew(() => ReadInfantryTextures(graphicsDevice, rules.InfantryTypes));
+            var task6 = Task.Factory.StartNew(() => ReadOverlayTextures(graphicsDevice, rules.OverlayTypes));
+            Task.WaitAll(task1, task2, task3, task4, task6);
         }
 
         private void ReadTileTextures(GraphicsDevice graphicsDevice)
@@ -210,7 +211,7 @@ namespace TSMapEditor.Rendering
 
         public void ReadUnitTextures(GraphicsDevice graphicsDevice, List<UnitType> unitTypes)
         {
-            Dictionary<string, ObjectImage> loadedTextures = new Dictionary<string, ObjectImage>();
+            var loadedTextures = new Dictionary<string, ObjectImage>();
             UnitTextures = new ObjectImage[unitTypes.Count];
 
             for (int i = 0; i < unitTypes.Count; i++)
@@ -245,6 +246,49 @@ namespace TSMapEditor.Rendering
                 shpFile.ParseFromBuffer(shpData);
                 UnitTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, unitPalette, framesToLoad);
                 loadedTextures[shpFileName] = UnitTextures[i];
+            }
+        }
+
+        public void ReadInfantryTextures(GraphicsDevice graphicsDevice, List<InfantryType> infantryTypes)
+        {
+            var loadedTextures = new Dictionary<string, ObjectImage>();
+            InfantryTextures = new ObjectImage[infantryTypes.Count];
+
+            for (int i = 0; i < infantryTypes.Count; i++)
+            {
+                var infantryType = infantryTypes[i];
+
+                string image = string.IsNullOrWhiteSpace(infantryType.Image) ? infantryType.ININame : infantryType.Image;
+                string shpFileName = string.IsNullOrWhiteSpace(infantryType.ArtConfig.Image) ? image : infantryType.ArtConfig.Image;
+                shpFileName += SHP_FILE_EXTENSION;
+                if (loadedTextures.TryGetValue(shpFileName, out ObjectImage loadedImage))
+                {
+                    InfantryTextures[i] = loadedImage;
+                    continue;
+                }
+
+                if (infantryType.ArtConfig.Sequence == null)
+                {
+                    continue;
+                }
+
+                byte[] shpData = fileManager.LoadFile(shpFileName);
+
+                if (shpData == null)
+                    continue;
+
+                var framesToLoad = new List<int>();
+                const int FACING_COUNT = 8;
+                var readySequence = infantryType.ArtConfig.Sequence.Ready;
+                for (int j = 0; j < FACING_COUNT; j++)
+                {
+                    framesToLoad.Add(readySequence.StartFrame + (readySequence.FrameCount * readySequence.FacingMultiplier * j));
+                }
+
+                var shpFile = new ShpFile();
+                shpFile.ParseFromBuffer(shpData);
+                InfantryTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, unitPalette, framesToLoad);
+                loadedTextures[shpFileName] = InfantryTextures[i];
             }
         }
 
@@ -293,6 +337,7 @@ namespace TSMapEditor.Rendering
         public ObjectImage[] TerrainObjectTextures { get; set; }
         public ObjectImage[] BuildingTextures { get; set; }
         public ObjectImage[] UnitTextures { get; set; }
+        public ObjectImage[] InfantryTextures { get; set; }
         public ObjectImage[] OverlayTextures { get; set; }
 
         private Palette GetPaletteOrFail(string paletteFileName)

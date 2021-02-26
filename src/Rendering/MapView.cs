@@ -120,6 +120,7 @@ namespace TSMapEditor.Rendering
             List<GameObject> gameObjects = new List<GameObject>(Map.TerrainObjects);
             gameObjects.AddRange(Map.Structures);
             gameObjects.AddRange(Map.Units);
+            gameObjects.AddRange(Map.Infantry);
             gameObjects = gameObjects.OrderBy(s => s.GetYPositionForDrawOrder())
                 .ThenBy(s => s.GetXPositionForDrawOrder()).ToList();
             gameObjects.ForEach(go => DrawObject(go));
@@ -154,6 +155,12 @@ namespace TSMapEditor.Rendering
                     graphics = TheaterGraphics.UnitTextures[unit.ObjectType.Index];
                     replacementColor = Color.Red;
                     iniName = unit.ObjectType.ININame;
+                    break;
+                case RTTIType.Infantry:
+                    var infantry = (Infantry)gameObject;
+                    graphics = TheaterGraphics.InfantryTextures[infantry.ObjectType.Index];
+                    replacementColor = Color.Teal;
+                    iniName = infantry.ObjectType.ININame;
                     break;
                 case RTTIType.Overlay:
                     var overlay = (Overlay)gameObject;
