@@ -88,7 +88,7 @@ namespace TSMapEditor.Rendering
             var task4 = Task.Factory.StartNew(() => ReadUnitTextures(graphicsDevice, rules.UnitTypes));
             var task5 = Task.Factory.StartNew(() => ReadInfantryTextures(graphicsDevice, rules.InfantryTypes));
             var task6 = Task.Factory.StartNew(() => ReadOverlayTextures(graphicsDevice, rules.OverlayTypes));
-            Task.WaitAll(task1, task2, task3, task4, task6);
+            Task.WaitAll(task1, task2, task3, task4, task5, task6);
         }
 
         private void ReadTileTextures(GraphicsDevice graphicsDevice)
@@ -244,6 +244,12 @@ namespace TSMapEditor.Rendering
 
                 var shpFile = new ShpFile();
                 shpFile.ParseFromBuffer(shpData);
+
+                // Load shadow frames
+                int regularFrameCount = framesToLoad.Count;
+                for (int j = 0; j < regularFrameCount; j++)
+                    framesToLoad.Add(framesToLoad[j] + (shpFile.FrameCount / 2));
+
                 UnitTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, unitPalette, framesToLoad);
                 loadedTextures[shpFileName] = UnitTextures[i];
             }
@@ -287,7 +293,13 @@ namespace TSMapEditor.Rendering
 
                 var shpFile = new ShpFile();
                 shpFile.ParseFromBuffer(shpData);
-                InfantryTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, unitPalette, framesToLoad);
+
+                // Load shadow frames
+                int regularFrameCount = framesToLoad.Count;
+                for (int j = 0; j < regularFrameCount; j++)
+                    framesToLoad.Add(framesToLoad[j] + (shpFile.FrameCount / 2));
+
+                InfantryTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, unitPalette, null);
                 loadedTextures[shpFileName] = InfantryTextures[i];
             }
         }

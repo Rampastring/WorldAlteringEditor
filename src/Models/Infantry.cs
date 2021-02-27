@@ -19,10 +19,14 @@
                 return -1;
 
             var readySequence = ObjectType.ArtConfig.Sequence.Ready;
-            int startFrame = readySequence.StartFrame;
-            int seqFrameCount = readySequence.FrameCount;
+            int frame = readySequence.StartFrame + ((Facing / 32) * readySequence.FacingMultiplier * readySequence.FrameCount);
 
-            return startFrame + ((Facing / 8) * readySequence.FacingMultiplier * readySequence.FrameCount);
+            return frame;
+        }
+
+        public override int GetShadowFrameIndex(int frameCount)
+        {
+            return GetFrameIndex(frameCount) + (frameCount / 2);
         }
     }
 }

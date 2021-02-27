@@ -48,6 +48,9 @@ namespace TSMapEditor.Models
             UnitTypes.ForEach(ut => initializer.ReadObjectTypeArtPropertiesFromINI(ut, iniFile,
                 string.IsNullOrWhiteSpace(ut.Image) ? ut.ININame : ut.Image));
 
+            InfantryTypes.ForEach(it => initializer.ReadObjectTypeArtPropertiesFromINI(it, iniFile,
+                string.IsNullOrWhiteSpace(it.Image) ? it.ININame : it.Image));
+
             OverlayTypes.ForEach(ot => initializer.ReadObjectTypeArtPropertiesFromINI(ot, iniFile,
                 string.IsNullOrWhiteSpace(ot.Image) ? ot.ININame : ot.Image));
         }
