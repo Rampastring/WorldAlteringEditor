@@ -13,6 +13,16 @@ namespace TSMapEditor.Models
         public Rules Rules { get; private set; }
 
         public MapTile[][] Tiles { get; private set; } = new MapTile[600][]; // for now
+        public MapTile GetTile(int x, int y)
+        {
+            if (y < 0 || y >= Tiles.Length)
+                return null;
+
+            if (x < 0 || x >= Tiles[y].Length)
+                return null;
+
+            return Tiles[y][x];
+        }
 
         public List<Aircraft> Aircraft { get; } = new List<Aircraft>();
         public List<Infantry> Infantry { get; } = new List<Infantry>();

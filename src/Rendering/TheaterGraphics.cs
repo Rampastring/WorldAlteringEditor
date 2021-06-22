@@ -10,6 +10,9 @@ using TSMapEditor.Models;
 
 namespace TSMapEditor.Rendering
 {
+    /// <summary>
+    /// Contains graphics for a single full TMP (all sub-tiles / all cells).
+    /// </summary>
     public class TileImage
     {
         public TileImage(int tileSetId, int tileIndex, MGTMPImage[] tmpImages)
@@ -22,6 +25,65 @@ namespace TSMapEditor.Rendering
         public int TileSetId { get; set; }
         public int TileIndex { get; set; }
         public MGTMPImage[] TMPImages { get; set; }
+
+        /// <summary>
+        /// Calculates and returns the width of this full tile image.
+        /// </summary>
+        public int GetWidth(out int outMinX)
+        {
+            outMinX = 0;
+
+            if (TMPImages == null)
+                return 0;
+
+            int maxX = int.MinValue;
+            int minX = int.MaxValue;
+            for (int i = 0; i < TMPImages.Length; i++)
+            {
+                if (TMPImages[i] == null)
+                    continue;
+
+                var tmpData = TMPImages[i].TmpImage;
+                if (tmpData == null)
+                    continue;
+
+                if (tmpData.X < minX)
+                    minX = tmpData.X;
+
+                int cellRightXCoordinate = tmpData.X + Constants.CellSizeX;
+                if (cellRightXCoordinate > maxX)
+                    maxX = cellRightXCoordinate;
+            }
+
+            outMinX = minX;
+            return Math.Abs(minX) + maxX;
+        }
+
+        /// <summary>
+        /// Calculates and returns the height of this full tile image.
+        /// </summary>
+        public int GetHeight()
+        {
+            if (TMPImages == null)
+                return 0;
+
+            int height = 0;
+            for (int i = 0; i < TMPImages.Length; i++)
+            {
+                if (TMPImages[i] == null)
+                    continue;
+
+                var tmpData = TMPImages[i].TmpImage;
+                if (tmpData == null)
+                    continue;
+
+                int cellBottomCoordinate = tmpData.Y + Constants.CellSizeY;
+                if (cellBottomCoordinate > height)
+                    height = cellBottomCoordinate;
+            }
+
+            return height;
+        }
     }
 
     public class ObjectImage
@@ -68,7 +130,7 @@ namespace TSMapEditor.Rendering
     }
 
     /// <summary>
-    /// A wrapper for a theater that loads and stores tile graphics.
+    /// A wrapper for a theater that loads and stores tile and object graphics.
     /// </summary>
     public class TheaterGraphics
     {
@@ -93,9 +155,12 @@ namespace TSMapEditor.Rendering
 
         private void ReadTileTextures(GraphicsDevice graphicsDevice)
         {
+            int currentTileIndex = 0; // Used for setting the starting tile ID of a tileset
+
             for (int tsId = 0; tsId < Theater.TileSets.Count; tsId++)
             {
                 TileSet tileSet = Theater.TileSets[tsId];
+                tileSet.StartTileIndex = currentTileIndex;
 
                 Console.WriteLine("Loading " + tileSet.SetName);
 
@@ -141,6 +206,7 @@ namespace TSMapEditor.Rendering
                         tileGraphics.Add(new TileImage(tsId, i, tmpImages.ToArray()));
                     }
 
+                    currentTileIndex += tileSet.TilesInSet;
                     graphicsList.Add(tileGraphics.ToArray());
                 }
             }

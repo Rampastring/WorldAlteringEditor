@@ -14,7 +14,14 @@ using TSMapEditor.Models.MapFormat;
 
 namespace TSMapEditor.Rendering
 {
-    public class MapView : XNAControl
+    public interface ICursorActionTarget
+    {
+        Map Map { get; }
+        TheaterGraphics TheaterGraphics { get; }
+        void AddRefreshPoint(Point2D point);
+    }
+
+    public class MapView : XNAControl, ICursorActionTarget
     {
         public MapView(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics) : base(windowManager)
         {
@@ -25,18 +32,25 @@ namespace TSMapEditor.Rendering
         public Map Map { get; }
         public TheaterGraphics TheaterGraphics { get; }
 
-        private RenderTarget2D renderTarget;
+        private RenderTarget2D mapRenderTarget;
 
         private bool mapInvalidated = true;
         private Point2D cameraTopLeftPoint = new Point2D(0, 0);
 
         private int scrollRate = 20;
 
+        private List<Point2D> refreshes = new List<Point2D>();
+
+        public void AddRefreshPoint(Point2D point)
+        {
+            refreshes.Add(point);
+        }
+
         public override void Initialize()
         {
             base.Initialize();
 
-            renderTarget = new RenderTarget2D(GraphicsDevice,
+            mapRenderTarget = new RenderTarget2D(GraphicsDevice,
                 Map.Size.X * Constants.CellSizeX,
                 Map.Size.Y * Constants.CellSizeY, false, SurfaceFormat.Color,
                 DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
@@ -49,7 +63,7 @@ namespace TSMapEditor.Rendering
         {
             sw.Restart();
 
-            Renderer.PushRenderTarget(renderTarget);
+            Renderer.PushRenderTarget(mapRenderTarget);
             GraphicsDevice.Clear(Color.Black);
 
             for (int i = 0; i < Map.Tiles.Length; i++)
@@ -107,8 +121,6 @@ namespace TSMapEditor.Rendering
                     var tile = row[j];
                     if (tile.Overlay != null)
                     {
-                        int overlayIndex = tile.Overlay.OverlayType.Index;
-                        int frameIndex = tile.Overlay.FrameIndex;
                         DrawObject(tile.Overlay);
                     }
                 }
@@ -124,6 +136,64 @@ namespace TSMapEditor.Rendering
             gameObjects = gameObjects.OrderBy(s => s.GetYPositionForDrawOrder())
                 .ThenBy(s => s.GetXPositionForDrawOrder()).ToList();
             gameObjects.ForEach(go => DrawObject(go));
+        }
+
+        private void RefreshOverArea(Point2D center)
+        {
+            var tilesToRedraw = new List<MapTile>();
+            var objectsToRedraw = new List<GameObject>();
+            var cellCoords = CellMath.CellCoordsFromPixelCoords(center, Map.Size);
+            const int tileRefreshArea = 10;
+            const int objectRefreshArea = 20;
+            for (int y = -tileRefreshArea; y <= tileRefreshArea; y++)
+            {
+                for (int x = -tileRefreshArea; x <= tileRefreshArea; x++)
+                {
+                    var tile = Map.Tiles[cellCoords.Y + y][cellCoords.X + x];
+                    if (tile == null)
+                        continue;
+
+                    tilesToRedraw.Add(tile);
+                }
+            }
+
+            for (int y = -objectRefreshArea; y <= objectRefreshArea; y++)
+            {
+                for (int x = -objectRefreshArea; x <= objectRefreshArea; x++)
+                {
+                    var tile = Map.Tiles[cellCoords.Y + y][cellCoords.X + x];
+                    if (tile == null)
+                        continue;
+
+                    for (int i = 0; i < tile.Infantry.Length; i++)
+                    {
+                        if (tile.Infantry[i] != null)
+                            objectsToRedraw.Add(tile.Infantry[i]);
+                    }
+
+                    if (tile.VehicleOrAircraft != null)
+                        objectsToRedraw.Add(tile.VehicleOrAircraft);
+
+                    if (tile.Structure != null)
+                        objectsToRedraw.Add(tile.Structure);
+
+                    if (tile.TerrainObject != null)
+                        objectsToRedraw.Add(tile.TerrainObject);
+                }
+            }
+
+            objectsToRedraw = objectsToRedraw.OrderBy(s => s.GetYPositionForDrawOrder())
+                .ThenBy(s => s.GetXPositionForDrawOrder()).ToList();
+
+            Renderer.PushRenderTarget(mapRenderTarget);
+            tilesToRedraw.ForEach(t => DrawTerrainTile(t));
+            tilesToRedraw.ForEach(t =>
+            {
+                if (t.Overlay != null)
+                    DrawObject(t.Overlay);
+            });
+            objectsToRedraw.ForEach(o => DrawObject(o));
+            Renderer.PopRenderTarget();
         }
 
         private void DrawObject(GameObject gameObject)
@@ -199,18 +269,18 @@ namespace TSMapEditor.Rendering
 
             int yDrawOffset = gameObject.GetYDrawOffset();
 
-            int shadowFrameIndex = gameObject.GetShadowFrameIndex(graphics.Frames.Length);
-            if (shadowFrameIndex > 0 && shadowFrameIndex < graphics.Frames.Length)
-            {
-                var shadowFrame = graphics.Frames[shadowFrameIndex];
-                if (shadowFrame != null)
-                {
-                    var shadowTexture = shadowFrame.Texture;
-                    DrawTexture(shadowTexture, new Rectangle(drawPoint.X - shadowFrame.ShapeWidth / 2 + shadowFrame.OffsetX + Constants.CellSizeX / 2,
-                        drawPoint.Y - shadowFrame.ShapeHeight / 2 + shadowFrame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
-                        shadowTexture.Width, shadowTexture.Height), new Color(0, 0, 0, 128));
-                }
-            }
+            // int shadowFrameIndex = gameObject.GetShadowFrameIndex(graphics.Frames.Length);
+            // if (shadowFrameIndex > 0 && shadowFrameIndex < graphics.Frames.Length)
+            // {
+            //     var shadowFrame = graphics.Frames[shadowFrameIndex];
+            //     if (shadowFrame != null)
+            //     {
+            //         var shadowTexture = shadowFrame.Texture;
+            //         DrawTexture(shadowTexture, new Rectangle(drawPoint.X - shadowFrame.ShapeWidth / 2 + shadowFrame.OffsetX + Constants.CellSizeX / 2,
+            //             drawPoint.Y - shadowFrame.ShapeHeight / 2 + shadowFrame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
+            //             shadowTexture.Width, shadowTexture.Height), new Color(0, 0, 0, 128));
+            //     }
+            // }
             
             int frameIndex = gameObject.GetFrameIndex(graphics.Frames.Length);
             var frame = graphics.Frames[frameIndex];
@@ -242,21 +312,23 @@ namespace TSMapEditor.Rendering
             }
         }
 
-        public void DrawTerrainTile(IsoMapPack5Tile tile)
+        public void DrawTerrainTile(MapTile tile)
         {
             Point2D drawPoint = CellMath.CellTopLeftPoint(new Point2D(tile.X, tile.Y), Map.Size.X);
             
-
             if (tile.TileIndex >= TheaterGraphics.TileCount)
                 return;
 
-            TileImage tileImage = TheaterGraphics.GetTileGraphics(tile.TileIndex);
+            if (tile.TileImage == null)
+                tile.TileImage = TheaterGraphics.GetTileGraphics(tile.TileIndex);
+
+            var tileImage = tile.TileImage;
             if (tile.SubTileIndex >= tileImage.TMPImages.Length)
             {
                 DrawString(tile.SubTileIndex.ToString(), 0, new Vector2(drawPoint.X, drawPoint.Y), Color.Red);
                 return;
             }
-                
+            
             Texture2D texture = tileImage.TMPImages[tile.SubTileIndex].Texture;
             if (texture != null)
             {
@@ -280,34 +352,47 @@ namespace TSMapEditor.Rendering
             base.Update(gameTime);
         }
 
+        private Point2D GetCursorMapPoint()
+        {
+            Point cursorPoint = GetCursorPoint();
+            Point2D cursorMapPoint = new Point2D(cameraTopLeftPoint.X + cursorPoint.X - Constants.CellSizeX / 2,
+                    cameraTopLeftPoint.Y + cursorPoint.Y - Constants.CellSizeY / 2);
+            return cursorMapPoint;
+        }
+
         private void Keyboard_OnKeyPressed(object sender, Rampastring.XNAUI.Input.KeyPressEventArgs e)
         {
             if (!IsActive)
                 return;
 
-            if (e.PressedKey != Microsoft.Xna.Framework.Input.Keys.A)
-                return;
+            Point2D tileCoords = CellMath.CellCoordsFromPixelCoords(GetCursorMapPoint(), Map.Size);
 
-            Point cursorPoint = GetCursorPoint();
-            Point2D cursorMapPoint = new Point2D(cameraTopLeftPoint.X + cursorPoint.X - Constants.CellSizeX / 2,
-                cameraTopLeftPoint.Y + cursorPoint.Y - Constants.CellSizeY / 2);
-            Point2D tileCoords = CellMath.CellCoordsFromPixelCoords(cursorMapPoint, Map.Size);
-
-            if (tileCoords.X >= 1 && tileCoords.Y >= 1 && tileCoords.Y < Map.Tiles.Length && tileCoords.X < Map.Tiles[tileCoords.Y].Length)
+            if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.A)
             {
-                var tile = Map.Tiles[tileCoords.Y][tileCoords.X];
-                if (tile == null)
-                    return;
-
-                var unit = Map.Units.Find(u => u.Position.X == tile.X && u.Position.Y == tile.Y);
-                if (unit != null)
+                if (tileCoords.X >= 1 && tileCoords.Y >= 1 && tileCoords.Y < Map.Tiles.Length && tileCoords.X < Map.Tiles[tileCoords.Y].Length)
                 {
-                    int facing = unit.Facing;
-                    facing += 8;
-                    facing = facing % 256;
-                    unit.Facing = (byte)facing;
-                    mapInvalidated = true;
+                    var tile = Map.Tiles[tileCoords.Y][tileCoords.X];
+                    if (tile == null)
+                        return;
+
+                    var unit = Map.Units.Find(u => u.Position.X == tile.X && u.Position.Y == tile.Y);
+                    if (unit != null)
+                    {
+                        int facing = unit.Facing;
+                        facing += 8;
+                        facing = facing % 256;
+                        unit.Facing = (byte)facing;
+                        refreshes.Add(CellMath.CellTopLeftPoint(unit.Position, Map.Size.X));
+                    }
                 }
+
+                return;
+            }
+
+            if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.Delete)
+            {
+                DeleteObjectFromTile(tileCoords);
+                refreshes.Add(CellMath.CellTopLeftPoint(tileCoords, Map.Size.X));
             }
         }
 
@@ -350,6 +435,53 @@ namespace TSMapEditor.Rendering
             }
         }
 
+        public void DeleteObjectFromTile(Point2D cellCoords)
+        {
+            var tile = Map.GetTile(cellCoords.X, cellCoords.Y);
+            if (tile == null)
+                return;
+
+            for (int i = 0; i < tile.Infantry.Length; i++)
+            {
+                if (tile.Infantry[i] != null)
+                {
+                    Map.Infantry.Remove(tile.Infantry[i]);
+                    tile.Infantry[i] = null;
+                    return;
+                }
+            }
+
+            if (tile.VehicleOrAircraft != null)
+            {
+                if (tile.VehicleOrAircraft.WhatAmI() == RTTIType.Unit)
+                {
+                    Map.Units.Remove((Unit)tile.VehicleOrAircraft);
+                }
+                else if (tile.VehicleOrAircraft.WhatAmI() == RTTIType.Aircraft)
+                {
+                    Map.Aircraft.Remove((Aircraft)tile.VehicleOrAircraft);
+                }
+                else
+                {
+                    throw new InvalidOperationException("DeleteObjectFromTile: Unknown object type");
+                }
+
+                tile.VehicleOrAircraft = null;
+                return;
+            }
+
+            if (tile.Structure != null)
+            {
+                throw new NotImplementedException();
+            }
+
+            if (tile.TerrainObject != null)
+            {
+                Map.TerrainObjects.Remove(tile.TerrainObject);
+                tile.TerrainObject = null;
+            }
+        }
+
         public override void Draw(GameTime gameTime)
         {
             if (mapInvalidated)
@@ -358,7 +490,13 @@ namespace TSMapEditor.Rendering
                 mapInvalidated = false;
             }
 
-            DrawTexture(renderTarget, new Rectangle(cameraTopLeftPoint.X, cameraTopLeftPoint.Y,
+            foreach (var refresh in refreshes)
+            {
+                RefreshOverArea(refresh);
+            }
+            refreshes.Clear();
+
+            DrawTexture(mapRenderTarget, new Rectangle(cameraTopLeftPoint.X, cameraTopLeftPoint.Y,
                 Width, Height), new Rectangle(0, 0, Width, Height), Color.White);
 
             DrawCursorTile();

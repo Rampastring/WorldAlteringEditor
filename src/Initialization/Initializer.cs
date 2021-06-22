@@ -187,7 +187,11 @@ namespace TSMapEditor.Initialization
                     continue;
                 }
 
-                map.TerrainObjects.Add(new TerrainObject(terrainType, new GameMath.Point2D(x, y)));
+                var terrainObject = new TerrainObject(terrainType, new Point2D(x, y));
+                map.TerrainObjects.Add(terrainObject);
+                var tile = map.GetTile(x, y);
+                if (tile != null)
+                    tile.TerrainObject = terrainObject;
             }
         }
 
@@ -247,6 +251,22 @@ namespace TSMapEditor.Initialization
                 };
 
                 map.Structures.Add(building);
+                for (int foundationY = 0; foundationY < buildingType.ArtConfig.FoundationY; foundationY++)
+                {
+                    for (int foundationX = 0; foundationX < buildingType.ArtConfig.FoundationX; foundationX++)
+                    {
+                        var tile = map.GetTile(x + foundationX, y + foundationY);
+                        if (tile != null)
+                            tile.Structure = building;
+                    }
+                }
+
+                if (buildingType.ArtConfig.FoundationX == 0 || buildingType.ArtConfig.FoundationY == 0)
+                {
+                    var tile = map.GetTile(x, y);
+                    if (tile != null)
+                        tile.Structure = building;
+                }
             }
         }
 
@@ -303,6 +323,9 @@ namespace TSMapEditor.Initialization
                 };
 
                 map.Units.Add(unit);
+                var tile = map.GetTile(x, y);
+                if (tile != null)
+                    tile.VehicleOrAircraft = unit;
             }
         }
 
@@ -357,6 +380,9 @@ namespace TSMapEditor.Initialization
                 };
 
                 map.Infantry.Add(infantry);
+                var tile = map.GetTile(x, y);
+                if (tile != null)
+                    tile.Infantry[(int)subCell] = infantry;
             }
         }
 

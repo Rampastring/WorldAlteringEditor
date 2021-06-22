@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Models;
+using TSMapEditor.UI;
 
 namespace TSMapEditor.Rendering
 {
@@ -83,6 +84,12 @@ namespace TSMapEditor.Rendering
             mapView.Width = windowManager.RenderResolutionX;
             mapView.Height = windowManager.RenderResolutionY;
             windowManager.AddAndInitializeControl(mapView);
+
+            var tileDisplay = new TileDisplay(windowManager, theaterGraphics);
+            tileDisplay.Width = windowManager.RenderResolutionX;
+            tileDisplay.Height = 300;
+            windowManager.AddAndInitializeControl(tileDisplay);
+            tileDisplay.SetTileSet(theater.TileSets[0]);
         }
     }
 }

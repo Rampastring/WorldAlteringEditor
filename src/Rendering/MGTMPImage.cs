@@ -5,7 +5,8 @@ using TSMapEditor.CCEngine;
 namespace TSMapEditor.Rendering
 {
     /// <summary>
-    /// A MonoGame-drawable TMP image. 
+    /// A MonoGame-drawable TMP image.
+    /// Contains graphics for a single cell (sub-tile of a full TMP).
     /// </summary>
     public class MGTMPImage
     {
@@ -29,8 +30,8 @@ namespace TSMapEditor.Rendering
 
         private Texture2D TextureFromTmpImage(GraphicsDevice graphicsDevice, TmpImage image, Palette palette)
         {
-            Texture2D texture = new Texture2D(graphicsDevice, 48, 24, false, SurfaceFormat.Color);
-            Color[] colorData = new Color[48 * 24];
+            Texture2D texture = new Texture2D(graphicsDevice, Constants.CellSizeX, Constants.CellSizeY, false, SurfaceFormat.Color);
+            Color[] colorData = new Color[Constants.CellSizeX * Constants.CellSizeY];
             for (int i = 0; i < colorData.Length; i++)
             {
                 colorData[i] = Color.Transparent;
@@ -38,12 +39,12 @@ namespace TSMapEditor.Rendering
 
             int tmpPixelIndex = 0;
             int w = 4;
-            for (int i = 0; i < 24; i++)
+            for (int i = 0; i < Constants.CellSizeY; i++)
             {
-                int xPos = 24 - (w / 2);
+                int xPos = Constants.CellSizeY - (w / 2);
                 for (int x = 0; x < w; x++)
                 {
-                    colorData[i * 48 + xPos] = XNAColorFromRGBColor(palette.Data[image.ColorData[tmpPixelIndex]]);
+                    colorData[i * Constants.CellSizeX + xPos] = XNAColorFromRGBColor(palette.Data[image.ColorData[tmpPixelIndex]]);
                     xPos++;
                     tmpPixelIndex++;
                 }

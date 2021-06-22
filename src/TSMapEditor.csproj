@@ -131,6 +131,8 @@
     <Compile Include="Rendering\MapView.cs" />
     <Compile Include="Rendering\MGTMPImage.cs" />
     <Compile Include="Rendering\TheaterGraphics.cs" />
+    <Compile Include="UI\CursorAction.cs" />
+    <Compile Include="UI\TileDisplay.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -163,6 +165,10 @@
     <Content Include="Content\cursor.cur">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="UI\CursorActions\" />
+    <Folder Include="UI\TerrainPlacement\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using TSMapEditor.Models.MapFormat;
+using TSMapEditor.Rendering;
 
 namespace TSMapEditor.Models
 {
@@ -11,10 +12,25 @@ namespace TSMapEditor.Models
 
         public MapTile(byte[] data) : base(data) { }
 
+        public TileImage TileImage { get; set; }
         public TerrainObject TerrainObject { get; set; }
         public Structure Structure { get; set; }
-        public AbstractObject VehicleOrAircraft { get; set; }
+        public TechnoBase VehicleOrAircraft { get; set; }
         public Infantry[] Infantry { get; set; } = new Infantry[SubCellCount];
+        public bool AddInfantry(Infantry infantry)
+        {
+            for (int i = 0; i < Infantry.Length; i++)
+            {
+                if (Infantry[i] == null)
+                {
+                    Infantry[i] = infantry;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public Overlay Overlay { get; set; }
 
         /// <summary>

@@ -14,6 +14,8 @@ namespace TSMapEditor.CCEngine
         public int NonMarbleMadness { get; set; } = -1;
         public bool AllowTiberium { get; set; }
 
+        public int StartTileIndex { get; set; }
+
         public void Read(IniSection iniSection)
         {
             SetPropertiesFromSection(iniSection);

@@ -8,6 +8,7 @@ namespace TSMapEditor.Initialization
     public interface IMap
     {
         MapTile[][] Tiles { get; }
+        MapTile GetTile(int x, int y);
         List<House> StandardHouses { get; }
         List<Aircraft> Aircraft { get; }
         List<House> Houses { get; }

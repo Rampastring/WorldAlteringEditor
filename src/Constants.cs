@@ -10,5 +10,8 @@
 
         // TODO parse from Rules.ini
         public const int ConditionYellowHP = 128;
+
+        public const int UIEmptySideSpace = 10;
+        public const int UIEmptyTopSpace = 10;
     }
 }
