@@ -270,6 +270,61 @@ namespace TSMapEditor.Initialization
             }
         }
 
+        public void ReadAircraft(IMap map, IniFile mapIni)
+        {
+            IniSection section = mapIni.GetSection("Aircraft");
+            if (section == null)
+                return;
+
+            // [Aircraft]
+            // INDEX=OWNER,ID,HEALTH,X,Y,FACING,MISSION,TAG,VETERANCY,GROUP,AUTOCREATE_NO_RECRUITABLE,AUTOCREATE_YES_RECRUITABLE
+
+            foreach (var kvp in section.Keys)
+            {
+                string[] values = kvp.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                if (values.Length < UNIT_PROPERTY_FIELD_COUNT)
+                    continue;
+
+                string ownerName = values[0];
+                string aircraftTypeId = values[1];
+                int health = Math.Min(Constants.ObjectHealthMax, Math.Max(0, Conversions.IntFromString(values[2], Constants.ObjectHealthMax)));
+                int x = Conversions.IntFromString(values[3], 0);
+                int y = Conversions.IntFromString(values[4], 0);
+                int facing = Math.Min(Constants.FacingMax, Math.Max(0, Conversions.IntFromString(values[5], Constants.FacingMax)));
+                string mission = values[6];
+                string attachedTag = values[7];
+                int veterancy = Conversions.IntFromString(values[8], 0);
+                int group = Conversions.IntFromString(values[9], 0);
+                bool autocreateNoRecruitable = Conversions.BooleanFromString(values[10], false);
+                bool autocreateYesRecruitable = Conversions.BooleanFromString(values[11], false);
+
+                var aircraftType = map.Rules.AircraftTypes.Find(ut => ut.ININame == aircraftTypeId);
+                if (aircraftType == null)
+                {
+                    Logger.Log($"Unable to find aircraft type {aircraftTypeId} - skipping it.");
+                    continue;
+                }
+
+                var aircraft = new Aircraft(aircraftType)
+                {
+                    HP = health,
+                    Position = new Point2D(x, y),
+                    Facing = (byte)facing,
+                    // TODO Mission
+                    // TODO attached tag
+                    Veterancy = veterancy,
+                    Group = group,
+                    AutocreateNoRecruitable = autocreateNoRecruitable,
+                    AutocreateYesRecruitable = autocreateYesRecruitable
+                };
+
+                map.Aircraft.Add(aircraft);
+                var tile = map.GetTile(x, y);
+                if (tile != null)
+                    tile.Aircraft = aircraft;
+            }
+        }
+
         public void ReadUnits(IMap map, IniFile mapIni)
         {
             IniSection section = mapIni.GetSection("Units");
@@ -325,7 +380,7 @@ namespace TSMapEditor.Initialization
                 map.Units.Add(unit);
                 var tile = map.GetTile(x, y);
                 if (tile != null)
-                    tile.VehicleOrAircraft = unit;
+                    tile.Vehicle = unit;
             }
         }
 

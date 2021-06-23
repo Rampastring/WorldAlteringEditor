@@ -65,6 +65,7 @@ namespace TSMapEditor.Models
             initializer.ReadIsoMapPack(this, mapIni);
             initializer.ReadTerrainObjects(this, mapIni);
             initializer.ReadBuildings(this, mapIni);
+            initializer.ReadAircraft(this, mapIni);
             initializer.ReadUnits(this, mapIni);
             initializer.ReadInfantry(this, mapIni);
             initializer.ReadOverlays(this, mapIni);
