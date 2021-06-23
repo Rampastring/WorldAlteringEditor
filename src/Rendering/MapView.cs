@@ -11,6 +11,7 @@ using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Models.MapFormat;
+using TSMapEditor.UI;
 
 namespace TSMapEditor.Rendering
 {
@@ -18,6 +19,7 @@ namespace TSMapEditor.Rendering
     {
         Map Map { get; }
         TheaterGraphics TheaterGraphics { get; }
+        WindowManager WindowManager { get; }
         void AddRefreshPoint(Point2D point);
     }
 
@@ -32,7 +34,11 @@ namespace TSMapEditor.Rendering
         public Map Map { get; }
         public TheaterGraphics TheaterGraphics { get; }
 
+        public CursorAction CursorAction { get; set; }
+
         private RenderTarget2D mapRenderTarget;
+
+        private MapTile tileUnderCursor;
 
         private bool mapInvalidated = true;
         private Point2D cameraTopLeftPoint = new Point2D(0, 0);
@@ -171,8 +177,8 @@ namespace TSMapEditor.Rendering
                             objectsToRedraw.Add(tile.Infantry[i]);
                     }
 
-                    if (tile.VehicleOrAircraft != null)
-                        objectsToRedraw.Add(tile.VehicleOrAircraft);
+                    if (tile.Vehicle != null)
+                        objectsToRedraw.Add(tile.Vehicle);
 
                     if (tile.Structure != null)
                         objectsToRedraw.Add(tile.Structure);
@@ -398,9 +404,10 @@ namespace TSMapEditor.Rendering
 
         private void DrawCursorTile()
         {
-            Point cursorPoint = GetCursorPoint();
-            Point2D cursorMapPoint = new Point2D(cameraTopLeftPoint.X + cursorPoint.X - Constants.CellSizeX / 2,
-                cameraTopLeftPoint.Y + cursorPoint.Y - Constants.CellSizeY / 2);
+            if (!IsActive)
+                return;
+
+            Point2D cursorMapPoint = GetCursorMapPoint();
 
             DrawStringWithShadow("Cursor coord: " + cursorMapPoint.X + ", " + cursorMapPoint.Y, 0, new Vector2(0f, 0f), Color.White);
 
@@ -411,6 +418,7 @@ namespace TSMapEditor.Rendering
             if (tileCoords.X >= 1 && tileCoords.Y >= 1 && tileCoords.Y < Map.Tiles.Length && tileCoords.X < Map.Tiles[tileCoords.Y].Length)
             {
                 var tile = Map.Tiles[tileCoords.Y][tileCoords.X];
+                tileUnderCursor = tile;
 
                 if (tile == null)
                 {
@@ -433,6 +441,10 @@ namespace TSMapEditor.Rendering
                     DrawStringWithShadow("Sub-tile ID: " + tile.SubTileIndex, 0, new Vector2(0f, 80f), Color.White);
                 }
             }
+            else
+            {
+                tileUnderCursor = null;
+            }
         }
 
         public void DeleteObjectFromTile(Point2D cellCoords)
@@ -451,22 +463,17 @@ namespace TSMapEditor.Rendering
                 }
             }
 
-            if (tile.VehicleOrAircraft != null)
+            if (tile.Aircraft != null)
             {
-                if (tile.VehicleOrAircraft.WhatAmI() == RTTIType.Unit)
-                {
-                    Map.Units.Remove((Unit)tile.VehicleOrAircraft);
-                }
-                else if (tile.VehicleOrAircraft.WhatAmI() == RTTIType.Aircraft)
-                {
-                    Map.Aircraft.Remove((Aircraft)tile.VehicleOrAircraft);
-                }
-                else
-                {
-                    throw new InvalidOperationException("DeleteObjectFromTile: Unknown object type");
-                }
+                Map.Aircraft.Remove(tile.Aircraft);
+                tile.Aircraft = null;
+                return;
+            }
 
-                tile.VehicleOrAircraft = null;
+            if (tile.Vehicle != null)
+            {
+                Map.Units.Remove(tile.Vehicle);
+                tile.Vehicle = null;
                 return;
             }
 
@@ -498,6 +505,14 @@ namespace TSMapEditor.Rendering
 
             DrawTexture(mapRenderTarget, new Rectangle(cameraTopLeftPoint.X, cameraTopLeftPoint.Y,
                 Width, Height), new Rectangle(0, 0, Width, Height), Color.White);
+
+            if (tileUnderCursor != null && CursorAction != null)
+            {
+                Point2D cursorMapPoint = GetCursorMapPoint();
+                CursorAction.DrawPreview(
+                    CellMath.CellTopLeftPoint(new Point2D(tileUnderCursor.X, tileUnderCursor.Y), Map.Size.X) - cameraTopLeftPoint,
+                    this);
+            }
 
             DrawCursorTile();
 

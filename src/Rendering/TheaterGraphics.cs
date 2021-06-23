@@ -15,15 +15,29 @@ namespace TSMapEditor.Rendering
     /// </summary>
     public class TileImage
     {
-        public TileImage(int tileSetId, int tileIndex, MGTMPImage[] tmpImages)
+        public TileImage(int tileSetId, int tileIndex, int tileId, MGTMPImage[] tmpImages)
         {
             TileSetId = tileSetId;
             TileIndex = tileIndex;
+            TileID = tileId;
             TMPImages = tmpImages;
         }
 
+        /// <summary>
+        /// The index of the tile set.
+        /// </summary>
         public int TileSetId { get; set; }
+
+        /// <summary>
+        /// The index of the tile within its tileset.
+        /// </summary>
         public int TileIndex { get; set; }
+
+        /// <summary>
+        /// The unique ID of this tile within all tiles in the game.
+        /// </summary>
+        public int TileID { get; set; }
+
         public MGTMPImage[] TMPImages { get; set; }
 
         /// <summary>
@@ -187,7 +201,7 @@ namespace TSMapEditor.Rendering
                         {
                             if (v == 0)
                             {
-                                tileGraphics.Add(new TileImage(tsId, i, new MGTMPImage[0]));
+                                tileGraphics.Add(new TileImage(tsId, i, currentTileIndex, new MGTMPImage[0]));
                                 break;
                             }
                             else
@@ -204,14 +218,13 @@ namespace TSMapEditor.Rendering
                         {
                             tmpImages.Add(new MGTMPImage(graphicsDevice, tmpFile.GetImage(img), theaterPalette, tsId));
                         }
-                        tileGraphics.Add(new TileImage(tsId, i, tmpImages.ToArray()));
+                        tileGraphics.Add(new TileImage(tsId, i, currentTileIndex, tmpImages.ToArray()));
                     }
 
                     tileSet.LoadedTileCount++;
+                    currentTileIndex++;
                     graphicsList.Add(tileGraphics.ToArray());
                 }
-
-                currentTileIndex += tileSet.TilesInSet;
             }
         }
 

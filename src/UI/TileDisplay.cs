@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
+using System;
 using System.Collections.Generic;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Rendering;
@@ -26,11 +27,28 @@ namespace TSMapEditor.UI
     public class TileDisplay : XNAPanel
     {
         private const int TILE_PADDING = 3;
+        private const int SCROLL_RATE = 10;
 
         public TileDisplay(WindowManager windowManager, TheaterGraphics theaterGraphics) : base(windowManager)
         {
             this.theaterGraphics = theaterGraphics;
             DrawMode = ControlDrawMode.UNIQUE_RENDER_TARGET;
+        }
+
+        public event EventHandler SelectedTileChanged;
+
+        private TileImage _selectedTile;
+        public TileImage SelectedTile
+        {
+            get => _selectedTile;
+            set
+            {
+                if (_selectedTile != value)
+                {
+                    _selectedTile = value;
+                    SelectedTileChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
         }
 
         private readonly TheaterGraphics theaterGraphics;
@@ -39,7 +57,8 @@ namespace TSMapEditor.UI
 
         private List<TileDisplayTile> tilesInView = new List<TileDisplayTile>();
 
-        int tSetId = 0;
+        private int tSetId = 0;
+        private int viewY = 0;
 
         public override void Initialize()
         {
@@ -69,12 +88,14 @@ namespace TSMapEditor.UI
 
         public void SetTileSet(TileSet tileSet)
         {
+            viewY = 0;
             this.tileSet = tileSet;
             RefreshGraphics();
         }
 
         private void RefreshGraphics()
         {
+            viewY = 0;
             tilesInView.Clear();
 
             if (tileSet == null)
@@ -136,13 +157,43 @@ namespace TSMapEditor.UI
             }
         }
 
+        public override void OnMouseScrolled()
+        {
+            base.OnMouseScrolled();
+            viewY += Cursor.ScrollWheelValue * SCROLL_RATE;
+        }
+
+        public override void OnMouseLeftDown()
+        {
+            base.OnMouseLeftDown();
+            SelectedTile = GetTileUnderCursor()?.TileImage;
+        }
+
+        private TileDisplayTile GetTileUnderCursor()
+        {
+            if (!IsActive)
+                return null;
+
+            Point cursorPoint = GetCursorPoint();
+
+            foreach (var tile in tilesInView)
+            {
+                var rectangle = new Rectangle(tile.Location.X, tile.Location.Y + viewY, tile.Size.X, tile.Size.Y);
+                if (rectangle.Contains(cursorPoint))
+                    return tile;
+            }
+
+            return null;
+        }
+
         public override void Draw(GameTime gameTime)
         {
             DrawPanel();
 
             foreach (var tile in tilesInView)
             {
-                FillRectangle(new Rectangle(tile.Location.X, tile.Location.Y, tile.Size.X, tile.Size.Y), Color.Black);
+                var rectangle = new Rectangle(tile.Location.X, tile.Location.Y + viewY, tile.Size.X, tile.Size.Y);
+                FillRectangle(rectangle, Color.Black);
 
                 foreach (MGTMPImage image in tile.TileImage.TMPImages)
                 {
@@ -150,9 +201,12 @@ namespace TSMapEditor.UI
                         continue;
 
                     DrawTexture(image.Texture, new Rectangle(tile.Location.X + image.TmpImage.X + tile.Offset.X,
-                        tile.Location.Y + image.TmpImage.Y + tile.Offset.Y,
+                        viewY + tile.Location.Y + image.TmpImage.Y + tile.Offset.Y,
                         Constants.CellSizeX, Constants.CellSizeY), Color.White);
                 }
+
+                if (tile.TileImage == SelectedTile)
+                    DrawRectangle(rectangle, Color.Red, 2);
             }
 
             DrawChildren(gameTime);

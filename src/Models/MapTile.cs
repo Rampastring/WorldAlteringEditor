@@ -15,7 +15,8 @@ namespace TSMapEditor.Models
         public TileImage TileImage { get; set; }
         public TerrainObject TerrainObject { get; set; }
         public Structure Structure { get; set; }
-        public TechnoBase VehicleOrAircraft { get; set; }
+        public Unit Vehicle { get; set; }
+        public Aircraft Aircraft { get; set; }
         public Infantry[] Infantry { get; set; } = new Infantry[SubCellCount];
         public bool AddInfantry(Infantry infantry)
         {

@@ -10,7 +10,9 @@ namespace TSMapEditor.UI
 {
     public abstract class CursorAction
     {
-        public abstract void PerformAction(Point2D cellPoint, ICursorActionTarget cursorActionTarget);
+        public virtual void LeftDown(Point2D cellPoint, ICursorActionTarget cursorActionTarget) { }
+
+        public abstract void LeftClick(Point2D cellPoint, ICursorActionTarget cursorActionTarget);
 
         public abstract void DrawPreview(Point2D cellTopLeftPoint, ICursorActionTarget cursorActionTarget);
     }

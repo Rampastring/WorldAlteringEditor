@@ -7,6 +7,7 @@ using System.IO;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Models;
 using TSMapEditor.UI;
+using TSMapEditor.UI.CursorActions;
 
 namespace TSMapEditor.Rendering
 {
@@ -81,16 +82,29 @@ namespace TSMapEditor.Rendering
 
             TheaterGraphics theaterGraphics = new TheaterGraphics(GraphicsDevice, theater, ccFileManager, map.Rules);
 
-            MapView mapView = new MapView(windowManager, map, theaterGraphics);
+            mapView = new MapView(windowManager, map, theaterGraphics);
             mapView.Width = windowManager.RenderResolutionX;
             mapView.Height = windowManager.RenderResolutionY;
             windowManager.AddAndInitializeControl(mapView);
 
-            var tileSelector = new TileSelector(windowManager, theaterGraphics);
+            tileSelector = new TileSelector(windowManager, theaterGraphics);
             tileSelector.Width = windowManager.RenderResolutionX;
             tileSelector.Height = 300;
             tileSelector.Y = windowManager.RenderResolutionY - tileSelector.Height;
             windowManager.AddAndInitializeControl(tileSelector);
+            tileSelector.TileDisplay.SelectedTileChanged += TileDisplay_SelectedTileChanged;
+
+            terrainPlacementAction = new TerrainPlacementAction();
+        }
+
+        MapView mapView;
+        TileSelector tileSelector;
+        TerrainPlacementAction terrainPlacementAction;
+
+        private void TileDisplay_SelectedTileChanged(object sender, EventArgs e)
+        {
+            mapView.CursorAction = terrainPlacementAction;
+            terrainPlacementAction.Tile = tileSelector.TileDisplay.SelectedTile;
         }
     }
 }
