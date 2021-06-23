@@ -161,6 +161,7 @@ namespace TSMapEditor.Rendering
             {
                 TileSet tileSet = Theater.TileSets[tsId];
                 tileSet.StartTileIndex = currentTileIndex;
+                tileSet.LoadedTileCount = 0;
 
                 Console.WriteLine("Loading " + tileSet.SetName);
 
@@ -206,9 +207,11 @@ namespace TSMapEditor.Rendering
                         tileGraphics.Add(new TileImage(tsId, i, tmpImages.ToArray()));
                     }
 
-                    currentTileIndex += tileSet.TilesInSet;
+                    tileSet.LoadedTileCount++;
                     graphicsList.Add(tileGraphics.ToArray());
                 }
+
+                currentTileIndex += tileSet.TilesInSet;
             }
         }
 

@@ -30,6 +30,7 @@ namespace TSMapEditor.UI
         public TileDisplay(WindowManager windowManager, TheaterGraphics theaterGraphics) : base(windowManager)
         {
             this.theaterGraphics = theaterGraphics;
+            DrawMode = ControlDrawMode.UNIQUE_RENDER_TARGET;
         }
 
         private readonly TheaterGraphics theaterGraphics;
@@ -57,6 +58,13 @@ namespace TSMapEditor.UI
                 tSetId++;
                 SetTileSet(theaterGraphics.Theater.TileSets[tSetId]);
             }
+        }
+
+        protected override void OnClientRectangleUpdated()
+        {
+            base.OnClientRectangleUpdated();
+
+            RefreshGraphics();
         }
 
         public void SetTileSet(TileSet tileSet)
@@ -130,7 +138,7 @@ namespace TSMapEditor.UI
 
         public override void Draw(GameTime gameTime)
         {
-            base.Draw(gameTime);
+            DrawPanel();
 
             foreach (var tile in tilesInView)
             {
@@ -146,6 +154,9 @@ namespace TSMapEditor.UI
                         Constants.CellSizeX, Constants.CellSizeY), Color.White);
                 }
             }
+
+            DrawChildren(gameTime);
+            DrawPanelBorders();
         }
     }
 }

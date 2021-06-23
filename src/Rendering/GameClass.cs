@@ -33,6 +33,7 @@ namespace TSMapEditor.Rendering
             base.Initialize();
 
             AssetLoader.Initialize(GraphicsDevice, Content);
+            AssetLoader.AssetSearchPaths.Add(Environment.CurrentDirectory + DSC + "Content" + DSC);
 
             windowManager = new WindowManager(this, graphics);
             windowManager.Initialize(Content, Environment.CurrentDirectory + DSC + "Content" + DSC);
@@ -85,11 +86,11 @@ namespace TSMapEditor.Rendering
             mapView.Height = windowManager.RenderResolutionY;
             windowManager.AddAndInitializeControl(mapView);
 
-            var tileDisplay = new TileDisplay(windowManager, theaterGraphics);
-            tileDisplay.Width = windowManager.RenderResolutionX;
-            tileDisplay.Height = 300;
-            windowManager.AddAndInitializeControl(tileDisplay);
-            tileDisplay.SetTileSet(theater.TileSets[0]);
+            var tileSelector = new TileSelector(windowManager, theaterGraphics);
+            tileSelector.Width = windowManager.RenderResolutionX;
+            tileSelector.Height = 300;
+            tileSelector.Y = windowManager.RenderResolutionY - tileSelector.Height;
+            windowManager.AddAndInitializeControl(tileSelector);
         }
     }
 }
