@@ -5,12 +5,10 @@ using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
-using TSMapEditor.Models.MapFormat;
 using TSMapEditor.UI;
 
 namespace TSMapEditor.Rendering
@@ -105,8 +103,6 @@ namespace TSMapEditor.Rendering
 
             DrawOverlays();
 
-            Texture2D debugTexture = null;
-
             DrawObjects();
             DrawWaypoints();
 
@@ -114,11 +110,6 @@ namespace TSMapEditor.Rendering
 
             sw.Stop();
             Console.WriteLine("Map render time: " + sw.Elapsed.TotalMilliseconds);
-
-            //using (var stream = File.OpenWrite(Environment.CurrentDirectory + "/texture.png"))
-            //{
-            //    debugTexture.SaveAsPng(stream, debugTexture.Width, debugTexture.Height);
-            //}
         }
 
         private void DrawOverlays()

@@ -443,5 +443,22 @@ namespace TSMapEditor.Initialization
                 map.AddWaypoint(waypoint);
             }
         }
+
+        public static void ReadTaskForces(IMap map, IniFile mapIni)
+        {
+            var section = mapIni.GetSection("TaskForces");
+            if (section == null)
+                return;
+
+            foreach (var kvp in section.Keys)
+            {
+                if (string.IsNullOrWhiteSpace(kvp.Value))
+                    continue;
+
+                var taskForce = TaskForce.ReadTaskForce(map.Rules, mapIni.GetSection(kvp.Value));
+
+                map.AddTaskForce(taskForce);
+            }
+        }
     }
 }

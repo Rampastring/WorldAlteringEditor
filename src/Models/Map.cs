@@ -41,6 +41,8 @@ namespace TSMapEditor.Models
         public List<TerrainObject> TerrainObjects { get; } = new List<TerrainObject>();
         public List<Waypoint> Waypoints { get; } = new List<Waypoint>();
 
+        public List<TaskForce> TaskForces { get; } = new List<TaskForce>();
+
         public Point2D Size { get; set; }
 
         private readonly Initializer initializer;
@@ -70,6 +72,7 @@ namespace TSMapEditor.Models
             MapLoader.ReadInfantry(this, mapIni);
             MapLoader.ReadOverlays(this, mapIni);
             MapLoader.ReadWaypoints(this, mapIni);
+            MapLoader.ReadTaskForces(this, mapIni);
         }
 
         /// <summary>
@@ -133,6 +136,11 @@ namespace TSMapEditor.Models
         {
             Waypoints.Add(waypoint);
             GetTile(waypoint.Position.X, waypoint.Position.Y).Waypoint = waypoint;
+        }
+
+        public void AddTaskForce(TaskForce taskForce)
+        {
+            TaskForces.Add(taskForce);
         }
 
         // public void StartNew(IniFile rulesIni, IniFile firestormIni, TheaterType theaterType, Point2D size)

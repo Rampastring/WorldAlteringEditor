@@ -23,5 +23,6 @@ namespace TSMapEditor.Initialization
         void SetTileData(List<MapTile> tiles);
         House FindOrMakeHouse(string houseName);
         void AddWaypoint(Waypoint waypoint);
+        void AddTaskForce(TaskForce taskForce);
     }
 }
