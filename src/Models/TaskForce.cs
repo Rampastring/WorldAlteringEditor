@@ -6,7 +6,7 @@
         public int Count { get; set; }
     }
 
-    public class TaskForce : AbstractObject
+    public class TaskForce
     {
         public const int MaxTechnoCount = 6;
 
@@ -14,8 +14,6 @@
         {
             ININame = iniName;
         }
-
-        public override RTTIType WhatAmI() => RTTIType.TaskForce;
 
         public string ININame { get; }
 

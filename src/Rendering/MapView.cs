@@ -108,21 +108,17 @@ namespace TSMapEditor.Rendering
             Texture2D debugTexture = null;
 
             DrawObjects();
-
-            int a = 0;
+            DrawWaypoints();
 
             Renderer.PopRenderTarget();
 
             sw.Stop();
             Console.WriteLine("Map render time: " + sw.Elapsed.TotalMilliseconds);
 
-            if (a == 0)
-                return;
-
-            using (var stream = File.OpenWrite(Environment.CurrentDirectory + "/texture.png"))
-            {
-                debugTexture.SaveAsPng(stream, debugTexture.Width, debugTexture.Height);
-            }
+            //using (var stream = File.OpenWrite(Environment.CurrentDirectory + "/texture.png"))
+            //{
+            //    debugTexture.SaveAsPng(stream, debugTexture.Width, debugTexture.Height);
+            //}
         }
 
         private void DrawOverlays()
@@ -147,6 +143,28 @@ namespace TSMapEditor.Rendering
             }
         }
 
+        private void DrawWaypoints()
+        {
+            for (int i = 0; i < Map.Tiles.Length; i++)
+            {
+                var row = Map.Tiles[i];
+
+                for (int j = 0; j < row.Length; j++)
+                {
+                    if (row[j] == null)
+                        continue;
+
+                    Point2D drawPoint = CellMath.CellTopLeftPoint(new Point2D(i, j), Map.Size.X);
+
+                    var tile = row[j];
+                    if (tile.Waypoint != null)
+                    {
+                        DrawWaypoint(tile.Waypoint);
+                    }
+                }
+            }
+        }
+
         private void DrawObjects()
         {
             List<GameObject> gameObjects = new List<GameObject>(Map.TerrainObjects);
@@ -161,6 +179,7 @@ namespace TSMapEditor.Rendering
         private void RefreshOverArea(Point2D center)
         {
             var tilesToRedraw = new List<MapTile>();
+            var waypointsToRedraw = new List<Waypoint>();
             var objectsToRedraw = new List<GameObject>();
             var cellCoords = CellMath.CellCoordsFromPixelCoords(center, Map.Size);
             const int tileRefreshArea = 10;
@@ -174,6 +193,9 @@ namespace TSMapEditor.Rendering
                         continue;
 
                     tilesToRedraw.Add(tile);
+
+                    if (tile.Waypoint != null)
+                        waypointsToRedraw.Add(tile.Waypoint);
                 }
             }
 
@@ -213,6 +235,10 @@ namespace TSMapEditor.Rendering
                     DrawObject(t.Overlay);
             });
             objectsToRedraw.ForEach(o => DrawObject(o));
+            waypointsToRedraw.ForEach(w =>
+            {
+                DrawWaypoint(w);
+            });
             Renderer.PopRenderTarget();
         }
 
@@ -367,6 +393,29 @@ namespace TSMapEditor.Rendering
                 DrawTexture(texture, new Rectangle(drawPoint.X, drawPoint.Y,
                     Constants.CellSizeX, Constants.CellSizeY), Color.White);
             }
+        }
+
+        private void DrawWaypoint(Waypoint waypoint)
+        {
+            const int waypointBorderOffsetX = 8;
+            const int waypointBorderOffsetY = 4;
+            const int textOffset = 3;
+
+            Point2D drawPoint = CellMath.CellTopLeftPoint(waypoint.Position, Map.Size.X);
+
+            var rect = new Rectangle(drawPoint.X + waypointBorderOffsetX,
+                drawPoint.Y + waypointBorderOffsetY,
+                Constants.CellSizeX - (waypointBorderOffsetX * 2),
+                Constants.CellSizeY - (waypointBorderOffsetY * 2));
+
+            Color waypointColor = Color.Fuchsia;
+
+            FillRectangle(rect, new Color(0, 0, 0, 128));
+            DrawRectangle(rect, waypointColor);
+            DrawStringWithShadow(waypoint.Identifier.ToString(),
+                Constants.UIDefaultFont, 
+                new Vector2(rect.X + textOffset, rect.Y),
+                waypointColor);
         }
 
         public override void OnMouseMove()

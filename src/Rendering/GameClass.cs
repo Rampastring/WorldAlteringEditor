@@ -23,6 +23,9 @@ namespace TSMapEditor.Rendering
             Content.RootDirectory = "Content";
             graphics.SynchronizeWithVerticalRetrace = false;
             Window.Title = "DTA Scenario Editor";
+
+            //IsFixedTimeStep = false;
+            TargetElapsedTime = TimeSpan.FromMilliseconds(4);
         }
 
         private WindowManager windowManager;
@@ -56,8 +59,8 @@ namespace TSMapEditor.Rendering
             IniFile firestormIni = new IniFile(Path.Combine(GameDirectory, "INI/Enhance.ini"));
             IniFile artIni = new IniFile(Path.Combine(GameDirectory, "INI/Art.ini"));
             IniFile artFSIni = new IniFile(Path.Combine(GameDirectory, "INI/ArtE.INI"));
-            IniFile mapIni = new IniFile(Path.Combine(GameDirectory, "Maps/Missions/stomp.map"));
-            //IniFile mapIni = new IniFile(Path.Combine(GameDirectory, "Maps/Default/a_buoyant_city.map"));
+            //IniFile mapIni = new IniFile(Path.Combine(GameDirectory, "Maps/Missions/stomp.map"));
+            IniFile mapIni = new IniFile(Path.Combine(GameDirectory, "Maps/Default/a_buoyant_city.map"));
             Map map = new Map();
             map.LoadExisting(rulesIni, firestormIni, artIni, artFSIni, mapIni);
 

@@ -2,6 +2,9 @@
 
 namespace TSMapEditor.Models.MapFormat
 {
+    /// <summary>
+    /// Low-level cell class.
+    /// </summary>
     public class IsoMapPack5Tile
     {
         public const int Size = 11;

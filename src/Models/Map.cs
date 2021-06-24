@@ -61,14 +61,15 @@ namespace TSMapEditor.Models
 
             LoadedINI = mapIni ?? throw new ArgumentNullException(nameof(mapIni));
             Rules.InitFromINI(mapIni, initializer);
-            initializer.ReadMapSection(this, mapIni);
-            initializer.ReadIsoMapPack(this, mapIni);
-            initializer.ReadTerrainObjects(this, mapIni);
-            initializer.ReadBuildings(this, mapIni);
-            initializer.ReadAircraft(this, mapIni);
-            initializer.ReadUnits(this, mapIni);
-            initializer.ReadInfantry(this, mapIni);
-            initializer.ReadOverlays(this, mapIni);
+            MapLoader.ReadMapSection(this, mapIni);
+            MapLoader.ReadIsoMapPack(this, mapIni);
+            MapLoader.ReadTerrainObjects(this, mapIni);
+            MapLoader.ReadBuildings(this, mapIni);
+            MapLoader.ReadAircraft(this, mapIni);
+            MapLoader.ReadUnits(this, mapIni);
+            MapLoader.ReadInfantry(this, mapIni);
+            MapLoader.ReadOverlays(this, mapIni);
+            MapLoader.ReadWaypoints(this, mapIni);
         }
 
         /// <summary>
@@ -126,6 +127,12 @@ namespace TSMapEditor.Models
                 ox++;
                 oy++;
             }
+        }
+
+        public void AddWaypoint(Waypoint waypoint)
+        {
+            Waypoints.Add(waypoint);
+            GetTile(waypoint.Position.X, waypoint.Position.Y).Waypoint = waypoint;
         }
 
         // public void StartNew(IniFile rulesIni, IniFile firestormIni, TheaterType theaterType, Point2D size)

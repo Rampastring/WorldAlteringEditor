@@ -22,5 +22,6 @@ namespace TSMapEditor.Initialization
         Point2D Size { get; set; }
         void SetTileData(List<MapTile> tiles);
         House FindOrMakeHouse(string houseName);
+        void AddWaypoint(Waypoint waypoint);
     }
 }

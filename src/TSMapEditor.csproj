@@ -74,6 +74,7 @@
     <Compile Include="GameMath\Point2D.cs" />
     <Compile Include="Initialization\IInitializer.cs" />
     <Compile Include="Initialization\Initializer.cs" />
+    <Compile Include="Initialization\MapLoader.cs" />
     <Compile Include="INI\INIDefineable.cs" />
     <Compile Include="Models\AbstractObject.cs" />
     <Compile Include="Models\Aircraft.cs" />
@@ -122,6 +123,7 @@
     <Compile Include="Models\TechnoType.cs" />
     <Compile Include="Models\TerrainObject.cs" />
     <Compile Include="Models\TerrainType.cs" />
+    <Compile Include="Models\Trigger.cs" />
     <Compile Include="Models\Unit.cs" />
     <Compile Include="Models\UnitType.cs" />
     <Compile Include="Models\Waypoint.cs" />

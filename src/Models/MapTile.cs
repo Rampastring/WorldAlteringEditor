@@ -5,6 +5,9 @@ using TSMapEditor.Rendering;
 
 namespace TSMapEditor.Models
 {
+    /// <summary>
+    /// A cell on the map with additional logic properties for the map editor.
+    /// </summary>
     public class MapTile : IsoMapPack5Tile
     {
         private const int SubCellCount = 5;
@@ -41,6 +44,8 @@ namespace TSMapEditor.Models
         public int PreviewSubTileIndex { get; set; }
 
         public Overlay Overlay { get; set; }
+
+        public Waypoint Waypoint { get; set; }
 
         /// <summary>
         /// A list of objects that graphically overlap with this tile.
