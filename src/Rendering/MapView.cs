@@ -15,6 +15,9 @@ using TSMapEditor.UI;
 
 namespace TSMapEditor.Rendering
 {
+    /// <summary>
+    /// An interface for an object that cursor actions use to interact with the map.
+    /// </summary>
     public interface ICursorActionTarget
     {
         Map Map { get; }
@@ -366,8 +369,25 @@ namespace TSMapEditor.Rendering
             }
         }
 
+        public override void OnMouseMove()
+        {
+            base.OnMouseMove();
+
+            if (tileUnderCursor != null && CursorAction != null)
+            {
+                if (Cursor.LeftDown)
+                {
+                    CursorAction.LeftDown(tileUnderCursor.CoordsToPoint(), this);
+                }
+            }
+        }
+
         public override void Update(GameTime gameTime)
         {
+            // Make scroll rate independent of FPS
+            // Scroll rate is designed for 60 FPS
+            int scrollRate = (int)(this.scrollRate * (gameTime.ElapsedGameTime.TotalMilliseconds / 16.666));
+
             if (Keyboard.IsKeyHeldDown(Microsoft.Xna.Framework.Input.Keys.Left))
                 cameraTopLeftPoint += new Point2D(-scrollRate, 0);
             else if (Keyboard.IsKeyHeldDown(Microsoft.Xna.Framework.Input.Keys.Right))
@@ -377,6 +397,11 @@ namespace TSMapEditor.Rendering
                 cameraTopLeftPoint += new Point2D(0, -scrollRate);
             else if (Keyboard.IsKeyHeldDown(Microsoft.Xna.Framework.Input.Keys.Down))
                 cameraTopLeftPoint += new Point2D(0, scrollRate);
+
+            Point2D cursorMapPoint = GetCursorMapPoint();
+            Point2D tileCoords = CellMath.CellCoordsFromPixelCoords(cursorMapPoint, Map.Size);
+            var tile = Map.GetTile(tileCoords.X, tileCoords.Y);
+            tileUnderCursor = tile;
 
             base.Update(gameTime);
         }
@@ -430,43 +455,26 @@ namespace TSMapEditor.Rendering
             if (!IsActive)
                 return;
 
-            Point2D cursorMapPoint = GetCursorMapPoint();
-
-            DrawStringWithShadow("Cursor coord: " + cursorMapPoint.X + ", " + cursorMapPoint.Y, 0, new Vector2(0f, 0f), Color.White);
-
-            Point2D tileCoords = CellMath.CellCoordsFromPixelCoords(cursorMapPoint, Map.Size);
-
-            DrawStringWithShadow(tileCoords.X + ", " + tileCoords.Y, 0, new Vector2(0f, 20f), Color.White);
-
-            if (tileCoords.X >= 1 && tileCoords.Y >= 1 && tileCoords.Y < Map.Tiles.Length && tileCoords.X < Map.Tiles[tileCoords.Y].Length)
+            if (tileUnderCursor == null)
             {
-                var tile = Map.Tiles[tileCoords.Y][tileCoords.X];
-                tileUnderCursor = tile;
-
-                if (tile == null)
-                {
-                    DrawString("Null tile", 0, new Vector2(0f, 40f), Color.White);
-                }
-                else
-                {
-                    Point2D drawPoint = CellMath.CellTopLeftPoint(new Point2D(tile.X, tile.Y), Map.Size.X);
-
-                    FillRectangle(new Rectangle(drawPoint.X - cameraTopLeftPoint.X,
-                        drawPoint.Y - cameraTopLeftPoint.Y,
-                        Constants.CellSizeX, Constants.CellSizeY),
-                        new Color(128, 128, 128, 128));
-
-                    TileImage tileGraphics = TheaterGraphics.GetTileGraphics(tile.TileIndex);
-                    TileSet tileSet = TheaterGraphics.Theater.TileSets[tileGraphics.TileSetId];
-                    DrawStringWithShadow("TileSet: " + tileSet.SetName + " (" + tileGraphics.TileSetId + ")", 0,
-                        new Vector2(0f, 40f), Color.White);
-                    DrawStringWithShadow("Tile ID: " + tileGraphics.TileIndex, 0, new Vector2(0f, 60f), Color.White);
-                    DrawStringWithShadow("Sub-tile ID: " + tile.SubTileIndex, 0, new Vector2(0f, 80f), Color.White);
-                }
+                DrawString("Null tile", 0, new Vector2(0f, 40f), Color.White);
             }
             else
             {
-                tileUnderCursor = null;
+                DrawStringWithShadow("X: " + tileUnderCursor.X + ", Y: " + tileUnderCursor.Y, 0, new Vector2(0f, 0f), Color.White);
+                Point2D drawPoint = CellMath.CellTopLeftPoint(new Point2D(tileUnderCursor.X, tileUnderCursor.Y), Map.Size.X);
+
+                FillRectangle(new Rectangle(drawPoint.X - cameraTopLeftPoint.X,
+                    drawPoint.Y - cameraTopLeftPoint.Y,
+                    Constants.CellSizeX, Constants.CellSizeY),
+                    new Color(128, 128, 128, 128));
+
+                TileImage tileGraphics = TheaterGraphics.GetTileGraphics(tileUnderCursor.TileIndex);
+                TileSet tileSet = TheaterGraphics.Theater.TileSets[tileGraphics.TileSetId];
+                DrawStringWithShadow("TileSet: " + tileSet.SetName + " (" + tileGraphics.TileSetId + ")", 0,
+                    new Vector2(0f, 20f), Color.White);
+                DrawStringWithShadow("Tile ID: " + tileGraphics.TileIndex, 0, new Vector2(0f, 40f), Color.White);
+                DrawStringWithShadow("Sub-tile ID: " + tileUnderCursor.SubTileIndex, 0, new Vector2(0f, 60f), Color.White);
             }
         }
 
@@ -538,14 +546,6 @@ namespace TSMapEditor.Rendering
             {
                 CursorAction.PostMapDraw(tileUnderCursor.CoordsToPoint(), this);
             }
-
-            // if (tileUnderCursor != null && CursorAction != null)
-            // {
-            //     Point2D cursorMapPoint = GetCursorMapPoint();
-            //     CursorAction.DrawPreview(
-            //         CellMath.CellTopLeftPoint(new Point2D(tileUnderCursor.X, tileUnderCursor.Y), Map.Size.X) - cameraTopLeftPoint,
-            //         this);
-            // }
 
             DrawCursorTile();
 

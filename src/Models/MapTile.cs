@@ -13,6 +13,10 @@ namespace TSMapEditor.Models
 
         public MapTile(byte[] data) : base(data) { }
 
+        /// <summary>
+        /// The cached image for this tile.
+        /// This should be cleared when the tile's terrain is changed.
+        /// </summary>
         public TileImage TileImage { get; set; }
         public TerrainObject TerrainObject { get; set; }
         public Structure Structure { get; set; }

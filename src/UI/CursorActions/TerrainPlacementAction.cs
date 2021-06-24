@@ -51,7 +51,27 @@ namespace TSMapEditor.UI.CursorActions
 
         public override void LeftDown(Point2D cellPoint, ICursorActionTarget cursorActionTarget)
         {
-            base.LeftDown(cellPoint, cursorActionTarget);
+            if (Tile == null)
+                return;
+
+            for (int i = 0; i < Tile.TMPImages.Length; i++)
+            {
+                if (Tile.TMPImages[i].TmpImage == null)
+                    continue;
+
+                int cx = cellPoint.X + i % Tile.Width;
+                int cy = cellPoint.Y + i / Tile.Width;
+
+                var mapTile = cursorActionTarget.Map.GetTile(cx, cy);
+                if (mapTile != null)
+                {
+                    mapTile.TileImage = null;
+                    mapTile.TileIndex = Tile.TileID;
+                    mapTile.SubTileIndex = (byte)i;
+                }
+            }
+
+            cursorActionTarget.AddRefreshPoint(CellMath.CellTopLeftPoint(cellPoint, cursorActionTarget.Map.Size.X));
         }
 
         public override void DrawPreview(Point2D cellTopLeftPoint, ICursorActionTarget cursorActionTarget)
