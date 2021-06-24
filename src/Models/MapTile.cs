@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using TSMapEditor.GameMath;
 using TSMapEditor.Models.MapFormat;
 using TSMapEditor.Rendering;
 
@@ -32,6 +33,9 @@ namespace TSMapEditor.Models
             return false;
         }
 
+        public TileImage PreviewTileImage { get; set; }
+        public int PreviewSubTileIndex { get; set; }
+
         public Overlay Overlay { get; set; }
 
         /// <summary>
@@ -40,5 +44,7 @@ namespace TSMapEditor.Models
         /// be re-drawn as well.
         /// </summary>
         public List<AbstractObject> OverlapList { get; set; }
+
+        public Point2D CoordsToPoint() => new Point2D(X, Y);
     }
 }

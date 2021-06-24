@@ -17,6 +17,10 @@ namespace TSMapEditor.CCEngine
         public int ImageCount => tmpImages.Count;
         public TmpImage GetImage(int id) => tmpImages[id];
 
+        public int CellsX => tmpFileHeader.Width;
+
+        public int CellsY => tmpFileHeader.Height;
+
         public void ParseFromFile(string filePath)
         {
             using (FileStream stream = File.OpenRead(filePath))

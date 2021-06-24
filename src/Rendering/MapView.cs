@@ -37,6 +37,7 @@ namespace TSMapEditor.Rendering
         public CursorAction CursorAction { get; set; }
 
         private RenderTarget2D mapRenderTarget;
+        private RenderTarget2D objectRenderTarget;
 
         private MapTile tileUnderCursor;
 
@@ -45,6 +46,10 @@ namespace TSMapEditor.Rendering
 
         private int scrollRate = 20;
 
+        /// <summary>
+        /// A list of cells that have been invalidated.
+        /// Areas around these cells are to be redrawn.
+        /// </summary>
         private List<Point2D> refreshes = new List<Point2D>();
 
         public void AddRefreshPoint(Point2D point)
@@ -56,12 +61,18 @@ namespace TSMapEditor.Rendering
         {
             base.Initialize();
 
-            mapRenderTarget = new RenderTarget2D(GraphicsDevice,
-                Map.Size.X * Constants.CellSizeX,
-                Map.Size.Y * Constants.CellSizeY, false, SurfaceFormat.Color,
-                DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
+            mapRenderTarget = CreateFullMapRenderTarget();
+            objectRenderTarget = CreateFullMapRenderTarget();
 
             Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
+        }
+
+        private RenderTarget2D CreateFullMapRenderTarget()
+        {
+           return new RenderTarget2D(GraphicsDevice,
+               Map.Size.X * Constants.CellSizeX,
+               Map.Size.Y * Constants.CellSizeY, false, SurfaceFormat.Color,
+               DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
         }
 
         Stopwatch sw = new Stopwatch();
@@ -155,7 +166,7 @@ namespace TSMapEditor.Rendering
             {
                 for (int x = -tileRefreshArea; x <= tileRefreshArea; x++)
                 {
-                    var tile = Map.Tiles[cellCoords.Y + y][cellCoords.X + x];
+                    var tile = Map.GetTile(cellCoords.X + x, cellCoords.Y + y);
                     if (tile == null)
                         continue;
 
@@ -167,7 +178,7 @@ namespace TSMapEditor.Rendering
             {
                 for (int x = -objectRefreshArea; x <= objectRefreshArea; x++)
                 {
-                    var tile = Map.Tiles[cellCoords.Y + y][cellCoords.X + x];
+                    var tile = Map.GetTile(cellCoords.X + x, cellCoords.Y + y);
                     if (tile == null)
                         continue;
 
@@ -328,14 +339,26 @@ namespace TSMapEditor.Rendering
             if (tile.TileImage == null)
                 tile.TileImage = TheaterGraphics.GetTileGraphics(tile.TileIndex);
 
-            var tileImage = tile.TileImage;
-            if (tile.SubTileIndex >= tileImage.TMPImages.Length)
+            TileImage tileImage;
+            int subTileIndex;
+            if (tile.PreviewTileImage != null)
             {
-                DrawString(tile.SubTileIndex.ToString(), 0, new Vector2(drawPoint.X, drawPoint.Y), Color.Red);
+                tileImage = tile.PreviewTileImage;
+                subTileIndex = tile.PreviewSubTileIndex;
+            }
+            else
+            {
+                tileImage = tile.TileImage;
+                subTileIndex = tile.SubTileIndex;
+            }
+
+            if (subTileIndex >= tileImage.TMPImages.Length)
+            {
+                DrawString(subTileIndex.ToString(), 0, new Vector2(drawPoint.X, drawPoint.Y), Color.Red);
                 return;
             }
             
-            Texture2D texture = tileImage.TMPImages[tile.SubTileIndex].Texture;
+            Texture2D texture = tileImage.TMPImages[subTileIndex].Texture;
             if (texture != null)
             {
                 DrawTexture(texture, new Rectangle(drawPoint.X, drawPoint.Y,
@@ -497,6 +520,11 @@ namespace TSMapEditor.Rendering
                 mapInvalidated = false;
             }
 
+            if (tileUnderCursor != null && CursorAction != null)
+            {
+                CursorAction.PreMapDraw(tileUnderCursor.CoordsToPoint(), this);
+            }
+
             foreach (var refresh in refreshes)
             {
                 RefreshOverArea(refresh);
@@ -508,11 +536,16 @@ namespace TSMapEditor.Rendering
 
             if (tileUnderCursor != null && CursorAction != null)
             {
-                Point2D cursorMapPoint = GetCursorMapPoint();
-                CursorAction.DrawPreview(
-                    CellMath.CellTopLeftPoint(new Point2D(tileUnderCursor.X, tileUnderCursor.Y), Map.Size.X) - cameraTopLeftPoint,
-                    this);
+                CursorAction.PostMapDraw(tileUnderCursor.CoordsToPoint(), this);
             }
+
+            // if (tileUnderCursor != null && CursorAction != null)
+            // {
+            //     Point2D cursorMapPoint = GetCursorMapPoint();
+            //     CursorAction.DrawPreview(
+            //         CellMath.CellTopLeftPoint(new Point2D(tileUnderCursor.X, tileUnderCursor.Y), Map.Size.X) - cameraTopLeftPoint,
+            //         this);
+            // }
 
             DrawCursorTile();
 

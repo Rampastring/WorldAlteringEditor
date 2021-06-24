@@ -15,13 +15,25 @@ namespace TSMapEditor.Rendering
     /// </summary>
     public class TileImage
     {
-        public TileImage(int tileSetId, int tileIndex, int tileId, MGTMPImage[] tmpImages)
+        public TileImage(int width, int height, int tileSetId, int tileIndex, int tileId, MGTMPImage[] tmpImages)
         {
+            Width = width;
+            Height = height;
             TileSetId = tileSetId;
             TileIndex = tileIndex;
             TileID = tileId;
             TMPImages = tmpImages;
         }
+
+        /// <summary>
+        /// Width of the tile in cells.
+        /// </summary>
+        public int Width { get; }
+
+        /// <summary>
+        /// Height of the tile in cells.
+        /// </summary>
+        public int Height { get; }
 
         /// <summary>
         /// The index of the tile set.
@@ -201,7 +213,7 @@ namespace TSMapEditor.Rendering
                         {
                             if (v == 0)
                             {
-                                tileGraphics.Add(new TileImage(tsId, i, currentTileIndex, new MGTMPImage[0]));
+                                tileGraphics.Add(new TileImage(0, 0, tsId, i, currentTileIndex, new MGTMPImage[0]));
                                 break;
                             }
                             else
@@ -218,7 +230,7 @@ namespace TSMapEditor.Rendering
                         {
                             tmpImages.Add(new MGTMPImage(graphicsDevice, tmpFile.GetImage(img), theaterPalette, tsId));
                         }
-                        tileGraphics.Add(new TileImage(tsId, i, currentTileIndex, tmpImages.ToArray()));
+                        tileGraphics.Add(new TileImage(tmpFile.CellsX, tmpFile.CellsY, tsId, i, currentTileIndex, tmpImages.ToArray()));
                     }
 
                     tileSet.LoadedTileCount++;

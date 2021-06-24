@@ -1,11 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Rampastring.XNAUI;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TSMapEditor.GameMath;
+using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 
 namespace TSMapEditor.UI.CursorActions
@@ -13,6 +10,44 @@ namespace TSMapEditor.UI.CursorActions
     class TerrainPlacementAction : CursorAction
     {
         public TileImage Tile { get; set; }
+
+        public override void PreMapDraw(Point2D cellCoordsOnCursor, ICursorActionTarget cursorActionTarget)
+        {
+            // Assign preview data
+            DoActionForCells(cellCoordsOnCursor, cursorActionTarget, t => t.PreviewTileImage = Tile);
+        }
+
+        public override void PostMapDraw(Point2D cellCoordsOnCursor, ICursorActionTarget cursorActionTarget)
+        {
+            // Clear preview data
+            DoActionForCells(cellCoordsOnCursor, cursorActionTarget, t => t.PreviewTileImage = null);
+        }
+
+        private void DoActionForCells(Point2D cellCoordsOnCursor, ICursorActionTarget cursorActionTarget, Action<MapTile> action)
+        {
+            if (Tile == null)
+                return;
+
+            for (int i = 0; i < Tile.TMPImages.Length; i++)
+            {
+                MGTMPImage image = Tile.TMPImages[i];
+
+                if (image.TmpImage == null)
+                    continue;
+
+                int cx = cellCoordsOnCursor.X + i % Tile.Width;
+                int cy = cellCoordsOnCursor.Y + i / Tile.Width;
+
+                var mapTile = cursorActionTarget.Map.GetTile(cx, cy);
+                if (mapTile != null)
+                {
+                    mapTile.PreviewSubTileIndex = i;
+                    action(mapTile);
+                }
+            }
+
+            cursorActionTarget.AddRefreshPoint(CellMath.CellTopLeftPoint(cellCoordsOnCursor, cursorActionTarget.Map.Size.X));
+        }
 
         public override void LeftDown(Point2D cellPoint, ICursorActionTarget cursorActionTarget)
         {
