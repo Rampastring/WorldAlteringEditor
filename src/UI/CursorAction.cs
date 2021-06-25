@@ -23,8 +23,8 @@ namespace TSMapEditor.UI
 
         public virtual void LeftDown(Point2D cellPoint, ICursorActionTarget cursorActionTarget) { }
 
-        public abstract void LeftClick(Point2D cellPoint, ICursorActionTarget cursorActionTarget);
+        public virtual void LeftClick(Point2D cellPoint, ICursorActionTarget cursorActionTarget) { }
 
-        public abstract void DrawPreview(Point2D cellTopLeftPoint, ICursorActionTarget cursorActionTarget);
+        public virtual void DrawPreview(Point2D cellTopLeftPoint, ICursorActionTarget cursorActionTarget) { }
     }
 }

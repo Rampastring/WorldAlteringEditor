@@ -422,6 +422,16 @@ namespace TSMapEditor.Rendering
             }
         }
 
+        public override void OnLeftClick()
+        {
+            base.OnLeftClick();
+
+            if (tileUnderCursor != null && CursorAction != null)
+            {
+                CursorAction.LeftClick(tileUnderCursor.CoordsToPoint(), this);
+            }
+        }
+
         public override void Update(GameTime gameTime)
         {
             // Make scroll rate independent of FPS
