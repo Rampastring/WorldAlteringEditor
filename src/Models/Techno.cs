@@ -15,6 +15,6 @@
         public House Owner { get; set; }
         public int HP { get; set; }
         public byte Facing { get; set; }
-        public string Tag { get; set; }
+        public Tag AttachedTag { get; set; }
     }
 }

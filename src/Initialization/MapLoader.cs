@@ -129,6 +129,21 @@ namespace TSMapEditor.Initialization
             }
         }
 
+        private static void FindAttachedTag(IMap map, TechnoBase techno, string attachedTagString)
+        {
+            if (attachedTagString != Constants.NoneValue)
+            {
+                Tag tag = map.Tags.Find(t => t.ID == attachedTagString);
+                if (tag == null)
+                {
+                    Logger.Log($"Unable to find tag {attachedTagString} attached to {techno.WhatAmI()}");
+                    return;
+                }
+
+                techno.AttachedTag = tag;
+            }
+        }
+
         public static void ReadBuildings(IMap map, IniFile mapIni)
         {
             IniSection section = mapIni.GetSection("Structures");
@@ -175,7 +190,6 @@ namespace TSMapEditor.Initialization
                     HP = health,
                     Position = new GameMath.Point2D(x, y),
                     Facing = (byte)facing,
-                    // TODO handle attached tag
                     AISellable = aiSellable,
                     Powered = powered,
                     // TODO handle upgrades
@@ -183,6 +197,8 @@ namespace TSMapEditor.Initialization
                     AIRepairable = aiRepairable,
                     Nominal = nominal
                 };
+
+                FindAttachedTag(map, building, attachedTag);
 
                 map.Structures.Add(building);
                 for (int foundationY = 0; foundationY < buildingType.ArtConfig.FoundationY; foundationY++)
@@ -245,12 +261,13 @@ namespace TSMapEditor.Initialization
                     Position = new Point2D(x, y),
                     Facing = (byte)facing,
                     // TODO Mission
-                    // TODO attached tag
                     Veterancy = veterancy,
                     Group = group,
                     AutocreateNoRecruitable = autocreateNoRecruitable,
                     AutocreateYesRecruitable = autocreateYesRecruitable
                 };
+
+                FindAttachedTag(map, aircraft, attachedTag);
 
                 map.Aircraft.Add(aircraft);
                 var tile = map.GetTile(x, y);
@@ -302,7 +319,6 @@ namespace TSMapEditor.Initialization
                     Position = new Point2D(x, y),
                     Facing = (byte)facing,
                     // TODO Mission
-                    // TODO attached tag
                     Veterancy = veterancy,
                     Group = group,
                     High = high,
@@ -310,6 +326,8 @@ namespace TSMapEditor.Initialization
                     AutocreateNoRecruitable = autocreateNoRecruitable,
                     AutocreateYesRecruitable = autocreateYesRecruitable
                 };
+
+                FindAttachedTag(map, unit, attachedTag);
 
                 map.Units.Add(unit);
                 var tile = map.GetTile(x, y);
@@ -367,6 +385,8 @@ namespace TSMapEditor.Initialization
                     AutocreateYesRecruitable = autocreateYesRecruitable,
                     SubCell = subCell
                 };
+
+                FindAttachedTag(map, infantry, attachedTag);
 
                 map.Infantry.Add(infantry);
                 var tile = map.GetTile(x, y);

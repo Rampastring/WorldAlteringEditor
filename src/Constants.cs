@@ -17,5 +17,7 @@
         public const int UIEmptyTopSpace = 10;
 
         public const int UIDefaultFont = 0;
+
+        public const string NoneValue = "<none>";
     }
 }
