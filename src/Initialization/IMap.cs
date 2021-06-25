@@ -22,6 +22,7 @@ namespace TSMapEditor.Initialization
         List<Waypoint> Waypoints { get; }
         List<Trigger> Triggers { get; }
         List<Tag> Tags { get; }
+        List<Script> Scripts { get; }
 
         Point2D Size { get; set; }
 
@@ -31,5 +32,6 @@ namespace TSMapEditor.Initialization
         void AddTaskForce(TaskForce taskForce);
         void AddTrigger(Trigger trigger);
         void AddTag(Tag tag);
+        void AddScript(Script script);
     }
 }

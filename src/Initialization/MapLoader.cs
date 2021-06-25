@@ -131,7 +131,7 @@ namespace TSMapEditor.Initialization
 
         private static void FindAttachedTag(IMap map, TechnoBase techno, string attachedTagString)
         {
-            if (attachedTagString != Constants.NoneValue)
+            if (attachedTagString != Constants.NoneValue1 && attachedTagString != Constants.NoneValue2)
             {
                 Tag tag = map.Tags.Find(t => t.ID == attachedTagString);
                 if (tag == null)
@@ -530,6 +530,21 @@ namespace TSMapEditor.Initialization
 
                 var tag = new Tag() { ID = kvp.Key, Repeating = repeating, Name = parts[1], Trigger = trigger };
                 map.AddTag(tag);
+            }
+        }
+
+        public static void ReadScripts(IMap map, IniFile mapIni)
+        {
+            var section = mapIni.GetSection("ScriptTypes");
+            if (section == null)
+                return;
+
+            foreach (var kvp in section.Keys)
+            {
+                var script = Script.ParseScript(kvp.Key, mapIni.GetSection(kvp.Value));
+
+                if (script != null)
+                    map.AddScript(script);
             }
         }
     }

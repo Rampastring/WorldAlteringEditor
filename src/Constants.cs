@@ -18,6 +18,7 @@
 
         public const int UIDefaultFont = 0;
 
-        public const string NoneValue = "<none>";
+        public const string NoneValue1 = "<none>";
+        public const string NoneValue2 = "None";
     }
 }
