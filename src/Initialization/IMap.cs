@@ -23,6 +23,8 @@ namespace TSMapEditor.Initialization
         List<Trigger> Triggers { get; }
         List<Tag> Tags { get; }
         List<Script> Scripts { get; }
+        List<TaskForce> TaskForces { get; }
+        List<TeamType> TeamTypes { get; }
 
         Point2D Size { get; set; }
 
@@ -33,5 +35,6 @@ namespace TSMapEditor.Initialization
         void AddTrigger(Trigger trigger);
         void AddTag(Tag tag);
         void AddScript(Script script);
+        void AddTeamType(TeamType teamType);
     }
 }

@@ -45,6 +45,7 @@ namespace TSMapEditor.Models
         public List<Trigger> Triggers { get; } = new List<Trigger>();
         public List<Tag> Tags { get; } = new List<Tag>();
         public List<Script> Scripts { get; } = new List<Script>();
+        public List<TeamType> TeamTypes { get; } = new List<TeamType>();
 
         public Point2D Size { get; set; }
 
@@ -76,6 +77,7 @@ namespace TSMapEditor.Models
             MapLoader.ReadTriggers(this, mapIni);
             MapLoader.ReadTags(this, mapIni);
             MapLoader.ReadScripts(this, mapIni);
+            MapLoader.ReadTeamTypes(this, mapIni);
 
             MapLoader.ReadBuildings(this, mapIni);
             MapLoader.ReadAircraft(this, mapIni);
@@ -164,6 +166,11 @@ namespace TSMapEditor.Models
         public void AddScript(Script script)
         {
             Scripts.Add(script);
+        }
+
+        public void AddTeamType(TeamType teamType)
+        {
+            TeamTypes.Add(teamType);
         }
 
         // public void StartNew(IniFile rulesIni, IniFile firestormIni, TheaterType theaterType, Point2D size)

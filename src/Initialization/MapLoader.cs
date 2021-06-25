@@ -547,5 +547,34 @@ namespace TSMapEditor.Initialization
                     map.AddScript(script);
             }
         }
+
+        public static void ReadTeamTypes(IMap map, IniFile mapIni)
+        {
+            var section = mapIni.GetSection("TeamTypes");
+            if (section == null)
+                return;
+
+            foreach (var kvp in section.Keys)
+            {
+                if (string.IsNullOrWhiteSpace(kvp.Key) || string.IsNullOrWhiteSpace(kvp.Value))
+                    continue;
+
+                var teamTypeSection = mapIni.GetSection(kvp.Value);
+                if (teamTypeSection == null)
+                    continue;
+
+                var teamType = new TeamType(kvp.Value);
+                teamType.ReadPropertiesFromIniSection(teamTypeSection);
+                string scriptId = teamTypeSection.GetStringValue("Script", string.Empty);
+                string taskForceId = teamTypeSection.GetStringValue("TaskForce", string.Empty);
+                string tagId = teamTypeSection.GetStringValue("Tag", string.Empty);
+
+                teamType.Script = map.Scripts.Find(s => s.ININame == scriptId);
+                teamType.TaskForce = map.TaskForces.Find(t => t.ININame == taskForceId);
+                teamType.Tag = map.Tags.Find(t => t.ID == tagId);
+
+                map.AddTeamType(teamType);
+            }
+        }
     }
 }

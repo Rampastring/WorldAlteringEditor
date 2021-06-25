@@ -1,6 +1,6 @@
 ﻿namespace TSMapEditor.Models
 {
-    public class TeamType
+    public class TeamType : AbstractObject
     {
         public TeamType(string iniName)
         {
@@ -16,13 +16,14 @@
         public House House { get; set; }
         public Script Script { get; set; }
         public TaskForce TaskForce { get; set; }
+        public Tag Tag { get; set; }
         public bool Whiner { get; set; }
         public bool Droppod { get; set; }
         public bool Suicide { get; set; }
         public bool Loadable { get; set; }
         public bool Prebuild { get; set; }
         public int Priority { get; set; }
-        public byte Waypoint { get; set; }
+        public int Waypoint { get; set; }
         public bool Annoyance { get; set; }
         public bool IonImmune { get; set; }
         public bool Recruiter { get; set; }
@@ -39,5 +40,10 @@
         public bool OnlyTargetHouseEnemy { get; set; }
         public bool TransportsReturnOnUnload { get; set; }
         public bool AreTeamMembersRecruitable { get; set; }
+
+        public override RTTIType WhatAmI()
+        {
+            return RTTIType.TeamType;
+        }
     }
 }
