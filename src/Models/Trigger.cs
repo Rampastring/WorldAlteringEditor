@@ -23,7 +23,7 @@ namespace TSMapEditor.Models
         /// <param name="id">The ID of the trigger.</param>
         /// <param name="data">The data line.</param>
         /// <returns>A Trigger instance if the parsing succeeds, otherwise null.</returns>
-        public static Trigger TryParse(string id, string data)
+        public static Trigger ParseTrigger(string id, string data)
         {
             // [Triggers]
             // ID=HOUSE,LINKED_TRIGGER,NAME,DISABLED,EASY,NORMAL,HARD,REPEATING

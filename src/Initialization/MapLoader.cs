@@ -433,7 +433,7 @@ namespace TSMapEditor.Initialization
 
             foreach (var kvp in waypointsSection.Keys)
             {
-                var waypoint = Waypoint.Read(kvp.Key, kvp.Value);
+                var waypoint = Waypoint.ParseWaypoint(kvp.Key, kvp.Value);
                 if (waypoint == null)
                     continue;
 
@@ -455,9 +455,61 @@ namespace TSMapEditor.Initialization
                 if (string.IsNullOrWhiteSpace(kvp.Value))
                     continue;
 
-                var taskForce = TaskForce.ReadTaskForce(map.Rules, mapIni.GetSection(kvp.Value));
+                var taskForce = TaskForce.ParseTaskForce(map.Rules, mapIni.GetSection(kvp.Value));
 
                 map.AddTaskForce(taskForce);
+            }
+        }
+
+        public static void ReadTriggers(IMap map, IniFile mapIni)
+        {
+            var section = mapIni.GetSection("Triggers");
+            if (section == null)
+                return;
+
+            foreach (var kvp in section.Keys)
+            {
+                if (string.IsNullOrWhiteSpace(kvp.Key) || string.IsNullOrWhiteSpace(kvp.Value))
+                    continue;
+
+                var trigger = Trigger.ParseTrigger(kvp.Key, kvp.Value);
+                if (trigger != null)
+                    map.AddTrigger(trigger);
+            }
+        }
+
+        public static void ReadTags(IMap map, IniFile mapIni)
+        {
+            var section = mapIni.GetSection("Tags");
+            if (section == null)
+                return;
+
+            // [Tags]
+            // ID=REPEATING,NAME,TRIGGER_ID
+
+            foreach (var kvp in section.Keys)
+            {
+                if (string.IsNullOrWhiteSpace(kvp.Key) || string.IsNullOrWhiteSpace(kvp.Value))
+                    continue;
+
+                string[] parts = kvp.Value.Split(',');
+                if (parts.Length != 3)
+                    continue;
+
+                int repeating = Conversions.IntFromString(parts[0], -1);
+                if (repeating < 0 || repeating > Tag.REPEAT_TYPE_MAX)
+                    continue;
+
+                string triggerId = parts[2];
+                Trigger trigger = map.Triggers.Find(t => t.ID == triggerId);
+                if (trigger == null)
+                {
+                    Logger.Log("Ignoring tag " + kvp.Key + " because its related trigger " + triggerId + " does not exist!");
+                    continue;
+                }
+
+                var tag = new Tag() { ID = kvp.Key, Repeating = repeating, Name = parts[1], Trigger = trigger };
+                map.AddTag(tag);
             }
         }
     }

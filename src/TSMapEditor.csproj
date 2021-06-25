@@ -117,6 +117,7 @@
     <Compile Include="Models\Enums\SpotlightType.cs" />
     <Compile Include="Models\Structure.cs" />
     <Compile Include="Models\SubCell.cs" />
+    <Compile Include="Models\Tag.cs" />
     <Compile Include="Models\TaskForce.cs" />
     <Compile Include="Models\TeamType.cs" />
     <Compile Include="Models\Techno.cs" />

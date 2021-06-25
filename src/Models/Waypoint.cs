@@ -10,7 +10,7 @@ namespace TSMapEditor.Models
         public int Identifier { get; set; }
         public Point2D Position { get; set; }
 
-        public static Waypoint Read(string id, string coordsString)
+        public static Waypoint ParseWaypoint(string id, string coordsString)
         {
             int waypointIndex = Conversions.IntFromString(id, -1);
 

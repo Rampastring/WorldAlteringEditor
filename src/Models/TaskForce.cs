@@ -55,12 +55,13 @@ namespace TSMapEditor.Models
 
         public int Group { get; set; } = -1;
 
-        public static TaskForce ReadTaskForce(Rules rules, IniSection taskforceSection)
+        public static TaskForce ParseTaskForce(Rules rules, IniSection taskforceSection)
         {
             if (taskforceSection == null)
                 return null;
 
             var taskForce = new TaskForce(taskforceSection.SectionName);
+            taskForce.Name = taskforceSection.GetStringValue(nameof(Name), string.Empty);
             taskForce.Group = taskforceSection.GetIntValue(nameof(Group), taskForce.Group);
 
             for (int i = 0; i < MaxTechnoCount; i++)

@@ -42,6 +42,8 @@ namespace TSMapEditor.Models
         public List<Waypoint> Waypoints { get; } = new List<Waypoint>();
 
         public List<TaskForce> TaskForces { get; } = new List<TaskForce>();
+        public List<Trigger> Triggers { get; } = new List<Trigger>();
+        public List<Tag> Tags { get; } = new List<Tag>();
 
         public Point2D Size { get; set; }
 
@@ -65,14 +67,18 @@ namespace TSMapEditor.Models
             Rules.InitFromINI(mapIni, initializer);
             MapLoader.ReadMapSection(this, mapIni);
             MapLoader.ReadIsoMapPack(this, mapIni);
+            MapLoader.ReadOverlays(this, mapIni);
             MapLoader.ReadTerrainObjects(this, mapIni);
+
+            MapLoader.ReadWaypoints(this, mapIni);
+            MapLoader.ReadTaskForces(this, mapIni);
+            MapLoader.ReadTriggers(this, mapIni);
+            MapLoader.ReadTags(this, mapIni);
+
             MapLoader.ReadBuildings(this, mapIni);
             MapLoader.ReadAircraft(this, mapIni);
             MapLoader.ReadUnits(this, mapIni);
             MapLoader.ReadInfantry(this, mapIni);
-            MapLoader.ReadOverlays(this, mapIni);
-            MapLoader.ReadWaypoints(this, mapIni);
-            MapLoader.ReadTaskForces(this, mapIni);
         }
 
         /// <summary>
@@ -141,6 +147,16 @@ namespace TSMapEditor.Models
         public void AddTaskForce(TaskForce taskForce)
         {
             TaskForces.Add(taskForce);
+        }
+
+        public void AddTrigger(Trigger trigger)
+        {
+            Triggers.Add(trigger);
+        }
+
+        public void AddTag(Tag tag)
+        {
+            Tags.Add(tag);
         }
 
         // public void StartNew(IniFile rulesIni, IniFile firestormIni, TheaterType theaterType, Point2D size)

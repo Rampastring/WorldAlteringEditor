@@ -1,0 +1,15 @@
+﻿namespace TSMapEditor.Models
+{
+    /// <summary>
+    /// A trigger tag. Tags are responsible for activating map triggers.
+    /// </summary>
+    public class Tag
+    {
+        public const int REPEAT_TYPE_MAX = 2;
+
+        public string ID { get; set; }
+        public int Repeating { get; set; }
+        public string Name { get; set; }
+        public Trigger Trigger { get; set; }
+    }
+}

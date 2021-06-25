@@ -18,11 +18,18 @@ namespace TSMapEditor.Initialization
         List<Structure> Structures { get; }
         List<TerrainObject> TerrainObjects { get; }
         List<Unit> Units { get; }
+
         List<Waypoint> Waypoints { get; }
+        List<Trigger> Triggers { get; }
+        List<Tag> Tags { get; }
+
         Point2D Size { get; set; }
+
         void SetTileData(List<MapTile> tiles);
         House FindOrMakeHouse(string houseName);
         void AddWaypoint(Waypoint waypoint);
         void AddTaskForce(TaskForce taskForce);
+        void AddTrigger(Trigger trigger);
+        void AddTag(Tag tag);
     }
 }
