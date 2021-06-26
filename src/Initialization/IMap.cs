@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Rampastring.Tools;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
@@ -7,6 +8,8 @@ namespace TSMapEditor.Initialization
 {
     public interface IMap
     {
+        BasicSection Basic { get; }
+
         MapTile[][] Tiles { get; }
         MapTile GetTile(int x, int y);
         List<House> StandardHouses { get; }
@@ -27,6 +30,8 @@ namespace TSMapEditor.Initialization
         List<TeamType> TeamTypes { get; }
 
         Point2D Size { get; set; }
+        Rectangle LocalSize { get; set; }
+        string Theater { get; set; }
 
         void SetTileData(List<MapTile> tiles);
         House FindOrMakeHouse(string houseName);

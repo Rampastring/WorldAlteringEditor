@@ -99,6 +99,15 @@ namespace TSMapEditor.Initialization
             map.SetTileData(tiles);
         }
 
+        public static void ReadBasicSection(IMap map, IniFile mapIni)
+        {
+            var section = mapIni.GetSection("Basic");
+            if (section == null)
+                return;
+
+            map.Basic.ReadPropertiesFromIniSection(section);
+        }
+
         public static void ReadTerrainObjects(IMap map, IniFile mapIni)
         {
             IniSection section = mapIni.GetSection("Terrain");

@@ -1,4 +1,5 @@
-﻿using Rampastring.Tools;
+﻿using Microsoft.Xna.Framework;
+using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
 using TSMapEditor.GameMath;
@@ -11,6 +12,8 @@ namespace TSMapEditor.Models
         public IniFile LoadedINI { get; set; }
 
         public Rules Rules { get; private set; }
+
+        public BasicSection Basic { get; private set; } = new BasicSection();
 
         public MapTile[][] Tiles { get; private set; } = new MapTile[600][]; // for now
         public MapTile GetTile(int x, int y)
@@ -48,6 +51,8 @@ namespace TSMapEditor.Models
         public List<TeamType> TeamTypes { get; } = new List<TeamType>();
 
         public Point2D Size { get; set; }
+        public Rectangle LocalSize { get; set; }
+        public string Theater { get; set; }
 
         private readonly Initializer initializer;
 
@@ -61,12 +66,21 @@ namespace TSMapEditor.Models
             initializer = new Initializer(this);
         }
 
+        public void InitNew(IniFile rulesIni, IniFile firestormIni, IniFile artIni, IniFile artFirestormIni)
+        {
+            Initialize(rulesIni, firestormIni, artIni, artFirestormIni);
+            LoadedINI = new IniFile();
+            Rules.InitFromINI(LoadedINI, initializer);
+        }
+
         public void LoadExisting(IniFile rulesIni, IniFile firestormIni, IniFile artIni, IniFile artFirestormIni, IniFile mapIni)
         {
             Initialize(rulesIni, firestormIni, artIni, artFirestormIni);
 
             LoadedINI = mapIni ?? throw new ArgumentNullException(nameof(mapIni));
             Rules.InitFromINI(mapIni, initializer);
+
+            MapLoader.ReadBasicSection(this, mapIni);
             MapLoader.ReadMapSection(this, mapIni);
             MapLoader.ReadIsoMapPack(this, mapIni);
             MapLoader.ReadOverlays(this, mapIni);
@@ -83,6 +97,12 @@ namespace TSMapEditor.Models
             MapLoader.ReadAircraft(this, mapIni);
             MapLoader.ReadUnits(this, mapIni);
             MapLoader.ReadInfantry(this, mapIni);
+        }
+
+        public void Write(string path)
+        {
+            MapWriter.WriteMapSection(this, LoadedINI);
+            MapWriter.WriteBasicSection(this, LoadedINI);
         }
 
         /// <summary>
