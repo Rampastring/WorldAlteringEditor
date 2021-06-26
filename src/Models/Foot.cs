@@ -12,7 +12,7 @@
         public Foot(T objectType) : base(objectType) { }
 
 
-        public Mission Mission { get; set; }
+        public string Mission { get; set; }
         public bool High { get; set; }
         public int Veterancy { get; set; }
         public int Group { get; set; } = -1;

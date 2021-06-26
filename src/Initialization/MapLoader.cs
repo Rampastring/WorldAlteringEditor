@@ -220,7 +220,8 @@ namespace TSMapEditor.Initialization
                     // TODO handle upgrades
                     Spotlight = (SpotlightType)spotlight,
                     AIRepairable = aiRepairable,
-                    Nominal = nominal
+                    Nominal = nominal,
+                    Owner = map.FindOrMakeHouse(ownerName)
                 };
 
                 FindAttachedTag(map, building, attachedTag);
@@ -285,11 +286,12 @@ namespace TSMapEditor.Initialization
                     HP = health,
                     Position = new Point2D(x, y),
                     Facing = (byte)facing,
-                    // TODO Mission
+                    Mission = mission,
                     Veterancy = veterancy,
                     Group = group,
                     AutocreateNoRecruitable = autocreateNoRecruitable,
-                    AutocreateYesRecruitable = autocreateYesRecruitable
+                    AutocreateYesRecruitable = autocreateYesRecruitable,
+                    Owner = map.FindOrMakeHouse(ownerName)
                 };
 
                 FindAttachedTag(map, aircraft, attachedTag);
@@ -343,13 +345,14 @@ namespace TSMapEditor.Initialization
                     HP = health,
                     Position = new Point2D(x, y),
                     Facing = (byte)facing,
-                    // TODO Mission
+                    Mission = mission,
                     Veterancy = veterancy,
                     Group = group,
                     High = high,
                     FollowsID = followsIndex,
                     AutocreateNoRecruitable = autocreateNoRecruitable,
-                    AutocreateYesRecruitable = autocreateYesRecruitable
+                    AutocreateYesRecruitable = autocreateYesRecruitable,
+                    Owner = map.FindOrMakeHouse(ownerName)
                 };
 
                 FindAttachedTag(map, unit, attachedTag);
@@ -408,7 +411,9 @@ namespace TSMapEditor.Initialization
                     High = high,
                     AutocreateNoRecruitable = autocreateNoRecruitable,
                     AutocreateYesRecruitable = autocreateYesRecruitable,
-                    SubCell = subCell
+                    SubCell = subCell,
+                    Mission = mission,
+                    Owner = map.FindOrMakeHouse(ownerName)
                 };
 
                 FindAttachedTag(map, infantry, attachedTag);
