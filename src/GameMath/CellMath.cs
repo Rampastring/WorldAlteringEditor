@@ -7,8 +7,8 @@
     {
         public static Point2D CellTopLeftPoint(Point2D cellCoords, int mapWidth)
         {
-            int cx = cellCoords.X * (Constants.CellSizeX / 2);
-            int cy = cellCoords.X * (Constants.CellSizeY / 2);
+            int cx = (cellCoords.X - 1) * (Constants.CellSizeX / 2);
+            int cy = (cellCoords.X - 1) * (Constants.CellSizeY / 2);
 
             int diff = mapWidth - cellCoords.Y;
             cx += diff * (Constants.CellSizeX / 2);
@@ -43,7 +43,7 @@
             else if (rx < (ry - Constants.CellSizeY / 2) * 2)
                 cy++;
 
-            return new Point2D(cx, cy);
+            return new Point2D(cx + 1, cy);
         }
     }
 }

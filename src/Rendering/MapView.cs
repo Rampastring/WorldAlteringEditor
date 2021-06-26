@@ -72,7 +72,7 @@ namespace TSMapEditor.Rendering
         {
            return new RenderTarget2D(GraphicsDevice,
                Map.Size.X * Constants.CellSizeX,
-               Map.Size.Y * Constants.CellSizeY, false, SurfaceFormat.Color,
+               Map.Size.Y * Constants.CellSizeY + Constants.CellSizeY / 2, false, SurfaceFormat.Color,
                DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
         }
 
@@ -93,7 +93,7 @@ namespace TSMapEditor.Rendering
                     Point2D drawPoint = CellMath.CellTopLeftPoint(new Point2D(i, j), Map.Size.X);
                     if (row[j] == null)
                     {
-                        DrawString("n", 0, drawPoint.ToXNAVector(), Color.Red, 0.5f);
+                        DrawString("n", 0, drawPoint.ToXNAVector() + new Vector2(Constants.CellSizeX / 2, Constants.CellSizeY / 2), Color.Red, 0.5f);
                         continue;
                     }
 
@@ -414,8 +414,8 @@ namespace TSMapEditor.Rendering
         private void DrawMapBorder()
         {
             // TODO this algorithm seems correct for the x-axis, but it's wrong for the y-axis
-            int x = Map.LocalSize.X * Constants.CellSizeX + Constants.CellSizeX / 2;
-            int y = (Map.LocalSize.Y - 1) * (Constants.CellSizeY * 3) / 4;
+            int x = Map.LocalSize.X * Constants.CellSizeX;
+            int y = Map.LocalSize.Y * (Constants.CellSizeY * 3) / 4;
             int width = Map.LocalSize.Width * Constants.CellSizeX;
             int bottom = (Map.Size.Y - (Map.Size.Y - Map.LocalSize.Y - Map.LocalSize.Height)) * Constants.CellSizeY;
             int height = bottom - y;
