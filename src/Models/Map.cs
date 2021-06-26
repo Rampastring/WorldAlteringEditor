@@ -109,6 +109,7 @@ namespace TSMapEditor.Models
             MapWriter.WriteIsoMapPack5(this, LoadedINI);
 
             MapWriter.WriteOverlays(this, LoadedINI);
+            MapWriter.WriteTerrainObjects(this, LoadedINI);
 
             MapWriter.WriteAircraft(this, LoadedINI);
             MapWriter.WriteUnits(this, LoadedINI);

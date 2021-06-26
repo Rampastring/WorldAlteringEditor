@@ -9,7 +9,7 @@ using TSMapEditor.Models.MapFormat;
 namespace TSMapEditor.Initialization
 {
     /// <summary>
-    /// Contains static methods for writing a map to a INI file.
+    /// Contains static methods for writing a map to an INI file.
     /// </summary>
     public static class MapWriter
     {
@@ -177,6 +177,24 @@ namespace TSMapEditor.Initialization
             var overlayDataPackSection = new IniSection(overlayDataPackSectionName);
             mapIni.AddSection(overlayDataPackSection);
             WriteBase64ToSection(compressedOverlayDataArray, overlayDataPackSection);
+        }
+
+        public static void WriteTerrainObjects(IMap map, IniFile mapIni)
+        {
+            const string sectionName = "Terrain";
+            mapIni.RemoveSection(sectionName);
+
+            var section = new IniSection(sectionName);
+            mapIni.AddSection(section);
+
+            map.DoForAllValidTiles(tile =>
+            {
+                if (tile.TerrainObject == null)
+                    return;
+
+                int tileIndex = tile.Y * 1000 + tile.X;
+                section.SetStringValue(tileIndex.ToString(), tile.TerrainObject.TerrainType.ININame);
+            });
         }
 
         private static string GetAttachedTagName(TechnoBase techno)
