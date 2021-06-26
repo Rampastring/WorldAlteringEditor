@@ -105,6 +105,7 @@ namespace TSMapEditor.Rendering
 
             DrawObjects();
             DrawWaypoints();
+            DrawMapBorder();
 
             Renderer.PopRenderTarget();
 
@@ -230,6 +231,7 @@ namespace TSMapEditor.Rendering
             {
                 DrawWaypoint(w);
             });
+            DrawMapBorder();
             Renderer.PopRenderTarget();
         }
 
@@ -407,6 +409,18 @@ namespace TSMapEditor.Rendering
                 Constants.UIDefaultFont, 
                 new Vector2(rect.X + textOffset, rect.Y),
                 waypointColor);
+        }
+
+        private void DrawMapBorder()
+        {
+            // TODO this algorithm seems correct for the x-axis, but it's wrong for the y-axis
+            int x = Map.LocalSize.X * Constants.CellSizeX + Constants.CellSizeX / 2;
+            int y = (Map.LocalSize.Y - 1) * (Constants.CellSizeY * 3) / 4;
+            int width = Map.LocalSize.Width * Constants.CellSizeX;
+            int bottom = (Map.Size.Y - (Map.Size.Y - Map.LocalSize.Y - Map.LocalSize.Height)) * Constants.CellSizeY;
+            int height = bottom - y;
+
+            DrawRectangle(new Rectangle(x, y, width, height), Color.Blue, 4);
         }
 
         public override void OnMouseMove()
