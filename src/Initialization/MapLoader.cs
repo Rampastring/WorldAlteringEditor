@@ -169,6 +169,15 @@ namespace TSMapEditor.Initialization
             }
         }
 
+        private static BuildingType FindUpgrade(string upgradeBuildingId, IMap map)
+        {
+            if (upgradeBuildingId.Equals(Constants.NoneValue1, StringComparison.InvariantCultureIgnoreCase) ||
+                upgradeBuildingId.Equals(Constants.NoneValue2, StringComparison.InvariantCultureIgnoreCase))
+                return null;
+
+            return map.Rules.BuildingTypes.Find(b => b.ININame == upgradeBuildingId);
+        }
+
         public static void ReadBuildings(IMap map, IniFile mapIni)
         {
             IniSection section = mapIni.GetSection("Structures");
@@ -196,9 +205,7 @@ namespace TSMapEditor.Initialization
                 bool powered = Conversions.BooleanFromString(values[9], true);
                 int upgradeCount = Conversions.IntFromString(values[10], 0);
                 int spotlight = Conversions.IntFromString(values[11], 0);
-                string upgrade1 = values[12];
-                string upgrade2 = values[13];
-                string upgrade3 = values[14];
+                string[] upgradeIds = new string[] { values[12], values[13], values[14] };
                 bool aiRepairable = Conversions.BooleanFromString(values[15], false);
                 bool nominal = Conversions.BooleanFromString(values[16], false);
 
@@ -223,6 +230,11 @@ namespace TSMapEditor.Initialization
                     Nominal = nominal,
                     Owner = map.FindOrMakeHouse(ownerName)
                 };
+
+                for (int i = 0; i < upgradeCount && i < buildingType.Upgrades && i < Structure.MaxUpgradeCount; i++)
+                {
+                    building.Upgrades[i] = FindUpgrade(upgradeIds[i], map);
+                }
 
                 FindAttachedTag(map, building, attachedTag);
 

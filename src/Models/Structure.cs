@@ -20,10 +20,26 @@
         /// </summary>
         public bool AIRebuildable { get; set; }
         public bool Powered { get; set; }
-        public int UpgradeCount { get; set; }
+        
         public SpotlightType Spotlight { get; set; }
         public int[] UpgradeIds { get; private set; } = new int[MaxUpgradeCount];
-        public Structure[] Upgrades { get; private set; } = new Structure[MaxUpgradeCount];
+        public BuildingType[] Upgrades { get; private set; } = new BuildingType[MaxUpgradeCount];
+        public int UpgradeCount
+        {
+            get
+            {
+                int upgradeCount = 0;
+
+                for (int i = 0; i < MaxUpgradeCount; i++)
+                {
+                    if (Upgrades[i] != null)
+                        upgradeCount++;
+                }
+
+                return upgradeCount;
+            }
+        }
+
         public bool AIRepairable { get; set; }
         public bool Nominal { get; set; }
 

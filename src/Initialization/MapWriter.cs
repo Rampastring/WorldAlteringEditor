@@ -221,5 +221,46 @@ namespace TSMapEditor.Initialization
                 section.SetStringValue(i.ToString(), value);
             }
         }
+
+        private static string UpgradeToString(BuildingType upgrade)
+        {
+            if (upgrade == null)
+                return Constants.NoneValue2;
+
+            return upgrade.ININame;
+        }
+
+        public static void WriteBuildings(IMap map, IniFile mapIni)
+        {
+            const string sectionName = "Structures";
+
+            mapIni.RemoveSection(sectionName);
+            if (map.Structures.Count == 0)
+                return;
+
+            var section = new IniSection(sectionName);
+            mapIni.AddSection(section);
+
+            for (int i = 0; i < map.Structures.Count; i++)
+            {
+                var structure = map.Structures[i];
+
+                // INDEX=OWNER,ID,HEALTH,X,Y,FACING,TAG,AI_SELLABLE,AI_REBUILDABLE,POWERED_ON,UPGRADES,SPOTLIGHT,UPGRADE_1,UPGRADE_2,UPGRADE_3,AI_REPAIRABLE,NOMINAL
+
+                string attachedTag = GetAttachedTagName(structure);
+                string upgrade1 = UpgradeToString(structure.Upgrades[0]);
+                string upgrade2 = UpgradeToString(structure.Upgrades[1]);
+                string upgrade3 = UpgradeToString(structure.Upgrades[2]);
+
+                string value = $"{structure.Owner.ININame},{structure.ObjectType.ININame},{structure.HP}," +
+                               $"{structure.Position.X},{structure.Position.Y}," +
+                               $"{structure.Facing},{attachedTag},{structure.AISellable}," +
+                               $"{structure.AIRebuildable},{structure.Powered}," +
+                               $"{structure.UpgradeCount},{((int)structure.Spotlight)}," + 
+                               $"{upgrade1},{upgrade2},{upgrade3},{structure.AIRepairable},{structure.Nominal}";
+
+                section.SetStringValue(i.ToString(), value);
+            }
+        }
     }
 }
