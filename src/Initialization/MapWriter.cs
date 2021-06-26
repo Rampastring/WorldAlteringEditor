@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TSMapEditor.Models;
 using TSMapEditor.Models.MapFormat;
 
 namespace TSMapEditor.Initialization
@@ -126,6 +127,33 @@ namespace TSMapEditor.Initialization
                 section.SetStringValue(lineIndex.ToString(), substring);
                 lineIndex++;
                 processedChars += length;
+            }
+        }
+
+        public static void WriteAircraft(IMap map, IniFile mapIni)
+        {
+            const string sectionName = "Aircraft";
+
+            mapIni.RemoveSection(sectionName);
+            if (map.Aircraft.Count == 0)
+                return;
+
+            var section = new IniSection(sectionName);
+            mapIni.AddSection(section);
+
+            for (int i = 0; i < map.Aircraft.Count; i++)
+            {
+                var aircraft = map.Aircraft[i];
+
+                // INDEX = OWNER,ID,HEALTH,X,Y,FACING,MISSION,TAG,VETERANCY,GROUP,AUTOCREATE_NO_RECRUITABLE,AUTOCREATE_YES_RECRUITABLE
+
+                string attachedTag = aircraft.AttachedTag == null ? Constants.NoneValue2 : aircraft.AttachedTag.ID;
+                string value = $"{aircraft.Owner.ININame},{aircraft.ObjectType.ININame},{aircraft.HP}," +
+                               $"{aircraft.Position.X},{aircraft.Position.Y},{aircraft.Facing}," +
+                               $"{aircraft.Mission},{attachedTag},{aircraft.Veterancy}," +
+                               $"{aircraft.AutocreateNoRecruitable},{aircraft.AutocreateYesRecruitable}";
+
+                section.SetStringValue(i.ToString(), value);
             }
         }
     }

@@ -107,6 +107,8 @@ namespace TSMapEditor.Models
             MapWriter.WriteBasicSection(this, LoadedINI);
             MapWriter.WriteIsoMapPack5(this, LoadedINI);
 
+            MapWriter.WriteAircraft(this, LoadedINI);
+
             LoadedINI.WriteIniFile(LoadedINI.FileName.Substring(0, LoadedINI.FileName.Length - 4) + "_test.map");
         }
 
