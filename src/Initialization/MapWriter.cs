@@ -215,6 +215,31 @@ namespace TSMapEditor.Initialization
             }
         }
 
+        public static void WriteTaskForces(IMap map, IniFile mapIni)
+        {
+            const string sectionName = "TaskForces";
+            mapIni.RemoveSection(sectionName);
+
+            if (map.TaskForces.Count == 0)
+                return;
+
+            var taskForcesSection = new IniSection(sectionName);
+            mapIni.AddSection(taskForcesSection);
+
+            for (int i = 0; i < map.TaskForces.Count; i++)
+            {
+                TaskForce taskForce = map.TaskForces[i];
+
+                taskForcesSection.SetStringValue(i.ToString(), taskForce.ININame);
+
+                mapIni.RemoveSection(taskForce.ININame);
+
+                var taskForceSection = new IniSection(taskForce.ININame);
+                mapIni.AddSection(taskForceSection);
+                taskForce.Write(taskForceSection);
+            }
+        }
+
         private static string GetAttachedTagName(TechnoBase techno)
         {
             return techno.AttachedTag == null ? Constants.NoneValue2 : techno.AttachedTag.ID;

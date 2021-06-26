@@ -2,6 +2,9 @@
 
 namespace TSMapEditor.Models
 {
+    /// <summary>
+    /// A single unit entry in a TaskForce. Contains information on the unit and its quantity.
+    /// </summary>
     public class TaskForceTechnoEntry
     {
         public TechnoType TechnoType { get; set; }
@@ -38,6 +41,9 @@ namespace TSMapEditor.Models
         }
     }
 
+    /// <summary>
+    /// A taskforce. A group of unit types that can be used in team types.
+    /// </summary>
     public class TaskForce
     {
         public const int MaxTechnoCount = 6;
@@ -54,6 +60,20 @@ namespace TSMapEditor.Models
         public TaskForceTechnoEntry[] TechnoTypes = new TaskForceTechnoEntry[MaxTechnoCount];
 
         public int Group { get; set; } = -1;
+
+        public void Write(IniSection section)
+        {
+            for (int i = 0; i < TechnoTypes.Length; i++)
+            {
+                if (TechnoTypes[i] == null)
+                    continue;
+
+                section.SetStringValue(i.ToString(), $"{TechnoTypes[i].Count},{TechnoTypes[i].TechnoType.ININame}");
+            }
+
+            section.SetStringValue(nameof(Name), Name);
+            section.SetIntValue(nameof(Group), Group);
+        }
 
         public static TaskForce ParseTaskForce(Rules rules, IniSection taskforceSection)
         {

@@ -112,6 +112,7 @@ namespace TSMapEditor.Models
             MapWriter.WriteTerrainObjects(this, LoadedINI);
 
             MapWriter.WriteWaypoints(this, LoadedINI);
+            MapWriter.WriteTaskForces(this, LoadedINI);
 
             MapWriter.WriteAircraft(this, LoadedINI);
             MapWriter.WriteUnits(this, LoadedINI);
