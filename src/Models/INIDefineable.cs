@@ -104,6 +104,8 @@ namespace TSMapEditor.Models
 
                 if (propertyType.Equals(typeof(int)))
                     iniSection.SetIntValue(property.Name, (int)getter.Invoke(this, null));
+                else if (propertyType.Equals(typeof(byte)))
+                    iniSection.SetIntValue(property.Name, (int)getter.Invoke(this, null));
                 else if (propertyType.Equals(typeof(double)))
                     iniSection.SetDoubleValue(property.Name, (double)getter.Invoke(this, null));
                 else if (propertyType.Equals(typeof(float)))
@@ -111,9 +113,12 @@ namespace TSMapEditor.Models
                 else if (propertyType.Equals(typeof(bool)))
                     iniSection.SetBooleanValue(property.Name, (bool)getter.Invoke(this, null), BooleanStringStyle);
                 else if (propertyType.Equals(typeof(string)))
-                    iniSection.SetStringValue(property.Name, (string)getter.Invoke(this, null));
-                else if (propertyType.Equals(typeof(byte)))
-                    iniSection.SetIntValue(property.Name, (int)getter.Invoke(this, null));
+                {
+                    string value = (string)getter.Invoke(this, null);
+
+                    if (value != null)
+                        iniSection.SetStringValue(property.Name, value);
+                }
             }
         }
     }

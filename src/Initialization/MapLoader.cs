@@ -1,4 +1,5 @@
 ﻿using CNCMaps.FileFormats.Encodings;
+using Microsoft.Xna.Framework;
 using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
@@ -39,7 +40,22 @@ namespace TSMapEditor.Initialization
 
             int width = int.Parse(parts[2]);
             int height = int.Parse(parts[3]);
-            map.Size = new GameMath.Point2D(width, height);
+            map.Size = new Point2D(width, height);
+
+            string localSize = section.GetStringValue("LocalSize", null);
+            if (localSize == null)
+                throw new MapLoadException("Invalid [Map] LocalSize=");
+            parts = localSize.Split(',');
+            if (parts.Length != 4)
+                throw new MapLoadException("Invalid [Map] LocalSize=");
+
+            map.LocalSize = new Rectangle(
+                Conversions.IntFromString(parts[0], 0),
+                Conversions.IntFromString(parts[1], 0),
+                Conversions.IntFromString(parts[2], width),
+                Conversions.IntFromString(parts[3], height));
+
+            map.Theater = section.GetStringValue("Theater", string.Empty);
         }
 
         public static void ReadIsoMapPack(IMap map, IniFile mapIni)
