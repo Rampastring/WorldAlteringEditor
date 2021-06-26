@@ -156,5 +156,35 @@ namespace TSMapEditor.Initialization
                 section.SetStringValue(i.ToString(), value);
             }
         }
+
+        public static void WriteUnits(IMap map, IniFile mapIni)
+        {
+            const string sectionName = "Units";
+
+            mapIni.RemoveSection(sectionName);
+            if (map.Units.Count == 0)
+                return;
+
+            var section = new IniSection(sectionName);
+            mapIni.AddSection(section);
+
+            for (int i = 0; i < map.Units.Count; i++)
+            {
+                var unit = map.Units[i];
+
+                // INDEX=OWNER,ID,HEALTH,X,Y,FACING,MISSION,TAG,VETERANCY,GROUP,HIGH,FOLLOWS_INDEX,AUTOCREATE_NO_RECRUITABLE,AUTOCREATE_YES_RECRUITABLE
+
+                string attachedTag = unit.AttachedTag == null ? Constants.NoneValue2 : unit.AttachedTag.ID;
+                string followsIndex = unit.FollowedUnit == null ? "-1" : map.Units.FindIndex(otherUnit => otherUnit == unit.FollowedUnit).ToString();
+
+                string value = $"{unit.Owner.ININame},{unit.ObjectType.ININame},{unit.HP}," +
+                               $"{unit.Position.X},{unit.Position.Y},{unit.Facing}," +
+                               $"{unit.Mission},{attachedTag},{unit.Veterancy}," +
+                               $"{unit.Group},{unit.High},{followsIndex}," +
+                               $"{unit.AutocreateNoRecruitable},{unit.AutocreateYesRecruitable}";
+
+                section.SetStringValue(i.ToString(), value);
+            }
+        }
     }
 }
