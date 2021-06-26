@@ -1,4 +1,5 @@
-﻿using Rampastring.Tools;
+﻿using CNCMaps.FileFormats.Encodings;
+using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -111,13 +112,22 @@ namespace TSMapEditor.Initialization
             }
 
             // Base64 encode
-            string base64String = Convert.ToBase64String(finalData.ToArray());
-            const int maxIsoMapPackEntryLineLength = 70;
-            int lineIndex = 1; // TS/RA2 IsoMapPack5 is indexed starting from 1
-            int processedChars = 0;
-
             var section = new IniSection(sectionName);
             mapIni.AddSection(section);
+            WriteBase64ToSection(finalData.ToArray(), section);
+        }
+
+        /// <summary>
+        /// Generic method for writing a byte array as a 
+        /// base64-encoded line-length-limited block of data to a INI section.
+        /// Used for writing IsoMapPack5, OverlayPack and OverlayDataPack.
+        /// </summary>
+        private static void WriteBase64ToSection(byte[] data, IniSection section)
+        {
+            string base64String = Convert.ToBase64String(data.ToArray());
+            const int maxIsoMapPackEntryLineLength = 70;
+            int lineIndex = 1; // TS/RA2 IsoMapPack5, OverlayPack and OverlayDataPack is indexed starting from 1
+            int processedChars = 0;
 
             while (processedChars < base64String.Length)
             {
@@ -128,6 +138,45 @@ namespace TSMapEditor.Initialization
                 lineIndex++;
                 processedChars += length;
             }
+        }
+
+        public static void WriteOverlays(IMap map, IniFile mapIni)
+        {
+            const string overlayPackSectionName = "OverlayPack";
+            const string overlayDataPackSectionName = "OverlayDataPack";
+
+            mapIni.RemoveSection(overlayPackSectionName);
+            mapIni.RemoveSection(overlayDataPackSectionName);
+
+            var overlayArray = new byte[Constants.MAX_MAP_LENGTH_IN_DIMENSION * Constants.MAX_MAP_LENGTH_IN_DIMENSION];
+            for (int i = 0; i < overlayArray.Length; i++)
+                overlayArray[i] = Constants.NO_OVERLAY;
+
+            var overlayDataArray = new byte[Constants.MAX_MAP_LENGTH_IN_DIMENSION * Constants.MAX_MAP_LENGTH_IN_DIMENSION];
+
+            map.DoForAllValidTiles(tile =>
+            {
+                if (tile.Overlay == null)
+                    return;
+
+                int dataIndex = (tile.Y * Constants.MAX_MAP_LENGTH_IN_DIMENSION) + tile.X;
+
+                overlayArray[dataIndex] = (byte)tile.Overlay.OverlayType.Index;
+                overlayDataArray[dataIndex] = (byte)tile.Overlay.FrameIndex;
+            });
+
+            // Format80 compression
+            byte[] compressedOverlayArray = Format5.Encode(overlayArray, Constants.OverlayPackFormat);
+            byte[] compressedOverlayDataArray = Format5.Encode(overlayDataArray, Constants.OverlayPackFormat);
+
+            // Base64 encode
+            var overlayPackSection = new IniSection(overlayPackSectionName);
+            mapIni.AddSection(overlayPackSection);
+            WriteBase64ToSection(compressedOverlayArray, overlayPackSection);
+
+            var overlayDataPackSection = new IniSection(overlayDataPackSectionName);
+            mapIni.AddSection(overlayDataPackSection);
+            WriteBase64ToSection(compressedOverlayDataArray, overlayDataPackSection);
         }
 
         private static string GetAttachedTagName(TechnoBase techno)

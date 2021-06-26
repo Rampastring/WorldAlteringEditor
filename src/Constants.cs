@@ -18,6 +18,10 @@
 
         public const int UIDefaultFont = 0;
 
+        public const int MAX_MAP_LENGTH_IN_DIMENSION = 512;
+        public const int NO_OVERLAY = 255; // 0xFF
+        public const int OverlayPackFormat = 80;
+
         public const string NoneValue1 = "<none>";
         public const string NoneValue2 = "None";
     }

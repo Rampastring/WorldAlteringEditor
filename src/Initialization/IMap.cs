@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Rampastring.Tools;
 using TSMapEditor.GameMath;
@@ -41,6 +42,8 @@ namespace TSMapEditor.Initialization
         void AddTag(Tag tag);
         void AddScript(Script script);
         void AddTeamType(TeamType teamType);
+
+        void DoForAllValidTiles(Action<MapTile> action);
 
         void Write(string path);
     }

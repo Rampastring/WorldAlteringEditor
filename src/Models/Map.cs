@@ -85,6 +85,7 @@ namespace TSMapEditor.Models
             MapLoader.ReadBasicSection(this, mapIni);
             MapLoader.ReadMapSection(this, mapIni);
             MapLoader.ReadIsoMapPack(this, mapIni);
+
             MapLoader.ReadOverlays(this, mapIni);
             MapLoader.ReadTerrainObjects(this, mapIni);
 
@@ -106,6 +107,8 @@ namespace TSMapEditor.Models
             MapWriter.WriteMapSection(this, LoadedINI);
             MapWriter.WriteBasicSection(this, LoadedINI);
             MapWriter.WriteIsoMapPack5(this, LoadedINI);
+
+            MapWriter.WriteOverlays(this, LoadedINI);
 
             MapWriter.WriteAircraft(this, LoadedINI);
             MapWriter.WriteUnits(this, LoadedINI);
@@ -204,6 +207,22 @@ namespace TSMapEditor.Models
         public void AddTeamType(TeamType teamType)
         {
             TeamTypes.Add(teamType);
+        }
+
+        public void DoForAllValidTiles(Action<MapTile> action)
+        {
+            for (int y = 0; y < Tiles.Length; y++)
+            {
+                for (int x = 0; x < Tiles[y].Length; x++)
+                {
+                    MapTile tile = Tiles[y][x];
+
+                    if (tile == null)
+                        continue;
+
+                    action(tile);
+                }
+            }
         }
 
         // public void StartNew(IniFile rulesIni, IniFile firestormIni, TheaterType theaterType, Point2D size)

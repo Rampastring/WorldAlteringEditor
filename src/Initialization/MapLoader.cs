@@ -17,9 +17,6 @@ namespace TSMapEditor.Initialization
     /// </summary>
     public static class MapLoader
     {
-        private const int MAX_MAP_LENGTH_IN_DIMENSION = 512;
-        private const int NO_OVERLAY = 255; // 0xFF
-
         private const int BUILDING_PROPERTY_FIELD_COUNT = 17;
         private const int UNIT_PROPERTY_FIELD_COUNT = 14;
         private const int INFANTRY_PROPERTY_FIELD_COUNT = 14;
@@ -459,14 +456,14 @@ namespace TSMapEditor.Initialization
             var stringBuilder = new StringBuilder();
             overlayPackSection.Keys.ForEach(kvp => stringBuilder.Append(kvp.Value));
             byte[] compressedData = Convert.FromBase64String(stringBuilder.ToString());
-            byte[] uncompressedOverlayPack = new byte[MAX_MAP_LENGTH_IN_DIMENSION * MAX_MAP_LENGTH_IN_DIMENSION];
-            Format5.DecodeInto(compressedData, uncompressedOverlayPack, 80);
+            byte[] uncompressedOverlayPack = new byte[Constants.MAX_MAP_LENGTH_IN_DIMENSION * Constants.MAX_MAP_LENGTH_IN_DIMENSION];
+            Format5.DecodeInto(compressedData, uncompressedOverlayPack, Constants.OverlayPackFormat);
 
             stringBuilder.Clear();
             overlayDataPackSection.Keys.ForEach(kvp => stringBuilder.Append(kvp.Value));
             compressedData = Convert.FromBase64String(stringBuilder.ToString());
-            byte[] uncompressedOverlayDataPack = new byte[MAX_MAP_LENGTH_IN_DIMENSION * MAX_MAP_LENGTH_IN_DIMENSION];
-            Format5.DecodeInto(compressedData, uncompressedOverlayDataPack, 80);
+            byte[] uncompressedOverlayDataPack = new byte[Constants.MAX_MAP_LENGTH_IN_DIMENSION * Constants.MAX_MAP_LENGTH_IN_DIMENSION];
+            Format5.DecodeInto(compressedData, uncompressedOverlayDataPack, Constants.OverlayPackFormat);
 
             for (int y = 0; y < map.Tiles.Length; y++)
             {
@@ -476,9 +473,9 @@ namespace TSMapEditor.Initialization
                     if (tile == null)
                         continue;
 
-                    int overlayDataIndex = (tile.Y * MAX_MAP_LENGTH_IN_DIMENSION) + tile.X;
+                    int overlayDataIndex = (tile.Y * Constants.MAX_MAP_LENGTH_IN_DIMENSION) + tile.X;
                     int overlayTypeIndex = uncompressedOverlayPack[overlayDataIndex];
-                    if (overlayTypeIndex == NO_OVERLAY)
+                    if (overlayTypeIndex == Constants.NO_OVERLAY)
                         continue;
 
                     if (overlayTypeIndex >= map.Rules.OverlayTypes.Count)
