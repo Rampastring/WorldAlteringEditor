@@ -130,6 +130,11 @@ namespace TSMapEditor.Initialization
             }
         }
 
+        private static string GetAttachedTagName(TechnoBase techno)
+        {
+            return techno.AttachedTag == null ? Constants.NoneValue2 : techno.AttachedTag.ID;
+        }
+
         public static void WriteAircraft(IMap map, IniFile mapIni)
         {
             const string sectionName = "Aircraft";
@@ -147,7 +152,8 @@ namespace TSMapEditor.Initialization
 
                 // INDEX = OWNER,ID,HEALTH,X,Y,FACING,MISSION,TAG,VETERANCY,GROUP,AUTOCREATE_NO_RECRUITABLE,AUTOCREATE_YES_RECRUITABLE
 
-                string attachedTag = aircraft.AttachedTag == null ? Constants.NoneValue2 : aircraft.AttachedTag.ID;
+                string attachedTag = GetAttachedTagName(aircraft);
+
                 string value = $"{aircraft.Owner.ININame},{aircraft.ObjectType.ININame},{aircraft.HP}," +
                                $"{aircraft.Position.X},{aircraft.Position.Y},{aircraft.Facing}," +
                                $"{aircraft.Mission},{attachedTag},{aircraft.Veterancy}," +
@@ -174,7 +180,7 @@ namespace TSMapEditor.Initialization
 
                 // INDEX=OWNER,ID,HEALTH,X,Y,FACING,MISSION,TAG,VETERANCY,GROUP,HIGH,FOLLOWS_INDEX,AUTOCREATE_NO_RECRUITABLE,AUTOCREATE_YES_RECRUITABLE
 
-                string attachedTag = unit.AttachedTag == null ? Constants.NoneValue2 : unit.AttachedTag.ID;
+                string attachedTag = GetAttachedTagName(unit);
                 string followsIndex = unit.FollowedUnit == null ? "-1" : map.Units.FindIndex(otherUnit => otherUnit == unit.FollowedUnit).ToString();
 
                 string value = $"{unit.Owner.ININame},{unit.ObjectType.ININame},{unit.HP}," +
@@ -182,6 +188,35 @@ namespace TSMapEditor.Initialization
                                $"{unit.Mission},{attachedTag},{unit.Veterancy}," +
                                $"{unit.Group},{unit.High},{followsIndex}," +
                                $"{unit.AutocreateNoRecruitable},{unit.AutocreateYesRecruitable}";
+
+                section.SetStringValue(i.ToString(), value);
+            }
+        }
+
+        public static void WriteInfantry(IMap map, IniFile mapIni)
+        {
+            const string sectionName = "Infantry";
+
+            mapIni.RemoveSection(sectionName);
+            if (map.Units.Count == 0)
+                return;
+
+            var section = new IniSection(sectionName);
+            mapIni.AddSection(section);
+
+            for (int i = 0; i < map.Infantry.Count; i++)
+            {
+                var infantry = map.Infantry[i];
+
+                // INDEX=OWNER,ID,HEALTH,X,Y,SUB_CELL,MISSION,FACING,TAG,VETERANCY,GROUP,HIGH,AUTOCREATE_NO_RECRUITABLE,AUTOCREATE_YES_RECRUITABLE
+
+                string attachedTag = GetAttachedTagName(infantry);
+
+                string value = $"{infantry.Owner.ININame},{infantry.ObjectType.ININame},{infantry.HP}," +
+                               $"{infantry.Position.X},{infantry.Position.Y},{infantry.SubCell}," +
+                               $"{infantry.Mission},{infantry.Facing},{attachedTag},{infantry.Veterancy}," +
+                               $"{infantry.Group},{infantry.High}," +
+                               $"{infantry.AutocreateNoRecruitable},{infantry.AutocreateYesRecruitable}";
 
                 section.SetStringValue(i.ToString(), value);
             }
