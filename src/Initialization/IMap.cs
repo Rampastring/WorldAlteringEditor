@@ -41,5 +41,7 @@ namespace TSMapEditor.Initialization
         void AddTag(Tag tag);
         void AddScript(Script script);
         void AddTeamType(TeamType teamType);
+
+        void Write(string path);
     }
 }

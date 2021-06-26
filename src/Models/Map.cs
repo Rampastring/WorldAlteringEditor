@@ -2,6 +2,7 @@
 using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using TSMapEditor.GameMath;
 using TSMapEditor.Initialization;
 
@@ -71,6 +72,7 @@ namespace TSMapEditor.Models
             Initialize(rulesIni, firestormIni, artIni, artFirestormIni);
             LoadedINI = new IniFile();
             Rules.InitFromINI(LoadedINI, initializer);
+            SetTileData(null);
         }
 
         public void LoadExisting(IniFile rulesIni, IniFile firestormIni, IniFile artIni, IniFile artFirestormIni, IniFile mapIni)
@@ -103,6 +105,9 @@ namespace TSMapEditor.Models
         {
             MapWriter.WriteMapSection(this, LoadedINI);
             MapWriter.WriteBasicSection(this, LoadedINI);
+            MapWriter.WriteIsoMapPack5(this, LoadedINI);
+
+            LoadedINI.WriteIniFile(LoadedINI.FileName.Substring(0, LoadedINI.FileName.Length - 4) + "_test.map");
         }
 
         /// <summary>
@@ -128,9 +133,12 @@ namespace TSMapEditor.Models
 
         public void SetTileData(List<MapTile> tiles)
         {
-            foreach (var tile in tiles)
+            if (tiles != null)
             {
-                Tiles[tile.Y][tile.X] = tile;
+                foreach (var tile in tiles)
+                {
+                    Tiles[tile.Y][tile.X] = tile;
+                }
             }
 
             // Check for uninitialized tiles within the map bounds
