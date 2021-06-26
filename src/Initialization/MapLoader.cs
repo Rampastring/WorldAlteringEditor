@@ -362,6 +362,18 @@ namespace TSMapEditor.Initialization
                 if (tile != null)
                     tile.Vehicle = unit;
             }
+
+            // Process follow IDs
+            foreach (var unit in map.Units)
+            {
+                if (unit.FollowsID < 0)
+                    continue;
+
+                if (unit.FollowsID >= map.Units.Count)
+                    continue;
+
+                unit.FollowedUnit = map.Units[unit.FollowsID];
+            }
         }
 
         public static void ReadInfantry(IMap map, IniFile mapIni)
