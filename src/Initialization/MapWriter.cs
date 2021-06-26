@@ -197,6 +197,24 @@ namespace TSMapEditor.Initialization
             });
         }
 
+        public static void WriteWaypoints(IMap map, IniFile mapIni)
+        {
+            const string sectionName = "Waypoints";
+            mapIni.RemoveSection(sectionName);
+
+            if (map.Waypoints.Count == 0)
+                return;
+
+            var section = new IniSection(sectionName);
+            mapIni.AddSection(section);
+
+            foreach (var waypoint in map.Waypoints)
+            {
+                int tileIndex = waypoint.Position.Y * 1000 + waypoint.Position.X;
+                section.SetIntValue(waypoint.Identifier.ToString(), tileIndex);
+            }
+        }
+
         private static string GetAttachedTagName(TechnoBase techno)
         {
             return techno.AttachedTag == null ? Constants.NoneValue2 : techno.AttachedTag.ID;
