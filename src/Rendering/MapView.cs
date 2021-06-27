@@ -104,6 +104,7 @@ namespace TSMapEditor.Rendering
             DrawOverlays();
 
             DrawObjects();
+            DrawCellTags();
             DrawWaypoints();
             DrawMapBorder();
 
@@ -115,46 +116,29 @@ namespace TSMapEditor.Rendering
 
         private void DrawOverlays()
         {
-            for (int i = 0; i < Map.Tiles.Length; i++)
+            Map.DoForAllValidTiles(t =>
             {
-                var row = Map.Tiles[i];
-
-                for (int j = 0; j < row.Length; j++)
-                {
-                    if (row[j] == null)
-                        continue;
-
-                    Point2D drawPoint = CellMath.CellTopLeftPoint(new Point2D(i, j), Map.Size.X);
-
-                    var tile = row[j];
-                    if (tile.Overlay != null)
-                    {
-                        DrawObject(tile.Overlay);
-                    }
-                }
-            }
+                if (t.Overlay != null)
+                    DrawObject(t.Overlay);
+            });
         }
 
         private void DrawWaypoints()
         {
-            for (int i = 0; i < Map.Tiles.Length; i++)
+            Map.DoForAllValidTiles(t =>
             {
-                var row = Map.Tiles[i];
+                if (t.Waypoint != null)
+                    DrawWaypoint(t.Waypoint);
+            });
+        }
 
-                for (int j = 0; j < row.Length; j++)
-                {
-                    if (row[j] == null)
-                        continue;
-
-                    Point2D drawPoint = CellMath.CellTopLeftPoint(new Point2D(i, j), Map.Size.X);
-
-                    var tile = row[j];
-                    if (tile.Waypoint != null)
-                    {
-                        DrawWaypoint(tile.Waypoint);
-                    }
-                }
-            }
+        private void DrawCellTags()
+        {
+            Map.DoForAllValidTiles(t =>
+            {
+                if (t.CellTag != null)
+                    DrawCellTag(t.CellTag);
+            });
         }
 
         private void DrawObjects()
@@ -430,6 +414,22 @@ namespace TSMapEditor.Rendering
                 Constants.UIDefaultFont, 
                 new Vector2(rect.X + textOffset, rect.Y),
                 waypointColor);
+        }
+
+        private void DrawCellTag(CellTag cellTag)
+        {
+            const int cellTagBorderOffsetX = 12;
+            const int cellTagBorderOffsetY = 4;
+
+            Point2D drawPoint = CellMath.CellTopLeftPoint(cellTag.Position, Map.Size.X);
+
+            var rect = new Rectangle(drawPoint.X + cellTagBorderOffsetX,
+                drawPoint.Y + cellTagBorderOffsetY,
+                Constants.CellSizeX - (cellTagBorderOffsetX * 2),
+                Constants.CellSizeY - (cellTagBorderOffsetY * 2));
+
+            FillRectangle(rect, new Color(128, 0, 0, 128));
+            DrawRectangle(rect, Color.Yellow);
         }
 
         private void DrawMapBorder()

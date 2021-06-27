@@ -49,6 +49,7 @@ namespace TSMapEditor.Models
         public List<TaskForce> TaskForces { get; } = new List<TaskForce>();
         public List<Trigger> Triggers { get; } = new List<Trigger>();
         public List<Tag> Tags { get; } = new List<Tag>();
+        public List<CellTag> CellTags { get; } = new List<CellTag>();
         public List<Script> Scripts { get; } = new List<Script>();
         public List<TeamType> TeamTypes { get; } = new List<TeamType>();
 
@@ -96,6 +97,7 @@ namespace TSMapEditor.Models
             MapLoader.ReadTaskForces(this, mapIni);
             MapLoader.ReadTriggers(this, mapIni);
             MapLoader.ReadTags(this, mapIni);
+            MapLoader.ReadCellTags(this, mapIni);
             MapLoader.ReadScripts(this, mapIni);
             MapLoader.ReadTeamTypes(this, mapIni);
 
@@ -226,6 +228,19 @@ namespace TSMapEditor.Models
         public void AddTag(Tag tag)
         {
             Tags.Add(tag);
+        }
+
+        public void AddCellTag(CellTag cellTag)
+        {
+            var tile = GetTile(cellTag.Position.X, cellTag.Position.Y);
+            if (tile.CellTag != null)
+            {
+                Logger.Log("Tile already has a celltag, skipping placing of celltag at " + cellTag.Position);
+                return;
+            }
+
+            CellTags.Add(cellTag);
+            GetTile(cellTag.Position.X, cellTag.Position.Y).CellTag = cellTag;
         }
 
         public void AddScript(Script script)

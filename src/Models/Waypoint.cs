@@ -19,31 +19,12 @@ namespace TSMapEditor.Models
                 Logger.Log("Waypoint.Read: invalid waypoint index " + waypointIndex);
                 return null;
             }
-                
-            int coords = Conversions.IntFromString(coordsString, -1);
-            if (coords < 0 || coordsString.Length < 5)
-            {
-                Logger.Log("Waypoint.Read: invalid coord string " + coordsString);
-                return null;
-            }
 
-            string xCoordPart = coordsString.Substring(coordsString.Length - 3);
-            int x = Conversions.IntFromString(xCoordPart, -1);
-            if (x < 0)
-            {
-                Logger.Log("Waypoint.Read: invalid X coord " + x);
+            Point2D? coords = Helpers.CoordStringToPoint(coordsString);
+            if (coords == null)
                 return null;
-            }
 
-            string yCoordPart = coordsString.Substring(0, coordsString.Length - 3);
-            int y = Conversions.IntFromString(yCoordPart, -1);
-            if (y < 0)
-            {
-                Logger.Log("Waypoint.Read: invalid Y coord " + y);
-                return null;
-            }
-
-            return new Waypoint() { Identifier = waypointIndex, Position = new Point2D(x, y) };
+            return new Waypoint() { Identifier = waypointIndex, Position = coords.Value };
         }
     }
 }

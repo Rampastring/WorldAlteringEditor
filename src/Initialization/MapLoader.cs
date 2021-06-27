@@ -688,5 +688,29 @@ namespace TSMapEditor.Initialization
                 }
             }
         }
+
+        public static void ReadCellTags(IMap map, IniFile mapIni)
+        {
+            var section = mapIni.GetSection("CellTags");
+            if (section == null)
+                return;
+
+            foreach (var kvp in section.Keys)
+            {
+                Point2D? coords = Helpers.CoordStringToPoint(kvp.Key);
+                if (coords == null)
+                    continue;
+
+                var tile = map.GetTile(coords.Value.X, coords.Value.Y);
+                if (tile == null)
+                    continue;
+
+                Tag tag = map.Tags.Find(t => t.ID == kvp.Value);
+                if (tag == null)
+                    continue;
+
+                map.AddCellTag(new CellTag() { Position = coords.Value, Tag = tag });
+            }
+        }
     }
 }

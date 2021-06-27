@@ -90,6 +90,7 @@
     <Compile Include="Models\ArtConfig\VehicleArtConfig.cs" />
     <Compile Include="Models\BasicSection.cs" />
     <Compile Include="Models\BuildingType.cs" />
+    <Compile Include="Models\CellTag.cs" />
     <Compile Include="Models\Enums\AITriggerConditionType.cs" />
     <Compile Include="Models\AITriggerType.cs" />
     <Compile Include="Models\Enums\LandType.cs" />

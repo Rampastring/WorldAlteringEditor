@@ -47,6 +47,8 @@ namespace TSMapEditor.Models
 
         public Waypoint Waypoint { get; set; }
 
+        public CellTag CellTag { get; set; }
+
         /// <summary>
         /// A list of objects that graphically overlap with this tile.
         /// When this tile is re-drawn, all the objects in the list should

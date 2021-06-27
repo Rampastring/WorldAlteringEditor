@@ -26,6 +26,7 @@ namespace TSMapEditor.Initialization
         List<Waypoint> Waypoints { get; }
         List<Trigger> Triggers { get; }
         List<Tag> Tags { get; }
+        List<CellTag> CellTags { get; }
         List<Script> Scripts { get; }
         List<TaskForce> TaskForces { get; }
         List<TeamType> TeamTypes { get; }
@@ -41,6 +42,7 @@ namespace TSMapEditor.Initialization
         void AddTaskForce(TaskForce taskForce);
         void AddTrigger(Trigger trigger);
         void AddTag(Tag tag);
+        void AddCellTag(CellTag cellTag);
         void AddScript(Script script);
         void AddTeamType(TeamType teamType);
 

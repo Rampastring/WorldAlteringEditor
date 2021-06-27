@@ -27,5 +27,10 @@ namespace TSMapEditor.GameMath
             => new Point2D(point.X, point.Y);
 
         public Vector2 ToXNAVector() => new Vector2(X, Y);
+
+        public override string ToString()
+        {
+            return X + ", " + Y;
+        }
     }
 }
