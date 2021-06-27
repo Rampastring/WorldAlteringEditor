@@ -116,6 +116,9 @@ namespace TSMapEditor.UI
             lbTileSetList.Clear();
             foreach (TileSet tileSet in theaterGraphics.Theater.TileSets)
             {
+                if (tileSet.NonMarbleMadness > -1)
+                    continue;
+
                 if (tileSet.AllowToPlace && tileSet.LoadedTileCount > 0)
                     lbTileSetList.AddItem(new XNAListBoxItem() { Text = tileSet.SetName, Tag = tileSet });
             }
