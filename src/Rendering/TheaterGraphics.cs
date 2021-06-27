@@ -287,8 +287,34 @@ namespace TSMapEditor.Rendering
 
                     tileSet.LoadedTileCount++;
                     currentTileIndex++;
-                    graphicsList.Add(tileGraphics.ToArray());
+                    terrainGraphicsList.Add(tileGraphics.ToArray());
                 }
+            }
+
+            // Assign marble-madness (MM) mode tile graphics
+            int tileIndex = 0;
+            for (int tsId = 0; tsId < Theater.TileSets.Count; tsId++)
+            {
+                TileSet tileSet = Theater.TileSets[tsId];
+                if (tileSet.NonMarbleMadness > -1 || tileSet.MarbleMadness < 0)
+                {
+                    // This is a MM tileset or a tileset with no MM graphics
+                    for (int i = 0; i < tileSet.LoadedTileCount; i++)
+                    {
+                        mmTerrainGraphicsList.Add(terrainGraphicsList[tileIndex + i]);
+                    }
+
+                    tileIndex += tileSet.LoadedTileCount;
+                    continue;
+                }
+
+                // For non-MM tilesets with MM graphics, fetch the MM tileset
+                TileSet mmTileSet = Theater.TileSets[tileSet.MarbleMadness];
+                for (int i = 0; i < tileSet.LoadedTileCount; i++)
+                {
+                    mmTerrainGraphicsList.Add(terrainGraphicsList[mmTileSet.StartTileIndex + i]);
+                }
+                tileIndex += tileSet.LoadedTileCount;
             }
         }
 
@@ -485,12 +511,13 @@ namespace TSMapEditor.Rendering
         private readonly Palette theaterPalette;
         private readonly Palette unitPalette;
 
-        private List<TileImage[]> graphicsList = new List<TileImage[]>();
+        private List<TileImage[]> terrainGraphicsList = new List<TileImage[]>();
+        private List<TileImage[]> mmTerrainGraphicsList = new List<TileImage[]>();
 
-        public int TileCount => graphicsList.Count;
+        public int TileCount => terrainGraphicsList.Count;
 
-        public TileImage GetTileGraphics(int id) => graphicsList[id][random.Next(graphicsList[id].Length)];
-
+        public TileImage GetTileGraphics(int id) => terrainGraphicsList[id][random.Next(terrainGraphicsList[id].Length)];
+        public TileImage GetMarbleMadnessTileGraphics(int id) => mmTerrainGraphicsList[id][0];
 
         public ObjectImage[] TerrainObjectTextures { get; set; }
         public ObjectImage[] BuildingTextures { get; set; }

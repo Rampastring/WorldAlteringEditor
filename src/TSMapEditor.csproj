@@ -138,6 +138,7 @@
     <Compile Include="Models\Waypoint.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Rendering\EditorState.cs" />
     <Compile Include="Rendering\GameClass.cs" />
     <Compile Include="Rendering\MapView.cs" />
     <Compile Include="Rendering\MGTMPImage.cs" />

@@ -42,8 +42,8 @@ namespace TSMapEditor.Rendering
             windowManager = new WindowManager(this, graphics);
             windowManager.Initialize(Content, Environment.CurrentDirectory + DSC + "Content" + DSC);
 
-            windowManager.InitGraphicsMode(1600, 900, false);
-            windowManager.SetRenderResolution(1600, 900);
+            windowManager.InitGraphicsMode(2560, 1200, false);
+            windowManager.SetRenderResolution(2560, 1200);
             windowManager.CenterOnScreen();
             windowManager.Cursor.LoadNativeCursor(Environment.CurrentDirectory + DSC + "Content" + DSC + "cursor.cur");
 
@@ -59,8 +59,8 @@ namespace TSMapEditor.Rendering
             IniFile firestormIni = new IniFile(Path.Combine(GameDirectory, "INI/Enhance.ini"));
             IniFile artIni = new IniFile(Path.Combine(GameDirectory, "INI/Art.ini"));
             IniFile artFSIni = new IniFile(Path.Combine(GameDirectory, "INI/ArtE.INI"));
-            //IniFile mapIni = new IniFile(Path.Combine(GameDirectory, "Maps/Missions/stomp.map"));
-            IniFile mapIni = new IniFile(Path.Combine(GameDirectory, "Maps/Default/a_buoyant_city.map"));
+            IniFile mapIni = new IniFile(Path.Combine(GameDirectory, "Maps/Missions/stomp.map"));
+            //IniFile mapIni = new IniFile(Path.Combine(GameDirectory, "Maps/Default/a_buoyant_city.map"));
             Map map = new Map();
             map.LoadExisting(rulesIni, firestormIni, artIni, artFSIni, mapIni);
 
@@ -85,7 +85,7 @@ namespace TSMapEditor.Rendering
 
             TheaterGraphics theaterGraphics = new TheaterGraphics(GraphicsDevice, theater, ccFileManager, map.Rules);
 
-            mapView = new MapView(windowManager, map, theaterGraphics);
+            mapView = new MapView(windowManager, map, theaterGraphics, new EditorState());
             mapView.Width = windowManager.RenderResolutionX;
             mapView.Height = windowManager.RenderResolutionY;
             windowManager.AddAndInitializeControl(mapView);

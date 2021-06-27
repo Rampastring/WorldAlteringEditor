@@ -26,12 +26,14 @@ namespace TSMapEditor.Rendering
 
     public class MapView : XNAControl, ICursorActionTarget
     {
-        public MapView(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics) : base(windowManager)
+        public MapView(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics, EditorState editorState) : base(windowManager)
         {
+            EditorState = editorState;
             Map = map;
             TheaterGraphics = theaterGraphics;
         }
 
+        public EditorState EditorState { get; }
         public Map Map { get; }
         public TheaterGraphics TheaterGraphics { get; }
 
@@ -378,6 +380,10 @@ namespace TSMapEditor.Rendering
                 tileImage = tile.TileImage;
                 subTileIndex = tile.SubTileIndex;
             }
+
+            // MM support
+            if (EditorState.IsMarbleMadness)
+                tileImage = TheaterGraphics.GetMarbleMadnessTileGraphics(tileImage.TileID);
 
             if (subTileIndex >= tileImage.TMPImages.Length)
             {
