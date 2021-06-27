@@ -7,7 +7,10 @@
             ININame = iniName;
         }
 
+        [INI(false)]
         public string ININame { get; }
+
+        [INI(false)]
         public int Index { get; set; }
     }
 }

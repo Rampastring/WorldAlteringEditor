@@ -87,6 +87,8 @@ namespace TSMapEditor.Models
             MapLoader.ReadMapSection(this, mapIni);
             MapLoader.ReadIsoMapPack(this, mapIni);
 
+            MapLoader.ReadHouses(this, mapIni);
+
             MapLoader.ReadOverlays(this, mapIni);
             MapLoader.ReadTerrainObjects(this, mapIni);
 
@@ -145,7 +147,7 @@ namespace TSMapEditor.Models
             if (house != null)
                 return house;
 
-            house = new House() { ININame = houseName };
+            house = new House(houseName);
             StandardHouses.Add(house);
             return house;
         }

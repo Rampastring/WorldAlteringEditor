@@ -16,6 +16,7 @@ namespace TSMapEditor.Models
         public List<OverlayType> OverlayTypes = new List<OverlayType>();
 
         public List<InfantrySequence> InfantrySequences = new List<InfantrySequence>();
+        public List<RulesColor> Colors = new List<RulesColor>();
 
         /// <summary>
         /// Initializes rules types from an INI file.
@@ -36,6 +37,15 @@ namespace TSMapEditor.Models
             AircraftTypes.ForEach(ut => initializer.ReadObjectTypePropertiesFromINI(ut, iniFile));
             TerrainTypes.ForEach(ut => initializer.ReadObjectTypePropertiesFromINI(ut, iniFile));
             OverlayTypes.ForEach(ut => initializer.ReadObjectTypePropertiesFromINI(ut, iniFile));
+
+            var colorsSection = iniFile.GetSection("Colors");
+            if (colorsSection != null)
+            {
+                foreach (var kvp in colorsSection.Keys)
+                {
+                    Colors.Add(new RulesColor(kvp.Key, kvp.Value));
+                }
+            }
         }
 
         public void InitArt(IniFile iniFile, IInitializer initializer)
@@ -66,7 +76,7 @@ namespace TSMapEditor.Models
             foreach (var kvp in housesSection.Keys)
             {
                 string houseName = kvp.Value;
-                var house = new House() { ININame = houseName };
+                var house = new House(houseName);
                 InitHouse(iniFile, house);
                 houses.Add(house);
             }

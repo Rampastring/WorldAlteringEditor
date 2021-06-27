@@ -312,18 +312,21 @@ namespace TSMapEditor.Rendering
 
             int yDrawOffset = gameObject.GetYDrawOffset();
 
-            // int shadowFrameIndex = gameObject.GetShadowFrameIndex(graphics.Frames.Length);
-            // if (shadowFrameIndex > 0 && shadowFrameIndex < graphics.Frames.Length)
-            // {
-            //     var shadowFrame = graphics.Frames[shadowFrameIndex];
-            //     if (shadowFrame != null)
-            //     {
-            //         var shadowTexture = shadowFrame.Texture;
-            //         DrawTexture(shadowTexture, new Rectangle(drawPoint.X - shadowFrame.ShapeWidth / 2 + shadowFrame.OffsetX + Constants.CellSizeX / 2,
-            //             drawPoint.Y - shadowFrame.ShapeHeight / 2 + shadowFrame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
-            //             shadowTexture.Width, shadowTexture.Height), new Color(0, 0, 0, 128));
-            //     }
-            // }
+            if (Constants.DrawShadows)
+            {
+                int shadowFrameIndex = gameObject.GetShadowFrameIndex(graphics.Frames.Length);
+                if (shadowFrameIndex > 0 && shadowFrameIndex < graphics.Frames.Length)
+                {
+                    var shadowFrame = graphics.Frames[shadowFrameIndex];
+                    if (shadowFrame != null)
+                    {
+                        var shadowTexture = shadowFrame.Texture;
+                        DrawTexture(shadowTexture, new Rectangle(drawPoint.X - shadowFrame.ShapeWidth / 2 + shadowFrame.OffsetX + Constants.CellSizeX / 2,
+                            drawPoint.Y - shadowFrame.ShapeHeight / 2 + shadowFrame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
+                            shadowTexture.Width, shadowTexture.Height), new Color(0, 0, 0, 128));
+                    }
+                }
+            }
             
             int frameIndex = gameObject.GetFrameIndex(graphics.Frames.Length);
             var frame = graphics.Frames[frameIndex];

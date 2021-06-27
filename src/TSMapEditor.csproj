@@ -117,6 +117,7 @@
     <Compile Include="Models\Overlay.cs" />
     <Compile Include="Models\OverlayType.cs" />
     <Compile Include="Models\Rules.cs" />
+    <Compile Include="Models\RulesColor.cs" />
     <Compile Include="Models\Script.cs" />
     <Compile Include="Models\Enums\SpotlightType.cs" />
     <Compile Include="Models\Structure.cs" />

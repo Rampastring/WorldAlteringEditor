@@ -662,5 +662,31 @@ namespace TSMapEditor.Initialization
                 map.AddTeamType(teamType);
             }
         }
+
+        public static void ReadHouses(IMap map, IniFile mapIni)
+        {
+            var section = mapIni.GetSection("Houses");
+            if (section == null)
+                return;
+
+            foreach (var kvp in section.Keys)
+            {
+                string houseName = kvp.Value;
+                var house = new House(houseName);
+                map.Houses.Add(house);
+
+                var houseSection = mapIni.GetSection(houseName);
+                if (houseSection != null)
+                {
+                    house.ReadPropertiesFromIniSection(houseSection);
+
+                    var color = map.Rules.Colors.Find(c => c.Name == house.Color);
+                    if (color == null)
+                        house.XNAColor = Color.Black;
+                    else 
+                        house.XNAColor = color.XNAColor;
+                }
+            }
+        }
     }
 }
