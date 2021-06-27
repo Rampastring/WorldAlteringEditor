@@ -113,6 +113,8 @@ namespace TSMapEditor.Models
             MapWriter.WriteBasicSection(this, LoadedINI);
             MapWriter.WriteIsoMapPack5(this, LoadedINI);
 
+            MapWriter.WriteHouses(this, LoadedINI);
+
             MapWriter.WriteOverlays(this, LoadedINI);
             MapWriter.WriteTerrainObjects(this, LoadedINI);
 

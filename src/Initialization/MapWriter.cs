@@ -309,6 +309,29 @@ namespace TSMapEditor.Initialization
             }
         }
 
+        public static void WriteHouses(IMap map, IniFile mapIni)
+        {
+            const string sectionName = "Houses";
+            mapIni.RemoveSection(sectionName);
+
+            if (map.Houses.Count == 0)
+                return;
+
+            var housesSection = new IniSection(sectionName);
+            mapIni.AddSection(housesSection);
+
+            for (int i = 0; i < map.Houses.Count; i++)
+            {
+                House house = map.Houses[i];
+                housesSection.SetStringValue(i.ToString(), house.ININame);
+
+                // TODO don't remove section until we can handle base nodes
+                // mapIni.RemoveSection(house.ININame);
+                var houseSection = FindOrMakeSection(house.ININame, mapIni);
+                house.WritePropertiesToIniSection(houseSection);
+            }
+        }
+
         private static string GetAttachedTagName(TechnoBase techno)
         {
             return techno.AttachedTag == null ? Constants.NoneValue2 : techno.AttachedTag.ID;
