@@ -1,4 +1,5 @@
 ﻿using Rampastring.Tools;
+using System.Collections.Generic;
 
 namespace TSMapEditor.Models
 {
@@ -22,13 +23,87 @@ namespace TSMapEditor.Models
         public bool Normal { get; set; }
         public bool Hard { get; set; }
 
-        public void WriteToIniSection(IniSection iniSection)
+        public List<TriggerCondition> Conditions { get; } = new List<TriggerCondition>();
+        public List<TriggerAction> Actions { get; } = new List<TriggerAction>();
+
+        public void WriteToIniFile(IniFile iniFile)
         {
+            // Write entry to [Triggers]
             string linkedTriggerId = LinkedTrigger == null ? Constants.NoneValue2 : LinkedTrigger.ID;
-            iniSection.SetStringValue(ID,
+            iniFile.SetStringValue("Triggers", ID,
                 $"{House},{linkedTriggerId},{Name}," +
                 $"{Helpers.BoolToIntString(Disabled)}," +
                 $"{Helpers.BoolToIntString(Easy)},{Helpers.BoolToIntString(Normal)},{Helpers.BoolToIntString(Hard)},0");
+
+            // Write entry to [Events]
+            var conditionDataString = new ExtendedStringBuilder(true, ',');
+            conditionDataString.Append(Conditions.Count);
+            foreach (var condition in Conditions)
+            {
+                conditionDataString.Append(condition.ConditionIndex);
+                conditionDataString.Append(condition.Parameter1);
+                conditionDataString.Append(condition.Parameter2);
+            }
+
+            iniFile.SetStringValue("Events", ID, conditionDataString.ToString());
+
+            // Write entry to [Actions]
+            var actionDataString = new ExtendedStringBuilder(true, ',');
+            actionDataString.Append(Actions.Count);
+            foreach (var action in Actions)
+            {
+                actionDataString.Append(action.ActionIndex);
+                for (int i = 0; i < TriggerAction.PARAM_COUNT; i++)
+                    actionDataString.Append(action.Parameters[i]);
+            }
+
+            iniFile.SetStringValue("Actions", ID, actionDataString.ToString());
+        }
+
+        public void ParseConditions(string data)
+        {
+            if (string.IsNullOrWhiteSpace(data))
+                return;
+
+            string[] dataArray = data.Split(',');
+
+            int eventCount = Conversions.IntFromString(dataArray[0], -1);
+            if (eventCount < 0)
+                return;
+
+            int startIndex = 1;
+            for (int i = 0; i < eventCount; i++)
+            {
+                var triggerEvent = TriggerCondition.ParseFromArray(dataArray, startIndex);
+                if (triggerEvent == null)
+                    return;
+
+                startIndex += TriggerCondition.INI_VALUE_COUNT;
+                Conditions.Add(triggerEvent);
+            }
+        }
+
+        public void ParseActions(string data)
+        {
+            if (string.IsNullOrWhiteSpace(data))
+                return;
+
+            string[] dataArray = data.Split(',');
+
+            int actionCount = Conversions.IntFromString(dataArray[0], -1);
+            if (actionCount < 0)
+                return;
+
+            int startIndex = 1;
+            for (int i = 0; i < actionCount; i++)
+            {
+                var triggerAction = TriggerAction.ParseFromArray(dataArray, startIndex);
+                if (triggerAction == null)
+                    return;
+
+                startIndex += TriggerAction.INI_VALUE_COUNT;
+                Actions.Add(triggerAction);
+            }
         }
 
         /// <summary>

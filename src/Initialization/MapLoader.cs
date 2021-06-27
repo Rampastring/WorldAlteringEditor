@@ -546,6 +546,12 @@ namespace TSMapEditor.Initialization
                 var trigger = Trigger.ParseTrigger(kvp.Key, kvp.Value);
                 if (trigger != null)
                     map.AddTrigger(trigger);
+
+                string actionData = mapIni.GetStringValue("Actions", trigger.ID, null);
+                trigger.ParseActions(actionData);
+
+                string conditionData = mapIni.GetStringValue("Events", trigger.ID, null);
+                trigger.ParseConditions(conditionData);
             }
 
             // Parse and apply linked triggers

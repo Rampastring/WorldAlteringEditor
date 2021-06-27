@@ -242,15 +242,14 @@ namespace TSMapEditor.Initialization
 
         public static void WriteTriggers(IMap map, IniFile mapIni)
         {
-            const string sectionName = "Triggers";
-            mapIni.RemoveSection(sectionName);
+            mapIni.RemoveSection("Triggers");
+            mapIni.RemoveSection("Events");
+            mapIni.RemoveSection("Actions");
 
             if (map.Triggers.Count == 0)
                 return;
 
-            var triggersSection = new IniSection(sectionName);
-            mapIni.AddSection(triggersSection);
-            map.Triggers.ForEach(t => t.WriteToIniSection(triggersSection));
+            map.Triggers.ForEach(t => t.WriteToIniFile(mapIni));
         }
 
         public static void WriteTags(IMap map, IniFile mapIni)

@@ -129,6 +129,8 @@
     <Compile Include="Models\TerrainObject.cs" />
     <Compile Include="Models\TerrainType.cs" />
     <Compile Include="Models\Trigger.cs" />
+    <Compile Include="Models\TriggerAction.cs" />
+    <Compile Include="Models\TriggerCondition.cs" />
     <Compile Include="Models\Unit.cs" />
     <Compile Include="Models\UnitType.cs" />
     <Compile Include="Models\Waypoint.cs" />
