@@ -265,6 +265,27 @@ namespace TSMapEditor.Initialization
             map.Tags.ForEach(t => t.WriteToIniSection(tagsSection));
         }
 
+        public static void WriteScripts(IMap map, IniFile mapIni)
+        {
+            const string sectionName = "ScriptTypes";
+            mapIni.RemoveSection(sectionName);
+
+            if (map.Scripts.Count == 0)
+                return;
+
+            var scriptTypesSection = new IniSection(sectionName);
+            mapIni.AddSection(scriptTypesSection);
+            for (int i = 0; i < map.Scripts.Count; i++)
+            {
+                Script script = map.Scripts[i];
+                scriptTypesSection.SetStringValue(i.ToString(), script.ININame);
+
+                var scriptSection = new IniSection(script.ININame);
+                mapIni.AddSection(scriptSection);
+                script.WriteToIniSection(scriptSection);
+            }
+        }
+
         private static string GetAttachedTagName(TechnoBase techno)
         {
             return techno.AttachedTag == null ? Constants.NoneValue2 : techno.AttachedTag.ID;

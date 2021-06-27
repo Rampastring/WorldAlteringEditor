@@ -39,6 +39,16 @@ namespace TSMapEditor.Models
 
         public List<ScriptActionEntry> Actions = new List<ScriptActionEntry>();
 
+        public void WriteToIniSection(IniSection scriptSection)
+        {
+            for (int i = 0; i < Actions.Count; i++)
+            {
+                scriptSection.SetStringValue(i.ToString(), $"{Actions[i].Action},{Actions[i].Argument}");
+            }
+
+            scriptSection.SetStringValue("Name", Name);
+        }
+
         public static Script ParseScript(string id, IniSection scriptSection)
         {
             if (string.IsNullOrWhiteSpace(id) || scriptSection == null)

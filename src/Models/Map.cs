@@ -118,6 +118,7 @@ namespace TSMapEditor.Models
             MapWriter.WriteTaskForces(this, LoadedINI);
             MapWriter.WriteTriggers(this, LoadedINI);
             MapWriter.WriteTags(this, LoadedINI);
+            MapWriter.WriteScripts(this, LoadedINI);
 
             MapWriter.WriteAircraft(this, LoadedINI);
             MapWriter.WriteUnits(this, LoadedINI);
