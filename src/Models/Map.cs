@@ -109,7 +109,7 @@ namespace TSMapEditor.Models
 
         public void Write(string path)
         {
-            LoadedINI.Comment = "; Written by DTA Scenario Editor\r\n; all comments have been truncated\r\n; www.moddb.com/members/Rampastring\r\n; github.com/Rampastring";
+            LoadedINI.Comment = "Written by DTA Scenario Editor\r\n; all comments have been truncated\r\n; www.moddb.com/members/Rampastring\r\n; github.com/Rampastring";
 
             MapWriter.WriteMapSection(this, LoadedINI);
             MapWriter.WriteBasicSection(this, LoadedINI);
@@ -124,6 +124,7 @@ namespace TSMapEditor.Models
             MapWriter.WriteTaskForces(this, LoadedINI);
             MapWriter.WriteTriggers(this, LoadedINI);
             MapWriter.WriteTags(this, LoadedINI);
+            MapWriter.WriteCellTags(this, LoadedINI);
             MapWriter.WriteScripts(this, LoadedINI);
             MapWriter.WriteTeamTypes(this, LoadedINI);
 

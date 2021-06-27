@@ -265,6 +265,24 @@ namespace TSMapEditor.Initialization
             map.Tags.ForEach(t => t.WriteToIniSection(tagsSection));
         }
 
+        public static void WriteCellTags(IMap map, IniFile mapIni)
+        {
+            const string sectionName = "CellTags";
+            mapIni.RemoveSection(sectionName);
+
+            if (map.CellTags.Count == 0)
+                return;
+
+            var section = new IniSection(sectionName);
+            mapIni.AddSection(section);
+
+            foreach (var cellTag in map.CellTags)
+            {
+                int tileIndex = cellTag.Position.Y * 1000 + cellTag.Position.X;
+                section.SetStringValue(tileIndex.ToString(), cellTag.Tag.ID);
+            }
+        }
+
         public static void WriteScripts(IMap map, IniFile mapIni)
         {
             const string sectionName = "ScriptTypes";
