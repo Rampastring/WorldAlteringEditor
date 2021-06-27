@@ -238,9 +238,10 @@ namespace TSMapEditor.Rendering
         private void DrawObject(GameObject gameObject)
         {
             Point2D drawPoint = CellMath.CellTopLeftPoint(gameObject.Position, Map.Size.X);
-            
+
             ObjectImage graphics = null;
             Color replacementColor = Color.Red;
+            Color remapColor = Color.White;
             string iniName = string.Empty;
 
             // TODO refactor this to be more object-oriented
@@ -258,18 +259,21 @@ namespace TSMapEditor.Rendering
                     graphics = TheaterGraphics.BuildingTextures[structure.ObjectType.Index];
                     replacementColor = Color.Yellow;
                     iniName = structure.ObjectType.ININame;
+                    remapColor = structure.ObjectType.ArtConfig.Remapable ? structure.Owner.XNAColor : remapColor;
                     break;
                 case RTTIType.Unit:
                     var unit = (Unit)gameObject;
                     graphics = TheaterGraphics.UnitTextures[unit.ObjectType.Index];
                     replacementColor = Color.Red;
                     iniName = unit.ObjectType.ININame;
+                    remapColor = unit.ObjectType.ArtConfig.Remapable ? unit.Owner.XNAColor : remapColor;
                     break;
                 case RTTIType.Infantry:
                     var infantry = (Infantry)gameObject;
                     graphics = TheaterGraphics.InfantryTextures[infantry.ObjectType.Index];
                     replacementColor = Color.Teal;
                     iniName = infantry.ObjectType.ININame;
+                    remapColor = infantry.ObjectType.ArtConfig.Remapable ? infantry.Owner.XNAColor : remapColor;
                     break;
                 case RTTIType.Overlay:
                     var overlay = (Overlay)gameObject;
@@ -329,7 +333,14 @@ namespace TSMapEditor.Rendering
             var texture = frame.Texture;
             DrawTexture(texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
                 drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
-                texture.Width, texture.Height), Color.White);
+                texture.Width, texture.Height), Constants.HQRemap ? Color.White : remapColor);
+
+            if (Constants.HQRemap && graphics.RemapFrames != null)
+            {
+                DrawTexture(graphics.RemapFrames[frameIndex].Texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
+                    drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
+                    texture.Width, texture.Height), remapColor);
+            }
 
             if (gameObject.WhatAmI() == RTTIType.Unit)
             {
@@ -345,7 +356,14 @@ namespace TSMapEditor.Rendering
                         texture = frame.Texture;
                         DrawTexture(texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
                             drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
-                            texture.Width, texture.Height), Color.White);
+                            texture.Width, texture.Height), Constants.HQRemap ? Color.White : remapColor);
+
+                        if (Constants.HQRemap && graphics.RemapFrames != null)
+                        {
+                            DrawTexture(graphics.RemapFrames[turretFrameIndex].Texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
+                                drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
+                                texture.Width, texture.Height), remapColor);
+                        }
                     }
                 }
             }

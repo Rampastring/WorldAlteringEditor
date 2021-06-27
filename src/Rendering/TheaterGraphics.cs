@@ -114,16 +114,19 @@ namespace TSMapEditor.Rendering
 
     public class ObjectImage
     {
-        public ObjectImage(GraphicsDevice graphicsDevice, ShpFile shp, byte[] shpFileData, Palette palette, List<int> framesToLoad = null)
+        public ObjectImage(GraphicsDevice graphicsDevice, ShpFile shp, byte[] shpFileData, Palette palette, List<int> framesToLoad = null, bool remapable = false)
         {
             Frames = new PositionedTexture[shp.FrameCount];
+            if (remapable && Constants.HQRemap)
+                RemapFrames = new PositionedTexture[Frames.Length];
+
             for (int i = 0; i < shp.FrameCount; i++)
             {
                 if (framesToLoad != null && !framesToLoad.Contains(i))
                     continue;
 
                 var frameInfo = shp.GetShpFrameInfo(i);
-                var frameData = shp.GetUncompressedFrameData(i, shpFileData);
+                byte[] frameData = shp.GetUncompressedFrameData(i, shpFileData);
                 if (frameData == null)
                     continue;
 
@@ -131,10 +134,59 @@ namespace TSMapEditor.Rendering
                 Color[] colorArray = frameData.Select(b => b == 0 ? Color.Transparent : palette.Data[b].ToXnaColor()).ToArray();
                 texture.SetData<Color>(colorArray);
                 Frames[i] = new PositionedTexture(shp.Width, shp.Height, frameInfo.XOffset, frameInfo.YOffset, texture);
+
+                if (remapable && Constants.HQRemap)
+                {
+                    if (Constants.HQRemap)
+                    {
+                        // Fetch remap colors from the array
+
+                        Color[] remapColorArray = frameData.Select(b =>
+                        {
+                            if (b >= 0x10 && b <= 0x1F)
+                            {
+                                // This is a remap color, convert to grayscale
+                                Color xnaColor = palette.Data[b].ToXnaColor();
+                                float value = Math.Max(xnaColor.R / 255.0f, Math.Max(xnaColor.G / 255.0f, xnaColor.B / 255.0f));
+
+                                // Brighten it up a bit
+                                value *= Constants.RemapBrightenFactor;
+                                return new Color(value, value, value);
+                            }
+
+                            return Color.Transparent;
+                        }).ToArray();
+
+                        var remapTexture = new Texture2D(graphicsDevice, frameInfo.Width, frameInfo.Height, false, SurfaceFormat.Color);
+                        remapTexture.SetData<Color>(remapColorArray);
+                        RemapFrames[i] = new PositionedTexture(shp.Width, shp.Height, frameInfo.XOffset, frameInfo.YOffset, remapTexture);
+                    }
+                    else
+                    {
+                        // Convert colors to grayscale
+                        // Get HSV value, change S = 0, convert back to RGB and assign
+                        // With S = 0, the formula for converting HSV to RGB can be reduced to a quite simple form :)
+
+                        System.Drawing.Color[] sdColorArray = colorArray.Select(c => System.Drawing.Color.FromArgb(c.A, c.R, c.G, c.B)).ToArray();
+                        for (int j = 0; j < sdColorArray.Length; j++)
+                        {
+                            if (colorArray[j] == Color.Transparent)
+                                continue;
+
+                            float value = sdColorArray[j].GetBrightness() * Constants.RemapBrightenFactor;
+                            if (value > 1.0f)
+                                value = 1.0f;
+                            colorArray[j] = new Color(value, value, value);
+                        }
+                    }
+
+
+                }
             }
         }
 
         public PositionedTexture[] Frames { get; set; }
+        public PositionedTexture[] RemapFrames { get; set; }
     }
 
     public class PositionedTexture
@@ -299,7 +351,7 @@ namespace TSMapEditor.Rendering
                 var shpFile = new ShpFile();
                 shpFile.ParseFromBuffer(shpData);
                 BuildingTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData,
-                    buildingType.ArtConfig.TerrainPalette ? theaterPalette : unitPalette);
+                    buildingType.ArtConfig.TerrainPalette ? theaterPalette : unitPalette, null, buildingType.ArtConfig.Remapable);
             }
         }
 
@@ -344,7 +396,7 @@ namespace TSMapEditor.Rendering
                 for (int j = 0; j < regularFrameCount; j++)
                     framesToLoad.Add(framesToLoad[j] + (shpFile.FrameCount / 2));
 
-                UnitTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, unitPalette, framesToLoad);
+                UnitTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, unitPalette, framesToLoad, unitType.ArtConfig.Remapable);
                 loadedTextures[shpFileName] = UnitTextures[i];
             }
         }
@@ -393,7 +445,7 @@ namespace TSMapEditor.Rendering
                 for (int j = 0; j < regularFrameCount; j++)
                     framesToLoad.Add(framesToLoad[j] + (shpFile.FrameCount / 2));
 
-                InfantryTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, unitPalette, null);
+                InfantryTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, unitPalette, null, infantryType.ArtConfig.Remapable);
                 loadedTextures[shpFileName] = InfantryTextures[i];
             }
         }
