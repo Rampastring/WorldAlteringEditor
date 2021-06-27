@@ -1,4 +1,6 @@
-﻿namespace TSMapEditor.Models
+﻿using Rampastring.Tools;
+
+namespace TSMapEditor.Models
 {
     /// <summary>
     /// A trigger tag. Tags are responsible for activating map triggers.
@@ -11,5 +13,10 @@
         public int Repeating { get; set; }
         public string Name { get; set; }
         public Trigger Trigger { get; set; }
+
+        public void WriteToIniSection(IniSection iniSection)
+        {
+            iniSection.SetStringValue(ID, $"{Repeating},{Name},{Trigger.ID}");
+        }
     }
 }

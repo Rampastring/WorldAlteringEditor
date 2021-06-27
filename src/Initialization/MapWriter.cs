@@ -253,6 +253,19 @@ namespace TSMapEditor.Initialization
             map.Triggers.ForEach(t => t.WriteToIniSection(triggersSection));
         }
 
+        public static void WriteTags(IMap map, IniFile mapIni)
+        {
+            const string sectionName = "Tags";
+            mapIni.RemoveSection(sectionName);
+
+            if (map.Tags.Count == 0)
+                return;
+
+            var tagsSection = new IniSection(sectionName);
+            mapIni.AddSection(tagsSection);
+            map.Tags.ForEach(t => t.WriteToIniSection(tagsSection));
+        }
+
         private static string GetAttachedTagName(TechnoBase techno)
         {
             return techno.AttachedTag == null ? Constants.NoneValue2 : techno.AttachedTag.ID;
