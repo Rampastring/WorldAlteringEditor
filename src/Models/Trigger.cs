@@ -9,12 +9,27 @@ namespace TSMapEditor.Models
     {
         public string ID { get; set; }
         public string House { get; set; }
-        public string LinkedTriggerId { get; set; }
+
+        /// <summary>
+        /// The linked trigger ID loaded from the map.
+        /// Do not use post map loading.
+        /// </summary>
+        public string LinkedTriggerId { get; set; } = Constants.NoneValue2;
+        public Trigger LinkedTrigger { get; set; }
         public string Name { get; set; }
         public bool Disabled { get; set; }
         public bool Easy { get; set; }
         public bool Normal { get; set; }
         public bool Hard { get; set; }
+
+        public void WriteToIniSection(IniSection iniSection)
+        {
+            string linkedTriggerId = LinkedTrigger == null ? Constants.NoneValue2 : LinkedTrigger.ID;
+            iniSection.SetStringValue(ID,
+                $"{House},{linkedTriggerId},{Name}," +
+                $"{Helpers.BoolToIntString(Disabled)}," +
+                $"{Helpers.BoolToIntString(Easy)},{Helpers.BoolToIntString(Normal)},{Helpers.BoolToIntString(Hard)},0");
+        }
 
         /// <summary>
         /// Parses and creates a trigger instance from a trigger data line

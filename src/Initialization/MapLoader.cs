@@ -547,6 +547,15 @@ namespace TSMapEditor.Initialization
                 if (trigger != null)
                     map.AddTrigger(trigger);
             }
+
+            // Parse and apply linked triggers
+            foreach (var trigger in map.Triggers)
+            {
+                if (Helpers.IsStringNoneValue(trigger.LinkedTriggerId))
+                    continue;
+
+                trigger.LinkedTrigger = map.Triggers.Find(otherTrigger => otherTrigger.ID == trigger.LinkedTriggerId);
+            }
         }
 
         public static void ReadTags(IMap map, IniFile mapIni)

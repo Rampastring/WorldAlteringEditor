@@ -240,6 +240,19 @@ namespace TSMapEditor.Initialization
             }
         }
 
+        public static void WriteTriggers(IMap map, IniFile mapIni)
+        {
+            const string sectionName = "Triggers";
+            mapIni.RemoveSection(sectionName);
+
+            if (map.Triggers.Count == 0)
+                return;
+
+            var triggersSection = new IniSection(sectionName);
+            mapIni.AddSection(triggersSection);
+            map.Triggers.ForEach(t => t.WriteToIniSection(triggersSection));
+        }
+
         private static string GetAttachedTagName(TechnoBase techno)
         {
             return techno.AttachedTag == null ? Constants.NoneValue2 : techno.AttachedTag.ID;

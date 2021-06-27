@@ -3,6 +3,7 @@ using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using TSMapEditor.GameMath;
 using TSMapEditor.Initialization;
 
@@ -104,6 +105,8 @@ namespace TSMapEditor.Models
 
         public void Write(string path)
         {
+            LoadedINI.Comment = "; Written by DTA Scenario Editor\r\n; all comments have been truncated\r\n; www.moddb.com/members/Rampastring\r\n; github.com/Rampastring";
+
             MapWriter.WriteMapSection(this, LoadedINI);
             MapWriter.WriteBasicSection(this, LoadedINI);
             MapWriter.WriteIsoMapPack5(this, LoadedINI);
@@ -113,6 +116,7 @@ namespace TSMapEditor.Models
 
             MapWriter.WriteWaypoints(this, LoadedINI);
             MapWriter.WriteTaskForces(this, LoadedINI);
+            MapWriter.WriteTriggers(this, LoadedINI);
 
             MapWriter.WriteAircraft(this, LoadedINI);
             MapWriter.WriteUnits(this, LoadedINI);
