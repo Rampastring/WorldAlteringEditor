@@ -1,4 +1,6 @@
-﻿namespace TSMapEditor.Models
+﻿using Rampastring.Tools;
+
+namespace TSMapEditor.Models
 {
     public class TeamType : AbstractObject
     {
@@ -40,6 +42,18 @@
         public bool OnlyTargetHouseEnemy { get; set; }
         public bool TransportsReturnOnUnload { get; set; }
         public bool AreTeamMembersRecruitable { get; set; }
+
+        public void WriteToIniSection(IniSection iniSection)
+        {
+            // This cuts it for all properties of standard types
+            WritePropertiesToIniSection(iniSection);
+
+            iniSection.SetStringValue("House", House.ININame);
+            iniSection.SetStringValue("Script", Script.ININame);
+            iniSection.SetStringValue("TaskForce", TaskForce.ININame);
+            if (Tag != null)
+                iniSection.SetStringValue("Tag", Tag.ID);
+        }
 
         public override RTTIType WhatAmI()
         {

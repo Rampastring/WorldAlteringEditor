@@ -607,7 +607,7 @@ namespace TSMapEditor.Initialization
 
             foreach (var kvp in section.Keys)
             {
-                var script = Script.ParseScript(kvp.Key, mapIni.GetSection(kvp.Value));
+                var script = Script.ParseScript(kvp.Value, mapIni.GetSection(kvp.Value));
 
                 if (script != null)
                     map.AddScript(script);
@@ -631,13 +631,33 @@ namespace TSMapEditor.Initialization
 
                 var teamType = new TeamType(kvp.Value);
                 teamType.ReadPropertiesFromIniSection(teamTypeSection);
+                string houseIniName = teamTypeSection.GetStringValue("House", string.Empty);
                 string scriptId = teamTypeSection.GetStringValue("Script", string.Empty);
                 string taskForceId = teamTypeSection.GetStringValue("TaskForce", string.Empty);
                 string tagId = teamTypeSection.GetStringValue("Tag", string.Empty);
 
+                teamType.House = map.FindHouse(houseIniName);
                 teamType.Script = map.Scripts.Find(s => s.ININame == scriptId);
                 teamType.TaskForce = map.TaskForces.Find(t => t.ININame == taskForceId);
                 teamType.Tag = map.Tags.Find(t => t.ID == tagId);
+
+                if (teamType.House == null)
+                {
+                    Logger.Log($"TeamType {teamType.ININame} has an invalid house ({houseIniName}) specified! Ignoring teamtype.");
+                    continue;
+                }
+
+                if (teamType.Script == null)
+                {
+                    Logger.Log($"TeamType {teamType.ININame} has an invalid script ({scriptId}) specified! Ignoring teamtype.");
+                    continue;
+                }
+
+                if (teamType.TaskForce == null)
+                {
+                    Logger.Log($"TeamType {teamType.ININame} has an invalid TaskForce ({taskForceId}) specified! Ignoring teamtype.");
+                    continue;
+                }
 
                 map.AddTeamType(teamType);
             }

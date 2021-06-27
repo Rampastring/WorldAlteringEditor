@@ -280,9 +280,32 @@ namespace TSMapEditor.Initialization
                 Script script = map.Scripts[i];
                 scriptTypesSection.SetStringValue(i.ToString(), script.ININame);
 
+                mapIni.RemoveSection(script.ININame);
                 var scriptSection = new IniSection(script.ININame);
                 mapIni.AddSection(scriptSection);
                 script.WriteToIniSection(scriptSection);
+            }
+        }
+
+        public static void WriteTeamTypes(IMap map, IniFile mapIni)
+        {
+            const string sectionName = "TeamTypes";
+            mapIni.RemoveSection(sectionName);
+
+            if (map.TeamTypes.Count == 0)
+                return;
+
+            var teamTypesSection = new IniSection(sectionName);
+            mapIni.AddSection(teamTypesSection);
+            for (int i = 0; i < map.TeamTypes.Count; i++)
+            {
+                TeamType teamType = map.TeamTypes[i];
+                teamTypesSection.SetStringValue(i.ToString(), teamType.ININame);
+
+                mapIni.RemoveSection(teamType.ININame);
+                var teamTypeSection = new IniSection(teamType.ININame);
+                mapIni.AddSection(teamTypeSection);
+                teamType.WriteToIniSection(teamTypeSection);
             }
         }
 

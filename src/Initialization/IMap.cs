@@ -36,6 +36,7 @@ namespace TSMapEditor.Initialization
 
         void SetTileData(List<MapTile> tiles);
         House FindOrMakeHouse(string houseName);
+        House FindHouse(string houseName);
         void AddWaypoint(Waypoint waypoint);
         void AddTaskForce(TaskForce taskForce);
         void AddTrigger(Trigger trigger);

@@ -119,6 +119,7 @@ namespace TSMapEditor.Models
             MapWriter.WriteTriggers(this, LoadedINI);
             MapWriter.WriteTags(this, LoadedINI);
             MapWriter.WriteScripts(this, LoadedINI);
+            MapWriter.WriteTeamTypes(this, LoadedINI);
 
             MapWriter.WriteAircraft(this, LoadedINI);
             MapWriter.WriteUnits(this, LoadedINI);
@@ -147,6 +148,20 @@ namespace TSMapEditor.Models
             house = new House() { ININame = houseName };
             StandardHouses.Add(house);
             return house;
+        }
+
+        /// <summary>
+        /// Finds a house with the given name from the map's or the game's house lists.
+        /// Returns null if no house is found.
+        /// </summary>
+        /// <param name="houseName">The name of the house to find.</param>
+        public House FindHouse(string houseName)
+        {
+            var house = Houses.Find(h => h.ININame == houseName);
+            if (house != null)
+                return house;
+
+            return StandardHouses.Find(h => h.ININame == houseName);
         }
 
         public void SetTileData(List<MapTile> tiles)
