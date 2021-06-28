@@ -6,7 +6,7 @@ namespace TSMapEditor.Rendering
 {
     /// <summary>
     /// A MonoGame-drawable TMP image.
-    /// Contains graphics for a single cell (sub-tile of a full TMP).
+    /// Contains graphics and information for a single cell (sub-tile of a full TMP).
     /// </summary>
     public class MGTMPImage
     {

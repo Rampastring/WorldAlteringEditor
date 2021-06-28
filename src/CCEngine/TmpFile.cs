@@ -94,7 +94,7 @@ namespace TSMapEditor.CCEngine
     }
 
     /// <summary>
-    /// A single TMP image.
+    /// A single TMP image (representing a single cell).
     /// </summary>
     public class TmpImage
     {

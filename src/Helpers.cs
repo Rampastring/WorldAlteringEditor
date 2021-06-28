@@ -44,5 +44,44 @@ namespace TSMapEditor
 
             return new Point2D(x, y);
         }
+
+        public static string LandTypeToString(int landType)
+        {
+            return GetLandTypeName(landType) + " (0x" + landType.ToString("X") + ")";
+        }
+
+        private static string GetLandTypeName(int landType)
+        {
+            switch (landType)
+            {
+                case 0x0:
+                    return "Clear";
+                case 0x1:
+                case 0x2:
+                case 0x3:
+                case 0x4:
+                    return "Ice";
+                case 0x5:
+                    return "Tunnel";
+                case 0x6:
+                    return "Railroad";
+                case 0x7:
+                case 0x8:
+                    return "Rock";
+                case 0x9:
+                    return "Water";
+                case 0xA:
+                    return "Beach";
+                case 0xB:
+                case 0xC:
+                    return "Road";
+                case 0xD:
+                    return "Clear";
+                case 0xE:
+                    return "Rock";
+                default:
+                    return "Unknown";
+            }
+        }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TSMapEditor.UI;
 
 namespace TSMapEditor.Rendering
 {
@@ -11,6 +12,7 @@ namespace TSMapEditor.Rendering
     /// </summary>
     public class EditorState
     {
-        public bool IsMarbleMadness { get; set; } = true;
+        public bool IsMarbleMadness { get; set; } = false;
+        public CursorAction CursorAction { get; set; }
     }
 }

@@ -85,29 +85,8 @@ namespace TSMapEditor.Rendering
 
             TheaterGraphics theaterGraphics = new TheaterGraphics(GraphicsDevice, theater, ccFileManager, map.Rules);
 
-            mapView = new MapView(windowManager, map, theaterGraphics, new EditorState());
-            mapView.Width = windowManager.RenderResolutionX;
-            mapView.Height = windowManager.RenderResolutionY;
-            windowManager.AddAndInitializeControl(mapView);
-
-            tileSelector = new TileSelector(windowManager, theaterGraphics);
-            tileSelector.Width = windowManager.RenderResolutionX;
-            tileSelector.Height = 300;
-            tileSelector.Y = windowManager.RenderResolutionY - tileSelector.Height;
-            windowManager.AddAndInitializeControl(tileSelector);
-            tileSelector.TileDisplay.SelectedTileChanged += TileDisplay_SelectedTileChanged;
-
-            terrainPlacementAction = new TerrainPlacementAction();
-        }
-
-        MapView mapView;
-        TileSelector tileSelector;
-        TerrainPlacementAction terrainPlacementAction;
-
-        private void TileDisplay_SelectedTileChanged(object sender, EventArgs e)
-        {
-            mapView.CursorAction = terrainPlacementAction;
-            terrainPlacementAction.Tile = tileSelector.TileDisplay.SelectedTile;
+            var uiManager = new UIManager(windowManager, map, theaterGraphics);
+            windowManager.AddAndInitializeControl(uiManager);
         }
     }
 }

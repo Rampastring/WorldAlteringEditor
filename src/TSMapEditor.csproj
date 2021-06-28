@@ -145,8 +145,11 @@
     <Compile Include="Rendering\TheaterGraphics.cs" />
     <Compile Include="UI\CursorAction.cs" />
     <Compile Include="UI\CursorActions\TerrainPlacementAction.cs" />
+    <Compile Include="UI\EditorPanel.cs" />
     <Compile Include="UI\TileDisplay.cs" />
+    <Compile Include="UI\TileInfoDisplay.cs" />
     <Compile Include="UI\TileSelector.cs" />
+    <Compile Include="UI\UIManager.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

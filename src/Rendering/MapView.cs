@@ -36,6 +36,7 @@ namespace TSMapEditor.Rendering
         public EditorState EditorState { get; }
         public Map Map { get; }
         public TheaterGraphics TheaterGraphics { get; }
+        public TileInfoDisplay TileInfoDisplay { get; set; }
 
         public CursorAction CursorAction { get; set; }
 
@@ -493,6 +494,7 @@ namespace TSMapEditor.Rendering
             Point2D tileCoords = CellMath.CellCoordsFromPixelCoords(cursorMapPoint, Map.Size);
             var tile = Map.GetTile(tileCoords.X, tileCoords.Y);
             tileUnderCursor = tile;
+            TileInfoDisplay.MapTile = tile;
 
             base.Update(gameTime);
         }
@@ -552,20 +554,11 @@ namespace TSMapEditor.Rendering
             }
             else
             {
-                DrawStringWithShadow("X: " + tileUnderCursor.X + ", Y: " + tileUnderCursor.Y, 0, new Vector2(0f, 0f), Color.White);
                 Point2D drawPoint = CellMath.CellTopLeftPoint(new Point2D(tileUnderCursor.X, tileUnderCursor.Y), Map.Size.X);
-
                 FillRectangle(new Rectangle(drawPoint.X - cameraTopLeftPoint.X,
                     drawPoint.Y - cameraTopLeftPoint.Y,
                     Constants.CellSizeX, Constants.CellSizeY),
                     new Color(128, 128, 128, 128));
-
-                TileImage tileGraphics = TheaterGraphics.GetTileGraphics(tileUnderCursor.TileIndex);
-                TileSet tileSet = TheaterGraphics.Theater.TileSets[tileGraphics.TileSetId];
-                DrawStringWithShadow("TileSet: " + tileSet.SetName + " (" + tileGraphics.TileSetId + ")", 0,
-                    new Vector2(0f, 20f), Color.White);
-                DrawStringWithShadow("Tile ID: " + tileGraphics.TileIndex, 0, new Vector2(0f, 40f), Color.White);
-                DrawStringWithShadow("Sub-tile ID: " + tileUnderCursor.SubTileIndex, 0, new Vector2(0f, 60f), Color.White);
             }
         }
 
