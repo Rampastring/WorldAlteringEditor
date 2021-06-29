@@ -29,8 +29,6 @@ namespace TSMapEditor.UI
 
         private MutationManager mutationManager;
 
-        private KeyboardCommands keyboardCommands;
-
         public override void Initialize()
         {
             Name = nameof(UIManager);
@@ -45,6 +43,11 @@ namespace TSMapEditor.UI
             terrainPlacementAction = new TerrainPlacementAction();
 
             mutationManager = new MutationManager();
+
+            // Keyboard must be initialized before any other controls so it's properly usable
+            KeyboardCommands.Instance = new KeyboardCommands();
+            KeyboardCommands.Instance.Undo.Action = UndoAction;
+            KeyboardCommands.Instance.Redo.Action = RedoAction;
 
             mapView = new MapView(WindowManager, map, theaterGraphics, editorState, mutationManager);
             mapView.Width = WindowManager.RenderResolutionX;
@@ -62,10 +65,6 @@ namespace TSMapEditor.UI
             AddChild(tileInfoDisplay);
             tileInfoDisplay.X = Width - tileInfoDisplay.Width;
             mapView.TileInfoDisplay = tileInfoDisplay;
-
-            keyboardCommands = new KeyboardCommands();
-            keyboardCommands.Undo.Action = UndoAction;
-            keyboardCommands.Redo.Action = RedoAction;
 
             base.Initialize();
 
@@ -87,7 +86,7 @@ namespace TSMapEditor.UI
                     return;
             }
 
-            foreach (var keyboardCommand in keyboardCommands.Commands)
+            foreach (var keyboardCommand in KeyboardCommands.Instance.Commands)
             {
                 if (e.PressedKey == keyboardCommand.Key.Key)
                 {

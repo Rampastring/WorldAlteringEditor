@@ -68,6 +68,67 @@ namespace TSMapEditor.UI
             PanelBackgroundDrawMode = PanelBackgroundImageDrawMode.STRETCHED;
 
             Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
+
+            KeyboardCommands.Instance.NextTile.Action = NextTile;
+            KeyboardCommands.Instance.PreviousTile.Action = PreviousTile;
+        }
+
+        /// <summary>
+        /// Handles the "Next Tile" keyboard command.
+        /// </summary>
+        private void NextTile()
+        {
+            int selectedTileIndex = tilesInView.FindIndex(t => t.TileImage == SelectedTile);
+
+            if (SelectedTile == null || selectedTileIndex < 0)
+            {
+                // If no tile from the current tileset is selected, then select the first tile
+
+                if (tilesInView.Count > 0)
+                    SelectedTile = tilesInView[0].TileImage;
+
+                return;
+            }
+
+            if (Keyboard.IsAltHeldDown())
+                selectedTileIndex += 5;
+            else
+                selectedTileIndex++;
+
+            // Don't cross bounds
+            if (selectedTileIndex >= tilesInView.Count)
+                selectedTileIndex = tilesInView.Count - 1;
+
+            SelectedTile = tilesInView[selectedTileIndex].TileImage;
+        }
+
+        /// <summary>
+        /// Handles the "Previous Tile" keyboard command.
+        /// </summary>
+        private void PreviousTile()
+        {
+            int selectedTileIndex = tilesInView.FindIndex(t => t.TileImage == SelectedTile);
+
+            if (SelectedTile == null || selectedTileIndex < 0)
+            {
+                // If no tile from the current tileset is selected, then select the last tile
+
+                if (tilesInView.Count > 0)
+                    SelectedTile = tilesInView[tilesInView.Count - 1].TileImage;
+
+                return;
+            }
+
+            if (Keyboard.IsAltHeldDown())
+                selectedTileIndex -= 5;
+            else
+                selectedTileIndex--;
+
+            // Don't cross bounds
+            if (selectedTileIndex < 0)
+                selectedTileIndex = 0;
+
+            SelectedTile = tilesInView[selectedTileIndex].TileImage;
         }
 
         private void Keyboard_OnKeyPressed(object sender, Rampastring.XNAUI.Input.KeyPressEventArgs e)

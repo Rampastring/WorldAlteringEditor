@@ -37,7 +37,6 @@ namespace TSMapEditor.UI
 
         private bool isBeingDragged = false;
         private int previousMouseY;
-        
 
         public override void Initialize()
         {
