@@ -62,6 +62,37 @@ namespace TSMapEditor.UI
             base.Initialize();
 
             RefreshTileSets();
+
+            KeyboardCommands.Instance.NextTileSet.Action = NextTileSet;
+            KeyboardCommands.Instance.PreviousTileSet.Action = PreviousTileSet;
+        }
+
+        private void NextTileSet()
+        {
+            if (lbTileSetList.Items.Count == 0)
+                return;
+
+            if (lbTileSetList.SelectedItem == null)
+                lbTileSetList.SelectedIndex = 0;
+
+            if (lbTileSetList.SelectedIndex == lbTileSetList.Items.Count - 1)
+                return;
+
+            lbTileSetList.SelectedIndex++;
+        }
+
+        private void PreviousTileSet()
+        {
+            if (lbTileSetList.Items.Count == 0)
+                return;
+
+            if (lbTileSetList.SelectedItem == null)
+                lbTileSetList.SelectedIndex = lbTileSetList.Items.Count - 1;
+
+            if (lbTileSetList.SelectedIndex == 0)
+                return;
+
+            lbTileSetList.SelectedIndex--;
         }
 
         public override void OnMouseMove()
@@ -108,6 +139,9 @@ namespace TSMapEditor.UI
                 tileSet = lbTileSetList.SelectedItem.Tag as TileSet;
 
             TileDisplay.SetTileSet(tileSet);
+
+            // Unselect the listbox
+            WindowManager.SelectedControl = null;
         }
 
         private void RefreshTileSets()
