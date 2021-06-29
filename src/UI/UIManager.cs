@@ -3,6 +3,7 @@ using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
 using TSMapEditor.Models;
+using TSMapEditor.Mutations;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI.CursorActions;
 
@@ -26,6 +27,10 @@ namespace TSMapEditor.UI
 
         private TerrainPlacementAction terrainPlacementAction;
 
+        private MutationManager mutationManager;
+
+        private KeyboardCommands keyboardCommands;
+
         public override void Initialize()
         {
             Name = nameof(UIManager);
@@ -39,7 +44,9 @@ namespace TSMapEditor.UI
             editorState = new EditorState();
             terrainPlacementAction = new TerrainPlacementAction();
 
-            mapView = new MapView(WindowManager, map, theaterGraphics, new EditorState());
+            mutationManager = new MutationManager();
+
+            mapView = new MapView(WindowManager, map, theaterGraphics, editorState, mutationManager);
             mapView.Width = WindowManager.RenderResolutionX;
             mapView.Height = WindowManager.RenderResolutionY;
             AddChild(mapView);
@@ -56,13 +63,68 @@ namespace TSMapEditor.UI
             tileInfoDisplay.X = Width - tileInfoDisplay.Width;
             mapView.TileInfoDisplay = tileInfoDisplay;
 
+            keyboardCommands = new KeyboardCommands();
+            keyboardCommands.Undo.Action = UndoAction;
+            keyboardCommands.Redo.Action = RedoAction;
+
             base.Initialize();
+
+            Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
+        }
+
+        private void Keyboard_OnKeyPressed(object sender, Rampastring.XNAUI.Input.KeyPressEventArgs e)
+        {
+            if (!WindowManager.HasFocus)
+                return;
+
+            if (!IsActive)
+                return;
+
+            var selectedControl = WindowManager.SelectedControl;
+            if (selectedControl != null)
+            {
+                if (selectedControl is XNATextBox || selectedControl is XNAListBox)
+                    return;
+            }
+
+            foreach (var keyboardCommand in keyboardCommands.Commands)
+            {
+                if (e.PressedKey == keyboardCommand.Key.Key)
+                {
+                    // Key matches, check modifiers
+
+                    if ((keyboardCommand.Key.Modifiers & KeyboardModifiers.Alt) == KeyboardModifiers.Alt && !Keyboard.IsAltHeldDown())
+                        continue;
+
+                    if ((keyboardCommand.Key.Modifiers & KeyboardModifiers.Ctrl) == KeyboardModifiers.Ctrl && !Keyboard.IsCtrlHeldDown())
+                        continue;
+
+                    if ((keyboardCommand.Key.Modifiers & KeyboardModifiers.Shift) == KeyboardModifiers.Shift && !Keyboard.IsShiftHeldDown())
+                        continue;
+
+                    // All keys match, perform the command!
+                    e.Handled = true;
+
+                    keyboardCommand.Action?.Invoke();
+                    break;
+                }
+            }
         }
 
         private void TileDisplay_SelectedTileChanged(object sender, EventArgs e)
         {
             mapView.CursorAction = terrainPlacementAction;
             terrainPlacementAction.Tile = tileSelector.TileDisplay.SelectedTile;
+        }
+
+        private void UndoAction()
+        {
+            mutationManager.Undo();
+        }
+
+        private void RedoAction()
+        {
+            mutationManager.Redo();
         }
     }
 }

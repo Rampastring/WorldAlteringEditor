@@ -3,6 +3,7 @@ using Rampastring.XNAUI;
 using System;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
+using TSMapEditor.Mutations.Classes;
 using TSMapEditor.Rendering;
 
 namespace TSMapEditor.UI.CursorActions
@@ -46,7 +47,7 @@ namespace TSMapEditor.UI.CursorActions
                 }
             }
 
-            cursorActionTarget.AddRefreshPoint(CellMath.CellTopLeftPoint(cellCoordsOnCursor, cursorActionTarget.Map.Size.X));
+            cursorActionTarget.AddRefreshPoint(cellCoordsOnCursor);
         }
 
         public override void LeftDown(Point2D cellPoint, ICursorActionTarget cursorActionTarget)
@@ -54,24 +55,8 @@ namespace TSMapEditor.UI.CursorActions
             if (Tile == null)
                 return;
 
-            for (int i = 0; i < Tile.TMPImages.Length; i++)
-            {
-                if (Tile.TMPImages[i].TmpImage == null)
-                    continue;
-
-                int cx = cellPoint.X + i % Tile.Width;
-                int cy = cellPoint.Y + i / Tile.Width;
-
-                var mapTile = cursorActionTarget.Map.GetTile(cx, cy);
-                if (mapTile != null)
-                {
-                    mapTile.TileImage = null;
-                    mapTile.TileIndex = Tile.TileID;
-                    mapTile.SubTileIndex = (byte)i;
-                }
-            }
-
-            cursorActionTarget.AddRefreshPoint(CellMath.CellTopLeftPoint(cellPoint, cursorActionTarget.Map.Size.X));
+            var mutation = new ChangeTerrainMutation(cursorActionTarget.MutationTarget, cursorActionTarget.Map.GetTile(cellPoint), Tile);
+            cursorActionTarget.MutationManager.PerformMutation(mutation);
         }
 
         public override void LeftClick(Point2D cellPoint, ICursorActionTarget cursorActionTarget)

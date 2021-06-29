@@ -29,6 +29,8 @@ namespace TSMapEditor.Models
             return Tiles[y][x];
         }
 
+        public MapTile GetTile(Point2D cellCoords) => GetTile(cellCoords.X, cellCoords.Y);
+
         public List<Aircraft> Aircraft { get; } = new List<Aircraft>();
         public List<Infantry> Infantry { get; } = new List<Infantry>();
         public List<Unit> Units { get; } = new List<Unit>();

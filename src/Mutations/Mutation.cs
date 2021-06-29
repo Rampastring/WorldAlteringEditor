@@ -1,4 +1,6 @@
-﻿namespace TSMapEditor.Mutations
+﻿using TSMapEditor.Rendering;
+
+namespace TSMapEditor.Mutations
 {
     /// <summary>
     /// A base class for all mutations.
@@ -7,6 +9,13 @@
     /// </summary>
     public abstract class Mutation
     {
+        public Mutation(IMutationTarget mutationTarget)
+        {
+            MutationTarget = mutationTarget;
+        }
+
+        protected IMutationTarget MutationTarget { get; }
+
         public abstract void Perform();
 
         public abstract void Undo();

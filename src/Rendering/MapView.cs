@@ -9,10 +9,21 @@ using System.Linq;
 using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
+using TSMapEditor.Mutations;
 using TSMapEditor.UI;
 
 namespace TSMapEditor.Rendering
 {
+    /// <summary>
+    /// An interface for an object that mutations use to interact with the map.
+    /// </summary>
+    public interface IMutationTarget
+    {
+        Map Map { get; }
+        TheaterGraphics TheaterGraphics { get; }
+        void AddRefreshPoint(Point2D point);
+    }
+
     /// <summary>
     /// An interface for an object that cursor actions use to interact with the map.
     /// </summary>
@@ -22,28 +33,44 @@ namespace TSMapEditor.Rendering
         TheaterGraphics TheaterGraphics { get; }
         WindowManager WindowManager { get; }
         void AddRefreshPoint(Point2D point);
+        MutationManager MutationManager { get; }
+        IMutationTarget MutationTarget { get; }
     }
 
-    public class MapView : XNAControl, ICursorActionTarget
+    public class MapView : XNAControl, ICursorActionTarget, IMutationTarget
     {
-        public MapView(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics, EditorState editorState) : base(windowManager)
+        public MapView(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics, EditorState editorState, MutationManager mutationManager) : base(windowManager)
         {
             EditorState = editorState;
             Map = map;
             TheaterGraphics = theaterGraphics;
+            MutationManager = mutationManager;
         }
 
         public EditorState EditorState { get; }
         public Map Map { get; }
         public TheaterGraphics TheaterGraphics { get; }
+        public MutationManager MutationManager { get; }
+        public IMutationTarget MutationTarget => this;
         public TileInfoDisplay TileInfoDisplay { get; set; }
+        
 
-        public CursorAction CursorAction { get; set; }
+        private CursorAction _cursorAction;
+        public CursorAction CursorAction
+        {
+            get => _cursorAction;
+            set
+            {
+                _cursorAction = value;
+                lastTileUnderCursor = null;
+            }
+        }
 
         private RenderTarget2D mapRenderTarget;
         private RenderTarget2D objectRenderTarget;
 
         private MapTile tileUnderCursor;
+        private MapTile lastTileUnderCursor;
 
         private bool mapInvalidated = true;
         private Point2D cameraTopLeftPoint = new Point2D(0, 0);
@@ -160,14 +187,13 @@ namespace TSMapEditor.Rendering
             var tilesToRedraw = new List<MapTile>();
             var waypointsToRedraw = new List<Waypoint>();
             var objectsToRedraw = new List<GameObject>();
-            var cellCoords = CellMath.CellCoordsFromPixelCoords(center, Map.Size);
             const int tileRefreshArea = 10;
             const int objectRefreshArea = 20;
             for (int y = -tileRefreshArea; y <= tileRefreshArea; y++)
             {
                 for (int x = -tileRefreshArea; x <= tileRefreshArea; x++)
                 {
-                    var tile = Map.GetTile(cellCoords.X + x, cellCoords.Y + y);
+                    var tile = Map.GetTile(center.X + x, center.Y + y);
                     if (tile == null)
                         continue;
 
@@ -182,7 +208,7 @@ namespace TSMapEditor.Rendering
             {
                 for (int x = -objectRefreshArea; x <= objectRefreshArea; x++)
                 {
-                    var tile = Map.GetTile(cellCoords.X + x, cellCoords.Y + y);
+                    var tile = Map.GetTile(center.X + x, center.Y + y);
                     if (tile == null)
                         continue;
 
@@ -457,9 +483,10 @@ namespace TSMapEditor.Rendering
 
             if (tileUnderCursor != null && CursorAction != null)
             {
-                if (Cursor.LeftDown)
+                if (Cursor.LeftDown && lastTileUnderCursor != tileUnderCursor)
                 {
                     CursorAction.LeftDown(tileUnderCursor.CoordsToPoint(), this);
+                    lastTileUnderCursor = tileUnderCursor;
                 }
             }
         }
@@ -529,7 +556,7 @@ namespace TSMapEditor.Rendering
                         facing += 8;
                         facing = facing % 256;
                         unit.Facing = (byte)facing;
-                        refreshes.Add(CellMath.CellTopLeftPoint(unit.Position, Map.Size.X));
+                        refreshes.Add(unit.Position);
                     }
                 }
 
@@ -539,7 +566,7 @@ namespace TSMapEditor.Rendering
             if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.Delete)
             {
                 DeleteObjectFromTile(tileCoords);
-                refreshes.Add(CellMath.CellTopLeftPoint(tileCoords, Map.Size.X));
+                refreshes.Add(tileCoords);
             }
         }
 
