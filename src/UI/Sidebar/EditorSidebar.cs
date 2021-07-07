@@ -1,10 +1,6 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Rampastring.XNAUI;
+﻿using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 
@@ -45,21 +41,58 @@ namespace TSMapEditor.UI.Sidebar
 
             lbSelection.Height = lbSelection.Items.Count * lbSelection.LineHeight + 5;
             AddChild(lbSelection);
+            
 
             lbSelection.EnableScrollbar = false;
 
-            modePanels = new XNAPanel[lbSelection.Items.Count];
+            var aircraftListPanel = new AircraftListPanel(WindowManager, editorState, map, theaterGraphics);
+            aircraftListPanel.Name = nameof(aircraftListPanel);
+            InitPanel(aircraftListPanel);
 
             var unitListPanel = new UnitListPanel(WindowManager, editorState, map, theaterGraphics);
             unitListPanel.Name = nameof(unitListPanel);
-            unitListPanel.Y = lbSelection.Bottom;
-            unitListPanel.Height = Height - unitListPanel.Y;
-            unitListPanel.Width = Width;
-            AddChild(unitListPanel);
+            InitPanel(unitListPanel);
+
+            var infantryListPanel = new InfantryListPanel(WindowManager, editorState, map, theaterGraphics);
+            infantryListPanel.Name = nameof(infantryListPanel);
+            InitPanel(infantryListPanel);
+
+            modePanels = new XNAPanel[]
+            {
+                aircraftListPanel,
+                null, // buildings
+                unitListPanel,
+                infantryListPanel, // infantry
+                null, // terrain objects
+                null // overlay
+            };
+            lbSelection.SelectedIndexChanged += LbSelection_SelectedIndexChanged;
+            lbSelection.SelectedIndex = 0;
 
             base.Initialize();
         }
 
+        private void LbSelection_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            foreach (var panel in modePanels)
+            {
+                if (panel != null)
+                    panel.Disable();
+            }
 
+            if (lbSelection.SelectedIndex > -1)
+            {
+                if (modePanels[lbSelection.SelectedIndex] != null)
+                    modePanels[lbSelection.SelectedIndex].Enable();
+            }
+        }
+
+        private void InitPanel(ObjectListPanel panel)
+        {
+            panel.Y = lbSelection.Bottom;
+            panel.Height = Height - panel.Y;
+            panel.Width = Width;
+            AddChild(panel);
+        }
     }
 }

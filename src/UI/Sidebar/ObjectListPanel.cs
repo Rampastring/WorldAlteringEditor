@@ -1,8 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using TSMapEditor.Models;
+using TSMapEditor.Models.ArtConfig;
 using TSMapEditor.Rendering;
 
 namespace TSMapEditor.UI.Sidebar
@@ -90,6 +94,84 @@ namespace TSMapEditor.UI.Sidebar
         }
 
         protected abstract void InitObjects();
+
+        protected void InitObjectsBase<T>(List<T> objectTypeList, ObjectImage[] textures) where T : TechnoType, IArtConfigContainer
+        {
+            var sideCategories = new List<TreeViewCategory>();
+            for (int i = 0; i < objectTypeList.Count; i++)
+            {
+                TreeViewCategory category = null;
+                var objectType = objectTypeList[i];
+                Color remapColor = Color.White;
+
+                if (string.IsNullOrEmpty(objectType.Owner))
+                {
+                    category = FindOrMakeCategory("Unspecified", sideCategories);
+                }
+                else
+                {
+                    string[] owners = objectType.Owner.Split(',');
+                    string primaryOwnerName = owners[0];
+                    var house = Map.StandardHouses.Find(h => h.ININame == primaryOwnerName);
+                    if (house != null)
+                    {
+                        int actsLike = house.ActsLike;
+                        if (actsLike > -1)
+                            primaryOwnerName = Map.StandardHouses[actsLike].ININame;
+                    }
+
+                    var ownerHouse = Map.Houses.Find(h => h.ININame == primaryOwnerName);
+                    if (ownerHouse != null)
+                        remapColor = ownerHouse.XNAColor;
+
+                    category = FindOrMakeCategory(primaryOwnerName, sideCategories);
+                }
+
+                Texture2D texture = null;
+                Texture2D remapTexture = null;
+                if (textures != null)
+                {
+                    if (textures[i] != null)
+                    {
+                        var frames = textures[i].Frames;
+                        if (frames.Length > 0)
+                        {
+                            // Find the first valid frame and use that as our texture
+                            int firstNotNullIndex = Array.FindIndex(frames, f => f != null);
+                            if (firstNotNullIndex > -1)
+                            {
+                                texture = frames[firstNotNullIndex].Texture;
+                                if (Constants.HQRemap && objectType.GetArtConfig().Remapable)
+                                    remapTexture = textures[i].RemapFrames[firstNotNullIndex].Texture;
+                            }
+                        }
+                    }
+                }
+
+                category.Nodes.Add(new TreeViewNode()
+                {
+                    Text = (objectType.ININame.StartsWith("AI") ? "AI - " : "") + objectType.Name + " (" + objectType.ININame + ")",
+                    Texture = texture,
+                    RemapTexture = remapTexture,
+                    RemapColor = remapColor
+                });
+
+                category.Nodes = category.Nodes.OrderBy(n => n.Text).ToList();
+            }
+
+            sideCategories.ForEach(c => ObjectTreeView.AddCategory(c));
+        }
+
+        private TreeViewCategory FindOrMakeCategory(string categoryName, List<TreeViewCategory> categoryList)
+        {
+            var category = categoryList.Find(c => c.Text == categoryName);
+            if (category != null)
+                return category;
+
+            category = new TreeViewCategory() { Text = categoryName };
+            categoryList.Add(category);
+            return category;
+        }
 
         private void Parent_ClientRectangleUpdated(object sender, EventArgs e)
         {
