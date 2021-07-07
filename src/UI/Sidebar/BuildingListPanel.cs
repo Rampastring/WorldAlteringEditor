@@ -14,5 +14,10 @@ namespace TSMapEditor.UI.Sidebar
         {
             InitObjectsBase(Map.Rules.BuildingTypes, TheaterGraphics.BuildingTextures);
         }
+
+        protected override void ObjectSelected()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

@@ -84,7 +84,20 @@ namespace TSMapEditor.UI.Sidebar
             }
         }
 
-        public TreeViewNode SelectedNode { get; set; }
+        private TreeViewNode _selectedNode;
+        public TreeViewNode SelectedNode
+        {
+            get => _selectedNode;
+            set
+            {
+                if (_selectedNode != value)
+                {
+                    _selectedNode = value;
+                    SelectedItemChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+
         public TreeViewNode HoveredNode { get; set; }
 
         public List<TreeViewCategory> Categories { get; set; } = new List<TreeViewCategory>();

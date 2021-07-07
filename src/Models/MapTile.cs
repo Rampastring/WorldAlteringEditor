@@ -26,18 +26,29 @@ namespace TSMapEditor.Models
         public Unit Vehicle { get; set; }
         public Aircraft Aircraft { get; set; }
         public Infantry[] Infantry { get; set; } = new Infantry[SubCellCount];
-        public bool AddInfantry(Infantry infantry)
-        {
-            for (int i = 0; i < Infantry.Length; i++)
-            {
-                if (Infantry[i] == null)
-                {
-                    Infantry[i] = infantry;
-                    return true;
-                }
-            }
 
-            return false;
+        public void AddInfantry(Infantry infantry)
+        {
+            Infantry[(int)infantry.SubCell] = infantry;
+        }
+
+        public SubCell GetFreeSubCellSpot()
+        {
+            if (GetInfantryFromSubCellSpot(SubCell.Bottom) == null)
+                return SubCell.Bottom;
+
+            if (GetInfantryFromSubCellSpot(SubCell.Left) == null)
+                return SubCell.Left;
+
+            if (GetInfantryFromSubCellSpot(SubCell.Right) == null)
+                return SubCell.Right;
+
+            return SubCell.None;
+        }
+
+        public Infantry GetInfantryFromSubCellSpot(SubCell subCell)
+        {
+            return Infantry[(int)subCell];
         }
 
         public TileImage PreviewTileImage { get; set; }

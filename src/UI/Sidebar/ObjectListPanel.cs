@@ -68,6 +68,7 @@ namespace TSMapEditor.UI.Sidebar
             AddChild(ObjectTreeView);
             ObjectTreeView.BackgroundTexture = AssetLoader.CreateTexture(new Color(0, 0, 0, 222), 2, 2);
 
+            ObjectTreeView.SelectedItemChanged += ObjectTreeView_SelectedItemChanged;
             EditorState.ObjectOwnerChanged += EditorState_ObjectOwnerChanged;
 
             base.Initialize();
@@ -79,6 +80,16 @@ namespace TSMapEditor.UI.Sidebar
 
             InitObjects();
         }
+
+        private void ObjectTreeView_SelectedItemChanged(object sender, EventArgs e)
+        {
+            if (EditorState.ObjectOwner == null)
+                return;
+
+            ObjectSelected();
+        }
+
+        protected abstract void ObjectSelected();
 
         private void SearchBox_EnterPressed(object sender, EventArgs e)
         {
@@ -164,7 +175,8 @@ namespace TSMapEditor.UI.Sidebar
                     Text = (objectType.ININame.StartsWith("AI") ? "AI - " : "") + objectType.Name + " (" + objectType.ININame + ")",
                     Texture = texture,
                     RemapTexture = remapTexture,
-                    RemapColor = remapColor
+                    RemapColor = remapColor,
+                    Tag = objectType
                 });
 
                 category.Nodes = category.Nodes.OrderBy(n => n.Text).ToList();

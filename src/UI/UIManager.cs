@@ -42,22 +42,22 @@ namespace TSMapEditor.UI
             Width = WindowManager.RenderResolutionX;
             Height = WindowManager.RenderResolutionY;
 
-            editorState = new EditorState();
-            terrainPlacementAction = new TerrainPlacementAction();
-
-            mutationManager = new MutationManager();
-
             // Keyboard must be initialized before any other controls so it's properly usable
             KeyboardCommands.Instance = new KeyboardCommands();
             KeyboardCommands.Instance.Undo.Action = UndoAction;
             KeyboardCommands.Instance.Redo.Action = RedoAction;
+
+            editorState = new EditorState();
+            mutationManager = new MutationManager();
 
             mapView = new MapView(WindowManager, map, theaterGraphics, editorState, mutationManager);
             mapView.Width = WindowManager.RenderResolutionX;
             mapView.Height = WindowManager.RenderResolutionY;
             AddChild(mapView);
 
-            editorSidebar = new EditorSidebar(WindowManager, editorState, map, theaterGraphics);
+            terrainPlacementAction = new TerrainPlacementAction(mapView);
+
+            editorSidebar = new EditorSidebar(WindowManager, editorState, map, theaterGraphics, mapView);
             editorSidebar.Width = 250;
             editorSidebar.Y = 40;
             editorSidebar.Height = WindowManager.RenderResolutionY - editorSidebar.Y;

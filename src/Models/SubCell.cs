@@ -2,6 +2,7 @@
 {
     public enum SubCell
     {
+        None = -1,
         Center = 0,
         Top = 1,
         Right = 2,

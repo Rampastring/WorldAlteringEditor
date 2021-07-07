@@ -46,6 +46,9 @@ namespace TSMapEditor.Initialization
         void AddScript(Script script);
         void AddTeamType(TeamType teamType);
 
+        void PlaceUnit(Unit unit);
+        void RemoveUnit(Unit unit);
+
         void DoForAllValidTiles(Action<MapTile> action);
 
         void Write(string path);

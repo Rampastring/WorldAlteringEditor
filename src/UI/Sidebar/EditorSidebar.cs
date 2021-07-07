@@ -9,11 +9,12 @@ namespace TSMapEditor.UI.Sidebar
 {
     public class EditorSidebar : EditorPanel
     {
-        public EditorSidebar(WindowManager windowManager, EditorState editorState, Map map, TheaterGraphics theaterGraphics) : base(windowManager)
+        public EditorSidebar(WindowManager windowManager, EditorState editorState, Map map, TheaterGraphics theaterGraphics, ICursorActionTarget cursorActionTarget) : base(windowManager)
         {
             this.editorState = editorState;
             this.map = map;
             this.theaterGraphics = theaterGraphics;
+            this.cursorActionTarget = cursorActionTarget;
         }
 
         private readonly EditorState editorState;
@@ -24,6 +25,8 @@ namespace TSMapEditor.UI.Sidebar
 
         private XNAPanel[] modePanels;
         private XNAPanel activePanel;
+
+        private ICursorActionTarget cursorActionTarget;
 
         public override void Initialize()
         {
@@ -53,11 +56,11 @@ namespace TSMapEditor.UI.Sidebar
             buildingListPanel.Name = nameof(buildingListPanel);
             InitPanel(buildingListPanel);
 
-            var unitListPanel = new UnitListPanel(WindowManager, editorState, map, theaterGraphics);
+            var unitListPanel = new UnitListPanel(WindowManager, editorState, map, theaterGraphics, cursorActionTarget);
             unitListPanel.Name = nameof(unitListPanel);
             InitPanel(unitListPanel);
 
-            var infantryListPanel = new InfantryListPanel(WindowManager, editorState, map, theaterGraphics);
+            var infantryListPanel = new InfantryListPanel(WindowManager, editorState, map, theaterGraphics, cursorActionTarget);
             infantryListPanel.Name = nameof(infantryListPanel);
             InitPanel(infantryListPanel);
 

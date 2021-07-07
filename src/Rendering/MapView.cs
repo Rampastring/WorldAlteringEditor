@@ -22,6 +22,7 @@ namespace TSMapEditor.Rendering
         Map Map { get; }
         TheaterGraphics TheaterGraphics { get; }
         void AddRefreshPoint(Point2D point);
+        House ObjectOwner { get; }
     }
 
     /// <summary>
@@ -52,18 +53,13 @@ namespace TSMapEditor.Rendering
         public TheaterGraphics TheaterGraphics { get; }
         public MutationManager MutationManager { get; }
         public IMutationTarget MutationTarget => this;
+        public House ObjectOwner => EditorState.ObjectOwner;
         public TileInfoDisplay TileInfoDisplay { get; set; }
         
-
-        private CursorAction _cursorAction;
         public CursorAction CursorAction
         {
-            get => _cursorAction;
-            set
-            {
-                _cursorAction = value;
-                lastTileUnderCursor = null;
-            }
+            get => EditorState.CursorAction;
+            set => EditorState.CursorAction = value;
         }
 
         private RenderTarget2D mapRenderTarget;
@@ -95,7 +91,14 @@ namespace TSMapEditor.Rendering
             mapRenderTarget = CreateFullMapRenderTarget();
             objectRenderTarget = CreateFullMapRenderTarget();
 
+            EditorState.CursorActionChanged += EditorState_CursorActionChanged;
+
             Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
+        }
+
+        private void EditorState_CursorActionChanged(object sender, EventArgs e)
+        {
+            lastTileUnderCursor = null;
         }
 
         private RenderTarget2D CreateFullMapRenderTarget()
@@ -287,6 +290,24 @@ namespace TSMapEditor.Rendering
                     replacementColor = Color.Teal;
                     iniName = infantry.ObjectType.ININame;
                     remapColor = infantry.ObjectType.ArtConfig.Remapable ? infantry.Owner.XNAColor : remapColor;
+                    switch (infantry.SubCell)
+                    {
+                        case SubCell.Top:
+                            drawPoint += new Point2D(0, Constants.CellSizeY / -4);
+                            break;
+                        case SubCell.Bottom:
+                            drawPoint += new Point2D(0, Constants.CellSizeY / 4);
+                            break;
+                        case SubCell.Left:
+                            drawPoint += new Point2D(Constants.CellSizeX / -4, 0);
+                            break;
+                        case SubCell.Right:
+                            drawPoint += new Point2D(Constants.CellSizeX / 4, 0);
+                            break;
+                        case SubCell.Center:
+                        default:
+                            break;
+                    }
                     break;
                 case RTTIType.Overlay:
                     var overlay = (Overlay)gameObject;
@@ -485,7 +506,7 @@ namespace TSMapEditor.Rendering
             {
                 if (Cursor.LeftDown && lastTileUnderCursor != tileUnderCursor)
                 {
-                    CursorAction.LeftDown(tileUnderCursor.CoordsToPoint(), this);
+                    CursorAction.LeftDown(tileUnderCursor.CoordsToPoint());
                     lastTileUnderCursor = tileUnderCursor;
                 }
             }
@@ -497,7 +518,7 @@ namespace TSMapEditor.Rendering
 
             if (tileUnderCursor != null && CursorAction != null)
             {
-                CursorAction.LeftClick(tileUnderCursor.CoordsToPoint(), this);
+                CursorAction.LeftClick(tileUnderCursor.CoordsToPoint());
             }
         }
 
@@ -641,7 +662,7 @@ namespace TSMapEditor.Rendering
 
             if (tileUnderCursor != null && CursorAction != null)
             {
-                CursorAction.PreMapDraw(tileUnderCursor.CoordsToPoint(), this);
+                CursorAction.PreMapDraw(tileUnderCursor.CoordsToPoint());
             }
 
             foreach (var refresh in refreshes)
@@ -655,7 +676,7 @@ namespace TSMapEditor.Rendering
 
             if (tileUnderCursor != null && CursorAction != null)
             {
-                CursorAction.PostMapDraw(tileUnderCursor.CoordsToPoint(), this);
+                CursorAction.PostMapDraw(tileUnderCursor.CoordsToPoint());
             }
 
             DrawCursorTile();

@@ -19,5 +19,10 @@ namespace TSMapEditor.UI.Sidebar
         {
             InitObjectsBase(Map.Rules.AircraftTypes, null);
         }
+
+        protected override void ObjectSelected()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

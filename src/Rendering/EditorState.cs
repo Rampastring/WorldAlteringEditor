@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TSMapEditor.Models;
-using TSMapEditor.Mutations;
 using TSMapEditor.UI;
 
 namespace TSMapEditor.Rendering
@@ -14,10 +9,27 @@ namespace TSMapEditor.Rendering
     /// </summary>
     public class EditorState
     {
+        public event EventHandler CursorActionChanged;
         public event EventHandler ObjectOwnerChanged;
 
         public bool IsMarbleMadness { get; set; } = false;
-        public CursorAction CursorAction { get; set; }
+
+        private CursorAction _cursorAction;
+        public CursorAction CursorAction
+        {
+            get => _cursorAction;
+            set
+            {
+                if (_cursorAction != value)
+                {
+                    if (_cursorAction != null)
+                        _cursorAction.ExitAction();
+
+                    _cursorAction = value;
+                    CursorActionChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
 
         private House _objectOwner;
         public House ObjectOwner

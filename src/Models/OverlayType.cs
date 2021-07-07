@@ -14,7 +14,6 @@ namespace TSMapEditor.Models
         // We might not need all of these properties at least immediately,
         // but I listed them all for possible future convenience
 
-        public string Name { get; set; }
         public LandType Land { get; set; }
         public string Image { get; set; }
         public OverlayArtConfig ArtConfig { get; } = new OverlayArtConfig();

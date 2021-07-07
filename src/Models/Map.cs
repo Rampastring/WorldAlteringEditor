@@ -256,6 +256,40 @@ namespace TSMapEditor.Models
             TeamTypes.Add(teamType);
         }
 
+        public void PlaceUnit(Unit unit)
+        {
+            var cell = GetTile(unit.Position);
+            if (cell.Vehicle != null)
+                throw new InvalidOperationException("Cannot place a vehicle on a cell that already has a vehicle!");
+
+            cell.Vehicle = unit;
+            Units.Add(unit);
+        }
+
+        public void RemoveUnit(Unit unit)
+        {
+            var cell = GetTile(unit.Position);
+            cell.Vehicle = null;
+            Units.Remove(unit);
+        }
+
+        public void PlaceInfantry(Infantry infantry)
+        {
+            var cell = GetTile(infantry.Position);
+            if (cell.Infantry[(int)infantry.SubCell] != null)
+                throw new InvalidOperationException("Cannot place infantry on an occupied sub-cell spot!");
+
+            cell.Infantry[(int)infantry.SubCell] = infantry;
+            Infantry.Add(infantry);
+        }
+
+        public void RemoveInfantry(Infantry infantry)
+        {
+            var cell = GetTile(infantry.Position);
+            cell.Infantry[(int)infantry.SubCell] = null;
+            Infantry.Remove(infantry);
+        }
+
         public void DoForAllValidTiles(Action<MapTile> action)
         {
             for (int y = 0; y < Tiles.Length; y++)
