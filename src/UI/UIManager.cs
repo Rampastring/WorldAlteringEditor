@@ -6,6 +6,7 @@ using TSMapEditor.Models;
 using TSMapEditor.Mutations;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI.CursorActions;
+using TSMapEditor.UI.Sidebar;
 
 namespace TSMapEditor.UI
 {
@@ -22,6 +23,8 @@ namespace TSMapEditor.UI
 
         private MapView mapView;
         private TileSelector tileSelector;
+        private EditorSidebar editorSidebar;
+
         private EditorState editorState;
         private TileInfoDisplay tileInfoDisplay;
 
@@ -54,10 +57,18 @@ namespace TSMapEditor.UI
             mapView.Height = WindowManager.RenderResolutionY;
             AddChild(mapView);
 
+            editorSidebar = new EditorSidebar(WindowManager, map, theaterGraphics);
+            editorSidebar.Width = 250;
+            editorSidebar.Y = 40;
+            editorSidebar.Height = WindowManager.RenderResolutionY - editorSidebar.Y;
+            AddChild(editorSidebar);
+
             tileSelector = new TileSelector(WindowManager, theaterGraphics);
-            tileSelector.Width = WindowManager.RenderResolutionX;
+            tileSelector.X = editorSidebar.Right;
+            tileSelector.Width = WindowManager.RenderResolutionX - tileSelector.X;
             tileSelector.Height = 300;
             tileSelector.Y = WindowManager.RenderResolutionY - tileSelector.Height;
+            
             AddChild(tileSelector);
             tileSelector.TileDisplay.SelectedTileChanged += TileDisplay_SelectedTileChanged;
 

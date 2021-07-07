@@ -1,4 +1,5 @@
-﻿using Rampastring.Tools;
+﻿using Microsoft.Xna.Framework;
+using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
 using TSMapEditor.Initialization;
@@ -86,8 +87,14 @@ namespace TSMapEditor.Models
 
         private void InitHouse(IniFile iniFile, House house)
         {
-            house.Name = iniFile.GetStringValue(house.ININame, "Name", house.ININame);
-            house.Color = iniFile.GetStringValue(house.ININame, "Color", "Grey");
+            house.ReadPropertiesFromIniSection(iniFile.GetSection(house.ININame));
+            //house.Name = iniFile.GetStringValue(house.ININame, "Name", house.ININame);
+            //house.Color = iniFile.GetStringValue(house.ININame, "Color", "Grey");
+            var color = Colors.Find(c => c.Name == house.Color);
+            if (color == null)
+                house.XNAColor = Color.Black;
+            else
+                house.XNAColor = color.XNAColor;
         }
 
         private void InitFromTypeSection<T>(IniFile iniFile, string sectionName, List<T> targetList)

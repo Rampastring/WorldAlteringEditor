@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TSMapEditor.Models;
+using TSMapEditor.Mutations;
 using TSMapEditor.UI;
 
 namespace TSMapEditor.Rendering
@@ -14,5 +16,6 @@ namespace TSMapEditor.Rendering
     {
         public bool IsMarbleMadness { get; set; } = false;
         public CursorAction CursorAction { get; set; }
+        public House ObjectOwner { get; set; }
     }
 }

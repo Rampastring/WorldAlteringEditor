@@ -151,6 +151,10 @@
     <Compile Include="UI\EditorPanel.cs" />
     <Compile Include="UI\KeyboardCommand.cs" />
     <Compile Include="UI\KeyboardCommands.cs" />
+    <Compile Include="UI\Sidebar\EditorSidebar.cs" />
+    <Compile Include="UI\Sidebar\ObjectListPanel.cs" />
+    <Compile Include="UI\Sidebar\SidebarMode.cs" />
+    <Compile Include="UI\Sidebar\TreeView.cs" />
     <Compile Include="UI\TileDisplay.cs" />
     <Compile Include="UI\TileInfoDisplay.cs" />
     <Compile Include="UI\TileSelector.cs" />
