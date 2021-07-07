@@ -152,6 +152,7 @@
     <Compile Include="UI\KeyboardCommand.cs" />
     <Compile Include="UI\KeyboardCommands.cs" />
     <Compile Include="UI\Sidebar\AircraftListPanel.cs" />
+    <Compile Include="UI\Sidebar\BuildingListPanel.cs" />
     <Compile Include="UI\Sidebar\EditorSidebar.cs" />
     <Compile Include="UI\Sidebar\InfantryListPanel.cs" />
     <Compile Include="UI\Sidebar\ObjectListPanel.cs" />

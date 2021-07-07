@@ -9,6 +9,8 @@ namespace TSMapEditor.Models
         }
 
         public int Upgrades { get; set; }
+        public string PowersUpBuilding { get; set; }
+
         public BuildingArtConfig ArtConfig { get; set; } = new BuildingArtConfig();
         public IArtConfig GetArtConfig() => ArtConfig;
 

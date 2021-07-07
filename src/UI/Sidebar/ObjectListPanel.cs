@@ -104,6 +104,17 @@ namespace TSMapEditor.UI.Sidebar
                 var objectType = objectTypeList[i];
                 Color remapColor = Color.White;
 
+                if (objectType.WhatAmI() == RTTIType.BuildingType)
+                {
+                    var buildingType = (BuildingType)(TechnoType)objectType;
+                    if (buildingType.PowersUpBuilding != null)
+                    {
+                        // Don't list upgrades
+                        continue;
+                    }
+                }
+
+
                 if (string.IsNullOrEmpty(objectType.Owner))
                 {
                     category = FindOrMakeCategory("Unspecified", sideCategories);

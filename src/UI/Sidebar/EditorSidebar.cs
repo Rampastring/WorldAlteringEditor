@@ -1,4 +1,5 @@
-﻿using Rampastring.XNAUI;
+﻿using Microsoft.Xna.Framework.Input;
+using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
 using TSMapEditor.Models;
@@ -22,6 +23,7 @@ namespace TSMapEditor.UI.Sidebar
         private XNAListBox lbSelection;
 
         private XNAPanel[] modePanels;
+        private XNAPanel activePanel;
 
         public override void Initialize()
         {
@@ -41,13 +43,15 @@ namespace TSMapEditor.UI.Sidebar
 
             lbSelection.Height = lbSelection.Items.Count * lbSelection.LineHeight + 5;
             AddChild(lbSelection);
-            
-
             lbSelection.EnableScrollbar = false;
 
             var aircraftListPanel = new AircraftListPanel(WindowManager, editorState, map, theaterGraphics);
             aircraftListPanel.Name = nameof(aircraftListPanel);
             InitPanel(aircraftListPanel);
+
+            var buildingListPanel = new BuildingListPanel(WindowManager, editorState, map, theaterGraphics);
+            buildingListPanel.Name = nameof(buildingListPanel);
+            InitPanel(buildingListPanel);
 
             var unitListPanel = new UnitListPanel(WindowManager, editorState, map, theaterGraphics);
             unitListPanel.Name = nameof(unitListPanel);
@@ -60,7 +64,7 @@ namespace TSMapEditor.UI.Sidebar
             modePanels = new XNAPanel[]
             {
                 aircraftListPanel,
-                null, // buildings
+                buildingListPanel,
                 unitListPanel,
                 infantryListPanel, // infantry
                 null, // terrain objects
@@ -70,6 +74,23 @@ namespace TSMapEditor.UI.Sidebar
             lbSelection.SelectedIndex = 0;
 
             base.Initialize();
+
+            Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
+        }
+
+        private void Keyboard_OnKeyPressed(object sender, Rampastring.XNAUI.Input.KeyPressEventArgs e)
+        {
+            if (!WindowManager.HasFocus)
+                return;
+
+            if (e.PressedKey == Keys.F && Keyboard.IsCtrlHeldDown())
+            {
+                if (activePanel != null)
+                {
+                    if (activePanel is ObjectListPanel objectPanel)
+                        WindowManager.SelectedControl = objectPanel.SearchBox;
+                }
+            }
         }
 
         private void LbSelection_SelectedIndexChanged(object sender, EventArgs e)
@@ -80,10 +101,15 @@ namespace TSMapEditor.UI.Sidebar
                     panel.Disable();
             }
 
-            if (lbSelection.SelectedIndex > -1)
+            activePanel = null;
+            int selectedIndex = lbSelection.SelectedIndex;
+
+            if (selectedIndex > -1)
             {
-                if (modePanels[lbSelection.SelectedIndex] != null)
-                    modePanels[lbSelection.SelectedIndex].Enable();
+                if (modePanels[selectedIndex] != null)
+                    modePanels[selectedIndex].Enable();
+
+                activePanel = modePanels[selectedIndex];
             }
         }
 
