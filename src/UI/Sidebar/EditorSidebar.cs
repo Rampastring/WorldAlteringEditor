@@ -48,7 +48,7 @@ namespace TSMapEditor.UI.Sidebar
             AddChild(lbSelection);
             lbSelection.EnableScrollbar = false;
 
-            var aircraftListPanel = new AircraftListPanel(WindowManager, editorState, map, theaterGraphics);
+            var aircraftListPanel = new AircraftListPanel(WindowManager, editorState, map, theaterGraphics, cursorActionTarget);
             aircraftListPanel.Name = nameof(aircraftListPanel);
             InitPanel(aircraftListPanel);
 

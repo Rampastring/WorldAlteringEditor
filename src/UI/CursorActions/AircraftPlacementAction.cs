@@ -6,35 +6,32 @@ using TSMapEditor.Rendering;
 
 namespace TSMapEditor.UI.CursorActions
 {
-    /// <summary>
-    /// A cursor action that allows placing units on the map.
-    /// </summary>
-    class UnitPlacementAction : CursorAction
+    public class AircraftPlacementAction : CursorAction
     {
-        public UnitPlacementAction(ICursorActionTarget cursorActionTarget) : base(cursorActionTarget)
+        public AircraftPlacementAction(ICursorActionTarget cursorActionTarget) : base(cursorActionTarget)
         {
         }
 
-        private Unit unit;
+        private Aircraft aircraft;
 
-        private UnitType _unitType;
+        private AircraftType _aircraftType;
 
-        public UnitType UnitType
+        public AircraftType AircraftType
         {
-            get => _unitType;
+            get => _aircraftType;
             set
             {
-                if (_unitType != value)
+                if (_aircraftType != value)
                 {
-                    _unitType = value;
+                    _aircraftType = value;
 
-                    if (_unitType == null)
+                    if (_aircraftType == null)
                     {
-                        unit = null;
+                        aircraft = null;
                     }
                     else
                     {
-                        unit = new Unit(_unitType) { Owner = CursorActionTarget.MutationTarget.ObjectOwner };
+                        aircraft = new Aircraft(_aircraftType) { Owner = CursorActionTarget.MutationTarget.ObjectOwner };
                     }
                 }
             }
@@ -43,12 +40,12 @@ namespace TSMapEditor.UI.CursorActions
         public override void PreMapDraw(Point2D cellCoords)
         {
             // Assign preview data
-            unit.Position = cellCoords;
+            aircraft.Position = cellCoords;
 
             var tile = CursorActionTarget.Map.GetTile(cellCoords);
-            if (tile.Vehicle == null)
+            if (tile.Aircraft == null)
             {
-                tile.Vehicle = unit;
+                tile.Aircraft = aircraft;
                 CursorActionTarget.AddRefreshPoint(cellCoords);
             }
         }
@@ -57,23 +54,23 @@ namespace TSMapEditor.UI.CursorActions
         {
             // Clear preview data
             var tile = CursorActionTarget.Map.GetTile(cellCoords);
-            if (tile.Vehicle == unit)
+            if (tile.Aircraft == aircraft)
             {
-                tile.Vehicle = null;
+                tile.Aircraft = null;
                 CursorActionTarget.AddRefreshPoint(cellCoords);
             }
         }
 
         public override void LeftDown(Point2D cellPoint)
         {
-            if (UnitType == null)
-                throw new InvalidOperationException(nameof(UnitType) + " cannot be null");
+            if (AircraftType == null)
+                throw new InvalidOperationException(nameof(AircraftType) + " cannot be null");
 
             var tile = CursorActionTarget.Map.GetTile(cellPoint);
-            if (tile.Vehicle != null)
+            if (tile.Aircraft != null)
                 return;
 
-            var mutation = new PlaceVehicleMutation(CursorActionTarget.MutationTarget, UnitType, cellPoint);
+            var mutation = new PlaceAircraftMutation(CursorActionTarget.MutationTarget, AircraftType, cellPoint);
             CursorActionTarget.MutationManager.PerformMutation(mutation);
         }
 

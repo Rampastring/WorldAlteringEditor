@@ -290,6 +290,23 @@ namespace TSMapEditor.Models
             Infantry.Remove(infantry);
         }
 
+        public void PlaceAircraft(Aircraft aircraft)
+        {
+            var cell = GetTile(aircraft.Position);
+            if (cell.Aircraft != null)
+                throw new InvalidOperationException("Cannot place an aircraft on a cell that already has an aircraft!");
+
+            cell.Aircraft = aircraft;
+            Aircraft.Add(aircraft);
+        }
+
+        public void RemoveAircraft(Aircraft aircraft)
+        {
+            var cell = GetTile(aircraft.Position);
+            cell.Aircraft = null;
+            Aircraft.Remove(aircraft);
+        }
+
         public void DoForAllValidTiles(Action<MapTile> action)
         {
             for (int y = 0; y < Tiles.Length; y++)

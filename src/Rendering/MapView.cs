@@ -178,6 +178,7 @@ namespace TSMapEditor.Rendering
         {
             List<GameObject> gameObjects = new List<GameObject>(Map.TerrainObjects);
             gameObjects.AddRange(Map.Structures);
+            gameObjects.AddRange(Map.Aircraft);
             gameObjects.AddRange(Map.Units);
             gameObjects.AddRange(Map.Infantry);
             gameObjects = gameObjects.OrderBy(s => s.GetYPositionForDrawOrder())
@@ -220,6 +221,9 @@ namespace TSMapEditor.Rendering
                         if (tile.Infantry[i] != null)
                             objectsToRedraw.Add(tile.Infantry[i]);
                     }
+
+                    if (tile.Aircraft != null)
+                        objectsToRedraw.Add(tile.Aircraft);
 
                     if (tile.Vehicle != null)
                         objectsToRedraw.Add(tile.Vehicle);
@@ -264,6 +268,11 @@ namespace TSMapEditor.Rendering
 
             switch (gameObject.WhatAmI())
             {
+                case RTTIType.Aircraft:
+                    var aircraft = (Aircraft)gameObject;
+                    replacementColor = Color.HotPink;
+                    iniName = aircraft.ObjectType.ININame;
+                    break;
                 case RTTIType.Terrain:
                     var terrainObject = (TerrainObject)gameObject;
                     graphics = TheaterGraphics.TerrainObjectTextures[terrainObject.TerrainType.Index];
@@ -340,7 +349,7 @@ namespace TSMapEditor.Rendering
 
             if (graphics == null || graphics.Frames.Length == 0)
             {
-                DrawString(iniName, 1, drawPoint.ToXNAVector(), replacementColor, 1.0f);
+                DrawStringWithShadow(iniName, 1, drawPoint.ToXNAVector(), replacementColor, 1.0f);
                 return;
             }
 

@@ -72,7 +72,7 @@ namespace TSMapEditor.UI.CursorActions
         public override void LeftDown(Point2D cellPoint)
         {
             if (InfantryType == null)
-                throw new InvalidOperationException("UnitType cannot be null");
+                throw new InvalidOperationException(nameof(InfantryType) + " cannot be null");
 
             var tile = CursorActionTarget.Map.GetTile(cellPoint);
             SubCell freeSubCell = tile.GetFreeSubCellSpot();
