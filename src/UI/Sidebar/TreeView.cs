@@ -104,6 +104,62 @@ namespace TSMapEditor.UI.Sidebar
             ScrollBar.Refresh();
         }
 
+        /// <summary>
+        /// Finds a node from the tree view with the specified text.
+        /// </summary>
+        /// <param name="text">The search term.</param>
+        /// <param name="findNext">Whether the find the next matching node that follows the currently selected node.
+        /// If set to false, then simply finds the first matching node.</param>
+        public void FindNode(string text, bool findNext)
+        {
+            TreeViewNode foundNode = null;
+            int accumulatedHeight = 0;
+            bool selectedFound = false;
+
+            foreach (var category in Categories)
+            {
+                accumulatedHeight += CategoryHeight;
+
+                for (int i = 0; i < category.Nodes.Count; i++)
+                {
+                    var currentNode = category.Nodes[i];
+
+                    if (currentNode.Text.ToUpperInvariant().Contains(text.ToUpperInvariant()))
+                    {
+                        if (findNext && currentNode == SelectedNode)
+                        {
+                            selectedFound = true;
+                        }
+                        else if (!findNext || (findNext && selectedFound))
+                        {
+                            foundNode = currentNode;
+                            accumulatedHeight += i * LineHeight;
+                            category.IsOpened = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (foundNode != null)
+                    break;
+
+                if (category.IsOpened)
+                    accumulatedHeight += category.Nodes.Count * LineHeight;
+            }
+
+            if (foundNode != null)
+            {
+                SelectedNode = foundNode;
+
+                // Scroll the view to the found item
+                int totalHeight = GetTotalContentHeight();
+                if (accumulatedHeight + Height > totalHeight)
+                    accumulatedHeight = totalHeight - Height;
+
+                ViewTop = accumulatedHeight;
+            }
+        }
+
         private int GetTotalContentHeight()
         {
             int height = 0;
@@ -239,7 +295,7 @@ namespace TSMapEditor.UI.Sidebar
             else if (mouseLocation.X > Width)
                 return null;
 
-            if (mouseLocation.Y > Height)
+            if (mouseLocation.Y > Height || mouseLocation.Y < MARGIN)
                 return null;
 
             int height = MARGIN;

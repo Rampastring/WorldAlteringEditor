@@ -57,7 +57,7 @@ namespace TSMapEditor.UI
             mapView.Height = WindowManager.RenderResolutionY;
             AddChild(mapView);
 
-            editorSidebar = new EditorSidebar(WindowManager, map, theaterGraphics);
+            editorSidebar = new EditorSidebar(WindowManager, editorState, map, theaterGraphics);
             editorSidebar.Width = 250;
             editorSidebar.Y = 40;
             editorSidebar.Height = WindowManager.RenderResolutionY - editorSidebar.Y;
@@ -78,6 +78,9 @@ namespace TSMapEditor.UI
             mapView.TileInfoDisplay = tileInfoDisplay;
 
             base.Initialize();
+
+            if (map.Houses.Count > 0)
+                editorState.ObjectOwner = map.Houses[0];
 
             Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
         }

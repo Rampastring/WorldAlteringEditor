@@ -14,8 +14,23 @@ namespace TSMapEditor.Rendering
     /// </summary>
     public class EditorState
     {
+        public event EventHandler ObjectOwnerChanged;
+
         public bool IsMarbleMadness { get; set; } = false;
         public CursorAction CursorAction { get; set; }
-        public House ObjectOwner { get; set; }
+
+        private House _objectOwner;
+        public House ObjectOwner
+        {
+            get => _objectOwner;
+            set
+            {
+                if (_objectOwner != value)
+                {
+                    _objectOwner = value;
+                    ObjectOwnerChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
     }
 }

@@ -155,6 +155,7 @@
     <Compile Include="UI\Sidebar\ObjectListPanel.cs" />
     <Compile Include="UI\Sidebar\SidebarMode.cs" />
     <Compile Include="UI\Sidebar\TreeView.cs" />
+    <Compile Include="UI\Sidebar\UnitListPanel.cs" />
     <Compile Include="UI\TileDisplay.cs" />
     <Compile Include="UI\TileInfoDisplay.cs" />
     <Compile Include="UI\TileSelector.cs" />
@@ -188,7 +189,25 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\checkBoxChecked.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\checkBoxCheckedD.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\checkBoxClear.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\checkBoxClearD.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\comboBoxArrow.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\cursor.cur">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\openedComboBoxArrow.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\sbBackground.png">

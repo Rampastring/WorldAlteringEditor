@@ -17,8 +17,13 @@
         public const int UIEmptyTopSpace = 10;
         public const int UIEmptyBottomSpace = 10;
 
+        public const int UIHorizontalSpacing = 6;
+        public const int UIVerticalSpacing = 6;
+
         public const int UIDefaultFont = 0;
         public const int UIBoldFont = 1;
+
+        public const int UITextBoxHeight = 21;
 
         public const int MAX_MAP_LENGTH_IN_DIMENSION = 512;
         public const int NO_OVERLAY = 255; // 0xFF
