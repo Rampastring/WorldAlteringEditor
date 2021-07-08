@@ -190,6 +190,7 @@ namespace TSMapEditor.Rendering
         {
             var tilesToRedraw = new List<MapTile>();
             var waypointsToRedraw = new List<Waypoint>();
+            var cellTagsToRedraw = new List<CellTag>();
             var objectsToRedraw = new List<GameObject>();
             const int tileRefreshArea = 10;
             const int objectRefreshArea = 20;
@@ -205,6 +206,9 @@ namespace TSMapEditor.Rendering
 
                     if (tile.Waypoint != null)
                         waypointsToRedraw.Add(tile.Waypoint);
+
+                    if (tile.CellTag != null)
+                        cellTagsToRedraw.Add(tile.CellTag);
                 }
             }
 
@@ -247,10 +251,8 @@ namespace TSMapEditor.Rendering
                     DrawObject(t.Overlay);
             });
             objectsToRedraw.ForEach(o => DrawObject(o));
-            waypointsToRedraw.ForEach(w =>
-            {
-                DrawWaypoint(w);
-            });
+            cellTagsToRedraw.ForEach(c => DrawCellTag(c));
+            waypointsToRedraw.ForEach(w => DrawWaypoint(w));
             DrawMapBorder();
             Renderer.PopRenderTarget();
         }
@@ -523,12 +525,22 @@ namespace TSMapEditor.Rendering
 
         public override void OnLeftClick()
         {
-            base.OnLeftClick();
-
             if (tileUnderCursor != null && CursorAction != null)
             {
                 CursorAction.LeftClick(tileUnderCursor.CoordsToPoint());
             }
+
+            base.OnLeftClick();
+        }
+
+        public override void OnRightClick()
+        {
+            if (CursorAction != null)
+            {
+                CursorAction = null;
+            }
+
+            base.OnRightClick();
         }
 
         public override void Update(GameTime gameTime)
@@ -609,12 +621,12 @@ namespace TSMapEditor.Rendering
             {
                 DrawString("Null tile", 0, new Vector2(0f, 40f), Color.White);
             }
-            else
+            else if (CursorAction == null)
             {
                 Point2D drawPoint = CellMath.CellTopLeftPoint(new Point2D(tileUnderCursor.X, tileUnderCursor.Y), Map.Size.X);
-                FillRectangle(new Rectangle(drawPoint.X - cameraTopLeftPoint.X,
-                    drawPoint.Y - cameraTopLeftPoint.Y,
-                    Constants.CellSizeX, Constants.CellSizeY),
+                FillRectangle(new Rectangle(drawPoint.X - cameraTopLeftPoint.X + Constants.CellSizeX / 4,
+                    drawPoint.Y - cameraTopLeftPoint.Y + Constants.CellSizeY / 4,
+                    Constants.CellSizeX / 2, Constants.CellSizeY / 2),
                     new Color(128, 128, 128, 128));
             }
         }
@@ -686,6 +698,7 @@ namespace TSMapEditor.Rendering
             if (tileUnderCursor != null && CursorAction != null)
             {
                 CursorAction.PostMapDraw(tileUnderCursor.CoordsToPoint());
+                CursorAction.DrawPreview(tileUnderCursor.CoordsToPoint(), cameraTopLeftPoint);
             }
 
             DrawCursorTile();

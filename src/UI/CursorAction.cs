@@ -46,5 +46,13 @@ namespace TSMapEditor.UI
         /// </summary>
         /// <param name="cellCoords">The coords of the cell under the cursor.</param>
         public virtual void LeftClick(Point2D cellCoords) { }
+
+        /// <summary>
+        /// Called after drawing the map.
+        /// Override in derived classes to draw on top of the map texture.
+        /// </summary>
+        /// <param name="cellCoords">The coords of the cell under the cursor.</param>
+        /// <param name="cameraTopLeftPoint">The top-left point of the user's screen.</param>
+        public virtual void DrawPreview(Point2D cellCoords, Point2D cameraTopLeftPoint) { }
     }
 }

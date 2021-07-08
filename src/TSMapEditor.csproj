@@ -136,6 +136,7 @@
     <Compile Include="Models\Unit.cs" />
     <Compile Include="Models\UnitType.cs" />
     <Compile Include="Models\Waypoint.cs" />
+    <Compile Include="Mutations\Classes\ChangeTechnoOwnerMutation.cs" />
     <Compile Include="Mutations\Classes\ChangeTerrainMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceAircraftMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceInfantryMutation.cs" />
@@ -151,6 +152,7 @@
     <Compile Include="Rendering\TheaterGraphics.cs" />
     <Compile Include="UI\CursorAction.cs" />
     <Compile Include="UI\CursorActions\AircraftPlacementAction.cs" />
+    <Compile Include="UI\CursorActions\ChangeTechnoOwnerAction.cs" />
     <Compile Include="UI\CursorActions\InfantryPlacementAction.cs" />
     <Compile Include="UI\CursorActions\TerrainPlacementAction.cs" />
     <Compile Include="UI\CursorActions\UnitPlacementAction.cs" />

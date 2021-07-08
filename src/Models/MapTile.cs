@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models.MapFormat;
 using TSMapEditor.Rendering;
@@ -49,6 +50,30 @@ namespace TSMapEditor.Models
         public Infantry GetInfantryFromSubCellSpot(SubCell subCell)
         {
             return Infantry[(int)subCell];
+        }
+
+        public bool HasTechno()
+        {
+            return Structure != null || Vehicle != null || Aircraft != null || Array.Exists(Infantry, inf => inf != null);
+        }
+
+        public bool HasTechnoThatPassesCheck(Predicate<TechnoBase> predicate)
+        {
+            return GetFirstTechnoThatPassesCheck(predicate) != null;
+        }
+
+        public TechnoBase GetFirstTechnoThatPassesCheck(Predicate<TechnoBase> predicate)
+        {
+            if (Structure != null && predicate(Structure))
+                return Structure;
+
+            if (Vehicle != null && predicate(Vehicle))
+                return Vehicle;
+
+            if (Aircraft != null && predicate(Aircraft))
+                return Aircraft;
+
+            return Array.Find(Infantry, inf => inf != null && predicate(inf));
         }
 
         public TileImage PreviewTileImage { get; set; }

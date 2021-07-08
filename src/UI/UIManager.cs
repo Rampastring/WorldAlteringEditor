@@ -29,6 +29,7 @@ namespace TSMapEditor.UI
         private TileInfoDisplay tileInfoDisplay;
 
         private TerrainPlacementAction terrainPlacementAction;
+        private ChangeTechnoOwnerAction changeTechnoOwnerAction;
 
         private MutationManager mutationManager;
 
@@ -56,6 +57,8 @@ namespace TSMapEditor.UI
             AddChild(mapView);
 
             terrainPlacementAction = new TerrainPlacementAction(mapView);
+            changeTechnoOwnerAction = new ChangeTechnoOwnerAction(mapView);
+            editorState.ObjectOwnerChanged += (s, e) => editorState.CursorAction = changeTechnoOwnerAction;
 
             editorSidebar = new EditorSidebar(WindowManager, editorState, map, theaterGraphics, mapView);
             editorSidebar.Width = 250;
