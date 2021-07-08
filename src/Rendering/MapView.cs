@@ -73,11 +73,18 @@ namespace TSMapEditor.Rendering
 
         private int scrollRate = 20;
 
+        // For right-click scrolling
+        private bool isRightClickScrolling = false;
+        private Point rightClickScrollInitPos = new Point(-1, -1);
+        private Vector2 cameraFloatTopLeftPoint = new Vector2(-1, -1);
+
         /// <summary>
         /// A list of cells that have been invalidated.
         /// Areas around these cells are to be redrawn.
         /// </summary>
         private List<Point2D> refreshes = new List<Point2D>();
+
+
 
         public void AddRefreshPoint(Point2D point)
         {
@@ -509,6 +516,24 @@ namespace TSMapEditor.Rendering
             DrawRectangle(new Rectangle(x, y, width, height), Color.Blue, 4);
         }
 
+        public override void OnMouseOnControl()
+        {
+            if (Cursor.RightDown && isRightClickScrolling)
+            {
+                var newCursorPosition = GetCursorPoint();
+                var result = newCursorPosition - rightClickScrollInitPos;
+                float rightClickScrollRate = scrollRate / 64f;
+
+                cameraFloatTopLeftPoint = new Vector2(cameraFloatTopLeftPoint.X + result.X * rightClickScrollRate,
+                    cameraFloatTopLeftPoint.Y + result.Y * rightClickScrollRate);
+
+                cameraTopLeftPoint = new Point2D((int)cameraFloatTopLeftPoint.X,
+                    (int)cameraFloatTopLeftPoint.Y);
+            }
+
+            base.OnMouseOnControl();
+        }
+
         public override void OnMouseMove()
         {
             base.OnMouseMove();
@@ -520,6 +545,22 @@ namespace TSMapEditor.Rendering
                     CursorAction.LeftDown(tileUnderCursor.CoordsToPoint());
                     lastTileUnderCursor = tileUnderCursor;
                 }
+            }
+
+            // Right-click scrolling
+            if (Cursor.RightDown)
+            {
+                if (!isRightClickScrolling)
+                {
+                    isRightClickScrolling = true;
+                    rightClickScrollInitPos = GetCursorPoint();
+                    cameraFloatTopLeftPoint = cameraTopLeftPoint.ToXNAVector();
+                }
+            }
+            else if (isRightClickScrolling)
+            {
+                isRightClickScrolling = false;
+                rightClickScrollInitPos = new Point(-1, -1);
             }
         }
 
@@ -535,7 +576,7 @@ namespace TSMapEditor.Rendering
 
         public override void OnRightClick()
         {
-            if (CursorAction != null)
+            if (CursorAction != null && !isRightClickScrolling)
             {
                 CursorAction = null;
             }
