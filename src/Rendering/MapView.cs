@@ -518,17 +518,24 @@ namespace TSMapEditor.Rendering
 
         public override void OnMouseOnControl()
         {
-            if (Cursor.RightDown && isRightClickScrolling)
+            if (isRightClickScrolling)
             {
-                var newCursorPosition = GetCursorPoint();
-                var result = newCursorPosition - rightClickScrollInitPos;
-                float rightClickScrollRate = scrollRate / 64f;
+                if (!Cursor.RightDown)
+                {
+                    isRightClickScrolling = false;
+                }
+                else
+                {
+                    var newCursorPosition = GetCursorPoint();
+                    var result = newCursorPosition - rightClickScrollInitPos;
+                    float rightClickScrollRate = scrollRate / 64f;
 
-                cameraFloatTopLeftPoint = new Vector2(cameraFloatTopLeftPoint.X + result.X * rightClickScrollRate,
-                    cameraFloatTopLeftPoint.Y + result.Y * rightClickScrollRate);
+                    cameraFloatTopLeftPoint = new Vector2(cameraFloatTopLeftPoint.X + result.X * rightClickScrollRate,
+                        cameraFloatTopLeftPoint.Y + result.Y * rightClickScrollRate);
 
-                cameraTopLeftPoint = new Point2D((int)cameraFloatTopLeftPoint.X,
-                    (int)cameraFloatTopLeftPoint.Y);
+                    cameraTopLeftPoint = new Point2D((int)cameraFloatTopLeftPoint.X,
+                        (int)cameraFloatTopLeftPoint.Y);
+                }
             }
 
             base.OnMouseOnControl();
