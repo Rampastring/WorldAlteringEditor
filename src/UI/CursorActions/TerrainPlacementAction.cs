@@ -57,7 +57,7 @@ namespace TSMapEditor.UI.CursorActions
             if (Tile == null)
                 return;
 
-            var mutation = new ChangeTerrainMutation(CursorActionTarget.MutationTarget, CursorActionTarget.Map.GetTile(cellCoords), Tile);
+            var mutation = new PlaceTerrainTileMutation(CursorActionTarget.MutationTarget, CursorActionTarget.Map.GetTile(cellCoords), Tile);
             CursorActionTarget.MutationManager.PerformMutation(mutation);
         }
 

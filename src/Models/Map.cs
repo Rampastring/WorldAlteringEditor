@@ -307,6 +307,23 @@ namespace TSMapEditor.Models
             Aircraft.Remove(aircraft);
         }
 
+        public void AddTerrainObject(TerrainObject terrainObject)
+        {
+            var cell = GetTile(terrainObject.Position);
+            if (cell.TerrainObject != null)
+                throw new InvalidOperationException("Cannot place a terrain object on a cell that already has a terrain object!");
+
+            cell.TerrainObject = terrainObject;
+            TerrainObjects.Add(terrainObject);
+        }
+
+        public void RemoveTerrainObject(Point2D cellCoords)
+        {
+            var cell = GetTile(cellCoords);
+            TerrainObjects.Remove(cell.TerrainObject);
+            cell.TerrainObject = null;
+        }
+
         public void DoForAllValidTiles(Action<MapTile> action)
         {
             for (int y = 0; y < Tiles.Length; y++)

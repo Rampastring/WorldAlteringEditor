@@ -137,9 +137,10 @@
     <Compile Include="Models\UnitType.cs" />
     <Compile Include="Models\Waypoint.cs" />
     <Compile Include="Mutations\Classes\ChangeTechnoOwnerMutation.cs" />
-    <Compile Include="Mutations\Classes\ChangeTerrainMutation.cs" />
+    <Compile Include="Mutations\Classes\PlaceTerrainTileMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceAircraftMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceInfantryMutation.cs" />
+    <Compile Include="Mutations\Classes\PlaceTerrainObjectMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceVehicleMutation.cs" />
     <Compile Include="Mutations\Mutation.cs" />
     <Compile Include="Mutations\MutationManager.cs" />
@@ -154,6 +155,7 @@
     <Compile Include="UI\CursorActions\AircraftPlacementAction.cs" />
     <Compile Include="UI\CursorActions\ChangeTechnoOwnerAction.cs" />
     <Compile Include="UI\CursorActions\InfantryPlacementAction.cs" />
+    <Compile Include="UI\CursorActions\TerrainObjectPlacementAction.cs" />
     <Compile Include="UI\CursorActions\TerrainPlacementAction.cs" />
     <Compile Include="UI\CursorActions\UnitPlacementAction.cs" />
     <Compile Include="UI\EditorPanel.cs" />
@@ -163,8 +165,10 @@
     <Compile Include="UI\Sidebar\BuildingListPanel.cs" />
     <Compile Include="UI\Sidebar\EditorSidebar.cs" />
     <Compile Include="UI\Sidebar\InfantryListPanel.cs" />
+    <Compile Include="UI\Sidebar\ISearchBoxContainer.cs" />
     <Compile Include="UI\Sidebar\ObjectListPanel.cs" />
     <Compile Include="UI\Sidebar\SidebarMode.cs" />
+    <Compile Include="UI\Sidebar\TerrainObjectListPanel.cs" />
     <Compile Include="UI\Sidebar\TreeView.cs" />
     <Compile Include="UI\Sidebar\UnitListPanel.cs" />
     <Compile Include="UI\TileDisplay.cs" />

@@ -38,7 +38,7 @@ namespace TSMapEditor.Mutations.Classes
         public override void Undo()
         {
             var cell = MutationTarget.Map.GetTile(cellCoords);
-            MutationTarget.Map.RemoveUnit(cell.Vehicle);
+            MutationTarget.Map.RemoveAircraft(cell.Aircraft);
             MutationTarget.AddRefreshPoint(cellCoords);
         }
     }

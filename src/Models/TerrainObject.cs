@@ -7,9 +7,13 @@ namespace TSMapEditor.Models
     /// </summary>
     public class TerrainObject : GameObject
     {
-        public TerrainObject(TerrainType terrainType, Point2D position)
+        public TerrainObject(TerrainType terrainType)
         {
             TerrainType = terrainType;
+        }
+
+        public TerrainObject(TerrainType terrainType, Point2D position) : this(terrainType)
+        {
             Position = position;
         }
 

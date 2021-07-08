@@ -14,7 +14,7 @@ namespace TSMapEditor.UI.Sidebar
     /// <summary>
     /// A base class for all object type list panels.
     /// </summary>
-    public abstract class ObjectListPanel : XNAPanel
+    public abstract class ObjectListPanel : XNAPanel, ISearchBoxContainer
     {
         public ObjectListPanel(WindowManager windowManager, EditorState editorState, Map map, TheaterGraphics theaterGraphics) : base(windowManager)
         {

@@ -64,13 +64,17 @@ namespace TSMapEditor.UI.Sidebar
             infantryListPanel.Name = nameof(infantryListPanel);
             InitPanel(infantryListPanel);
 
+            var terrainObjectListPanel = new TerrainObjectListPanel(WindowManager, editorState, map, theaterGraphics, cursorActionTarget);
+            terrainObjectListPanel.Name = nameof(terrainObjectListPanel);
+            InitPanel(terrainObjectListPanel);
+
             modePanels = new XNAPanel[]
             {
                 aircraftListPanel,
                 buildingListPanel,
                 unitListPanel,
-                infantryListPanel, // infantry
-                null, // terrain objects
+                infantryListPanel,
+                terrainObjectListPanel,
                 null // overlay
             };
             lbSelection.SelectedIndexChanged += LbSelection_SelectedIndexChanged;
@@ -90,8 +94,8 @@ namespace TSMapEditor.UI.Sidebar
             {
                 if (activePanel != null)
                 {
-                    if (activePanel is ObjectListPanel objectPanel)
-                        WindowManager.SelectedControl = objectPanel.SearchBox;
+                    if (activePanel is ISearchBoxContainer searchBoxContainer)
+                        WindowManager.SelectedControl = searchBoxContainer.SearchBox;
                 }
             }
         }
@@ -116,7 +120,7 @@ namespace TSMapEditor.UI.Sidebar
             }
         }
 
-        private void InitPanel(ObjectListPanel panel)
+        private void InitPanel(XNAPanel panel)
         {
             panel.Y = lbSelection.Bottom;
             panel.Height = Height - panel.Y;

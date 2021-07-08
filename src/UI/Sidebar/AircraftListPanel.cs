@@ -11,7 +11,9 @@ namespace TSMapEditor.UI.Sidebar
     /// </summary>
     public class AircraftListPanel : ObjectListPanel
     {
-        public AircraftListPanel(WindowManager windowManager, EditorState editorState, Map map, TheaterGraphics theaterGraphics, ICursorActionTarget cursorActionTarget) : base(windowManager, editorState, map, theaterGraphics)
+        public AircraftListPanel(WindowManager windowManager, EditorState editorState,
+            Map map, TheaterGraphics theaterGraphics, ICursorActionTarget cursorActionTarget)
+            : base(windowManager, editorState, map, theaterGraphics)
         {
             aircraftPlacementAction = new AircraftPlacementAction(cursorActionTarget);
             aircraftPlacementAction.ActionExited += AircraftPlacementAction_ActionExited;

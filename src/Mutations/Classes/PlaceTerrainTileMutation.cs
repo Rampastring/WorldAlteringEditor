@@ -5,11 +5,11 @@ using TSMapEditor.Rendering;
 namespace TSMapEditor.Mutations.Classes
 {
     /// <summary>
-    /// A mutation that changes the terrain of the map.
+    /// A mutation that places a terrain tile on the map.
     /// </summary>
-    public class ChangeTerrainMutation : Mutation
+    public class PlaceTerrainTileMutation : Mutation
     {
-        public ChangeTerrainMutation(IMutationTarget mutationTarget, MapTile target, TileImage tile) : base(mutationTarget)
+        public PlaceTerrainTileMutation(IMutationTarget mutationTarget, MapTile target, TileImage tile) : base(mutationTarget)
         {
             this.target = target;
             this.tile = tile;
