@@ -34,6 +34,8 @@ namespace TSMapEditor.UI
             Key = defaultKey;
         }
 
+        public event EventHandler Triggered;
+
         public string ININame { get; }
         public string UIName { get; }
         public KeyboardCommandInput DefaultKey { get; }
@@ -50,6 +52,11 @@ namespace TSMapEditor.UI
 
                 action = value;
             }
+        }
+
+        public void DoTrigger()
+        {
+            Triggered?.Invoke(this, EventArgs.Empty);
         }
     }
 }

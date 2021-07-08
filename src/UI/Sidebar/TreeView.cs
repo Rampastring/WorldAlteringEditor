@@ -62,6 +62,8 @@ namespace TSMapEditor.UI.Sidebar
 
         public int CategoryMargin { get; set; } = 5;
 
+        private int CategoryHeight => LineHeight + CategoryMargin * 2;
+
         /// <summary>
         /// Gets or sets the distance between the text of a tree view item
         /// and the panel border in pixels.
@@ -105,6 +107,68 @@ namespace TSMapEditor.UI.Sidebar
         public void AddCategory(TreeViewCategory category)
         {
             Categories.Add(category);
+        }
+
+        public void SelectNextNode()
+        {
+            if (Categories.Count == 0)
+                return;
+
+            if (SelectedNode == null)
+                return;
+
+            bool selectedNodeFound = false;
+
+            foreach (var category in Categories)
+            {
+                for (int i = 0; i < category.Nodes.Count; i++)
+                {
+                    if (category.Nodes[i] == SelectedNode)
+                    {
+                        selectedNodeFound = true;
+
+                        if (category.Nodes.Count > i + 1)
+                        {
+                            SelectedNode = category.Nodes[i + 1];
+                            break;
+                        }
+                    }
+                }
+
+                if (selectedNodeFound)
+                    break;
+            }
+        }
+
+        public void SelectPreviousNode()
+        {
+            if (Categories.Count == 0)
+                return;
+
+            if (SelectedNode == null)
+                return;
+
+            bool selectedNodeFound = false;
+
+            foreach (var category in Categories)
+            {
+                for (int i = 0; i < category.Nodes.Count; i++)
+                {
+                    if (category.Nodes[i] == SelectedNode)
+                    {
+                        selectedNodeFound = true;
+
+                        if (i > 0)
+                        {
+                            SelectedNode = category.Nodes[i - 1];
+                            break;
+                        }
+                    }
+                }
+
+                if (selectedNodeFound)
+                    break;
+            }
         }
 
         /// <summary>
@@ -333,8 +397,6 @@ namespace TSMapEditor.UI.Sidebar
 
             return null;
         }
-
-        private int CategoryHeight => LineHeight + CategoryMargin * 2;
 
         public override void Draw(GameTime gameTime)
         {

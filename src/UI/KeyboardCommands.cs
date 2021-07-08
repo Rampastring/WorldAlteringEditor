@@ -1,9 +1,5 @@
 ﻿using Microsoft.Xna.Framework.Input;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TSMapEditor.UI
 {
@@ -18,7 +14,9 @@ namespace TSMapEditor.UI
                 NextTile,
                 PreviousTile,
                 NextTileSet,
-                PreviousTileSet
+                PreviousTileSet,
+                NextSidebarNode,
+                PreviousSidebarNode
             };
         }
 
@@ -32,5 +30,7 @@ namespace TSMapEditor.UI
         public KeyboardCommand PreviousTile { get; } = new KeyboardCommand("PreviousTile", "Select Previous Tile", new KeyboardCommandInput(Keys.N, KeyboardModifiers.None));
         public KeyboardCommand NextTileSet { get; } = new KeyboardCommand("NextTileSet", "Select Next TileSet", new KeyboardCommandInput(Keys.J, KeyboardModifiers.None));
         public KeyboardCommand PreviousTileSet { get; } = new KeyboardCommand("PreviousTileSet", "Select Previous TileSet", new KeyboardCommandInput(Keys.H, KeyboardModifiers.None));
+        public KeyboardCommand NextSidebarNode { get; } = new KeyboardCommand("NextSidebarNode", "Select Next Sidebar Node", new KeyboardCommandInput(Keys.O, KeyboardModifiers.None));
+        public KeyboardCommand PreviousSidebarNode { get; } = new KeyboardCommand("PreviousSidebarNode", "Select Previous Sidebar Node", new KeyboardCommandInput(Keys.P, KeyboardModifiers.None));
     }
 }

@@ -122,6 +122,7 @@ namespace TSMapEditor.UI
                     e.Handled = true;
 
                     keyboardCommand.Action?.Invoke();
+                    keyboardCommand.DoTrigger();
                     break;
                 }
             }

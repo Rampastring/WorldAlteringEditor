@@ -60,6 +60,21 @@ namespace TSMapEditor.UI.Sidebar
             ObjectTreeView.SelectedItemChanged += ObjectTreeView_SelectedItemChanged;
 
             InitTerrainObjects();
+
+            KeyboardCommands.Instance.NextSidebarNode.Triggered += NextSidebarNode_Triggered;
+            KeyboardCommands.Instance.PreviousSidebarNode.Triggered += PreviousSidebarNode_Triggered;
+        }
+
+        private void NextSidebarNode_Triggered(object sender, EventArgs e)
+        {
+            if (Enabled)
+                ObjectTreeView.SelectNextNode();
+        }
+
+        private void PreviousSidebarNode_Triggered(object sender, EventArgs e)
+        {
+            if (Enabled)
+                ObjectTreeView.SelectPreviousNode();
         }
 
         private void ObjectTreeView_SelectedItemChanged(object sender, EventArgs e)
