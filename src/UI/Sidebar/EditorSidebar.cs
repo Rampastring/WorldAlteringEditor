@@ -68,6 +68,10 @@ namespace TSMapEditor.UI.Sidebar
             terrainObjectListPanel.Name = nameof(terrainObjectListPanel);
             InitPanel(terrainObjectListPanel);
 
+            var overlayListPanel = new OverlayListPanel(WindowManager, editorState, map, theaterGraphics, cursorActionTarget);
+            overlayListPanel.Name = nameof(overlayListPanel);
+            InitPanel(overlayListPanel);
+
             modePanels = new XNAPanel[]
             {
                 aircraftListPanel,
@@ -75,7 +79,7 @@ namespace TSMapEditor.UI.Sidebar
                 unitListPanel,
                 infantryListPanel,
                 terrainObjectListPanel,
-                null // overlay
+                overlayListPanel
             };
             lbSelection.SelectedIndexChanged += LbSelection_SelectedIndexChanged;
             lbSelection.SelectedIndex = 0;

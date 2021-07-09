@@ -91,6 +91,7 @@
     <Compile Include="Models\BasicSection.cs" />
     <Compile Include="Models\BuildingType.cs" />
     <Compile Include="Models\CellTag.cs" />
+    <Compile Include="Models\EditorConfig.cs" />
     <Compile Include="Models\Enums\AITriggerConditionType.cs" />
     <Compile Include="Models\AITriggerType.cs" />
     <Compile Include="Models\Enums\LandType.cs" />
@@ -161,12 +162,14 @@
     <Compile Include="UI\EditorPanel.cs" />
     <Compile Include="UI\KeyboardCommand.cs" />
     <Compile Include="UI\KeyboardCommands.cs" />
+    <Compile Include="UI\OverlayCollection.cs" />
     <Compile Include="UI\Sidebar\AircraftListPanel.cs" />
     <Compile Include="UI\Sidebar\BuildingListPanel.cs" />
     <Compile Include="UI\Sidebar\EditorSidebar.cs" />
     <Compile Include="UI\Sidebar\InfantryListPanel.cs" />
     <Compile Include="UI\Sidebar\ISearchBoxContainer.cs" />
     <Compile Include="UI\Sidebar\ObjectListPanel.cs" />
+    <Compile Include="UI\Sidebar\OverlayListPanel.cs" />
     <Compile Include="UI\Sidebar\SidebarMode.cs" />
     <Compile Include="UI\Sidebar\TerrainObjectListPanel.cs" />
     <Compile Include="UI\Sidebar\TreeView.cs" />
@@ -184,6 +187,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include="Config\OverlayCollections.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Content\SpriteFont0.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

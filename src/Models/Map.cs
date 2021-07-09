@@ -14,6 +14,7 @@ namespace TSMapEditor.Models
         public IniFile LoadedINI { get; set; }
 
         public Rules Rules { get; private set; }
+        public EditorConfig EditorConfig { get; private set; }
 
         public BasicSection Basic { get; private set; } = new BasicSection();
 
@@ -71,11 +72,18 @@ namespace TSMapEditor.Models
             initializer = new Initializer(this);
         }
 
+        private void InitEditorConfig()
+        {
+            EditorConfig = new EditorConfig();
+            EditorConfig.ReadOverlayCollections(Rules);
+        }
+
         public void InitNew(IniFile rulesIni, IniFile firestormIni, IniFile artIni, IniFile artFirestormIni)
         {
             Initialize(rulesIni, firestormIni, artIni, artFirestormIni);
             LoadedINI = new IniFile();
             Rules.InitFromINI(LoadedINI, initializer);
+            InitEditorConfig();
             SetTileData(null);
         }
 
@@ -85,6 +93,7 @@ namespace TSMapEditor.Models
 
             LoadedINI = mapIni ?? throw new ArgumentNullException(nameof(mapIni));
             Rules.InitFromINI(mapIni, initializer);
+            InitEditorConfig();
 
             MapLoader.ReadBasicSection(this, mapIni);
             MapLoader.ReadMapSection(this, mapIni);

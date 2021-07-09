@@ -13,6 +13,7 @@ namespace TSMapEditor
         [STAThread]
         static void Main()
         {
+            Environment.CurrentDirectory = Application.StartupPath.Replace('\\', '/');
             Logger.WriteToConsole = true;
 
             new GameClass().Run();
