@@ -21,8 +21,9 @@ namespace TSMapEditor.Rendering
     {
         Map Map { get; }
         TheaterGraphics TheaterGraphics { get; }
-        void AddRefreshPoint(Point2D point);
+        void AddRefreshPoint(Point2D point, int size = 10);
         House ObjectOwner { get; }
+        BrushSize BrushSize { get; }
     }
 
     /// <summary>
@@ -33,9 +34,22 @@ namespace TSMapEditor.Rendering
         Map Map { get; }
         TheaterGraphics TheaterGraphics { get; }
         WindowManager WindowManager { get; }
-        void AddRefreshPoint(Point2D point);
+        void AddRefreshPoint(Point2D point, int size = 10);
         MutationManager MutationManager { get; }
         IMutationTarget MutationTarget { get; }
+        BrushSize BrushSize { get; }
+    }
+
+    struct RefreshPoint
+    {
+        public Point2D CellCoords;
+        public int Size;
+
+        public RefreshPoint(Point2D cellCoords, int size)
+        {
+            CellCoords = cellCoords;
+            Size = size;
+        }
     }
 
     public class MapView : XNAControl, ICursorActionTarget, IMutationTarget
@@ -54,6 +68,7 @@ namespace TSMapEditor.Rendering
         public MutationManager MutationManager { get; }
         public IMutationTarget MutationTarget => this;
         public House ObjectOwner => EditorState.ObjectOwner;
+        public BrushSize BrushSize => EditorState.BrushSize;
         public TileInfoDisplay TileInfoDisplay { get; set; }
         
         public CursorAction CursorAction
@@ -82,13 +97,13 @@ namespace TSMapEditor.Rendering
         /// A list of cells that have been invalidated.
         /// Areas around these cells are to be redrawn.
         /// </summary>
-        private List<Point2D> refreshes = new List<Point2D>();
+        private List<RefreshPoint> refreshes = new List<RefreshPoint>();
 
 
 
-        public void AddRefreshPoint(Point2D point)
+        public void AddRefreshPoint(Point2D point, int size = 10)
         {
-            refreshes.Add(point);
+            refreshes.Add(new RefreshPoint(point, size));
         }
 
         public override void Initialize()
@@ -193,19 +208,20 @@ namespace TSMapEditor.Rendering
             gameObjects.ForEach(go => DrawObject(go));
         }
 
-        private void RefreshOverArea(Point2D center)
+        private void RefreshOverArea(RefreshPoint refreshPoint)
         {
             var tilesToRedraw = new List<MapTile>();
             var waypointsToRedraw = new List<Waypoint>();
             var cellTagsToRedraw = new List<CellTag>();
             var objectsToRedraw = new List<GameObject>();
-            const int tileRefreshArea = 10;
-            const int objectRefreshArea = 20;
-            for (int y = -tileRefreshArea; y <= tileRefreshArea; y++)
+            //const int tileRefreshArea = 10;
+            int objectRefreshArea = refreshPoint.Size + 1;
+
+            for (int y = -refreshPoint.Size; y <= refreshPoint.Size; y++)
             {
-                for (int x = -tileRefreshArea; x <= tileRefreshArea; x++)
+                for (int x = -refreshPoint.Size; x <= refreshPoint.Size; x++)
                 {
-                    var tile = Map.GetTile(center.X + x, center.Y + y);
+                    var tile = Map.GetTile(refreshPoint.CellCoords.X + x, refreshPoint.CellCoords.Y + y);
                     if (tile == null)
                         continue;
 
@@ -223,7 +239,7 @@ namespace TSMapEditor.Rendering
             {
                 for (int x = -objectRefreshArea; x <= objectRefreshArea; x++)
                 {
-                    var tile = Map.GetTile(center.X + x, center.Y + y);
+                    var tile = Map.GetTile(refreshPoint.CellCoords.X + x, refreshPoint.CellCoords.Y + y);
                     if (tile == null)
                         continue;
 
@@ -646,7 +662,7 @@ namespace TSMapEditor.Rendering
                         facing += 8;
                         facing = facing % 256;
                         unit.Facing = (byte)facing;
-                        refreshes.Add(unit.Position);
+                        refreshes.Add(new RefreshPoint(unit.Position, 2));
                     }
                 }
 
@@ -656,7 +672,7 @@ namespace TSMapEditor.Rendering
             if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.Delete)
             {
                 DeleteObjectFromTile(tileCoords);
-                refreshes.Add(tileCoords);
+                refreshes.Add(new RefreshPoint(tileCoords, 2));
             }
         }
 

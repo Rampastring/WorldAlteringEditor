@@ -44,5 +44,7 @@ namespace TSMapEditor.Rendering
                 }
             }
         }
+
+        public BrushSize BrushSize { get; } = new BrushSize(1, 1);
     }
 }

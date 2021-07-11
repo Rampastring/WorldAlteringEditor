@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
+using TSMapEditor.UI;
 
 namespace TSMapEditor.Mutations.Classes
 {
@@ -13,22 +16,26 @@ namespace TSMapEditor.Mutations.Classes
         {
             this.target = target;
             this.tile = tile;
+            this.brushSize = mutationTarget.BrushSize;
         }
 
         struct OriginalTerrainData
         {
-            public OriginalTerrainData(int tileIndex, int subTileIndex)
+            public OriginalTerrainData(int tileIndex, int subTileIndex, Point2D cellCoords)
             {
                 TileIndex = tileIndex;
                 SubTileIndex = subTileIndex;
+                CellCoords = cellCoords;
             }
 
             public int TileIndex;
             public int SubTileIndex;
+            public Point2D CellCoords;
         }
 
         private readonly MapTile target;
         private readonly TileImage tile;
+        private readonly BrushSize brushSize;
         private OriginalTerrainData[] undoData;
 
 
@@ -36,52 +43,46 @@ namespace TSMapEditor.Mutations.Classes
         {
             var undoData = new List<OriginalTerrainData>();
 
-            for (int i = 0; i < tile.TMPImages.Length; i++)
+            brushSize.DoForBrushSize(offset =>
             {
-                MGTMPImage image = tile.TMPImages[i];
-
-                if (image.TmpImage == null)
-                    continue;
-
-                int cx = target.X + i % tile.Width;
-                int cy = target.Y + i / tile.Width;
-
-                var mapTile = MutationTarget.Map.GetTile(cx, cy);
-                if (mapTile != null)
+                for (int i = 0; i < tile.TMPImages.Length; i++)
                 {
-                    undoData.Add(new OriginalTerrainData(mapTile.TileIndex, mapTile.SubTileIndex));
+                    MGTMPImage image = tile.TMPImages[i];
 
-                    mapTile.TileImage = null;
-                    mapTile.TileIndex = tile.TileID;
-                    mapTile.SubTileIndex = (byte)i;
+                    if (image.TmpImage == null)
+                        continue;
+
+                    int cx = target.X + (offset.X * tile.Width) + i % tile.Width;
+                    int cy = target.Y + (offset.Y * tile.Height) + i / tile.Width;
+
+                    var mapTile = MutationTarget.Map.GetTile(cx, cy);
+                    if (mapTile != null)
+                    {
+                        undoData.Add(new OriginalTerrainData(mapTile.TileIndex, mapTile.SubTileIndex, new Point2D(cx, cy)));
+
+                        mapTile.TileImage = null;
+                        mapTile.TileIndex = tile.TileID;
+                        mapTile.SubTileIndex = (byte)i;
+                    }
                 }
-            }
+            });
 
             this.undoData = undoData.ToArray();
-            MutationTarget.AddRefreshPoint(target.CoordsToPoint());
+            MutationTarget.AddRefreshPoint(target.CoordsToPoint(), Math.Max(tile.Width, tile.Height) * Math.Max(brushSize.Width, brushSize.Height));
         }
 
         public override void Undo()
         {
-            int undoDataIndex = 0;
-            for (int i = 0; i < tile.TMPImages.Length; i++)
+            for (int i = 0; i < undoData.Length; i++)
             {
-                MGTMPImage image = tile.TMPImages[i];
+                OriginalTerrainData originalTerrainData = undoData[i];
 
-                if (image.TmpImage == null)
-                    continue;
-
-                int cx = target.X + i % tile.Width;
-                int cy = target.Y + i / tile.Width;
-
-                var mapTile = MutationTarget.Map.GetTile(cx, cy);
+                var mapTile = MutationTarget.Map.GetTile(originalTerrainData.CellCoords);
                 if (mapTile != null)
                 {
                     mapTile.TileImage = null;
-                    mapTile.TileIndex = undoData[undoDataIndex].TileIndex;
-                    mapTile.SubTileIndex = (byte)undoData[undoDataIndex].SubTileIndex;
-
-                    undoDataIndex++;
+                    mapTile.TileIndex = originalTerrainData.TileIndex;
+                    mapTile.SubTileIndex = (byte)originalTerrainData.SubTileIndex;
                 }
             }
 

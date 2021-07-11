@@ -152,6 +152,7 @@
     <Compile Include="Rendering\MapView.cs" />
     <Compile Include="Rendering\MGTMPImage.cs" />
     <Compile Include="Rendering\TheaterGraphics.cs" />
+    <Compile Include="UI\BrushSize.cs" />
     <Compile Include="UI\CursorAction.cs" />
     <Compile Include="UI\CursorActions\AircraftPlacementAction.cs" />
     <Compile Include="UI\CursorActions\ChangeTechnoOwnerAction.cs" />

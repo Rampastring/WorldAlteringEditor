@@ -31,25 +31,30 @@ namespace TSMapEditor.UI.CursorActions
             if (Tile == null)
                 return;
 
-            for (int i = 0; i < Tile.TMPImages.Length; i++)
+            BrushSize brush = CursorActionTarget.BrushSize;
+
+            brush.DoForBrushSize(offset =>
             {
-                MGTMPImage image = Tile.TMPImages[i];
-
-                if (image.TmpImage == null)
-                    continue;
-
-                int cx = cellCoords.X + i % Tile.Width;
-                int cy = cellCoords.Y + i / Tile.Width;
-
-                var mapTile = CursorActionTarget.Map.GetTile(cx, cy);
-                if (mapTile != null)
+                for (int i = 0; i < Tile.TMPImages.Length; i++)
                 {
-                    mapTile.PreviewSubTileIndex = i;
-                    action(mapTile);
-                }
-            }
+                    MGTMPImage image = Tile.TMPImages[i];
 
-            CursorActionTarget.AddRefreshPoint(cellCoords);
+                    if (image.TmpImage == null)
+                        continue;
+
+                    int cx = cellCoords.X + (offset.X * Tile.Width) + i % Tile.Width;
+                    int cy = cellCoords.Y + (offset.Y * Tile.Height) + i / Tile.Width;
+
+                    var mapTile = CursorActionTarget.Map.GetTile(cx, cy);
+                    if (mapTile != null)
+                    {
+                        mapTile.PreviewSubTileIndex = i;
+                        action(mapTile);
+                    }
+                }
+            });
+
+            CursorActionTarget.AddRefreshPoint(cellCoords, Math.Max(Tile.Width, Tile.Height) * Math.Max(brush.Width, brush.Height));
         }
 
         public override void LeftDown(Point2D cellCoords)
