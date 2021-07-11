@@ -144,7 +144,8 @@ namespace TSMapEditor.Models
             MapWriter.WriteInfantry(this, LoadedINI);
             MapWriter.WriteBuildings(this, LoadedINI);
 
-            LoadedINI.WriteIniFile(LoadedINI.FileName.Substring(0, LoadedINI.FileName.Length - 4) + "_test.map");
+            //LoadedINI.WriteIniFile(LoadedINI.FileName.Substring(0, LoadedINI.FileName.Length - 4) + "_test.map");
+            LoadedINI.WriteIniFile(LoadedINI.FileName);
         }
 
         /// <summary>

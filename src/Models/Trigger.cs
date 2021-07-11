@@ -29,7 +29,7 @@ namespace TSMapEditor.Models
         public void WriteToIniFile(IniFile iniFile)
         {
             // Write entry to [Triggers]
-            string linkedTriggerId = LinkedTrigger == null ? Constants.NoneValue2 : LinkedTrigger.ID;
+            string linkedTriggerId = LinkedTrigger == null ? Constants.NoneValue1 : LinkedTrigger.ID;
             iniFile.SetStringValue("Triggers", ID,
                 $"{House},{linkedTriggerId},{Name}," +
                 $"{Helpers.BoolToIntString(Disabled)}," +
