@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
+using TSMapEditor.UI.CursorActions;
 
 namespace TSMapEditor.UI.Sidebar
 {
@@ -32,6 +33,8 @@ namespace TSMapEditor.UI.Sidebar
 
         private readonly ICursorActionTarget cursorActionTarget;
 
+        private OverlayCollectionPlacementAction overlayCollectionPlacementAction;
+
         public override void Initialize()
         {
             SearchBox = new XNASuggestionTextBox(WindowManager);
@@ -42,8 +45,8 @@ namespace TSMapEditor.UI.Sidebar
             SearchBox.Height = Constants.UITextBoxHeight;
             SearchBox.Suggestion = "Search overlay... (CTRL + F)";
             AddChild(SearchBox);
-            //SearchBox.TextChanged += SearchBox_TextChanged;
-            //SearchBox.EnterPressed += SearchBox_EnterPressed;
+            SearchBox.TextChanged += SearchBox_TextChanged;
+            SearchBox.EnterPressed += SearchBox_EnterPressed;
 
             ObjectTreeView = new TreeView(WindowManager);
             ObjectTreeView.Name = nameof(ObjectTreeView);
@@ -55,13 +58,59 @@ namespace TSMapEditor.UI.Sidebar
 
             base.Initialize();
 
-            //terrainObjectPlacementAction = new TerrainObjectPlacementAction(cursorActionTarget);
-            //ObjectTreeView.SelectedItemChanged += ObjectTreeView_SelectedItemChanged;
+            overlayCollectionPlacementAction = new OverlayCollectionPlacementAction(cursorActionTarget);
+            ObjectTreeView.SelectedItemChanged += ObjectTreeView_SelectedItemChanged;
 
             InitOverlays();
 
-            // KeyboardCommands.Instance.NextSidebarNode.Triggered += NextSidebarNode_Triggered;
-            // KeyboardCommands.Instance.PreviousSidebarNode.Triggered += PreviousSidebarNode_Triggered;
+            KeyboardCommands.Instance.NextSidebarNode.Triggered += NextSidebarNode_Triggered;
+            KeyboardCommands.Instance.PreviousSidebarNode.Triggered += PreviousSidebarNode_Triggered;
+        }
+
+        private void ObjectTreeView_SelectedItemChanged(object sender, EventArgs e)
+        {
+            if (ObjectTreeView.SelectedNode == null)
+                return;
+
+            var tag = ObjectTreeView.SelectedNode.Tag;
+            if (tag == null)
+                return;
+
+            if (tag is OverlayCollection collection)
+            {
+                overlayCollectionPlacementAction.OverlayCollection = collection;
+                EditorState.CursorAction = overlayCollectionPlacementAction;
+            }
+
+            //if (tag is OverlayType overlayType)
+            //{
+            //    throw new NotImplementedException();
+            //}
+        }
+
+        private void NextSidebarNode_Triggered(object sender, EventArgs e)
+        {
+            if (Enabled)
+                ObjectTreeView.SelectNextNode();
+        }
+
+        private void PreviousSidebarNode_Triggered(object sender, EventArgs e)
+        {
+            if (Enabled)
+                ObjectTreeView.SelectPreviousNode();
+        }
+
+        private void SearchBox_EnterPressed(object sender, EventArgs e)
+        {
+            ObjectTreeView.FindNode(SearchBox.Text, true);
+        }
+
+        private void SearchBox_TextChanged(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(SearchBox.Text) || SearchBox.Text == SearchBox.Suggestion)
+                return;
+
+            ObjectTreeView.FindNode(SearchBox.Text, false);
         }
 
         private void InitOverlays()

@@ -333,6 +333,39 @@ namespace TSMapEditor.Models
             cell.TerrainObject = null;
         }
 
+        public int GetOverlayFrameIndex(Point2D cellCoords)
+        {
+            var cell = GetTile(cellCoords);
+            if (cell.Overlay == null)
+                return Constants.NO_OVERLAY;
+
+            if (!cell.Overlay.OverlayType.Tiberium)
+                return cell.Overlay.FrameIndex;
+
+            // Smooth out tiberium
+
+            int[] frameIndexesForEachAdjacentTiberiumCell = { 0, 1, 3, 4, 6, 7, 8, 10, 11 };
+            int adjTiberiumCount = 0;
+
+            for (int y = -1; y <= 1; y++)
+            {
+                for (int x = -1; x <= 1; x++)
+                {
+                    if (y == 0 && x == 0)
+                        continue;
+
+                    var otherTile = GetTile(cellCoords + new Point2D(x, y));
+                    if (otherTile != null && otherTile.Overlay != null)
+                    {
+                        if (otherTile.Overlay.OverlayType.Tiberium)
+                            adjTiberiumCount++;
+                    }
+                }
+            }
+
+            return frameIndexesForEachAdjacentTiberiumCell[adjTiberiumCount];
+        }
+
         public void DoForAllValidTiles(Action<MapTile> action)
         {
             for (int y = 0; y < Tiles.Length; y++)

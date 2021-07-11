@@ -38,6 +38,7 @@ namespace TSMapEditor.Rendering
         MutationManager MutationManager { get; }
         IMutationTarget MutationTarget { get; }
         BrushSize BrushSize { get; }
+        Randomizer Randomizer { get; }
     }
 
     struct RefreshPoint
@@ -69,6 +70,7 @@ namespace TSMapEditor.Rendering
         public IMutationTarget MutationTarget => this;
         public House ObjectOwner => EditorState.ObjectOwner;
         public BrushSize BrushSize => EditorState.BrushSize;
+        public Randomizer Randomizer => EditorState.Randomizer;
         public TileInfoDisplay TileInfoDisplay { get; set; }
         
         public CursorAction CursorAction
@@ -215,7 +217,7 @@ namespace TSMapEditor.Rendering
             var cellTagsToRedraw = new List<CellTag>();
             var objectsToRedraw = new List<GameObject>();
             //const int tileRefreshArea = 10;
-            int objectRefreshArea = refreshPoint.Size + 1;
+            int objectRefreshArea = refreshPoint.Size + 3;
 
             for (int y = -refreshPoint.Size; y <= refreshPoint.Size; y++)
             {
@@ -673,6 +675,16 @@ namespace TSMapEditor.Rendering
             {
                 DeleteObjectFromTile(tileCoords);
                 refreshes.Add(new RefreshPoint(tileCoords, 2));
+            }
+
+            if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.OemPlus)
+            {
+                EditorState.BrushSize = new BrushSize(EditorState.BrushSize.Width + 1, EditorState.BrushSize.Height + 1);
+            }
+            else if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.OemMinus)
+            {
+                if (EditorState.BrushSize.Width > 0)
+                    EditorState.BrushSize = new BrushSize(EditorState.BrushSize.Width - 1, EditorState.BrushSize.Height - 1);
             }
         }
 

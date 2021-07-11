@@ -1,4 +1,5 @@
 ﻿using System;
+using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.UI;
 
@@ -45,6 +46,8 @@ namespace TSMapEditor.Rendering
             }
         }
 
-        public BrushSize BrushSize { get; } = new BrushSize(1, 1);
+        public BrushSize BrushSize { get; set; } = new BrushSize(1, 1);
+
+        public Randomizer Randomizer { get; } = new Randomizer();
     }
 }
