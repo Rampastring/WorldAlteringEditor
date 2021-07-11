@@ -34,6 +34,7 @@ namespace TSMapEditor.UI.Sidebar
         private readonly ICursorActionTarget cursorActionTarget;
 
         private OverlayCollectionPlacementAction overlayCollectionPlacementAction;
+        private OverlayPlacementAction overlayPlacementAction;
 
         public override void Initialize()
         {
@@ -59,6 +60,7 @@ namespace TSMapEditor.UI.Sidebar
             base.Initialize();
 
             overlayCollectionPlacementAction = new OverlayCollectionPlacementAction(cursorActionTarget);
+            overlayPlacementAction = new OverlayPlacementAction(cursorActionTarget);
             ObjectTreeView.SelectedItemChanged += ObjectTreeView_SelectedItemChanged;
 
             InitOverlays();
@@ -81,11 +83,11 @@ namespace TSMapEditor.UI.Sidebar
                 overlayCollectionPlacementAction.OverlayCollection = collection;
                 EditorState.CursorAction = overlayCollectionPlacementAction;
             }
-
-            //if (tag is OverlayType overlayType)
-            //{
-            //    throw new NotImplementedException();
-            //}
+            else if (tag is OverlayType overlayType)
+            {
+                overlayPlacementAction.OverlayType = overlayType;
+                EditorState.CursorAction = overlayPlacementAction;
+            }
         }
 
         private void NextSidebarNode_Triggered(object sender, EventArgs e)

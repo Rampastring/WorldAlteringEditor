@@ -24,6 +24,7 @@ namespace TSMapEditor.Rendering
         void AddRefreshPoint(Point2D point, int size = 10);
         House ObjectOwner { get; }
         BrushSize BrushSize { get; }
+        Randomizer Randomizer { get; }
     }
 
     /// <summary>

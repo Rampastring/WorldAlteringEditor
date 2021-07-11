@@ -8,18 +8,20 @@ using TSMapEditor.UI;
 namespace TSMapEditor.Mutations.Classes
 {
     /// <summary>
-    /// A mutation that allows placing overlay collections.
+    /// A mutation that allows placing regular, individual overlay.
     /// </summary>
-    class PlaceOverlayCollectionMutation : Mutation
+    class PlaceOverlayMutation : Mutation
     {
-        public PlaceOverlayCollectionMutation(IMutationTarget mutationTarget, OverlayCollection overlayCollection, Point2D cellCoords) : base(mutationTarget)
+        public PlaceOverlayMutation(IMutationTarget mutationTarget, OverlayType overlayType, int? forcedFrameIndex, Point2D cellCoords) : base(mutationTarget)
         {
-            this.overlayCollection = overlayCollection;
-            this.brush = mutationTarget.BrushSize;
+            this.overlayType = overlayType;
+            this.forcedFrameIndex = forcedFrameIndex;
             this.cellCoords = cellCoords;
+            brush = mutationTarget.BrushSize;
         }
 
-        private readonly OverlayCollection overlayCollection;
+        private readonly OverlayType overlayType;
+        private readonly int? forcedFrameIndex;
         private readonly BrushSize brush;
         private readonly Point2D cellCoords;
 
@@ -44,17 +46,20 @@ namespace TSMapEditor.Mutations.Classes
 
                 tile.Overlay = new Overlay()
                 {
-                     Position = tile.CoordsToPoint(),
-                     OverlayType = overlayCollection.OverlayTypes[MutationTarget.Randomizer.GetRandomNumber(0, overlayCollection.OverlayTypes.Length - 1)],
-                     FrameIndex = 0
+                    Position = tile.CoordsToPoint(),
+                    OverlayType = overlayType,
+                    FrameIndex = forcedFrameIndex == null ? 0 : forcedFrameIndex.Value
                 };
             });
 
-            for (int y = -brush.Height - 1; y <= brush.Height + 1; y++)
+            if (!forcedFrameIndex.HasValue)
             {
-                for (int x = -brush.Width - 1; x <= brush.Width + 1; x++)
+                for (int y = -brush.Height - 1; y <= brush.Height + 1; y++)
                 {
-                    SetOverlayFrameIndexForTile(cellCoords + new Point2D(x, y));
+                    for (int x = -brush.Width - 1; x <= brush.Width + 1; x++)
+                    {
+                        SetOverlayFrameIndexForTile(cellCoords + new Point2D(x, y));
+                    }
                 }
             }
 
@@ -93,11 +98,14 @@ namespace TSMapEditor.Mutations.Classes
                 };
             }
 
-            for (int y = -brush.Height - 1; y <= brush.Height + 1; y++)
+            if (!forcedFrameIndex.HasValue)
             {
-                for (int x = -brush.Width - 1; x <= brush.Width + 1; x++)
+                for (int y = -brush.Height - 1; y <= brush.Height + 1; y++)
                 {
-                    SetOverlayFrameIndexForTile(cellCoords + new Point2D(x, y));
+                    for (int x = -brush.Width - 1; x <= brush.Width + 1; x++)
+                    {
+                        SetOverlayFrameIndexForTile(cellCoords + new Point2D(x, y));
+                    }
                 }
             }
 
