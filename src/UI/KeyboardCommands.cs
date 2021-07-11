@@ -16,7 +16,8 @@ namespace TSMapEditor.UI
                 NextTileSet,
                 PreviousTileSet,
                 NextSidebarNode,
-                PreviousSidebarNode
+                PreviousSidebarNode,
+                FrameworkMode
             };
         }
 
@@ -32,5 +33,6 @@ namespace TSMapEditor.UI
         public KeyboardCommand PreviousTileSet { get; } = new KeyboardCommand("PreviousTileSet", "Select Previous TileSet", new KeyboardCommandInput(Keys.H, KeyboardModifiers.None));
         public KeyboardCommand NextSidebarNode { get; } = new KeyboardCommand("NextSidebarNode", "Select Next Sidebar Node", new KeyboardCommandInput(Keys.O, KeyboardModifiers.None));
         public KeyboardCommand PreviousSidebarNode { get; } = new KeyboardCommand("PreviousSidebarNode", "Select Previous Sidebar Node", new KeyboardCommandInput(Keys.P, KeyboardModifiers.None));
+        public KeyboardCommand FrameworkMode { get; } = new KeyboardCommand("MarbleMadness", "Framework Mode (Marble Madness)", new KeyboardCommandInput(Keys.F, KeyboardModifiers.Shift));
     }
 }

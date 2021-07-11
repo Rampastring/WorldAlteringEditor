@@ -119,6 +119,13 @@ namespace TSMapEditor.Rendering
             EditorState.CursorActionChanged += EditorState_CursorActionChanged;
 
             Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
+            KeyboardCommands.Instance.FrameworkMode.Triggered += FrameworkMode_Triggered;
+        }
+
+        private void FrameworkMode_Triggered(object sender, EventArgs e)
+        {
+            EditorState.IsMarbleMadness = !EditorState.IsMarbleMadness;
+            mapInvalidated = true;
         }
 
         private void EditorState_CursorActionChanged(object sender, EventArgs e)
@@ -539,11 +546,7 @@ namespace TSMapEditor.Rendering
         {
             if (isRightClickScrolling)
             {
-                if (!Cursor.RightDown)
-                {
-                    isRightClickScrolling = false;
-                }
-                else
+                if (Cursor.RightDown)
                 {
                     var newCursorPosition = GetCursorPoint();
                     var result = newCursorPosition - rightClickScrollInitPos;
@@ -583,11 +586,6 @@ namespace TSMapEditor.Rendering
                     cameraFloatTopLeftPoint = cameraTopLeftPoint.ToXNAVector();
                 }
             }
-            else if (isRightClickScrolling)
-            {
-                isRightClickScrolling = false;
-                rightClickScrollInitPos = new Point(-1, -1);
-            }
         }
 
         public override void OnLeftClick()
@@ -606,6 +604,8 @@ namespace TSMapEditor.Rendering
             {
                 CursorAction = null;
             }
+
+            isRightClickScrolling = false;
 
             base.OnRightClick();
         }
