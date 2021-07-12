@@ -156,7 +156,7 @@ namespace TSMapEditor.Initialization
 
             map.DoForAllValidTiles(tile =>
             {
-                if (tile.Overlay == null)
+                if (tile.Overlay == null || tile.Overlay.OverlayType == null)
                     return;
 
                 int dataIndex = (tile.Y * Constants.MAX_MAP_LENGTH_IN_DIMENSION) + tile.X;

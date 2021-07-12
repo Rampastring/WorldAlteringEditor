@@ -355,6 +355,8 @@ namespace TSMapEditor.Rendering
                     break;
                 case RTTIType.Overlay:
                     var overlay = (Overlay)gameObject;
+                    if (overlay.OverlayType == null)
+                        return;
                     graphics = TheaterGraphics.OverlayTextures[overlay.OverlayType.Index];
                     replacementColor = Color.LimeGreen;
                     iniName = overlay.OverlayType.ININame;

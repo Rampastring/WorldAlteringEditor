@@ -44,12 +44,19 @@ namespace TSMapEditor.Mutations.Classes
                     FrameIndex = tile.Overlay == null ? -1 : tile.Overlay.FrameIndex,
                 });
 
-                tile.Overlay = new Overlay()
+                if (overlayType != null)
                 {
-                    Position = tile.CoordsToPoint(),
-                    OverlayType = overlayType,
-                    FrameIndex = forcedFrameIndex == null ? 0 : forcedFrameIndex.Value
-                };
+                    tile.Overlay = new Overlay()
+                    {
+                        Position = tile.CoordsToPoint(),
+                        OverlayType = overlayType,
+                        FrameIndex = forcedFrameIndex == null ? 0 : forcedFrameIndex.Value
+                    };
+                }
+                else
+                {
+                    tile.Overlay = null;
+                }
             });
 
             if (!forcedFrameIndex.HasValue)

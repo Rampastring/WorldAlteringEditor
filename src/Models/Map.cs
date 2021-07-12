@@ -338,7 +338,7 @@ namespace TSMapEditor.Models
         public int GetOverlayFrameIndex(Point2D cellCoords)
         {
             var cell = GetTile(cellCoords);
-            if (cell.Overlay == null)
+            if (cell.Overlay == null || cell.Overlay.OverlayType == null)
                 return Constants.NO_OVERLAY;
 
             if (!cell.Overlay.OverlayType.Tiberium)

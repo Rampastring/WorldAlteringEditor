@@ -88,6 +88,12 @@ namespace TSMapEditor.UI.Sidebar
                 overlayPlacementAction.OverlayType = overlayType;
                 EditorState.CursorAction = overlayPlacementAction;
             }
+            else
+            {
+                // Assume this to be the overlay removal entry
+                overlayPlacementAction.OverlayType = null;
+                EditorState.CursorAction = overlayPlacementAction;
+            }
         }
 
         private void NextSidebarNode_Triggered(object sender, EventArgs e)
@@ -118,6 +124,12 @@ namespace TSMapEditor.UI.Sidebar
         private void InitOverlays()
         {
             var categories = new List<TreeViewCategory>();
+
+            categories.Add(new TreeViewCategory()
+            {
+                Text = "Erase Overlay",
+                Tag = new object()
+            });
 
             if (Map.EditorConfig.OverlayCollections.Count > 0)
             {

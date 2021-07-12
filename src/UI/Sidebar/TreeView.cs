@@ -348,8 +348,15 @@ namespace TSMapEditor.UI.Sidebar
             var treeViewCategory = node as TreeViewCategory;
             if (treeViewCategory != null)
             {
-                treeViewCategory.IsOpened = !treeViewCategory.IsOpened;
-                RefreshScrollbar();
+                if (treeViewCategory.Nodes.Count == 0)
+                {
+                    SelectedNode = node;
+                }
+                else
+                {
+                    treeViewCategory.IsOpened = !treeViewCategory.IsOpened;
+                    RefreshScrollbar();
+                }
             }
             else
             {
@@ -423,7 +430,12 @@ namespace TSMapEditor.UI.Sidebar
                             UISettings.ActiveSettings.FocusColor);
                     }
 
-                    string text = category.IsOpened ? "- " + category.Text : "+ " + category.Text;
+                    string text = null;
+                    if (category.Nodes.Count > 0)
+                        text = category.IsOpened ? "- " + category.Text : "+ " + category.Text;
+                    else
+                        text = category.Text;
+
                     DrawStringWithShadow(text, Constants.UIDefaultFont, new Vector2(x, y + CategoryMargin), UISettings.ActiveSettings.AltColor);
                 }
 
