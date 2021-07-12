@@ -86,6 +86,28 @@ namespace TSMapEditor.UI
                 editorState.ObjectOwner = map.Houses[0];
 
             Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
+
+            editorState.BrushSize = map.EditorConfig.BrushSizes[0];
+            KeyboardCommands.Instance.NextBrushSize.Triggered += NextBrushSize_Triggered;
+            KeyboardCommands.Instance.PreviousBrushSize.Triggered += PreviousBrushSize_Triggered;
+        }
+
+        private void PreviousBrushSize_Triggered(object sender, EventArgs e)
+        {
+            int currentBrushSizeIndex = map.EditorConfig.BrushSizes.FindIndex(b => b == editorState.BrushSize);
+            if (currentBrushSizeIndex < 1)
+                return;
+
+            editorState.BrushSize = map.EditorConfig.BrushSizes[currentBrushSizeIndex - 1];
+        }
+
+        private void NextBrushSize_Triggered(object sender, EventArgs e)
+        {
+            int currentBrushSizeIndex = map.EditorConfig.BrushSizes.FindIndex(b => b == editorState.BrushSize);
+            if (currentBrushSizeIndex >= map.EditorConfig.BrushSizes.Count - 1)
+                return;
+
+            editorState.BrushSize = map.EditorConfig.BrushSizes[currentBrushSizeIndex + 1];
         }
 
         private void Keyboard_OnKeyPressed(object sender, Rampastring.XNAUI.Input.KeyPressEventArgs e)

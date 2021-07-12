@@ -677,16 +677,6 @@ namespace TSMapEditor.Rendering
                 DeleteObjectFromTile(tileCoords);
                 refreshes.Add(new RefreshPoint(tileCoords, 2));
             }
-
-            if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.OemPlus)
-            {
-                EditorState.BrushSize = new BrushSize(EditorState.BrushSize.Width + 1, EditorState.BrushSize.Height + 1);
-            }
-            else if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.OemMinus)
-            {
-                if (EditorState.BrushSize.Width > 0)
-                    EditorState.BrushSize = new BrushSize(EditorState.BrushSize.Width - 1, EditorState.BrushSize.Height - 1);
-            }
         }
 
         private void DrawCursorTile()
