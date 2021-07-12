@@ -155,6 +155,7 @@
     <Compile Include="Rendering\GameClass.cs" />
     <Compile Include="Rendering\MapView.cs" />
     <Compile Include="Rendering\MGTMPImage.cs" />
+    <Compile Include="Rendering\Refresh.cs" />
     <Compile Include="Rendering\TheaterGraphics.cs" />
     <Compile Include="UI\BrushSize.cs" />
     <Compile Include="UI\CursorAction.cs" />
