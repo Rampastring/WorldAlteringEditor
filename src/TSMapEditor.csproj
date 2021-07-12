@@ -139,6 +139,7 @@
     <Compile Include="Models\UnitType.cs" />
     <Compile Include="Models\Waypoint.cs" />
     <Compile Include="Mutations\Classes\ChangeTechnoOwnerMutation.cs" />
+    <Compile Include="Mutations\Classes\FillTerrainAreaMutation.cs" />
     <Compile Include="Mutations\Classes\OriginalOverlayInfo.cs" />
     <Compile Include="Mutations\Classes\PlaceOverlayCollectionMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceOverlayMutation.cs" />
@@ -261,6 +262,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="UI\TopBar\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

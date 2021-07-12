@@ -28,6 +28,11 @@ namespace TSMapEditor.GameMath
 
         public Vector2 ToXNAVector() => new Vector2(X, Y);
 
+        public override int GetHashCode()
+        {
+            return Y * 1000 + X;
+        }
+
         public override string ToString()
         {
             return X + ", " + Y;

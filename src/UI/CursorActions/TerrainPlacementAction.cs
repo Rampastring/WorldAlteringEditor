@@ -1,6 +1,7 @@
 ﻿using System;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
+using TSMapEditor.Mutations;
 using TSMapEditor.Mutations.Classes;
 using TSMapEditor.Rendering;
 
@@ -62,7 +63,17 @@ namespace TSMapEditor.UI.CursorActions
             if (Tile == null)
                 return;
 
-            var mutation = new PlaceTerrainTileMutation(CursorActionTarget.MutationTarget, CursorActionTarget.Map.GetTile(cellCoords), Tile);
+            Mutation mutation = null;
+
+            if (CursorActionTarget.WindowManager.Keyboard.IsCtrlHeldDown() && (Tile.Width == 1 && Tile.Height == 1))
+            {
+                mutation = new FillTerrainAreaMutation(CursorActionTarget.MutationTarget, CursorActionTarget.Map.GetTile(cellCoords), Tile);
+            }
+            else
+            {
+                mutation = new PlaceTerrainTileMutation(CursorActionTarget.MutationTarget, CursorActionTarget.Map.GetTile(cellCoords), Tile);
+            }
+
             CursorActionTarget.MutationManager.PerformMutation(mutation);
         }
 

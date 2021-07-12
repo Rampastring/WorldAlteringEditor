@@ -22,6 +22,7 @@ namespace TSMapEditor.Rendering
         Map Map { get; }
         TheaterGraphics TheaterGraphics { get; }
         void AddRefreshPoint(Point2D point, int size = 10);
+        void InvalidateMap();
         House ObjectOwner { get; }
         BrushSize BrushSize { get; }
         Randomizer Randomizer { get; }
@@ -36,6 +37,7 @@ namespace TSMapEditor.Rendering
         TheaterGraphics TheaterGraphics { get; }
         WindowManager WindowManager { get; }
         void AddRefreshPoint(Point2D point, int size = 10);
+        void InvalidateMap();
         MutationManager MutationManager { get; }
         IMutationTarget MutationTarget { get; }
         BrushSize BrushSize { get; }
@@ -106,7 +108,14 @@ namespace TSMapEditor.Rendering
 
         public void AddRefreshPoint(Point2D point, int size = 10)
         {
-            refreshes.Add(new RefreshPoint(point, size));
+            if (!mapInvalidated)
+                refreshes.Add(new RefreshPoint(point, size));
+        }
+
+        public void InvalidateMap()
+        {
+            refreshes.Clear();
+            mapInvalidated = true;
         }
 
         public override void Initialize()
