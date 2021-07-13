@@ -78,7 +78,6 @@
     <Compile Include="Initialization\Initializer.cs" />
     <Compile Include="Initialization\MapLoader.cs" />
     <Compile Include="Initialization\MapWriter.cs" />
-    <Compile Include="INI\INIDefineable.cs" />
     <Compile Include="Models\AbstractObject.cs" />
     <Compile Include="Models\Aircraft.cs" />
     <Compile Include="Models\AircraftType.cs" />
@@ -200,6 +199,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Config\OverlayCollections.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\Theaters.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Content\SpriteFont0.xnb">

@@ -1,5 +1,5 @@
 ﻿using Rampastring.Tools;
-using TSMapEditor.INI;
+using TSMapEditor.Models;
 
 namespace TSMapEditor.CCEngine
 {
@@ -24,7 +24,7 @@ namespace TSMapEditor.CCEngine
 
         public void Read(IniSection iniSection)
         {
-            SetPropertiesFromSection(iniSection);
+            ReadPropertiesFromIniSection(iniSection);
         }
     }
 }

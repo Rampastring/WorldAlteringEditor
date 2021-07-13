@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using TSMapEditor.CCEngine;
 using TSMapEditor.UI;
 
 namespace TSMapEditor.Models
@@ -15,6 +16,27 @@ namespace TSMapEditor.Models
 
         public List<OverlayCollection> OverlayCollections { get; } = new List<OverlayCollection>();
         public List<BrushSize> BrushSizes { get; } = new List<BrushSize>() { new BrushSize(1, 1) };
+        public List<Theater> Theaters { get; } = new List<Theater>();
+
+        public void ReadTheaters()
+        {
+            var iniFile = new IniFile(Environment.CurrentDirectory + "/Config/Theaters.ini");
+            var section = iniFile.GetSection("Theaters");
+            if (section == null)
+                return;
+
+            foreach (var kvp in section.Keys)
+            {
+                string theaterName = kvp.Value;
+                IniSection theaterSection = iniFile.GetSection(theaterName);
+                if (theaterSection == null)
+                    continue;
+
+                Theater theater = new Theater(theaterName);
+                theater.ReadPropertiesFromIniSection(theaterSection);
+                Theaters.Add(theater);
+            }
+        }
 
         public void ReadOverlayCollections(Rules rules)
         {

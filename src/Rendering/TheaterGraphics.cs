@@ -219,7 +219,7 @@ namespace TSMapEditor.Rendering
             Theater = theater;
             this.fileManager = fileManager;
 
-            theaterPalette = GetPaletteOrFail(theater.PaletteName);
+            theaterPalette = GetPaletteOrFail(theater.TerrainPaletteName);
             unitPalette = GetPaletteOrFail(Theater.UnitPaletteName);
 
             var task1 = Task.Factory.StartNew(() => ReadTileTextures(graphicsDevice));
@@ -296,7 +296,7 @@ namespace TSMapEditor.Rendering
             for (int tsId = 0; tsId < Theater.TileSets.Count; tsId++)
             {
                 TileSet tileSet = Theater.TileSets[tsId];
-                if (tileSet.NonMarbleMadness > -1 || tileSet.MarbleMadness < 0)
+                if (tileSet.NonMarbleMadness > -1 || tileSet.MarbleMadness < 0 || tileSet.MarbleMadness >= Theater.TileSets.Count)
                 {
                     // This is a MM tileset or a tileset with no MM graphics
                     for (int i = 0; i < tileSet.LoadedTileCount; i++)

@@ -68,6 +68,8 @@ namespace TSMapEditor.Models
                     setter.Invoke(this, new object[] { iniSection.GetStringValue(property.Name, (string)property.GetValue(this, null)) });
                 else if (propertyType.Equals(typeof(byte)))
                     setter.Invoke(this, new object[] { (byte)Math.Min(byte.MaxValue, iniSection.GetIntValue(property.Name, (byte)property.GetValue(this, null))) });
+                else if (propertyType.Equals(typeof(char)))
+                    setter.Invoke(this, new object[] { iniSection.GetStringValue(property.Name, ((char)property.GetValue(this, null)).ToString())[0] });
             }
         }
 

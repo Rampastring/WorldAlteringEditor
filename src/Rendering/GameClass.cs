@@ -59,7 +59,7 @@ namespace TSMapEditor.Rendering
             IniFile firestormIni = new IniFile(Path.Combine(GameDirectory, "INI/Enhance.ini"));
             IniFile artIni = new IniFile(Path.Combine(GameDirectory, "INI/Art.ini"));
             IniFile artFSIni = new IniFile(Path.Combine(GameDirectory, "INI/ArtE.INI"));
-            IniFile mapIni = new IniFile(Path.Combine(GameDirectory, "Maps/Missions/stomp.map"));
+            IniFile mapIni = new IniFile(Path.Combine(GameDirectory, "Maps/Missions/rsovm6.map"));
             //IniFile mapIni = new IniFile(Path.Combine(GameDirectory, "Maps/Default/a_buoyant_city.map"));
             Map map = new Map();
             map.LoadExisting(rulesIni, firestormIni, artIni, artFSIni, mapIni);
@@ -67,7 +67,11 @@ namespace TSMapEditor.Rendering
             Console.WriteLine();
             Console.WriteLine("Map loaded.");
 
-            Theater theater = new Theater("Temperate", "INI/Tem.ini", "IsoTem.mix", "isotem.pal", "unittem.pal", ".tem", 'A');
+            var theater = map.EditorConfig.Theaters.Find(t => t.UIName.Equals(map.Theater, StringComparison.InvariantCultureIgnoreCase));
+            if (theater == null)
+            {
+                throw new InvalidOperationException("Theater of map not found: " + map.Theater);
+            }
             theater.ReadConfigINI(GameDirectory);
 
             CCFileManager ccFileManager = new CCFileManager();

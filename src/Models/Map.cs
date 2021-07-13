@@ -75,6 +75,7 @@ namespace TSMapEditor.Models
         private void InitEditorConfig()
         {
             EditorConfig = new EditorConfig();
+            EditorConfig.ReadTheaters();
             EditorConfig.ReadOverlayCollections(Rules);
             EditorConfig.ReadBrushSizes();
         }
