@@ -74,6 +74,7 @@
     <Compile Include="GameMath\Point2D.cs" />
     <Compile Include="GameMath\Randomizer.cs" />
     <Compile Include="Helpers.cs" />
+    <Compile Include="INIExtension.cs" />
     <Compile Include="Initialization\IInitializer.cs" />
     <Compile Include="Initialization\Initializer.cs" />
     <Compile Include="Initialization\MapLoader.cs" />
@@ -196,6 +197,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <None Include="Config\BrushSizes.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\FileManagerConfig.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Config\OverlayCollections.ini">

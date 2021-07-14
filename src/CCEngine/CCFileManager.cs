@@ -1,15 +1,28 @@
-﻿using System.Collections.Generic;
+﻿using Rampastring.Tools;
+using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace TSMapEditor.CCEngine
 {
     public class CCFileManager
     {
+        public string GameDirectory { get; set; }
+
         private Dictionary<uint, FileLocationInfo> fileLocationInfos = new Dictionary<uint, FileLocationInfo>();
         private List<MixFile> mixFiles = new List<MixFile>();
 
         private List<string> searchDirectories = new List<string>();
 
+
+        public void ReadConfig()
+        {
+            var iniFile = new IniFile(Environment.CurrentDirectory + "/Config/FileManagerConfig.ini");
+
+            iniFile.DoForEveryValueInSection("SearchDirectories", v => AddSearchDirectory(Path.Combine(GameDirectory, v)));
+            iniFile.DoForEveryValueInSection("PrimaryMIXFiles", v => LoadPrimaryMixFile(v));
+            iniFile.DoForEveryValueInSection("SecondaryMIXFiles", v => LoadSecondaryMixFile(v));
+        }
 
         /// <summary>
         /// Adds a directory to the list of directories where files will be
