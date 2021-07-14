@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Models;
+using TSMapEditor.Settings;
 using TSMapEditor.UI;
 using TSMapEditor.UI.CursorActions;
 
@@ -14,10 +15,15 @@ namespace TSMapEditor.Rendering
     public class GameClass : Microsoft.Xna.Framework.Game
     {
         private GraphicsDeviceManager graphics;
-        private const string GameDirectory = "F:/Pelit/DTA Beta/";
+        private static string GameDirectory;
 
         public GameClass()
         {
+            new UserSettings();
+            GameDirectory = UserSettings.Instance.GameDirectory;
+            if (!GameDirectory.EndsWith("/") && !GameDirectory.EndsWith("\\"))
+                GameDirectory += "/";
+
             graphics = new GraphicsDeviceManager(this);
             graphics.GraphicsProfile = GraphicsProfile.HiDef;
             Content.RootDirectory = "Content";
@@ -25,7 +31,7 @@ namespace TSMapEditor.Rendering
             Window.Title = "DTA Scenario Editor";
 
             //IsFixedTimeStep = false;
-            TargetElapsedTime = TimeSpan.FromMilliseconds(4);
+            TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / UserSettings.Instance.TargetFPS);
         }
 
         private WindowManager windowManager;
@@ -42,8 +48,8 @@ namespace TSMapEditor.Rendering
             windowManager = new WindowManager(this, graphics);
             windowManager.Initialize(Content, Environment.CurrentDirectory + DSC + "Content" + DSC);
 
-            windowManager.InitGraphicsMode(2560, 1200, false);
-            windowManager.SetRenderResolution(2560, 1200);
+            windowManager.InitGraphicsMode(UserSettings.Instance.ResolutionWidth.GetValue(), UserSettings.Instance.ResolutionHeight.GetValue(), false);
+            windowManager.SetRenderResolution(UserSettings.Instance.RenderResolutionWidth.GetValue(), UserSettings.Instance.RenderResolutionHeight.GetValue());
             windowManager.CenterOnScreen();
             windowManager.Cursor.LoadNativeCursor(Environment.CurrentDirectory + DSC + "Content" + DSC + "cursor.cur");
 
@@ -54,7 +60,6 @@ namespace TSMapEditor.Rendering
 
         private void InitTest()
         {
-            
             IniFile rulesIni = new IniFile(Path.Combine(GameDirectory, "INI/Rules.ini"));
             IniFile firestormIni = new IniFile(Path.Combine(GameDirectory, "INI/Enhance.ini"));
             IniFile artIni = new IniFile(Path.Combine(GameDirectory, "INI/Art.ini"));

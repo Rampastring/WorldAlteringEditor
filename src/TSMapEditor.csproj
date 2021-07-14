@@ -158,6 +158,9 @@
     <Compile Include="Rendering\MGTMPImage.cs" />
     <Compile Include="Rendering\Refresh.cs" />
     <Compile Include="Rendering\TheaterGraphics.cs" />
+    <Compile Include="Settings\IntSetting.cs" />
+    <Compile Include="Settings\SettingBase.cs" />
+    <Compile Include="Settings\StringSetting.cs" />
     <Compile Include="UI\BrushSize.cs" />
     <Compile Include="UI\CursorAction.cs" />
     <Compile Include="UI\CursorActions\AircraftPlacementAction.cs" />
@@ -187,6 +190,7 @@
     <Compile Include="UI\TileInfoDisplay.cs" />
     <Compile Include="UI\TileSelector.cs" />
     <Compile Include="UI\UIManager.cs" />
+    <Compile Include="Settings\UserSettings.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -212,6 +216,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Content\SpriteFont1.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="MapEditorSettings.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Properties\Settings.settings">
