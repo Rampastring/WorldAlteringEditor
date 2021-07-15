@@ -21,12 +21,14 @@ namespace TSMapEditor.Mutations
             UndoList.Add(mutation);
         }
 
+        public bool CanUndo() => UndoList.Count > 0;
+
         /// <summary>
         /// Undoes the last mutation to the map.
         /// </summary>
         public void Undo()
         {
-            if (UndoList.Count == 0)
+            if (!CanUndo())
                 return;
 
             int lastUndoIndex = UndoList.Count - 1;
@@ -35,12 +37,14 @@ namespace TSMapEditor.Mutations
             UndoList.RemoveAt(lastUndoIndex);
         }
 
+        public bool CanRedo() => RedoList.Count > 0;
+
         /// <summary>
         /// Redoes the last un-done mutation on the map.
         /// </summary>
         public void Redo()
         {
-            if (RedoList.Count == 0)
+            if (!CanRedo())
                 return;
 
             int lastRedoIndex = RedoList.Count - 1;

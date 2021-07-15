@@ -7,6 +7,7 @@ using TSMapEditor.Mutations;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI.CursorActions;
 using TSMapEditor.UI.Sidebar;
+using TSMapEditor.UI.TopBar;
 
 namespace TSMapEditor.UI
 {
@@ -79,6 +80,9 @@ namespace TSMapEditor.UI
             AddChild(tileInfoDisplay);
             tileInfoDisplay.X = Width - tileInfoDisplay.Width;
             mapView.TileInfoDisplay = tileInfoDisplay;
+
+            var topBarMenu = new TopBarMenu(WindowManager, mutationManager, map);
+            AddChild(topBarMenu);
 
             base.Initialize();
 

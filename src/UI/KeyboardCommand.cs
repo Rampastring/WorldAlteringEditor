@@ -22,6 +22,24 @@ namespace TSMapEditor.UI
 
         public Keys Key;
         public KeyboardModifiers Modifiers;
+
+        public string GetKeyNameString()
+        {
+            if (Key == Keys.None)
+                return "<no hotkey>";
+
+            string key = "";
+            if ((Modifiers & KeyboardModifiers.Ctrl) == KeyboardModifiers.Ctrl)
+                key += "CTRL + ";
+
+            if ((Modifiers & KeyboardModifiers.Shift) == KeyboardModifiers.Shift)
+                key += "Shift + ";
+
+            if ((Modifiers & KeyboardModifiers.Alt) == KeyboardModifiers.Alt)
+                key += "Alt + ";
+
+            return key + Key.ToString();
+        }
     }
 
     public class KeyboardCommand
