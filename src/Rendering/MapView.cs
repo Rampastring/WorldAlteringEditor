@@ -759,7 +759,7 @@ namespace TSMapEditor.Rendering
                 mapInvalidated = false;
             }
 
-            if (tileUnderCursor != null && CursorAction != null)
+            if (IsActive && tileUnderCursor != null && CursorAction != null)
             {
                 CursorAction.PreMapDraw(tileUnderCursor.CoordsToPoint());
             }
@@ -773,7 +773,7 @@ namespace TSMapEditor.Rendering
             DrawTexture(mapRenderTarget, new Rectangle(cameraTopLeftPoint.X, cameraTopLeftPoint.Y,
                 Width, Height), new Rectangle(0, 0, Width, Height), Color.White);
 
-            if (tileUnderCursor != null && CursorAction != null)
+            if (IsActive && tileUnderCursor != null && CursorAction != null)
             {
                 CursorAction.PostMapDraw(tileUnderCursor.CoordsToPoint());
                 CursorAction.DrawPreview(tileUnderCursor.CoordsToPoint(), cameraTopLeftPoint);
