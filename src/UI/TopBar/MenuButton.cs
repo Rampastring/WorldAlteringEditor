@@ -13,7 +13,7 @@ namespace TSMapEditor.UI.TopBar
         {
             ContextMenu = contextMenu;
 
-            Height = 23;
+            Height = Constants.UITopBarMenuHeight;
             FontIndex = Constants.UIBoldFont;
         }
 

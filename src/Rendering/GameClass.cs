@@ -55,16 +55,17 @@ namespace TSMapEditor.Rendering
 
             Components.Add(windowManager);
 
-            InitTest();
+            InitTest("Maps/Missions/sov_naval.map");
+            //InitTest("Maps/Default/a_buoyant_city.map");
         }
 
-        private void InitTest()
+        private void InitTest(string mapPath)
         {
             IniFile rulesIni = new IniFile(Path.Combine(GameDirectory, "INI/Rules.ini"));
             IniFile firestormIni = new IniFile(Path.Combine(GameDirectory, "INI/Enhance.ini"));
             IniFile artIni = new IniFile(Path.Combine(GameDirectory, "INI/Art.ini"));
             IniFile artFSIni = new IniFile(Path.Combine(GameDirectory, "INI/ArtE.INI"));
-            IniFile mapIni = new IniFile(Path.Combine(GameDirectory, "Maps/Missions/rsovm6.map"));
+            IniFile mapIni = new IniFile(Path.Combine(GameDirectory, mapPath));
             //IniFile mapIni = new IniFile(Path.Combine(GameDirectory, "Maps/Default/a_buoyant_city.map"));
             Map map = new Map();
             map.LoadExisting(rulesIni, firestormIni, artIni, artFSIni, mapIni);

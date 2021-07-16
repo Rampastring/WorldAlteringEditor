@@ -191,6 +191,7 @@
     <Compile Include="UI\TileInfoDisplay.cs" />
     <Compile Include="UI\TileSelector.cs" />
     <Compile Include="UI\TopBar\MenuButton.cs" />
+    <Compile Include="UI\TopBar\TopBarControlMenu.cs" />
     <Compile Include="UI\TopBar\TopBarMenu.cs" />
     <Compile Include="UI\UIManager.cs" />
     <Compile Include="Settings\UserSettings.cs" />

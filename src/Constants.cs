@@ -25,6 +25,8 @@
 
         public const int UITextBoxHeight = 21;
 
+        public const int UITopBarMenuHeight = 23;
+
         public const int MAX_MAP_LENGTH_IN_DIMENSION = 512;
         public const int NO_OVERLAY = 255; // 0xFF
         public const int OverlayPackFormat = 80;

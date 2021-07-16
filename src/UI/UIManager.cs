@@ -63,7 +63,7 @@ namespace TSMapEditor.UI
 
             editorSidebar = new EditorSidebar(WindowManager, editorState, map, theaterGraphics, mapView);
             editorSidebar.Width = 250;
-            editorSidebar.Y = 40;
+            editorSidebar.Y = Constants.UITopBarMenuHeight;
             editorSidebar.Height = WindowManager.RenderResolutionY - editorSidebar.Y;
             AddChild(editorSidebar);
 
@@ -83,6 +83,13 @@ namespace TSMapEditor.UI
 
             var topBarMenu = new TopBarMenu(WindowManager, mutationManager, map);
             AddChild(topBarMenu);
+            topBarMenu.Width = editorSidebar.Width;
+
+            var topBarControlMenu = new TopBarControlMenu(WindowManager, map, map.EditorConfig, editorState);
+            topBarControlMenu.X = topBarMenu.Right;
+            topBarControlMenu.Width = 500;
+            topBarControlMenu.Height = topBarMenu.Height * 2;
+            AddChild(topBarControlMenu);
 
             base.Initialize();
 
@@ -90,28 +97,6 @@ namespace TSMapEditor.UI
                 editorState.ObjectOwner = map.Houses[0];
 
             Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
-
-            editorState.BrushSize = map.EditorConfig.BrushSizes[0];
-            KeyboardCommands.Instance.NextBrushSize.Triggered += NextBrushSize_Triggered;
-            KeyboardCommands.Instance.PreviousBrushSize.Triggered += PreviousBrushSize_Triggered;
-        }
-
-        private void PreviousBrushSize_Triggered(object sender, EventArgs e)
-        {
-            int currentBrushSizeIndex = map.EditorConfig.BrushSizes.FindIndex(b => b == editorState.BrushSize);
-            if (currentBrushSizeIndex < 1)
-                return;
-
-            editorState.BrushSize = map.EditorConfig.BrushSizes[currentBrushSizeIndex - 1];
-        }
-
-        private void NextBrushSize_Triggered(object sender, EventArgs e)
-        {
-            int currentBrushSizeIndex = map.EditorConfig.BrushSizes.FindIndex(b => b == editorState.BrushSize);
-            if (currentBrushSizeIndex >= map.EditorConfig.BrushSizes.Count - 1)
-                return;
-
-            editorState.BrushSize = map.EditorConfig.BrushSizes[currentBrushSizeIndex + 1];
         }
 
         private void Keyboard_OnKeyPressed(object sender, Rampastring.XNAUI.Input.KeyPressEventArgs e)
