@@ -53,7 +53,8 @@ namespace TSMapEditor.UI.CursorActions
             structure.ObjectType.ArtConfig.DoForFoundationCoords(offset =>
             {
                 var cell = CursorActionTarget.Map.GetTile(cellCoords + offset);
-                if (cell.Structure != null)
+
+                if (cell != null && cell.Structure != null)
                     foundationAreaHasStructure = true;
             });
 
