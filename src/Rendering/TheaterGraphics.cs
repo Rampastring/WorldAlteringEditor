@@ -11,6 +11,16 @@ using TSMapEditor.Models;
 namespace TSMapEditor.Rendering
 {
     /// <summary>
+    /// An interface for an object that can be used to fetch 
+    /// game logic related information about a theater.
+    /// </summary>
+    public interface ITheater
+    {
+        int GetTileSetId(int uniqueTileIndex);
+        Theater Theater { get; }
+    }
+
+    /// <summary>
     /// Contains graphics for a single full TMP (all sub-tiles / all cells).
     /// </summary>
     public class TileImage
@@ -20,7 +30,7 @@ namespace TSMapEditor.Rendering
             Width = width;
             Height = height;
             TileSetId = tileSetId;
-            TileIndex = tileIndex;
+            TileIndexInTileSet = tileIndex;
             TileID = tileId;
             TMPImages = tmpImages;
         }
@@ -43,7 +53,7 @@ namespace TSMapEditor.Rendering
         /// <summary>
         /// The index of the tile within its tileset.
         /// </summary>
-        public int TileIndex { get; set; }
+        public int TileIndexInTileSet { get; set; }
 
         /// <summary>
         /// The unique ID of this tile within all tiles in the game.
@@ -208,9 +218,9 @@ namespace TSMapEditor.Rendering
     }
 
     /// <summary>
-    /// A wrapper for a theater that loads and stores tile and object graphics.
+    /// Graphical layer for the theater.
     /// </summary>
-    public class TheaterGraphics
+    public class TheaterGraphics : ITheater
     {
         private const string SHP_FILE_EXTENSION = ".SHP";
 
@@ -245,7 +255,7 @@ namespace TSMapEditor.Rendering
 
                 for (int i = 0; i < tileSet.TilesInSet; i++)
                 {
-                    Console.WriteLine("#" + i);
+                    // Console.WriteLine("#" + i);
 
                     var tileGraphics = new List<TileImage>();
 
@@ -531,6 +541,11 @@ namespace TSMapEditor.Rendering
             if (paletteData == null)
                 throw new KeyNotFoundException(paletteFileName + " not found from loaded MIX files!");
             return new Palette(paletteData);
+        }
+
+        public int GetTileSetId(int uniqueTileIndex)
+        {
+            return GetTileGraphics(uniqueTileIndex).TileSetId;
         }
     }
 }

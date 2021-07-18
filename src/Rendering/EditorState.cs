@@ -12,6 +12,7 @@ namespace TSMapEditor.Rendering
     {
         public event EventHandler CursorActionChanged;
         public event EventHandler ObjectOwnerChanged;
+        public event EventHandler AutoLATEnabledChanged;
 
         public bool IsMarbleMadness { get; set; } = false;
 
@@ -49,5 +50,19 @@ namespace TSMapEditor.Rendering
         public BrushSize BrushSize { get; set; } = new BrushSize(1, 1);
 
         public Randomizer Randomizer { get; } = new Randomizer();
+
+        private bool _autoLatEnabled = true;
+        public bool AutoLATEnabled
+        {
+            get => _autoLatEnabled;
+            set
+            {
+                if (value != _autoLatEnabled)
+                {
+                    _autoLatEnabled = value;
+                    AutoLATEnabledChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
     }
 }

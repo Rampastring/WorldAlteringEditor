@@ -4,8 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
 using TSMapEditor.Initialization;
+using TSMapEditor.Rendering;
 
 namespace TSMapEditor.Models
 {
@@ -58,7 +60,8 @@ namespace TSMapEditor.Models
 
         public Point2D Size { get; set; }
         public Rectangle LocalSize { get; set; }
-        public string Theater { get; set; }
+        public string TheaterName { get; set; }
+        public ITheater TheaterInstance { get; set; }
 
         private readonly Initializer initializer;
 
@@ -383,6 +386,82 @@ namespace TSMapEditor.Models
                     action(tile);
                 }
             }
+        }
+
+        public int GetAutoLATIndex(MapTile mapTile, int baseLATTileSetIndex, int transitionLATTileSetIndex)
+        {
+            foreach (var autoLatData in AutoLATType.AutoLATData)
+            {
+                if (TransitionArrayDataMatches(autoLatData.TransitionMatchArray, mapTile, baseLATTileSetIndex, transitionLATTileSetIndex))
+                {
+                    return autoLatData.TransitionTypeIndex;
+                }
+            }
+
+            return -1;
+        }
+
+        /// <summary>
+        /// Convenience structure for <see cref="TransitionArrayDataMatches(int[], MapTile, int, int)"/>.
+        /// </summary>
+        struct NearbyTileData
+        {
+            public int XOffset;
+            public int YOffset;
+            public int DirectionIndex;
+
+            public NearbyTileData(int xOffset, int yOffset, int directionIndex)
+            {
+                XOffset = xOffset;
+                YOffset = yOffset;
+                DirectionIndex = directionIndex;
+            }
+        }
+
+        /// <summary>
+        /// Checks if specific transition data matches for a tile.
+        /// If it does, then the tile should use the LAT transition index related to the data.
+        /// </summary>
+        private bool TransitionArrayDataMatches(int[] transitionData, MapTile mapTile, int desiredTileSetId1, int desiredTileSetId2)
+        {
+            var nearbyTiles = new NearbyTileData[]
+            {
+                new NearbyTileData(0, -1, AutoLATType.NE_INDEX),
+                new NearbyTileData(-1, 0, AutoLATType.NW_INDEX),
+                new NearbyTileData(0, 0, AutoLATType.CENTER_INDEX),
+                new NearbyTileData(1, 0, AutoLATType.SE_INDEX),
+                new NearbyTileData(0, 1, AutoLATType.SW_INDEX)
+            };
+
+            foreach (var nearbyTile in nearbyTiles)
+            {
+                if (!TileSetMatchesExpected(mapTile.X + nearbyTile.XOffset, mapTile.Y + nearbyTile.YOffset,
+                    transitionData, nearbyTile.DirectionIndex, desiredTileSetId1, desiredTileSetId2))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private bool TileSetMatchesExpected(int x, int y, int[] transitionData, int transitionDataIndex, int desiredTileSetId1, int desiredTileSetId2)
+        {
+            var tile = GetTile(x, y);
+
+            if (tile == null)
+                return true;
+
+            bool shouldMatch = transitionData[transitionDataIndex] > 0;
+
+            int tileSetId = TheaterInstance.GetTileSetId(tile.TileIndex);
+            if (shouldMatch && (tileSetId != desiredTileSetId1 && tileSetId != desiredTileSetId2))
+                return false;
+
+            if (!shouldMatch && (tileSetId == desiredTileSetId1 || tileSetId == desiredTileSetId2))
+                return false;
+
+            return true;
         }
 
         // public void StartNew(IniFile rulesIni, IniFile firestormIni, TheaterType theaterType, Point2D size)

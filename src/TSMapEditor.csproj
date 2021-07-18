@@ -60,6 +60,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CCEngine\AutoLATType.cs" />
     <Compile Include="CCEngine\CCFileManager.cs" />
     <Compile Include="CCEngine\MixCRC.cs" />
     <Compile Include="CCEngine\MixFile.cs" />
@@ -162,6 +163,7 @@
     <Compile Include="Settings\SettingBase.cs" />
     <Compile Include="Settings\StringSetting.cs" />
     <Compile Include="UI\BrushSize.cs" />
+    <Compile Include="UI\Controls\EditorButton.cs" />
     <Compile Include="UI\CursorAction.cs" />
     <Compile Include="UI\CursorActions\AircraftPlacementAction.cs" />
     <Compile Include="UI\CursorActions\ChangeTechnoOwnerAction.cs" />

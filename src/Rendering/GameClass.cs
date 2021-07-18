@@ -19,6 +19,8 @@ namespace TSMapEditor.Rendering
 
         public GameClass()
         {
+            AutoLATType.InitArray();
+
             new UserSettings();
             GameDirectory = UserSettings.Instance.GameDirectory;
             if (!GameDirectory.EndsWith("/") && !GameDirectory.EndsWith("\\"))
@@ -55,6 +57,11 @@ namespace TSMapEditor.Rendering
 
             Components.Add(windowManager);
 
+            UISettings.ActiveSettings.CheckBoxCheckedTexture = AssetLoader.LoadTextureUncached("checkBoxChecked.png");
+            UISettings.ActiveSettings.CheckBoxClearTexture = AssetLoader.LoadTextureUncached("checkBoxClear.png");
+            UISettings.ActiveSettings.CheckBoxDisabledCheckedTexture = AssetLoader.LoadTextureUncached("checkBoxCheckedD.png");
+            UISettings.ActiveSettings.CheckBoxDisabledClearTexture = AssetLoader.LoadTextureUncached("checkBoxClearD.png");
+
             InitTest("Maps/Missions/sov_naval.map");
             //InitTest("Maps/Default/a_buoyant_city.map");
         }
@@ -73,10 +80,10 @@ namespace TSMapEditor.Rendering
             Console.WriteLine();
             Console.WriteLine("Map loaded.");
 
-            var theater = map.EditorConfig.Theaters.Find(t => t.UIName.Equals(map.Theater, StringComparison.InvariantCultureIgnoreCase));
+            var theater = map.EditorConfig.Theaters.Find(t => t.UIName.Equals(map.TheaterName, StringComparison.InvariantCultureIgnoreCase));
             if (theater == null)
             {
-                throw new InvalidOperationException("Theater of map not found: " + map.Theater);
+                throw new InvalidOperationException("Theater of map not found: " + map.TheaterName);
             }
             theater.ReadConfigINI(GameDirectory);
 
@@ -86,6 +93,7 @@ namespace TSMapEditor.Rendering
             ccFileManager.LoadPrimaryMixFile(theater.ContentMIXName);
 
             TheaterGraphics theaterGraphics = new TheaterGraphics(GraphicsDevice, theater, ccFileManager, map.Rules);
+            map.TheaterInstance = theaterGraphics;
 
             var uiManager = new UIManager(windowManager, map, theaterGraphics);
             windowManager.AddAndInitializeControl(uiManager);

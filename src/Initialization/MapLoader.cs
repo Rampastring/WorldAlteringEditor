@@ -52,7 +52,7 @@ namespace TSMapEditor.Initialization
                 Conversions.IntFromString(parts[2], width),
                 Conversions.IntFromString(parts[3], height));
 
-            map.Theater = section.GetStringValue("Theater", string.Empty);
+            map.TheaterName = section.GetStringValue("Theater", string.Empty);
         }
 
         public static void ReadIsoMapPack(IMap map, IniFile mapIni)

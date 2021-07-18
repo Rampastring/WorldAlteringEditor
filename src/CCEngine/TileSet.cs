@@ -5,7 +5,12 @@ namespace TSMapEditor.CCEngine
 {
     public class TileSet : INIDefineable
     {
-        public int Index { get; set; }
+        public TileSet(int index)
+        {
+            Index = index;
+        }
+
+        public int Index { get; }
         public string SetName { get; set; }
         public string FileName { get; set; }
         public int TilesInSet { get; set; }
@@ -15,6 +20,9 @@ namespace TSMapEditor.CCEngine
         public bool AllowTiberium { get; set; }
         public bool AllowToPlace { get; set; } = true;
 
+        /// <summary>
+        /// The unique tile ID of the first tile of this tileset.
+        /// </summary>
         public int StartTileIndex { get; set; }
 
         /// <summary>

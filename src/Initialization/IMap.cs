@@ -33,7 +33,7 @@ namespace TSMapEditor.Initialization
 
         Point2D Size { get; set; }
         Rectangle LocalSize { get; set; }
-        string Theater { get; set; }
+        string TheaterName { get; set; }
 
         void SetTileData(List<MapTile> tiles);
         House FindOrMakeHouse(string houseName);

@@ -26,6 +26,7 @@ namespace TSMapEditor.Rendering
         House ObjectOwner { get; }
         BrushSize BrushSize { get; }
         Randomizer Randomizer { get; }
+        bool AutoLATEnabled { get; }
     }
 
     /// <summary>
@@ -42,6 +43,7 @@ namespace TSMapEditor.Rendering
         IMutationTarget MutationTarget { get; }
         BrushSize BrushSize { get; }
         Randomizer Randomizer { get; }
+        bool AutoLATEnabled { get; }
     }
 
     struct RefreshPoint
@@ -74,6 +76,7 @@ namespace TSMapEditor.Rendering
         public House ObjectOwner => EditorState.ObjectOwner;
         public BrushSize BrushSize => EditorState.BrushSize;
         public Randomizer Randomizer => EditorState.Randomizer;
+        public bool AutoLATEnabled => EditorState.AutoLATEnabled;
         public TileInfoDisplay TileInfoDisplay { get; set; }
         
         public CursorAction CursorAction
