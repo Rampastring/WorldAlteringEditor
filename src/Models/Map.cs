@@ -33,7 +33,7 @@ namespace TSMapEditor.Models
         }
 
         public MapTile GetTile(Point2D cellCoords) => GetTile(cellCoords.X, cellCoords.Y);
-
+        public MapTile GetTileOrFail(Point2D cellCoords) => GetTile(cellCoords.X, cellCoords.Y) ?? throw new InvalidOperationException("Invalid cell coords: " + cellCoords);
         public List<Aircraft> Aircraft { get; } = new List<Aircraft>();
         public List<Infantry> Infantry { get; } = new List<Infantry>();
         public List<Unit> Units { get; } = new List<Unit>();
@@ -269,6 +269,43 @@ namespace TSMapEditor.Models
         public void AddTeamType(TeamType teamType)
         {
             TeamTypes.Add(teamType);
+        }
+
+        public void PlaceBuilding(Structure structure)
+        {
+            structure.ObjectType.ArtConfig.DoForFoundationCoords(offset =>
+            {
+                var cell = GetTile(structure.Position + offset);
+                if (cell == null)
+                    return;
+
+                if (cell.Structure != null)
+                    throw new InvalidOperationException("Cannot place a structure on a cell that already has a structure!");
+
+                cell.Structure = structure;
+            });
+
+            if (structure.ObjectType.ArtConfig.FoundationX == 0 && structure.ObjectType.ArtConfig.FoundationY == 0)
+            {
+                GetTile(structure.Position).Structure = structure;
+            }
+            
+            Structures.Add(structure);
+        }
+
+        public void RemoveBuilding(Structure structure)
+        {
+            structure.ObjectType.ArtConfig.DoForFoundationCoords(offset =>
+            {
+                var cell = GetTile(structure.Position + offset);
+                if (cell == null)
+                    return;
+
+                if (cell.Structure == structure)
+                    cell.Structure = null;
+            });
+
+            Structures.Remove(structure);
         }
 
         public void PlaceUnit(Unit unit)

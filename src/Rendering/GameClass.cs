@@ -1,14 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Rampastring.Tools;
 using Rampastring.XNAUI;
 using System;
 using System.IO;
 using TSMapEditor.CCEngine;
-using TSMapEditor.Models;
 using TSMapEditor.Settings;
 using TSMapEditor.UI;
-using TSMapEditor.UI.CursorActions;
 
 namespace TSMapEditor.Rendering
 {

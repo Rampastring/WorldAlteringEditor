@@ -21,9 +21,7 @@ namespace TSMapEditor.Mutations.Classes
 
         public override void Perform()
         {
-            var cell = MutationTarget.Map.GetTile(cellCoords);
-            if (cell == null)
-                return;
+            var cell = MutationTarget.Map.GetTileOrFail(cellCoords);
 
             if (cell.Vehicle != null)
                 throw new InvalidOperationException(nameof(PlaceVehicleMutation) + ": the cell already has a vehicle!");

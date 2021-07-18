@@ -52,7 +52,7 @@ namespace TSMapEditor.UI.Sidebar
             aircraftListPanel.Name = nameof(aircraftListPanel);
             InitPanel(aircraftListPanel);
 
-            var buildingListPanel = new BuildingListPanel(WindowManager, editorState, map, theaterGraphics);
+            var buildingListPanel = new BuildingListPanel(WindowManager, editorState, map, theaterGraphics, cursorActionTarget);
             buildingListPanel.Name = nameof(buildingListPanel);
             InitPanel(buildingListPanel);
 

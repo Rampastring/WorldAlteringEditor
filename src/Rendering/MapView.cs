@@ -277,7 +277,7 @@ namespace TSMapEditor.Rendering
                     if (tile.Vehicle != null)
                         objectsToRedraw.Add(tile.Vehicle);
 
-                    if (tile.Structure != null)
+                    if (tile.Structure != null && !objectsToRedraw.Contains(tile.Structure))
                         objectsToRedraw.Add(tile.Structure);
 
                     if (tile.TerrainObject != null)
@@ -744,7 +744,7 @@ namespace TSMapEditor.Rendering
 
             if (tile.Structure != null)
             {
-                throw new NotImplementedException();
+                Map.RemoveBuilding(tile.Structure);
             }
 
             if (tile.TerrainObject != null)

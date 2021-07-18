@@ -1,5 +1,6 @@
 ﻿using Rampastring.Tools;
 using System;
+using TSMapEditor.GameMath;
 
 namespace TSMapEditor.Models.ArtConfig
 {
@@ -38,6 +39,17 @@ namespace TSMapEditor.Models.ArtConfig
             NewTheater = iniSection.GetBooleanValue(nameof(NewTheater), NewTheater);
             TerrainPalette = iniSection.GetBooleanValue(nameof(TerrainPalette), TerrainPalette);
             Theater = iniSection.GetBooleanValue(nameof(Theater), Theater);
+        }
+
+        public void DoForFoundationCoords(Action<Point2D> action)
+        {
+            for (int y = 0; y < FoundationY; y++)
+            {
+                for (int x = 0; x < FoundationX; x++)
+                {
+                    action(new Point2D(x, y));
+                }
+            }
         }
     }
 }

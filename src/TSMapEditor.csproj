@@ -142,6 +142,7 @@
     <Compile Include="Mutations\Classes\ChangeTechnoOwnerMutation.cs" />
     <Compile Include="Mutations\Classes\FillTerrainAreaMutation.cs" />
     <Compile Include="Mutations\Classes\OriginalOverlayInfo.cs" />
+    <Compile Include="Mutations\Classes\PlaceBuildingMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceOverlayCollectionMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceOverlayMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceTerrainTileMutation.cs" />
@@ -167,6 +168,7 @@
     <Compile Include="UI\Controls\EditorButton.cs" />
     <Compile Include="UI\CursorAction.cs" />
     <Compile Include="UI\CursorActions\AircraftPlacementAction.cs" />
+    <Compile Include="UI\CursorActions\BuildingPlacementAction.cs" />
     <Compile Include="UI\CursorActions\ChangeTechnoOwnerAction.cs" />
     <Compile Include="UI\CursorActions\InfantryPlacementAction.cs" />
     <Compile Include="UI\CursorActions\OverlayCollectionPlacementAction.cs" />
