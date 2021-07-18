@@ -31,7 +31,16 @@ namespace TSMapEditor.Settings
         public T DefaultValue { get; }
         
         public bool HasUserDefinedValue { get; private set; }
-        public T UserDefinedValue { get; protected set; }
+        private T _userDefinedValue;
+        public T UserDefinedValue 
+        {
+            get => _userDefinedValue;
+            set
+            {
+                _userDefinedValue = value;
+                HasUserDefinedValue = true;
+            }
+        }
 
         public T GetValue()
         {

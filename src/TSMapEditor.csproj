@@ -159,6 +159,7 @@
     <Compile Include="Rendering\MGTMPImage.cs" />
     <Compile Include="Rendering\Refresh.cs" />
     <Compile Include="Rendering\TheaterGraphics.cs" />
+    <Compile Include="Settings\BoolSetting.cs" />
     <Compile Include="Settings\IntSetting.cs" />
     <Compile Include="Settings\SettingBase.cs" />
     <Compile Include="Settings\StringSetting.cs" />
@@ -177,6 +178,7 @@
     <Compile Include="UI\EditorPanel.cs" />
     <Compile Include="UI\KeyboardCommand.cs" />
     <Compile Include="UI\KeyboardCommands.cs" />
+    <Compile Include="UI\MainMenu.cs" />
     <Compile Include="UI\OverlayCollection.cs" />
     <Compile Include="UI\Sidebar\AircraftListPanel.cs" />
     <Compile Include="UI\Sidebar\BuildingListPanel.cs" />

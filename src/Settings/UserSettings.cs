@@ -8,6 +8,8 @@ namespace TSMapEditor.Settings
         private const string General = "General";
         private const string Display = "Display";
 
+        private IniFile userSettingsIni;
+
         public UserSettings()
         {
             if (Instance != null)
@@ -15,7 +17,7 @@ namespace TSMapEditor.Settings
 
             Instance = this;
 
-            IniFile userSettingsIni = new IniFile(Environment.CurrentDirectory + "/MapEditorSettings.ini");
+            userSettingsIni = new IniFile(Environment.CurrentDirectory + "/MapEditorSettings.ini");
 
             settings = new IINILoadable[]
             {
@@ -24,12 +26,23 @@ namespace TSMapEditor.Settings
                 ResolutionHeight,
                 RenderResolutionWidth,
                 RenderResolutionHeight,
+                Borderless,
+                FullscreenWindowed,
 
-                GameDirectory
+                GameDirectory,
+                LastScenarioPath
             };
 
             foreach (var setting in settings)
                 setting.LoadValue(userSettingsIni);
+        }
+
+        public void SaveSettings()
+        {
+            foreach (var setting in settings)
+            {
+                setting.WriteValue(userSettingsIni, false);
+            }
         }
 
         public static UserSettings Instance { get; private set; }
@@ -41,7 +54,10 @@ namespace TSMapEditor.Settings
         public IntSetting ResolutionHeight = new IntSetting(Display, "ResolutionHeight", 720);
         public IntSetting RenderResolutionWidth = new IntSetting(Display, "RenderResolutionWidth", 1280);
         public IntSetting RenderResolutionHeight = new IntSetting(Display, "RenderResolutionHeight", 720);
+        public BoolSetting Borderless = new BoolSetting(Display, "Borderless", false);
+        public BoolSetting FullscreenWindowed = new BoolSetting(Display, "FullscreenWindowed", false);
 
         public StringSetting GameDirectory = new StringSetting(General, "GameDirectory", string.Empty);
+        public StringSetting LastScenarioPath = new StringSetting(General, nameof(LastScenarioPath), "Maps/Custom/");
     }
 }
