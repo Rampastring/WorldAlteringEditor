@@ -9,24 +9,31 @@ using TSMapEditor.CCEngine;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI.Controls;
+using TSMapEditor.UI.CursorActions;
 
 namespace TSMapEditor.UI.TopBar
 {
     public class TopBarControlMenu : EditorPanel
     {
-        public TopBarControlMenu(WindowManager windowManager, Map map, EditorConfig editorConfig, EditorState editorState) : base(windowManager)
+        public TopBarControlMenu(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics,
+            EditorConfig editorConfig, EditorState editorState, TerrainPlacementAction terrainPlacementAction) : base(windowManager)
         {
             this.map = map;
+            this.theaterGraphics = theaterGraphics;
             this.editorConfig = editorConfig;
             this.editorState = editorState;
+            this.terrainPlacementAction = terrainPlacementAction;
         }
 
         private readonly Map map;
+        private readonly TheaterGraphics theaterGraphics;
         private readonly EditorConfig editorConfig;
         private readonly EditorState editorState;
 
         private XNADropDown ddBrushSize;
         private XNACheckBox chkAutoLat;
+
+        private TerrainPlacementAction terrainPlacementAction;
 
         public override void Initialize()
         {
@@ -65,6 +72,7 @@ namespace TSMapEditor.UI.TopBar
                 btn.Width = 20;
                 btn.Text = autoLATGround.GroundTileSet.SetName.Substring(0, 2);
                 btn.Tag = autoLATGround;
+                btn.LeftClick += GroundButton_LeftClick;
                 AddChild(btn);
 
                 prevRight = btn.Right;
@@ -85,6 +93,15 @@ namespace TSMapEditor.UI.TopBar
             base.Initialize();
 
             editorState.AutoLATEnabledChanged += EditorState_AutoLATEnabledChanged;
+        }
+
+        private void GroundButton_LeftClick(object sender, EventArgs e)
+        {
+            var button = (EditorButton)sender;
+            var latGround = button.Tag as LATGround;
+
+            terrainPlacementAction.Tile = theaterGraphics.GetTileGraphics(latGround.GroundTileSet.StartTileIndex);
+            editorState.CursorAction = terrainPlacementAction;
         }
 
         private void ChkAutoLat_CheckedChanged(object sender, EventArgs e)

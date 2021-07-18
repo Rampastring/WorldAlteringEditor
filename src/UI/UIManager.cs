@@ -85,7 +85,8 @@ namespace TSMapEditor.UI
             AddChild(topBarMenu);
             topBarMenu.Width = editorSidebar.Width;
 
-            var topBarControlMenu = new TopBarControlMenu(WindowManager, map, map.EditorConfig, editorState);
+            var topBarControlMenu = new TopBarControlMenu(WindowManager, map, theaterGraphics,
+                map.EditorConfig, editorState, terrainPlacementAction);
             topBarControlMenu.X = topBarMenu.Right;
             topBarControlMenu.Width = 500;
             topBarControlMenu.Height = topBarMenu.Height * 2;

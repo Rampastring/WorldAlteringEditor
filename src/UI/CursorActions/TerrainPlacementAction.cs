@@ -7,7 +7,7 @@ using TSMapEditor.Rendering;
 
 namespace TSMapEditor.UI.CursorActions
 {
-    class TerrainPlacementAction : CursorAction
+    public class TerrainPlacementAction : CursorAction
     {
         public TerrainPlacementAction(ICursorActionTarget cursorActionTarget) : base(cursorActionTarget)
         {
