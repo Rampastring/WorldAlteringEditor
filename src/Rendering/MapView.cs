@@ -421,6 +421,9 @@ namespace TSMapEditor.Rendering
             }
             
             int frameIndex = gameObject.GetFrameIndex(graphics.Frames.Length);
+            if (frameIndex >= graphics.Frames.Length)
+                return;
+
             var frame = graphics.Frames[frameIndex];
             if (frame == null)
                 return;

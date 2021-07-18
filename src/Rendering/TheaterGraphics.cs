@@ -493,7 +493,12 @@ namespace TSMapEditor.Rendering
             {
                 var overlayType = overlayTypes[i];
 
-                string imageName = string.IsNullOrWhiteSpace(overlayType.Image) ? overlayType.ININame : overlayType.Image;
+                string imageName = overlayType.ININame;
+                if (overlayType.ArtConfig.Image != null)
+                    imageName = overlayType.ArtConfig.Image;
+                else if (overlayType.Image != null)
+                    imageName = overlayType.Image;
+
                 string fileExtension = overlayType.ArtConfig.Theater ? Theater.FileExtension : SHP_FILE_EXTENSION;
                 byte[] shpData = fileManager.LoadFile(imageName + fileExtension);
 
