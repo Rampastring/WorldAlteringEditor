@@ -377,7 +377,8 @@ namespace TSMapEditor.Initialization
                 string value = $"{aircraft.Owner.ININame},{aircraft.ObjectType.ININame},{aircraft.HP}," +
                                $"{aircraft.Position.X},{aircraft.Position.Y},{aircraft.Facing}," +
                                $"{aircraft.Mission},{attachedTag},{aircraft.Veterancy}," +
-                               $"{aircraft.AutocreateNoRecruitable},{aircraft.AutocreateYesRecruitable}";
+                               $"{BoolToObjectStyle(aircraft.AutocreateNoRecruitable)}," +
+                               $"{BoolToObjectStyle(aircraft.AutocreateYesRecruitable)}";
 
                 section.SetStringValue(i.ToString(), value);
             }
@@ -406,8 +407,10 @@ namespace TSMapEditor.Initialization
                 string value = $"{unit.Owner.ININame},{unit.ObjectType.ININame},{unit.HP}," +
                                $"{unit.Position.X},{unit.Position.Y},{unit.Facing}," +
                                $"{unit.Mission},{attachedTag},{unit.Veterancy}," +
-                               $"{unit.Group},{unit.High},{followsIndex}," +
-                               $"{unit.AutocreateNoRecruitable},{unit.AutocreateYesRecruitable}";
+                               $"{unit.Group},{BoolToObjectStyle(unit.High)}," +
+                               $"{followsIndex}," +
+                               $"{BoolToObjectStyle(unit.AutocreateNoRecruitable)}," +
+                               $"{BoolToObjectStyle(unit.AutocreateYesRecruitable)}";
 
                 section.SetStringValue(i.ToString(), value);
             }
@@ -433,10 +436,11 @@ namespace TSMapEditor.Initialization
                 string attachedTag = GetAttachedTagName(infantry);
 
                 string value = $"{infantry.Owner.ININame},{infantry.ObjectType.ININame},{infantry.HP}," +
-                               $"{infantry.Position.X},{infantry.Position.Y},{infantry.SubCell}," +
+                               $"{infantry.Position.X},{infantry.Position.Y},{(int)infantry.SubCell}," +
                                $"{infantry.Mission},{infantry.Facing},{attachedTag},{infantry.Veterancy}," +
-                               $"{infantry.Group},{infantry.High}," +
-                               $"{infantry.AutocreateNoRecruitable},{infantry.AutocreateYesRecruitable}";
+                               $"{infantry.Group},{BoolToObjectStyle(infantry.High)}," +
+                               $"{BoolToObjectStyle(infantry.AutocreateNoRecruitable)}," +
+                               $"{BoolToObjectStyle(infantry.AutocreateYesRecruitable)}";
 
                 section.SetStringValue(i.ToString(), value);
             }
@@ -474,13 +478,23 @@ namespace TSMapEditor.Initialization
 
                 string value = $"{structure.Owner.ININame},{structure.ObjectType.ININame},{structure.HP}," +
                                $"{structure.Position.X},{structure.Position.Y}," +
-                               $"{structure.Facing},{attachedTag},{structure.AISellable}," +
-                               $"{structure.AIRebuildable},{structure.Powered}," +
-                               $"{structure.UpgradeCount},{((int)structure.Spotlight)}," + 
-                               $"{upgrade1},{upgrade2},{upgrade3},{structure.AIRepairable},{structure.Nominal}";
+                               $"{structure.Facing},{attachedTag}," +
+                               $"{BoolToObjectStyle(structure.AISellable)}," +
+                               $"{BoolToObjectStyle(structure.AIRebuildable)}," +
+                               $"{BoolToObjectStyle(structure.Powered)}," +
+                               $"{structure.UpgradeCount}," +
+                               $"{(int)structure.Spotlight}," + 
+                               $"{upgrade1},{upgrade2},{upgrade3}," +
+                               $"{BoolToObjectStyle(structure.AIRepairable)}," +
+                               $"{BoolToObjectStyle(structure.Nominal)}";
 
                 section.SetStringValue(i.ToString(), value);
             }
+        }
+
+        private static string BoolToObjectStyle(bool value)
+        {
+            return Conversions.BooleanToString(value, BooleanStringStyle.ZEROONE);
         }
     }
 }
