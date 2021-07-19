@@ -10,6 +10,7 @@ using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations;
+using TSMapEditor.Mutations.Classes;
 using TSMapEditor.UI;
 
 namespace TSMapEditor.Rendering
@@ -95,6 +96,9 @@ namespace TSMapEditor.Rendering
         private Point2D cameraTopLeftPoint = new Point2D(0, 0);
 
         private int scrollRate = 20;
+
+        private bool isDraggingObject = false;
+        private GameObject draggedObject = null;
 
         // For right-click scrolling
         private bool isRightClickScrolling = false;
@@ -561,6 +565,23 @@ namespace TSMapEditor.Rendering
 
         public override void OnMouseOnControl()
         {
+            if (CursorAction == null && isDraggingObject)
+            {
+                if (!Cursor.LeftDown)
+                {
+                    isDraggingObject = false;
+
+                    if (tileUnderCursor != null && tileUnderCursor.CoordsToPoint() != draggedObject.Position)
+                    {
+                        if (Map.CanMoveObject(draggedObject, tileUnderCursor.CoordsToPoint()))
+                        {
+                            var mutation = new MoveObjectMutation(MutationTarget, draggedObject, tileUnderCursor.CoordsToPoint());
+                            MutationManager.PerformMutation(mutation);
+                        }
+                    }
+                }
+            }
+
             if (isRightClickScrolling)
             {
                 if (Cursor.RightDown)
@@ -578,6 +599,19 @@ namespace TSMapEditor.Rendering
             }
 
             base.OnMouseOnControl();
+        }
+
+        public override void OnMouseLeftDown()
+        {
+            if (CursorAction == null && tileUnderCursor != null)
+            {
+                draggedObject = tileUnderCursor.GetObject();
+
+                if (draggedObject != null)
+                    isDraggingObject = true;
+            }
+
+            base.OnMouseLeftDown();
         }
 
         public override void OnMouseMove()
@@ -707,11 +741,29 @@ namespace TSMapEditor.Rendering
             }
             else if (CursorAction == null)
             {
-                Point2D drawPoint = CellMath.CellTopLeftPoint(new Point2D(tileUnderCursor.X, tileUnderCursor.Y), Map.Size.X);
-                FillRectangle(new Rectangle(drawPoint.X - cameraTopLeftPoint.X + Constants.CellSizeX / 4,
-                    drawPoint.Y - cameraTopLeftPoint.Y + Constants.CellSizeY / 4,
-                    Constants.CellSizeX / 2, Constants.CellSizeY / 2),
-                    new Color(128, 128, 128, 128));
+                if (isDraggingObject)
+                {
+                    Color lineColor = Color.White;
+                    if (!Map.CanMoveObject(draggedObject, tileUnderCursor.CoordsToPoint()))
+                        lineColor = Color.Red;
+
+                    Point2D cameraAndCellCenterOffset = new Point2D(-cameraTopLeftPoint.X + Constants.CellSizeX / 2,
+                                                     -cameraTopLeftPoint.Y + Constants.CellSizeY / 2);
+
+                    Point2D startDrawPoint = CellMath.CellTopLeftPoint(draggedObject.Position, Map.Size.X) + cameraAndCellCenterOffset;
+
+                    Point2D endDrawPoint = CellMath.CellTopLeftPoint(tileUnderCursor.CoordsToPoint(), Map.Size.X) + cameraAndCellCenterOffset;
+
+                    DrawLine(startDrawPoint.ToXNAVector(), endDrawPoint.ToXNAVector(), lineColor, 1);
+                }
+                else
+                {
+                    Point2D drawPoint = CellMath.CellTopLeftPoint(new Point2D(tileUnderCursor.X, tileUnderCursor.Y), Map.Size.X);
+                    FillRectangle(new Rectangle(drawPoint.X - cameraTopLeftPoint.X + Constants.CellSizeX / 4,
+                        drawPoint.Y - cameraTopLeftPoint.Y + Constants.CellSizeY / 4,
+                        Constants.CellSizeX / 2, Constants.CellSizeY / 2),
+                        new Color(128, 128, 128, 128));
+                }
             }
         }
 

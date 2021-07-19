@@ -76,6 +76,40 @@ namespace TSMapEditor.Models
             return Array.Find(Infantry, inf => inf != null && predicate(inf));
         }
 
+        public GameObject GetObject()
+        {
+            GameObject obj = GetFirstTechnoThatPassesCheck(_ => true);
+            if (obj != null)
+                return obj;
+
+            if (TerrainObject != null)
+                return TerrainObject;
+
+            return null;
+        }
+
+        /// <summary>
+        /// Determines whether a specific game object can be assigned to this tile.
+        /// </summary>
+        public bool CanAddObject(GameObject gameObject)
+        {
+            switch (gameObject.WhatAmI())
+            {
+                case RTTIType.Aircraft:
+                    return Aircraft == null;
+                case RTTIType.Building:
+                    return Structure == null || Structure == gameObject;
+                case RTTIType.Unit:
+                    return Vehicle == null;
+                case RTTIType.Infantry:
+                    return Array.Exists(Infantry, i => i == null);
+                case RTTIType.Terrain:
+                    return TerrainObject == null;
+            }
+
+            return false;
+        }
+
         public TileImage PreviewTileImage { get; set; }
         public int PreviewSubTileIndex { get; set; }
 

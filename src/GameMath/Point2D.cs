@@ -37,5 +37,15 @@ namespace TSMapEditor.GameMath
         {
             return X + ", " + Y;
         }
+
+        public static bool operator !=(Point2D p1, Point2D p2)
+        {
+            return !(p1 == p2);
+        }
+
+        public static bool operator ==(Point2D p1, Point2D p2)
+        {
+            return p1.X == p2.X && p1.Y == p2.Y;
+        }
     }
 }

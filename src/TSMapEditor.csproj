@@ -141,6 +141,7 @@
     <Compile Include="Models\Waypoint.cs" />
     <Compile Include="Mutations\Classes\ChangeTechnoOwnerMutation.cs" />
     <Compile Include="Mutations\Classes\FillTerrainAreaMutation.cs" />
+    <Compile Include="Mutations\Classes\MoveObjectMutation.cs" />
     <Compile Include="Mutations\Classes\OriginalOverlayInfo.cs" />
     <Compile Include="Mutations\Classes\PlaceBuildingMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceOverlayCollectionMutation.cs" />

@@ -308,6 +308,13 @@ namespace TSMapEditor.Models
             Structures.Remove(structure);
         }
 
+        public void MoveBuilding(Structure structure, Point2D newCoords)
+        {
+            RemoveBuilding(structure);
+            structure.Position = newCoords;
+            PlaceBuilding(structure);
+        }
+
         public void PlaceUnit(Unit unit)
         {
             var cell = GetTile(unit.Position);
@@ -323,6 +330,13 @@ namespace TSMapEditor.Models
             var cell = GetTile(unit.Position);
             cell.Vehicle = null;
             Units.Remove(unit);
+        }
+
+        public void MoveUnit(Unit unit, Point2D newCoords)
+        {
+            RemoveUnit(unit);
+            unit.Position = newCoords;
+            PlaceUnit(unit);
         }
 
         public void PlaceInfantry(Infantry infantry)
@@ -342,6 +356,16 @@ namespace TSMapEditor.Models
             Infantry.Remove(infantry);
         }
 
+        public void MoveInfantry(Infantry infantry, Point2D newCoords)
+        {
+            var newCell = GetTile(newCoords);
+            SubCell freeSubCell = newCell.GetFreeSubCellSpot();
+            RemoveInfantry(infantry);
+            infantry.Position = newCoords;
+            infantry.SubCell = freeSubCell;
+            PlaceInfantry(infantry);
+        }
+
         public void PlaceAircraft(Aircraft aircraft)
         {
             var cell = GetTile(aircraft.Position);
@@ -359,6 +383,13 @@ namespace TSMapEditor.Models
             Aircraft.Remove(aircraft);
         }
 
+        public void MoveAircraft(Aircraft aircraft, Point2D newCoords)
+        {
+            RemoveAircraft(aircraft);
+            aircraft.Position = newCoords;
+            PlaceAircraft(aircraft);
+        }
+
         public void AddTerrainObject(TerrainObject terrainObject)
         {
             var cell = GetTile(terrainObject.Position);
@@ -374,6 +405,43 @@ namespace TSMapEditor.Models
             var cell = GetTile(cellCoords);
             TerrainObjects.Remove(cell.TerrainObject);
             cell.TerrainObject = null;
+        }
+
+        public void MoveTerrainObject(TerrainObject terrainObject, Point2D newCoords)
+        {
+            RemoveTerrainObject(terrainObject.Position);
+            terrainObject.Position = newCoords;
+            AddTerrainObject(terrainObject);
+        }
+
+        /// <summary>
+        /// Determines whether an object can be moved to a specific location.
+        /// </summary>
+        /// <param name="gameObject">The type of the object to move.</param>
+        /// <param name="newCoords">The new coordinates of the object.</param>
+        /// <returns>True if the object can be moved, otherwise false.</returns>
+        public bool CanMoveObject(GameObject gameObject, Point2D newCoords)
+        {
+            if (gameObject.WhatAmI() == RTTIType.Building)
+            {
+                bool canPlace = true;
+
+                ((Structure)gameObject).ObjectType.ArtConfig.DoForFoundationCoords(offset =>
+                {
+                    MapTile foundationCell = GetTile(newCoords + offset);
+                    if (foundationCell == null)
+                        return;
+
+                    if (foundationCell.Structure != null && foundationCell.Structure != gameObject)
+                        canPlace = false;
+                });
+
+                if (!canPlace)
+                    return false;
+            }
+
+            MapTile cell = GetTile(newCoords);
+            return cell.CanAddObject(gameObject);
         }
 
         public int GetOverlayFrameIndex(Point2D cellCoords)
