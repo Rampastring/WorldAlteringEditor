@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
+using TSMapEditor.Mutations.Classes;
 using TSMapEditor.UI;
 
 namespace TSMapEditor.Rendering
@@ -25,12 +27,23 @@ namespace TSMapEditor.Rendering
                 if (_cursorAction != value)
                 {
                     if (_cursorAction != null)
-                        _cursorAction.ExitAction();
+                    {
+                        _cursorAction.OnActionExit();
+                        _cursorAction.OnExitingAction -= CursorAction_OnExitingAction;
+                    }
 
                     _cursorAction = value;
+                    if (value != null)
+                        value.OnExitingAction += CursorAction_OnExitingAction;
+
                     CursorActionChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
+        }
+
+        private void CursorAction_OnExitingAction(object sender, EventArgs e)
+        {
+            CursorAction = null;
         }
 
         private House _objectOwner;
@@ -64,5 +77,7 @@ namespace TSMapEditor.Rendering
                 }
             }
         }
+
+        public List<CopiedTerrainData> CopiedTerrainData { get; } = new List<CopiedTerrainData>();
     }
 }

@@ -18,7 +18,14 @@ namespace TSMapEditor.UI
         /// </summary>
         public event EventHandler ActionExited;
 
-        public void ExitAction() => ActionExited?.Invoke(this, EventArgs.Empty);
+        /// <summary>
+        /// Raised when the action itself wants it to be disabled.
+        /// </summary>
+        public event EventHandler OnExitingAction;
+
+        public void OnActionExit() => ActionExited?.Invoke(this, EventArgs.Empty);
+
+        public void ExitAction() => OnExitingAction?.Invoke(this, EventArgs.Empty);
 
         protected ICursorActionTarget CursorActionTarget { get; }
 

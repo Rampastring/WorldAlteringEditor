@@ -9,7 +9,7 @@ namespace TSMapEditor.Mutations.Classes
     /// <summary>
     /// A mutation that fills an area with terrain.
     /// </summary>
-    public class FillTerrainAreaMutation : Mutation
+    public partial class FillTerrainAreaMutation : Mutation
     {
         public FillTerrainAreaMutation(IMutationTarget mutationTarget, MapTile target, TileImage tile) : base(mutationTarget)
         {
@@ -23,20 +23,6 @@ namespace TSMapEditor.Mutations.Classes
         private MapTile targetTile;
         private TileImage tile;
         private OriginalCellTerrainData[] undoData;
-
-        struct OriginalCellTerrainData
-        {
-            public Point2D CellCoords;
-            public int TileIndex;
-            public byte SubTileIndex;
-
-            public OriginalCellTerrainData(Point2D cellCoords, int tileIndex, byte subTileIndex)
-            {
-                CellCoords = cellCoords;
-                TileIndex = tileIndex;
-                SubTileIndex = subTileIndex;
-            }
-        }
 
         public override void Perform()
         {

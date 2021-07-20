@@ -494,7 +494,7 @@ namespace TSMapEditor.Initialization
 
         private static string BoolToObjectStyle(bool value)
         {
-            return Conversions.BooleanToString(value, BooleanStringStyle.ZEROONE);
+            return Conversions.BooleanToString(value, BooleanStringStyle.ONEZERO);
         }
     }
 }

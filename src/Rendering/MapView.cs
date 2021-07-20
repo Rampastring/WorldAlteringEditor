@@ -12,6 +12,7 @@ using TSMapEditor.Models;
 using TSMapEditor.Mutations;
 using TSMapEditor.Mutations.Classes;
 using TSMapEditor.UI;
+using TSMapEditor.UI.CursorActions;
 
 namespace TSMapEditor.Rendering
 {
@@ -45,6 +46,7 @@ namespace TSMapEditor.Rendering
         BrushSize BrushSize { get; }
         Randomizer Randomizer { get; }
         bool AutoLATEnabled { get; }
+        List<CopiedTerrainData> CopiedTerrainData { get; }
     }
 
     struct RefreshPoint
@@ -73,11 +75,14 @@ namespace TSMapEditor.Rendering
         public Map Map { get; }
         public TheaterGraphics TheaterGraphics { get; }
         public MutationManager MutationManager { get; }
+
         public IMutationTarget MutationTarget => this;
         public House ObjectOwner => EditorState.ObjectOwner;
         public BrushSize BrushSize => EditorState.BrushSize;
         public Randomizer Randomizer => EditorState.Randomizer;
         public bool AutoLATEnabled => EditorState.AutoLATEnabled;
+        public List<CopiedTerrainData> CopiedTerrainData => EditorState.CopiedTerrainData;
+
         public TileInfoDisplay TileInfoDisplay { get; set; }
         
         public CursorAction CursorAction
@@ -111,7 +116,7 @@ namespace TSMapEditor.Rendering
         /// </summary>
         private List<RefreshPoint> refreshes = new List<RefreshPoint>();
 
-
+        private CopyTerrainCursorAction copyTerrainCursorAction;
 
         public void AddRefreshPoint(Point2D point, int size = 10)
         {
@@ -136,6 +141,8 @@ namespace TSMapEditor.Rendering
 
             Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
             KeyboardCommands.Instance.FrameworkMode.Triggered += FrameworkMode_Triggered;
+
+            copyTerrainCursorAction = new CopyTerrainCursorAction(this);
         }
 
         private void FrameworkMode_Triggered(object sender, EventArgs e)
@@ -727,6 +734,13 @@ namespace TSMapEditor.Rendering
             {
                 DeleteObjectFromTile(tileCoords);
                 refreshes.Add(new RefreshPoint(tileCoords, 2));
+                return;
+            }
+
+            if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.C && Keyboard.IsCtrlHeldDown())
+            {
+                copyTerrainCursorAction.StartCellCoords = null;
+                CursorAction = copyTerrainCursorAction;
             }
         }
 
