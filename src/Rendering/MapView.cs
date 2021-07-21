@@ -117,6 +117,7 @@ namespace TSMapEditor.Rendering
         private List<RefreshPoint> refreshes = new List<RefreshPoint>();
 
         private CopyTerrainCursorAction copyTerrainCursorAction;
+        private PasteTerrainCursorAction pasteTerrainCursorAction;
 
         public void AddRefreshPoint(Point2D point, int size = 10)
         {
@@ -143,6 +144,7 @@ namespace TSMapEditor.Rendering
             KeyboardCommands.Instance.FrameworkMode.Triggered += FrameworkMode_Triggered;
 
             copyTerrainCursorAction = new CopyTerrainCursorAction(this);
+            pasteTerrainCursorAction = new PasteTerrainCursorAction(this);
         }
 
         private void FrameworkMode_Triggered(object sender, EventArgs e)
@@ -741,6 +743,11 @@ namespace TSMapEditor.Rendering
             {
                 copyTerrainCursorAction.StartCellCoords = null;
                 CursorAction = copyTerrainCursorAction;
+            }
+
+            if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.V && Keyboard.IsCtrlHeldDown())
+            {
+                CursorAction = pasteTerrainCursorAction;
             }
         }
 
