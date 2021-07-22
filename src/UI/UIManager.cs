@@ -8,6 +8,7 @@ using TSMapEditor.Rendering;
 using TSMapEditor.UI.CursorActions;
 using TSMapEditor.UI.Sidebar;
 using TSMapEditor.UI.TopBar;
+using TSMapEditor.UI.Windows;
 
 namespace TSMapEditor.UI
 {
@@ -36,6 +37,8 @@ namespace TSMapEditor.UI
 
         public override void Initialize()
         {
+            new Parser(WindowManager);
+
             Name = nameof(UIManager);
 
             UISettings.ActiveSettings.PanelBackgroundColor = new Color(0, 0, 0, 128);
@@ -98,6 +101,10 @@ namespace TSMapEditor.UI
                 editorState.ObjectOwner = map.Houses[0];
 
             Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
+
+            var taskForcesWindow = new TaskforcesWindow(WindowManager);
+            AddChild(taskForcesWindow);
+            //WindowManager.AddAndInitializeControl(taskForcesWindow);
         }
 
         private void Keyboard_OnKeyPressed(object sender, Rampastring.XNAUI.Input.KeyPressEventArgs e)
