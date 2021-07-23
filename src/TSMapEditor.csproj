@@ -216,6 +216,7 @@
     <Compile Include="UI\UIManager.cs" />
     <Compile Include="Settings\UserSettings.cs" />
     <Compile Include="UI\Windows\TaskforcesWindow.cs" />
+    <Compile Include="UI\Windows\WindowController.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

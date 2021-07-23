@@ -1,25 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Rampastring.XNAUI;
-using Rampastring.XNAUI.XNAControls;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations;
+using TSMapEditor.UI.Windows;
 
 namespace TSMapEditor.UI.TopBar
 {
     class TopBarMenu : EditorPanel
     {
-        public TopBarMenu(WindowManager windowManager, MutationManager mutationManager, Map map) : base(windowManager)
+        public TopBarMenu(WindowManager windowManager, MutationManager mutationManager, Map map, WindowController windowController) : base(windowManager)
         {
             this.mutationManager = mutationManager;
             this.map = map;
+            this.windowController = windowController;
         }
 
         private readonly MutationManager mutationManager;
         private readonly Map map;
+        private readonly WindowController windowController;
 
         private MenuButton[] menuButtons;
 
@@ -49,6 +47,7 @@ namespace TSMapEditor.UI.TopBar
             editContextMenu.Name = nameof(editContextMenu);
             editContextMenu.AddItem("Undo", () => mutationManager.Undo(), () => mutationManager.CanUndo(), null, null);
             editContextMenu.AddItem("Redo", () => mutationManager.Redo(), () => mutationManager.CanRedo(), null, null);
+            editContextMenu.AddItem("TaskForces", () => windowController.TaskForcesWindow.Open(), null, null, null);
             editContextMenu.Items[0].HintText = KeyboardCommands.Instance.Undo.Key.GetKeyNameString();
             editContextMenu.Items[1].HintText = KeyboardCommands.Instance.Redo.Key.GetKeyNameString();
 

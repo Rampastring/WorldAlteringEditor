@@ -10,6 +10,7 @@ using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI.Controls;
 using TSMapEditor.UI.CursorActions;
+using TSMapEditor.UI.Windows;
 
 namespace TSMapEditor.UI.TopBar
 {
@@ -29,11 +30,10 @@ namespace TSMapEditor.UI.TopBar
         private readonly TheaterGraphics theaterGraphics;
         private readonly EditorConfig editorConfig;
         private readonly EditorState editorState;
+        private readonly TerrainPlacementAction terrainPlacementAction;
 
         private XNADropDown ddBrushSize;
         private XNACheckBox chkAutoLat;
-
-        private TerrainPlacementAction terrainPlacementAction;
 
         public override void Initialize()
         {

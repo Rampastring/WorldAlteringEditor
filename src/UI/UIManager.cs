@@ -2,9 +2,11 @@
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
+using System.Collections.Generic;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations;
 using TSMapEditor.Rendering;
+using TSMapEditor.UI.Controls;
 using TSMapEditor.UI.CursorActions;
 using TSMapEditor.UI.Sidebar;
 using TSMapEditor.UI.TopBar;
@@ -35,6 +37,7 @@ namespace TSMapEditor.UI
 
         private MutationManager mutationManager;
 
+
         public override void Initialize()
         {
             new Parser(WindowManager);
@@ -52,6 +55,7 @@ namespace TSMapEditor.UI
             KeyboardCommands.Instance.Undo.Action = UndoAction;
             KeyboardCommands.Instance.Redo.Action = RedoAction;
 
+            var windowController = new WindowController();
             editorState = new EditorState();
             mutationManager = new MutationManager();
 
@@ -84,7 +88,7 @@ namespace TSMapEditor.UI
             tileInfoDisplay.X = Width - tileInfoDisplay.Width;
             mapView.TileInfoDisplay = tileInfoDisplay;
 
-            var topBarMenu = new TopBarMenu(WindowManager, mutationManager, map);
+            var topBarMenu = new TopBarMenu(WindowManager, mutationManager, map, windowController);
             AddChild(topBarMenu);
             topBarMenu.Width = editorSidebar.Width;
 
@@ -97,15 +101,12 @@ namespace TSMapEditor.UI
 
             base.Initialize();
 
+            windowController.Initialize(this, map);
+
             if (map.Houses.Count > 0)
                 editorState.ObjectOwner = map.Houses[0];
 
             Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
-
-            var taskForcesWindow = new TaskforcesWindow(WindowManager, map);
-            AddChild(taskForcesWindow);
-            taskForcesWindow.Open();
-            //WindowManager.AddAndInitializeControl(taskForcesWindow);
         }
 
         private void Keyboard_OnKeyPressed(object sender, Rampastring.XNAUI.Input.KeyPressEventArgs e)
