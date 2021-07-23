@@ -20,6 +20,7 @@ namespace TSMapEditor.UI.Controls
 
         protected IniFile ConfigIni { get; private set; }
 
+        private bool hasCloseButton = false;
         private bool _initialized = false;
 
         public T FindChildOrFail<T>(string childName) where T : XNAControl
@@ -67,7 +68,28 @@ namespace TSMapEditor.UI.Controls
 
             base.Initialize();
 
+            if (hasCloseButton)
+            {
+                var closeButton = new EditorButton(WindowManager);
+                closeButton.Name = "btnCloseX";
+                closeButton.Width = Constants.UIButtonHeight;
+                closeButton.Height = Constants.UIButtonHeight;
+                closeButton.Text = "X";
+                closeButton.X = Width - closeButton.Width;
+                closeButton.Y = 0;
+                AddChild(closeButton);
+                closeButton.LeftClick += (s, e) => Hide();
+            }
+
             _initialized = true;
+        }
+
+        public override void ParseAttributeFromINI(IniFile iniFile, string key, string value)
+        {
+            if (key == "HasCloseButton")
+                hasCloseButton = iniFile.GetBooleanValue(Name, key, hasCloseButton);
+            
+            base.ParseAttributeFromINI(iniFile, key, value);
         }
 
         private void ReadINIForControl(XNAControl control)

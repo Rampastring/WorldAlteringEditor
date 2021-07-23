@@ -23,6 +23,16 @@ namespace TSMapEditor.UI.Controls
         private bool isDragged;
         private Point lastCursorPoint;
 
+        public override void Initialize()
+        {
+            Color baseColor = UISettings.ActiveSettings.PanelBackgroundColor;
+            var backgroundColor = new Color(baseColor.R / 2, baseColor.G / 2, baseColor.B / 2, 222);
+            BackgroundTexture = AssetLoader.CreateTexture(backgroundColor, 2, 2);
+            PanelBackgroundDrawMode = PanelBackgroundImageDrawMode.STRETCHED;
+
+            base.Initialize();
+        }
+
         private void CloseButton_LeftClick(object sender, EventArgs e)
         {
             Hide();

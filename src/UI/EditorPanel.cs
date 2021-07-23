@@ -16,8 +16,11 @@ namespace TSMapEditor.UI
         {
             base.Initialize();
 
-            BackgroundTexture = AssetLoader.CreateTexture(UISettings.ActiveSettings.PanelBackgroundColor, 2, 2);
-            PanelBackgroundDrawMode = PanelBackgroundImageDrawMode.STRETCHED;
+            if (BackgroundTexture == null)
+            {
+                BackgroundTexture = AssetLoader.CreateTexture(UISettings.ActiveSettings.PanelBackgroundColor, 2, 2);
+                PanelBackgroundDrawMode = PanelBackgroundImageDrawMode.STRETCHED;
+            }
         }
     }
 }

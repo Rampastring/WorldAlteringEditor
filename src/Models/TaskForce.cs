@@ -1,4 +1,5 @@
 ﻿using Rampastring.Tools;
+using System;
 
 namespace TSMapEditor.Models
 {
@@ -60,6 +61,57 @@ namespace TSMapEditor.Models
         public TaskForceTechnoEntry[] TechnoTypes = new TaskForceTechnoEntry[MaxTechnoCount];
 
         public int Group { get; set; } = -1;
+
+        public void AddTechnoEntry(TaskForceTechnoEntry taskForceTechnoEntry)
+        {
+            for (int i = 0; i < MaxTechnoCount; i++)
+            {
+                if (TechnoTypes[i] == null)
+                {
+                    TechnoTypes[i] = taskForceTechnoEntry;
+                    break;
+                }
+            }
+        }
+
+        public void RemoveTechnoEntry(int technoEntryIndex)
+        {
+            TechnoTypes[technoEntryIndex] = null;
+            for (int i = technoEntryIndex + 1; i < MaxTechnoCount; i++)
+            {
+                TechnoTypes[i - 1] = TechnoTypes[i];
+            }
+
+            // Set the last item to null, necessary so deletion of
+            // techno entries works properly for TaskForces with MaxTechnoCount techno entries
+
+            TechnoTypes[MaxTechnoCount - 1] = null;
+        }
+
+        /// <summary>
+        /// Creates and returns a deep clone of this task force.
+        /// </summary>
+        /// <param name="iniName">The INI name of the new task force.</param>
+        public TaskForce Clone(string iniName)
+        {
+            var newTaskForce = new TaskForce(iniName);
+            newTaskForce.Name = "Clone of " + Name;
+            newTaskForce.Group = Group;
+
+            for (int i = 0; i < TechnoTypes.Length; i++)
+            {
+                if (TechnoTypes[i] != null)
+                {
+                    newTaskForce.TechnoTypes[i] = new TaskForceTechnoEntry()
+                    {
+                        TechnoType = TechnoTypes[i].TechnoType,
+                        Count = TechnoTypes[i].Count
+                    };
+                }
+            }
+
+            return newTaskForce;
+        }
 
         public void Write(IniSection section)
         {

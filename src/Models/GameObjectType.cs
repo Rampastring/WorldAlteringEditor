@@ -16,5 +16,13 @@
         public string Name { get; set; }
         public string FSName { get; set; }
         public string EditorCategory { get; set; }
+
+        public string GetEditorDisplayName()
+        {
+            if (string.IsNullOrWhiteSpace(FSName))
+                return Name ?? ININame;
+
+            return FSName;
+        }
     }
 }

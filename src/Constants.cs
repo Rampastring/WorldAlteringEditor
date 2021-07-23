@@ -24,6 +24,7 @@
         public const int UIBoldFont = 1;
 
         public const int UITextBoxHeight = 21;
+        public const int UIButtonHeight = 23;
 
         public const int UITopBarMenuHeight = 23;
 

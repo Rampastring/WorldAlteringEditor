@@ -102,8 +102,9 @@ namespace TSMapEditor.UI
 
             Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
 
-            var taskForcesWindow = new TaskforcesWindow(WindowManager);
+            var taskForcesWindow = new TaskforcesWindow(WindowManager, map);
             AddChild(taskForcesWindow);
+            taskForcesWindow.Open();
             //WindowManager.AddAndInitializeControl(taskForcesWindow);
         }
 

@@ -171,6 +171,7 @@
     <Compile Include="UI\BrushSize.cs" />
     <Compile Include="UI\Controls\EditorButton.cs" />
     <Compile Include="UI\Controls\EditorGUICreator.cs" />
+    <Compile Include="UI\Controls\EditorListBox.cs" />
     <Compile Include="UI\Controls\EditorSuggestionTextBox.cs" />
     <Compile Include="UI\Controls\EditorTextBox.cs" />
     <Compile Include="UI\Controls\INItializableWindow.cs" />

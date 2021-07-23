@@ -7,6 +7,7 @@ namespace TSMapEditor.UI.Controls
         private EditorGUICreator()
         {
             AddControl(typeof(EditorButton));
+            AddControl(typeof(EditorListBox));
             AddControl(typeof(EditorTextBox));
             AddControl(typeof(EditorNumberTextBox));
             AddControl(typeof(EditorSuggestionTextBox));

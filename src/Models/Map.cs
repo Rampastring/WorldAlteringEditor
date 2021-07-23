@@ -2,6 +2,7 @@
 using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using TSMapEditor.CCEngine;
@@ -567,6 +568,36 @@ namespace TSMapEditor.Models
                 return false;
 
             return true;
+        }
+
+        /// <summary>
+        /// Generates an unique internal ID.
+        /// Used for new TaskForces, Scripts, TeamTypes and Triggers.
+        /// </summary>
+        /// <returns></returns>
+        public string GetNewUniqueInternalId()
+        {
+            int id = 01000000;
+            string idString = id.ToString(CultureInfo.InvariantCulture);
+
+            while (true)
+            {
+               
+                if (TaskForces.Exists(tf => tf.ININame == idString) || 
+                    Scripts.Exists(s => s.ININame == idString) || 
+                    TeamTypes.Exists(tt => tt.ININame == idString) ||
+                    Triggers.Exists(t => t.ID == idString) || Tags.Exists(t => t.ID == idString) ||
+                    LoadedINI.SectionExists(idString))
+                {
+                    id++;
+                    idString = id.ToString(CultureInfo.InvariantCulture);
+                    continue;
+                }
+
+                break;
+            }
+
+            return idString;
         }
 
         // public void StartNew(IniFile rulesIni, IniFile firestormIni, TheaterType theaterType, Point2D size)

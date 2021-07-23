@@ -1,4 +1,6 @@
-﻿using Rampastring.Tools;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Rampastring.Tools;
 using System;
 using TSMapEditor.GameMath;
 
@@ -82,6 +84,77 @@ namespace TSMapEditor
                 default:
                     return "Unknown";
             }
+        }
+
+        /// <summary>
+        /// Creates and returns a new UI texture.
+        /// </summary>
+        /// <param name="gd">A GraphicsDevice instance.</param>
+        /// <param name="width">The width of the texture.</param>
+        /// <param name="height">The height of the texture.</param>
+        /// <param name="mainColor">The background color of the texture.</param>
+        /// <param name="secondaryColor">The first border color.</param>
+        /// <param name="tertiaryColor">The second border color.</param>
+        /// <returns></returns>
+        public static Texture2D CreateUITexture(GraphicsDevice gd, int width, int height, Color mainColor, Color secondaryColor, Color tertiaryColor)
+        {
+            Texture2D Texture = new Texture2D(gd, width, height, false, SurfaceFormat.Color);
+
+            Color[] color = new Color[width * height];
+
+            // background color
+            // ***
+
+            for (int i = 0; i < color.Length; i++)
+                color[i] = mainColor;
+
+            // main border
+            // ***
+
+            // top
+            for (int i = width; i < (width * 3); i++)
+                color[i] = secondaryColor;
+
+            // bottom
+            for (int i = color.Length - (width * 3); i < color.Length - width; i++)
+                color[i] = secondaryColor;
+
+            // right
+            for (int i = 1; i < color.Length - width - 2; i = i + width)
+                color[i] = secondaryColor;
+
+            for (int i = 2; i < color.Length - width - 2; i = i + width)
+                color[i] = secondaryColor;
+
+            // left
+            for (int i = width - 3; i < color.Length; i = i + width)
+                color[i] = secondaryColor;
+
+            for (int i = width - 2; i < color.Length; i = i + width)
+                color[i] = secondaryColor;
+
+            // outer border
+            // ***
+
+            // top
+            for (int i = 0; i < width; i++)
+                color[i] = tertiaryColor;
+
+            // bottom
+            for (int i = color.Length - width; i < color.Length; i++)
+                color[i] = tertiaryColor;
+
+            // right
+            for (int i = 0; i < color.Length - width; i = i + width)
+                color[i] = tertiaryColor;
+
+            // left
+            for (int i = width - 1; i < color.Length; i = i + width)
+                color[i] = tertiaryColor;
+
+            Texture.SetData(color);
+
+            return Texture;
         }
     }
 }

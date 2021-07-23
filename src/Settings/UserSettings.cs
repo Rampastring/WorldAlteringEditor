@@ -43,6 +43,8 @@ namespace TSMapEditor.Settings
             {
                 setting.WriteValue(userSettingsIni, false);
             }
+
+            userSettingsIni.WriteIniFile();
         }
 
         public static UserSettings Instance { get; private set; }
