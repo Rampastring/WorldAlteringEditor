@@ -169,6 +169,7 @@
     <Compile Include="Settings\SettingBase.cs" />
     <Compile Include="Settings\StringSetting.cs" />
     <Compile Include="UI\BrushSize.cs" />
+    <Compile Include="UI\Controls\DarkeningPanel.cs" />
     <Compile Include="UI\Controls\EditorButton.cs" />
     <Compile Include="UI\Controls\EditorGUICreator.cs" />
     <Compile Include="UI\Controls\EditorListBox.cs" />
@@ -215,6 +216,7 @@
     <Compile Include="UI\TopBar\TopBarMenu.cs" />
     <Compile Include="UI\UIManager.cs" />
     <Compile Include="Settings\UserSettings.cs" />
+    <Compile Include="UI\Windows\EditorMessageBox.cs" />
     <Compile Include="UI\Windows\TaskforcesWindow.cs" />
     <Compile Include="UI\Windows\WindowController.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">

@@ -1,5 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using Rampastring.XNAUI;
+﻿using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System.Collections.Generic;
 using System.Linq;
@@ -117,6 +116,16 @@ namespace TSMapEditor.UI.Windows
             if (editedTaskForce == null)
                 return;
 
+            var messageBox = EditorMessageBox.Show(WindowManager,
+                "Confirm",
+                $"Are you sure you wish to delete '{editedTaskForce.Name}'?\r\n\r\n" +
+                $"You'll need to manually fix any TeamTypes using the TaskForce.",
+                MessageBoxButtons.YesNo);
+            messageBox.YesClickedAction = _ => DeleteTaskForce();
+        }
+
+        private void DeleteTaskForce()
+        {
             map.TaskForces.Remove(editedTaskForce);
             ListTaskForces();
             lbTaskForces.SelectedIndex = -1;
