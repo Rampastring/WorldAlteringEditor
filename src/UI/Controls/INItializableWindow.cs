@@ -23,16 +23,14 @@ namespace TSMapEditor.UI.Controls
         private bool hasCloseButton = false;
         private bool _initialized = false;
 
-        public T FindChildOrFail<T>(string childName) where T : XNAControl
+        public T FindChild<T>(string childName, bool optional = false) where T : XNAControl
         {
-            T child = FindChild<T>(childName);
-            if (child == null)
+            T child = FindChild<T>(Children, childName);
+            if (child == null && !optional)
                 throw new KeyNotFoundException("Could not find required child control: " + childName);
 
             return child;
         }
-
-        public T FindChild<T>(string childName) where T : XNAControl => FindChild<T>(Children, childName);
 
         private T FindChild<T>(IEnumerable<XNAControl> list, string controlName) where T : XNAControl
         {

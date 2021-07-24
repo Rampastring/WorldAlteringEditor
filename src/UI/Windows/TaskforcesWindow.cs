@@ -35,27 +35,27 @@ namespace TSMapEditor.UI.Windows
 
             base.Initialize();
 
-            lbTaskForces = FindChildOrFail<EditorListBox>(nameof(lbTaskForces));
-            tbTaskForceName = FindChildOrFail<EditorTextBox>(nameof(tbTaskForceName));
-            tbGroup = FindChildOrFail<EditorNumberTextBox>(nameof(tbGroup));
-            lbUnitEntries = FindChildOrFail<EditorListBox>(nameof(lbUnitEntries));
-            tbUnitCount = FindChildOrFail<EditorNumberTextBox>(nameof(tbUnitCount));
-            tbSearchUnit = FindChildOrFail<EditorSuggestionTextBox>(nameof(tbSearchUnit));
-            lbUnitType = FindChildOrFail<EditorListBox>(nameof(lbUnitType));
+            lbTaskForces = FindChild<EditorListBox>(nameof(lbTaskForces));
+            tbTaskForceName = FindChild<EditorTextBox>(nameof(tbTaskForceName));
+            tbGroup = FindChild<EditorNumberTextBox>(nameof(tbGroup));
+            lbUnitEntries = FindChild<EditorListBox>(nameof(lbUnitEntries));
+            tbUnitCount = FindChild<EditorNumberTextBox>(nameof(tbUnitCount));
+            tbSearchUnit = FindChild<EditorSuggestionTextBox>(nameof(tbSearchUnit));
+            lbUnitType = FindChild<EditorListBox>(nameof(lbUnitType));
 
-            var btnNewTaskForce = FindChildOrFail<EditorButton>("btnNewTaskForce");
+            var btnNewTaskForce = FindChild<EditorButton>("btnNewTaskForce");
             btnNewTaskForce.LeftClick += BtnNewTaskForce_LeftClick;
 
-            var btnDeleteTaskForce = FindChildOrFail<EditorButton>("btnDeleteTaskForce");
+            var btnDeleteTaskForce = FindChild<EditorButton>("btnDeleteTaskForce");
             btnDeleteTaskForce.LeftClick += BtnDeleteTaskForce_LeftClick;
 
-            var btnCloneTaskForce = FindChildOrFail<EditorButton>("btnCloneTaskForce");
+            var btnCloneTaskForce = FindChild<EditorButton>("btnCloneTaskForce");
             btnCloneTaskForce.LeftClick += BtnCloneTaskForce_LeftClick;
 
-            var btnAddUnit = FindChildOrFail<EditorButton>("btnAddUnit");
+            var btnAddUnit = FindChild<EditorButton>("btnAddUnit");
             btnAddUnit.LeftClick += BtnAddUnit_LeftClick;
 
-            var btnDeleteUnit = FindChildOrFail<EditorButton>("btnDeleteUnit");
+            var btnDeleteUnit = FindChild<EditorButton>("btnDeleteUnit");
             btnDeleteUnit.LeftClick += BtnDeleteUnit_LeftClick;
 
             ListUnits();
@@ -116,12 +116,19 @@ namespace TSMapEditor.UI.Windows
             if (editedTaskForce == null)
                 return;
 
-            var messageBox = EditorMessageBox.Show(WindowManager,
-                "Confirm",
-                $"Are you sure you wish to delete '{editedTaskForce.Name}'?\r\n\r\n" +
-                $"You'll need to manually fix any TeamTypes using the TaskForce.",
-                MessageBoxButtons.YesNo);
-            messageBox.YesClickedAction = _ => DeleteTaskForce();
+            if (Keyboard.IsKeyHeldDown(KeyboardCommands.Instance.SkipConfirmationKey))
+            {
+                DeleteTaskForce();
+            }
+            else
+            {
+                var messageBox = EditorMessageBox.Show(WindowManager,
+                    "Confirm",
+                    $"Are you sure you wish to delete '{editedTaskForce.Name}'?\r\n\r\n" +
+                    $"You'll need to manually fix any TeamTypes using the TaskForce.",
+                    MessageBoxButtons.YesNo);
+                messageBox.YesClickedAction = _ => DeleteTaskForce();
+            }
         }
 
         private void DeleteTaskForce()

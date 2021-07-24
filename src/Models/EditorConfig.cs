@@ -14,9 +14,20 @@ namespace TSMapEditor.Models
     {
         public EditorConfig() { }
 
+        
+
         public List<OverlayCollection> OverlayCollections { get; } = new List<OverlayCollection>();
         public List<BrushSize> BrushSizes { get; } = new List<BrushSize>() { new BrushSize(1, 1) };
+        public List<ScriptAction> ScriptActions { get; } = new List<ScriptAction>();
         public List<Theater> Theaters { get; } = new List<Theater>();
+
+        public void Init(Rules rules)
+        {
+            ReadTheaters();
+            ReadOverlayCollections(rules);
+            ReadBrushSizes();
+            ReadScriptActions();
+        }
 
         public void ReadTheaters()
         {
@@ -80,6 +91,21 @@ namespace TSMapEditor.Models
                     continue;
 
                 BrushSizes.Add(new BrushSize(sizes[0], sizes[1]));
+            }
+        }
+
+        public void ReadScriptActions()
+        {
+            var iniFile = new IniFile(Environment.CurrentDirectory + "/Config/ScriptActions.ini");
+            List<string> sections = iniFile.GetSections();
+
+            for (int i = 0; i < sections.Count; i++)
+            {
+                var scriptAction = new ScriptAction(i);
+                var scriptSection = iniFile.GetSection(sections[i]);
+                scriptAction.ReadIniSection(scriptSection);
+
+                ScriptActions.Add(scriptAction);
             }
         }
     }

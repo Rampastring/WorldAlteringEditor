@@ -1,24 +1,40 @@
 ﻿using Microsoft.Xna.Framework;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
+using System;
 
-namespace TSMapEditor.UI.TopBar
+namespace TSMapEditor.UI.Controls
 {
     /// <summary>
     /// A button that opens a menu.
     /// </summary>
     public class MenuButton : XNAButton
     {
-        public MenuButton(WindowManager windowManager, XNAContextMenu contextMenu) : base(windowManager)
+        public MenuButton(WindowManager windowManager) : base(windowManager)
         {
-            ContextMenu = contextMenu;
-
             Height = Constants.UITopBarMenuHeight;
             FontIndex = Constants.UIBoldFont;
         }
 
+        public MenuButton(WindowManager windowManager, XNAContextMenu contextMenu) : this(windowManager)
+        {
+            ContextMenu = contextMenu;
+        }
 
-        public XNAContextMenu ContextMenu { get; }
+        private XNAContextMenu _contextMenu;
+        public XNAContextMenu ContextMenu 
+        {
+            get => _contextMenu;
+            set
+            {
+                if (_contextMenu != null)
+                    throw new InvalidOperationException("The context menu of a menu button cannot be changed once assigned!");
+
+                _contextMenu = value;
+                _contextMenu.EnabledChanged += ContextMenu_EnabledChanged;
+                AddChild(_contextMenu);
+            }
+        }
 
         /*
          * Warning: this class pretty much hacks around the typical behaviour 
@@ -38,9 +54,6 @@ namespace TSMapEditor.UI.TopBar
             base.Initialize();
 
             Width = (int)Renderer.GetTextDimensions(Text, FontIndex).X + Constants.UIEmptySideSpace * 2;
-
-            AddChild(ContextMenu);
-            ContextMenu.EnabledChanged += ContextMenu_EnabledChanged;
         }
 
         private void ContextMenu_EnabledChanged(object sender, System.EventArgs e)

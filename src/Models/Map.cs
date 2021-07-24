@@ -79,9 +79,7 @@ namespace TSMapEditor.Models
         private void InitEditorConfig()
         {
             EditorConfig = new EditorConfig();
-            EditorConfig.ReadTheaters();
-            EditorConfig.ReadOverlayCollections(Rules);
-            EditorConfig.ReadBrushSizes();
+            EditorConfig.Init(Rules);
         }
 
         public void InitNew(IniFile rulesIni, IniFile firestormIni, IniFile artIni, IniFile artFirestormIni)

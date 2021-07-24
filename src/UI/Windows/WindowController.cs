@@ -10,11 +10,15 @@ namespace TSMapEditor.UI.Windows
         private List<EditorWindow> Windows { get; } = new List<EditorWindow>();
 
         public TaskforcesWindow TaskForcesWindow { get; private set; }
+        public ScriptsWindow ScriptsWindow { get; private set; }
 
         public void Initialize(XNAControl windowParentControl, Map map)
         {
             TaskForcesWindow = new TaskforcesWindow(windowParentControl.WindowManager, map);
             Windows.Add(TaskForcesWindow);
+
+            ScriptsWindow = new ScriptsWindow(windowParentControl.WindowManager, map);
+            Windows.Add(ScriptsWindow);
 
             foreach (var window in Windows)
             {

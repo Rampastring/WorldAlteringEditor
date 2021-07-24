@@ -2,6 +2,7 @@
 using Rampastring.XNAUI;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations;
+using TSMapEditor.UI.Controls;
 using TSMapEditor.UI.Windows;
 
 namespace TSMapEditor.UI.TopBar

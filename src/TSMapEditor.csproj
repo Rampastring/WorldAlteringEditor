@@ -66,10 +66,14 @@
     <Compile Include="CCEngine\MixFile.cs" />
     <Compile Include="CCEngine\Palette.cs" />
     <Compile Include="CCEngine\RGBColor.cs" />
+    <Compile Include="CCEngine\ScriptAction.cs" />
     <Compile Include="CCEngine\ShpFile.cs" />
     <Compile Include="CCEngine\Theater.cs" />
     <Compile Include="CCEngine\TileSet.cs" />
     <Compile Include="CCEngine\TmpFile.cs" />
+    <None Include="Config\UI\SelectScriptActionWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Compile Include="Constants.cs" />
     <Compile Include="GameMath\CellMath.cs" />
     <Compile Include="GameMath\Point2D.cs" />
@@ -173,6 +177,7 @@
     <Compile Include="UI\Controls\EditorButton.cs" />
     <Compile Include="UI\Controls\EditorGUICreator.cs" />
     <Compile Include="UI\Controls\EditorListBox.cs" />
+    <Compile Include="UI\Controls\EditorPopUpSelector.cs" />
     <Compile Include="UI\Controls\EditorSuggestionTextBox.cs" />
     <Compile Include="UI\Controls\EditorTextBox.cs" />
     <Compile Include="UI\Controls\INItializableWindow.cs" />
@@ -211,12 +216,14 @@
     <Compile Include="UI\TileDisplay.cs" />
     <Compile Include="UI\TileInfoDisplay.cs" />
     <Compile Include="UI\TileSelector.cs" />
-    <Compile Include="UI\TopBar\MenuButton.cs" />
+    <Compile Include="UI\Controls\MenuButton.cs" />
     <Compile Include="UI\TopBar\TopBarControlMenu.cs" />
     <Compile Include="UI\TopBar\TopBarMenu.cs" />
     <Compile Include="UI\UIManager.cs" />
     <Compile Include="Settings\UserSettings.cs" />
     <Compile Include="UI\Windows\EditorMessageBox.cs" />
+    <Compile Include="UI\Windows\ScriptsWindow.cs" />
+    <Compile Include="UI\Windows\SelectScriptActionWindow.cs" />
     <Compile Include="UI\Windows\TaskforcesWindow.cs" />
     <Compile Include="UI\Windows\WindowController.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -237,7 +244,13 @@
     <None Include="Config\OverlayCollections.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Config\ScriptActions.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Config\Theaters.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\UI\ScriptsWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Config\UI\TaskforcesWindow.ini">

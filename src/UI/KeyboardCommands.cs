@@ -38,5 +38,7 @@ namespace TSMapEditor.UI
         public KeyboardCommand FrameworkMode { get; } = new KeyboardCommand("MarbleMadness", "Framework Mode (Marble Madness)", new KeyboardCommandInput(Keys.F, KeyboardModifiers.Shift));
         public KeyboardCommand NextBrushSize { get; } = new KeyboardCommand("NextBrushSize", "Next Brush Size", new KeyboardCommandInput(Keys.OemPlus, KeyboardModifiers.None));
         public KeyboardCommand PreviousBrushSize { get; } = new KeyboardCommand("PreviousBrushSize", "Previous Brush Size", new KeyboardCommandInput(Keys.D0, KeyboardModifiers.None));
+
+        public Keys SkipConfirmationKey { get; } = Keys.LeftAlt;
     }
 }
