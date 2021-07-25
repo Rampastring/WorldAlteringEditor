@@ -1,6 +1,5 @@
 ﻿using Rampastring.Tools;
 using Rampastring.XNAUI;
-using Rampastring.XNAUI.XNAControls;
 using System.Globalization;
 
 namespace TSMapEditor.UI.Controls
@@ -20,7 +19,27 @@ namespace TSMapEditor.UI.Controls
 
         public int Value
         {
-            get => Conversions.IntFromString(Text, 0);
+            get
+            {
+                Conversions.IntFromString(Text, DefaultValue);
+                int firstNonDigitIndex = -1;
+                int i = 0;
+                while (i < Text.Length)
+                {
+                    if (!char.IsDigit(Text[i]) && Text[i] != '-')
+                    {
+                        firstNonDigitIndex = i;
+                        break;
+                    }
+
+                    i++;
+                }
+
+                if (firstNonDigitIndex == -1)
+                    return Conversions.IntFromString(Text, DefaultValue);
+
+                return Conversions.IntFromString(Text.Substring(0, firstNonDigitIndex), DefaultValue);
+            }
             set => Text = value.ToString(CultureInfo.InvariantCulture);
         }
     }
