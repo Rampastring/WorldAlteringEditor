@@ -102,7 +102,6 @@ namespace TSMapEditor.UI
             base.Initialize();
 
             windowController.Initialize(this, map);
-            windowController.ScriptsWindow.Open();
 
             if (map.Houses.Count > 0)
                 editorState.ObjectOwner = map.Houses[0];
