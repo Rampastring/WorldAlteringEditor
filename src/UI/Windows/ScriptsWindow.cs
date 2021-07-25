@@ -51,6 +51,7 @@ namespace TSMapEditor.UI.Windows
             btnEditorPresetValues.ContextMenu = presetValuesContextMenu;
             btnEditorPresetValues.ContextMenu.OptionSelected += ContextMenu_OptionSelected;
 
+            tbName.TextChanged += TbName_TextChanged;
             tbParameterValue.TextChanged += TbParameterValue_TextChanged;
             lbScriptTypes.SelectedIndexChanged += LbScriptTypes_SelectedIndexChanged;
             lbActions.SelectedIndexChanged += LbActions_SelectedIndexChanged;
@@ -70,10 +71,9 @@ namespace TSMapEditor.UI.Windows
 
             FindChild<EditorButton>("btnAddScript").LeftClick += BtnAddScript_LeftClick;
             FindChild<EditorButton>("btnDeleteScript").LeftClick += BtnDeleteScript_LeftClick;
-            var btnCloneScript = FindChild<EditorButton>("btnCloneScript");
-
-            var btnAddAction = FindChild<EditorButton>("btnAddAction");
-            var btnDeleteAction = FindChild<EditorButton>("btnDeleteAction");
+            FindChild<EditorButton>("btnCloneScript").LeftClick += BtnCloneScript_LeftClick;
+            FindChild<EditorButton>("btnAddAction").LeftClick += BtnAddAction_LeftClick;
+            FindChild<EditorButton>("btnDeleteAction").LeftClick += BtnDeleteAction_LeftClick;
         }
 
         private void BtnAddScript_LeftClick(object sender, EventArgs e)
@@ -91,6 +91,44 @@ namespace TSMapEditor.UI.Windows
             map.Scripts.RemoveAt(lbScriptTypes.SelectedIndex);
             lbScriptTypes.SelectedIndex = -1;
             ListScripts();
+        }
+
+        private void BtnCloneScript_LeftClick(object sender, EventArgs e)
+        {
+            if (editedScript == null)
+                return;
+
+            map.Scripts.Add(editedScript.Clone(map.GetNewUniqueInternalId()));
+            ListScripts();
+            lbScriptTypes.SelectedIndex = map.Scripts.Count - 1;
+        }
+
+        private void BtnAddAction_LeftClick(object sender, EventArgs e)
+        {
+            if (editedScript == null)
+                return;
+
+            editedScript.Actions.Add(new ScriptActionEntry(0, 0));
+            EditScript(editedScript);
+            lbActions.SelectedIndex = lbActions.Items.Count - 1;
+        }
+
+        private void BtnDeleteAction_LeftClick(object sender, EventArgs e)
+        {
+            if (editedScript == null || lbActions.SelectedItem == null)
+                return;
+
+            editedScript.Actions.RemoveAt(lbActions.SelectedIndex);
+            EditScript(editedScript);
+        }
+
+        private void TbName_TextChanged(object sender, EventArgs e)
+        {
+            if (editedScript == null)
+                return;
+
+            editedScript.Name = tbName.Text;
+            lbScriptTypes.SelectedItem.Text = tbName.Text;
         }
 
         private void TbParameterValue_TextChanged(object sender, EventArgs e)

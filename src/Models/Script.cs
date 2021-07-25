@@ -5,6 +5,14 @@ namespace TSMapEditor.Models
 {
     public class ScriptActionEntry
     {
+        public ScriptActionEntry() { }
+
+        public ScriptActionEntry(int action, int argument)
+        {
+            Action = action;
+            Argument = argument;
+        }
+
         public int Action { get; set; }
         public int Argument { get; set; }
 
@@ -38,6 +46,27 @@ namespace TSMapEditor.Models
         public string Name { get; set; }
 
         public List<ScriptActionEntry> Actions = new List<ScriptActionEntry>();
+
+        /// <summary>
+        /// Creates and returns a clone of this script.
+        /// </summary>
+        /// <param name="iniName">The INI name of the cloned script.</param>
+        /// <returns>The created script.</returns>
+        public Script Clone(string iniName)
+        {
+            var script = new Script(iniName);
+            script.Name = "Clone of " + Name;
+            foreach (var action in Actions)
+            {
+                script.Actions.Add(new ScriptActionEntry() 
+                { 
+                    Action = action.Action, 
+                    Argument = action.Argument 
+                });
+            }
+
+            return script;
+        }
 
         public void WriteToIniSection(IniSection scriptSection)
         {
