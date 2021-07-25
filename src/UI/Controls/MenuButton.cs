@@ -91,9 +91,12 @@ namespace TSMapEditor.UI.Controls
 
         public void OpenContextMenu()
         {
+            if (ContextMenu.Items.Count == 0)
+                return;
+
             if (!ContextMenu.Enabled)
             {
-                ContextMenu.Open(new Point(0, Bottom));
+                ContextMenu.Open(new Point(0, Height));
                 RemapColor = UISettings.ActiveSettings.FocusColor;
                 TextColorIdle = UISettings.ActiveSettings.ButtonHoverColor;
             }
