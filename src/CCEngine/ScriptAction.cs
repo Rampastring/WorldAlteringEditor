@@ -15,6 +15,11 @@ namespace TSMapEditor.CCEngine
             Value = value;
             Text = text;
         }
+
+        public string GetOptionText()
+        {
+            return Value + " - " + Text;
+        }
     }
 
     public class ScriptAction
