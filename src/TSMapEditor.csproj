@@ -225,6 +225,7 @@
     <Compile Include="UI\Windows\ScriptsWindow.cs" />
     <Compile Include="UI\Windows\SelectScriptActionWindow.cs" />
     <Compile Include="UI\Windows\TaskforcesWindow.cs" />
+    <Compile Include="UI\Windows\TeamTypesWindow.cs" />
     <Compile Include="UI\Windows\WindowController.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -254,6 +255,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Config\UI\TaskforcesWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\UI\TeamTypesWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Content\SpriteFont0.xnb">
