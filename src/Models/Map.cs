@@ -49,6 +49,8 @@ namespace TSMapEditor.Models
         /// </summary>
         public List<House> StandardHouses { get; set; }
         public List<House> Houses { get; } = new List<House>();
+        public List<House> GetHouses() => Houses.Count == 0 ? Houses : StandardHouses;
+
         public List<TerrainObject> TerrainObjects { get; } = new List<TerrainObject>();
         public List<Waypoint> Waypoints { get; } = new List<Waypoint>();
 

@@ -21,7 +21,7 @@ namespace TSMapEditor.UI.Windows
             ScriptsWindow = new ScriptsWindow(windowParentControl.WindowManager, map);
             Windows.Add(ScriptsWindow);
 
-            TeamTypesWindow = new TeamTypesWindow(windowParentControl.WindowManager);
+            TeamTypesWindow = new TeamTypesWindow(windowParentControl.WindowManager, map);
             Windows.Add(TeamTypesWindow);
 
             foreach (var window in Windows)
