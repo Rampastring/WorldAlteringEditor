@@ -676,15 +676,18 @@ namespace TSMapEditor.Rendering
             // Scroll rate is designed for 60 FPS
             int scrollRate = (int)(this.scrollRate * (gameTime.ElapsedGameTime.TotalMilliseconds / 16.666));
 
-            if (Keyboard.IsKeyHeldDown(Microsoft.Xna.Framework.Input.Keys.Left))
-                cameraTopLeftPoint += new Point2D(-scrollRate, 0);
-            else if (Keyboard.IsKeyHeldDown(Microsoft.Xna.Framework.Input.Keys.Right))
-                cameraTopLeftPoint += new Point2D(scrollRate, 0);
+            if (IsActive && !(WindowManager.SelectedControl is XNATextBox))
+            {
+                if (Keyboard.IsKeyHeldDown(Microsoft.Xna.Framework.Input.Keys.Left))
+                    cameraTopLeftPoint += new Point2D(-scrollRate, 0);
+                else if (Keyboard.IsKeyHeldDown(Microsoft.Xna.Framework.Input.Keys.Right))
+                    cameraTopLeftPoint += new Point2D(scrollRate, 0);
 
-            if (Keyboard.IsKeyHeldDown(Microsoft.Xna.Framework.Input.Keys.Up))
-                cameraTopLeftPoint += new Point2D(0, -scrollRate);
-            else if (Keyboard.IsKeyHeldDown(Microsoft.Xna.Framework.Input.Keys.Down))
-                cameraTopLeftPoint += new Point2D(0, scrollRate);
+                if (Keyboard.IsKeyHeldDown(Microsoft.Xna.Framework.Input.Keys.Up))
+                    cameraTopLeftPoint += new Point2D(0, -scrollRate);
+                else if (Keyboard.IsKeyHeldDown(Microsoft.Xna.Framework.Input.Keys.Down))
+                    cameraTopLeftPoint += new Point2D(0, scrollRate);
+            }
 
             Point2D cursorMapPoint = GetCursorMapPoint();
             Point2D tileCoords = CellMath.CellCoordsFromPixelCoords(cursorMapPoint, Map.Size);
