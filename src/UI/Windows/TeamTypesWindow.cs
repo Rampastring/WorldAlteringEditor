@@ -34,6 +34,7 @@ namespace TSMapEditor.UI.Windows
         private List<XNACheckBox> checkBoxes = new List<XNACheckBox>();
 
         private SelectTaskForceWindow selectTaskForceWindow;
+        private SelectScriptWindow selectScriptWindow;
 
         public override void Initialize()
         {
@@ -67,20 +68,36 @@ namespace TSMapEditor.UI.Windows
             FindChild<EditorButton>("btnCloneTeamType").LeftClick += BtnCloneTeamType_LeftClick;
 
             selectTaskForceWindow = new SelectTaskForceWindow(WindowManager, map);
-            var darkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTaskForceWindow);
-            darkeningPanel.Hidden += DarkeningPanel_Hidden;
+            var taskForceDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTaskForceWindow);
+            taskForceDarkeningPanel.Hidden += TaskForceSelection_DarkeningPanel_Hidden;
+
+            selectScriptWindow = new SelectScriptWindow(WindowManager, map);
+            var scriptDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectScriptWindow);
+            scriptDarkeningPanel.Hidden += ScriptSelection_DarkeningPanel_Hidden;
 
             selTaskForce.LeftClick += (s, e) => selectTaskForceWindow.Open(editedTeamType.TaskForce);
+            selScript.LeftClick += (s, e) => selectScriptWindow.Open(editedTeamType.Script);
         }
 
-        private void DarkeningPanel_Hidden(object sender, EventArgs e)
+        private void ScriptSelection_DarkeningPanel_Hidden(object sender, EventArgs e)
         {
             if (lbTeamTypes.SelectedItem == null || editedTeamType == null)
             {
                 return;
             }
 
-            editedTeamType.TaskForce = selectTaskForceWindow.SelectedTaskForce;
+            editedTeamType.Script = selectScriptWindow.SelectedObject;
+            EditTeamType(editedTeamType);
+        }
+
+        private void TaskForceSelection_DarkeningPanel_Hidden(object sender, EventArgs e)
+        {
+            if (lbTeamTypes.SelectedItem == null || editedTeamType == null)
+            {
+                return;
+            }
+
+            editedTeamType.TaskForce = selectTaskForceWindow.SelectedObject;
             EditTeamType(editedTeamType);
         }
 

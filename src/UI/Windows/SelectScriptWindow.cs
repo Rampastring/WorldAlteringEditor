@@ -5,12 +5,9 @@ using TSMapEditor.Models;
 
 namespace TSMapEditor.UI.Windows
 {
-    /// <summary>
-    /// A window that allows the user to select a TaskForce (for example, for a TeamType).
-    /// </summary>
-    public class SelectTaskForceWindow : SelectObjectWindow<TaskForce>
+    public class SelectScriptWindow : SelectObjectWindow<Script>
     {
-        public SelectTaskForceWindow(WindowManager windowManager, Map map) : base(windowManager)
+        public SelectScriptWindow(WindowManager windowManager, Map map) : base(windowManager)
         {
             this.map = map;
         }
@@ -19,7 +16,7 @@ namespace TSMapEditor.UI.Windows
 
         public override void Initialize()
         {
-            Name = nameof(SelectTaskForceWindow);
+            Name = nameof(SelectScriptWindow);
             base.Initialize();
         }
 
@@ -31,21 +28,21 @@ namespace TSMapEditor.UI.Windows
                 return;
             }
 
-            SelectedObject = (TaskForce)lbObjectList.SelectedItem.Tag;
+            SelectedObject = (Script)lbObjectList.SelectedItem.Tag;
         }
 
         protected override void ListObjects()
         {
             lbObjectList.Clear();
 
-            foreach (TaskForce taskForce in map.TaskForces)
+            foreach (Script script in map.Scripts)
             {
-                lbObjectList.AddItem(new XNAListBoxItem() { Text = $"{taskForce.Name} ({taskForce.ININame})", Tag = taskForce });
-                if (taskForce == SelectedObject)
+                lbObjectList.AddItem(new XNAListBoxItem() { Text = $"{script.Name} ({script.ININame})", Tag = script });
+                if (script == SelectedObject)
                     lbObjectList.SelectedIndex = lbObjectList.Items.Count - 1;
             }
 
-            // If the initial selection taskforce wasn't found for some reason, then clear selection
+            // If the initial selection script wasn't found for some reason, then clear selection
             if (lbObjectList.SelectedItem == null)
                 SelectedObject = null;
         }
