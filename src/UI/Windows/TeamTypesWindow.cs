@@ -35,6 +35,7 @@ namespace TSMapEditor.UI.Windows
 
         private SelectTaskForceWindow selectTaskForceWindow;
         private SelectScriptWindow selectScriptWindow;
+        private SelectTagWindow selectTagWindow;
 
         public override void Initialize()
         {
@@ -69,35 +70,29 @@ namespace TSMapEditor.UI.Windows
 
             selectTaskForceWindow = new SelectTaskForceWindow(WindowManager, map);
             var taskForceDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTaskForceWindow);
-            taskForceDarkeningPanel.Hidden += TaskForceSelection_DarkeningPanel_Hidden;
+            taskForceDarkeningPanel.Hidden += (s, e) => SelectionWindow_ApplyEffect(w => editedTeamType.TaskForce = w.SelectedObject, selectTaskForceWindow); ;
 
             selectScriptWindow = new SelectScriptWindow(WindowManager, map);
             var scriptDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectScriptWindow);
-            scriptDarkeningPanel.Hidden += ScriptSelection_DarkeningPanel_Hidden;
+            scriptDarkeningPanel.Hidden += (s, e) => SelectionWindow_ApplyEffect(w => editedTeamType.Script = w.SelectedObject, selectScriptWindow);
+
+            selectTagWindow = new SelectTagWindow(WindowManager, map);
+            var tagDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTagWindow);
+            tagDarkeningPanel.Hidden += (s, e) => SelectionWindow_ApplyEffect(w => editedTeamType.Tag = w.SelectedObject, selectTagWindow);
 
             selTaskForce.LeftClick += (s, e) => selectTaskForceWindow.Open(editedTeamType.TaskForce);
             selScript.LeftClick += (s, e) => selectScriptWindow.Open(editedTeamType.Script);
+            selTag.LeftClick += (s, e) => selectTagWindow.Open(editedTeamType.Tag);
         }
 
-        private void ScriptSelection_DarkeningPanel_Hidden(object sender, EventArgs e)
+        private void SelectionWindow_ApplyEffect<T>(Action<T> action, T window)
         {
             if (lbTeamTypes.SelectedItem == null || editedTeamType == null)
             {
                 return;
             }
 
-            editedTeamType.Script = selectScriptWindow.SelectedObject;
-            EditTeamType(editedTeamType);
-        }
-
-        private void TaskForceSelection_DarkeningPanel_Hidden(object sender, EventArgs e)
-        {
-            if (lbTeamTypes.SelectedItem == null || editedTeamType == null)
-            {
-                return;
-            }
-
-            editedTeamType.TaskForce = selectTaskForceWindow.SelectedObject;
+            action(window);
             EditTeamType(editedTeamType);
         }
 
@@ -340,6 +335,7 @@ namespace TSMapEditor.UI.Windows
         private void TbName_TextChanged(object sender, EventArgs e)
         {
             editedTeamType.Name = tbName.Text;
+            lbTeamTypes.SelectedItem.Text = tbName.Text;
         }
     }
 }

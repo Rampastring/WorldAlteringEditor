@@ -226,6 +226,7 @@
     <Compile Include="UI\Windows\SelectObjectWindow.cs" />
     <Compile Include="UI\Windows\SelectScriptActionWindow.cs" />
     <Compile Include="UI\Windows\SelectScriptWindow.cs" />
+    <Compile Include="UI\Windows\SelectTagWindow.cs" />
     <Compile Include="UI\Windows\SelectTaskForceWindow.cs" />
     <Compile Include="UI\Windows\TaskforcesWindow.cs" />
     <Compile Include="UI\Windows\TeamTypesWindow.cs" />
@@ -260,6 +261,7 @@
     <None Include="Config\UI\SelectScriptWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Config\UI\SelectTagWindow.ini" />
     <None Include="Config\UI\SelectTaskForceWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
