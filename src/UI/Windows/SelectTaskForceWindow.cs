@@ -35,6 +35,30 @@ namespace TSMapEditor.UI.Windows
             lbTaskForces.DoubleLeftClick += LbScriptActions_DoubleLeftClick;
             lbTaskForces.SelectedIndexChanged += LbTaskForces_SelectedIndexChanged;
             FindChild<EditorButton>("btnSelect").LeftClick += BtnSelect_LeftClick;
+
+            tbSearch.TextChanged += TbSearch_TextChanged;
+            tbSearch.EnterPressed += (s, e) => FindNext();
+        }
+
+        private void TbSearch_TextChanged(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(tbSearch.Text) || tbSearch.Text == tbSearch.Suggestion)
+                return;
+
+            lbTaskForces.SelectedIndex = -1;
+            FindNext();
+        }
+
+        private void FindNext()
+        {
+            for (int i = lbTaskForces.SelectedIndex + 1; i < lbTaskForces.Items.Count; i++)
+            {
+                if (lbTaskForces.Items[i].Text.ToUpperInvariant().Contains(tbSearch.Text.ToUpperInvariant()))
+                {
+                    lbTaskForces.SelectedIndex = i;
+                    break;
+                }
+            }
         }
 
         private void LbTaskForces_SelectedIndexChanged(object sender, EventArgs e)

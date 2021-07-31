@@ -255,18 +255,6 @@ namespace TSMapEditor.UI
             tokenPlace++;
         }
 
-        // private int GetArithmeticValue()
-        // {
-        //     while (true)
-        //     {
-        //         char c = Input[tokenPlace];
-        //         if (char.IsDigit(c))
-        //             return;
-        // 
-        //         tokenPlace++;
-        //     }
-        // }
-
         private int GetInt()
         {
             int value = 0;
