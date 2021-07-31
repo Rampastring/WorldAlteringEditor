@@ -224,6 +224,7 @@
     <Compile Include="UI\Windows\EditorMessageBox.cs" />
     <Compile Include="UI\Windows\ScriptsWindow.cs" />
     <Compile Include="UI\Windows\SelectScriptActionWindow.cs" />
+    <Compile Include="UI\Windows\SelectTaskForceWindow.cs" />
     <Compile Include="UI\Windows\TaskforcesWindow.cs" />
     <Compile Include="UI\Windows\TeamTypesWindow.cs" />
     <Compile Include="UI\Windows\WindowController.cs" />
@@ -252,6 +253,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Config\UI\ScriptsWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\UI\SelectTaskForceWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Config\UI\TaskforcesWindow.ini">

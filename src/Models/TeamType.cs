@@ -9,7 +9,7 @@ namespace TSMapEditor.Models
             ININame = iniName;
         }
 
-        public string ININame { get; }
+        public string ININame { get; private set; }
 
         public int Max { get; set; }
         public bool Full { get; set; }
@@ -25,7 +25,7 @@ namespace TSMapEditor.Models
         public bool Loadable { get; set; }
         public bool Prebuild { get; set; }
         public int Priority { get; set; }
-        public int Waypoint { get; set; }
+        public string Waypoint { get; set; } = "A";
         public bool Annoyance { get; set; }
         public bool IonImmune { get; set; }
         public bool Recruiter { get; set; }
@@ -42,6 +42,20 @@ namespace TSMapEditor.Models
         public bool OnlyTargetHouseEnemy { get; set; }
         public bool TransportsReturnOnUnload { get; set; }
         public bool AreTeamMembersRecruitable { get; set; }
+
+        /// <summary>
+        /// Creates and returns a clone of this TeamType.
+        /// </summary>
+        /// <param name="iniName">The INI name of the created TeamType.</param>
+        public TeamType Clone(string iniName)
+        {
+            var clone = MemberwiseClone() as TeamType;
+            clone.ININame = iniName;
+            clone.Name = "Clone of " + Name;
+
+            // This class has no members that we'd need to deep clone
+            return clone;
+        }
 
         public void WriteToIniSection(IniSection iniSection)
         {

@@ -57,15 +57,8 @@ namespace TSMapEditor.UI.Windows
             lbActions.SelectedIndexChanged += LbActions_SelectedIndexChanged;
 
             selectScriptActionWindow = new SelectScriptActionWindow(WindowManager, map.EditorConfig);
-            var darkeningPanel = new DarkeningPanel(WindowManager);
-            darkeningPanel.DrawOrder = 1;
-            darkeningPanel.UpdateOrder = 1;
-            Parent.AddChild(darkeningPanel);
-            darkeningPanel.AddChild(selectScriptActionWindow);
-            darkeningPanel.Hide();
-            darkeningPanel.Alpha = 0f;
+            var darkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectScriptActionWindow);
             darkeningPanel.Hidden += DarkeningPanel_Hidden;
-            selectScriptActionWindow.CenterOnParent();
 
             selTypeOfAction.MouseLeftDown += SelTypeOfAction_MouseLeftDown;
 

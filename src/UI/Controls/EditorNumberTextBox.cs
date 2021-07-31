@@ -14,7 +14,7 @@ namespace TSMapEditor.UI.Controls
 
         protected override bool AllowCharacterInput(char character)
         {
-            return (character >= '0' && character <= '9') || character == '-';
+            return (character >= '0' && character <= '9') || (character == '-' && Text.Length == 0);
         }
 
         public int Value

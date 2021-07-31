@@ -86,6 +86,39 @@ namespace TSMapEditor
             }
         }
 
+        public static int GetWaypointNumberFromAlphabeticalString(string str)
+        {
+            if (str.Length < 1 || str.Length > 2 ||
+                str[0] < 'A' || str[0] > 'Z' || (str.Length == 2 && (str[1] < 'A' || str[1] > 'Z')))
+                throw new InvalidOperationException("Waypoint values are only valid between A and ZZ. Invalid value: " + str);
+
+            if (str.Length == 1)
+                return str[0] - 'A';
+
+            const int CharCount = 26;
+
+            int multiplier = (str[0] - 'A' + 1);
+            return (multiplier * CharCount) + (str[1] - 'A');
+        }
+
+        public static string WaypointNumberToAlphabeticalString(int waypointNumber)
+        {
+            const int WAYPOINT_MAX = 701;
+
+            if (waypointNumber > WAYPOINT_MAX)
+                return "A"; // matches 0
+
+            const int CharCount = 26;
+
+            int firstLetterValue = (waypointNumber / CharCount);
+            int secondLetterValue = waypointNumber % CharCount;
+
+            if (firstLetterValue == 0)
+                return ((char)('A' + secondLetterValue)).ToString();
+
+            return ((char)('A' + (firstLetterValue - 1))).ToString() + ((char)('A' + secondLetterValue)).ToString();
+        }
+
         /// <summary>
         /// Creates and returns a new UI texture.
         /// </summary>

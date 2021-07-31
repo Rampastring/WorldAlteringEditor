@@ -99,6 +99,8 @@ namespace TSMapEditor.UI.Controls
         {
             base.Update(gameTime);
 
+            RemapColor = Color.White * Alpha;
+
             if (Alpha <= 0.0f)
             {
                 Enabled = false;
@@ -113,6 +115,20 @@ namespace TSMapEditor.UI.Controls
             wm.AddAndInitializeControl(dp);
             dp.AddChild(control);
             dp.Show();
+        }
+
+        public static DarkeningPanel InitializeAndAddToParentControlWithChild(WindowManager windowManager, XNAControl parent, XNAControl child)
+        {
+            var darkeningPanel = new DarkeningPanel(windowManager);
+            darkeningPanel.DrawOrder = 1;
+            darkeningPanel.UpdateOrder = 1;
+            parent.AddChild(darkeningPanel);
+            darkeningPanel.AddChild(child);
+            darkeningPanel.Hide();
+            darkeningPanel.Alpha = 0f;
+            child.CenterOnParent();
+
+            return darkeningPanel;
         }
     }
 }

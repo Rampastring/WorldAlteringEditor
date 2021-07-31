@@ -33,6 +33,8 @@ namespace TSMapEditor.UI.Windows
         private TeamType editedTeamType;
         private List<XNACheckBox> checkBoxes = new List<XNACheckBox>();
 
+        private SelectTaskForceWindow selectTaskForceWindow;
+
         public override void Initialize()
         {
             Name = nameof(TeamTypesWindow);
@@ -59,6 +61,56 @@ namespace TSMapEditor.UI.Windows
             ddVeteranLevel.AddItem("Elite");
 
             lbTeamTypes.SelectedIndexChanged += LbTeamTypes_SelectedIndexChanged;
+
+            FindChild<EditorButton>("btnNewTeamType").LeftClick += BtnNewTeamType_LeftClick;
+            FindChild<EditorButton>("btnDeleteTeamType").LeftClick += BtnDeleteTeamType_LeftClick;
+            FindChild<EditorButton>("btnCloneTeamType").LeftClick += BtnCloneTeamType_LeftClick;
+
+            selectTaskForceWindow = new SelectTaskForceWindow(WindowManager, map);
+            var darkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTaskForceWindow);
+            darkeningPanel.Hidden += DarkeningPanel_Hidden;
+
+            selTaskForce.LeftClick += (s, e) => selectTaskForceWindow.Open(editedTeamType.TaskForce);
+        }
+
+        private void DarkeningPanel_Hidden(object sender, EventArgs e)
+        {
+            if (lbTeamTypes.SelectedItem == null || editedTeamType == null)
+            {
+                return;
+            }
+
+            editedTeamType.TaskForce = selectTaskForceWindow.SelectedTaskForce;
+            EditTeamType(editedTeamType);
+        }
+
+        private void BtnNewTeamType_LeftClick(object sender, EventArgs e)
+        {
+            map.TeamTypes.Add(new TeamType(map.GetNewUniqueInternalId()) { Name = "New TeamType" });
+            ListTeamTypes();
+            lbTeamTypes.SelectedIndex = map.TeamTypes.Count - 1;
+            lbTeamTypes.ScrollToBottom();
+        }
+
+        private void BtnDeleteTeamType_LeftClick(object sender, EventArgs e)
+        {
+            if (lbTeamTypes.SelectedItem == null)
+                return;
+
+            map.TeamTypes.RemoveAt(lbTeamTypes.SelectedIndex);
+            ListTeamTypes();
+            LbTeamTypes_SelectedIndexChanged(this, EventArgs.Empty);
+        }
+
+        private void BtnCloneTeamType_LeftClick(object sender, EventArgs e)
+        {
+            if (lbTeamTypes.SelectedItem == null)
+                return;
+
+            map.TeamTypes.Add(((TeamType)lbTeamTypes.SelectedItem.Tag).Clone(map.GetNewUniqueInternalId()));
+            ListTeamTypes();
+            lbTeamTypes.SelectedIndex = map.TeamTypes.Count - 1;
+            lbTeamTypes.ScrollToBottom();
         }
 
         private void LbTeamTypes_SelectedIndexChanged(object sender, EventArgs e)
@@ -151,6 +203,16 @@ namespace TSMapEditor.UI.Windows
 
         private void EditTeamType(TeamType teamType)
         {
+            tbName.TextChanged -= TbName_TextChanged;
+            ddVeteranLevel.SelectedChanged -= DdVeteranLevel_SelectedChanged;
+            ddHouse.SelectedIndexChanged -= DdHouse_SelectedIndexChanged;
+            tbPriority.TextChanged -= TbPriority_TextChanged;
+            tbMax.TextChanged -= TbMax_TextChanged;
+            tbTechLevel.TextChanged -= TbTechLevel_TextChanged;
+            tbGroup.TextChanged -= TbGroup_TextChanged;
+            tbWaypoint.TextChanged -= TbWaypoint_TextChanged;
+            checkBoxes.ForEach(chk => chk.CheckedChanged -= Chk_CheckedChanged);
+
             editedTeamType = teamType;
 
             if (editedTeamType == null)
@@ -185,7 +247,7 @@ namespace TSMapEditor.UI.Windows
             tbMax.Value = editedTeamType.Max;
             tbTechLevel.Value = editedTeamType.TechLevel;
             tbGroup.Value = editedTeamType.Group;
-            tbWaypoint.Value = editedTeamType.Waypoint;
+            tbWaypoint.Value = Helpers.GetWaypointNumberFromAlphabeticalString(editedTeamType.Waypoint);
 
             if (editedTeamType.TaskForce != null)
                 selTaskForce.Text = editedTeamType.TaskForce.Name + " (" + editedTeamType.TaskForce.ININame + ")";
@@ -201,6 +263,66 @@ namespace TSMapEditor.UI.Windows
                 selTag.Text = editedTeamType.Tag.Name + " (" + editedTeamType.Tag.ID + ")";
             else
                 selTag.Text = string.Empty;
+
+            checkBoxes.ForEach(chk => chk.Checked = (bool)((PropertyInfo)chk.Tag).GetValue(editedTeamType));
+
+            tbName.TextChanged += TbName_TextChanged;
+            ddVeteranLevel.SelectedChanged += DdVeteranLevel_SelectedChanged;
+            ddHouse.SelectedIndexChanged += DdHouse_SelectedIndexChanged;
+            tbPriority.TextChanged += TbPriority_TextChanged;
+            tbMax.TextChanged += TbMax_TextChanged;
+            tbTechLevel.TextChanged += TbTechLevel_TextChanged;
+            tbGroup.TextChanged += TbGroup_TextChanged;
+            tbWaypoint.TextChanged += TbWaypoint_TextChanged;
+            checkBoxes.ForEach(chk => chk.CheckedChanged += Chk_CheckedChanged);
+        }
+
+        private void Chk_CheckedChanged(object sender, EventArgs e)
+        {
+            var checkBox = (XNACheckBox)sender;
+            var propertyInfo = (PropertyInfo)checkBox.Tag;
+
+            propertyInfo.SetValue(editedTeamType, checkBox.Checked);
+        }
+
+        private void TbWaypoint_TextChanged(object sender, EventArgs e)
+        {
+            editedTeamType.Waypoint = Helpers.WaypointNumberToAlphabeticalString(tbWaypoint.Value);
+        }
+
+        private void TbGroup_TextChanged(object sender, EventArgs e)
+        {
+            editedTeamType.Group = tbGroup.Value;
+        }
+
+        private void TbTechLevel_TextChanged(object sender, EventArgs e)
+        {
+            editedTeamType.TechLevel = tbTechLevel.Value;
+        }
+
+        private void TbMax_TextChanged(object sender, EventArgs e)
+        {
+            editedTeamType.Max = tbMax.Value;
+        }
+
+        private void TbPriority_TextChanged(object sender, EventArgs e)
+        {
+            editedTeamType.Priority = tbPriority.Value;
+        }
+
+        private void DdHouse_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            editedTeamType.House = map.GetHouses()[ddHouse.SelectedIndex];
+        }
+
+        private void DdVeteranLevel_SelectedChanged(object sender, EventArgs e)
+        {
+            editedTeamType.VeteranLevel = ddVeteranLevel.SelectedIndex;
+        }
+
+        private void TbName_TextChanged(object sender, EventArgs e)
+        {
+            editedTeamType.Name = tbName.Text;
         }
     }
 }

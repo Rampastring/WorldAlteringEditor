@@ -45,7 +45,11 @@ namespace TSMapEditor.UI
             if (controlName == primaryControl.Name)
                 return primaryControl;
 
-            return Find(primaryControl.Children, controlName);
+            var control = Find(primaryControl.Children, controlName);
+            if (control == null)
+                throw new KeyNotFoundException($"Control '{controlName}' not found while parsing input '{Input}'");
+
+            return control;
         }
 
         private XNAControl Find(IEnumerable<XNAControl> list, string controlName)
