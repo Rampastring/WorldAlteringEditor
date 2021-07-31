@@ -50,6 +50,7 @@ namespace TSMapEditor.UI.TopBar
             editContextMenu.AddItem("Redo", () => mutationManager.Redo(), () => mutationManager.CanRedo(), null, null);
             editContextMenu.AddItem("TaskForces", () => windowController.TaskForcesWindow.Open(), null, null, null);
             editContextMenu.AddItem("Scripts", () => windowController.ScriptsWindow.Open(), null, null, null);
+            editContextMenu.AddItem("TeamTypes", () => windowController.TeamTypesWindow.Open(), null, null, null);
             editContextMenu.Items[0].HintText = KeyboardCommands.Instance.Undo.Key.GetKeyNameString();
             editContextMenu.Items[1].HintText = KeyboardCommands.Instance.Redo.Key.GetKeyNameString();
 
