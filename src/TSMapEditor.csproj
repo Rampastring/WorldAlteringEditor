@@ -71,6 +71,9 @@
     <Compile Include="CCEngine\Theater.cs" />
     <Compile Include="CCEngine\TileSet.cs" />
     <Compile Include="CCEngine\TmpFile.cs" />
+    <None Include="Config\Actions.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Config\Events.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
