@@ -30,6 +30,6 @@ namespace TSMapEditor.Models.Enums
         Waypoint,
         String,
         GlobalVariable,
-
+        House
     }
 }

@@ -19,6 +19,7 @@ namespace TSMapEditor.Models
         public List<OverlayCollection> OverlayCollections { get; } = new List<OverlayCollection>();
         public List<BrushSize> BrushSizes { get; } = new List<BrushSize>() { new BrushSize(1, 1) };
         public List<ScriptAction> ScriptActions { get; } = new List<ScriptAction>();
+        public List<TriggerEventType> TriggerEventTypes { get; } = new List<TriggerEventType>();
         public List<Theater> Theaters { get; } = new List<Theater>();
 
         public void Init(Rules rules)
@@ -27,9 +28,10 @@ namespace TSMapEditor.Models
             ReadOverlayCollections(rules);
             ReadBrushSizes();
             ReadScriptActions();
+            ReadTriggerEventTypes();
         }
 
-        public void ReadTheaters()
+        private void ReadTheaters()
         {
             var iniFile = new IniFile(Environment.CurrentDirectory + "/Config/Theaters.ini");
             var section = iniFile.GetSection("Theaters");
@@ -49,7 +51,7 @@ namespace TSMapEditor.Models
             }
         }
 
-        public void ReadOverlayCollections(Rules rules)
+        private void ReadOverlayCollections(Rules rules)
         {
             OverlayCollections.Clear();
 
@@ -71,7 +73,7 @@ namespace TSMapEditor.Models
             }
         }
 
-        public void ReadBrushSizes()
+        private void ReadBrushSizes()
         {
             var iniFile = new IniFile(Environment.CurrentDirectory + "/Config/BrushSizes.ini");
             var section = iniFile.GetSection("BrushSizes");
@@ -94,7 +96,7 @@ namespace TSMapEditor.Models
             }
         }
 
-        public void ReadScriptActions()
+        private void ReadScriptActions()
         {
             var iniFile = new IniFile(Environment.CurrentDirectory + "/Config/ScriptActions.ini");
             List<string> sections = iniFile.GetSections();
@@ -106,6 +108,21 @@ namespace TSMapEditor.Models
                 scriptAction.ReadIniSection(scriptSection);
 
                 ScriptActions.Add(scriptAction);
+            }
+        }
+
+        private void ReadTriggerEventTypes()
+        {
+            var iniFile = new IniFile(Environment.CurrentDirectory + "/Config/Events.ini");
+            List<string> sections = iniFile.GetSections();
+
+            for (int i = 0; i < sections.Count; i++)
+            {
+                var triggerEventType = new TriggerEventType(i);
+                var section = iniFile.GetSection(sections[i]);
+                triggerEventType.ReadPropertiesFromIniSection(section);
+
+                TriggerEventTypes.Add(triggerEventType);
             }
         }
     }

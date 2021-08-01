@@ -71,9 +71,13 @@
     <Compile Include="CCEngine\Theater.cs" />
     <Compile Include="CCEngine\TileSet.cs" />
     <Compile Include="CCEngine\TmpFile.cs" />
+    <None Include="Config\Events.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Config\UI\SelectScriptActionWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Compile Include="CCEngine\TriggerEventType.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="GameMath\CellMath.cs" />
     <Compile Include="GameMath\Point2D.cs" />
@@ -174,6 +178,7 @@
     <Compile Include="Settings\StringSetting.cs" />
     <Compile Include="UI\BrushSize.cs" />
     <Compile Include="UI\Controls\DarkeningPanel.cs" />
+    <Compile Include="UI\Controls\EditorDescriptionPanel.cs" />
     <Compile Include="UI\Controls\EditorButton.cs" />
     <Compile Include="UI\Controls\EditorGUICreator.cs" />
     <Compile Include="UI\Controls\EditorListBox.cs" />
@@ -230,6 +235,7 @@
     <Compile Include="UI\Windows\SelectTaskForceWindow.cs" />
     <Compile Include="UI\Windows\TaskforcesWindow.cs" />
     <Compile Include="UI\Windows\TeamTypesWindow.cs" />
+    <Compile Include="UI\Windows\TriggersWindow.cs" />
     <Compile Include="UI\Windows\WindowController.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -269,6 +275,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Config\UI\TeamTypesWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\UI\TriggersWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Content\SpriteFont0.xnb">

@@ -9,6 +9,7 @@ namespace TSMapEditor.UI.Controls
             AddControl(typeof(EditorPanel));
             AddControl(typeof(EditorButton));
             AddControl(typeof(MenuButton));
+            AddControl(typeof(EditorDescriptionPanel));
             AddControl(typeof(EditorListBox));
             AddControl(typeof(EditorTextBox));
             AddControl(typeof(EditorNumberTextBox));

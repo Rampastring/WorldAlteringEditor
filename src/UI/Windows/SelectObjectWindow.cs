@@ -59,6 +59,7 @@ namespace TSMapEditor.UI.Windows
             SelectedObject = initialSelection;
             ListObjects();
             Show();
+            WindowManager.SelectedControl = tbSearch;
         }
 
         protected abstract void LbObjectList_SelectedIndexChanged(object sender, EventArgs e);

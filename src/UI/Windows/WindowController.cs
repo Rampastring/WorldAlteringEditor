@@ -12,6 +12,7 @@ namespace TSMapEditor.UI.Windows
         public TaskforcesWindow TaskForcesWindow { get; private set; }
         public ScriptsWindow ScriptsWindow { get; private set; }
         public TeamTypesWindow TeamTypesWindow { get; private set; }
+        public TriggersWindow TriggersWindow { get; private set; }
 
         public void Initialize(XNAControl windowParentControl, Map map)
         {
@@ -23,6 +24,9 @@ namespace TSMapEditor.UI.Windows
 
             TeamTypesWindow = new TeamTypesWindow(windowParentControl.WindowManager, map);
             Windows.Add(TeamTypesWindow);
+
+            TriggersWindow = new TriggersWindow(windowParentControl.WindowManager);
+            Windows.Add(TriggersWindow);
 
             foreach (var window in Windows)
             {
