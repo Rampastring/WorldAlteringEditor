@@ -19,6 +19,7 @@ namespace TSMapEditor.Models.Enums
         Unit,
         Movie,
         Text,
+        Tag,
         Trigger,
         Boolean,
         Sound,
@@ -30,6 +31,11 @@ namespace TSMapEditor.Models.Enums
         Waypoint,
         String,
         GlobalVariable,
-        House
+        House,
+        Quarry,
+        Weapon,
+        SpotlightBehaviour,
+        RadarEvent,
+        VoxelAnim
     }
 }
