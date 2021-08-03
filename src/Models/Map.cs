@@ -49,7 +49,7 @@ namespace TSMapEditor.Models
         /// </summary>
         public List<House> StandardHouses { get; set; }
         public List<House> Houses { get; } = new List<House>();
-        public List<House> GetHouses() => Houses.Count == 0 ? Houses : StandardHouses;
+        public List<House> GetHouses() => Houses.Count > 0 ? Houses : StandardHouses;
 
         public List<TerrainObject> TerrainObjects { get; } = new List<TerrainObject>();
         public List<Waypoint> Waypoints { get; } = new List<Waypoint>();
@@ -305,6 +305,11 @@ namespace TSMapEditor.Models
                 if (cell.Structure == structure)
                     cell.Structure = null;
             });
+
+            if (structure.ObjectType.ArtConfig.FoundationX == 0 && structure.ObjectType.ArtConfig.FoundationY == 0)
+            {
+                GetTile(structure.Position).Structure = null;
+            }
 
             Structures.Remove(structure);
         }
