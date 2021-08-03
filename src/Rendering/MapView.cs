@@ -674,7 +674,8 @@ namespace TSMapEditor.Rendering
         {
             // Make scroll rate independent of FPS
             // Scroll rate is designed for 60 FPS
-            int scrollRate = (int)(this.scrollRate * (gameTime.ElapsedGameTime.TotalMilliseconds / 16.666));
+            // 1000 ms (1 second) divided by 60 frames =~ 16.667 ms / frame
+            int scrollRate = (int)(this.scrollRate * (gameTime.ElapsedGameTime.TotalMilliseconds / 16.667));
 
             if (IsActive && !(WindowManager.SelectedControl is XNATextBox))
             {

@@ -25,7 +25,7 @@ namespace TSMapEditor.UI.Windows
             TeamTypesWindow = new TeamTypesWindow(windowParentControl.WindowManager, map);
             Windows.Add(TeamTypesWindow);
 
-            TriggersWindow = new TriggersWindow(windowParentControl.WindowManager);
+            TriggersWindow = new TriggersWindow(windowParentControl.WindowManager, map);
             Windows.Add(TriggersWindow);
 
             foreach (var window in Windows)
