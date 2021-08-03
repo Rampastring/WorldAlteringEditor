@@ -50,6 +50,10 @@ namespace TSMapEditor.CCEngine
             while (true)
             {
                 string key = "Option" + i;
+
+                if (!iniSection.KeyExists(key))
+                    break;
+
                 string value = iniSection.GetStringValue(key, null);
                 if (string.IsNullOrWhiteSpace(value))
                 {
