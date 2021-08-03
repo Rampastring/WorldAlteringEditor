@@ -19,7 +19,7 @@
         /// According to ModEnc, this is an obsolete key from Red Alert.
         /// </summary>
         public bool AIRebuildable { get; set; }
-        public bool Powered { get; set; }
+        public bool Powered { get; set; } = true;
         
         public SpotlightType Spotlight { get; set; }
         public int[] UpgradeIds { get; private set; } = new int[MaxUpgradeCount];
