@@ -89,6 +89,7 @@ namespace TSMapEditor.UI.TopBar
 
             KeyboardCommands.Instance.NextBrushSize.Triggered += NextBrushSize_Triggered;
             KeyboardCommands.Instance.PreviousBrushSize.Triggered += PreviousBrushSize_Triggered;
+            KeyboardCommands.Instance.ToggleAutoLAT.Triggered += ToggleAutoLAT_Triggered;
 
             base.Initialize();
 
@@ -102,6 +103,11 @@ namespace TSMapEditor.UI.TopBar
 
             terrainPlacementAction.Tile = theaterGraphics.GetTileGraphics(latGround.GroundTileSet.StartTileIndex);
             editorState.CursorAction = terrainPlacementAction;
+        }
+
+        private void ToggleAutoLAT_Triggered(object sender, EventArgs e)
+        {
+            chkAutoLat.Checked = !chkAutoLat.Checked;
         }
 
         private void ChkAutoLat_CheckedChanged(object sender, EventArgs e)

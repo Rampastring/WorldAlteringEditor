@@ -695,6 +695,12 @@ namespace TSMapEditor.Rendering
             tileUnderCursor = tile;
             TileInfoDisplay.MapTile = tile;
 
+            if (IsActive && tileUnderCursor != null)
+            {
+                if (KeyboardCommands.Instance.DeleteObject.AreKeysDown(Keyboard))
+                    DeleteObjectFromTile(tileUnderCursor.CoordsToPoint());
+            }
+            
             base.Update(gameTime);
         }
 
@@ -732,13 +738,6 @@ namespace TSMapEditor.Rendering
                     }
                 }
 
-                return;
-            }
-
-            if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.Delete)
-            {
-                DeleteObjectFromTile(tileCoords);
-                refreshes.Add(new RefreshPoint(tileCoords, 2));
                 return;
             }
 
@@ -803,23 +802,20 @@ namespace TSMapEditor.Rendering
             {
                 if (tile.Infantry[i] != null)
                 {
-                    Map.Infantry.Remove(tile.Infantry[i]);
-                    tile.Infantry[i] = null;
+                    Map.RemoveInfantry(tile.Infantry[i]);
                     return;
                 }
             }
 
             if (tile.Aircraft != null)
             {
-                Map.Aircraft.Remove(tile.Aircraft);
-                tile.Aircraft = null;
+                Map.RemoveAircraft(tile.Aircraft);
                 return;
             }
 
             if (tile.Vehicle != null)
             {
-                Map.Units.Remove(tile.Vehicle);
-                tile.Vehicle = null;
+                Map.RemoveUnit(tile.Vehicle);
                 return;
             }
 
@@ -831,8 +827,7 @@ namespace TSMapEditor.Rendering
 
             if (tile.TerrainObject != null)
             {
-                Map.TerrainObjects.Remove(tile.TerrainObject);
-                tile.TerrainObject = null;
+                Map.RemoveTerrainObject(tile.CoordsToPoint());
                 return;
             }
         }

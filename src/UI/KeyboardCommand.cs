@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework.Input;
+using Rampastring.XNAUI.Input;
 using System;
 
 namespace TSMapEditor.UI
@@ -75,6 +76,31 @@ namespace TSMapEditor.UI
         public void DoTrigger()
         {
             Triggered?.Invoke(this, EventArgs.Empty);
+        }
+
+        /// <summary>
+        /// Checks if the keys of this command are held down.
+        /// </summary>
+        /// <param name="keyboard">The Rampastring.XNAUI RKeyboard instance.</param>
+        /// <returns>True if the keys are currently held down, otherwise false.</returns>
+        public bool AreKeysDown(RKeyboard keyboard)
+        {
+            if (Key.Key == Keys.None)
+                return false;
+
+            if (!keyboard.IsKeyHeldDown(Key.Key))
+                return false;
+
+            if ((Key.Modifiers & KeyboardModifiers.Alt) == KeyboardModifiers.Alt && !keyboard.IsAltHeldDown())
+                return false;
+
+            if ((Key.Modifiers & KeyboardModifiers.Ctrl) == KeyboardModifiers.Ctrl && !keyboard.IsCtrlHeldDown())
+                return false;
+
+            if ((Key.Modifiers & KeyboardModifiers.Shift) == KeyboardModifiers.Shift && !keyboard.IsShiftHeldDown())
+                return false;
+
+            return true;
         }
     }
 }
