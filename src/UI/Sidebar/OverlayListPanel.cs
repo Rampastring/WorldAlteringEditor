@@ -62,6 +62,8 @@ namespace TSMapEditor.UI.Sidebar
             overlayCollectionPlacementAction = new OverlayCollectionPlacementAction(cursorActionTarget);
             overlayPlacementAction = new OverlayPlacementAction(cursorActionTarget);
             ObjectTreeView.SelectedItemChanged += ObjectTreeView_SelectedItemChanged;
+            overlayCollectionPlacementAction.ActionExited += (s, e) => ObjectTreeView.SelectedNode = null;
+            overlayPlacementAction.ActionExited += (s, e) => ObjectTreeView.SelectedNode = null;
 
             InitOverlays();
 

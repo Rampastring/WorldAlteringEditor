@@ -101,7 +101,8 @@ namespace TSMapEditor.UI.Sidebar
             if (EditorState.ObjectOwner == null)
                 return;
 
-            ObjectSelected();
+            if (ObjectTreeView.SelectedNode != null)
+                ObjectSelected();
         }
 
         protected abstract void ObjectSelected();
@@ -226,7 +227,7 @@ namespace TSMapEditor.UI.Sidebar
 
         private void DdOwner_SelectedIndexChanged(object sender, EventArgs e)
         {
-            EditorState.ObjectOwner = Map.Houses[ddOwner.SelectedIndex];
+            EditorState.ObjectOwner = Map.GetHouses()[ddOwner.SelectedIndex];
         }
 
         private void RefreshHouseList()
@@ -234,8 +235,8 @@ namespace TSMapEditor.UI.Sidebar
             ddOwner.SelectedIndexChanged -= DdOwner_SelectedIndexChanged;
 
             ddOwner.Items.Clear();
-            Map.Houses.ForEach(h => ddOwner.AddItem(h.ININame, h.XNAColor));
-            ddOwner.SelectedIndex = Map.Houses.FindIndex(h => h == EditorState.ObjectOwner);
+            Map.GetHouses().ForEach(h => ddOwner.AddItem(h.ININame, h.XNAColor));
+            ddOwner.SelectedIndex = Map.GetHouses().FindIndex(h => h == EditorState.ObjectOwner);
 
             ddOwner.SelectedIndexChanged += DdOwner_SelectedIndexChanged;
         }
@@ -244,7 +245,7 @@ namespace TSMapEditor.UI.Sidebar
         {
             ddOwner.SelectedIndexChanged -= DdOwner_SelectedIndexChanged;
 
-            ddOwner.SelectedIndex = Map.Houses.FindIndex(h => h == EditorState.ObjectOwner);
+            ddOwner.SelectedIndex = Map.GetHouses().FindIndex(h => h == EditorState.ObjectOwner);
 
             ddOwner.SelectedIndexChanged += DdOwner_SelectedIndexChanged;
         }

@@ -797,6 +797,8 @@ namespace TSMapEditor.Rendering
             if (tile == null)
                 return;
 
+            AddRefreshPoint(cellCoords);
+
             for (int i = 0; i < tile.Infantry.Length; i++)
             {
                 if (tile.Infantry[i] != null)
@@ -824,12 +826,14 @@ namespace TSMapEditor.Rendering
             if (tile.Structure != null)
             {
                 Map.RemoveBuilding(tile.Structure);
+                return;
             }
 
             if (tile.TerrainObject != null)
             {
                 Map.TerrainObjects.Remove(tile.TerrainObject);
                 tile.TerrainObject = null;
+                return;
             }
         }
 

@@ -338,6 +338,13 @@ namespace TSMapEditor.UI.Sidebar
             base.OnMouseOnControl();   
         }
 
+        public override void OnMouseLeave()
+        {
+            HoveredNode = null;
+
+            base.OnMouseLeave();
+        }
+
         public override void OnMouseLeftDown()
         {
             var node = GetItemOnCursor(GetCursorPoint());
@@ -424,7 +431,7 @@ namespace TSMapEditor.UI.Sidebar
                 {
                     // This category header is at least partially visible, draw it!
 
-                    if (HoveredNode == category)
+                    if (HoveredNode == category || SelectedNode == category)
                     {
                         FillRectangle(new Rectangle(1, y, drawnWidth, CategoryHeight),
                             UISettings.ActiveSettings.FocusColor);
