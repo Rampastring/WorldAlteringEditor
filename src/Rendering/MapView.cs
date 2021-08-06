@@ -733,6 +733,8 @@ namespace TSMapEditor.Rendering
                     {
                         int facing = unit.Facing;
                         facing += 8;
+                        if (Keyboard.IsAltHeldDown())
+                            facing += 24;
                         facing = facing % 256;
                         unit.Facing = (byte)facing;
                         refreshes.Add(new RefreshPoint(unit.Position, 2));
