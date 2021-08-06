@@ -80,6 +80,7 @@
     <None Include="Config\UI\SelectScriptActionWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Compile Include="CCEngine\TriggerActionType.cs" />
     <Compile Include="CCEngine\TriggerEventType.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="GameMath\CellMath.cs" />

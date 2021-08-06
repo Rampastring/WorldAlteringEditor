@@ -1,7 +1,6 @@
 ﻿using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using TSMapEditor.CCEngine;
 using TSMapEditor.UI;
 
@@ -13,13 +12,13 @@ namespace TSMapEditor.Models
     public class EditorConfig
     {
         public EditorConfig() { }
-
         
 
         public List<OverlayCollection> OverlayCollections { get; } = new List<OverlayCollection>();
         public List<BrushSize> BrushSizes { get; } = new List<BrushSize>() { new BrushSize(1, 1) };
         public List<ScriptAction> ScriptActions { get; } = new List<ScriptAction>();
         public List<TriggerEventType> TriggerEventTypes { get; } = new List<TriggerEventType>();
+        public List<TriggerActionType> TriggerActionTypes { get; } = new List<TriggerActionType>();
         public List<Theater> Theaters { get; } = new List<Theater>();
 
         public void Init(Rules rules)
@@ -29,6 +28,7 @@ namespace TSMapEditor.Models
             ReadBrushSizes();
             ReadScriptActions();
             ReadTriggerEventTypes();
+            ReadTriggerActionTypes();
         }
 
         private void ReadTheaters()
@@ -123,6 +123,21 @@ namespace TSMapEditor.Models
                 triggerEventType.ReadPropertiesFromIniSection(section);
 
                 TriggerEventTypes.Add(triggerEventType);
+            }
+        }
+
+        private void ReadTriggerActionTypes()
+        {
+            var iniFile = new IniFile(Environment.CurrentDirectory + "/Config/Actions.ini");
+            List<string> sections = iniFile.GetSections();
+
+            for (int i = 0; i < sections.Count; i++)
+            {
+                var triggerActionType = new TriggerActionType(i);
+                var section = iniFile.GetSection(sections[i]);
+                triggerActionType.ReadPropertiesFromIniSection(section);
+
+                TriggerActionTypes.Add(triggerActionType);
             }
         }
     }
