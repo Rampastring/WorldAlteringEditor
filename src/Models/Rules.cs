@@ -19,6 +19,9 @@ namespace TSMapEditor.Models
         public List<InfantrySequence> InfantrySequences = new List<InfantrySequence>();
         public List<RulesColor> Colors = new List<RulesColor>();
 
+        public List<string> GlobalVariableNames = new List<string>();
+
+
         /// <summary>
         /// Initializes rules types from an INI file.
         /// </summary>
@@ -45,6 +48,15 @@ namespace TSMapEditor.Models
                 foreach (var kvp in colorsSection.Keys)
                 {
                     Colors.Add(new RulesColor(kvp.Key, kvp.Value));
+                }
+            }
+
+            var variableNamesSection = iniFile.GetSection("VariableNames");
+            if (variableNamesSection != null)
+            {
+                foreach (var kvp in variableNamesSection.Keys)
+                {
+                    GlobalVariableNames.Add(kvp.Value);
                 }
             }
         }

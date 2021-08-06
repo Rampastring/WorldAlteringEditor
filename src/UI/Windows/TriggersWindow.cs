@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -49,7 +50,7 @@ namespace TSMapEditor.UI.Windows
         private EditorPopUpSelector selActionType;
         private EditorDescriptionPanel panelActionDescription;
         private EditorListBox lbActionParameters;
-        private EditorNumberTextBox tbActionParameterValue;
+        private EditorTextBox tbActionParameterValue;
 
         private Trigger editedTrigger;
 
@@ -78,7 +79,7 @@ namespace TSMapEditor.UI.Windows
             selActionType = FindChild<EditorPopUpSelector>(nameof(selActionType));
             panelActionDescription = FindChild<EditorDescriptionPanel>(nameof(panelActionDescription));
             lbActionParameters = FindChild<EditorListBox>(nameof(lbActionParameters));
-            tbActionParameterValue = FindChild<EditorNumberTextBox>(nameof(tbActionParameterValue));
+            tbActionParameterValue = FindChild<EditorTextBox>(nameof(tbActionParameterValue));
 
             ddType.AddItem("0 - one-time, single-object condition");
             ddType.AddItem("1 - one-time, multi-object condition");
@@ -87,7 +88,51 @@ namespace TSMapEditor.UI.Windows
             lbEvents.AllowMultiLineItems = false;
             lbActions.AllowMultiLineItems = false;
 
+            FindChild<EditorButton>("btnAddEvent").LeftClick += BtnAddEvent_LeftClick;
+            FindChild<EditorButton>("btnDeleteEvent").LeftClick += BtnDeleteEvent_LeftClick;
+
+            FindChild<EditorButton>("btnAddAction").LeftClick += BtnAddAction_LeftClick;
+            FindChild<EditorButton>("btnDeleteAction").LeftClick += BtnDeleteAction_LeftClick;
+
             lbTriggers.SelectedIndexChanged += LbTriggers_SelectedIndexChanged;
+        }
+
+        private void BtnAddAction_LeftClick(object sender, EventArgs e)
+        {
+            if (editedTrigger == null)
+                return;
+
+            editedTrigger.Actions.Add(new TriggerAction());
+            EditTrigger(editedTrigger);
+            lbActions.SelectedIndex = lbActions.Items.Count - 1;
+        }
+
+        private void BtnDeleteAction_LeftClick(object sender, EventArgs e)
+        {
+            if (editedTrigger == null || lbActions.SelectedItem == null)
+                return;
+
+            editedTrigger.Actions.RemoveAt(lbActions.SelectedIndex);
+            EditTrigger(editedTrigger);
+        }
+
+        private void BtnAddEvent_LeftClick(object sender, EventArgs e)
+        {
+            if (editedTrigger == null)
+                return;
+
+            editedTrigger.Conditions.Add(new TriggerCondition());
+            EditTrigger(editedTrigger);
+            lbEvents.SelectedIndex = lbEvents.Items.Count - 1;
+        }
+
+        private void BtnDeleteEvent_LeftClick(object sender, EventArgs e)
+        {
+            if (editedTrigger == null || lbEvents.SelectedItem == null)
+                return;
+
+            editedTrigger.Conditions.RemoveAt(lbEvents.SelectedIndex);
+            EditTrigger(editedTrigger);
         }
 
         private void LbTriggers_SelectedIndexChanged(object sender, EventArgs e)
@@ -128,6 +173,10 @@ namespace TSMapEditor.UI.Windows
         {
             lbEvents.SelectedIndexChanged -= LbEvents_SelectedIndexChanged;
             lbActions.SelectedIndexChanged -= LbActions_SelectedIndexChanged;
+            tbName.TextChanged -= TbName_TextChanged;
+            ddHouse.SelectedIndexChanged -= DdHouse_SelectedIndexChanged;
+            ddType.SelectedIndexChanged -= DdType_SelectedIndexChanged;
+            chkDisabled.CheckedChanged -= ChkDisabled_CheckedChanged;
 
             editedTrigger = trigger;
 
@@ -175,6 +224,33 @@ namespace TSMapEditor.UI.Windows
 
             lbEvents.SelectedIndexChanged += LbEvents_SelectedIndexChanged;
             lbActions.SelectedIndexChanged += LbActions_SelectedIndexChanged;
+            tbName.TextChanged += TbName_TextChanged;
+            ddHouse.SelectedIndexChanged += DdHouse_SelectedIndexChanged;
+            ddType.SelectedIndexChanged += DdType_SelectedIndexChanged;
+            chkDisabled.CheckedChanged += ChkDisabled_CheckedChanged;
+        }
+
+        private void DdType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var tag = map.Tags.Find(t => t.Trigger == editedTrigger);
+            if (tag != null)
+                tag.Repeating = ddType.SelectedIndex;
+        }
+
+        private void DdHouse_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            editedTrigger.House = ddHouse.SelectedItem.Text;
+        }
+
+        private void ChkDisabled_CheckedChanged(object sender, EventArgs e)
+        {
+            editedTrigger.Disabled = chkDisabled.Checked;
+        }
+
+        private void TbName_TextChanged(object sender, EventArgs e)
+        {
+            editedTrigger.Name = tbName.Text;
+            lbTriggers.SelectedItem.Text = tbName.Text;
         }
 
         private void LbActions_SelectedIndexChanged(object sender, EventArgs e)
@@ -225,13 +301,55 @@ namespace TSMapEditor.UI.Windows
 
         private void LbActionParameters_SelectedIndexChanged(object sender, EventArgs e)
         {
+            tbActionParameterValue.TextChanged -= TbActionParameterValue_TextChanged;
+
             if (lbActionParameters.SelectedItem == null || editedTrigger == null || lbActions.SelectedItem == null)
             {
                 tbActionParameterValue.Text = string.Empty;
                 return;
             }
 
-            tbActionParameterValue.Text = editedTrigger.Actions[lbActions.SelectedIndex].Parameters[(int)lbActionParameters.SelectedItem.Tag];
+            TriggerAction triggerAction = editedTrigger.Actions[lbActions.SelectedIndex];
+            int paramNumber = (int)lbActionParameters.SelectedItem.Tag;
+            var triggerActionType = GetTriggerActionType(triggerAction.ActionIndex);
+            var triggerParamType = TriggerParamType.Unknown;
+            if (triggerActionType != null)
+            {
+                triggerParamType = triggerActionType.Parameters[paramNumber].TriggerParamType;
+            }
+
+            tbActionParameterValue.Text = GetParamValueText(triggerAction.Parameters[paramNumber], triggerParamType);
+
+            tbActionParameterValue.TextChanged += TbActionParameterValue_TextChanged;
+        }
+
+        private void TbActionParameterValue_TextChanged(object sender, EventArgs e)
+        {
+            if (lbActionParameters.SelectedItem == null || editedTrigger == null || lbActions.SelectedItem == null)
+            {
+                return;
+            }
+
+            int paramNumber = (int)lbActionParameters.SelectedItem.Tag;
+            var triggerAction = (TriggerAction)lbActions.SelectedItem.Tag;
+
+            int spaceIndex = tbActionParameterValue.Text.IndexOf(' ');
+            string value = tbActionParameterValue.Text;
+            if (spaceIndex > -1)
+                value = value.Substring(0, spaceIndex);
+
+            triggerAction.Parameters[paramNumber] = value;
+        }
+
+        private void AddAction(TriggerAction action)
+        {
+            if (action.ActionIndex >= map.EditorConfig.TriggerActionTypes.Count)
+            {
+                lbActions.AddItem(new XNAListBoxItem() { Text = action.ActionIndex + " Unknown", Tag = action });
+                return;
+            }
+
+            lbActions.AddItem(new XNAListBoxItem() { Text = action.ActionIndex + " " + map.EditorConfig.TriggerActionTypes[action.ActionIndex].Name, Tag = action });
         }
 
         private void LbEvents_SelectedIndexChanged(object sender, EventArgs e)
@@ -277,23 +395,52 @@ namespace TSMapEditor.UI.Windows
 
         private void LbEventParameters_SelectedIndexChanged(object sender, EventArgs e)
         {
+            tbEventParameterValue.TextChanged -= TbEventParameterValue_TextChanged;
+
             if (lbEventParameters.SelectedItem == null || editedTrigger == null || lbEvents.SelectedItem == null)
             {
                 tbEventParameterValue.Text = string.Empty;
                 return;
             }
 
-            int paramNumber = (int)lbActionParameters.SelectedItem.Tag;
+            var triggerEventType = GetTriggerEventType(editedTrigger.Conditions[lbEvents.SelectedIndex].ConditionIndex);
+            var triggerParamType = TriggerParamType.Unknown;
+            int paramValue = -1;
+            int paramNumber = (int)lbEventParameters.SelectedItem.Tag;
             if (paramNumber == EVENT_PARAM_FIRST)
             {
-                tbEventParameterValue.Text = editedTrigger.Conditions[lbEvents.SelectedIndex].Parameter1.ToString();
+                paramValue = editedTrigger.Conditions[lbEvents.SelectedIndex].Parameter1;
+
+                if (triggerEventType != null)
+                    triggerParamType = triggerEventType.P1Type;
             }
             else
             {
-                tbEventParameterValue.Text = editedTrigger.Conditions[lbEvents.SelectedIndex].Parameter2.ToString();
+                paramValue = editedTrigger.Conditions[lbEvents.SelectedIndex].Parameter2;
+
+                if (triggerEventType != null)
+                    triggerParamType = triggerEventType.P2Type;
             }
 
-            // TODO figure out the parameter contexts and display more relevant information
+            tbEventParameterValue.Text = GetParamValueText(paramValue.ToString(), triggerParamType);
+
+            tbEventParameterValue.TextChanged += TbEventParameterValue_TextChanged;
+        }
+
+        private void TbEventParameterValue_TextChanged(object sender, EventArgs e)
+        {
+            if (lbEventParameters.SelectedItem == null || editedTrigger == null || lbEvents.SelectedItem == null)
+            {
+                return;
+            }
+
+            int paramNumber = (int)lbEventParameters.SelectedItem.Tag;
+
+            var triggerCondition = (TriggerCondition)lbEvents.SelectedItem.Tag;
+            if (paramNumber == EVENT_PARAM_FIRST)
+                triggerCondition.Parameter1 = tbEventParameterValue.Value;
+            else
+                triggerCondition.Parameter2 = tbEventParameterValue.Value;
         }
 
         private void AddEvent(TriggerCondition condition)
@@ -307,15 +454,103 @@ namespace TSMapEditor.UI.Windows
             lbEvents.AddItem(new XNAListBoxItem() { Text = condition.ConditionIndex + " " + map.EditorConfig.TriggerEventTypes[condition.ConditionIndex].Name, Tag = condition });
         }
 
-        private void AddAction(TriggerAction action)
+        private TriggerEventType GetTriggerEventType(int index)
         {
-            if (action.ActionIndex >= map.EditorConfig.TriggerActionTypes.Count)
+            if (index >= map.EditorConfig.TriggerEventTypes.Count)
+                return null;
+
+            return map.EditorConfig.TriggerEventTypes[index];
+        }
+
+        private TriggerActionType GetTriggerActionType(int index)
+        {
+            if (index >= map.EditorConfig.TriggerActionTypes.Count)
+                return null;
+
+            return map.EditorConfig.TriggerActionTypes[index];
+        }
+
+        private string GetParamValueText(string paramValue, TriggerParamType paramType)
+        {
+            bool intParseSuccess = int.TryParse(paramValue, NumberStyles.None, CultureInfo.InvariantCulture, out int intValue);
+
+            switch (paramType)
             {
-                lbActions.AddItem(new XNAListBoxItem() { Text = action.ActionIndex + " Unknown", Tag = action });
-                return;
+                case TriggerParamType.House:
+                    if (intParseSuccess)
+                    {
+                        var houses = map.GetHouses();
+                        if (intValue >= houses.Count)
+                            return intValue.ToString() + " - Unknown House";
+
+                        return intValue + " " + houses[intValue].ININame;
+                    }
+
+                    return paramValue;
+                case TriggerParamType.GlobalVariable:
+                    if (!intParseSuccess)
+                        return paramValue;
+
+                    if (intValue >= map.Rules.GlobalVariableNames.Count)
+                        return intValue + " - invalid variable";
+
+                    return intValue + " " + map.Rules.GlobalVariableNames[intValue];
+                case TriggerParamType.Waypoint:
+                    if (!intParseSuccess)
+                        return Helpers.GetWaypointNumberFromAlphabeticalString(paramValue).ToString();
+
+                    return intValue.ToString();
+                case TriggerParamType.TeamType:
+                    TeamType teamType = map.TeamTypes.Find(t => t.ININame == paramValue);
+                    if (teamType == null)
+                        return paramValue;
+
+                    return paramValue + " " + teamType.Name;
+                case TriggerParamType.Trigger:
+                    Trigger trigger = map.Triggers.Find(t => t.ID == paramValue);
+                    if (trigger == null)
+                        return paramValue;
+
+                    return paramValue + " " + trigger.Name;
+                case TriggerParamType.Building:
+                    return GetObjectValueText(RTTIType.Building, map.Rules.BuildingTypes, paramValue);
+                case TriggerParamType.Aircraft:
+                    return GetObjectValueText(RTTIType.Aircraft, map.Rules.AircraftTypes, paramValue);
+                case TriggerParamType.Infantry:
+                    return GetObjectValueText(RTTIType.Infantry, map.Rules.InfantryTypes, paramValue);
+                case TriggerParamType.Unit:
+                    return GetObjectValueText(RTTIType.Unit, map.Rules.UnitTypes, paramValue);
+                case TriggerParamType.Boolean:
+                default:
+                    return paramValue;
+            }
+        }
+
+        private string GetObjectValueText<T>(RTTIType rtti, List<T> objectTypeList, string paramValue) where T : TechnoType
+        {
+            bool intParseSuccess = int.TryParse(paramValue, NumberStyles.None, CultureInfo.InvariantCulture, out int intValue);
+
+            if (!intParseSuccess)
+                return paramValue;
+
+            if (intValue >= objectTypeList.Count)
+            {
+                switch (rtti)
+                {
+                    case RTTIType.Aircraft:
+                        return intValue + " - Unknown Aircraft";
+                    case RTTIType.Building:
+                        return intValue + " - Unknown Building";
+                    case RTTIType.Infantry:
+                        return intValue + " - Unknown Infantry";
+                    case RTTIType.Unit:
+                        return intValue + " - Unknown Unit";
+                    default:
+                        return intValue + " - Unknown Object";
+                }
             }
 
-            lbActions.AddItem(new XNAListBoxItem() { Text = action.ActionIndex + " " + map.EditorConfig.TriggerActionTypes[action.ActionIndex].Name, Tag = action });
+            return intValue + " " + objectTypeList[intValue].GetEditorDisplayName();
         }
     }
 }
