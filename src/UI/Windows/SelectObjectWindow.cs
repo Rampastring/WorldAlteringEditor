@@ -17,7 +17,6 @@ namespace TSMapEditor.UI.Windows
 
         public override void Initialize()
         {
-            Name = nameof(SelectTaskForceWindow);
             base.Initialize();
 
             tbSearch = FindChild<EditorSuggestionTextBox>(nameof(tbSearch));

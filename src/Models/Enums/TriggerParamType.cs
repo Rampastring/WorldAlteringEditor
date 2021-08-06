@@ -23,6 +23,7 @@
         Animation,
         Particle,
         Waypoint,
+        WaypointZZ,
         String,
         GlobalVariable,
         House,

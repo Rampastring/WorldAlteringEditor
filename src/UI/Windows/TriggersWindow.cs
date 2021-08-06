@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Rampastring.Tools;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using TSMapEditor.CCEngine;
@@ -52,6 +53,9 @@ namespace TSMapEditor.UI.Windows
         private EditorListBox lbActionParameters;
         private EditorTextBox tbActionParameterValue;
 
+        private SelectEventWindow selectEventWindow;
+        private SelectActionWindow selectActionWindow;
+
         private Trigger editedTrigger;
 
         public override void Initialize()
@@ -94,7 +98,59 @@ namespace TSMapEditor.UI.Windows
             FindChild<EditorButton>("btnAddAction").LeftClick += BtnAddAction_LeftClick;
             FindChild<EditorButton>("btnDeleteAction").LeftClick += BtnDeleteAction_LeftClick;
 
+            selectEventWindow = new SelectEventWindow(WindowManager, map);
+            var eventWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectEventWindow);
+            eventWindowDarkeningPanel.Hidden += EventWindowDarkeningPanel_Hidden;
+
+            selectActionWindow = new SelectActionWindow(WindowManager, map);
+            var actionWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectActionWindow);
+            actionWindowDarkeningPanel.Hidden += ActionWindowDarkeningPanel_Hidden;
+
             lbTriggers.SelectedIndexChanged += LbTriggers_SelectedIndexChanged;
+        }
+
+        private void EventWindowDarkeningPanel_Hidden(object sender, EventArgs e)
+        {
+            if (editedTrigger == null || lbEvents.SelectedItem == null || selectEventWindow.SelectedObject == null)
+                return;
+
+            TriggerCondition condition = editedTrigger.Conditions[lbEvents.SelectedIndex];
+            condition.ConditionIndex = selectEventWindow.SelectedObject.ID;
+
+            if (selectEventWindow.SelectedObject.P1Type == TriggerParamType.Unused)
+                condition.Parameter1 = 0;
+
+            if (selectEventWindow.SelectedObject.P2Type == TriggerParamType.Unused)
+                condition.Parameter2 = 0;
+
+            EditTrigger(editedTrigger);
+        }
+
+        private void ActionWindowDarkeningPanel_Hidden(object sender, EventArgs e)
+        {
+            if (editedTrigger == null || lbActions.SelectedItem == null || selectActionWindow.SelectedObject == null)
+                return;
+
+            TriggerActionType triggerActionType = selectActionWindow.SelectedObject;
+            TriggerAction action = editedTrigger.Actions[lbActions.SelectedIndex];
+            action.ActionIndex = selectActionWindow.SelectedObject.ID;
+
+            for (int i = 0; i < TriggerActionType.MAX_PARAM_COUNT; i++)
+            {
+                if ((int)triggerActionType.Parameters[i].TriggerParamType < 0)
+                {
+                    action.Parameters[i] = Math.Abs((int)triggerActionType.Parameters[i].TriggerParamType).ToString(CultureInfo.InvariantCulture);
+                    continue;
+                }
+
+                if (triggerActionType.Parameters[i].TriggerParamType == TriggerParamType.Unknown)
+                {
+                    action.Parameters[i] = "0";
+                    continue;
+                }
+            }
+
+            EditTrigger(editedTrigger);
         }
 
         private void BtnAddAction_LeftClick(object sender, EventArgs e)
@@ -256,6 +312,7 @@ namespace TSMapEditor.UI.Windows
         private void LbActions_SelectedIndexChanged(object sender, EventArgs e)
         {
             lbActionParameters.SelectedIndexChanged -= LbActionParameters_SelectedIndexChanged;
+            selActionType.LeftClick -= SelActionType_LeftClick;
 
             if (lbActions.SelectedItem == null)
             {
@@ -297,6 +354,16 @@ namespace TSMapEditor.UI.Windows
             LbActionParameters_SelectedIndexChanged(this, EventArgs.Empty);
 
             lbActionParameters.SelectedIndexChanged += LbActionParameters_SelectedIndexChanged;
+            selActionType.LeftClick += SelActionType_LeftClick;
+        }
+
+        private void SelActionType_LeftClick(object sender, EventArgs e)
+        {
+            if (editedTrigger == null || lbActions.SelectedItem == null)
+                return;
+
+            int actionTypeIndex = editedTrigger.Actions[lbActions.SelectedIndex].ActionIndex;
+            selectActionWindow.Open(GetTriggerActionType(actionTypeIndex));
         }
 
         private void LbActionParameters_SelectedIndexChanged(object sender, EventArgs e)
@@ -338,6 +405,15 @@ namespace TSMapEditor.UI.Windows
             if (spaceIndex > -1)
                 value = value.Substring(0, spaceIndex);
 
+            var triggerActionType = GetTriggerActionType(triggerAction.ActionIndex);
+
+            if (triggerActionType != null && 
+                triggerActionType.Parameters[paramNumber].TriggerParamType == TriggerParamType.WaypointZZ)
+            {
+                // Write waypoint with A-ZZ notation
+                value = Helpers.WaypointNumberToAlphabeticalString(Conversions.IntFromString(value, 0));
+            }
+
             triggerAction.Parameters[paramNumber] = value;
         }
 
@@ -355,6 +431,7 @@ namespace TSMapEditor.UI.Windows
         private void LbEvents_SelectedIndexChanged(object sender, EventArgs e)
         {
             lbEventParameters.SelectedIndexChanged -= LbEventParameters_SelectedIndexChanged;
+            selEventType.LeftClick -= SelEventType_LeftClick;
 
             if (lbEvents.SelectedItem == null)
             {
@@ -391,6 +468,16 @@ namespace TSMapEditor.UI.Windows
             LbEventParameters_SelectedIndexChanged(this, EventArgs.Empty);
 
             lbEventParameters.SelectedIndexChanged += LbEventParameters_SelectedIndexChanged;
+            selEventType.LeftClick += SelEventType_LeftClick;
+        }
+
+        private void SelEventType_LeftClick(object sender, EventArgs e)
+        {
+            if (editedTrigger == null || lbEvents.SelectedItem == null)
+                return;
+
+            int eventTypeIndex = editedTrigger.Conditions[lbEvents.SelectedIndex].ConditionIndex;
+            selectEventWindow.Open(GetTriggerEventType(eventTypeIndex));
         }
 
         private void LbEventParameters_SelectedIndexChanged(object sender, EventArgs e)
@@ -495,7 +582,7 @@ namespace TSMapEditor.UI.Windows
                         return intValue + " - invalid variable";
 
                     return intValue + " " + map.Rules.GlobalVariableNames[intValue];
-                case TriggerParamType.Waypoint:
+                case TriggerParamType.WaypointZZ:
                     if (!intParseSuccess)
                         return Helpers.GetWaypointNumberFromAlphabeticalString(paramValue).ToString();
 

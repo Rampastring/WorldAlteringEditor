@@ -54,7 +54,7 @@ namespace TSMapEditor.Models
             {
                 actionDataString.Append(action.ActionIndex);
                 for (int i = 0; i < TriggerAction.PARAM_COUNT; i++)
-                    actionDataString.Append(action.Parameters[i]);
+                    actionDataString.Append(action.ParamToString(i));
             }
 
             iniFile.SetStringValue("Actions", ID, actionDataString.ToString());

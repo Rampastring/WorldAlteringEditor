@@ -12,7 +12,7 @@ namespace TSMapEditor.Models
 
         public string ParamToString(int index)
         {
-            if (Parameters[index] == null)
+            if (string.IsNullOrWhiteSpace(Parameters[index]))
                 return "0";
 
             return Parameters[index];

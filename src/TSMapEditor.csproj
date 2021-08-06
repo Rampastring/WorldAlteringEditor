@@ -77,6 +77,12 @@
     <None Include="Config\Events.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Config\UI\SelectActionWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\UI\SelectEventWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Config\UI\SelectScriptActionWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -232,6 +238,8 @@
     <Compile Include="Settings\UserSettings.cs" />
     <Compile Include="UI\Windows\EditorMessageBox.cs" />
     <Compile Include="UI\Windows\ScriptsWindow.cs" />
+    <Compile Include="UI\Windows\SelectActionWindow.cs" />
+    <Compile Include="UI\Windows\SelectEventWindow.cs" />
     <Compile Include="UI\Windows\SelectObjectWindow.cs" />
     <Compile Include="UI\Windows\SelectScriptActionWindow.cs" />
     <Compile Include="UI\Windows\SelectScriptWindow.cs" />
