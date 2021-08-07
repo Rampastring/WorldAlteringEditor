@@ -59,7 +59,16 @@ namespace TSMapEditor.UI.TopBar
             ddBrushSize.SelectedIndexChanged += DdBrushSize_SelectedIndexChanged;
             ddBrushSize.SelectedIndex = 0;
 
-            int prevRight = ddBrushSize.Right;
+            var btnClearTerrain = new EditorButton(WindowManager);
+            btnClearTerrain.Name = nameof(btnClearTerrain);
+            btnClearTerrain.X = ddBrushSize.Right + Constants.UIHorizontalSpacing;
+            btnClearTerrain.Y = ddBrushSize.Y;
+            btnClearTerrain.Width = 30;
+            btnClearTerrain.Text = "Clr";
+            btnClearTerrain.LeftClick += BtnClearTerrain_LeftClick;
+            AddChild(btnClearTerrain);
+
+            int prevRight = btnClearTerrain.Right;
 
             for (int i = 0; i < map.TheaterInstance.Theater.LATGrounds.Count; i++)
             {
@@ -69,7 +78,7 @@ namespace TSMapEditor.UI.TopBar
                 btn.Name = "btn" + autoLATGround.GroundTileSet.SetName;
                 btn.X = prevRight + Constants.UIHorizontalSpacing;
                 btn.Y = ddBrushSize.Y;
-                btn.Width = 20;
+                btn.Width = 30;
                 btn.Text = autoLATGround.GroundTileSet.SetName.Substring(0, 2);
                 btn.Tag = autoLATGround;
                 btn.LeftClick += GroundButton_LeftClick;
@@ -94,6 +103,12 @@ namespace TSMapEditor.UI.TopBar
             base.Initialize();
 
             editorState.AutoLATEnabledChanged += EditorState_AutoLATEnabledChanged;
+        }
+
+        private void BtnClearTerrain_LeftClick(object sender, EventArgs e)
+        {
+            terrainPlacementAction.Tile = theaterGraphics.GetTileGraphics(0);
+            editorState.CursorAction = terrainPlacementAction;
         }
 
         private void GroundButton_LeftClick(object sender, EventArgs e)
