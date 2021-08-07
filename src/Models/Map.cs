@@ -251,7 +251,7 @@ namespace TSMapEditor.Models
 
         public void AddCellTag(CellTag cellTag)
         {
-            var tile = GetTile(cellTag.Position.X, cellTag.Position.Y);
+            var tile = GetTile(cellTag.Position);
             if (tile.CellTag != null)
             {
                 Logger.Log("Tile already has a celltag, skipping placing of celltag at " + cellTag.Position);
@@ -259,7 +259,17 @@ namespace TSMapEditor.Models
             }
 
             CellTags.Add(cellTag);
-            GetTile(cellTag.Position.X, cellTag.Position.Y).CellTag = cellTag;
+            tile.CellTag = cellTag;
+        }
+
+        public void RemoveCellTagFrom(Point2D cellCoords)
+        {
+            var tile = GetTile(cellCoords);
+            if (tile.CellTag != null)
+            {
+                CellTags.Remove(tile.CellTag);
+                tile.CellTag = null;
+            }
         }
 
         public void AddScript(Script script)

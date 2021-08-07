@@ -1,6 +1,7 @@
 ﻿using Rampastring.XNAUI.XNAControls;
 using System.Collections.Generic;
 using TSMapEditor.Models;
+using TSMapEditor.Rendering;
 using TSMapEditor.UI.Controls;
 
 namespace TSMapEditor.UI.Windows
@@ -14,7 +15,7 @@ namespace TSMapEditor.UI.Windows
         public TeamTypesWindow TeamTypesWindow { get; private set; }
         public TriggersWindow TriggersWindow { get; private set; }
 
-        public void Initialize(XNAControl windowParentControl, Map map)
+        public void Initialize(XNAControl windowParentControl, Map map, EditorState editorState, ICursorActionTarget cursorActionTarget)
         {
             TaskForcesWindow = new TaskforcesWindow(windowParentControl.WindowManager, map);
             Windows.Add(TaskForcesWindow);
@@ -25,7 +26,7 @@ namespace TSMapEditor.UI.Windows
             TeamTypesWindow = new TeamTypesWindow(windowParentControl.WindowManager, map);
             Windows.Add(TeamTypesWindow);
 
-            TriggersWindow = new TriggersWindow(windowParentControl.WindowManager, map);
+            TriggersWindow = new TriggersWindow(windowParentControl.WindowManager, map, editorState, cursorActionTarget);
             Windows.Add(TriggersWindow);
 
             foreach (var window in Windows)

@@ -1,4 +1,5 @@
 ﻿using Rampastring.Tools;
+using System;
 using System.Collections.Generic;
 
 namespace TSMapEditor.Models
@@ -8,7 +9,9 @@ namespace TSMapEditor.Models
     /// </summary>
     public class Trigger
     {
-        public string ID { get; set; }
+        public Trigger(string id) { ID = id; }
+
+        public string ID { get; private set; }
         public string House { get; set; }
 
         /// <summary>
@@ -23,8 +26,35 @@ namespace TSMapEditor.Models
         public bool Normal { get; set; }
         public bool Hard { get; set; }
 
-        public List<TriggerCondition> Conditions { get; } = new List<TriggerCondition>();
-        public List<TriggerAction> Actions { get; } = new List<TriggerAction>();
+        public List<TriggerCondition> Conditions { get; private set; } = new List<TriggerCondition>();
+        public List<TriggerAction> Actions { get; private set; } = new List<TriggerAction>();
+
+        /// <summary>
+        /// Creates and returns a deep clone of this trigger.
+        /// </summary>
+        /// <param name="uniqueId">The unique ID of the new trigger.</param>
+        public Trigger Clone(string uniqueId)
+        {
+            Trigger clone = (Trigger)MemberwiseClone();
+            clone.ID = uniqueId;
+            clone.Name = "Clone of " + Name;
+
+            // Deep clone the events and actions
+
+            clone.Conditions = new List<TriggerCondition>(Conditions.Capacity);
+            foreach (var condition in Conditions)
+            {
+                clone.Conditions.Add(condition.Clone());
+            }
+
+            clone.Actions = new List<TriggerAction>(Actions.Capacity);
+            foreach (var action in Actions)
+            {
+                clone.Actions.Add(action.Clone());
+            }
+
+            return clone;
+        }
 
         public void WriteToIniFile(IniFile iniFile)
         {
@@ -124,9 +154,8 @@ namespace TSMapEditor.Models
             if (parts.Length < 7)
                 return null;
 
-            return new Trigger()
+            return new Trigger(id)
             {
-                ID = id,
                 House = parts[0],
                 LinkedTriggerId = parts[1],
                 Name = parts[2],

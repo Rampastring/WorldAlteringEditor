@@ -126,6 +126,7 @@ namespace TSMapEditor.UI.Controls
             darkeningPanel.AddChild(child);
             darkeningPanel.Hide();
             darkeningPanel.Alpha = 0f;
+            darkeningPanel.Disable();
             child.CenterOnParent();
 
             return darkeningPanel;

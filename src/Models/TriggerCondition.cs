@@ -13,6 +13,11 @@ namespace TSMapEditor.Models
         public int Parameter1 { get; set; }
         public int Parameter2 { get; set; }
 
+        public TriggerCondition Clone()
+        {
+            return (TriggerCondition)MemberwiseClone();
+        }
+
         public static TriggerCondition ParseFromArray(string[] array, int startIndex)
         {
             if (startIndex + INI_VALUE_COUNT > array.Length)

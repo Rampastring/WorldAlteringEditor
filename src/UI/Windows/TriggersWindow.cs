@@ -10,7 +10,9 @@ using Rampastring.XNAUI.XNAControls;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Models;
 using TSMapEditor.Models.Enums;
+using TSMapEditor.Rendering;
 using TSMapEditor.UI.Controls;
+using TSMapEditor.UI.CursorActions;
 
 namespace TSMapEditor.UI.Windows
 {
@@ -19,12 +21,16 @@ namespace TSMapEditor.UI.Windows
         private const int EVENT_PARAM_FIRST = 0;
         private const int EVENT_PARAM_SECOND = 1;
 
-        public TriggersWindow(WindowManager windowManager, Map map) : base(windowManager)
+        public TriggersWindow(WindowManager windowManager, Map map, EditorState editorState, ICursorActionTarget cursorActionTarget) : base(windowManager)
         {
             this.map = map;
+            this.editorState = editorState;
+            this.placeCellTagCursorAction = new PlaceCellTagCursorAction(cursorActionTarget);
         }
 
         private readonly Map map;
+        private readonly PlaceCellTagCursorAction placeCellTagCursorAction;
+        private readonly EditorState editorState;
 
         // Trigger list
         private EditorListBox lbTriggers;
@@ -56,7 +62,13 @@ namespace TSMapEditor.UI.Windows
         private SelectEventWindow selectEventWindow;
         private SelectActionWindow selectActionWindow;
 
+        private SelectTeamTypeWindow selectTeamTypeWindow;
+        private SelectTriggerWindow selectTriggerWindow;
+
+        private XNAContextMenu contextMenu;
+
         private Trigger editedTrigger;
+
 
         public override void Initialize()
         {
@@ -92,11 +104,18 @@ namespace TSMapEditor.UI.Windows
             lbEvents.AllowMultiLineItems = false;
             lbActions.AllowMultiLineItems = false;
 
+            FindChild<EditorButton>("btnNewTrigger").LeftClick += BtnNewTrigger_LeftClick;
+            FindChild<EditorButton>("btnDeleteTrigger").LeftClick += BtnDeleteTrigger_LeftClick;
+            FindChild<EditorButton>("btnCloneTrigger").LeftClick += BtnCloneTrigger_LeftClick;
+            FindChild<EditorButton>("btnPlaceCellTag").LeftClick += BtnPlaceCellTag_LeftClick;
+
             FindChild<EditorButton>("btnAddEvent").LeftClick += BtnAddEvent_LeftClick;
             FindChild<EditorButton>("btnDeleteEvent").LeftClick += BtnDeleteEvent_LeftClick;
 
             FindChild<EditorButton>("btnAddAction").LeftClick += BtnAddAction_LeftClick;
             FindChild<EditorButton>("btnDeleteAction").LeftClick += BtnDeleteAction_LeftClick;
+
+            FindChild<EditorButton>("btnActionParameterValuePreset").LeftClick += BtnActionParameterValuePreset_LeftClick;
 
             selectEventWindow = new SelectEventWindow(WindowManager, map);
             var eventWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectEventWindow);
@@ -106,7 +125,128 @@ namespace TSMapEditor.UI.Windows
             var actionWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectActionWindow);
             actionWindowDarkeningPanel.Hidden += ActionWindowDarkeningPanel_Hidden;
 
+            selectTeamTypeWindow = new SelectTeamTypeWindow(WindowManager, map);
+            var teamTypeWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTeamTypeWindow);
+            teamTypeWindowDarkeningPanel.Hidden += TeamTypeWindowDarkeningPanel_Hidden;
+
+            selectTriggerWindow = new SelectTriggerWindow(WindowManager, map);
+            var triggerWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTriggerWindow);
+            triggerWindowDarkeningPanel.Hidden += TriggerWindowDarkeningPanel_Hidden;
+
+            contextMenu = new XNAContextMenu(WindowManager);
+            contextMenu.Name = nameof(contextMenu);
+            contextMenu.Width = tbActionParameterValue.Width;
+            AddChild(contextMenu);
+
             lbTriggers.SelectedIndexChanged += LbTriggers_SelectedIndexChanged;
+        }
+
+        private void BtnActionParameterValuePreset_LeftClick(object sender, EventArgs e)
+        {
+            if (editedTrigger == null || lbActions.SelectedItem == null || lbActionParameters.SelectedItem == null)
+                return;
+
+            var triggerAction = (TriggerAction)lbActions.SelectedItem.Tag;
+            var triggerActionType = GetTriggerActionType(triggerAction.ActionIndex);
+            int paramIndex = (int)lbActionParameters.SelectedItem.Tag;
+
+            if (triggerActionType == null)
+                return;
+
+            switch (triggerActionType.Parameters[paramIndex].TriggerParamType)
+            {
+                case TriggerParamType.TeamType:
+                    TeamType existingTeamType = map.TeamTypes.Find(tt => tt.ININame == triggerAction.Parameters[paramIndex]);
+                    selectTeamTypeWindow.Open(existingTeamType);
+                    break;
+                case TriggerParamType.Trigger:
+                    Trigger existingTrigger = map.Triggers.Find(tt => tt.ID == triggerAction.Parameters[paramIndex]);
+                    selectTriggerWindow.Open(existingTrigger);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void TriggerWindowDarkeningPanel_Hidden(object sender, EventArgs e)
+        {
+            if (selectTriggerWindow.SelectedObject == null)
+                return;
+
+            GetTriggerActionAndParamIndex(out TriggerAction triggerAction, out int paramIndex);
+            triggerAction.Parameters[paramIndex] = selectTriggerWindow.SelectedObject.ID;
+            EditTrigger(editedTrigger);
+        }
+
+        private void TeamTypeWindowDarkeningPanel_Hidden(object sender, EventArgs e)
+        {
+            if (selectTeamTypeWindow.SelectedObject == null)
+                return;
+
+            GetTriggerActionAndParamIndex(out TriggerAction triggerAction, out int paramIndex);
+            triggerAction.Parameters[paramIndex] = selectTeamTypeWindow.SelectedObject.ININame;
+            EditTrigger(editedTrigger);
+        }
+
+        private void GetTriggerActionAndParamIndex(out TriggerAction triggerAction, out int paramIndex)
+        {
+            triggerAction = (TriggerAction)lbActions.SelectedItem.Tag;
+            paramIndex = (int)lbActionParameters.SelectedItem.Tag;
+        }
+
+        private void BtnNewTrigger_LeftClick(object sender, EventArgs e)
+        {
+            var newTrigger = new Trigger(map.GetNewUniqueInternalId()) { Name = "New trigger" };
+            map.Triggers.Add(newTrigger);
+            map.Tags.Add(new Tag() { ID = map.GetNewUniqueInternalId(), Name = "New tag", Trigger = newTrigger });
+            ListTriggers();
+            SelectLastTrigger();
+        }
+
+        private void BtnCloneTrigger_LeftClick(object sender, EventArgs e)
+        {
+            if (editedTrigger == null)
+                return;
+
+            var clone = editedTrigger.Clone(map.GetNewUniqueInternalId());
+            map.Triggers.Add(clone);
+            map.Tags.Add(new Tag() { ID = map.GetNewUniqueInternalId(), Name = clone.Name + " (tag)", Trigger = clone });
+            ListTriggers();
+            SelectLastTrigger();
+        }
+
+        private void BtnDeleteTrigger_LeftClick(object sender, EventArgs e)
+        {
+            if (editedTrigger == null)
+                return;
+
+            map.Triggers.Remove(editedTrigger);
+            map.Triggers.ForEach(t => { if (t.LinkedTrigger == editedTrigger) t.LinkedTrigger = null; });
+            map.Tags.RemoveAll(t => t.Trigger == editedTrigger);
+            editedTrigger = null;
+
+            ListTriggers();
+        }
+
+        private void BtnPlaceCellTag_LeftClick(object sender, EventArgs e)
+        {
+            if (editedTrigger == null)
+                return;
+
+            var tag = map.Tags.Find(t => t.Trigger == editedTrigger);
+            if (tag == null)
+            {
+                return;
+            }
+
+            placeCellTagCursorAction.Tag = tag;
+            editorState.CursorAction = placeCellTagCursorAction;
+        }
+
+        private void SelectLastTrigger()
+        {
+            lbTriggers.SelectedIndex = map.Triggers.Count - 1;
+            lbTriggers.ScrollToBottom();
         }
 
         private void EventWindowDarkeningPanel_Hidden(object sender, EventArgs e)
@@ -223,6 +363,8 @@ namespace TSMapEditor.UI.Windows
             {
                 lbTriggers.AddItem(new XNAListBoxItem() { Text = trigger.Name, Tag = trigger });
             }
+
+            LbTriggers_SelectedIndexChanged(this, EventArgs.Empty);
         }
 
         private void EditTrigger(Trigger trigger)
@@ -259,10 +401,24 @@ namespace TSMapEditor.UI.Windows
             }
 
             var tag = map.Tags.Find(t => t.Trigger == editedTrigger);
+            if (tag == null)
+            {
+                ddType.AllowDropDown = false;
+
+                if (ddType.Items.Count < 4)
+                    ddType.AddItem("Error: No tag exists for this trigger!");
+            }
+            else
+            {
+                ddType.AllowDropDown = true;
+
+                if (ddType.Items.Count > 3)
+                    ddType.Items.RemoveAt(3);
+            }
 
             tbName.Text = editedTrigger.Name;
             ddHouse.SelectedIndex = map.GetHouses().FindIndex(h => h.ININame == trigger.House);
-            ddType.SelectedIndex = tag == null ? -1 : tag.Repeating;
+            ddType.SelectedIndex = tag == null ? 3 : tag.Repeating;
             selAttachedTrigger.Text = editedTrigger.LinkedTrigger == null ? Constants.NoneValue1 : editedTrigger.LinkedTrigger.Name;
             chkDisabled.Checked = editedTrigger.Disabled;
             chkEasy.Checked = editedTrigger.Easy;
@@ -305,6 +461,10 @@ namespace TSMapEditor.UI.Windows
 
         private void TbName_TextChanged(object sender, EventArgs e)
         {
+            var tag = map.Tags.Find(t => t.Trigger == editedTrigger);
+            if (tag != null)
+                tag.Name = tbName.Text + " (tag)";
+
             editedTrigger.Name = tbName.Text;
             lbTriggers.SelectedItem.Text = tbName.Text;
         }
@@ -560,6 +720,8 @@ namespace TSMapEditor.UI.Windows
         private string GetParamValueText(string paramValue, TriggerParamType paramType)
         {
             bool intParseSuccess = int.TryParse(paramValue, NumberStyles.None, CultureInfo.InvariantCulture, out int intValue);
+            if (paramValue == null)
+                paramValue = string.Empty;
 
             switch (paramType)
             {

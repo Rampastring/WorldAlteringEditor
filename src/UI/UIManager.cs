@@ -101,7 +101,7 @@ namespace TSMapEditor.UI
 
             base.Initialize();
 
-            windowController.Initialize(this, map);
+            windowController.Initialize(this, map, editorState, mapView);
             windowController.TriggersWindow.Open();
 
             if (map.Houses.Count > 0)

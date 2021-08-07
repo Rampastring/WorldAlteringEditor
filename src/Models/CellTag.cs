@@ -7,6 +7,16 @@ namespace TSMapEditor.Models
     /// </summary>
     public class CellTag
     {
+        public CellTag()
+        {
+        }
+
+        public CellTag(Point2D position, Tag tag)
+        {
+            Position = position;
+            Tag = tag;
+        }
+
         public Point2D Position { get; set; }
         public Tag Tag { get; set; }
     }

@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 
 namespace TSMapEditor.Models
 {
@@ -7,8 +8,16 @@ namespace TSMapEditor.Models
         public const int PARAM_COUNT = 7;
         public const int INI_VALUE_COUNT = PARAM_COUNT + 1;
 
+        public TriggerAction()
+        {
+            for (int i = 0; i < Parameters.Length - 1; i++)
+                Parameters[i] = "0";
+
+            Parameters[PARAM_COUNT - 1] = "A";
+        }
+
         public int ActionIndex { get; set; }
-        public string[] Parameters { get; } = new string[7];
+        public string[] Parameters { get; private set; } = new string[PARAM_COUNT];
 
         public string ParamToString(int index)
         {
@@ -16,6 +25,15 @@ namespace TSMapEditor.Models
                 return "0";
 
             return Parameters[index];
+        }
+
+        public TriggerAction Clone()
+        {
+            TriggerAction clone = (TriggerAction)MemberwiseClone();
+            clone.Parameters = new string[Parameters.Length];
+            Array.Copy(Parameters, clone.Parameters, Parameters.Length);
+
+            return clone;
         }
 
         public static TriggerAction ParseFromArray(string[] array, int startIndex)

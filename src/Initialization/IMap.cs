@@ -43,6 +43,7 @@ namespace TSMapEditor.Initialization
         void AddTrigger(Trigger trigger);
         void AddTag(Tag tag);
         void AddCellTag(CellTag cellTag);
+        void RemoveCellTagFrom(Point2D cellCoords);
         void AddScript(Script script);
         void AddTeamType(TeamType teamType);
 

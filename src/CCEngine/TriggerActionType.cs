@@ -40,7 +40,7 @@ namespace TSMapEditor.CCEngine
             for (int i = 0; i < Parameters.Length; i++)
             {
                 string key = $"P{i + 1}Type";
-                string nameOverride = $"P{i + 1}Name";
+                string nameOverrideKey = $"P{i + 1}Name";
 
                 if (!iniSection.KeyExists(key))
                 {
@@ -49,8 +49,11 @@ namespace TSMapEditor.CCEngine
                 }
 
                 var triggerParamType = (TriggerParamType)Enum.Parse(typeof(TriggerParamType), iniSection.GetStringValue(key, string.Empty));
+                string nameOverride = iniSection.GetStringValue(nameOverrideKey, null);
+                if (triggerParamType == TriggerParamType.WaypointZZ && string.IsNullOrWhiteSpace(nameOverride))
+                    nameOverride = "Waypoint";
 
-                Parameters[i] = new TriggerActionParam(triggerParamType, iniSection.GetStringValue(nameOverride, null));
+                Parameters[i] = new TriggerActionParam(triggerParamType, nameOverride);
             }
         }
     }
