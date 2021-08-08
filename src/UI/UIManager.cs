@@ -34,6 +34,7 @@ namespace TSMapEditor.UI
 
         private TerrainPlacementAction terrainPlacementAction;
         private ChangeTechnoOwnerAction changeTechnoOwnerAction;
+        private PlaceWaypointCursorAction placeWaypointCursorAction;
 
         private MutationManager mutationManager;
 
@@ -65,6 +66,7 @@ namespace TSMapEditor.UI
             AddChild(mapView);
 
             terrainPlacementAction = new TerrainPlacementAction(mapView);
+            placeWaypointCursorAction = new PlaceWaypointCursorAction(mapView);
             changeTechnoOwnerAction = new ChangeTechnoOwnerAction(mapView);
             editorState.ObjectOwnerChanged += (s, e) => editorState.CursorAction = changeTechnoOwnerAction;
 
@@ -93,16 +95,15 @@ namespace TSMapEditor.UI
             topBarMenu.Width = editorSidebar.Width;
 
             var topBarControlMenu = new TopBarControlMenu(WindowManager, map, theaterGraphics,
-                map.EditorConfig, editorState, terrainPlacementAction);
+                map.EditorConfig, editorState, terrainPlacementAction, placeWaypointCursorAction);
             topBarControlMenu.X = topBarMenu.Right;
             topBarControlMenu.Width = 500;
-            topBarControlMenu.Height = topBarMenu.Height * 2;
             AddChild(topBarControlMenu);
 
             base.Initialize();
 
             windowController.Initialize(this, map, editorState, mapView);
-            windowController.TriggersWindow.Open();
+            placeWaypointCursorAction.PlaceWaypointWindow = windowController.PlaceWaypointWindow;
 
             if (map.Houses.Count > 0)
                 editorState.ObjectOwner = map.Houses[0];

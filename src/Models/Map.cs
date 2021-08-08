@@ -231,7 +231,11 @@ namespace TSMapEditor.Models
         public void AddWaypoint(Waypoint waypoint)
         {
             Waypoints.Add(waypoint);
-            GetTile(waypoint.Position.X, waypoint.Position.Y).Waypoint = waypoint;
+            var cell = GetTile(waypoint.Position.X, waypoint.Position.Y);
+            if (cell.Waypoint != null)
+                throw new InvalidOperationException("Cannot add waypoint to a cell that already has a waypoint!");
+
+            cell.Waypoint = waypoint;
         }
 
         public void RemoveWaypoint(Waypoint waypoint)

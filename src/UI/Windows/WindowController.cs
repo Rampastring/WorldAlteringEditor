@@ -14,6 +14,7 @@ namespace TSMapEditor.UI.Windows
         public ScriptsWindow ScriptsWindow { get; private set; }
         public TeamTypesWindow TeamTypesWindow { get; private set; }
         public TriggersWindow TriggersWindow { get; private set; }
+        public PlaceWaypointWindow PlaceWaypointWindow { get; private set; }
 
         public void Initialize(XNAControl windowParentControl, Map map, EditorState editorState, ICursorActionTarget cursorActionTarget)
         {
@@ -28,6 +29,9 @@ namespace TSMapEditor.UI.Windows
 
             TriggersWindow = new TriggersWindow(windowParentControl.WindowManager, map, editorState, cursorActionTarget);
             Windows.Add(TriggersWindow);
+
+            PlaceWaypointWindow = new PlaceWaypointWindow(windowParentControl.WindowManager, map, cursorActionTarget.MutationManager, cursorActionTarget.MutationTarget);
+            Windows.Add(PlaceWaypointWindow);
 
             foreach (var window in Windows)
             {

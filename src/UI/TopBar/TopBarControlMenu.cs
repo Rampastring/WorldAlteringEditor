@@ -17,13 +17,16 @@ namespace TSMapEditor.UI.TopBar
     public class TopBarControlMenu : EditorPanel
     {
         public TopBarControlMenu(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics,
-            EditorConfig editorConfig, EditorState editorState, TerrainPlacementAction terrainPlacementAction) : base(windowManager)
+            EditorConfig editorConfig, EditorState editorState,
+            TerrainPlacementAction terrainPlacementAction,
+            PlaceWaypointCursorAction placeWaypointCursorAction) : base(windowManager)
         {
             this.map = map;
             this.theaterGraphics = theaterGraphics;
             this.editorConfig = editorConfig;
             this.editorState = editorState;
             this.terrainPlacementAction = terrainPlacementAction;
+            this.placeWaypointCursorAction = placeWaypointCursorAction;
         }
 
         private readonly Map map;
@@ -31,6 +34,7 @@ namespace TSMapEditor.UI.TopBar
         private readonly EditorConfig editorConfig;
         private readonly EditorState editorState;
         private readonly TerrainPlacementAction terrainPlacementAction;
+        private readonly PlaceWaypointCursorAction placeWaypointCursorAction;
 
         private XNADropDown ddBrushSize;
         private XNACheckBox chkAutoLat;
@@ -96,6 +100,17 @@ namespace TSMapEditor.UI.TopBar
             AddChild(chkAutoLat);
             chkAutoLat.CheckedChanged += ChkAutoLat_CheckedChanged;
 
+            var btnPlaceWaypoint = new EditorButton(WindowManager);
+            btnPlaceWaypoint.Name = nameof(btnPlaceWaypoint);
+            btnPlaceWaypoint.X = Constants.UIEmptySideSpace;
+            btnPlaceWaypoint.Y = ddBrushSize.Bottom + Constants.UIVerticalSpacing;
+            btnPlaceWaypoint.Width = 100;
+            btnPlaceWaypoint.Text = "Place Waypoint";
+            btnPlaceWaypoint.LeftClick += BtnPlaceWaypoint_LeftClick;
+            AddChild(btnPlaceWaypoint);
+
+            Height = btnPlaceWaypoint.Bottom + Constants.UIEmptyBottomSpace;
+
             KeyboardCommands.Instance.NextBrushSize.Triggered += NextBrushSize_Triggered;
             KeyboardCommands.Instance.PreviousBrushSize.Triggered += PreviousBrushSize_Triggered;
             KeyboardCommands.Instance.ToggleAutoLAT.Triggered += ToggleAutoLAT_Triggered;
@@ -103,6 +118,11 @@ namespace TSMapEditor.UI.TopBar
             base.Initialize();
 
             editorState.AutoLATEnabledChanged += EditorState_AutoLATEnabledChanged;
+        }
+
+        private void BtnPlaceWaypoint_LeftClick(object sender, EventArgs e)
+        {
+            editorState.CursorAction = placeWaypointCursorAction;
         }
 
         private void BtnClearTerrain_LeftClick(object sender, EventArgs e)
