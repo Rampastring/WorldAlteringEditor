@@ -723,7 +723,7 @@ namespace TSMapEditor.Rendering
 
             Point2D tileCoords = CellMath.CellCoordsFromPixelCoords(GetCursorMapPoint(), Map.Size);
 
-            if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.A)
+            if (e.PressedKey == KeyboardCommands.Instance.RotateUnit.Key.Key)
             {
                 if (tileCoords.X >= 1 && tileCoords.Y >= 1 && tileCoords.Y < Map.Tiles.Length && tileCoords.X < Map.Tiles[tileCoords.Y].Length)
                 {
