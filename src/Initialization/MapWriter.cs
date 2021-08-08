@@ -33,8 +33,6 @@ namespace TSMapEditor.Initialization
             section.SetStringValue("Size", $"0,0,{map.Size.X},{map.Size.Y}");
             section.SetStringValue("Theater", map.TheaterName);
             section.SetStringValue("LocalSize", $"{map.LocalSize.X},{map.LocalSize.Y},{map.LocalSize.Width},{map.LocalSize.Height}");
-
-            mapIni.AddSection(section);
         }
 
         public static void WriteBasicSection(IMap map, IniFile mapIni)
