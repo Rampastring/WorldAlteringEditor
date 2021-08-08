@@ -16,7 +16,7 @@ namespace TSMapEditor.UI.Windows
 
         public override void Initialize()
         {
-            Name = nameof(SelectScriptWindow);
+            Name = nameof(SelectTagWindow);
             base.Initialize();
         }
 
