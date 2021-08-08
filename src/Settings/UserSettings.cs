@@ -7,6 +7,7 @@ namespace TSMapEditor.Settings
     {
         private const string General = "General";
         private const string Display = "Display";
+        private const string MapView = "MapView";
 
         public UserSettings()
         {
@@ -26,6 +27,8 @@ namespace TSMapEditor.Settings
                 RenderResolutionHeight,
                 Borderless,
                 FullscreenWindowed,
+
+                ScrollRate,
 
                 GameDirectory,
                 LastScenarioPath
@@ -58,6 +61,8 @@ namespace TSMapEditor.Settings
         public IntSetting RenderResolutionHeight = new IntSetting(Display, "RenderResolutionHeight", 720);
         public BoolSetting Borderless = new BoolSetting(Display, "Borderless", false);
         public BoolSetting FullscreenWindowed = new BoolSetting(Display, "FullscreenWindowed", false);
+
+        public IntSetting ScrollRate = new IntSetting(MapView, nameof(ScrollRate), 15);
 
         public StringSetting GameDirectory = new StringSetting(General, "GameDirectory", string.Empty);
         public StringSetting LastScenarioPath = new StringSetting(General, nameof(LastScenarioPath), "Maps/Custom/");

@@ -11,6 +11,7 @@ using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations;
 using TSMapEditor.Mutations.Classes;
+using TSMapEditor.Settings;
 using TSMapEditor.UI;
 using TSMapEditor.UI.CursorActions;
 
@@ -100,7 +101,7 @@ namespace TSMapEditor.Rendering
         private bool mapInvalidated = true;
         private Point2D cameraTopLeftPoint = new Point2D(0, 0);
 
-        private int scrollRate = 20;
+        private int scrollRate;
 
         private bool isDraggingObject = false;
         private GameObject draggedObject = null;
@@ -137,6 +138,8 @@ namespace TSMapEditor.Rendering
 
             mapRenderTarget = CreateFullMapRenderTarget();
             objectRenderTarget = CreateFullMapRenderTarget();
+
+            scrollRate = UserSettings.Instance.ScrollRate;
 
             EditorState.CursorActionChanged += EditorState_CursorActionChanged;
 
