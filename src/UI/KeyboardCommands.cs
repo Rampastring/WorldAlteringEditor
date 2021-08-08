@@ -24,7 +24,14 @@ namespace TSMapEditor.UI
                 PreviousBrushSize,
                 DeleteObject,
                 ToggleAutoLAT,
-                RotateUnit
+                RotateUnit,
+
+                AircraftMenu,
+                BuildingMenu,
+                VehicleMenu,
+                InfantryMenu,
+                TerrainObjectMenu,
+                OverlayMenu
             };
         }
 
@@ -72,6 +79,13 @@ namespace TSMapEditor.UI
         public KeyboardCommand DeleteObject { get; } = new KeyboardCommand("DeleteObject", "Delete Object", new KeyboardCommandInput(Keys.Delete, KeyboardModifiers.None));
         public KeyboardCommand ToggleAutoLAT { get; } = new KeyboardCommand("ToggleAutoLAT", "Toggle AutoLAT", new KeyboardCommandInput(Keys.L, KeyboardModifiers.Ctrl));
         public KeyboardCommand RotateUnit { get; } = new KeyboardCommand("RotateUnit", "Rotate Unit", new KeyboardCommandInput(Keys.A, KeyboardModifiers.None));
+
+        public KeyboardCommand AircraftMenu { get; } = new KeyboardCommand("AircraftMenu", "Aircraft Menu", new KeyboardCommandInput(Keys.D1, KeyboardModifiers.None));
+        public KeyboardCommand BuildingMenu { get; } = new KeyboardCommand("BuildingMenu", "Building Menu", new KeyboardCommandInput(Keys.D2, KeyboardModifiers.None));
+        public KeyboardCommand VehicleMenu { get; } = new KeyboardCommand("VehicleMenu", "Vehicle Menu", new KeyboardCommandInput(Keys.D3, KeyboardModifiers.None));
+        public KeyboardCommand InfantryMenu { get; } = new KeyboardCommand("InfantryMenu", "Infantry Menu", new KeyboardCommandInput(Keys.D4, KeyboardModifiers.None));
+        public KeyboardCommand TerrainObjectMenu { get; } = new KeyboardCommand("TerrainObjectMenu", "Terrain Objects Menu", new KeyboardCommandInput(Keys.D5, KeyboardModifiers.None));
+        public KeyboardCommand OverlayMenu { get; } = new KeyboardCommand("OverlayMenu", "Overlay Menu", new KeyboardCommandInput(Keys.D6, KeyboardModifiers.None));
 
         public Keys SkipConfirmationKey { get; } = Keys.LeftAlt;
     }

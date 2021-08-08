@@ -86,6 +86,13 @@ namespace TSMapEditor.UI.Sidebar
 
             base.Initialize();
 
+            KeyboardCommands.Instance.AircraftMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 0;
+            KeyboardCommands.Instance.BuildingMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 1;
+            KeyboardCommands.Instance.VehicleMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 2;
+            KeyboardCommands.Instance.InfantryMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 3;
+            KeyboardCommands.Instance.TerrainObjectMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 4;
+            KeyboardCommands.Instance.OverlayMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 5;
+
             Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
         }
 
