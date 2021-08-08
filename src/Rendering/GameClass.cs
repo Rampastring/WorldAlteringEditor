@@ -1,8 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Rampastring.Tools;
 using Rampastring.XNAUI;
 using System;
 using System.IO;
+using System.Text;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Settings;
 using TSMapEditor.UI;
@@ -28,6 +30,44 @@ namespace TSMapEditor.Rendering
 
             //IsFixedTimeStep = false;
             TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / UserSettings.Instance.TargetFPS);
+
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+        }
+
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            string exceptLogPath = Environment.CurrentDirectory + DSC + "except.txt";
+            Exception ex = (Exception)e.ExceptionObject;
+            File.Delete(exceptLogPath);
+
+            StringBuilder sb = new StringBuilder();
+
+            LogLineGenerate("Unhandled exception! @ " + DateTime.Now.ToLongTimeString(), sb, exceptLogPath);
+            LogLineGenerate("Message: " + ex.Message, sb, exceptLogPath);
+            LogLineGenerate("Stack trace: " + ex.StackTrace, sb, exceptLogPath);
+
+            if (ex.InnerException != null)
+            {
+                LogLineGenerate("***************************", sb, exceptLogPath);
+                LogLineGenerate("InnerException information:", sb, exceptLogPath);
+                LogLineGenerate("Message: " + ex.InnerException.Message, sb, exceptLogPath);
+                LogLineGenerate("Stack trace: " + ex.InnerException.StackTrace, sb, exceptLogPath);
+            }
+
+            Logger.Log("Exiting.");
+
+            windowManager.HideWindow();
+            System.Windows.Forms.MessageBox.Show("The map editor has crashed. Go bash Rampastring." + Environment.NewLine + Environment.NewLine +
+                "Exception information logged into except.txt:" + Environment.NewLine + Environment.NewLine +
+                sb.ToString());
+
+            Environment.Exit(255);
+        }
+
+        private void LogLineGenerate(string text, StringBuilder sb, string exceptLogPath)
+        {
+            sb.Append(text + Environment.NewLine);
+            Logger.ForceLog(text, exceptLogPath);
         }
 
         private WindowManager windowManager;
