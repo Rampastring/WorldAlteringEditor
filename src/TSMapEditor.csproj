@@ -7,7 +7,7 @@
     <ProjectGuid>{7F1101DE-6849-404C-9141-0DF6A6BF12E7}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>TSMapEditor</RootNamespace>
-    <AssemblyName>TSMapEditor</AssemblyName>
+    <AssemblyName>DTAScenarioEditor</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

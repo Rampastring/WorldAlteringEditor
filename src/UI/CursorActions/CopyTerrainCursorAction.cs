@@ -64,10 +64,10 @@ namespace TSMapEditor.UI.CursorActions
             int startX = Math.Min(cellCoords.X, startCellCoords.X);
             int endX = Math.Max(cellCoords.X, startCellCoords.X);
 
-            Point2D startPoint = CellMath.CellTopLeftPoint(new Point2D(startX, startY), CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
-            Point2D endPoint = CellMath.CellTopLeftPoint(new Point2D(endX, endY), CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
-            Point2D corner1 = CellMath.CellTopLeftPoint(new Point2D(startX, endY), CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
-            Point2D corner2 = CellMath.CellTopLeftPoint(new Point2D(endX, startY), CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
+            Point2D startPoint = CellMath.CellTopLeftPoint(new Point2D(startX, startY), CursorActionTarget.Map.Size.X) - cameraTopLeftPoint + new Point2D(Constants.CellSizeX / 2, 0);
+            Point2D endPoint = CellMath.CellTopLeftPoint(new Point2D(endX, endY), CursorActionTarget.Map.Size.X) - cameraTopLeftPoint + new Point2D(Constants.CellSizeX / 2, Constants.CellSizeY);
+            Point2D corner1 = CellMath.CellTopLeftPoint(new Point2D(startX, endY), CursorActionTarget.Map.Size.X) - cameraTopLeftPoint + new Point2D(0, Constants.CellSizeY / 2);
+            Point2D corner2 = CellMath.CellTopLeftPoint(new Point2D(endX, startY), CursorActionTarget.Map.Size.X) - cameraTopLeftPoint + new Point2D(Constants.CellSizeX, Constants.CellSizeY / 2);
 
             Color lineColor = Color.Red;
             int thickness = 2;
