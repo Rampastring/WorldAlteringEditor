@@ -55,6 +55,7 @@ namespace TSMapEditor.UI
             KeyboardCommands.Instance = new KeyboardCommands();
             KeyboardCommands.Instance.Undo.Action = UndoAction;
             KeyboardCommands.Instance.Redo.Action = RedoAction;
+            KeyboardCommands.Instance.ReadFromSettings();
 
             var windowController = new WindowController();
             editorState = new EditorState();

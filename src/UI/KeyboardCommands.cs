@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xna.Framework.Input;
+using Rampastring.Tools;
 using System.Collections.Generic;
+using TSMapEditor.Settings;
 
 namespace TSMapEditor.UI
 {
@@ -21,9 +23,36 @@ namespace TSMapEditor.UI
                 NextBrushSize,
                 PreviousBrushSize,
                 DeleteObject,
-                ToggleAutoLAT
+                ToggleAutoLAT,
+                RotateUnit
             };
         }
+
+        public void ReadFromSettings()
+        {
+            IniFile iniFile = UserSettings.Instance.UserSettingsIni;
+
+            foreach (var command in Commands)
+            {
+                string dataString = iniFile.GetStringValue("Keybinds", command.ININame, null);
+                if (string.IsNullOrWhiteSpace(dataString))
+                    continue;
+
+                command.Key.ApplyDataString(dataString);
+            }
+        }
+
+        public void WriteToSettings()
+        {
+            IniFile iniFile = UserSettings.Instance.UserSettingsIni;
+
+            foreach (var command in Commands)
+            {
+                if (command.Key != command.DefaultKey)
+                    iniFile.SetStringValue("Keybinds", command.ININame, command.Key.GetDataString());
+            }
+        }
+
 
         public static KeyboardCommands Instance { get; set; }
 
@@ -42,6 +71,7 @@ namespace TSMapEditor.UI
         public KeyboardCommand PreviousBrushSize { get; } = new KeyboardCommand("PreviousBrushSize", "Previous Brush Size", new KeyboardCommandInput(Keys.D0, KeyboardModifiers.None));
         public KeyboardCommand DeleteObject { get; } = new KeyboardCommand("DeleteObject", "Delete Object", new KeyboardCommandInput(Keys.Delete, KeyboardModifiers.None));
         public KeyboardCommand ToggleAutoLAT { get; } = new KeyboardCommand("ToggleAutoLAT", "Toggle AutoLAT", new KeyboardCommandInput(Keys.L, KeyboardModifiers.Ctrl));
+        public KeyboardCommand RotateUnit { get; } = new KeyboardCommand("RotateUnit", "Rotate Unit", new KeyboardCommandInput(Keys.A, KeyboardModifiers.None));
 
         public Keys SkipConfirmationKey { get; } = Keys.LeftAlt;
     }

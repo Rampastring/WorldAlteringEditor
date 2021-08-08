@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework.Input;
+using Rampastring.Tools;
 using Rampastring.XNAUI.Input;
 using System;
 
@@ -41,6 +42,34 @@ namespace TSMapEditor.UI
 
             return key + Key.ToString();
         }
+
+        public string GetDataString()
+        {
+            return Key.ToString() + ":" + ((int)Modifiers).ToString();
+        }
+
+        public void ApplyDataString(string str)
+        {
+            string[] parts = str.Split(':');
+            if (parts.Length != 2)
+                throw new ArgumentException("Incorrect KeyboardCommandInput data format: " + str);
+
+            Key = (Keys)Enum.Parse(typeof(Keys), parts[0]);
+            Modifiers = (KeyboardModifiers)Conversions.IntFromString(parts[1], 0);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is KeyboardCommandInput objAsInput))
+                return false;
+
+            return objAsInput.Key == Key && objAsInput.Modifiers == Modifiers;
+        }
+
+        public override int GetHashCode()
+        {
+            return (int)Modifiers * 10000 + (int)Key;
+        }
     }
 
     public class KeyboardCommand
@@ -50,7 +79,7 @@ namespace TSMapEditor.UI
             ININame = iniName;
             UIName = uiName;
             DefaultKey = defaultKey;
-            Key = defaultKey;
+            Key = new KeyboardCommandInput(defaultKey.Key, defaultKey.Modifiers);
         }
 
         public event EventHandler Triggered;

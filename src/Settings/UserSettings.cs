@@ -8,8 +8,6 @@ namespace TSMapEditor.Settings
         private const string General = "General";
         private const string Display = "Display";
 
-        private IniFile userSettingsIni;
-
         public UserSettings()
         {
             if (Instance != null)
@@ -17,7 +15,7 @@ namespace TSMapEditor.Settings
 
             Instance = this;
 
-            userSettingsIni = new IniFile(Environment.CurrentDirectory + "/MapEditorSettings.ini");
+            UserSettingsIni = new IniFile(Environment.CurrentDirectory + "/MapEditorSettings.ini");
 
             settings = new IINILoadable[]
             {
@@ -34,17 +32,19 @@ namespace TSMapEditor.Settings
             };
 
             foreach (var setting in settings)
-                setting.LoadValue(userSettingsIni);
+                setting.LoadValue(UserSettingsIni);
         }
+
+        public IniFile UserSettingsIni { get; }
 
         public void SaveSettings()
         {
             foreach (var setting in settings)
             {
-                setting.WriteValue(userSettingsIni, false);
+                setting.WriteValue(UserSettingsIni, false);
             }
 
-            userSettingsIni.WriteIniFile();
+            UserSettingsIni.WriteIniFile();
         }
 
         public static UserSettings Instance { get; private set; }
