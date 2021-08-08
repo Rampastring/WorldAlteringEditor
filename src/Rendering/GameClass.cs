@@ -12,16 +12,12 @@ namespace TSMapEditor.Rendering
     public class GameClass : Microsoft.Xna.Framework.Game
     {
         private GraphicsDeviceManager graphics;
-        private static string GameDirectory;
 
         public GameClass()
         {
             AutoLATType.InitArray();
 
             new UserSettings();
-            GameDirectory = UserSettings.Instance.GameDirectory;
-            if (!GameDirectory.EndsWith("/") && !GameDirectory.EndsWith("\\"))
-                GameDirectory += "/";
 
             graphics = new GraphicsDeviceManager(this);
             graphics.HardwareModeSwitch = false;
@@ -75,7 +71,7 @@ namespace TSMapEditor.Rendering
 
         private void InitMainMenu()
         {
-            var mainMenu = new MainMenu(windowManager, GameDirectory);
+            var mainMenu = new MainMenu(windowManager);
             windowManager.AddAndInitializeControl(mainMenu);
             windowManager.CenterControlOnScreen(mainMenu);
         }
