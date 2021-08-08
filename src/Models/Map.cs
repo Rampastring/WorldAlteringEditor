@@ -234,6 +234,26 @@ namespace TSMapEditor.Models
             GetTile(waypoint.Position.X, waypoint.Position.Y).Waypoint = waypoint;
         }
 
+        public void RemoveWaypoint(Waypoint waypoint)
+        {
+            var tile = GetTile(waypoint.Position);
+            if (tile.Waypoint == waypoint)
+            {
+                Waypoints.Remove(waypoint);
+                tile.Waypoint = null;
+            }
+        }
+
+        public void RemoveWaypointFrom(Point2D cellCoords)
+        {
+            var tile = GetTile(cellCoords);
+            if (tile.Waypoint != null)
+            {
+                Waypoints.Remove(tile.Waypoint);
+                tile.Waypoint = null;
+            }
+        }
+
         public void AddTaskForce(TaskForce taskForce)
         {
             TaskForces.Add(taskForce);

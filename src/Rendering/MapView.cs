@@ -833,6 +833,18 @@ namespace TSMapEditor.Rendering
                 Map.RemoveTerrainObject(tile.CoordsToPoint());
                 return;
             }
+
+            if (tile.CellTag != null)
+            {
+                Map.RemoveCellTagFrom(tile.CoordsToPoint());
+                return;
+            }
+
+            if (tile.Waypoint != null)
+            {
+                Map.RemoveWaypoint(tile.Waypoint);
+                return;
+            }
         }
 
         public override void Draw(GameTime gameTime)
