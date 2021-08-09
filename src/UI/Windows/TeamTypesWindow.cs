@@ -253,7 +253,7 @@ namespace TSMapEditor.UI.Windows
             }
 
             tbName.Text = editedTeamType.Name;
-            ddVeteranLevel.SelectedIndex = editedTeamType.VeteranLevel;
+            ddVeteranLevel.SelectedIndex = editedTeamType.VeteranLevel - 1;
             ddHouse.SelectedIndex = ddHouse.Items.FindIndex(i => i.Text == (editedTeamType.House == null ? "" : editedTeamType.House.ININame));
             tbPriority.Value = editedTeamType.Priority;
             tbMax.Value = editedTeamType.Max;
@@ -329,7 +329,7 @@ namespace TSMapEditor.UI.Windows
 
         private void DdVeteranLevel_SelectedChanged(object sender, EventArgs e)
         {
-            editedTeamType.VeteranLevel = ddVeteranLevel.SelectedIndex;
+            editedTeamType.VeteranLevel = ddVeteranLevel.SelectedIndex + 1;
         }
 
         private void TbName_TextChanged(object sender, EventArgs e)
