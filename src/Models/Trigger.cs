@@ -22,9 +22,9 @@ namespace TSMapEditor.Models
         public Trigger LinkedTrigger { get; set; }
         public string Name { get; set; }
         public bool Disabled { get; set; }
-        public bool Easy { get; set; }
-        public bool Normal { get; set; }
-        public bool Hard { get; set; }
+        public bool Easy { get; set; } = true;
+        public bool Normal { get; set; } = true;
+        public bool Hard { get; set; } = true;
 
         public List<TriggerCondition> Conditions { get; private set; } = new List<TriggerCondition>();
         public List<TriggerAction> Actions { get; private set; } = new List<TriggerAction>();
