@@ -13,6 +13,13 @@ namespace TSMapEditor.UI.Windows
         protected EditorSuggestionTextBox tbSearch;
         protected EditorListBox lbObjectList;
 
+        /// <summary>
+        /// If the object is being selected for a trigger event or action,
+        /// this can be used to determine whether the object is selected
+        /// for an event or an action.
+        /// </summary>
+        public bool IsForEvent { get; set; }
+
         public T SelectedObject { get; protected set; }
 
         public override void Initialize()

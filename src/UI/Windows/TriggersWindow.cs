@@ -61,9 +61,9 @@ namespace TSMapEditor.UI.Windows
 
         private SelectEventWindow selectEventWindow;
         private SelectActionWindow selectActionWindow;
-
         private SelectTeamTypeWindow selectTeamTypeWindow;
         private SelectTriggerWindow selectTriggerWindow;
+        private SelectGlobalVariableWindow selectGlobalVariableWindow;
 
         private XNAContextMenu contextMenu;
 
@@ -116,6 +116,7 @@ namespace TSMapEditor.UI.Windows
             FindChild<EditorButton>("btnDeleteAction").LeftClick += BtnDeleteAction_LeftClick;
 
             FindChild<EditorButton>("btnActionParameterValuePreset").LeftClick += BtnActionParameterValuePreset_LeftClick;
+            FindChild<EditorButton>("btnEventParameterValuePreset").LeftClick += BtnEventParameterValuePreset_LeftClick;
 
             selectEventWindow = new SelectEventWindow(WindowManager, map);
             var eventWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectEventWindow);
@@ -133,12 +134,43 @@ namespace TSMapEditor.UI.Windows
             var triggerWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTriggerWindow);
             triggerWindowDarkeningPanel.Hidden += TriggerWindowDarkeningPanel_Hidden;
 
+            selectGlobalVariableWindow = new SelectGlobalVariableWindow(WindowManager, map);
+            var globalVariableDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectGlobalVariableWindow);
+            globalVariableDarkeningPanel.Hidden += GlobalVariableDarkeningPanel_Hidden; ;
+
             contextMenu = new XNAContextMenu(WindowManager);
             contextMenu.Name = nameof(contextMenu);
             contextMenu.Width = tbActionParameterValue.Width;
             AddChild(contextMenu);
 
             lbTriggers.SelectedIndexChanged += LbTriggers_SelectedIndexChanged;
+        }
+
+        private void BtnEventParameterValuePreset_LeftClick(object sender, EventArgs e)
+        {
+            if (editedTrigger == null || lbEvents.SelectedItem == null || lbEventParameters.SelectedItem == null)
+                return;
+
+            var triggerEvent = (TriggerCondition)lbEvents.SelectedItem.Tag;
+            var triggerEventType = GetTriggerEventType(triggerEvent.ConditionIndex);
+            int paramIndex = (int)lbEventParameters.SelectedItem.Tag;
+
+            if (triggerEventType == null)
+                return;
+
+            TriggerParamType triggerParamType = paramIndex == EVENT_PARAM_FIRST ? triggerEventType.P1Type : triggerEventType.P2Type;
+            int paramValue = paramIndex == EVENT_PARAM_FIRST ? triggerEvent.Parameter1 : triggerEvent.Parameter2;
+
+            switch (triggerParamType)
+            {
+                case TriggerParamType.GlobalVariable:
+                    GlobalVariable existingGlobalVariable = map.Rules.GlobalVariables.Find(gv => gv.Index == paramValue);
+                    selectGlobalVariableWindow.IsForEvent = true;
+                    selectGlobalVariableWindow.Open(existingGlobalVariable);
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void BtnActionParameterValuePreset_LeftClick(object sender, EventArgs e)
@@ -157,15 +189,43 @@ namespace TSMapEditor.UI.Windows
             {
                 case TriggerParamType.TeamType:
                     TeamType existingTeamType = map.TeamTypes.Find(tt => tt.ININame == triggerAction.Parameters[paramIndex]);
+                    selectTeamTypeWindow.IsForEvent = false;
                     selectTeamTypeWindow.Open(existingTeamType);
                     break;
                 case TriggerParamType.Trigger:
                     Trigger existingTrigger = map.Triggers.Find(tt => tt.ID == triggerAction.Parameters[paramIndex]);
                     selectTriggerWindow.Open(existingTrigger);
                     break;
+                case TriggerParamType.GlobalVariable:
+                    GlobalVariable existingGlobalVariable = map.Rules.GlobalVariables.Find(gv => gv.Index == Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1));
+                    selectGlobalVariableWindow.IsForEvent = false;
+                    selectGlobalVariableWindow.Open(existingGlobalVariable);
+                    break;
                 default:
                     break;
             }
+        }
+
+        private void GlobalVariableDarkeningPanel_Hidden(object sender, EventArgs e)
+        {
+            if (selectGlobalVariableWindow.SelectedObject == null)
+                return;
+
+            if (selectGlobalVariableWindow.IsForEvent)
+            {
+                GetTriggerEventAndParamIndex(out TriggerCondition triggerCondition, out int paramIndex);
+                if (paramIndex == EVENT_PARAM_FIRST)
+                    triggerCondition.Parameter1 = selectGlobalVariableWindow.SelectedObject.Index;
+                else
+                    triggerCondition.Parameter2 = selectGlobalVariableWindow.SelectedObject.Index;
+            }
+            else
+            {
+                GetTriggerActionAndParamIndex(out TriggerAction triggerAction, out int paramIndex);
+                triggerAction.Parameters[paramIndex] = selectGlobalVariableWindow.SelectedObject.Index.ToString();
+            }
+            
+            EditTrigger(editedTrigger);
         }
 
         private void TriggerWindowDarkeningPanel_Hidden(object sender, EventArgs e)
@@ -192,6 +252,12 @@ namespace TSMapEditor.UI.Windows
         {
             triggerAction = (TriggerAction)lbActions.SelectedItem.Tag;
             paramIndex = (int)lbActionParameters.SelectedItem.Tag;
+        }
+
+        private void GetTriggerEventAndParamIndex(out TriggerCondition triggerEvent, out int paramIndex)
+        {
+            triggerEvent = (TriggerCondition)lbEvents.SelectedItem.Tag;
+            paramIndex = (int)lbEventParameters.SelectedItem.Tag;
         }
 
         private void BtnNewTrigger_LeftClick(object sender, EventArgs e)
@@ -740,10 +806,10 @@ namespace TSMapEditor.UI.Windows
                     if (!intParseSuccess)
                         return paramValue;
 
-                    if (intValue >= map.Rules.GlobalVariableNames.Count)
+                    if (intValue >= map.Rules.GlobalVariables.Count)
                         return intValue + " - invalid variable";
 
-                    return intValue + " " + map.Rules.GlobalVariableNames[intValue];
+                    return intValue + " " + map.Rules.GlobalVariables[intValue].Name;
                 case TriggerParamType.WaypointZZ:
                     if (!intParseSuccess)
                         return Helpers.GetWaypointNumberFromAlphabeticalString(paramValue).ToString();

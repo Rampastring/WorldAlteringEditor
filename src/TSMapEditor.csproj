@@ -86,6 +86,7 @@
     <None Include="Config\UI\SelectEventWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Config\UI\SelectGlobalVariableWindow.ini" />
     <None Include="Config\UI\SelectScriptActionWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -124,6 +125,7 @@
     <Compile Include="Models\Foot.cs" />
     <Compile Include="Models\GameObject.cs" />
     <Compile Include="Models\GameObjectType.cs" />
+    <Compile Include="Models\GlobalVariable.cs" />
     <Compile Include="Models\House.cs" />
     <Compile Include="Initialization\IMap.cs" />
     <Compile Include="Models\Infantry.cs" />
@@ -248,6 +250,7 @@
     <Compile Include="UI\Windows\ScriptsWindow.cs" />
     <Compile Include="UI\Windows\SelectActionWindow.cs" />
     <Compile Include="UI\Windows\SelectEventWindow.cs" />
+    <Compile Include="UI\Windows\SelectGlobalVariableWindow.cs" />
     <Compile Include="UI\Windows\SelectObjectWindow.cs" />
     <Compile Include="UI\Windows\SelectScriptActionWindow.cs" />
     <Compile Include="UI\Windows\SelectScriptWindow.cs" />
@@ -289,7 +292,9 @@
     <None Include="Config\UI\SelectScriptWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Config\UI\SelectTagWindow.ini" />
+    <None Include="Config\UI\SelectTagWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Config\UI\SelectTaskForceWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

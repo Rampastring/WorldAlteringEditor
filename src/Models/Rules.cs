@@ -19,13 +19,13 @@ namespace TSMapEditor.Models
         public List<InfantrySequence> InfantrySequences = new List<InfantrySequence>();
         public List<RulesColor> Colors = new List<RulesColor>();
 
-        public List<string> GlobalVariableNames = new List<string>();
+        public List<GlobalVariable> GlobalVariables = new List<GlobalVariable>();
 
 
         /// <summary>
         /// Initializes rules types from an INI file.
         /// </summary>
-        public void InitFromINI(IniFile iniFile, IInitializer initializer)
+        public void InitFromINI(IniFile iniFile, IInitializer initializer, bool isMapIni = false)
         {
             InitFromTypeSection(iniFile, "VehicleTypes", UnitTypes);
             InitFromTypeSection(iniFile, "InfantryTypes", InfantryTypes);
@@ -51,12 +51,18 @@ namespace TSMapEditor.Models
                 }
             }
 
-            var variableNamesSection = iniFile.GetSection("VariableNames");
-            if (variableNamesSection != null)
+            if (isMapIni)
             {
-                foreach (var kvp in variableNamesSection.Keys)
+                // Don't load local variables defined in the map as globals
+
+                IniSection variableNamesSection = iniFile.GetSection("VariableNames");
+                if (variableNamesSection != null)
                 {
-                    GlobalVariableNames.Add(kvp.Value);
+                    for (int i = 0; i < variableNamesSection.Keys.Count; i++)
+                    {
+                        var kvp = variableNamesSection.Keys[i];
+                        GlobalVariables.Add(new GlobalVariable(i, kvp.Value));
+                    }
                 }
             }
         }

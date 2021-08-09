@@ -88,7 +88,7 @@ namespace TSMapEditor.Models
         {
             Initialize(rulesIni, firestormIni, artIni, artFirestormIni);
             LoadedINI = new IniFile();
-            Rules.InitFromINI(LoadedINI, initializer);
+            Rules.InitFromINI(LoadedINI, initializer, true);
             InitEditorConfig();
             SetTileData(null);
         }
@@ -98,7 +98,7 @@ namespace TSMapEditor.Models
             Initialize(rulesIni, firestormIni, artIni, artFirestormIni);
 
             LoadedINI = mapIni ?? throw new ArgumentNullException(nameof(mapIni));
-            Rules.InitFromINI(mapIni, initializer);
+            Rules.InitFromINI(mapIni, initializer, true);
             InitEditorConfig();
 
             MapLoader.ReadBasicSection(this, mapIni);
