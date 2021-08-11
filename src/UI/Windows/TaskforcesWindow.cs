@@ -108,7 +108,7 @@ namespace TSMapEditor.UI.Windows
 
             map.TaskForces.Add(editedTaskForce.Clone(map.GetNewUniqueInternalId()));
             AddTaskForceToList(map.TaskForces[map.TaskForces.Count - 1]);
-            lbTaskForces.SelectedIndex = lbTaskForces.Items.Count - 1;
+            SelectLastTaskForce();
         }
 
         private void BtnDeleteTaskForce_LeftClick(object sender, System.EventArgs e)
@@ -142,7 +142,13 @@ namespace TSMapEditor.UI.Windows
         {
             map.TaskForces.Add(new TaskForce(map.GetNewUniqueInternalId()) { Name = "New TaskForce" });
             AddTaskForceToList(map.TaskForces[map.TaskForces.Count - 1]);
+            SelectLastTaskForce();
+        }
+
+        private void SelectLastTaskForce()
+        {
             lbTaskForces.SelectedIndex = lbTaskForces.Items.Count - 1;
+            lbTaskForces.ScrollToBottom();
         }
 
         private void TbGroup_TextChanged(object sender, System.EventArgs e)

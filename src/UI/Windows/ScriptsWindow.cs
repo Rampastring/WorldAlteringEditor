@@ -73,7 +73,7 @@ namespace TSMapEditor.UI.Windows
         {
             map.Scripts.Add(new Script(map.GetNewUniqueInternalId()) { Name = "New script" });
             ListScripts();
-            lbScriptTypes.SelectedIndex = map.Scripts.Count - 1;
+            SelectLastScript();
         }
 
         private void BtnDeleteScript_LeftClick(object sender, EventArgs e)
@@ -93,7 +93,13 @@ namespace TSMapEditor.UI.Windows
 
             map.Scripts.Add(editedScript.Clone(map.GetNewUniqueInternalId()));
             ListScripts();
+            SelectLastScript();
+        }
+
+        private void SelectLastScript()
+        {
             lbScriptTypes.SelectedIndex = map.Scripts.Count - 1;
+            lbScriptTypes.ScrollToBottom();
         }
 
         private void BtnAddAction_LeftClick(object sender, EventArgs e)
