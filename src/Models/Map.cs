@@ -146,6 +146,7 @@ namespace TSMapEditor.Models
             MapWriter.WriteCellTags(this, LoadedINI);
             MapWriter.WriteScripts(this, LoadedINI);
             MapWriter.WriteTeamTypes(this, LoadedINI);
+            MapWriter.WriteLocalVariables(this, LoadedINI);
 
             MapWriter.WriteAircraft(this, LoadedINI);
             MapWriter.WriteUnits(this, LoadedINI);
@@ -618,12 +619,13 @@ namespace TSMapEditor.Models
         /// <returns></returns>
         public string GetNewUniqueInternalId()
         {
-            int id = 01000000;
-            string idString = id.ToString(CultureInfo.InvariantCulture);
+            int id = 1000000;
+            string idString = string.Empty;
 
             while (true)
             {
-               
+                idString = "0" + id.ToString(CultureInfo.InvariantCulture);
+
                 if (TaskForces.Exists(tf => tf.ININame == idString) || 
                     Scripts.Exists(s => s.ININame == idString) || 
                     TeamTypes.Exists(tt => tt.ININame == idString) ||
@@ -631,7 +633,6 @@ namespace TSMapEditor.Models
                     LoadedINI.SectionExists(idString))
                 {
                     id++;
-                    idString = id.ToString(CultureInfo.InvariantCulture);
                     continue;
                 }
 
