@@ -51,7 +51,7 @@ namespace TSMapEditor.Models
                 }
             }
 
-            if (isMapIni)
+            if (!isMapIni)
             {
                 // Don't load local variables defined in the map as globals
 
