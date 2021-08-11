@@ -40,6 +40,13 @@ namespace TSMapEditor.UI.Windows
 
         private void BtnPlace_LeftClick(object sender, EventArgs e)
         {
+            // Cancel dialog if the user leaves the text box empty
+            if (tbWaypointNumber.Text == string.Empty)
+            {
+                Hide();
+                return;
+            }
+
             if (tbWaypointNumber.Value < 0 || tbWaypointNumber.Value >= MaxWaypoints)
                 return;
 
