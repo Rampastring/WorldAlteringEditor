@@ -30,6 +30,7 @@ namespace TSMapEditor.Initialization
         List<Script> Scripts { get; }
         List<TaskForce> TaskForces { get; }
         List<TeamType> TeamTypes { get; }
+        List<LocalVariable> LocalVariables { get; }
 
         Point2D Size { get; set; }
         Rectangle LocalSize { get; set; }

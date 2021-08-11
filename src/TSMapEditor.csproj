@@ -77,6 +77,9 @@
     <None Include="Config\Events.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Config\UI\LocalVariablesWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Config\UI\PlaceWaypointWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -86,7 +89,9 @@
     <None Include="Config\UI\SelectEventWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Config\UI\SelectGlobalVariableWindow.ini" />
+    <None Include="Config\UI\SelectGlobalVariableWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Config\UI\SelectScriptActionWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -132,6 +137,7 @@
     <Compile Include="Models\InfantryType.cs" />
     <Compile Include="Models\INIDefineable.cs" />
     <Compile Include="Models\INIDefined.cs" />
+    <Compile Include="Models\LocalVariable.cs" />
     <Compile Include="Models\Map.cs" />
     <Compile Include="Models\MapFormat\Format5.cs" />
     <Compile Include="Models\MapFormat\Format80.cs" />
@@ -246,6 +252,7 @@
     <Compile Include="UI\UIManager.cs" />
     <Compile Include="Settings\UserSettings.cs" />
     <Compile Include="UI\Windows\EditorMessageBox.cs" />
+    <Compile Include="UI\Windows\LocalVariablesWindow.cs" />
     <Compile Include="UI\Windows\PlaceWaypointWindow.cs" />
     <Compile Include="UI\Windows\ScriptsWindow.cs" />
     <Compile Include="UI\Windows\SelectActionWindow.cs" />

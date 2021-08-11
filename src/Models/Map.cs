@@ -60,6 +60,7 @@ namespace TSMapEditor.Models
         public List<CellTag> CellTags { get; } = new List<CellTag>();
         public List<Script> Scripts { get; } = new List<Script>();
         public List<TeamType> TeamTypes { get; } = new List<TeamType>();
+        public List<LocalVariable> LocalVariables { get; } = new List<LocalVariable>();
 
         public Point2D Size { get; set; }
         public Rectangle LocalSize { get; set; }
@@ -117,6 +118,7 @@ namespace TSMapEditor.Models
             MapLoader.ReadCellTags(this, mapIni);
             MapLoader.ReadScripts(this, mapIni);
             MapLoader.ReadTeamTypes(this, mapIni);
+            MapLoader.ReadLocalVariables(this, mapIni);
 
             MapLoader.ReadBuildings(this, mapIni);
             MapLoader.ReadAircraft(this, mapIni);

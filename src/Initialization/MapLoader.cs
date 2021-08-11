@@ -712,5 +712,29 @@ namespace TSMapEditor.Initialization
                 map.AddCellTag(new CellTag() { Position = coords.Value, Tag = tag });
             }
         }
+
+        public static void ReadLocalVariables(IMap map, IniFile mapIni)
+        {
+            var section = mapIni.GetSection("VariableNames");
+            if (section == null)
+                return;
+
+            foreach (var kvp in section.Keys)
+            {
+                string[] parts = kvp.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts.Length != 2)
+                {
+                    Logger.Log($"Invalid local variable syntax in entry {kvp.Key}: {kvp.Value}, skipping reading locals");
+                    return;
+                }
+
+                var localVariable = new LocalVariable(map.LocalVariables.Count);
+                localVariable.Name = parts[0];
+                localVariable.InitialState = parts[1] == "1" ? true : false;
+
+                map.LocalVariables.Add(localVariable);
+            }
+        }
     }
 }
