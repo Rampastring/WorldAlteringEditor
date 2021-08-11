@@ -92,6 +92,9 @@
     <None Include="Config\UI\SelectGlobalVariableWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Config\UI\SelectLocalVariableWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Config\UI\SelectScriptActionWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -258,6 +261,7 @@
     <Compile Include="UI\Windows\SelectActionWindow.cs" />
     <Compile Include="UI\Windows\SelectEventWindow.cs" />
     <Compile Include="UI\Windows\SelectGlobalVariableWindow.cs" />
+    <Compile Include="UI\Windows\SelectLocalVariableWindow.cs" />
     <Compile Include="UI\Windows\SelectObjectWindow.cs" />
     <Compile Include="UI\Windows\SelectScriptActionWindow.cs" />
     <Compile Include="UI\Windows\SelectScriptWindow.cs" />

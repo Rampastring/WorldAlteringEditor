@@ -64,6 +64,7 @@ namespace TSMapEditor.UI.Windows
         private SelectTeamTypeWindow selectTeamTypeWindow;
         private SelectTriggerWindow selectTriggerWindow;
         private SelectGlobalVariableWindow selectGlobalVariableWindow;
+        private SelectLocalVariableWindow selectLocalVariableWindow;
 
         private XNAContextMenu contextMenu;
 
@@ -136,7 +137,11 @@ namespace TSMapEditor.UI.Windows
 
             selectGlobalVariableWindow = new SelectGlobalVariableWindow(WindowManager, map);
             var globalVariableDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectGlobalVariableWindow);
-            globalVariableDarkeningPanel.Hidden += GlobalVariableDarkeningPanel_Hidden; ;
+            globalVariableDarkeningPanel.Hidden += GlobalVariableDarkeningPanel_Hidden;
+
+            selectLocalVariableWindow = new SelectLocalVariableWindow(WindowManager, map);
+            var localVariableDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectLocalVariableWindow);
+            localVariableDarkeningPanel.Hidden += LocalVariableDarkeningPanel_Hidden;
 
             contextMenu = new XNAContextMenu(WindowManager);
             contextMenu.Name = nameof(contextMenu);
@@ -167,6 +172,11 @@ namespace TSMapEditor.UI.Windows
                     GlobalVariable existingGlobalVariable = map.Rules.GlobalVariables.Find(gv => gv.Index == paramValue);
                     selectGlobalVariableWindow.IsForEvent = true;
                     selectGlobalVariableWindow.Open(existingGlobalVariable);
+                    break;
+                case TriggerParamType.LocalVariable:
+                    LocalVariable existingLocalVariable = map.LocalVariables.Find(lv => lv.Index == paramValue);
+                    selectLocalVariableWindow.IsForEvent = true;
+                    selectLocalVariableWindow.Open(existingLocalVariable);
                     break;
                 default:
                     break;
@@ -201,9 +211,36 @@ namespace TSMapEditor.UI.Windows
                     selectGlobalVariableWindow.IsForEvent = false;
                     selectGlobalVariableWindow.Open(existingGlobalVariable);
                     break;
+                case TriggerParamType.LocalVariable:
+                    LocalVariable existingLocalVariable = map.LocalVariables.Find(lv => lv.Index == Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1));
+                    selectLocalVariableWindow.IsForEvent = false;
+                    selectLocalVariableWindow.Open(existingLocalVariable);
+                    break;
                 default:
                     break;
             }
+        }
+
+        private void LocalVariableDarkeningPanel_Hidden(object sender, EventArgs e)
+        {
+            if (selectLocalVariableWindow.SelectedObject == null)
+                return;
+
+            if (selectLocalVariableWindow.IsForEvent)
+            {
+                GetTriggerEventAndParamIndex(out TriggerCondition triggerCondition, out int paramIndex);
+                if (paramIndex == EVENT_PARAM_FIRST)
+                    triggerCondition.Parameter1 = selectLocalVariableWindow.SelectedObject.Index;
+                else
+                    triggerCondition.Parameter2 = selectLocalVariableWindow.SelectedObject.Index;
+            }
+            else
+            {
+                GetTriggerActionAndParamIndex(out TriggerAction triggerAction, out int paramIndex);
+                triggerAction.Parameters[paramIndex] = selectLocalVariableWindow.SelectedObject.Index.ToString();
+            }
+
+            EditTrigger(editedTrigger);
         }
 
         private void GlobalVariableDarkeningPanel_Hidden(object sender, EventArgs e)
@@ -807,9 +844,17 @@ namespace TSMapEditor.UI.Windows
                         return paramValue;
 
                     if (intValue >= map.Rules.GlobalVariables.Count)
-                        return intValue + " - invalid variable";
+                        return intValue + " - nonexistant variable";
 
                     return intValue + " " + map.Rules.GlobalVariables[intValue].Name;
+                case TriggerParamType.LocalVariable:
+                    if (!intParseSuccess)
+                        return paramValue;
+
+                    if (intValue >= map.LocalVariables.Count)
+                        return intValue + " - nonexistant variable";
+
+                    return intValue + " " + map.LocalVariables[intValue].Name;
                 case TriggerParamType.WaypointZZ:
                     if (!intParseSuccess)
                         return Helpers.GetWaypointNumberFromAlphabeticalString(paramValue).ToString();
