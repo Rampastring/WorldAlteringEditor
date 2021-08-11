@@ -490,6 +490,25 @@ namespace TSMapEditor.Initialization
             }
         }
 
+        public static void WriteLocalVariables(IMap map, IniFile mapIni)
+        {
+            const string sectionName = "VariableNames";
+
+            mapIni.RemoveSection(sectionName);
+            if (map.LocalVariables.Count == 0)
+                return;
+
+            var section = new IniSection(sectionName);
+            mapIni.AddSection(section);
+
+            for (int i = 0; i < map.LocalVariables.Count; i++)
+            {
+                var localVariable = map.LocalVariables[i];
+
+                section.SetStringValue(i.ToString(), localVariable.Name + "," + (localVariable.InitialState ? "1" : "0"));
+            }
+        }
+
         private static string BoolToObjectStyle(bool value)
         {
             return Conversions.BooleanToString(value, BooleanStringStyle.ONEZERO);
