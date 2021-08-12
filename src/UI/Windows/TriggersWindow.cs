@@ -62,6 +62,7 @@ namespace TSMapEditor.UI.Windows
         private SelectTriggerWindow selectTriggerWindow;
         private SelectGlobalVariableWindow selectGlobalVariableWindow;
         private SelectLocalVariableWindow selectLocalVariableWindow;
+        private SelectHouseWindow selectHouseWindow;
 
         private XNAContextMenu contextMenu;
 
@@ -140,6 +141,10 @@ namespace TSMapEditor.UI.Windows
             var localVariableDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectLocalVariableWindow);
             localVariableDarkeningPanel.Hidden += LocalVariableDarkeningPanel_Hidden;
 
+            selectHouseWindow = new SelectHouseWindow(WindowManager, map);
+            var houseDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectHouseWindow);
+            houseDarkeningPanel.Hidden += HouseDarkeningPAnel_Hidden;
+
             contextMenu = new XNAContextMenu(WindowManager);
             contextMenu.Name = nameof(contextMenu);
             contextMenu.Width = tbActionParameterValue.Width;
@@ -174,6 +179,13 @@ namespace TSMapEditor.UI.Windows
                     LocalVariable existingLocalVariable = map.LocalVariables.Find(lv => lv.Index == paramValue);
                     selectLocalVariableWindow.IsForEvent = true;
                     selectLocalVariableWindow.Open(existingLocalVariable);
+                    break;
+                case TriggerParamType.House:
+                    selectHouseWindow.IsForEvent = true;
+                    if (paramValue > -1 || paramValue < map.Houses.Count)
+                        selectHouseWindow.Open(map.Houses[paramValue]);
+                    else
+                        selectHouseWindow.Open(null);
                     break;
                 default:
                     break;
@@ -213,9 +225,26 @@ namespace TSMapEditor.UI.Windows
                     selectLocalVariableWindow.IsForEvent = false;
                     selectLocalVariableWindow.Open(existingLocalVariable);
                     break;
+                case TriggerParamType.House:
+                    int houseIndex = Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1);
+                    selectHouseWindow.IsForEvent = false;
+                    if (houseIndex > -1 || houseIndex < map.Houses.Count)
+                        selectHouseWindow.Open(map.Houses[houseIndex]);
+                    else
+                        selectHouseWindow.Open(null);
+                    break;
                 default:
                     break;
             }
+        }
+
+        private void HouseDarkeningPAnel_Hidden(object sender, EventArgs e)
+        {
+            if (selectHouseWindow.SelectedObject == null)
+                return;
+
+            int houseIndex = map.Houses.FindIndex(h => h == selectHouseWindow.SelectedObject);
+            AssignParamValue(selectHouseWindow.IsForEvent, houseIndex);
         }
 
         private void LocalVariableDarkeningPanel_Hidden(object sender, EventArgs e)
@@ -223,21 +252,8 @@ namespace TSMapEditor.UI.Windows
             if (selectLocalVariableWindow.SelectedObject == null)
                 return;
 
-            if (selectLocalVariableWindow.IsForEvent)
-            {
-                GetTriggerEventAndParamIndex(out TriggerCondition triggerCondition, out int paramIndex);
-                if (paramIndex == EVENT_PARAM_FIRST)
-                    triggerCondition.Parameter1 = selectLocalVariableWindow.SelectedObject.Index;
-                else
-                    triggerCondition.Parameter2 = selectLocalVariableWindow.SelectedObject.Index;
-            }
-            else
-            {
-                GetTriggerActionAndParamIndex(out TriggerAction triggerAction, out int paramIndex);
-                triggerAction.Parameters[paramIndex] = selectLocalVariableWindow.SelectedObject.Index.ToString();
-            }
-
-            EditTrigger(editedTrigger);
+            int localVariableIndex = selectLocalVariableWindow.SelectedObject.Index;
+            AssignParamValue(selectLocalVariableWindow.IsForEvent, localVariableIndex);
         }
 
         private void GlobalVariableDarkeningPanel_Hidden(object sender, EventArgs e)
@@ -245,20 +261,26 @@ namespace TSMapEditor.UI.Windows
             if (selectGlobalVariableWindow.SelectedObject == null)
                 return;
 
-            if (selectGlobalVariableWindow.IsForEvent)
+            int globalVariableIndex = selectGlobalVariableWindow.SelectedObject.Index;
+            AssignParamValue(selectGlobalVariableWindow.IsForEvent, globalVariableIndex);
+        }
+
+        private void AssignParamValue(bool isForEvent, int paramValue)
+        {
+            if (isForEvent)
             {
                 GetTriggerEventAndParamIndex(out TriggerCondition triggerCondition, out int paramIndex);
                 if (paramIndex == EVENT_PARAM_FIRST)
-                    triggerCondition.Parameter1 = selectGlobalVariableWindow.SelectedObject.Index;
+                    triggerCondition.Parameter1 = paramValue;
                 else
-                    triggerCondition.Parameter2 = selectGlobalVariableWindow.SelectedObject.Index;
+                    triggerCondition.Parameter2 = paramValue;
             }
             else
             {
                 GetTriggerActionAndParamIndex(out TriggerAction triggerAction, out int paramIndex);
-                triggerAction.Parameters[paramIndex] = selectGlobalVariableWindow.SelectedObject.Index.ToString();
+                triggerAction.Parameters[paramIndex] = paramValue.ToString();
             }
-            
+
             EditTrigger(editedTrigger);
         }
 

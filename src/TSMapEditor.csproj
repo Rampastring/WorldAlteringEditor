@@ -100,6 +100,9 @@
     </None>
     <Compile Include="CCEngine\TriggerActionType.cs" />
     <Compile Include="CCEngine\TriggerEventType.cs" />
+    <None Include="Config\UI\SelectHouseWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Compile Include="Constants.cs" />
     <Compile Include="GameMath\CellMath.cs" />
     <Compile Include="GameMath\Point2D.cs" />
@@ -261,6 +264,7 @@
     <Compile Include="UI\Windows\SelectActionWindow.cs" />
     <Compile Include="UI\Windows\SelectEventWindow.cs" />
     <Compile Include="UI\Windows\SelectGlobalVariableWindow.cs" />
+    <Compile Include="UI\Windows\SelectHouseWindow.cs" />
     <Compile Include="UI\Windows\SelectLocalVariableWindow.cs" />
     <Compile Include="UI\Windows\SelectObjectWindow.cs" />
     <Compile Include="UI\Windows\SelectScriptActionWindow.cs" />
