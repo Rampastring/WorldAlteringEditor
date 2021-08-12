@@ -64,6 +64,18 @@ namespace TSMapEditor.UI.Windows
         {
             SelectedObject = initialSelection;
             ListObjects();
+
+            if (lbObjectList.SelectedItem == null)
+            {
+                // If the initially selected object wasn't found for some reason, then clear selection
+                SelectedObject = default(T);
+            }
+
+            if (SelectedObject == null)
+            {
+                lbObjectList.SelectedIndex = -1;
+            }
+
             Show();
             WindowManager.SelectedControl = tbSearch;
         }

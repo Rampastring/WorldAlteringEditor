@@ -44,10 +44,6 @@ namespace TSMapEditor.UI.Windows
                 if (taskForce == SelectedObject)
                     lbObjectList.SelectedIndex = lbObjectList.Items.Count - 1;
             }
-
-            // If the initial selection taskforce wasn't found for some reason, then clear selection
-            if (lbObjectList.SelectedItem == null)
-                SelectedObject = null;
         }
     }
 }
