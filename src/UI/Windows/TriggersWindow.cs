@@ -633,6 +633,9 @@ namespace TSMapEditor.UI.Windows
                 }
             }
 
+            if (lbActionParameters.SelectedItem == null && lbActionParameters.Items.Count > 0)
+                lbActionParameters.SelectedIndex = 0;
+
             LbActionParameters_SelectedIndexChanged(this, EventArgs.Empty);
 
             lbActionParameters.SelectedIndexChanged += LbActionParameters_SelectedIndexChanged;
@@ -746,6 +749,9 @@ namespace TSMapEditor.UI.Windows
                 if (triggerEventType.P2Type != TriggerParamType.Unused)
                     lbEventParameters.AddItem(new XNAListBoxItem() { Text = triggerEventType.P2Type.ToString(), Tag = EVENT_PARAM_SECOND });
             }
+
+            if (lbEventParameters.SelectedItem == null && lbEventParameters.Items.Count > 0)
+                lbEventParameters.SelectedIndex = 0;
 
             LbEventParameters_SelectedIndexChanged(this, EventArgs.Empty);
 
