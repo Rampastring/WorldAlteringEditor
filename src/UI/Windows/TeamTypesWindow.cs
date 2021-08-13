@@ -216,7 +216,7 @@ namespace TSMapEditor.UI.Windows
         private void EditTeamType(TeamType teamType)
         {
             tbName.TextChanged -= TbName_TextChanged;
-            ddVeteranLevel.SelectedChanged -= DdVeteranLevel_SelectedChanged;
+            ddVeteranLevel.SelectedIndexChanged -= DdVeteranLevel_SelectedIndexChanged;
             ddHouse.SelectedIndexChanged -= DdHouse_SelectedIndexChanged;
             tbPriority.TextChanged -= TbPriority_TextChanged;
             tbMax.TextChanged -= TbMax_TextChanged;
@@ -279,7 +279,7 @@ namespace TSMapEditor.UI.Windows
             checkBoxes.ForEach(chk => chk.Checked = (bool)((PropertyInfo)chk.Tag).GetValue(editedTeamType));
 
             tbName.TextChanged += TbName_TextChanged;
-            ddVeteranLevel.SelectedChanged += DdVeteranLevel_SelectedChanged;
+            ddVeteranLevel.SelectedIndexChanged += DdVeteranLevel_SelectedIndexChanged;
             ddHouse.SelectedIndexChanged += DdHouse_SelectedIndexChanged;
             tbPriority.TextChanged += TbPriority_TextChanged;
             tbMax.TextChanged += TbMax_TextChanged;
@@ -327,7 +327,7 @@ namespace TSMapEditor.UI.Windows
             editedTeamType.House = map.GetHouses()[ddHouse.SelectedIndex];
         }
 
-        private void DdVeteranLevel_SelectedChanged(object sender, EventArgs e)
+        private void DdVeteranLevel_SelectedIndexChanged(object sender, EventArgs e)
         {
             editedTeamType.VeteranLevel = ddVeteranLevel.SelectedIndex + 1;
         }
