@@ -30,6 +30,9 @@ properly keep track of areas to refresh, which leads to graphical glitches at ti
 The current renderer should be considered more as a proof-of-concept of DTA/TS/RA2 map
 rendering done with MonoGame than an actual serious implementation.
 
+As the entire editor is currently work-in-progress, the code-base is so as well.
+If you browse the code, assume that nothing you see is final.
+
 ## System requirements
 
 This editor uses MonoGame with Rampastring's custom XNAUI library. 
