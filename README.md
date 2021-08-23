@@ -38,6 +38,12 @@ VRAM requirements might be steep, as the sprite graphics of the game are current
 converted into full 32-bit ARGB textures prior to drawing. In case of
 Dawn of the Tiberium Age, the editor appears to allocate roughly 500 MB of VRAM.
 
+## Downloads
+
+There is currently no publicly hosted download. It's easiest to clone the source and compile it
+yourself using Visual Studio 2017 or newer.
+If you want a download, you can, however, contact me and ask for one on DTA's Discord server: https://discord.gg/6UtC289
+
 ## Why only DTA? What about Tiberian Sun or Red Alert 2?
 
 As DTA runs on the Tiberian Sun game engine, the editor is compatible with the TS/RA2 map format. 
