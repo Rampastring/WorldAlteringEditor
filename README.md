@@ -44,6 +44,12 @@ There is currently no publicly hosted download. It's easiest to clone the source
 yourself using Visual Studio 2017 or newer.
 If you want a download, you can, however, contact me and ask for one on DTA's Discord server: https://discord.gg/6UtC289
 
+## License
+
+The editor is licensed under the GNU General Public License, version 2.
+If you create and publish a derivate, you need to also release your source code for the fork.
+Please see LICENSE.txt for more details.
+
 ## Why only DTA? What about Tiberian Sun or Red Alert 2?
 
 As DTA runs on the Tiberian Sun game engine, the editor is compatible with the TS/RA2 map format. 
