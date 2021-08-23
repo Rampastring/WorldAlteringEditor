@@ -1,3 +1,5 @@
+![Dawn of the Tiberium Age Logo](https://github.com/Rampastring/TSMapEditor/raw/master/dtalogo.png "DTA Logo")
+
 # Dawn of the Tiberium Age Scenario Editor
 
 Work-in-progress scenario editor for Dawn of the Tiberium Age (DTA) https://www.moddb.com/mods/the-dawn-of-the-tiberium-age
