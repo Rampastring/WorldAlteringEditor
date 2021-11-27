@@ -19,6 +19,7 @@ namespace TSMapEditor.Models
         /// <summary>
         /// The boolean string style to use when writing this object's properties to an INI file.
         /// </summary>
+        [INI(false)]
         public BooleanStringStyle BooleanStringStyle { get; set; } = BooleanStringStyle.YESNO_LOWERCASE;
 
         public void ReadPropertiesFromIniSection(IniSection iniSection)
