@@ -267,7 +267,7 @@ namespace TSMapEditor.UI.Windows
                 selTaskForce.Text = string.Empty;
 
             if (editedTeamType.Script != null)
-                selScript.Text = editedTeamType.Script.Name + " (" + editedTeamType.Script.Name + ")";
+                selScript.Text = editedTeamType.Script.Name + " (" + editedTeamType.Script.ININame + ")";
             else
                 selScript.Text = string.Empty;
 
