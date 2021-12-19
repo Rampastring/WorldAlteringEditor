@@ -228,7 +228,7 @@ namespace TSMapEditor.UI.Windows
                 case TriggerParamType.House:
                     int houseIndex = Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1);
                     selectHouseWindow.IsForEvent = false;
-                    if (houseIndex > -1 || houseIndex < map.Houses.Count)
+                    if (houseIndex > -1 && houseIndex < map.Houses.Count)
                         selectHouseWindow.Open(map.Houses[houseIndex]);
                     else
                         selectHouseWindow.Open(null);
