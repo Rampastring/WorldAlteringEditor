@@ -131,6 +131,12 @@ namespace TSMapEditor.UI
             textRenderer.AddTextPart(new XNATextPart( techno.ObjectType.Name + " (" + techno.ObjectType.ININame + "), Owner:",
                     Constants.UIDefaultFont, Color.White));
             textRenderer.AddTextPart(new XNATextPart(techno.Owner.ININame, Constants.UIBoldFont, techno.Owner.XNAColor));
+            if (techno.AttachedTag != null)
+            {
+                textRenderer.AddTextPart(new XNATextPart(",", Constants.UIDefaultFont, Color.White));
+                textRenderer.AddTextPart(new XNATextPart("Tag:", Constants.UIDefaultFont, Color.White));
+                textRenderer.AddTextPart(new XNATextPart(techno.AttachedTag.Name + " (" + techno.AttachedTag.ID + ")", Constants.UIBoldFont, Color.White));
+            }
         }
     }
 }
