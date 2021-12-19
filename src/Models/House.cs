@@ -25,6 +25,7 @@ namespace TSMapEditor.Models
         public int PercentBuilt { get; set; }
         public bool PlayerControl { get; set; }
         public string Side { get; set; }
+        public int ID { get; set; }
 
         [INI(false)]
         public Color XNAColor { get; set; }

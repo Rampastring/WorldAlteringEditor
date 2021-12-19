@@ -339,7 +339,7 @@ namespace TSMapEditor.Initialization
             for (int i = 0; i < map.Houses.Count; i++)
             {
                 House house = map.Houses[i];
-                housesSection.SetStringValue(i.ToString(), house.ININame);
+                housesSection.SetStringValue(house.ID > -1 ? house.ID.ToString() : i.ToString(), house.ININame);
 
                 // TODO don't remove section until we can handle base nodes
                 // mapIni.RemoveSection(house.ININame);

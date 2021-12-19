@@ -673,6 +673,8 @@ namespace TSMapEditor.Initialization
             {
                 string houseName = kvp.Value;
                 var house = new House(houseName);
+                house.ID = Conversions.IntFromString(kvp.Key, -1);
+
                 map.Houses.Add(house);
 
                 var houseSection = mapIni.GetSection(houseName);
