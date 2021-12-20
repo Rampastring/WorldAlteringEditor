@@ -61,7 +61,7 @@ namespace TSMapEditor.UI
             editorState = new EditorState();
             mutationManager = new MutationManager();
 
-            mapView = new MapView(WindowManager, map, theaterGraphics, editorState, mutationManager);
+            mapView = new MapView(WindowManager, map, theaterGraphics, editorState, mutationManager, windowController);
             mapView.Width = WindowManager.RenderResolutionX;
             mapView.Height = WindowManager.RenderResolutionY;
             AddChild(mapView);

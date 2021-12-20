@@ -22,7 +22,6 @@
         public bool Powered { get; set; } = true;
         
         public SpotlightType Spotlight { get; set; }
-        public int[] UpgradeIds { get; private set; } = new int[MaxUpgradeCount];
         public BuildingType[] Upgrades { get; private set; } = new BuildingType[MaxUpgradeCount];
         public int UpgradeCount
         {

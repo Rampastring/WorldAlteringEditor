@@ -201,6 +201,7 @@
     <Compile Include="Rendering\MGTMPImage.cs" />
     <Compile Include="Rendering\Refresh.cs" />
     <Compile Include="Rendering\TheaterGraphics.cs" />
+    <Compile Include="Scripts\ApplyAnimatedWaterScript.cs" />
     <Compile Include="Settings\BoolSetting.cs" />
     <Compile Include="Settings\IntSetting.cs" />
     <Compile Include="Settings\SettingBase.cs" />
@@ -273,6 +274,7 @@
     <Compile Include="UI\Windows\SelectTaskForceWindow.cs" />
     <Compile Include="UI\Windows\SelectTeamTypeWindow.cs" />
     <Compile Include="UI\Windows\SelectTriggerWindow.cs" />
+    <Compile Include="UI\Windows\StructureOptionsWindow.cs" />
     <Compile Include="UI\Windows\TaskforcesWindow.cs" />
     <Compile Include="UI\Windows\TeamTypesWindow.cs" />
     <Compile Include="UI\Windows\TriggersWindow.cs" />
@@ -317,6 +319,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Config\UI\SelectTriggerWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\UI\StructureOptionsWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Config\UI\TaskforcesWindow.ini">

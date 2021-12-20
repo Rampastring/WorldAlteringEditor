@@ -196,6 +196,11 @@ namespace TSMapEditor.UI.Controls
             if (string.IsNullOrEmpty(parts[0]))
                 throw new INIConfigException("Empty name in child control definition for " + parent.Name);
 
+            if (FindChild<XNAControl>(parts[0], true) != null)
+            {
+                throw new INIConfigException("A control named " + parts[0] + " has been defined more than once.");
+            }
+
             var childControl = EditorGUICreator.Instance.CreateControl(WindowManager, parts[1]);
             childControl.Name = parts[0];
             parent.AddChildWithoutInitialize(childControl);

@@ -66,18 +66,20 @@ namespace TSMapEditor.Rendering
 
     public class MapView : XNAControl, ICursorActionTarget, IMutationTarget
     {
-        public MapView(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics, EditorState editorState, MutationManager mutationManager) : base(windowManager)
+        public MapView(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics, EditorState editorState, MutationManager mutationManager, WindowController windowController) : base(windowManager)
         {
             EditorState = editorState;
             Map = map;
             TheaterGraphics = theaterGraphics;
             MutationManager = mutationManager;
+            this.windowController = windowController;
         }
 
         public EditorState EditorState { get; }
         public Map Map { get; }
         public TheaterGraphics TheaterGraphics { get; }
         public MutationManager MutationManager { get; }
+        private readonly WindowController windowController;
 
         public IMutationTarget MutationTarget => this;
         public House ObjectOwner => EditorState.ObjectOwner;
@@ -661,6 +663,16 @@ namespace TSMapEditor.Rendering
             }
 
             base.OnLeftClick();
+        }
+
+        public override void OnDoubleLeftClick()
+        {
+            if (tileUnderCursor != null && CursorAction == null && tileUnderCursor.Structure != null)
+            {
+                windowController.StructureOptionsWindow.Open(tileUnderCursor.Structure);
+            }
+
+            base.OnDoubleLeftClick();
         }
 
         public override void OnRightClick()
