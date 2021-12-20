@@ -2,8 +2,10 @@
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
+using System.Collections.Generic;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Models;
+using TSMapEditor.Models.Enums;
 using TSMapEditor.Rendering;
 
 namespace TSMapEditor.UI
@@ -13,11 +15,13 @@ namespace TSMapEditor.UI
     /// </summary>
     public class TileInfoDisplay : EditorPanel
     {
-        public TileInfoDisplay(WindowManager windowManager, TheaterGraphics theaterGraphics) : base(windowManager)
+        public TileInfoDisplay(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics) : base(windowManager)
         {
+            this.map = map;
             this.theaterGraphics = theaterGraphics;
         }
 
+        private readonly Map map;
         private readonly TheaterGraphics theaterGraphics;
 
         private MapTile _mapTile;
@@ -118,9 +122,92 @@ namespace TSMapEditor.UI
                     AddObjectInformation("Infantry: ", MapTile.Infantry[i]);
             }
 
+            if (MapTile.Waypoint != null)
+            {
+                AddWaypointInfo(MapTile.Waypoint);
+            }
+
             textRenderer.PrepareTextParts();
 
             Height = textRenderer.Bottom + Constants.UIEmptyBottomSpace;
+        }
+
+        private void AddWaypointInfo(Waypoint waypoint)
+        {
+            // Find all usages for this waypoint
+            List<string> usages = new List<string>(0);
+
+            foreach (Trigger trigger in map.Triggers)
+            {
+                foreach (var action in trigger.Actions)
+                {
+                    bool usageFound = false;
+
+                    if (action.ActionIndex < 0 && action.ActionIndex >= map.EditorConfig.TriggerActionTypes.Count)
+                        continue;
+
+                    var triggerActionType = map.EditorConfig.TriggerActionTypes[action.ActionIndex];
+
+                    for (int i = 0; i < triggerActionType.Parameters.Length; i++)
+                    {
+                        if (triggerActionType.Parameters[i] == null)
+                            continue;
+
+                        var param = triggerActionType.Parameters[i];
+
+                        if (param.TriggerParamType == TriggerParamType.Waypoint && action.Parameters[i] == waypoint.Identifier.ToString())
+                        {
+                            usages.Add("trigger '" + trigger.Name + "', ");
+                            usageFound = true;
+                        }
+                        else if (param.TriggerParamType == TriggerParamType.WaypointZZ && action.Parameters[i] == Helpers.WaypointNumberToAlphabeticalString(waypoint.Identifier))
+                        {
+                            usages.Add("trigger '" + trigger.Name + "', ");
+                            usageFound = true;
+                        }
+                    }
+
+                    // Don't list the trigger multiple times if it has multiple actions that refer to the waypoint
+                    if (usageFound)
+                        break;
+                }
+            }
+
+            foreach (Script script in map.Scripts)
+            {
+                foreach (var actionEntry in script.Actions)
+                {
+                    if (actionEntry.Action < 0 || actionEntry.Action >= map.EditorConfig.ScriptActions.Count)
+                        continue;
+
+                    var scriptAction = map.EditorConfig.ScriptActions[actionEntry.Action];
+                    if (scriptAction.ParamType == TriggerParamType.Waypoint && actionEntry.Argument == waypoint.Identifier)
+                    {
+                        usages.Add("script '" + script.Name + "', ");
+                    }
+                }
+            }
+
+            foreach (TeamType team in map.TeamTypes)
+            {
+                if (team.Waypoint == Helpers.WaypointNumberToAlphabeticalString(waypoint.Identifier))
+                {
+                    usages.Add("team '" + team.Name + "', ");
+                }
+            }
+
+            if (usages.Count > 0)
+            {
+                string lastUsage = usages[usages.Count - 1];
+                usages[usages.Count - 1] = lastUsage.Substring(0, lastUsage.Length - 2);
+
+                textRenderer.AddTextLine(new XNATextPart("Usages of waypoint " + waypoint.Identifier + ":", Constants.UIDefaultFont, Color.Gray));
+
+                foreach (var usage in usages)
+                {
+                    textRenderer.AddTextPart(new XNATextPart(usage, Constants.UIDefaultFont, Color.White));
+                }
+            }
         }
 
         private void AddObjectInformation<T>(string objectTypeLabel, Techno<T> techno) where T : GameObjectType

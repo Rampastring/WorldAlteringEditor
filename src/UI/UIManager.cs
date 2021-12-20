@@ -86,7 +86,7 @@ namespace TSMapEditor.UI
             AddChild(tileSelector);
             tileSelector.TileDisplay.SelectedTileChanged += TileDisplay_SelectedTileChanged;
 
-            tileInfoDisplay = new TileInfoDisplay(WindowManager, theaterGraphics);
+            tileInfoDisplay = new TileInfoDisplay(WindowManager, map, theaterGraphics);
             AddChild(tileInfoDisplay);
             tileInfoDisplay.X = Width - tileInfoDisplay.Width;
             mapView.TileInfoDisplay = tileInfoDisplay;
