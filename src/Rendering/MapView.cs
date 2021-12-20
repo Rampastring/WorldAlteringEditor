@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
@@ -14,6 +15,7 @@ using TSMapEditor.Mutations.Classes;
 using TSMapEditor.Settings;
 using TSMapEditor.UI;
 using TSMapEditor.UI.CursorActions;
+using TSMapEditor.UI.Windows;
 
 namespace TSMapEditor.Rendering
 {
@@ -756,6 +758,19 @@ namespace TSMapEditor.Rendering
             if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.V && Keyboard.IsCtrlHeldDown())
             {
                 CursorAction = pasteTerrainCursorAction;
+            }
+
+            if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.F1)
+            {
+                var text = new StringBuilder();
+
+                foreach (KeyboardCommand command in KeyboardCommands.Instance.Commands)
+                {
+                    text.Append(command.UIName + ": " + command.Key.GetKeyNameString());
+                    text.Append(Environment.NewLine);
+                }
+
+                EditorMessageBox.Show(WindowManager, "Hotkey Help", text.ToString(), MessageBoxButtons.OK);
             }
         }
 
