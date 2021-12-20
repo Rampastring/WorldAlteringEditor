@@ -617,19 +617,6 @@ namespace TSMapEditor.Rendering
             base.OnMouseOnControl();
         }
 
-        public override void OnMouseLeftDown()
-        {
-            if (CursorAction == null && tileUnderCursor != null)
-            {
-                draggedObject = tileUnderCursor.GetObject();
-
-                if (draggedObject != null)
-                    isDraggingObject = true;
-            }
-
-            base.OnMouseLeftDown();
-        }
-
         public override void OnMouseMove()
         {
             base.OnMouseMove();
@@ -641,6 +628,14 @@ namespace TSMapEditor.Rendering
                     CursorAction.LeftDown(tileUnderCursor.CoordsToPoint());
                     lastTileUnderCursor = tileUnderCursor;
                 }
+            }
+
+            if (CursorAction == null && tileUnderCursor != null && Cursor.LeftDown && tileUnderCursor.GetObject() != null && !isDraggingObject)
+            {
+                draggedObject = tileUnderCursor.GetObject();
+
+                if (draggedObject != null)
+                    isDraggingObject = true;
             }
 
             // Right-click scrolling
