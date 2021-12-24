@@ -662,9 +662,13 @@ namespace TSMapEditor.Rendering
 
         public override void OnDoubleLeftClick()
         {
-            if (tileUnderCursor != null && CursorAction == null && tileUnderCursor.Structure != null)
+            if (tileUnderCursor != null && CursorAction == null)
             {
-                windowController.StructureOptionsWindow.Open(tileUnderCursor.Structure);
+                if (tileUnderCursor.Structure != null)
+                    windowController.StructureOptionsWindow.Open(tileUnderCursor.Structure);
+
+                if (tileUnderCursor.Vehicle != null)
+                    windowController.VehicleOptionsWindow.Open(tileUnderCursor.Vehicle);
             }
 
             base.OnDoubleLeftClick();

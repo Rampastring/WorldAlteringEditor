@@ -34,8 +34,6 @@ namespace TSMapEditor.UI.Windows
 
         private SelectTagWindow selectTagWindow;
 
-        private EditorButton btnOK;
-
         public override void Initialize()
         {
             Name = nameof(StructureOptionsWindow);
@@ -92,7 +90,7 @@ namespace TSMapEditor.UI.Windows
             FetchUpgrade(upgrade1Selector, 0);
             FetchUpgrade(upgrade2Selector, 1);
             FetchUpgrade(upgrade3Selector, 2);
-            attachedTagSelector.Text = structure.AttachedTag == null ? string.Empty : structure.AttachedTag.Name + " (" + structure.AttachedTag.ID + ")";
+            attachedTagSelector.Text = structure.AttachedTag == null ? string.Empty : structure.AttachedTag.GetDisplayString();
             attachedTagSelector.Tag = structure.AttachedTag;
         }
 
@@ -109,7 +107,7 @@ namespace TSMapEditor.UI.Windows
 
         private void BtnOK_LeftClick(object sender, EventArgs e)
         {
-            structure.HP = Math.Min(tbStrength.Value, Constants.ObjectHealthMax);
+            structure.HP = Math.Max(0, Math.Min(tbStrength.Value, Constants.ObjectHealthMax));
             structure.AISellable = chkSellable.Checked;
             structure.AIRebuildable = chkRebuild.Checked;
             structure.Powered = chkPowered.Checked;

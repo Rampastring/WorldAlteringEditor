@@ -17,6 +17,7 @@ namespace TSMapEditor.UI.Windows
         public PlaceWaypointWindow PlaceWaypointWindow { get; private set; }
         public LocalVariablesWindow LocalVariablesWindow { get; private set; }
         public StructureOptionsWindow StructureOptionsWindow { get; private set; }
+        public VehicleOptionsWindow VehicleOptionsWindow { get; private set; }
 
         public void Initialize(XNAControl windowParentControl, Map map, EditorState editorState, ICursorActionTarget cursorActionTarget)
         {
@@ -40,6 +41,9 @@ namespace TSMapEditor.UI.Windows
 
             StructureOptionsWindow = new StructureOptionsWindow(windowParentControl.WindowManager, map);
             Windows.Add(StructureOptionsWindow);
+
+            VehicleOptionsWindow = new VehicleOptionsWindow(windowParentControl.WindowManager, map);
+            Windows.Add(VehicleOptionsWindow);
 
             foreach (var window in Windows)
             {

@@ -18,5 +18,7 @@ namespace TSMapEditor.Models
         {
             iniSection.SetStringValue(ID, $"{Repeating},{Name},{Trigger.ID}");
         }
+
+        public string GetDisplayString() => Name + " (" + ID + ")";
     }
 }
