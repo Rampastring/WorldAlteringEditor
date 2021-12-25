@@ -108,7 +108,8 @@ namespace TSMapEditor.Rendering
         private int scrollRate;
 
         private bool isDraggingObject = false;
-        private GameObject draggedObject = null;
+        private bool isRotatingObject = false;
+        private GameObject draggedOrRotatedObject = null;
 
         // For right-click scrolling
         private bool isRightClickScrolling = false;
@@ -581,19 +582,26 @@ namespace TSMapEditor.Rendering
 
         public override void OnMouseOnControl()
         {
-            if (CursorAction == null && isDraggingObject)
+            if (CursorAction == null && (isDraggingObject || isRotatingObject))
             {
                 if (!Cursor.LeftDown)
                 {
-                    isDraggingObject = false;
-
-                    if (tileUnderCursor != null && tileUnderCursor.CoordsToPoint() != draggedObject.Position)
+                    if (isDraggingObject)
                     {
-                        if (Map.CanMoveObject(draggedObject, tileUnderCursor.CoordsToPoint()))
+                        isDraggingObject = false;
+
+                        if (tileUnderCursor != null && tileUnderCursor.CoordsToPoint() != draggedOrRotatedObject.Position)
                         {
-                            var mutation = new MoveObjectMutation(MutationTarget, draggedObject, tileUnderCursor.CoordsToPoint());
-                            MutationManager.PerformMutation(mutation);
+                            if (Map.CanMoveObject(draggedOrRotatedObject, tileUnderCursor.CoordsToPoint()))
+                            {
+                                var mutation = new MoveObjectMutation(MutationTarget, draggedOrRotatedObject, tileUnderCursor.CoordsToPoint());
+                                MutationManager.PerformMutation(mutation);
+                            }
                         }
+                    }
+                    else if (isRotatingObject)
+                    {
+                        isRotatingObject = false;
                     }
                 }
             }
@@ -630,12 +638,17 @@ namespace TSMapEditor.Rendering
                 }
             }
 
-            if (CursorAction == null && tileUnderCursor != null && Cursor.LeftDown && tileUnderCursor.GetObject() != null && !isDraggingObject)
+            if (CursorAction == null && tileUnderCursor != null && Cursor.LeftDown && !isDraggingObject && !isRotatingObject && tileUnderCursor.GetObject() != null)
             {
-                draggedObject = tileUnderCursor.GetObject();
+                draggedOrRotatedObject = tileUnderCursor.GetObject();
 
-                if (draggedObject != null)
-                    isDraggingObject = true;
+                if (draggedOrRotatedObject != null)
+                {
+                    if (KeyboardCommands.Instance.RotateUnit.AreKeysDown(Keyboard))
+                        isRotatingObject = true;
+                    else
+                        isDraggingObject = true;
+                }
             }
 
             // Right-click scrolling
@@ -740,29 +753,29 @@ namespace TSMapEditor.Rendering
 
             Point2D tileCoords = CellMath.CellCoordsFromPixelCoords(GetCursorMapPoint(), Map.Size);
 
-            if (e.PressedKey == KeyboardCommands.Instance.RotateUnit.Key.Key)
-            {
-                if (tileCoords.X >= 1 && tileCoords.Y >= 1 && tileCoords.Y < Map.Tiles.Length && tileCoords.X < Map.Tiles[tileCoords.Y].Length)
-                {
-                    var tile = Map.Tiles[tileCoords.Y][tileCoords.X];
-                    if (tile == null)
-                        return;
+            //if (e.PressedKey == KeyboardCommands.Instance.RotateUnit.Key.Key)
+            //{
+            //    if (tileCoords.X >= 1 && tileCoords.Y >= 1 && tileCoords.Y < Map.Tiles.Length && tileCoords.X < Map.Tiles[tileCoords.Y].Length)
+            //    {
+            //        var tile = Map.Tiles[tileCoords.Y][tileCoords.X];
+            //        if (tile == null)
+            //            return;
 
-                    var unit = Map.Units.Find(u => u.Position.X == tile.X && u.Position.Y == tile.Y);
-                    if (unit != null)
-                    {
-                        int facing = unit.Facing;
-                        facing += 8;
-                        if (Keyboard.IsAltHeldDown())
-                            facing += 24;
-                        facing = facing % 256;
-                        unit.Facing = (byte)facing;
-                        refreshes.Add(new RefreshPoint(unit.Position, 2));
-                    }
-                }
+            //        var unit = Map.Units.Find(u => u.Position.X == tile.X && u.Position.Y == tile.Y);
+            //        if (unit != null)
+            //        {
+            //            int facing = unit.Facing;
+            //            facing += 8;
+            //            if (Keyboard.IsAltHeldDown())
+            //                facing += 24;
+            //            facing = facing % 256;
+            //            unit.Facing = (byte)facing;
+            //            refreshes.Add(new RefreshPoint(unit.Position, 2));
+            //        }
+            //    }
 
-                return;
-            }
+            //    return;
+            //}
 
             if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.C && Keyboard.IsCtrlHeldDown())
             {
@@ -803,17 +816,48 @@ namespace TSMapEditor.Rendering
                 if (isDraggingObject)
                 {
                     Color lineColor = Color.White;
-                    if (!Map.CanMoveObject(draggedObject, tileUnderCursor.CoordsToPoint()))
+                    if (!Map.CanMoveObject(draggedOrRotatedObject, tileUnderCursor.CoordsToPoint()))
                         lineColor = Color.Red;
 
                     Point2D cameraAndCellCenterOffset = new Point2D(-cameraTopLeftPoint.X + Constants.CellSizeX / 2,
                                                      -cameraTopLeftPoint.Y + Constants.CellSizeY / 2);
 
-                    Point2D startDrawPoint = CellMath.CellTopLeftPoint(draggedObject.Position, Map.Size.X) + cameraAndCellCenterOffset;
+                    Point2D startDrawPoint = CellMath.CellTopLeftPoint(draggedOrRotatedObject.Position, Map.Size.X) + cameraAndCellCenterOffset;
 
                     Point2D endDrawPoint = CellMath.CellTopLeftPoint(tileUnderCursor.CoordsToPoint(), Map.Size.X) + cameraAndCellCenterOffset;
 
                     DrawLine(startDrawPoint.ToXNAVector(), endDrawPoint.ToXNAVector(), lineColor, 1);
+                }
+                else if (isRotatingObject)
+                {
+                    Color lineColor = Color.Yellow;
+
+                    Point2D cameraAndCellCenterOffset = new Point2D(-cameraTopLeftPoint.X + Constants.CellSizeX / 2,
+                                                     -cameraTopLeftPoint.Y + Constants.CellSizeY / 2);
+
+                    Point2D startDrawPoint = CellMath.CellTopLeftPoint(draggedOrRotatedObject.Position, Map.Size.X) + cameraAndCellCenterOffset;
+
+                    Point2D endDrawPoint = CellMath.CellTopLeftPoint(tileUnderCursor.CoordsToPoint(), Map.Size.X) + cameraAndCellCenterOffset;
+
+                    DrawLine(startDrawPoint.ToXNAVector(), endDrawPoint.ToXNAVector(), lineColor, 1);
+
+                    if (draggedOrRotatedObject.IsTechno())
+                    {
+                        var techno = (TechnoBase)draggedOrRotatedObject;
+                        Point2D point = tileUnderCursor.CoordsToPoint() - draggedOrRotatedObject.Position;
+
+                        float angle = point.Angle() + ((float)Math.PI / 2.0f);
+                        if (angle > (float)Math.PI * 2.0f)
+                        {
+                            angle = angle - ((float)Math.PI * 2.0f);
+                        }
+
+                        float percent = angle / ((float)Math.PI * 2.0f);
+                        byte facing = (byte)(percent * (float)byte.MaxValue);
+
+                        techno.Facing = facing;
+                        AddRefreshPoint(techno.Position, 2);
+                    }
                 }
                 else
                 {

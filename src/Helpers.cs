@@ -189,5 +189,10 @@ namespace TSMapEditor
 
             return Texture;
         }
+
+        public static float AngleFromVector(Vector2 vector)
+        {
+            return (float)Math.Atan2(vector.Y, vector.X);
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using System;
 
 namespace TSMapEditor.GameMath
 {
@@ -46,6 +47,11 @@ namespace TSMapEditor.GameMath
         public static bool operator ==(Point2D p1, Point2D p2)
         {
             return p1.X == p2.X && p1.Y == p2.Y;
+        }
+
+        public float Angle()
+        {
+            return (float)Math.Atan2(Y, X);
         }
     }
 }
