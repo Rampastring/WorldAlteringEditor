@@ -669,6 +669,10 @@ namespace TSMapEditor.Rendering
 
                 if (tileUnderCursor.Vehicle != null)
                     windowController.VehicleOptionsWindow.Open(tileUnderCursor.Vehicle);
+
+                Infantry infantry = tileUnderCursor.GetFirstInfantry();
+                if (infantry != null)
+                    windowController.InfantryOptionsWindow.Open(infantry);
             }
 
             base.OnDoubleLeftClick();

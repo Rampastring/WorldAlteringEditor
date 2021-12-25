@@ -52,6 +52,17 @@ namespace TSMapEditor.Models
             return Infantry[(int)subCell];
         }
 
+        public Infantry GetFirstInfantry()
+        {
+            for (int i = 0; i < Infantry.Length; i++)
+            {
+                if (Infantry[i] != null)
+                    return Infantry[i];
+            }
+
+            return null;
+        }
+
         public bool HasTechno()
         {
             return Structure != null || Vehicle != null || Aircraft != null || Array.Exists(Infantry, inf => inf != null);
