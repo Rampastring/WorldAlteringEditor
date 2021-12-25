@@ -14,7 +14,6 @@ namespace TSMapEditor.Models
 
         [INI(false)]
         public string ININame { get; set; }
-        public string Name { get; set; }
         public int IQ { get; set; }
         public string Edge { get; set; }
         public string Color { get; set; }

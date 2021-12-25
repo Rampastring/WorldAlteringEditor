@@ -16,6 +16,7 @@ namespace TSMapEditor.Models
         public List<TerrainType> TerrainTypes = new List<TerrainType>();
         public List<OverlayType> OverlayTypes = new List<OverlayType>();
 
+        public List<string> Sides = new List<string>();
         public List<InfantrySequence> InfantrySequences = new List<InfantrySequence>();
         public List<RulesColor> Colors = new List<RulesColor>();
 
@@ -48,6 +49,15 @@ namespace TSMapEditor.Models
                 foreach (var kvp in colorsSection.Keys)
                 {
                     Colors.Add(new RulesColor(kvp.Key, kvp.Value));
+                }
+            }
+
+            var sidesSection = iniFile.GetSection("Sides");
+            if (sidesSection != null)
+            {
+                foreach (var kvp in sidesSection.Keys)
+                {
+                    Sides.Add(kvp.Value);
                 }
             }
 
