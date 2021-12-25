@@ -77,6 +77,9 @@
     <None Include="Config\Events.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Config\UI\BasicSectionConfigWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Config\UI\InfantryOptionsWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -261,6 +264,7 @@
     <Compile Include="UI\TopBar\TopBarMenu.cs" />
     <Compile Include="UI\UIManager.cs" />
     <Compile Include="Settings\UserSettings.cs" />
+    <Compile Include="UI\Windows\BasicSectionConfigWindow.cs" />
     <Compile Include="UI\Windows\EditorMessageBox.cs" />
     <Compile Include="UI\Windows\InfantryOptionsWindow.cs" />
     <Compile Include="UI\Windows\LocalVariablesWindow.cs" />

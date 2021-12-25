@@ -48,6 +48,8 @@ namespace TSMapEditor.UI.TopBar
             editContextMenu.Name = nameof(editContextMenu);
             editContextMenu.AddItem("Undo", () => mutationManager.Undo(), () => mutationManager.CanUndo(), null, null);
             editContextMenu.AddItem("Redo", () => mutationManager.Redo(), () => mutationManager.CanRedo(), null, null);
+            editContextMenu.AddItem(" ", null, () => false, null, null);
+            editContextMenu.AddItem("Basic", () => windowController.BasicSectionConfigWindow.Open(), null, null, null);
             editContextMenu.AddItem("Triggers", () => windowController.TriggersWindow.Open(), null, null, null);
             editContextMenu.AddItem("TaskForces", () => windowController.TaskForcesWindow.Open(), null, null, null);
             editContextMenu.AddItem("Scripts", () => windowController.ScriptsWindow.Open(), null, null, null);

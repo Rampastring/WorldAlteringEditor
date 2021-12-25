@@ -10,6 +10,7 @@ namespace TSMapEditor.UI.Windows
     {
         private List<EditorWindow> Windows { get; } = new List<EditorWindow>();
 
+        public BasicSectionConfigWindow BasicSectionConfigWindow { get; private set; }
         public TaskforcesWindow TaskForcesWindow { get; private set; }
         public ScriptsWindow ScriptsWindow { get; private set; }
         public TeamTypesWindow TeamTypesWindow { get; private set; }
@@ -19,9 +20,13 @@ namespace TSMapEditor.UI.Windows
         public StructureOptionsWindow StructureOptionsWindow { get; private set; }
         public VehicleOptionsWindow VehicleOptionsWindow { get; private set; }
         public InfantryOptionsWindow InfantryOptionsWindow { get; private set; }
+        
 
         public void Initialize(XNAControl windowParentControl, Map map, EditorState editorState, ICursorActionTarget cursorActionTarget)
         {
+            BasicSectionConfigWindow = new BasicSectionConfigWindow(windowParentControl.WindowManager, map);
+            Windows.Add(BasicSectionConfigWindow);
+
             TaskForcesWindow = new TaskforcesWindow(windowParentControl.WindowManager, map);
             Windows.Add(TaskForcesWindow);
 
@@ -48,6 +53,7 @@ namespace TSMapEditor.UI.Windows
 
             InfantryOptionsWindow = new InfantryOptionsWindow(windowParentControl.WindowManager, map);
             Windows.Add(InfantryOptionsWindow);
+
 
             foreach (var window in Windows)
             {
