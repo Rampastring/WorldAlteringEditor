@@ -896,11 +896,18 @@ namespace TSMapEditor.Rendering
                 }
                 else
                 {
-                    Point2D drawPoint = CellMath.CellTopLeftPoint(new Point2D(tileUnderCursor.X, tileUnderCursor.Y), Map.Size.X);
-                    FillRectangle(new Rectangle(drawPoint.X - cameraTopLeftPoint.X + Constants.CellSizeX / 4,
-                        drawPoint.Y - cameraTopLeftPoint.Y + Constants.CellSizeY / 4,
-                        Constants.CellSizeX / 2, Constants.CellSizeY / 2),
-                        new Color(128, 128, 128, 128));
+                    Color lineColor = new Color(96, 96, 96, 128);
+                    Point2D cellTopLeftPoint = CellMath.CellTopLeftPoint(new Point2D(tileUnderCursor.X, tileUnderCursor.Y), Map.Size.X) - cameraTopLeftPoint;
+
+                    var cellTopPoint = new Vector2(cellTopLeftPoint.X + Constants.CellSizeX / 2, cellTopLeftPoint.Y);
+                    var cellLeftPoint = new Vector2(cellTopLeftPoint.X, cellTopLeftPoint.Y + Constants.CellSizeY / 2);
+                    var cellRightPoint = new Vector2(cellTopLeftPoint.X + Constants.CellSizeX, cellLeftPoint.Y);
+                    var cellBottomPoint = new Vector2(cellTopPoint.X, cellTopLeftPoint.Y + Constants.CellSizeY);
+
+                    DrawLine(cellTopPoint, cellLeftPoint, lineColor, 1);
+                    DrawLine(cellRightPoint, cellTopPoint, lineColor, 1);
+                    DrawLine(cellBottomPoint, cellLeftPoint, lineColor, 1);
+                    DrawLine(cellRightPoint, cellBottomPoint, lineColor, 1);
                 }
             }
         }
