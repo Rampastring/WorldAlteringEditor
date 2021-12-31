@@ -101,35 +101,41 @@ namespace TSMapEditor.UI
             {
                 var cursorPoint = GetCursorPoint();
 
-                if (cursorPoint.Y > 0 && cursorPoint.Y < ResizeDragThreshold && Cursor.LeftDown)
+                if (!isBeingDragged && cursorPoint.Y > 0 && cursorPoint.Y < ResizeDragThreshold && Cursor.LeftDown)
                 {
-                    if (isBeingDragged)
-                    {
-                        if (cursorPoint.Y < previousMouseY)
-                        {
-                            int difference = previousMouseY - cursorPoint.Y;
-                            Y -= difference;
-                            Height += difference;
-                        }
-                        else if (cursorPoint.Y > previousMouseY)
-                        {
-                            int difference = cursorPoint.Y - previousMouseY;
-                            Y += difference;
-                            Height -= difference;
-                        }
-                    }
-
                     isBeingDragged = true;
-
-                    previousMouseY = GetCursorPoint().Y;
-                }
-                else
-                {
-                    isBeingDragged = false;
                 }
             }
 
             base.OnMouseMove();
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+
+            if (isBeingDragged)
+            {
+                var cursorPoint = GetCursorPoint();
+
+                if (cursorPoint.Y < previousMouseY)
+                {
+                    int difference = previousMouseY - cursorPoint.Y;
+                    Y -= difference;
+                    Height += difference;
+                }
+                else if (cursorPoint.Y > previousMouseY)
+                {
+                    int difference = cursorPoint.Y - previousMouseY;
+                    Y += difference;
+                    Height -= difference;
+                }
+
+                previousMouseY = GetCursorPoint().Y;
+
+                if (!Cursor.LeftDown)
+                    isBeingDragged = false;
+            }
         }
 
         private void LbTileSetList_SelectedIndexChanged(object sender, EventArgs e)
