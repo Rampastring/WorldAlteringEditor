@@ -67,8 +67,6 @@ namespace TSMapEditor.UI
             BackgroundTexture = AssetLoader.CreateTexture(new Color(0, 0, 0, 196), 2, 2);
             PanelBackgroundDrawMode = PanelBackgroundImageDrawMode.STRETCHED;
 
-            Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
-
             KeyboardCommands.Instance.NextTile.Action = NextTile;
             KeyboardCommands.Instance.PreviousTile.Action = PreviousTile;
         }
@@ -129,15 +127,6 @@ namespace TSMapEditor.UI
                 selectedTileIndex = 0;
 
             SelectedTile = tilesInView[selectedTileIndex].TileImage;
-        }
-
-        private void Keyboard_OnKeyPressed(object sender, Rampastring.XNAUI.Input.KeyPressEventArgs e)
-        {
-            if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.D)
-            {
-                tSetId++;
-                SetTileSet(theaterGraphics.Theater.TileSets[tSetId]);
-            }
         }
 
         protected override void OnClientRectangleUpdated()

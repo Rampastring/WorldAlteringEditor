@@ -225,6 +225,7 @@
     <Compile Include="UI\Controls\EditorSuggestionTextBox.cs" />
     <Compile Include="UI\Controls\EditorTextBox.cs" />
     <Compile Include="UI\Controls\INItializableWindow.cs" />
+    <Compile Include="UI\Controls\ToolTip.cs" />
     <Compile Include="UI\CursorAction.cs" />
     <Compile Include="UI\CursorActions\AircraftPlacementAction.cs" />
     <Compile Include="UI\CursorActions\BuildingPlacementAction.cs" />
@@ -247,6 +248,7 @@
     <Compile Include="UI\KeyboardCommands.cs" />
     <Compile Include="UI\MainMenu.cs" />
     <Compile Include="UI\OverlayCollection.cs" />
+    <Compile Include="UI\OverlayFrameSelector.cs" />
     <Compile Include="UI\Parser.cs" />
     <Compile Include="UI\Sidebar\AircraftListPanel.cs" />
     <Compile Include="UI\Sidebar\BuildingListPanel.cs" />

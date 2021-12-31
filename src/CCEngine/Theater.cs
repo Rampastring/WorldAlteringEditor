@@ -1,4 +1,5 @@
 ﻿using Rampastring.Tools;
+using System;
 using System.Collections.Generic;
 using TSMapEditor.Models;
 
@@ -6,13 +7,15 @@ namespace TSMapEditor.CCEngine
 {
     public class LATGround
     {
-        public LATGround(TileSet groundTileSet, TileSet transitionTileSet, TileSet baseTileSet)
+        public LATGround(string displayName, TileSet groundTileSet, TileSet transitionTileSet, TileSet baseTileSet)
         {
+            DisplayName = displayName;
             GroundTileSet = groundTileSet;
             TransitionTileSet = transitionTileSet;
             BaseTileSet = baseTileSet;
         }
 
+        public string DisplayName { get; }
         public TileSet GroundTileSet { get; }
         public TileSet TransitionTileSet { get; }
         public TileSet BaseTileSet { get; }
@@ -71,13 +74,22 @@ namespace TSMapEditor.CCEngine
                 int groundTileSetIndex = theaterIni.GetIntValue("General", $"Ground{i}Tile", -1);
                 int transitionTileSetIndex = theaterIni.GetIntValue("General", $"Ground{i}Lat", -1);
                 int baseTileSetIndex = theaterIni.GetIntValue("General", $"Ground{i}Base", -1);
+                
                 if (groundTileSetIndex < 0 || transitionTileSetIndex < 0)
                     break;
 
                 if (groundTileSetIndex >= TileSets.Count || transitionTileSetIndex >= TileSets.Count)
                     break;
 
+                string displayName = theaterIni.GetStringValue("General", $"Ground{i}Name", null);
+                if (displayName == null)
+                {
+                    string groundTileSetName = TileSets[groundTileSetIndex].SetName;
+                    displayName = groundTileSetName.Substring(0, Math.Min(groundTileSetName.Length, 4));
+                }
+
                 LATGrounds.Add(new LATGround(
+                    displayName,
                     TileSets[groundTileSetIndex],
                     TileSets[transitionTileSetIndex],
                     baseTileSetIndex > -1 ? TileSets[baseTileSetIndex] : null));

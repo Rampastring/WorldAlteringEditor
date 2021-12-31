@@ -67,8 +67,8 @@ namespace TSMapEditor.UI.TopBar
             btnClearTerrain.Name = nameof(btnClearTerrain);
             btnClearTerrain.X = ddBrushSize.Right + Constants.UIHorizontalSpacing;
             btnClearTerrain.Y = ddBrushSize.Y;
-            btnClearTerrain.Width = 30;
-            btnClearTerrain.Text = "Clr";
+            btnClearTerrain.Width = 50;
+            btnClearTerrain.Text = "Clear";
             btnClearTerrain.LeftClick += BtnClearTerrain_LeftClick;
             AddChild(btnClearTerrain);
 
@@ -82,11 +82,15 @@ namespace TSMapEditor.UI.TopBar
                 btn.Name = "btn" + autoLATGround.GroundTileSet.SetName;
                 btn.X = prevRight + Constants.UIHorizontalSpacing;
                 btn.Y = ddBrushSize.Y;
-                btn.Width = 30;
-                btn.Text = autoLATGround.GroundTileSet.SetName.Substring(0, 2);
+                btn.Width = 50;
+                btn.Text = autoLATGround.DisplayName;
                 btn.Tag = autoLATGround;
                 btn.LeftClick += GroundButton_LeftClick;
                 AddChild(btn);
+
+                var toolTip = new ToolTip(WindowManager, btn);
+                toolTip.Text = autoLATGround.GroundTileSet.SetName;
+                toolTip.ToolTipDelay = 500;
 
                 prevRight = btn.Right;
             }
