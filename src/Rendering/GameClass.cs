@@ -84,20 +84,15 @@ namespace TSMapEditor.Rendering
             windowManager = new WindowManager(this, graphics);
             windowManager.Initialize(Content, Environment.CurrentDirectory + DSC + "Content" + DSC);
 
-            bool fullscreenWindowed = UserSettings.Instance.FullscreenWindowed.GetValue();
-            bool borderless = UserSettings.Instance.Borderless.GetValue();
-            if (fullscreenWindowed && !borderless)
-                throw new InvalidOperationException("Borderless= cannot be set to false if FullscreenWindowed= is enabled.");
+            const int menuWidth = 800;
+            const int menuHeight = 600;
 
-            windowManager.InitGraphicsMode(
-                UserSettings.Instance.ResolutionWidth.GetValue(),
-                UserSettings.Instance.ResolutionHeight.GetValue(),
-                fullscreenWindowed);
+            windowManager.InitGraphicsMode(menuWidth, menuHeight, false);
 
-            windowManager.SetRenderResolution(UserSettings.Instance.RenderResolutionWidth.GetValue(), UserSettings.Instance.RenderResolutionHeight.GetValue());
+            windowManager.SetRenderResolution(menuWidth, menuHeight);
             windowManager.CenterOnScreen();
             windowManager.Cursor.LoadNativeCursor(Environment.CurrentDirectory + DSC + "Content" + DSC + "cursor.cur");
-            windowManager.SetBorderlessMode(borderless);
+            windowManager.SetBorderlessMode(false);
 
             Components.Add(windowManager);
 

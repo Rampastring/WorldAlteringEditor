@@ -28,6 +28,9 @@ namespace TSMapEditor.UI
         private EditorTextBox tbMapPath;
         private EditorButton btnLoad;
         private EditorListBox lbFileList;
+
+        private SettingsPanel settingsPanel;
+
         private int loadingStage;
 
         string fileListDirectoryPath = string.Empty;
@@ -100,6 +103,13 @@ namespace TSMapEditor.UI
 
             Height = btnLoad.Bottom + Constants.UIEmptyBottomSpace;
 
+            settingsPanel = new SettingsPanel(WindowManager);
+            settingsPanel.Name = nameof(settingsPanel);
+            settingsPanel.X = Width;
+            settingsPanel.Y = Constants.UIEmptyTopSpace;
+            settingsPanel.Height = Height - Constants.UIEmptyTopSpace - Constants.UIEmptyBottomSpace;
+            AddChild(settingsPanel);
+            Width += settingsPanel.Width + Constants.UIEmptySideSpace;
 
             if (Path.IsPathRooted(tbMapPath.Text))
             {
@@ -252,8 +262,27 @@ namespace TSMapEditor.UI
 
             btnLoad.Text = "Loading";
             loadingStage = 1;
-            
+
+            settingsPanel.ApplySettings();
+
             UserSettings.Instance.LastScenarioPath.UserDefinedValue = tbMapPath.Text;
+
+            bool fullscreenWindowed = UserSettings.Instance.FullscreenWindowed.GetValue();
+            bool borderless = UserSettings.Instance.Borderless.GetValue();
+            if (fullscreenWindowed && !borderless)
+                throw new InvalidOperationException("Borderless= cannot be set to false if FullscreenWindowed= is enabled.");
+
+            WindowManager.InitGraphicsMode(
+                UserSettings.Instance.ResolutionWidth.GetValue(),
+                UserSettings.Instance.ResolutionHeight.GetValue(),
+                fullscreenWindowed);
+
+            WindowManager.SetRenderResolution(UserSettings.Instance.RenderResolutionWidth.GetValue(), UserSettings.Instance.RenderResolutionHeight.GetValue());
+            WindowManager.CenterOnScreen();
+            WindowManager.SetBorderlessMode(borderless);
+
+            WindowManager.CenterControlOnScreen(this);
+
             UserSettings.Instance.SaveSettings();
         }
 

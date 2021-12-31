@@ -250,6 +250,7 @@
     <Compile Include="UI\OverlayCollection.cs" />
     <Compile Include="UI\OverlayFrameSelector.cs" />
     <Compile Include="UI\Parser.cs" />
+    <Compile Include="UI\SettingsPanel.cs" />
     <Compile Include="UI\Sidebar\AircraftListPanel.cs" />
     <Compile Include="UI\Sidebar\BuildingListPanel.cs" />
     <Compile Include="UI\Sidebar\EditorSidebar.cs" />
