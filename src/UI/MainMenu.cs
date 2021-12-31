@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Microsoft.Win32;
+using Microsoft.Xna.Framework;
 using Rampastring.Tools;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
@@ -49,6 +50,10 @@ namespace TSMapEditor.UI
             tbGameDirectory.Y = lblGameDirectory.Bottom + Constants.UIVerticalSpacing;
             tbGameDirectory.Width = Width - Constants.UIEmptySideSpace * 2;
             tbGameDirectory.Text = UserSettings.Instance.GameDirectory;
+            if (string.IsNullOrWhiteSpace(tbGameDirectory.Text))
+            {
+                ReadGameInstallDirectoryFromRegistry();
+            }
             tbGameDirectory.TextChanged += TbGameDirectory_TextChanged;
             AddChild(tbGameDirectory);
 
@@ -110,6 +115,31 @@ namespace TSMapEditor.UI
             ListFiles();
 
             base.Initialize();
+        }
+
+        private void ReadGameInstallDirectoryFromRegistry()
+        {
+            try
+            {
+                RegistryKey key;
+                key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\DawnOfTheTiberiumAge");
+                object value = key.GetValue("InstallPath", string.Empty);
+                if (!(value is string valueAsString))
+                {
+                    tbGameDirectory.Text = string.Empty;
+                }
+                else
+                {
+                    tbGameDirectory.Text = valueAsString;
+                }
+
+                key.Close();
+            }
+            catch (Exception ex)
+            {
+                tbGameDirectory.Text = string.Empty;
+                Logger.Log("Failed to read game installation path from the Windows registry! Exception message: " + ex.Message);
+            }
         }
 
         private void LbFileList_SelectedIndexChanged(object sender, EventArgs e)
