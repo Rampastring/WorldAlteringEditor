@@ -619,6 +619,8 @@ namespace TSMapEditor.Rendering
 
                     cameraTopLeftPoint = new Point2D((int)cameraFloatTopLeftPoint.X,
                         (int)cameraFloatTopLeftPoint.Y);
+
+                    ConstrainCamera();
                 }
             }
 
@@ -721,6 +723,8 @@ namespace TSMapEditor.Rendering
                     cameraTopLeftPoint += new Point2D(0, -scrollRate);
                 else if (Keyboard.IsKeyHeldDown(Microsoft.Xna.Framework.Input.Keys.Down))
                     cameraTopLeftPoint += new Point2D(0, scrollRate);
+
+                ConstrainCamera();
             }
 
             Point2D cursorMapPoint = GetCursorMapPoint();
@@ -736,6 +740,37 @@ namespace TSMapEditor.Rendering
             }
             
             base.Update(gameTime);
+        }
+
+        private void ConstrainCamera()
+        {
+            int minX = -WindowManager.RenderResolutionX / 2;
+            if (cameraTopLeftPoint.X < minX)
+                cameraTopLeftPoint = new Point2D(minX, cameraTopLeftPoint.Y);
+
+            if (cameraFloatTopLeftPoint.X < minX)
+                cameraFloatTopLeftPoint = new Vector2(minX, cameraFloatTopLeftPoint.Y);
+
+            int minY = -WindowManager.RenderResolutionY / 2;
+            if (cameraTopLeftPoint.Y < minY)
+                cameraTopLeftPoint = new Point2D(cameraTopLeftPoint.X, minY);
+
+            if (cameraFloatTopLeftPoint.Y < minY)
+                cameraFloatTopLeftPoint = new Vector2(cameraFloatTopLeftPoint.X, minY);
+
+            int maxX = Map.Size.X * Constants.CellSizeX - WindowManager.RenderResolutionX / 2;
+            if (cameraTopLeftPoint.X > maxX)
+                cameraTopLeftPoint = new Point2D(maxX, cameraTopLeftPoint.Y);
+
+            if (cameraFloatTopLeftPoint.X > maxX)
+                cameraFloatTopLeftPoint = new Vector2(maxX, cameraFloatTopLeftPoint.Y);
+
+            int maxY = Map.Size.Y * Constants.CellSizeY - WindowManager.RenderResolutionY / 2;
+            if (cameraTopLeftPoint.Y > maxY)
+                cameraTopLeftPoint = new Point2D(cameraTopLeftPoint.X, maxY);
+
+            if (cameraFloatTopLeftPoint.Y > maxY)
+                cameraFloatTopLeftPoint = new Vector2(cameraFloatTopLeftPoint.X, maxY);
         }
 
         private Point2D GetCursorMapPoint()
