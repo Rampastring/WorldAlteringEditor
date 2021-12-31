@@ -896,7 +896,7 @@ namespace TSMapEditor.Rendering
                 }
                 else
                 {
-                    Color lineColor = new Color(96, 96, 96, 128);
+                    Color lineColor = new Color(96, 168, 96, 128);
                     Point2D cellTopLeftPoint = CellMath.CellTopLeftPoint(new Point2D(tileUnderCursor.X, tileUnderCursor.Y), Map.Size.X) - cameraTopLeftPoint;
 
                     var cellTopPoint = new Vector2(cellTopLeftPoint.X + Constants.CellSizeX / 2, cellTopLeftPoint.Y);
@@ -908,6 +908,14 @@ namespace TSMapEditor.Rendering
                     DrawLine(cellRightPoint, cellTopPoint, lineColor, 1);
                     DrawLine(cellBottomPoint, cellLeftPoint, lineColor, 1);
                     DrawLine(cellRightPoint, cellBottomPoint, lineColor, 1);
+
+                    var shadowColor = new Color(0, 0, 0, 128);
+                    var down = new Vector2(0, 1f);
+
+                    DrawLine(cellTopPoint + down, cellLeftPoint + down, shadowColor, 1);
+                    DrawLine(cellRightPoint + down, cellTopPoint + down, shadowColor, 1);
+                    DrawLine(cellBottomPoint + down, cellLeftPoint + down, shadowColor, 1);
+                    DrawLine(cellRightPoint + down, cellBottomPoint + down, shadowColor, 1);
                 }
             }
         }
