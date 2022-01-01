@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using System.Text;
 using Rampastring.Tools;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
@@ -79,6 +81,7 @@ namespace TSMapEditor.UI.Windows
             ddHouse = FindChild<XNADropDown>(nameof(ddHouse));
             ddType = FindChild<XNADropDown>(nameof(ddType));
             selAttachedTrigger = FindChild<EditorPopUpSelector>(nameof(selAttachedTrigger));
+            FindChild<EditorButton>("btnViewAttachedObjects").LeftClick += BtnViewAttachedObjects_LeftClick;
             chkDisabled = FindChild<XNACheckBox>(nameof(chkDisabled));
             chkEasy = FindChild<XNACheckBox>(nameof(chkEasy));
             chkMedium = FindChild<XNACheckBox>(nameof(chkMedium));
@@ -152,6 +155,91 @@ namespace TSMapEditor.UI.Windows
 
             lbTriggers.SelectedIndexChanged += LbTriggers_SelectedIndexChanged;
         }
+
+        #region Viewing linked objects
+
+        private void BtnViewAttachedObjects_LeftClick(object sender, EventArgs e)
+        {
+            if (editedTrigger == null)
+                return;
+
+            var tag = map.Tags.Find(t => t.Trigger == editedTrigger);
+            if (tag == null)
+            {
+                EditorMessageBox.Show(WindowManager, "No tag found", 
+                    $"The selected trigger '{editedTrigger.Name}' has no" +
+                    $"associated tag. As such, it is not attached to any objects.",
+                    MessageBoxButtons.OK);
+
+                return;
+            }
+
+            var objectList = new List<TechnoBase>();
+            map.Infantry.ForEach(inf => AddObjectToListIfLinkedToTag(inf, objectList, tag));
+            map.Units.ForEach(unit => AddObjectToListIfLinkedToTag(unit, objectList, tag));
+            map.Structures.ForEach(structure => AddObjectToListIfLinkedToTag(structure, objectList, tag));
+            map.Aircraft.ForEach(aircraft => AddObjectToListIfLinkedToTag(aircraft, objectList, tag));
+
+            var stringBuilder = new StringBuilder(Environment.NewLine + Environment.NewLine);
+
+            if (objectList.Count == 0)
+            {
+                stringBuilder.Append("No attached objects found." + Environment.NewLine);
+            }
+            else
+            {
+                objectList.ForEach(techno =>
+                {
+                    switch (techno.WhatAmI())
+                    {
+                        case RTTIType.Aircraft:
+                            AppendToStringBuilder((Aircraft)techno, stringBuilder);
+                            break;
+                        case RTTIType.Building:
+                            AppendToStringBuilder((Structure)techno, stringBuilder);
+                            break;
+                        case RTTIType.Infantry:
+                            AppendToStringBuilder((Infantry)techno, stringBuilder);
+                            break;
+                        case RTTIType.Unit:
+                            AppendToStringBuilder((Unit)techno, stringBuilder);
+                            break;
+                        default:
+                            throw new NotImplementedException("Unknown RTTI type encountered when listing linked objects for a trigger.");
+                    }
+                });
+            }
+
+            var celltag = map.CellTags.Find(ct => ct.Tag == tag);
+            if (celltag != null)
+            {
+                stringBuilder.Append(Environment.NewLine);
+                stringBuilder.Append("The trigger is linked to one or more celltags (first match at " + celltag.Position + ").");
+            }
+
+            EditorMessageBox.Show(WindowManager, "Linked Objects",
+                $"The selected trigger '{editedTrigger.Name}' is linked to the following objects: " + stringBuilder.ToString(),
+                MessageBoxButtons.OK);
+
+            return;
+        }
+
+        private void AppendToStringBuilder<T>(Techno<T> techno, StringBuilder stringBuilder) where T : GameObjectType
+        {
+            string rtti = techno.WhatAmI().ToString();
+            string name = techno.ObjectType.Name;
+            string position = techno.Position.ToString();
+
+            stringBuilder.Append($"{rtti}: {name} at {position}{Environment.NewLine}");
+        }
+
+        private void AddObjectToListIfLinkedToTag(TechnoBase techno, List<TechnoBase> technoList, Tag tag)
+        {
+            if (techno.AttachedTag == tag)
+                technoList.Add(techno);
+        }
+
+        #endregion
 
         private void BtnEventParameterValuePreset_LeftClick(object sender, EventArgs e)
         {
