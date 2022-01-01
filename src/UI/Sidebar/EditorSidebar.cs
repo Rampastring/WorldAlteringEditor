@@ -4,22 +4,27 @@ using Rampastring.XNAUI.XNAControls;
 using System;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
+using TSMapEditor.UI.CursorActions;
 
 namespace TSMapEditor.UI.Sidebar
 {
     public class EditorSidebar : EditorPanel
     {
-        public EditorSidebar(WindowManager windowManager, EditorState editorState, Map map, TheaterGraphics theaterGraphics, ICursorActionTarget cursorActionTarget) : base(windowManager)
+        public EditorSidebar(WindowManager windowManager, EditorState editorState, Map map,
+            TheaterGraphics theaterGraphics, ICursorActionTarget cursorActionTarget,
+            OverlayPlacementAction overlayPlacementAction) : base(windowManager)
         {
             this.editorState = editorState;
             this.map = map;
             this.theaterGraphics = theaterGraphics;
             this.cursorActionTarget = cursorActionTarget;
+            this.overlayPlacementAction = overlayPlacementAction;
         }
 
         private readonly EditorState editorState;
         private readonly Map map;
         private readonly TheaterGraphics theaterGraphics;
+        private readonly OverlayPlacementAction overlayPlacementAction;
 
         private XNAListBox lbSelection;
 
@@ -68,7 +73,7 @@ namespace TSMapEditor.UI.Sidebar
             terrainObjectListPanel.Name = nameof(terrainObjectListPanel);
             InitPanel(terrainObjectListPanel);
 
-            var overlayListPanel = new OverlayListPanel(WindowManager, editorState, map, theaterGraphics, cursorActionTarget);
+            var overlayListPanel = new OverlayListPanel(WindowManager, editorState, map, theaterGraphics, cursorActionTarget, overlayPlacementAction);
             overlayListPanel.Name = nameof(overlayListPanel);
             InitPanel(overlayListPanel);
 

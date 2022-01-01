@@ -16,13 +16,16 @@ namespace TSMapEditor.UI.Sidebar
     public class OverlayListPanel : XNAPanel, ISearchBoxContainer
     {
         public OverlayListPanel(WindowManager windowManager, EditorState editorState,
-            Map map, TheaterGraphics theaterGraphics, ICursorActionTarget cursorActionTarget) : base(windowManager)
+            Map map, TheaterGraphics theaterGraphics, ICursorActionTarget cursorActionTarget,
+            OverlayPlacementAction overlayPlacementAction) : base(windowManager)
         {
             EditorState = editorState;
             Map = map;
             TheaterGraphics = theaterGraphics;
             this.cursorActionTarget = cursorActionTarget;
+            this.overlayPlacementAction = overlayPlacementAction;
         }
+
 
         protected EditorState EditorState { get; }
         protected Map Map { get; }
@@ -32,9 +35,9 @@ namespace TSMapEditor.UI.Sidebar
         public TreeView ObjectTreeView { get; private set; }
 
         private readonly ICursorActionTarget cursorActionTarget;
+        private readonly OverlayPlacementAction overlayPlacementAction;
 
         private OverlayCollectionPlacementAction overlayCollectionPlacementAction;
-        private OverlayPlacementAction overlayPlacementAction;
 
         public override void Initialize()
         {
@@ -60,7 +63,6 @@ namespace TSMapEditor.UI.Sidebar
             base.Initialize();
 
             overlayCollectionPlacementAction = new OverlayCollectionPlacementAction(cursorActionTarget);
-            overlayPlacementAction = new OverlayPlacementAction(cursorActionTarget);
             ObjectTreeView.SelectedItemChanged += ObjectTreeView_SelectedItemChanged;
             overlayCollectionPlacementAction.ActionExited += (s, e) => ObjectTreeView.SelectedNode = null;
             overlayPlacementAction.ActionExited += (s, e) => ObjectTreeView.SelectedNode = null;

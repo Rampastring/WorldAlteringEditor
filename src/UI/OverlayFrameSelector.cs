@@ -27,14 +27,19 @@ namespace TSMapEditor.UI
 
     public class OverlayFrameSelector : XNAPanel
     {
-        private const int TILE_PADDING = 3;
+        private const int OVERLAY_FRAME_PADDING = 10;
         private const int SCROLL_RATE = 10;
 
-        public OverlayFrameSelector(WindowManager windowManager, TheaterGraphics theaterGraphics) : base(windowManager)
+        public OverlayFrameSelector(WindowManager windowManager, TheaterGraphics theaterGraphics, EditorState editorState) : base(windowManager)
         {
             this.theaterGraphics = theaterGraphics;
+            this.editorState = editorState;
             DrawMode = ControlDrawMode.UNIQUE_RENDER_TARGET;
         }
+
+        private readonly TheaterGraphics theaterGraphics;
+
+        private readonly EditorState editorState;
 
         public event EventHandler SelectedFrameChanged;
 
@@ -52,8 +57,6 @@ namespace TSMapEditor.UI
             }
         }
 
-        private readonly TheaterGraphics theaterGraphics;
-
         private OverlayType overlayType;
 
         private List<OverlayFrameSelectorFrame> framesInView = new List<OverlayFrameSelectorFrame>();
@@ -67,8 +70,8 @@ namespace TSMapEditor.UI
             BackgroundTexture = AssetLoader.CreateTexture(new Color(0, 0, 0, 196), 2, 2);
             PanelBackgroundDrawMode = PanelBackgroundImageDrawMode.STRETCHED;
 
-            KeyboardCommands.Instance.NextTile.Action = NextOverlayFrame;
-            KeyboardCommands.Instance.PreviousTile.Action = PreviousOverlayFrame;
+            KeyboardCommands.Instance.NextTile.Triggered += (s, e) => NextOverlayFrame();
+            KeyboardCommands.Instance.PreviousTile.Triggered += (s, e) => PreviousOverlayFrame();
         }
 
         /// <summary>
@@ -76,6 +79,9 @@ namespace TSMapEditor.UI
         /// </summary>
         private void NextOverlayFrame()
         {
+            if (!Enabled)
+                return;
+
             int selectedFrameIndex = SelectedFrameIndex;
 
             if (selectedFrameIndex < 0)
@@ -105,6 +111,9 @@ namespace TSMapEditor.UI
         /// </summary>
         private void PreviousOverlayFrame()
         {
+            if (!Enabled)
+                return;
+
             if (SelectedFrameIndex < 0)
             {
                 // If no frame is selected, then select the last frame
@@ -165,15 +174,18 @@ namespace TSMapEditor.UI
             {
                 var frame = textures.Frames[i];
 
-                int width = frame.ShapeWidth;
-                int height = frame.ShapeHeight;
+                if (frame == null)
+                    break;
+
+                int width = frame.Texture.Width;
+                int height = frame.Texture.Height;
 
                 if (x + width > usableWidth)
                 {
                     // Start a new line of tile graphics
 
                     x = Constants.UIEmptySideSpace;
-                    y += currentLineHeight + TILE_PADDING;
+                    y += currentLineHeight + OVERLAY_FRAME_PADDING;
                     CenterLine(tilesOnCurrentLine, currentLineHeight);
                     currentLineHeight = 0;
                     tilesOnCurrentLine.Clear();
@@ -184,7 +196,7 @@ namespace TSMapEditor.UI
 
                 if (height > currentLineHeight)
                     currentLineHeight = height;
-                x += width + TILE_PADDING;
+                x += width + OVERLAY_FRAME_PADDING;
                 tilesOnCurrentLine.Add(tileDisplayTile);
             }
 

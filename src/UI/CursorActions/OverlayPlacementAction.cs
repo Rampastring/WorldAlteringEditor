@@ -16,7 +16,22 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
-        public OverlayType OverlayType { get; set; }
+        public event EventHandler OverlayTypeChanged;
+
+        private OverlayType _overlayType;
+        public OverlayType OverlayType 
+        { 
+            get => _overlayType; 
+            set
+            {
+                if (_overlayType != value)
+                {
+                    _overlayType = value;
+                    OverlayTypeChanged?.Invoke(this, EventArgs.Empty);
+                }
+            } 
+        }
+
         public int? FrameIndex { get; set; }
 
         struct OriginalOverlayInfo

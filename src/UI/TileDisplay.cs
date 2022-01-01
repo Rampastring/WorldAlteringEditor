@@ -57,7 +57,6 @@ namespace TSMapEditor.UI
 
         private List<TileDisplayTile> tilesInView = new List<TileDisplayTile>();
 
-        private int tSetId = 0;
         private int viewY = 0;
 
         public override void Initialize()
@@ -76,6 +75,9 @@ namespace TSMapEditor.UI
         /// </summary>
         private void NextTile()
         {
+            if (!AppliesToSelfAndAllParents(c => c.Enabled))
+                return;
+
             int selectedTileIndex = tilesInView.FindIndex(t => t.TileImage == SelectedTile);
 
             if (SelectedTile == null || selectedTileIndex < 0)
@@ -105,6 +107,9 @@ namespace TSMapEditor.UI
         /// </summary>
         private void PreviousTile()
         {
+            if (!AppliesToSelfAndAllParents(c => c.Enabled))
+                return;
+
             int selectedTileIndex = tilesInView.FindIndex(t => t.TileImage == SelectedTile);
 
             if (SelectedTile == null || selectedTileIndex < 0)

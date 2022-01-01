@@ -27,6 +27,7 @@ namespace TSMapEditor.UI
 
         private MapView mapView;
         private TileSelector tileSelector;
+        private OverlayFrameSelector overlayFrameSelector;
         private EditorSidebar editorSidebar;
 
         private EditorState editorState;
@@ -35,6 +36,7 @@ namespace TSMapEditor.UI
         private TerrainPlacementAction terrainPlacementAction;
         private ChangeTechnoOwnerAction changeTechnoOwnerAction;
         private PlaceWaypointCursorAction placeWaypointCursorAction;
+        private OverlayPlacementAction overlayPlacementAction;
 
         private MutationManager mutationManager;
 
@@ -71,7 +73,9 @@ namespace TSMapEditor.UI
             changeTechnoOwnerAction = new ChangeTechnoOwnerAction(mapView);
             editorState.ObjectOwnerChanged += (s, e) => editorState.CursorAction = changeTechnoOwnerAction;
 
-            editorSidebar = new EditorSidebar(WindowManager, editorState, map, theaterGraphics, mapView);
+            overlayPlacementAction = new OverlayPlacementAction(mapView);
+
+            editorSidebar = new EditorSidebar(WindowManager, editorState, map, theaterGraphics, mapView, overlayPlacementAction);
             editorSidebar.Width = 250;
             editorSidebar.Y = Constants.UITopBarMenuHeight;
             editorSidebar.Height = WindowManager.RenderResolutionY - editorSidebar.Y;
@@ -82,9 +86,19 @@ namespace TSMapEditor.UI
             tileSelector.Width = WindowManager.RenderResolutionX - tileSelector.X;
             tileSelector.Height = 300;
             tileSelector.Y = WindowManager.RenderResolutionY - tileSelector.Height;
-            
             AddChild(tileSelector);
             tileSelector.TileDisplay.SelectedTileChanged += TileDisplay_SelectedTileChanged;
+            tileSelector.ClientRectangleUpdated += UpdateTileAndOverlaySelectorArea;
+
+            overlayFrameSelector = new OverlayFrameSelector(WindowManager, theaterGraphics, editorState);
+            overlayFrameSelector.X = editorSidebar.Right;
+            overlayFrameSelector.Width = tileSelector.Width;
+            overlayFrameSelector.Height = tileSelector.Height;
+            overlayFrameSelector.Y = tileSelector.Y;
+            AddChild(overlayFrameSelector);
+            overlayFrameSelector.SelectedFrameChanged += OverlayFrameSelector_SelectedFrameChanged;
+            overlayFrameSelector.ClientRectangleUpdated += UpdateTileAndOverlaySelectorArea;
+            overlayFrameSelector.Disable();
 
             tileInfoDisplay = new TileInfoDisplay(WindowManager, map, theaterGraphics);
             AddChild(tileInfoDisplay);
@@ -110,6 +124,66 @@ namespace TSMapEditor.UI
                 editorState.ObjectOwner = map.Houses[0];
 
             Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
+
+            editorState.CursorActionChanged += EditorState_CursorActionChanged;
+            overlayPlacementAction.OverlayTypeChanged += OverlayPlacementAction_OverlayTypeChanged;
+        }
+
+        private void OverlayPlacementAction_OverlayTypeChanged(object sender, EventArgs e)
+        {
+            if (overlayPlacementAction.OverlayType == null)
+            {
+                ShowTileSelector();
+                return;
+            }
+
+            ShowOverlayFrameSelector();
+            overlayFrameSelector.SetOverlayType(overlayPlacementAction.OverlayType);
+            return;
+        }
+
+        private void EditorState_CursorActionChanged(object sender, EventArgs e)
+        {
+            if (editorState.CursorAction == null)
+            {
+                ShowTileSelector();
+                return;
+            }
+
+            var overlayPlacementAction = editorState.CursorAction as OverlayPlacementAction;
+            if (overlayPlacementAction == null || overlayPlacementAction.OverlayType == null)
+            {
+                ShowTileSelector();
+                return;
+            }
+
+            ShowOverlayFrameSelector();
+        }
+
+        private void ShowTileSelector()
+        {
+            tileSelector.Enable();
+            overlayFrameSelector.Disable();
+        }
+
+        private void ShowOverlayFrameSelector()
+        {
+            tileSelector.Disable();
+            overlayFrameSelector.Enable();
+        }
+
+        private void UpdateTileAndOverlaySelectorArea(object sender, EventArgs e)
+        {
+            tileSelector.ClientRectangleUpdated -= UpdateTileAndOverlaySelectorArea;
+            overlayFrameSelector.ClientRectangleUpdated -= UpdateTileAndOverlaySelectorArea;
+
+            if (sender == tileSelector)
+                overlayFrameSelector.ClientRectangle = tileSelector.ClientRectangle;
+            else
+                tileSelector.ClientRectangle = overlayFrameSelector.ClientRectangle;
+
+            tileSelector.ClientRectangleUpdated += UpdateTileAndOverlaySelectorArea;
+            overlayFrameSelector.ClientRectangleUpdated += UpdateTileAndOverlaySelectorArea;
         }
 
         private void Keyboard_OnKeyPressed(object sender, Rampastring.XNAUI.Input.KeyPressEventArgs e)
@@ -156,6 +230,14 @@ namespace TSMapEditor.UI
         {
             mapView.CursorAction = terrainPlacementAction;
             terrainPlacementAction.Tile = tileSelector.TileDisplay.SelectedTile;
+        }
+
+        private void OverlayFrameSelector_SelectedFrameChanged(object sender, EventArgs e)
+        {
+            if (overlayFrameSelector.SelectedFrameIndex < 0)
+                overlayPlacementAction.FrameIndex = null;
+            else
+                overlayPlacementAction.FrameIndex = overlayFrameSelector.SelectedFrameIndex;
         }
 
         private void UndoAction()
