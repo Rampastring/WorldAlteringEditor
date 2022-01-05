@@ -177,7 +177,7 @@ namespace TSMapEditor.UI.Windows
             ddColor.SelectedIndex = ddColor.Items.FindIndex(item => item.Text == editedHouse.Color);
             ddTechnologyLevel.SelectedIndex = ddTechnologyLevel.Items.FindIndex(item => Conversions.IntFromString(item.Text, -1) == editedHouse.TechLevel);
             ddPercentBuilt.SelectedIndex = ddPercentBuilt.Items.FindIndex(item => Conversions.IntFromString(item.Text, -1) == editedHouse.PercentBuilt);
-            tbAllies.Text = editedHouse.Allies;
+            tbAllies.Text = editedHouse.Allies ?? "";
             tbMoney.Value = editedHouse.Credits;
             chkPlayerControl.Checked = editedHouse.PlayerControl;
 
