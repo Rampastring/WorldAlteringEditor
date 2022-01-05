@@ -330,6 +330,7 @@ namespace TSMapEditor.Rendering
             ObjectImage graphics = null;
             Color replacementColor = Color.Red;
             Color remapColor = Color.White;
+            Color foundationLineColor = Color.White;
             string iniName = string.Empty;
 
             // TODO refactor this to be more object-oriented
@@ -353,6 +354,7 @@ namespace TSMapEditor.Rendering
                     replacementColor = Color.Yellow;
                     iniName = structure.ObjectType.ININame;
                     remapColor = structure.ObjectType.ArtConfig.Remapable ? structure.Owner.XNAColor : remapColor;
+                    foundationLineColor = structure.Owner.XNAColor;
                     break;
                 case RTTIType.Unit:
                     var unit = (Unit)gameObject;
@@ -407,8 +409,6 @@ namespace TSMapEditor.Rendering
                     Point2D p2 = CellMath.CellTopLeftPoint(new Point2D(gameObject.Position.X + foundationX, gameObject.Position.Y), Map.Size.X) + new Point2D(Constants.CellSizeX / 2, 0);
                     Point2D p3 = CellMath.CellTopLeftPoint(new Point2D(gameObject.Position.X, gameObject.Position.Y + foundationY), Map.Size.X) + new Point2D(Constants.CellSizeX / 2, 0);
                     Point2D p4 = CellMath.CellTopLeftPoint(new Point2D(gameObject.Position.X + foundationX, gameObject.Position.Y + foundationY), Map.Size.X) + new Point2D(Constants.CellSizeX / 2, 0);
-
-                    Color foundationLineColor = remapColor;
 
                     DrawLine(p1.ToXNAVector(), p2.ToXNAVector(), foundationLineColor, 1);
                     DrawLine(p1.ToXNAVector(), p3.ToXNAVector(), foundationLineColor, 1);
