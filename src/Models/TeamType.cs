@@ -62,9 +62,12 @@ namespace TSMapEditor.Models
             // This cuts it for all properties of standard types
             WritePropertiesToIniSection(iniSection);
 
-            iniSection.SetStringValue("House", House.ININame);
-            iniSection.SetStringValue("Script", Script.ININame);
-            iniSection.SetStringValue("TaskForce", TaskForce.ININame);
+            if (House != null)
+                iniSection.SetStringValue("House", House.ININame);
+            if (Script != null)
+                iniSection.SetStringValue("Script", Script.ININame);
+            if (TaskForce != null)
+                iniSection.SetStringValue("TaskForce", TaskForce.ININame);
             if (Tag != null)
                 iniSection.SetStringValue("Tag", Tag.ID);
         }

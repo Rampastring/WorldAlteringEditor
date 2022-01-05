@@ -643,20 +643,18 @@ namespace TSMapEditor.Initialization
 
                 if (teamType.House == null)
                 {
-                    Logger.Log($"TeamType {teamType.ININame} has an invalid house ({houseIniName}) specified! Ignoring teamtype.");
-                    continue;
+                    Logger.Log($"TeamType {teamType.ININame} has an invalid house ({houseIniName}) specified!");
+                    return;
                 }
 
                 if (teamType.Script == null)
                 {
-                    Logger.Log($"TeamType {teamType.ININame} has an invalid script ({scriptId}) specified! Ignoring teamtype.");
-                    continue;
+                    Logger.Log($"TeamType {teamType.ININame} has an invalid script ({scriptId}) specified!");
                 }
 
                 if (teamType.TaskForce == null)
                 {
-                    Logger.Log($"TeamType {teamType.ININame} has an invalid TaskForce ({taskForceId}) specified! Ignoring teamtype.");
-                    continue;
+                    Logger.Log($"TeamType {teamType.ININame} has an invalid TaskForce ({taskForceId}) specified!");
                 }
 
                 map.AddTeamType(teamType);

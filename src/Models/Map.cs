@@ -656,7 +656,11 @@ namespace TSMapEditor.Models
             Rules = new Rules();
             Rules.InitFromINI(rulesIni, initializer);
 
-            StandardHouses = Rules.GetStandardHouses(rulesIni);
+            var editorRulesIni = new IniFile(Environment.CurrentDirectory + "/Config/EditorRules.ini");
+
+            StandardHouses = Rules.GetStandardHouses(editorRulesIni);
+            if (StandardHouses.Count == 0)
+                StandardHouses = Rules.GetStandardHouses(rulesIni);
 
             if (firestormIni != null)
             {

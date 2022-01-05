@@ -115,6 +115,10 @@ namespace TSMapEditor.Models
 
         private void InitHouse(IniFile iniFile, House house)
         {
+            var section = iniFile.GetSection(house.ININame);
+            if (section == null)
+                return;
+
             house.ReadPropertiesFromIniSection(iniFile.GetSection(house.ININame));
             //house.Name = iniFile.GetStringValue(house.ININame, "Name", house.ININame);
             //house.Color = iniFile.GetStringValue(house.ININame, "Color", "Grey");
