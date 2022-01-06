@@ -36,7 +36,7 @@
 
             if (rx + ry * 2 < Constants.CellSizeY)
                 cx--;
-            else if (rx + ry > Constants.CellSizeX)
+            else if (rx + 2 * (ry - (Constants.CellSizeY / 2)) > Constants.CellSizeX)
                 cx++;
             else if (rx > Constants.CellSizeY + ry * 2)
                 cy--;
