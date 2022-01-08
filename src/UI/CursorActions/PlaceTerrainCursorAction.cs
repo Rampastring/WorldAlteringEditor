@@ -7,9 +7,9 @@ using TSMapEditor.Rendering;
 
 namespace TSMapEditor.UI.CursorActions
 {
-    public class TerrainPlacementAction : CursorAction
+    public class PlaceTerrainCursorAction : CursorAction
     {
-        public TerrainPlacementAction(ICursorActionTarget cursorActionTarget) : base(cursorActionTarget)
+        public PlaceTerrainCursorAction(ICursorActionTarget cursorActionTarget) : base(cursorActionTarget)
         {
         }
 
@@ -17,7 +17,7 @@ namespace TSMapEditor.UI.CursorActions
 
         private Point2D GetAdjustedCellCoords(Point2D cellCoords)
         {
-            if (KeyboardCommands.Instance.PlaceTerrainBelow.AreKeysDownOrModifiersDownWithNoPrimaryKeySpecified(CursorActionTarget.WindowManager.Keyboard))
+            if (KeyboardCommands.Instance.PlaceTerrainBelow.AreKeysOrModifiersDown(CursorActionTarget.WindowManager.Keyboard))
                 return cellCoords;
 
             // Don't place the tile where the user is pointing the cursor to,
@@ -85,7 +85,8 @@ namespace TSMapEditor.UI.CursorActions
 
             Mutation mutation = null;
 
-            if (CursorActionTarget.WindowManager.Keyboard.IsCtrlHeldDown() && (Tile.Width == 1 && Tile.Height == 1))
+            if (KeyboardCommands.Instance.FillTerrain.AreKeysOrModifiersDown(CursorActionTarget.WindowManager.Keyboard)
+                && (Tile.Width == 1 && Tile.Height == 1))
             {
                 var targetCell = CursorActionTarget.Map.GetTile(adjustedCellCoords);
 

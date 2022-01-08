@@ -25,12 +25,40 @@ namespace TSMapEditor.UI
         public Keys Key;
         public KeyboardModifiers Modifiers;
 
-        public string GetKeyNameString()
+        public string GetKeyDisplayString(bool allowModifiersOnly)
         {
-            if (Key == Keys.None)
-                return "<no hotkey>";
-
             string key = "";
+
+            if (Key == Keys.None)
+            {
+                if (!allowModifiersOnly || Modifiers == KeyboardModifiers.None)
+                    return "<no hotkey>";
+
+                // Build a different kind of string when there's only modifiers
+
+                if ((Modifiers & KeyboardModifiers.Ctrl) == KeyboardModifiers.Ctrl)
+                    key += "CTRL";
+
+                if ((Modifiers & KeyboardModifiers.Shift) == KeyboardModifiers.Shift)
+                {
+                    if (key.Length > 0)
+                        key += "+ Shift";
+                    else
+                        key += "Shift";
+                }
+
+                if ((Modifiers & KeyboardModifiers.Alt) == KeyboardModifiers.Alt)
+                {
+                    if (key.Length > 0)
+                        key += "+ Alt";
+                    else
+                        key += "Alt";
+                }
+
+                return key;
+            }
+
+            // Add modifiers to key display string
             if ((Modifiers & KeyboardModifiers.Ctrl) == KeyboardModifiers.Ctrl)
                 key += "CTRL + ";
 
@@ -74,10 +102,11 @@ namespace TSMapEditor.UI
 
     public class KeyboardCommand
     {
-        public KeyboardCommand(string iniName, string uiName, KeyboardCommandInput defaultKey)
+        public KeyboardCommand(string iniName, string uiName, KeyboardCommandInput defaultKey, bool allowedWithModifiersOnly = false)
         {
             ININame = iniName;
             UIName = uiName;
+            AllowedWithModifiersOnly = allowedWithModifiersOnly;
             DefaultKey = defaultKey;
             Key = new KeyboardCommandInput(defaultKey.Key, defaultKey.Modifiers);
         }
@@ -86,8 +115,10 @@ namespace TSMapEditor.UI
 
         public string ININame { get; }
         public string UIName { get; }
+        public bool AllowedWithModifiersOnly { get; }
         public KeyboardCommandInput DefaultKey { get; }
         public KeyboardCommandInput Key { get; set; }
+        
 
         private Action action;
         public Action Action
@@ -105,6 +136,11 @@ namespace TSMapEditor.UI
         public void DoTrigger()
         {
             Triggered?.Invoke(this, EventArgs.Empty);
+        }
+
+        public string GetKeyDisplayString()
+        {
+            return Key.GetKeyDisplayString(AllowedWithModifiersOnly);
         }
 
         private bool AreModifiersDown(RKeyboard keyboard)
@@ -146,11 +182,11 @@ namespace TSMapEditor.UI
         /// and only the key modifiers determine whether the key is held down.
         /// 
         /// If the primary key is None and no modifiers are specified,
-        /// this function behaves will always return False.
+        /// this function returns False regardless of the state of the user's keyboard.
         /// </summary>
         /// <param name="keyboard">The Rampastring.XNAUI RKeyboard instance.</param>
         /// <returns>True if the keys are currently held down, otherwise false.</returns>
-        public bool AreKeysDownOrModifiersDownWithNoPrimaryKeySpecified(RKeyboard keyboard)
+        public bool AreKeysOrModifiersDown(RKeyboard keyboard)
         {
             if (Key.Key == Keys.None)
             {

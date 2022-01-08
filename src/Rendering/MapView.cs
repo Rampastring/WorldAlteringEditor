@@ -803,7 +803,7 @@ namespace TSMapEditor.Rendering
 
                 foreach (KeyboardCommand command in KeyboardCommands.Instance.Commands)
                 {
-                    text.Append(command.UIName + ": " + command.Key.GetKeyNameString());
+                    text.Append(command.UIName + ": " + command.GetKeyDisplayString());
                     text.Append(Environment.NewLine);
                 }
 

@@ -33,7 +33,7 @@ namespace TSMapEditor.UI
         private EditorState editorState;
         private TileInfoDisplay tileInfoDisplay;
 
-        private TerrainPlacementAction terrainPlacementAction;
+        private PlaceTerrainCursorAction placeTerrainCursorAction;
         private ChangeTechnoOwnerAction changeTechnoOwnerAction;
         private PlaceWaypointCursorAction placeWaypointCursorAction;
         private OverlayPlacementAction overlayPlacementAction;
@@ -68,7 +68,7 @@ namespace TSMapEditor.UI
             mapView.Height = WindowManager.RenderResolutionY;
             AddChild(mapView);
 
-            terrainPlacementAction = new TerrainPlacementAction(mapView);
+            placeTerrainCursorAction = new PlaceTerrainCursorAction(mapView);
             placeWaypointCursorAction = new PlaceWaypointCursorAction(mapView);
             changeTechnoOwnerAction = new ChangeTechnoOwnerAction(mapView);
             editorState.ObjectOwnerChanged += (s, e) => editorState.CursorAction = changeTechnoOwnerAction;
@@ -110,7 +110,7 @@ namespace TSMapEditor.UI
             topBarMenu.Width = editorSidebar.Width;
 
             var topBarControlMenu = new TopBarControlMenu(WindowManager, map, theaterGraphics,
-                map.EditorConfig, editorState, terrainPlacementAction, placeWaypointCursorAction);
+                map.EditorConfig, editorState, placeTerrainCursorAction, placeWaypointCursorAction);
             topBarControlMenu.X = topBarMenu.Right;
             topBarControlMenu.Width = 500;
             AddChild(topBarControlMenu);
@@ -228,8 +228,8 @@ namespace TSMapEditor.UI
 
         private void TileDisplay_SelectedTileChanged(object sender, EventArgs e)
         {
-            mapView.CursorAction = terrainPlacementAction;
-            terrainPlacementAction.Tile = tileSelector.TileDisplay.SelectedTile;
+            mapView.CursorAction = placeTerrainCursorAction;
+            placeTerrainCursorAction.Tile = tileSelector.TileDisplay.SelectedTile;
         }
 
         private void OverlayFrameSelector_SelectedFrameChanged(object sender, EventArgs e)

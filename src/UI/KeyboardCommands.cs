@@ -26,6 +26,7 @@ namespace TSMapEditor.UI
                 ToggleAutoLAT,
                 RotateUnit,
                 PlaceTerrainBelow,
+                FillTerrain,
 
                 AircraftMenu,
                 BuildingMenu,
@@ -80,8 +81,8 @@ namespace TSMapEditor.UI
         public KeyboardCommand DeleteObject { get; } = new KeyboardCommand("DeleteObject", "Delete Object", new KeyboardCommandInput(Keys.Delete, KeyboardModifiers.None));
         public KeyboardCommand ToggleAutoLAT { get; } = new KeyboardCommand("ToggleAutoLAT", "Toggle AutoLAT", new KeyboardCommandInput(Keys.L, KeyboardModifiers.Ctrl));
         public KeyboardCommand RotateUnit { get; } = new KeyboardCommand("RotateUnit", "Rotate Unit", new KeyboardCommandInput(Keys.A, KeyboardModifiers.None));
-        public KeyboardCommand PlaceTerrainBelow { get; } = new KeyboardCommand("PlaceTerrainBelow", "Place Terrain Below Cursor", new KeyboardCommandInput(Keys.None, KeyboardModifiers.Alt));
-
+        public KeyboardCommand PlaceTerrainBelow { get; } = new KeyboardCommand("PlaceTerrainBelow", "Place Terrain Below Cursor", new KeyboardCommandInput(Keys.None, KeyboardModifiers.Alt), true);
+        public KeyboardCommand FillTerrain { get; } = new KeyboardCommand("FillTerrain", "Fill Terrain (1x1 tiles only)", new KeyboardCommandInput(Keys.None, KeyboardModifiers.Ctrl), true);
 
         public KeyboardCommand AircraftMenu { get; } = new KeyboardCommand("AircraftMenu", "Aircraft Menu", new KeyboardCommandInput(Keys.D1, KeyboardModifiers.None));
         public KeyboardCommand BuildingMenu { get; } = new KeyboardCommand("BuildingMenu", "Building Menu", new KeyboardCommandInput(Keys.D2, KeyboardModifiers.None));

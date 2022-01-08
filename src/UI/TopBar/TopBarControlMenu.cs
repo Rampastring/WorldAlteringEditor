@@ -18,7 +18,7 @@ namespace TSMapEditor.UI.TopBar
     {
         public TopBarControlMenu(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics,
             EditorConfig editorConfig, EditorState editorState,
-            TerrainPlacementAction terrainPlacementAction,
+            PlaceTerrainCursorAction terrainPlacementAction,
             PlaceWaypointCursorAction placeWaypointCursorAction) : base(windowManager)
         {
             this.map = map;
@@ -33,7 +33,7 @@ namespace TSMapEditor.UI.TopBar
         private readonly TheaterGraphics theaterGraphics;
         private readonly EditorConfig editorConfig;
         private readonly EditorState editorState;
-        private readonly TerrainPlacementAction terrainPlacementAction;
+        private readonly PlaceTerrainCursorAction terrainPlacementAction;
         private readonly PlaceWaypointCursorAction placeWaypointCursorAction;
 
         private XNADropDown ddBrushSize;
