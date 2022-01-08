@@ -5,7 +5,7 @@
     /// </summary>
     public static class CellMath
     {
-        public static Point2D CellTopLeftPoint(Point2D cellCoords, int mapWidth)
+        public static Point2D CellTopLeftPointFromCellCoords(Point2D cellCoords, int mapWidth)
         {
             int cx = (cellCoords.X - 1) * (Constants.CellSizeX / 2);
             int cy = (cellCoords.X - 1) * (Constants.CellSizeY / 2);
@@ -15,6 +15,9 @@
             cy -= diff * (Constants.CellSizeY / 2);
             return new Point2D(cx, cy);
         }
+
+        public static Point2D CellCenterPointFromCellCoords(Point2D cellCoords, int mapWidth)
+            => CellTopLeftPointFromCellCoords(cellCoords, mapWidth) + new Point2D(Constants.CellSizeX / 2, Constants.CellSizeY / 2);
 
         public static Point2D CellCoordsFromPixelCoords(Point2D pixelCoords, Point2D mapSize)
         {
@@ -43,7 +46,7 @@
             else if (rx < (ry - Constants.CellSizeY / 2) * 2)
                 cy++;
 
-            return new Point2D(cx + 1, cy);
+            return new Point2D(cx, cy);
         }
     }
 }

@@ -15,6 +15,22 @@ namespace TSMapEditor.UI.CursorActions
 
         public TileImage Tile { get; set; }
 
+        private Point2D GetAdjustedCellCoords(Point2D cellCoords)
+        {
+            if (KeyboardCommands.Instance.PlaceTerrainBelow.AreKeysDownOrModifiersDownWithNoPrimaryKeySpecified(CursorActionTarget.WindowManager.Keyboard))
+                return cellCoords;
+
+            // Don't place the tile where the user is pointing the cursor to,
+            // but slightly above it - FinalSun also does this to not obstruct
+            // the user's map view with the cursor
+            int height = Tile.GetHeight();
+            int cellHeight = height / Constants.CellSizeY;
+
+            Point2D newCellCoords = cellCoords - new Point2D(cellHeight, cellHeight);
+
+            return newCellCoords;
+        }
+
         public override void PreMapDraw(Point2D cellCoords)
         {
             // Assign preview data
@@ -32,6 +48,8 @@ namespace TSMapEditor.UI.CursorActions
             if (Tile == null)
                 return;
 
+            Point2D adjustedCellCoords = GetAdjustedCellCoords(cellCoords);
+
             BrushSize brush = CursorActionTarget.BrushSize;
 
             brush.DoForBrushSize(offset =>
@@ -43,8 +61,8 @@ namespace TSMapEditor.UI.CursorActions
                     if (image.TmpImage == null)
                         continue;
 
-                    int cx = cellCoords.X + (offset.X * Tile.Width) + i % Tile.Width;
-                    int cy = cellCoords.Y + (offset.Y * Tile.Height) + i / Tile.Width;
+                    int cx = adjustedCellCoords.X + (offset.X * Tile.Width) + i % Tile.Width;
+                    int cy = adjustedCellCoords.Y + (offset.Y * Tile.Height) + i / Tile.Width;
 
                     var mapTile = CursorActionTarget.Map.GetTile(cx, cy);
                     if (mapTile != null)
@@ -55,7 +73,7 @@ namespace TSMapEditor.UI.CursorActions
                 }
             });
 
-            CursorActionTarget.AddRefreshPoint(cellCoords, Math.Max(Tile.Width, Tile.Height) * Math.Max(brush.Width, brush.Height));
+            CursorActionTarget.AddRefreshPoint(adjustedCellCoords, Math.Max(Tile.Width, Tile.Height) * Math.Max(brush.Width, brush.Height));
         }
 
         public override void LeftDown(Point2D cellCoords)
@@ -63,15 +81,22 @@ namespace TSMapEditor.UI.CursorActions
             if (Tile == null)
                 return;
 
+            Point2D adjustedCellCoords = GetAdjustedCellCoords(cellCoords);
+
             Mutation mutation = null;
 
             if (CursorActionTarget.WindowManager.Keyboard.IsCtrlHeldDown() && (Tile.Width == 1 && Tile.Height == 1))
             {
-                mutation = new FillTerrainAreaMutation(CursorActionTarget.MutationTarget, CursorActionTarget.Map.GetTile(cellCoords), Tile);
+                var targetCell = CursorActionTarget.Map.GetTile(adjustedCellCoords);
+
+                if (targetCell != null)
+                {
+                    mutation = new FillTerrainAreaMutation(CursorActionTarget.MutationTarget, targetCell, Tile);
+                }
             }
             else
             {
-                mutation = new PlaceTerrainTileMutation(CursorActionTarget.MutationTarget, CursorActionTarget.Map.GetTile(cellCoords), Tile);
+                mutation = new PlaceTerrainTileMutation(CursorActionTarget.MutationTarget, adjustedCellCoords, Tile);
             }
 
             CursorActionTarget.MutationManager.PerformMutation(mutation);

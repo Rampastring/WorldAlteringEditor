@@ -107,6 +107,20 @@ namespace TSMapEditor.UI
             Triggered?.Invoke(this, EventArgs.Empty);
         }
 
+        private bool AreModifiersDown(RKeyboard keyboard)
+        {
+            if ((Key.Modifiers & KeyboardModifiers.Alt) == KeyboardModifiers.Alt && !keyboard.IsAltHeldDown())
+                return false;
+
+            if ((Key.Modifiers & KeyboardModifiers.Ctrl) == KeyboardModifiers.Ctrl && !keyboard.IsCtrlHeldDown())
+                return false;
+
+            if ((Key.Modifiers & KeyboardModifiers.Shift) == KeyboardModifiers.Shift && !keyboard.IsShiftHeldDown())
+                return false;
+
+            return true;
+        }
+
         /// <summary>
         /// Checks if the keys of this command are held down.
         /// </summary>
@@ -120,16 +134,33 @@ namespace TSMapEditor.UI
             if (!keyboard.IsKeyHeldDown(Key.Key))
                 return false;
 
-            if ((Key.Modifiers & KeyboardModifiers.Alt) == KeyboardModifiers.Alt && !keyboard.IsAltHeldDown())
-                return false;
-
-            if ((Key.Modifiers & KeyboardModifiers.Ctrl) == KeyboardModifiers.Ctrl && !keyboard.IsCtrlHeldDown())
-                return false;
-
-            if ((Key.Modifiers & KeyboardModifiers.Shift) == KeyboardModifiers.Shift && !keyboard.IsShiftHeldDown())
+            if (!AreModifiersDown(keyboard))
                 return false;
 
             return true;
+        }
+
+        /// <summary>
+        /// Checks if the keys of this command are held down.
+        /// If the primary key of this command is None, it's ignored
+        /// and only the key modifiers determine whether the key is held down.
+        /// 
+        /// If the primary key is None and no modifiers are specified,
+        /// this function behaves will always return False.
+        /// </summary>
+        /// <param name="keyboard">The Rampastring.XNAUI RKeyboard instance.</param>
+        /// <returns>True if the keys are currently held down, otherwise false.</returns>
+        public bool AreKeysDownOrModifiersDownWithNoPrimaryKeySpecified(RKeyboard keyboard)
+        {
+            if (Key.Key == Keys.None)
+            {
+                if (Key.Modifiers == KeyboardModifiers.None)
+                    return false;
+            }
+            else
+                return AreKeysDown(keyboard);
+
+            return AreModifiersDown(keyboard);
         }
     }
 }

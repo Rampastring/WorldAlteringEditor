@@ -26,7 +26,7 @@ namespace TSMapEditor.UI.CursorActions
         public override void DrawPreview(Point2D cellCoords, Point2D cameraTopLeftPoint)
         {
             MapTile tile = CursorActionTarget.Map.GetTile(cellCoords);
-            Point2D cellTopLeftPoint = CellMath.CellTopLeftPoint(cellCoords, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
+            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cellCoords, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
 
             Renderer.FillRectangle(new Rectangle(cellTopLeftPoint.X, cellTopLeftPoint.Y, Constants.CellSizeX, Constants.CellSizeY),
                 Color.LimeGreen * 0.5f);

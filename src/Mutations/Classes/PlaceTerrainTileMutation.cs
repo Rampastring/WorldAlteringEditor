@@ -13,9 +13,9 @@ namespace TSMapEditor.Mutations.Classes
     /// </summary>
     public class PlaceTerrainTileMutation : Mutation
     {
-        public PlaceTerrainTileMutation(IMutationTarget mutationTarget, MapTile target, TileImage tile) : base(mutationTarget)
+        public PlaceTerrainTileMutation(IMutationTarget mutationTarget, Point2D targetCellCoords, TileImage tile) : base(mutationTarget)
         {
-            this.target = target;
+            this.targetCellCoords = targetCellCoords;
             this.tile = tile;
             this.brushSize = mutationTarget.BrushSize;
         }
@@ -34,14 +34,14 @@ namespace TSMapEditor.Mutations.Classes
             public Point2D CellCoords;
         }
 
-        private readonly MapTile target;
+        private readonly Point2D targetCellCoords;
         private readonly TileImage tile;
         private readonly BrushSize brushSize;
         private OriginalTerrainData[] undoData;
 
         private void AddUndoData(List<OriginalTerrainData> undoData, Point2D offset)
         {
-            var mapTile = MutationTarget.Map.GetTile(target.CoordsToPoint() + offset);
+            var mapTile = MutationTarget.Map.GetTile(targetCellCoords + offset);
             if (mapTile != null)
             {
                 undoData.Add(new OriginalTerrainData(mapTile.TileIndex, mapTile.SubTileIndex, mapTile.CoordsToPoint()));
@@ -79,8 +79,8 @@ namespace TSMapEditor.Mutations.Classes
                     if (image.TmpImage == null)
                         continue;
 
-                    int cx = target.X + (offset.X * tile.Width) + i % tile.Width;
-                    int cy = target.Y + (offset.Y * tile.Height) + i / tile.Width;
+                    int cx = targetCellCoords.X + (offset.X * tile.Width) + i % tile.Width;
+                    int cy = targetCellCoords.Y + (offset.Y * tile.Height) + i / tile.Width;
 
                     var mapTile = MutationTarget.Map.GetTile(cx, cy);
                     if (mapTile != null)
@@ -117,7 +117,7 @@ namespace TSMapEditor.Mutations.Classes
 
                 brushSize.DoForBrushSizeAndSurroundings(offset =>
                 {
-                    var mapTile = MutationTarget.Map.GetTile(target.CoordsToPoint() + offset);
+                    var mapTile = MutationTarget.Map.GetTile(targetCellCoords + offset);
                     if (mapTile == null)
                         return;
 
@@ -150,7 +150,7 @@ namespace TSMapEditor.Mutations.Classes
             }
 
             this.undoData = undoData.ToArray();
-            MutationTarget.AddRefreshPoint(target.CoordsToPoint(), Math.Max(tile.Width, tile.Height) * Math.Max(brushSize.Width, brushSize.Height));
+            MutationTarget.AddRefreshPoint(targetCellCoords, Math.Max(tile.Width, tile.Height) * Math.Max(brushSize.Width, brushSize.Height));
         }
 
         public override void Undo()
@@ -168,7 +168,7 @@ namespace TSMapEditor.Mutations.Classes
                 }
             }
 
-            MutationTarget.AddRefreshPoint(target.CoordsToPoint());
+            MutationTarget.AddRefreshPoint(targetCellCoords);
         }
     }
 }
