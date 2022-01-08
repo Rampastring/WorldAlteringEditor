@@ -217,7 +217,9 @@ namespace TSMapEditor.UI
             var directories = Directory.GetDirectories(fileListDirectoryPath);
             foreach (string dir in directories)
             {
-                string dirName = dir.Substring(dir.LastIndexOf(Path.DirectorySeparatorChar) + 1);
+                string dirName = dir;
+                dirName = dirName.Substring(dirName.LastIndexOf(Path.DirectorySeparatorChar) + 1);
+                dirName = dirName.Substring(dirName.LastIndexOf(Path.AltDirectorySeparatorChar) + 1);
                 lbFileList.AddItem(new XNAListBoxItem(DirectoryPrefix + dirName, Color.LightGray) { Tag = new object() }); // Yay for wasting memory
             }
 
