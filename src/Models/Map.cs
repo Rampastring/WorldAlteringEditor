@@ -14,6 +14,8 @@ namespace TSMapEditor.Models
 {
     public class Map : IMap
     {
+        public event EventHandler HousesChanged;
+
         public IniFile LoadedINI { get; set; }
 
         public Rules Rules { get; private set; }
@@ -307,6 +309,32 @@ namespace TSMapEditor.Models
         public void AddTeamType(TeamType teamType)
         {
             TeamTypes.Add(teamType);
+        }
+
+        public void AddHouses(List<House> houses)
+        {
+            if (houses.Count > 0)
+            {
+                Houses.AddRange(houses);
+                HousesChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        public void AddHouse(House house)
+        {
+            Houses.Add(house);
+            HousesChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        public bool DeleteHouse(House house)
+        {
+            if (Houses.Remove(house))
+            {
+                HousesChanged?.Invoke(this, EventArgs.Empty);
+                return true;
+            }
+
+            return false;
         }
 
         public void PlaceBuilding(Structure structure)

@@ -11,9 +11,12 @@ namespace TSMapEditor.Models
     /// </summary>
     public class EditorConfig
     {
-        public EditorConfig() { }
+        public EditorConfig() 
+        {
+            EditorRulesIni = new IniFile(Environment.CurrentDirectory + "/Config/EditorRules.ini");
+        }
         
-
+        public IniFile EditorRulesIni { get; }
         public List<OverlayCollection> OverlayCollections { get; } = new List<OverlayCollection>();
         public List<BrushSize> BrushSizes { get; } = new List<BrushSize>() { new BrushSize(1, 1) };
         public List<ScriptAction> ScriptActions { get; } = new List<ScriptAction>();

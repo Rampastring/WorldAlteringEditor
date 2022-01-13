@@ -2,6 +2,7 @@
 using Rampastring.Tools;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
+using System;
 using System.Linq;
 using TSMapEditor.Models;
 using TSMapEditor.UI.Controls;
@@ -35,6 +36,8 @@ namespace TSMapEditor.UI.Windows
         private XNACheckBox chkPlayerControl;
 
         private House editedHouse;
+
+        private GenerateStandardHousesWindow generateStandardHousesWindow;
 
         public override void Initialize()
         {
@@ -70,9 +73,19 @@ namespace TSMapEditor.UI.Windows
 
             FindChild<EditorButton>("btnAddHouse").LeftClick += BtnAddHouse_LeftClick;
             FindChild<EditorButton>("btnDeleteHouse").LeftClick += BtnDeleteHouse_LeftClick;
+            FindChild<EditorButton>("btnStandardHouses").LeftClick += BtnStandardHouses_LeftClick;
 
             ddHouseOfHumanPlayer.SelectedIndexChanged += DdHouseOfHumanPlayer_SelectedIndexChanged;
             lbHouseList.SelectedIndexChanged += LbHouseList_SelectedIndexChanged;
+
+            generateStandardHousesWindow = new GenerateStandardHousesWindow(WindowManager, map);
+            var darkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, generateStandardHousesWindow);
+            darkeningPanel.Hidden += DarkeningPanel_Hidden;
+        }
+
+        private void DarkeningPanel_Hidden(object sender, EventArgs e)
+        {
+            ListHouses();
         }
 
         private void DdHouseOfHumanPlayer_SelectedIndexChanged(object sender, System.EventArgs e)
@@ -88,7 +101,7 @@ namespace TSMapEditor.UI.Windows
 
         private void BtnAddHouse_LeftClick(object sender, System.EventArgs e)
         {
-            map.Houses.Add(new House("NewHouse") 
+            map.AddHouse(new House("NewHouse") 
             { 
                 ActsLike = 0,
                 Allies = "NewHouse",
@@ -112,12 +125,27 @@ namespace TSMapEditor.UI.Windows
         {
             if (editedHouse != null)
             {
-                if (map.Houses.Remove(editedHouse))
+                if (map.DeleteHouse(editedHouse))
                 {
                     ListHouses();
                     lbHouseList.SelectedIndex = -1;
                 }
             }
+        }
+
+        private void BtnStandardHouses_LeftClick(object sender, System.EventArgs e)
+        {
+            if (map.Houses.Count > 0)
+            {
+                EditorMessageBox.Show(WindowManager,
+                    "Houses already exist",
+                    "Cannot generate standard because the map already has one or more houses specified." + Environment.NewLine + Environment.NewLine +
+                    "If you want to generate standard houses, please delete the existing houses first.", MessageBoxButtons.OK);
+
+                return;
+            }
+
+            generateStandardHousesWindow.Open();
         }
 
         private void LbHouseList_SelectedIndexChanged(object sender, System.EventArgs e)

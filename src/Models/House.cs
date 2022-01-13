@@ -16,7 +16,7 @@ namespace TSMapEditor.Models
         public string ININame { get; set; }
         public int IQ { get; set; }
         public string Edge { get; set; }
-        public string Color { get; set; }
+        public string Color { get; set; } = "White";
         public string Allies { get; set; }
         public int Credits { get; set; }
         public int ActsLike { get; set; } = -1;
@@ -27,6 +27,6 @@ namespace TSMapEditor.Models
         public int ID { get; set; }
 
         [INI(false)]
-        public Color XNAColor { get; set; }
+        public Color XNAColor { get; set; } = Microsoft.Xna.Framework.Color.White;
     }
 }

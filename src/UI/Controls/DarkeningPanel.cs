@@ -109,12 +109,21 @@ namespace TSMapEditor.UI.Controls
             }
         }
 
-        public static void AddAndInitializeWithControl(WindowManager wm, XNAControl control)
+        public static void AddAndInitializeWithControl(WindowManager wm, XNAControl control, bool display)
         {
             var dp = new DarkeningPanel(wm);
             wm.AddAndInitializeControl(dp);
             dp.AddChild(control);
-            dp.Show();
+
+            if (display)
+            {
+                dp.Show();
+            }
+            else
+            {
+                dp.Hide();
+                dp.Disable();
+            }
         }
 
         public static DarkeningPanel InitializeAndAddToParentControlWithChild(WindowManager windowManager, XNAControl parent, XNAControl child)

@@ -96,7 +96,12 @@ namespace TSMapEditor.Models
 
         public List<House> GetStandardHouses(IniFile iniFile)
         {
-            var housesSection = iniFile.GetSection("Houses");
+            return GetHousesFrom(iniFile, "Houses");
+        }
+
+        public List<House> GetHousesFrom(IniFile iniFile, string sectionName)
+        {
+            var housesSection = iniFile.GetSection(sectionName);
             if (housesSection == null)
                 return new List<House>(0);
 

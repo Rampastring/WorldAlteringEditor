@@ -187,7 +187,7 @@ namespace TSMapEditor.UI.Windows
                 Renderer.FixText(Renderer.GetSafeString(description, 0), 0, windowManager.RenderResolutionX).Text,
                 messageBoxButtons);
 
-            DarkeningPanel.AddAndInitializeWithControl(windowManager, msgBox);
+            DarkeningPanel.AddAndInitializeWithControl(windowManager, msgBox, true);
             return msgBox;
         }
     }
