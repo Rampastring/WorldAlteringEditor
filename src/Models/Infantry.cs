@@ -16,7 +16,7 @@
         public override int GetFrameIndex(int frameCount)
         {
             if (ObjectType.ArtConfig.Sequence == null)
-                return -1;
+                return 0;
 
             var readySequence = ObjectType.ArtConfig.Sequence.Ready;
             int frame = readySequence.StartFrame + ((Facing / 32) * readySequence.FacingMultiplier * readySequence.FrameCount);
