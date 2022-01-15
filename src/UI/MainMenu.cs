@@ -312,10 +312,9 @@ namespace TSMapEditor.UI
             IniFile firestormIni = new IniFile(Path.Combine(gameDirectory, "INI/Enhance.ini"));
             IniFile artIni = new IniFile(Path.Combine(gameDirectory, "INI/Art.ini"));
             IniFile artFSIni = new IniFile(Path.Combine(gameDirectory, "INI/ArtE.INI"));
-            IniFile fsaIni = new IniFile(Path.Combine(gameDirectory, "INI/FSA.INI"));
-            IniFile.ConsolidateIniFiles(artFSIni, fsaIni);
+            IniFile artOverridesIni = new IniFile(Path.Combine(Environment.CurrentDirectory, "Config/ArtOverrides.ini"));
+            IniFile.ConsolidateIniFiles(artFSIni, artOverridesIni);
             IniFile mapIni = new IniFile(Path.Combine(gameDirectory, mapPath));
-            //IniFile mapIni = new IniFile(Path.Combine(GameDirectory, "Maps/Default/a_buoyant_city.map"));
             Map map = new Map();
             map.LoadExisting(rulesIni, firestormIni, artIni, artFSIni, mapIni);
 
