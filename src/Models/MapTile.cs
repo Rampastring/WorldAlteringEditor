@@ -33,6 +33,15 @@ namespace TSMapEditor.Models
             Infantry[(int)infantry.SubCell] = infantry;
         }
 
+        public void DoForAllInfantry(Action<Infantry> action)
+        {
+            for (int i = 0; i < Infantry.Length; i++)
+            {
+                if (Infantry[i] != null)
+                    action(Infantry[i]);
+            }
+        }
+
         public SubCell GetFreeSubCellSpot()
         {
             if (GetInfantryFromSubCellSpot(SubCell.Bottom) == null)

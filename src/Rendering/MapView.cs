@@ -120,20 +120,30 @@ namespace TSMapEditor.Rendering
         /// A list of cells that have been invalidated.
         /// Areas around these cells are to be redrawn.
         /// </summary>
-        private List<RefreshPoint> refreshes = new List<RefreshPoint>();
+        //private List<RefreshPoint> refreshes = new List<RefreshPoint>();
+
+        private List<Refresh> newRefreshes = new List<Refresh>();
 
         private CopyTerrainCursorAction copyTerrainCursorAction;
         private PasteTerrainCursorAction pasteTerrainCursorAction;
 
         public void AddRefreshPoint(Point2D point, int size = 10)
         {
-            if (!mapInvalidated)
-                refreshes.Add(new RefreshPoint(point, size));
+            // if (!mapInvalidated)
+            //     refreshes.Add(new RefreshPoint(point, size));
+
+            if (mapInvalidated)
+                return;
+
+            var newRefresh = new Refresh(Map);
+            newRefresh.RedrawFromCell(size, point);
+            newRefreshes.Add(newRefresh);
         }
 
         public void InvalidateMap()
         {
-            refreshes.Clear();
+            // refreshes.Clear();
+            newRefreshes.Clear();
             mapInvalidated = true;
         }
 
@@ -961,11 +971,48 @@ namespace TSMapEditor.Rendering
                 CursorAction.PreMapDraw(tileUnderCursor.CoordsToPoint());
             }
 
-            foreach (var refresh in refreshes)
+            if (newRefreshes.Count > 0)
             {
-                RefreshOverArea(refresh);
+                Renderer.PushRenderTarget(mapRenderTarget);
+
+                foreach (var refresh in newRefreshes)
+                {
+                    var overlaysToRedraw = new List<Overlay>();
+                    var waypointsToRedraw = new List<Waypoint>();
+                    var cellTagsToRedraw = new List<CellTag>();
+
+                    foreach (var kvp in refresh.tilesToRedraw)
+                    {
+                        MapTile tile = kvp.Value;
+                        DrawTerrainTile(tile);
+
+                        if (tile.Overlay != null)
+                            overlaysToRedraw.Add(tile.Overlay);
+                        if (tile.Waypoint != null)
+                            waypointsToRedraw.Add(tile.Waypoint);
+                        if (tile.CellTag != null)
+                            cellTagsToRedraw.Add(tile.CellTag);
+                    }
+
+                    overlaysToRedraw.ForEach(o => DrawObject(o));
+                    var sortedObjects = refresh.objectsToRedraw.Select(kvp => kvp.Value).OrderBy(go => go.GetYPositionForDrawOrder()).ThenBy(go => go.GetXPositionForDrawOrder()).ToArray();
+                    Array.ForEach(sortedObjects, obj => DrawObject(obj));
+                    waypointsToRedraw.ForEach(wp => DrawWaypoint(wp));
+                    cellTagsToRedraw.ForEach(ct => DrawCellTag(ct));
+                }
+
+                DrawMapBorder();
+                Renderer.PopRenderTarget();
+
+                newRefreshes.Clear();
             }
-            refreshes.Clear();
+
+
+            // foreach (var refresh in refreshes)
+            // {
+            //     RefreshOverArea(refresh);
+            // }
+            // refreshes.Clear();
 
             DrawTexture(mapRenderTarget, new Rectangle(cameraTopLeftPoint.X, cameraTopLeftPoint.Y,
                 Width, Height), new Rectangle(0, 0, Width, Height), Color.White);
