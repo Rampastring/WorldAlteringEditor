@@ -87,12 +87,19 @@ namespace TSMapEditor.Models
             EditorConfig.Init(Rules);
         }
 
-        public void InitNew(IniFile rulesIni, IniFile firestormIni, IniFile artIni, IniFile artFirestormIni)
+        public void InitNew(IniFile rulesIni, IniFile firestormIni, IniFile artIni, IniFile artFirestormIni, string theaterName, Point2D size)
         {
+            const int marginY = 6;
+            const int marginX = 4;
+
             Initialize(rulesIni, firestormIni, artIni, artFirestormIni);
             LoadedINI = new IniFile();
-            Rules.InitFromINI(LoadedINI, initializer, true);
-            InitEditorConfig();
+            var baseMap = new IniFile(Environment.CurrentDirectory + "/Config/BaseMap.ini");
+            baseMap.FileName = string.Empty;
+            baseMap.SetStringValue("Map", "Theater", theaterName);
+            baseMap.SetStringValue("Map", "Size", $"0,0,{size.X},{size.Y}");
+            baseMap.SetStringValue("Map", "LocalSize", $"{marginX},{marginY},{size.X - (marginX * 2)},{size.Y - (marginY * 2)}");
+            LoadExisting(rulesIni, firestormIni, artIni, artFirestormIni, baseMap);
             SetTileData(null);
         }
 
