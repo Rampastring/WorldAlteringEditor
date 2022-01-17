@@ -37,27 +37,38 @@ namespace TSMapEditor.Mutations.Classes
         private readonly Point2D targetCellCoords;
         private readonly TileImage tile;
         private readonly BrushSize brushSize;
-        private OriginalTerrainData[] undoData;
+        private List<OriginalTerrainData> undoData;
 
-        private void AddUndoData(List<OriginalTerrainData> undoData, Point2D offset)
+        private void AddUndoDataForTile(Point2D brushOffset)
         {
-            var mapTile = MutationTarget.Map.GetTile(targetCellCoords + offset);
-            if (mapTile != null)
+            for (int i = 0; i < tile.TMPImages.Length; i++)
             {
-                undoData.Add(new OriginalTerrainData(mapTile.TileIndex, mapTile.SubTileIndex, mapTile.CoordsToPoint()));
+                MGTMPImage image = tile.TMPImages[i];
+
+                if (image.TmpImage == null)
+                    continue;
+
+                int cx = targetCellCoords.X + (brushOffset.X * tile.Width) + i % tile.Width;
+                int cy = targetCellCoords.Y + (brushOffset.Y * tile.Height) + i / tile.Width;
+
+                var mapTile = MutationTarget.Map.GetTile(cx, cy);
+                if (mapTile != null && !undoData.Exists(otd => otd.CellCoords.X == cx && otd.CellCoords.Y == cy))
+                {
+                    undoData.Add(new OriginalTerrainData(mapTile.TileIndex, mapTile.SubTileIndex, mapTile.CoordsToPoint()));
+                }
             }
         }
 
         public override void Perform()
         {
-            var undoData = new List<OriginalTerrainData>();
+            undoData = new List<OriginalTerrainData>(tile.TMPImages.Length * brushSize.Width * brushSize.Height);
 
             // Get un-do data
             if (MutationTarget.AutoLATEnabled)
             {
                 brushSize.DoForBrushSizeAndSurroundings(offset =>
                 {
-                    AddUndoData(undoData, offset);
+                    AddUndoDataForTile(offset);
                 });
             }
             else
@@ -65,7 +76,7 @@ namespace TSMapEditor.Mutations.Classes
                 // We don't need to include the surrounding tiles when AutoLAT is disabled
                 brushSize.DoForBrushSize(offset =>
                 {
-                    AddUndoData(undoData, offset);
+                    AddUndoDataForTile(offset);
                 });
             }
 
@@ -149,13 +160,12 @@ namespace TSMapEditor.Mutations.Classes
                 });
             }
 
-            this.undoData = undoData.ToArray();
             MutationTarget.AddRefreshPoint(targetCellCoords, Math.Max(tile.Width, tile.Height) * Math.Max(brushSize.Width, brushSize.Height));
         }
 
         public override void Undo()
         {
-            for (int i = 0; i < undoData.Length; i++)
+            for (int i = 0; i < undoData.Count; i++)
             {
                 OriginalTerrainData originalTerrainData = undoData[i];
 
