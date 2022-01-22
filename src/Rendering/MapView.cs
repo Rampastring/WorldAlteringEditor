@@ -819,6 +819,12 @@ namespace TSMapEditor.Rendering
 
                 EditorMessageBox.Show(WindowManager, "Hotkey Help", text.ToString(), MessageBoxButtons.OK);
             }
+
+            if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.F12)
+            {
+                var mmw = new MegamapWindow(WindowManager, mapRenderTarget);
+                WindowManager.AddAndInitializeControl(mmw);
+            }
         }
 
         private void DrawCursorTile()
