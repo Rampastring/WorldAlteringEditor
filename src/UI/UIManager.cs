@@ -43,8 +43,6 @@ namespace TSMapEditor.UI
 
         public override void Initialize()
         {
-            new Parser(WindowManager);
-
             Name = nameof(UIManager);
 
             UISettings.ActiveSettings.PanelBackgroundColor = new Color(0, 0, 0, 128);

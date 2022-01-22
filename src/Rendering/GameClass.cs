@@ -84,6 +84,8 @@ namespace TSMapEditor.Rendering
             windowManager = new WindowManager(this, graphics);
             windowManager.Initialize(Content, Environment.CurrentDirectory + DSC + "Content" + DSC);
 
+            new Parser(windowManager);
+
             const int menuWidth = 800;
             const int menuHeight = 600;
 

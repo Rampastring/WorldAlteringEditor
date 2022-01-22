@@ -27,6 +27,8 @@ namespace TSMapEditor.GameMath
         public static Point2D FromXNAPoint(Point point)
             => new Point2D(point.X, point.Y);
 
+        public static Point2D Zero => new Point2D(0, 0);
+
         public Vector2 ToXNAVector() => new Vector2(X, Y);
 
         public override int GetHashCode()

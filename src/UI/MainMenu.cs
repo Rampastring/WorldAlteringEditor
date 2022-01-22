@@ -6,11 +6,13 @@ using Rampastring.XNAUI.XNAControls;
 using System;
 using System.IO;
 using TSMapEditor.CCEngine;
+using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 using TSMapEditor.Settings;
 using TSMapEditor.UI.Controls;
 using TSMapEditor.UI.Windows;
+using TSMapEditor.UI.Windows.MainMenuWindows;
 
 namespace TSMapEditor.UI
 {
@@ -97,9 +99,18 @@ namespace TSMapEditor.UI
             btnLoad.Width = 100;
             btnLoad.Text = "Load";
             btnLoad.Y = lbFileList.Bottom + Constants.UIEmptyTopSpace;
+            btnLoad.X = lbFileList.Right - btnLoad.Width;
             AddChild(btnLoad);
-            btnLoad.CenterOnParentHorizontally();
             btnLoad.LeftClick += BtnLoad_LeftClick;
+
+            var btnCreateNewMap = new EditorButton(WindowManager);
+            btnCreateNewMap.Name = nameof(btnCreateNewMap);
+            btnCreateNewMap.Width = 100;
+            btnCreateNewMap.Text = "New Map...";
+            btnCreateNewMap.X = lbFileList.X;
+            btnCreateNewMap.Y = btnLoad.Y;
+            AddChild(btnCreateNewMap);
+            btnCreateNewMap.LeftClick += BtnCreateNewMap_LeftClick;
 
             Height = btnLoad.Bottom + Constants.UIEmptyBottomSpace;
 
@@ -125,6 +136,16 @@ namespace TSMapEditor.UI
             ListFiles();
 
             base.Initialize();
+        }
+
+        private void BtnCreateNewMap_LeftClick(object sender, EventArgs e)
+        {
+            if (!CheckGameDirectory())
+                return;
+
+            ApplySettings();
+            WindowManager.RemoveControl(this);
+            WindowManager.AddAndInitializeControl(new CreateNewMapWindow(WindowManager, gameDirectory));
         }
 
         private void ReadGameInstallDirectoryFromRegistry()
@@ -230,7 +251,7 @@ namespace TSMapEditor.UI
             }
         }
 
-        private void BtnLoad_LeftClick(object sender, EventArgs e)
+        private bool CheckGameDirectory()
         {
             if (!File.Exists(Path.Combine(tbGameDirectory.Text, "DTA.exe")))
             {
@@ -239,32 +260,18 @@ namespace TSMapEditor.UI
                     "DTA.exe not found, please check that you typed the correct game directory.",
                     MessageBoxButtons.OK);
 
-                return;
+                return false;
             }
 
             gameDirectory = tbGameDirectory.Text;
             if (!gameDirectory.EndsWith("/") && !gameDirectory.EndsWith("\\"))
                 gameDirectory += "/";
 
-            UserSettings.Instance.GameDirectory.UserDefinedValue = gameDirectory;
+            return true;
+        }
 
-            string mapPath = Path.Combine(gameDirectory, tbMapPath.Text);
-            if (Path.IsPathRooted(tbMapPath.Text))
-                mapPath = tbMapPath.Text;
-
-            if (!File.Exists(mapPath))
-            {
-                EditorMessageBox.Show(WindowManager,
-                    "Invalid map path",
-                    "Specified map file not found. Please re-check the path to the map file.",
-                    MessageBoxButtons.OK);
-
-                return;
-            }
-
-            btnLoad.Text = "Loading";
-            loadingStage = 1;
-
+        private void ApplySettings()
+        {
             settingsPanel.ApplySettings();
 
             UserSettings.Instance.LastScenarioPath.UserDefinedValue = tbMapPath.Text;
@@ -288,10 +295,37 @@ namespace TSMapEditor.UI
             UserSettings.Instance.SaveSettings();
         }
 
+        private void BtnLoad_LeftClick(object sender, EventArgs e)
+        {
+            if (!CheckGameDirectory())
+                return;
+
+            UserSettings.Instance.GameDirectory.UserDefinedValue = gameDirectory;
+
+            string mapPath = Path.Combine(gameDirectory, tbMapPath.Text);
+            if (Path.IsPathRooted(tbMapPath.Text))
+                mapPath = tbMapPath.Text;
+
+            if (!File.Exists(mapPath))
+            {
+                EditorMessageBox.Show(WindowManager,
+                    "Invalid map path",
+                    "Specified map file not found. Please re-check the path to the map file.",
+                    MessageBoxButtons.OK);
+
+                return;
+            }
+
+            btnLoad.Text = "Loading";
+            loadingStage = 1;
+
+            ApplySettings();
+        }
+
         public override void Update(GameTime gameTime)
         {
             if (loadingStage > 2)
-                InitTest(tbMapPath.Text);
+                LoadExisting(tbMapPath.Text);
 
             base.Update(gameTime);
         }
@@ -306,39 +340,9 @@ namespace TSMapEditor.UI
             }
         }
 
-        private void InitTest(string mapPath)
+        private void LoadExisting(string mapPath)
         {
-            IniFile rulesIni = new IniFile(Path.Combine(gameDirectory, "INI/Rules.ini"));
-            IniFile firestormIni = new IniFile(Path.Combine(gameDirectory, "INI/Enhance.ini"));
-            IniFile artIni = new IniFile(Path.Combine(gameDirectory, "INI/Art.ini"));
-            IniFile artFSIni = new IniFile(Path.Combine(gameDirectory, "INI/ArtE.INI"));
-            IniFile artOverridesIni = new IniFile(Path.Combine(Environment.CurrentDirectory, "Config/ArtOverrides.ini"));
-            IniFile.ConsolidateIniFiles(artFSIni, artOverridesIni);
-            IniFile mapIni = new IniFile(Path.Combine(gameDirectory, mapPath));
-            Map map = new Map();
-            map.LoadExisting(rulesIni, firestormIni, artIni, artFSIni, mapIni);
-
-            Console.WriteLine();
-            Console.WriteLine("Map loaded.");
-
-            var theater = map.EditorConfig.Theaters.Find(t => t.UIName.Equals(map.TheaterName, StringComparison.InvariantCultureIgnoreCase));
-            if (theater == null)
-            {
-                throw new InvalidOperationException("Theater of map not found: " + map.TheaterName);
-            }
-            theater.ReadConfigINI(gameDirectory);
-
-            CCFileManager ccFileManager = new CCFileManager();
-            ccFileManager.GameDirectory = gameDirectory;
-            ccFileManager.ReadConfig();
-            ccFileManager.LoadPrimaryMixFile(theater.ContentMIXName);
-
-            TheaterGraphics theaterGraphics = new TheaterGraphics(GraphicsDevice, theater, ccFileManager, map.Rules);
-            map.TheaterInstance = theaterGraphics;
-
-            var uiManager = new UIManager(WindowManager, map, theaterGraphics);
-            WindowManager.AddAndInitializeControl(uiManager);
-
+            MapSetup.InitializeMap(WindowManager, gameDirectory, false, mapPath, null, Point2D.Zero);
             WindowManager.RemoveControl(this);
         }
     }

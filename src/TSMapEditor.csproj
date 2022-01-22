@@ -90,6 +90,9 @@
     <None Include="Config\UI\BasicSectionConfigWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Config\UI\CreateNewMapWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Config\UI\GenerateStandardHousesWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -289,6 +292,8 @@
     <Compile Include="UI\Windows\HousesWindow.cs" />
     <Compile Include="UI\Windows\InfantryOptionsWindow.cs" />
     <Compile Include="UI\Windows\LocalVariablesWindow.cs" />
+    <Compile Include="UI\Windows\MainMenuWindows\MapSetup.cs" />
+    <Compile Include="UI\Windows\MegamapWindow.cs" />
     <Compile Include="UI\Windows\PlaceWaypointWindow.cs" />
     <Compile Include="UI\Windows\ScriptsWindow.cs" />
     <Compile Include="UI\Windows\SelectActionWindow.cs" />
@@ -384,6 +389,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="UI\Windows\MainMenuWindows\CreateNewMapWindow.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
