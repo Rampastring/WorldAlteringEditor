@@ -19,7 +19,8 @@ namespace TSMapEditor.UI.TopBar
         public TopBarControlMenu(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics,
             EditorConfig editorConfig, EditorState editorState,
             PlaceTerrainCursorAction terrainPlacementAction,
-            PlaceWaypointCursorAction placeWaypointCursorAction) : base(windowManager)
+            PlaceWaypointCursorAction placeWaypointCursorAction,
+            DeletionModeAction deletionModeAction) : base(windowManager)
         {
             this.map = map;
             this.theaterGraphics = theaterGraphics;
@@ -27,6 +28,7 @@ namespace TSMapEditor.UI.TopBar
             this.editorState = editorState;
             this.terrainPlacementAction = terrainPlacementAction;
             this.placeWaypointCursorAction = placeWaypointCursorAction;
+            this.deletionModeAction = deletionModeAction;
         }
 
         private readonly Map map;
@@ -35,6 +37,7 @@ namespace TSMapEditor.UI.TopBar
         private readonly EditorState editorState;
         private readonly PlaceTerrainCursorAction terrainPlacementAction;
         private readonly PlaceWaypointCursorAction placeWaypointCursorAction;
+        private readonly DeletionModeAction deletionModeAction;
 
         private XNADropDown ddBrushSize;
         private XNACheckBox chkAutoLat;
@@ -108,10 +111,19 @@ namespace TSMapEditor.UI.TopBar
             btnPlaceWaypoint.Name = nameof(btnPlaceWaypoint);
             btnPlaceWaypoint.X = Constants.UIEmptySideSpace;
             btnPlaceWaypoint.Y = ddBrushSize.Bottom + Constants.UIVerticalSpacing;
-            btnPlaceWaypoint.Width = 100;
+            btnPlaceWaypoint.Width = 120;
             btnPlaceWaypoint.Text = "Place Waypoint";
             btnPlaceWaypoint.LeftClick += BtnPlaceWaypoint_LeftClick;
             AddChild(btnPlaceWaypoint);
+
+            var btnDeletionMode = new EditorButton(WindowManager);
+            btnDeletionMode.Name = nameof(btnDeletionMode);
+            btnDeletionMode.X = btnPlaceWaypoint.Right + Constants.UIHorizontalSpacing;
+            btnDeletionMode.Y = btnPlaceWaypoint.Y;
+            btnDeletionMode.Width = btnPlaceWaypoint.Width;
+            btnDeletionMode.Text = "Deletion Mode";
+            btnDeletionMode.LeftClick += BtnDeletionMode_LeftClick;
+            AddChild(btnDeletionMode);
 
             Height = btnPlaceWaypoint.Bottom + Constants.UIEmptyBottomSpace;
 
@@ -122,6 +134,11 @@ namespace TSMapEditor.UI.TopBar
             base.Initialize();
 
             editorState.AutoLATEnabledChanged += EditorState_AutoLATEnabledChanged;
+        }
+
+        private void BtnDeletionMode_LeftClick(object sender, EventArgs e)
+        {
+            editorState.CursorAction = deletionModeAction;
         }
 
         private void BtnPlaceWaypoint_LeftClick(object sender, EventArgs e)

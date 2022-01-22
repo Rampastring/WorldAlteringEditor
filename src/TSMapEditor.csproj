@@ -247,6 +247,7 @@
     <Compile Include="UI\CursorActions\BuildingPlacementAction.cs" />
     <Compile Include="UI\CursorActions\ChangeTechnoOwnerAction.cs" />
     <Compile Include="UI\CursorActions\CopyTerrainCursorAction.cs" />
+    <Compile Include="UI\CursorActions\DeletionModeAction.cs" />
     <Compile Include="UI\CursorActions\InfantryPlacementAction.cs" />
     <Compile Include="UI\CursorActions\OverlayCollectionPlacementAction.cs" />
     <Compile Include="UI\CursorActions\OverlayPlacementAction.cs" />

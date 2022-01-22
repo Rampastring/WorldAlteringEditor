@@ -69,6 +69,7 @@ namespace TSMapEditor.UI
             placeTerrainCursorAction = new PlaceTerrainCursorAction(mapView);
             placeWaypointCursorAction = new PlaceWaypointCursorAction(mapView);
             changeTechnoOwnerAction = new ChangeTechnoOwnerAction(mapView);
+            var deletionModeCursorAction = new DeletionModeAction(mapView);
             editorState.ObjectOwnerChanged += (s, e) => editorState.CursorAction = changeTechnoOwnerAction;
 
             overlayPlacementAction = new OverlayPlacementAction(mapView);
@@ -108,7 +109,7 @@ namespace TSMapEditor.UI
             topBarMenu.Width = editorSidebar.Width;
 
             var topBarControlMenu = new TopBarControlMenu(WindowManager, map, theaterGraphics,
-                map.EditorConfig, editorState, placeTerrainCursorAction, placeWaypointCursorAction);
+                map.EditorConfig, editorState, placeTerrainCursorAction, placeWaypointCursorAction, deletionModeCursorAction);
             topBarControlMenu.X = topBarMenu.Right;
             topBarControlMenu.Width = 500;
             AddChild(topBarControlMenu);

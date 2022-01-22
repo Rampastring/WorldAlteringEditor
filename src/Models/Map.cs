@@ -522,6 +522,58 @@ namespace TSMapEditor.Models
             return cell.CanAddObject(gameObject);
         }
 
+        public void DeleteObjectFromCell(Point2D cellCoords)
+        {
+            var tile = GetTile(cellCoords.X, cellCoords.Y);
+            if (tile == null)
+                return;
+
+            for (int i = 0; i < tile.Infantry.Length; i++)
+            {
+                if (tile.Infantry[i] != null)
+                {
+                    RemoveInfantry(tile.Infantry[i]);
+                    return;
+                }
+            }
+
+            if (tile.Aircraft != null)
+            {
+                RemoveAircraft(tile.Aircraft);
+                return;
+            }
+
+            if (tile.Vehicle != null)
+            {
+                RemoveUnit(tile.Vehicle);
+                return;
+            }
+
+            if (tile.Structure != null)
+            {
+                RemoveBuilding(tile.Structure);
+                return;
+            }
+
+            if (tile.TerrainObject != null)
+            {
+                RemoveTerrainObject(tile.CoordsToPoint());
+                return;
+            }
+
+            if (tile.CellTag != null)
+            {
+                RemoveCellTagFrom(tile.CoordsToPoint());
+                return;
+            }
+
+            if (tile.Waypoint != null)
+            {
+                RemoveWaypoint(tile.Waypoint);
+                return;
+            }
+        }
+
         public int GetOverlayFrameIndex(Point2D cellCoords)
         {
             var cell = GetTile(cellCoords);

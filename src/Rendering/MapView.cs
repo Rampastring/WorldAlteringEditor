@@ -746,7 +746,7 @@ namespace TSMapEditor.Rendering
             if (IsActive && tileUnderCursor != null)
             {
                 if (KeyboardCommands.Instance.DeleteObject.AreKeysDown(Keyboard))
-                    DeleteObjectFromTile(tileUnderCursor.CoordsToPoint());
+                    DeleteObjectFromCell(tileUnderCursor.CoordsToPoint());
             }
             
             base.Update(gameTime);
@@ -910,58 +910,14 @@ namespace TSMapEditor.Rendering
             }
         }
 
-        public void DeleteObjectFromTile(Point2D cellCoords)
+        public void DeleteObjectFromCell(Point2D cellCoords)
         {
             var tile = Map.GetTile(cellCoords.X, cellCoords.Y);
             if (tile == null)
                 return;
 
             AddRefreshPoint(cellCoords);
-
-            for (int i = 0; i < tile.Infantry.Length; i++)
-            {
-                if (tile.Infantry[i] != null)
-                {
-                    Map.RemoveInfantry(tile.Infantry[i]);
-                    return;
-                }
-            }
-
-            if (tile.Aircraft != null)
-            {
-                Map.RemoveAircraft(tile.Aircraft);
-                return;
-            }
-
-            if (tile.Vehicle != null)
-            {
-                Map.RemoveUnit(tile.Vehicle);
-                return;
-            }
-
-            if (tile.Structure != null)
-            {
-                Map.RemoveBuilding(tile.Structure);
-                return;
-            }
-
-            if (tile.TerrainObject != null)
-            {
-                Map.RemoveTerrainObject(tile.CoordsToPoint());
-                return;
-            }
-
-            if (tile.CellTag != null)
-            {
-                Map.RemoveCellTagFrom(tile.CoordsToPoint());
-                return;
-            }
-
-            if (tile.Waypoint != null)
-            {
-                Map.RemoveWaypoint(tile.Waypoint);
-                return;
-            }
+            Map.DeleteObjectFromCell(cellCoords);
         }
 
         public override void Draw(GameTime gameTime)
