@@ -30,6 +30,8 @@ namespace TSMapEditor.Settings
 
                 ScrollRate,
 
+                UpscaleUI,
+
                 GameDirectory,
                 LastScenarioPath
             };
@@ -63,6 +65,8 @@ namespace TSMapEditor.Settings
         public BoolSetting FullscreenWindowed = new BoolSetting(Display, "FullscreenWindowed", false);
 
         public IntSetting ScrollRate = new IntSetting(MapView, nameof(ScrollRate), 15);
+
+        public BoolSetting UpscaleUI = new BoolSetting(General, "UpscaleUI", false);
 
         public StringSetting GameDirectory = new StringSetting(General, "GameDirectory", string.Empty);
         public StringSetting LastScenarioPath = new StringSetting(General, nameof(LastScenarioPath), "Maps/Custom/");

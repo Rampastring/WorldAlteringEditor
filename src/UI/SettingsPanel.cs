@@ -78,6 +78,7 @@ namespace TSMapEditor.UI
         private XNADropDown ddDisplayResolution;
         private XNADropDown ddRenderResolution;
         private XNACheckBox chkBorderless;
+        private XNACheckBox chkUpscaleUI;
 
         public override void Initialize()
         {
@@ -126,6 +127,13 @@ namespace TSMapEditor.UI
             chkBorderless.Text = "Borderless Mode";
             AddChild(chkBorderless);
 
+            chkUpscaleUI = new XNACheckBox(WindowManager);
+            chkUpscaleUI.Name = nameof(chkUpscaleUI);
+            chkUpscaleUI.X = Constants.UIEmptySideSpace;
+            chkUpscaleUI.Y = chkBorderless.Bottom + Constants.UIVerticalSpacing;
+            chkUpscaleUI.Text = "Upscale Windows";
+            AddChild(chkUpscaleUI);
+
             const int MinWidth = 1024;
             const int MinHeight = 600;
             const int MaxWidth = 16384;
@@ -151,6 +159,7 @@ namespace TSMapEditor.UI
             ddRenderResolution.SelectedIndex = ddRenderResolution.Items.FindIndex(i => i.Text == renderResolution);
 
             chkBorderless.Checked = userSettings.Borderless;
+            chkUpscaleUI.Checked = userSettings.UpscaleUI;
         }
 
         public void ApplySettings()
@@ -161,6 +170,7 @@ namespace TSMapEditor.UI
             ScreenResolution renderRes = null;
 
             userSettings.Borderless.UserDefinedValue = chkBorderless.Checked;
+            userSettings.UpscaleUI.UserDefinedValue = chkUpscaleUI.Checked;
 
             if (ddDisplayResolution.SelectedItem != null)
             {

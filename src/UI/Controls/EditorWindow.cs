@@ -3,6 +3,7 @@ using Rampastring.Tools;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
+using TSMapEditor.Settings;
 
 namespace TSMapEditor.UI.Controls
 {
@@ -59,6 +60,9 @@ namespace TSMapEditor.UI.Controls
             AlphaRate = AppearingRate;
             Alpha = 0f;
             Enable();
+
+            if (UserSettings.Instance.UpscaleUI && Width * 2 <= WindowManager.RenderResolutionX && Height * 2 <= WindowManager.RenderResolutionY)
+                Scaling = 2;
         }
 
         public override void Update(GameTime gameTime)
@@ -84,8 +88,8 @@ namespace TSMapEditor.UI.Controls
                     if (isDragged)
                     {
                         Point newCursorPoint = GetCursorPoint();
-                        X = X + newCursorPoint.X - lastCursorPoint.X;
-                        Y = Y + newCursorPoint.Y - lastCursorPoint.Y;
+                        X = X + (newCursorPoint.X - lastCursorPoint.X) * Scaling;
+                        Y = Y + (newCursorPoint.Y - lastCursorPoint.Y) * Scaling;
                         if (X + ScaledWidth > WindowManager.RenderResolutionX)
                             X = WindowManager.RenderResolutionX - ScaledWidth;
                         else if (X < 0)
