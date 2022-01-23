@@ -123,12 +123,24 @@ namespace TSMapEditor.UI
                     int difference = previousMouseY - cursorPoint.Y;
                     Y -= difference;
                     Height += difference;
+
+                    if (Height > WindowManager.RenderResolutionY)
+                    {
+                        Height = WindowManager.RenderResolutionY;
+                        Y = 0;
+                    }
                 }
                 else if (cursorPoint.Y > previousMouseY)
                 {
                     int difference = cursorPoint.Y - previousMouseY;
                     Y += difference;
                     Height -= difference;
+
+                    if (Height <= 10)
+                    {
+                        Height = 10;
+                        Y = WindowManager.RenderResolutionY - ScaledHeight;
+                    }
                 }
 
                 previousMouseY = GetCursorPoint().Y;
