@@ -37,6 +37,10 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework, Version=3.6.0.1625, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -72,6 +76,7 @@
     <Compile Include="CCEngine\Theater.cs" />
     <Compile Include="CCEngine\TileSet.cs" />
     <Compile Include="CCEngine\TmpFile.cs" />
+    <None Include="app.manifest" />
     <None Include="Config\Actions.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
