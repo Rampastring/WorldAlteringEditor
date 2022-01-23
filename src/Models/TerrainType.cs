@@ -1,4 +1,6 @@
-﻿using TSMapEditor.Models.Enums;
+﻿using System.Collections.Generic;
+using TSMapEditor.GameMath;
+using TSMapEditor.Models.Enums;
 
 namespace TSMapEditor.Models
 {
@@ -33,5 +35,11 @@ namespace TSMapEditor.Models
         // but they'd be useful in DTA at least
         public bool AvailableOnTemperate { get; set; }
         public bool AvailableOnSnow { get; set; }
+
+        /// <summary>
+        /// Impassable cell data for automatically placing impassable overlay
+        /// under terrain objects.
+        /// </summary>
+        public List<Point2D> ImpassableCells { get; set; }
     }
 }

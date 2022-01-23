@@ -22,6 +22,7 @@ namespace TSMapEditor.UI.Windows
         public InfantryOptionsWindow InfantryOptionsWindow { get; private set; }
         public HousesWindow HousesWindow { get; private set; }
         public SaveMapAsWindow SaveMapAsWindow { get; private set; }
+        public AutoApplyImpassableOverlayWindow AutoApplyImpassableOverlayWindow { get; private set; }
 
         public void Initialize(XNAControl windowParentControl, Map map, EditorState editorState, ICursorActionTarget cursorActionTarget)
         {
@@ -60,6 +61,9 @@ namespace TSMapEditor.UI.Windows
 
             SaveMapAsWindow = new SaveMapAsWindow(windowParentControl.WindowManager, map);
             Windows.Add(SaveMapAsWindow);
+
+            AutoApplyImpassableOverlayWindow = new AutoApplyImpassableOverlayWindow(windowParentControl.WindowManager, map, cursorActionTarget.MutationTarget);
+            Windows.Add(AutoApplyImpassableOverlayWindow);
 
             foreach (var window in Windows)
             {

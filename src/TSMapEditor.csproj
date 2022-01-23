@@ -92,6 +92,12 @@
     <None Include="Config\Events.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Config\TerrainTypeImpassability.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\UI\AutoApplyImpassableOverlayWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Config\UI\BasicSectionConfigWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -293,6 +299,7 @@
     <Compile Include="UI\TopBar\TopBarMenu.cs" />
     <Compile Include="UI\UIManager.cs" />
     <Compile Include="Settings\UserSettings.cs" />
+    <Compile Include="UI\Windows\AutoApplyImpassableOverlayWindow.cs" />
     <Compile Include="UI\Windows\BasicSectionConfigWindow.cs" />
     <Compile Include="UI\Windows\EditorMessageBox.cs" />
     <Compile Include="UI\Windows\GenerateStandardHousesWindow.cs" />

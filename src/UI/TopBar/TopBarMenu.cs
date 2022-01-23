@@ -72,8 +72,9 @@ namespace TSMapEditor.UI.TopBar
 
             var toolsContextMenu = new EditorContextMenu(WindowManager);
             toolsContextMenu.Name = nameof(toolsContextMenu);
-            toolsContextMenu.AddItem("Options");
-            toolsContextMenu.AddItem("Tool Scripts");
+            // toolsContextMenu.AddItem("Options");
+            toolsContextMenu.AddItem("Apply Impassable Overlay", () => windowController.AutoApplyImpassableOverlayWindow.Open(), null, null, null);
+            // toolsContextMenu.AddItem("Tool Scripts");
 
             var toolsButton = new MenuButton(WindowManager, toolsContextMenu);
             toolsButton.Name = nameof(toolsButton);

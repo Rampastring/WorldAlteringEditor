@@ -760,6 +760,26 @@ namespace TSMapEditor.Models
             {
                 Rules.InitArt(artFirestormIni, initializer);
             }
+
+            // Load impassable cell information for terrain types
+            var impassableTerrainObjectsIni = new IniFile(Environment.CurrentDirectory + "/Config/TerrainTypeImpassability.ini");
+
+            Rules.TerrainTypes.ForEach(tt =>
+            {
+                string value = impassableTerrainObjectsIni.GetStringValue(tt.ININame, "ImpassableCells", null);
+                if (string.IsNullOrWhiteSpace(value))
+                    return;
+
+                string[] cellInfos = value.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var cellInfo in cellInfos)
+                {
+                    Point2D point = Point2D.FromString(cellInfo);
+                    if (tt.ImpassableCells == null)
+                        tt.ImpassableCells = new List<Point2D>(2);
+
+                    tt.ImpassableCells.Add(point);
+                }
+            });
         }
     }
 }
