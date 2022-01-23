@@ -160,6 +160,11 @@ namespace TSMapEditor.Rendering
 
             Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
             KeyboardCommands.Instance.FrameworkMode.Triggered += FrameworkMode_Triggered;
+            KeyboardCommands.Instance.ViewMegamap.Triggered += (s, e) =>
+            {
+                var mmw = new MegamapWindow(WindowManager, mapRenderTarget);
+                WindowManager.AddAndInitializeControl(mmw);
+            };
 
             copyTerrainCursorAction = new CopyTerrainCursorAction(this);
             pasteTerrainCursorAction = new PasteTerrainCursorAction(this);
@@ -818,12 +823,6 @@ namespace TSMapEditor.Rendering
                 }
 
                 EditorMessageBox.Show(WindowManager, "Hotkey Help", text.ToString(), MessageBoxButtons.OK);
-            }
-
-            if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.F12)
-            {
-                var mmw = new MegamapWindow(WindowManager, mapRenderTarget);
-                WindowManager.AddAndInitializeControl(mmw);
             }
         }
 

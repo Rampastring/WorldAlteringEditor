@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Rampastring.XNAUI;
-using Rampastring.XNAUI.XNAControls;
 using System;
 using TSMapEditor.UI.Controls;
 
@@ -48,6 +47,8 @@ namespace TSMapEditor.UI.Windows
             base.Draw(gameTime);
 
             DrawTexture(megamapTexture, textureDrawRectangle, Color.White);
+            DrawStringWithShadow("Press <ESC> to close", 0,
+                new Vector2(Constants.UIEmptySideSpace, Constants.UIEmptyTopSpace), Color.Red);
         }
     }
 }
