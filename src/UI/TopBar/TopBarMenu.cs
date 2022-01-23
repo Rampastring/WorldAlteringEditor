@@ -26,6 +26,7 @@ namespace TSMapEditor.UI.TopBar
         {
             Name = nameof(TopBarMenu);
 
+
             var fileContextMenu = new EditorContextMenu(WindowManager);
             fileContextMenu.Name = nameof(fileContextMenu);
             fileContextMenu.AddItem("New", null, null, null, null);
@@ -33,10 +34,14 @@ namespace TSMapEditor.UI.TopBar
             fileContextMenu.AddItem("Save", () =>
             {
                 if (string.IsNullOrWhiteSpace(map.LoadedINI.FileName))
-                    throw new NotImplementedException("Saving of new maps is not implemented yet.");
+                {
+                    SaveAs();
+                    return;
+                }
 
-                map.Write(map.LoadedINI.FileName);
+                map.Write();
             });
+            fileContextMenu.AddItem("Save As", () => SaveAs(), null, null, null);
             fileContextMenu.AddItem("Exit", () => WindowManager.CloseGame());
 
             var fileButton = new MenuButton(WindowManager, fileContextMenu);
@@ -93,6 +98,11 @@ namespace TSMapEditor.UI.TopBar
 
             menuButtons = new MenuButton[] { fileButton, editButton, toolsButton, aboutButton };
             Array.ForEach(menuButtons, b => b.MouseEnter += MenuButton_MouseEnter);
+        }
+
+        private void SaveAs()
+        {
+            windowController.SaveMapAsWindow.Open();
         }
 
         private void MenuButton_MouseEnter(object sender, EventArgs e)

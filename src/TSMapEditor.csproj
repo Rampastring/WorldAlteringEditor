@@ -240,6 +240,7 @@
     <Compile Include="UI\Controls\EditorPopUpSelector.cs" />
     <Compile Include="UI\Controls\EditorSuggestionTextBox.cs" />
     <Compile Include="UI\Controls\EditorTextBox.cs" />
+    <Compile Include="UI\Controls\FileBrowserListBox.cs" />
     <Compile Include="UI\Controls\INItializableWindow.cs" />
     <Compile Include="UI\Controls\ToolTip.cs" />
     <Compile Include="UI\CursorAction.cs" />
@@ -296,6 +297,7 @@
     <Compile Include="UI\Windows\MainMenuWindows\MapSetup.cs" />
     <Compile Include="UI\Windows\MegamapWindow.cs" />
     <Compile Include="UI\Windows\PlaceWaypointWindow.cs" />
+    <Compile Include="UI\Windows\SaveMapAsWindow.cs" />
     <Compile Include="UI\Windows\ScriptsWindow.cs" />
     <Compile Include="UI\Windows\SelectActionWindow.cs" />
     <Compile Include="UI\Windows\SelectEventWindow.cs" />

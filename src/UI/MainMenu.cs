@@ -29,13 +29,11 @@ namespace TSMapEditor.UI
         private EditorTextBox tbGameDirectory;
         private EditorTextBox tbMapPath;
         private EditorButton btnLoad;
-        private EditorListBox lbFileList;
+        private FileBrowserListBox lbFileList;
 
         private SettingsPanel settingsPanel;
 
         private int loadingStage;
-
-        string fileListDirectoryPath = string.Empty;
 
         public override void Initialize()
         {
@@ -84,14 +82,14 @@ namespace TSMapEditor.UI
             lblDirectoryListing.Text = "Alternatively, select a map file below:";
             AddChild(lblDirectoryListing);
 
-            lbFileList = new EditorListBox(WindowManager);
+            lbFileList = new FileBrowserListBox(WindowManager);
             lbFileList.Name = nameof(lbFileList);
             lbFileList.X = Constants.UIEmptySideSpace;
             lbFileList.Y = lblDirectoryListing.Bottom + Constants.UIVerticalSpacing;
             lbFileList.Width = Width - Constants.UIEmptySideSpace * 2;
             lbFileList.Height = 300;
-            lbFileList.SelectedIndexChanged += LbFileList_SelectedIndexChanged;
-            lbFileList.DoubleLeftClick += LbFileList_DoubleLeftClick;
+            lbFileList.FileSelected += LbFileList_FileSelected;
+            lbFileList.FileDoubleLeftClick += LbFileList_FileDoubleLeftClick;
             AddChild(lbFileList);
 
             btnLoad = new EditorButton(WindowManager);
@@ -122,20 +120,26 @@ namespace TSMapEditor.UI
             AddChild(settingsPanel);
             Width += settingsPanel.Width + Constants.UIEmptySideSpace;
 
+            string directoryPath;
+
             if (Path.IsPathRooted(tbMapPath.Text))
             {
-                fileListDirectoryPath = Path.GetDirectoryName(tbMapPath.Text);
+                directoryPath = Path.GetDirectoryName(tbMapPath.Text);
             }
             else
             {
-                fileListDirectoryPath = Path.GetDirectoryName(tbGameDirectory.Text + tbMapPath.Text);
+                directoryPath = Path.GetDirectoryName(tbGameDirectory.Text + tbMapPath.Text);
             }
 
-            fileListDirectoryPath = fileListDirectoryPath.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
-
-            ListFiles();
+            directoryPath = directoryPath.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
+            lbFileList.DirectoryPath = directoryPath;
 
             base.Initialize();
+        }
+
+        private void LbFileList_FileSelected(object sender, FileSelectionEventArgs e)
+        {
+            tbMapPath.Text = e.FilePath;
         }
 
         private void BtnCreateNewMap_LeftClick(object sender, EventArgs e)
@@ -173,82 +177,14 @@ namespace TSMapEditor.UI
             }
         }
 
-        private void LbFileList_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (lbFileList.SelectedItem == null)
-                return;
-
-            if (lbFileList.SelectedItem.Tag != null)
-                return;
-
-            // Select file
-            if (!fileListDirectoryPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
-                fileListDirectoryPath += Path.DirectorySeparatorChar;
-
-            tbMapPath.Text = fileListDirectoryPath + lbFileList.SelectedItem.Text;
-        }
-
         private void TbGameDirectory_TextChanged(object sender, EventArgs e)
         {
-            fileListDirectoryPath = tbGameDirectory.Text;
-            ListFiles();
+            lbFileList.DirectoryPath = tbGameDirectory.Text;
         }
 
-        private void LbFileList_DoubleLeftClick(object sender, EventArgs e)
+        private void LbFileList_FileDoubleLeftClick(object sender, EventArgs e)
         {
-            if (lbFileList.SelectedItem == null)
-                return;
-
-            if (lbFileList.SelectedIndex == 0)
-            {
-                // Special case -- go up a directory
-                fileListDirectoryPath = Path.GetDirectoryName(fileListDirectoryPath.TrimEnd('/', '\\'));
-                ListFiles();
-                return;
-            }
-
-            if (!fileListDirectoryPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
-                fileListDirectoryPath += Path.DirectorySeparatorChar;
-
-            if (lbFileList.SelectedItem.Tag != null)
-            {
-                // Browse to next directory
-                fileListDirectoryPath = fileListDirectoryPath + lbFileList.SelectedItem.Text.Substring(DirectoryPrefix.Length) + Path.DirectorySeparatorChar;
-                ListFiles();
-                return;
-            }
-
-            // Select file
-            tbMapPath.Text = fileListDirectoryPath + lbFileList.SelectedItem.Text;
             BtnLoad_LeftClick(this, EventArgs.Empty);
-        }
-
-        private void ListFiles()
-        {
-            lbFileList.SelectedIndex = -1;
-            lbFileList.Clear();
-
-            if (string.IsNullOrWhiteSpace(fileListDirectoryPath) || !Directory.Exists(fileListDirectoryPath))
-            {
-                return;
-            }
-
-            lbFileList.AddItem(new XNAListBoxItem(".. <Directory Up>", Color.Gray) { Tag = new object() });
-
-            var directories = Directory.GetDirectories(fileListDirectoryPath);
-            foreach (string dir in directories)
-            {
-                string dirName = dir;
-                dirName = dirName.Substring(dirName.LastIndexOf(Path.DirectorySeparatorChar) + 1);
-                dirName = dirName.Substring(dirName.LastIndexOf(Path.AltDirectorySeparatorChar) + 1);
-                lbFileList.AddItem(new XNAListBoxItem(DirectoryPrefix + dirName, Color.LightGray) { Tag = new object() }); // Yay for wasting memory
-            }
-
-            var files = Directory.GetFiles(fileListDirectoryPath);
-            foreach (string file in files)
-            {
-                lbFileList.AddItem(Path.GetFileName(file));
-            }
         }
 
         private bool CheckGameDirectory()

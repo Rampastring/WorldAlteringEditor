@@ -53,6 +53,6 @@ namespace TSMapEditor.Initialization
 
         void DoForAllValidTiles(Action<MapTile> action);
 
-        void Write(string path);
+        void Write();
     }
 }

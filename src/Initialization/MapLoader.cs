@@ -61,6 +61,13 @@ namespace TSMapEditor.Initialization
             if (section == null)
                 return;
 
+            if (section.Keys.Count == 0)
+            {
+                Logger.Log("[IsoMapPack5] has no data!");
+                map.SetTileData(new List<MapTile>(0));
+                return;
+            }
+
             StringBuilder sb = new StringBuilder();
             section.Keys.ForEach(kvp => sb.Append(kvp.Value));
 

@@ -21,6 +21,7 @@ namespace TSMapEditor.UI.Windows
         public VehicleOptionsWindow VehicleOptionsWindow { get; private set; }
         public InfantryOptionsWindow InfantryOptionsWindow { get; private set; }
         public HousesWindow HousesWindow { get; private set; }
+        public SaveMapAsWindow SaveMapAsWindow { get; private set; }
 
         public void Initialize(XNAControl windowParentControl, Map map, EditorState editorState, ICursorActionTarget cursorActionTarget)
         {
@@ -56,6 +57,9 @@ namespace TSMapEditor.UI.Windows
 
             HousesWindow = new HousesWindow(windowParentControl.WindowManager, map);
             Windows.Add(HousesWindow);
+
+            SaveMapAsWindow = new SaveMapAsWindow(windowParentControl.WindowManager, map);
+            Windows.Add(SaveMapAsWindow);
 
             foreach (var window in Windows)
             {

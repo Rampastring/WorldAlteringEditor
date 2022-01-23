@@ -135,7 +135,7 @@ namespace TSMapEditor.Models
             MapLoader.ReadInfantry(this, mapIni);
         }
 
-        public void Write(string path)
+        public void Write()
         {
             LoadedINI.Comment = "Written by DTA Scenario Editor\r\n; all comments have been truncated\r\n; www.moddb.com/members/Rampastring\r\n; github.com/Rampastring";
 
