@@ -16,7 +16,8 @@ namespace TSMapEditor.UI.Controls
 
             if (BackgroundTexture == null)
             {
-                BackgroundTexture = AssetLoader.CreateTexture(new Color(0, 0, 0, 196), 2, 2);
+                var color = ((CustomUISettings)UISettings.ActiveSettings).ListBoxBackgroundColor;
+                BackgroundTexture = AssetLoader.CreateTexture(color, 2, 2);
                 PanelBackgroundDrawMode = PanelBackgroundImageDrawMode.STRETCHED;
             }
         }

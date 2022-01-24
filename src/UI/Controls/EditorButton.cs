@@ -16,8 +16,12 @@ namespace TSMapEditor.UI.Controls
         {
             base.Initialize();
 
+            var customUISettings = UISettings.ActiveSettings as CustomUISettings;
+
             IdleTexture = Helpers.CreateUITexture(GraphicsDevice, Width, Height,
-                new Color(0, 0, 0, 196), new Color(0, 0, 0, 255), Color.White);
+                customUISettings.ButtonMainBackgroundColor,
+                customUISettings.ButtonSecondaryBackgroundColor,
+                customUISettings.ButtonTertiaryBackgroundColor);
 
             HoverTexture = Helpers.CreateUITexture(GraphicsDevice, Width, Height,
                 new Color(128, 128, 128, 196),

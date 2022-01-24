@@ -2,11 +2,9 @@
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
-using System.Collections.Generic;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations;
 using TSMapEditor.Rendering;
-using TSMapEditor.UI.Controls;
 using TSMapEditor.UI.CursorActions;
 using TSMapEditor.UI.Sidebar;
 using TSMapEditor.UI.TopBar;
@@ -14,6 +12,14 @@ using TSMapEditor.UI.Windows;
 
 namespace TSMapEditor.UI
 {
+    public class CustomUISettings : UISettings
+    {
+        public Color ListBoxBackgroundColor { get; set; } = Color.Black;
+        public Color ButtonMainBackgroundColor { get; set; } = new Color(0, 0, 0, 196);
+        public Color ButtonSecondaryBackgroundColor { get; set; } = new Color(0, 0, 0, 255);
+        public Color ButtonTertiaryBackgroundColor { get; set; } = Color.White;
+    }
+
     class UIManager : XNAControl
     {
         public UIManager(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics) : base(windowManager)
@@ -47,6 +53,34 @@ namespace TSMapEditor.UI
 
             UISettings.ActiveSettings.PanelBackgroundColor = new Color(0, 0, 0, 128);
             UISettings.ActiveSettings.PanelBorderColor = new Color(128, 128, 128, 255);
+
+            bool lightTheme = false;
+            if (lightTheme)
+            {
+                UISettings.ActiveSettings.TextShadowDistance = 0;
+                ((CustomUISettings)UISettings.ActiveSettings).ListBoxBackgroundColor = Color.White * 0.77f;
+                ((CustomUISettings)UISettings.ActiveSettings).ButtonMainBackgroundColor = Color.White * 0.77f;
+                ((CustomUISettings)UISettings.ActiveSettings).ButtonSecondaryBackgroundColor = Color.Gray;
+                ((CustomUISettings)UISettings.ActiveSettings).ButtonTertiaryBackgroundColor = Color.Black;
+                UISettings.ActiveSettings.BackgroundColor = Color.White;
+                UISettings.ActiveSettings.PanelBackgroundColor = Color.White;
+                UISettings.ActiveSettings.TextColor = Color.Black;
+                UISettings.ActiveSettings.FocusColor = Color.Gray;
+                UISettings.ActiveSettings.AltColor = Color.Black;
+                UISettings.ActiveSettings.ButtonTextColor = Color.Black;
+            }
+
+            bool greenTheme = false;
+            if (greenTheme)
+            {
+                // ((CustomUISettings)UISettings.ActiveSettings).ButtonSecondaryBackgroundColor = new Color(0, 164, 0);
+                // ((CustomUISettings)UISettings.ActiveSettings).ButtonTertiaryBackgroundColor = Color.LimeGreen;
+                UISettings.ActiveSettings.TextColor = new Color(0,185,0);
+                UISettings.ActiveSettings.AltColor = Color.LimeGreen;
+                UISettings.ActiveSettings.FocusColor = new Color(0, 96, 0);
+                UISettings.ActiveSettings.ButtonTextColor = Color.LimeGreen;
+                UISettings.ActiveSettings.PanelBorderColor = new Color(0, 164, 0);
+            }
 
             Width = WindowManager.RenderResolutionX;
             Height = WindowManager.RenderResolutionY;
