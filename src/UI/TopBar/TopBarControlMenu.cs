@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using TSMapEditor.CCEngine;
@@ -10,7 +6,6 @@ using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI.Controls;
 using TSMapEditor.UI.CursorActions;
-using TSMapEditor.UI.Windows;
 
 namespace TSMapEditor.UI.TopBar
 {
@@ -41,6 +36,7 @@ namespace TSMapEditor.UI.TopBar
 
         private XNADropDown ddBrushSize;
         private XNACheckBox chkAutoLat;
+        private XNACheckBox chkOnlyPaintOnClearGround;
 
         public override void Initialize()
         {
@@ -107,6 +103,15 @@ namespace TSMapEditor.UI.TopBar
             AddChild(chkAutoLat);
             chkAutoLat.CheckedChanged += ChkAutoLat_CheckedChanged;
 
+            chkOnlyPaintOnClearGround = new XNACheckBox(WindowManager);
+            chkOnlyPaintOnClearGround.Name = nameof(chkOnlyPaintOnClearGround);
+            chkOnlyPaintOnClearGround.X = chkAutoLat.X;
+            chkOnlyPaintOnClearGround.Y = chkAutoLat.Bottom + Constants.UIVerticalSpacing;
+            chkOnlyPaintOnClearGround.Checked = editorState.OnlyPaintOnClearGround;
+            chkOnlyPaintOnClearGround.Text = "Only Paint on Clear";
+            AddChild(chkOnlyPaintOnClearGround);
+            chkOnlyPaintOnClearGround.CheckedChanged += ChkOnlyPaintOnClearGround_CheckedChanged;
+
             var btnPlaceWaypoint = new EditorButton(WindowManager);
             btnPlaceWaypoint.Name = nameof(btnPlaceWaypoint);
             btnPlaceWaypoint.X = Constants.UIEmptySideSpace;
@@ -134,6 +139,7 @@ namespace TSMapEditor.UI.TopBar
             base.Initialize();
 
             editorState.AutoLATEnabledChanged += EditorState_AutoLATEnabledChanged;
+            editorState.OnlyPaintOnClearGroundChanged += EditorState_OnlyPaintOnClearGroundChanged;
         }
 
         private void BtnDeletionMode_LeftClick(object sender, EventArgs e)
@@ -176,6 +182,18 @@ namespace TSMapEditor.UI.TopBar
         private void EditorState_AutoLATEnabledChanged(object sender, EventArgs e)
         {
             chkAutoLat.Checked = editorState.AutoLATEnabled;
+        }
+
+        private void ChkOnlyPaintOnClearGround_CheckedChanged(object sender, EventArgs e)
+        {
+            chkOnlyPaintOnClearGround.CheckedChanged -= ChkOnlyPaintOnClearGround_CheckedChanged;
+            editorState.OnlyPaintOnClearGround = !editorState.OnlyPaintOnClearGround;
+            chkOnlyPaintOnClearGround.CheckedChanged += ChkOnlyPaintOnClearGround_CheckedChanged;
+        }
+
+        private void EditorState_OnlyPaintOnClearGroundChanged(object sender, EventArgs e)
+        {
+            chkOnlyPaintOnClearGround.Checked = editorState.OnlyPaintOnClearGround;
         }
 
         private void DdBrushSize_SelectedIndexChanged(object sender, EventArgs e)

@@ -15,6 +15,7 @@ namespace TSMapEditor.Rendering
         public event EventHandler CursorActionChanged;
         public event EventHandler ObjectOwnerChanged;
         public event EventHandler AutoLATEnabledChanged;
+        public event EventHandler OnlyPaintOnClearGroundChanged;
 
         public bool IsMarbleMadness { get; set; } = false;
 
@@ -74,6 +75,20 @@ namespace TSMapEditor.Rendering
                 {
                     _autoLatEnabled = value;
                     AutoLATEnabledChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+
+        private bool _onlyPaintOnClearGround = false;
+        public bool OnlyPaintOnClearGround
+        {
+            get => _onlyPaintOnClearGround;
+            set
+            {
+                if (value != _onlyPaintOnClearGround)
+                {
+                    _onlyPaintOnClearGround = value;
+                    OnlyPaintOnClearGroundChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }

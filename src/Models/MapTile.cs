@@ -130,6 +130,11 @@ namespace TSMapEditor.Models
             return false;
         }
 
+        public bool IsClearGround()
+        {
+            return TileIndex == 0;
+        }
+
         public TileImage PreviewTileImage { get; set; }
         public int PreviewSubTileIndex { get; set; }
 

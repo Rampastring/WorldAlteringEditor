@@ -65,7 +65,7 @@ namespace TSMapEditor.UI.CursorActions
                     int cy = adjustedCellCoords.Y + (offset.Y * Tile.Height) + i / Tile.Width;
 
                     var mapTile = CursorActionTarget.Map.GetTile(cx, cy);
-                    if (mapTile != null)
+                    if (mapTile != null && (!CursorActionTarget.OnlyPaintOnClearGround || mapTile.IsClearGround()))
                     {
                         mapTile.PreviewSubTileIndex = i;
                         action(mapTile);

@@ -32,6 +32,7 @@ namespace TSMapEditor.Rendering
         BrushSize BrushSize { get; }
         Randomizer Randomizer { get; }
         bool AutoLATEnabled { get; }
+        bool OnlyPaintOnClearGround { get; }
     }
 
     /// <summary>
@@ -49,6 +50,7 @@ namespace TSMapEditor.Rendering
         BrushSize BrushSize { get; }
         Randomizer Randomizer { get; }
         bool AutoLATEnabled { get; }
+        bool OnlyPaintOnClearGround { get; }
         List<CopiedTerrainData> CopiedTerrainData { get; }
     }
 
@@ -86,6 +88,7 @@ namespace TSMapEditor.Rendering
         public BrushSize BrushSize => EditorState.BrushSize;
         public Randomizer Randomizer => EditorState.Randomizer;
         public bool AutoLATEnabled => EditorState.AutoLATEnabled;
+        public bool OnlyPaintOnClearGround => EditorState.OnlyPaintOnClearGround;
         public List<CopiedTerrainData> CopiedTerrainData => EditorState.CopiedTerrainData;
 
         public TileInfoDisplay TileInfoDisplay { get; set; }
@@ -535,7 +538,7 @@ namespace TSMapEditor.Rendering
                 DrawString(subTileIndex.ToString(), 0, new Vector2(drawPoint.X, drawPoint.Y), Color.Red);
                 return;
             }
-            
+
             Texture2D texture = tileImage.TMPImages[subTileIndex].Texture;
             if (texture != null)
             {
