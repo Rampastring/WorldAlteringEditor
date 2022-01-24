@@ -21,8 +21,9 @@ but with modernizations and changes to make the editor smoother and more efficie
 
 ## Current state of the project
 
-The map editor is crrently not able to actually create maps, but you can open existing maps and edit them.
-Most basic editing tools are included and you can code triggers, but a lot of advanced functionality is still missing.
+The editor is in an usable state and covers roughly 90-95% of what can be done with FinalSun. 
+Most basic and commonly used editing tools are included and you can code triggers with way more efficiency
+than with FinalSun, but some advanced functionality is still missing.
 
 There are also some limitations in the editor, particularly on the rendering side of things.
 The current map renderer, while functional and usable, is very primitive and does not
@@ -31,7 +32,7 @@ The current renderer should be considered more as a proof-of-concept of DTA/TS/R
 rendering done with MonoGame than an actual serious implementation.
 
 As the entire editor is currently work-in-progress, the code-base is so as well.
-If you browse the code, assume that nothing you see is final.
+If you browse the code, you might run into unfinished feature implementations.
 
 ## System requirements
 
