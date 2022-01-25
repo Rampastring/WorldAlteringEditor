@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
+using TSMapEditor.Rendering;
 
 namespace TSMapEditor.Scripts
 {
@@ -17,15 +18,16 @@ namespace TSMapEditor.Scripts
         private HashSet<Point2D> occupiedCells = new HashSet<Point2D>();
         private Random random;
 
-        public void Generate(Map map, List<Point2D> cells, List<TerrainType> treeGroupTerrainTypes, double treeGroupChance, double openTerrainChance, double openPebbleChance)
+        public void Generate(Map map, List<Point2D> cells, List<TerrainType> treeGroupTerrainTypes, double treeGroupChance, double openTerrainChance, double openPebbleChance, double openSmallRocksChance)
         {
             this.map = map;
             this.cells = cells;
             this.treeGroupTerrainTypes = treeGroupTerrainTypes;
             random = new Random();
 
-            var tgrassSet = map.TheaterInstance.Theater.TileSets.Find(ts => ts.SetName == "Tall Grass");
+            var tgrassSet = map.TheaterInstance.Theater.TileSets.Find(ts => ts.SetName == "Tall Grass" && ts.FileName != "blank");
             var pebbleSet = map.TheaterInstance.Theater.TileSets.Find(ts => ts.SetName == "Pebbles");
+            var smallRocksSet = map.TheaterInstance.Theater.TileSets.Find(ts => ts.SetName == "Small Rocks");
             int minY = cells.Select(p => p.Y).Aggregate((y1, y2) => Math.Min(y1, y2));
             int maxY = cells.Select(p => p.Y).Aggregate((y1, y2) => Math.Max(y1, y2));
             int minX = cells.Select(p => p.X).Aggregate((x1, x2) => Math.Min(x1, x2));
@@ -43,18 +45,39 @@ namespace TSMapEditor.Scripts
             }
 
             var openTerrainCells = cells.Where(p => !occupiedCells.Contains(p));
+
+            // Place non-LAT terrain
             foreach (Point2D cellCoord in openTerrainCells)
             {
+                if (random.NextDouble() < openSmallRocksChance)
+                {
+                    int indexInSet = random.Next(0, smallRocksSet.TilesInSet);
+                    int totalIndex = smallRocksSet.StartTileIndex + indexInSet;
+                    var tile = map.TheaterInstance.GetTile(totalIndex);
+
+                    if (!AllowPlacingTileOnCell(cellCoord, tile))
+                        continue;
+
+                    map.PlaceTerrainTileAt(tile, cellCoord);
+                }
+            }
+
+            openTerrainCells = cells.Where(p => !occupiedCells.Contains(p));
+
+            foreach (Point2D cellCoord in openTerrainCells)
+            {
+                var mapTile = map.GetTile(cellCoord);
+                if (mapTile == null || !mapTile.IsClearGround())
+                    continue;
+
                 if (random.NextDouble() < openTerrainChance)
                 {
-                    var mapTile = map.GetTile(cellCoord);
                     mapTile.TileImage = null;
                     mapTile.TileIndex = tgrassSet.StartTileIndex;
                     mapTile.SubTileIndex = 0;
                 }
                 else if (random.NextDouble() < openPebbleChance)
                 {
-                    var mapTile = map.GetTile(cellCoord);
                     mapTile.TileImage = null;
                     mapTile.TileIndex = pebbleSet.StartTileIndex;
                     mapTile.SubTileIndex = 0;
@@ -122,6 +145,25 @@ namespace TSMapEditor.Scripts
                     }
                 }
             }
+        }
+
+        private bool AllowPlacingTileOnCell(Point2D cellCoords, ITileImage tile)
+        {
+            for (int i = 0; i < tile.SubTileCount; i++)
+            {
+                var subTile = tile.GetSubTile(i);
+                if (subTile.TmpImage == null)
+                    continue;
+
+                Point2D offset = tile.GetSubTileCoordOffset(i).Value;
+
+                var mapTile = map.GetTile(cellCoords + offset);
+
+                if (mapTile == null || !mapTile.IsClearGround() || occupiedCells.Contains(mapTile.CoordsToPoint()))
+                    return false;
+            }
+
+            return true;
         }
 
         private bool AllowTreeGroupOnCell(Point2D cellCoords, TerrainType treeGroup)

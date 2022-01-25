@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Rampastring.Tools;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
+using TSMapEditor.Rendering;
 
 namespace TSMapEditor.Initialization
 {
@@ -37,6 +38,7 @@ namespace TSMapEditor.Initialization
         string TheaterName { get; set; }
 
         void SetTileData(List<MapTile> tiles);
+        void PlaceTerrainTileAt(ITileImage tile, Point2D cellCoords);
         House FindOrMakeHouse(string houseName);
         House FindHouse(string houseName);
         void AddWaypoint(Waypoint waypoint);

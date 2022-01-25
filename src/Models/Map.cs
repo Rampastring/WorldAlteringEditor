@@ -240,6 +240,26 @@ namespace TSMapEditor.Models
             }
         }
 
+        public void PlaceTerrainTileAt(ITileImage tile, Point2D cellCoords)
+        {
+            for (int i = 0; i < tile.SubTileCount; i++)
+            {
+                var subTile = tile.GetSubTile(i);
+                if (subTile.TmpImage == null)
+                    continue;
+
+                Point2D offset = tile.GetSubTileCoordOffset(i).Value;
+
+                var mapTile = GetTile(cellCoords + offset);
+                if (mapTile == null)
+                    continue;
+
+                mapTile.TileImage = null;
+                mapTile.TileIndex = tile.TileID;
+                mapTile.SubTileIndex = (byte)i;
+            }
+        }
+
         public void AddWaypoint(Waypoint waypoint)
         {
             Waypoints.Add(waypoint);

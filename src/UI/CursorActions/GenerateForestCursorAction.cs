@@ -49,7 +49,7 @@ namespace TSMapEditor.UI.CursorActions
 
             var treeGroupTerrainTypes = CursorActionTarget.Map.Rules.TerrainTypes.FindAll(tt => tt.ININame.StartsWith("TC0"));
 
-            new ForestGenerator().Generate(CursorActionTarget.Map, cells, treeGroupTerrainTypes, 0.15, 0.65, 0.1);
+            new ForestGenerator().Generate(CursorActionTarget.Map, cells, treeGroupTerrainTypes, 0.15, 0.65, 0.25, 0.05);
             CursorActionTarget.InvalidateMap();
             ExitAction();
         }

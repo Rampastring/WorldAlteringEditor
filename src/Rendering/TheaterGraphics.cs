@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using TSMapEditor.CCEngine;
+using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 
 namespace TSMapEditor.Rendering
@@ -17,13 +18,51 @@ namespace TSMapEditor.Rendering
     public interface ITheater
     {
         int GetTileSetId(int uniqueTileIndex);
+        ITileImage GetTile(int id);
         Theater Theater { get; }
+    }
+
+    /// <summary>
+    /// Interface for a full tile image (containing all sub-tiles).
+    /// </summary>
+    public interface ITileImage
+    {
+        /// <summary>
+        /// Width of the tile in cells.
+        /// </summary>
+        int Width { get; }
+
+        /// <summary>
+        /// Height of the tile in cells.
+        /// </summary>
+        int Height { get; }
+
+        /// <summary>
+        /// The index of the tile's tileset.
+        /// </summary>
+        int TileSetId { get; }
+
+        /// <summary>
+        /// The index of the tile within its tileset.
+        /// </summary>
+        int TileIndexInTileSet { get; }
+
+        /// <summary>
+        /// The unique ID of this tile within all tiles in the game.
+        /// </summary>
+        int TileID { get; }
+
+        int SubTileCount { get; }
+
+        ISubTileImage GetSubTile(int index);
+
+        Point2D? GetSubTileCoordOffset(int index);
     }
 
     /// <summary>
     /// Contains graphics for a single full TMP (all sub-tiles / all cells).
     /// </summary>
-    public class TileImage
+    public class TileImage : ITileImage
     {
         public TileImage(int width, int height, int tileSetId, int tileIndex, int tileId, MGTMPImage[] tmpImages)
         {
@@ -59,6 +98,20 @@ namespace TSMapEditor.Rendering
         /// The unique ID of this tile within all tiles in the game.
         /// </summary>
         public int TileID { get; set; }
+
+        public ISubTileImage GetSubTile(int index) => TMPImages[index];
+
+        public Point2D? GetSubTileCoordOffset(int index)
+        {
+            if (TMPImages[index] == null)
+                return null;
+
+            int x = index % Width;
+            int y = index / Width;
+            return new Point2D(x, y);
+        }
+
+        public int SubTileCount => TMPImages.Length;
 
         public MGTMPImage[] TMPImages { get; set; }
 
@@ -534,6 +587,8 @@ namespace TSMapEditor.Rendering
         public TileImage GetTileGraphics(int id) => terrainGraphicsList[id][random.Next(terrainGraphicsList[id].Length)];
         public TileImage GetTileGraphics(int id, int randomId) => terrainGraphicsList[id][randomId];
         public TileImage GetMarbleMadnessTileGraphics(int id) => mmTerrainGraphicsList[id][0];
+
+        public ITileImage GetTile(int id) => GetTileGraphics(id);
 
         public ObjectImage[] TerrainObjectTextures { get; set; }
         public ObjectImage[] BuildingTextures { get; set; }

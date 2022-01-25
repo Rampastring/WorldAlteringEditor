@@ -5,10 +5,19 @@ using TSMapEditor.CCEngine;
 namespace TSMapEditor.Rendering
 {
     /// <summary>
+    /// Interface for a single cell of a tile; sub-tile of a full TMP.
+    /// </summary>
+    public interface ISubTileImage
+    {
+        TmpImage TmpImage { get; }
+        Palette Palette { get; }
+    }
+
+    /// <summary>
     /// A MonoGame-drawable TMP image.
     /// Contains graphics and information for a single cell (sub-tile of a full TMP).
     /// </summary>
-    public class MGTMPImage
+    public class MGTMPImage : ISubTileImage
     {
         public MGTMPImage(GraphicsDevice gd, TmpImage tmpImage, Palette palette, int tileSetId)
         {
