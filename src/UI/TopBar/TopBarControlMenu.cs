@@ -112,6 +112,8 @@ namespace TSMapEditor.UI.TopBar
             AddChild(chkOnlyPaintOnClearGround);
             chkOnlyPaintOnClearGround.CheckedChanged += ChkOnlyPaintOnClearGround_CheckedChanged;
 
+            Width = chkOnlyPaintOnClearGround.Right + Constants.UIEmptySideSpace;
+
             var btnPlaceWaypoint = new EditorButton(WindowManager);
             btnPlaceWaypoint.Name = nameof(btnPlaceWaypoint);
             btnPlaceWaypoint.X = Constants.UIEmptySideSpace;
