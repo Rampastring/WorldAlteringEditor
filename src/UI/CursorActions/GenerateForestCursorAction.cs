@@ -47,9 +47,25 @@ namespace TSMapEditor.UI.CursorActions
                 }
             }
 
-            var treeGroupTerrainTypes = CursorActionTarget.Map.Rules.TerrainTypes.FindAll(tt => tt.ININame.StartsWith("TC0"));
+            var terrainTypes = CursorActionTarget.Map.Rules.TerrainTypes;
+            var tileSets = CursorActionTarget.Map.TheaterInstance.Theater.TileSets;
 
-            new ForestGenerator().Generate(CursorActionTarget.Map, cells, treeGroupTerrainTypes, 0.15, 0.65, 0.25, 0.05);
+            var treeGroupTerrainTypes = terrainTypes.FindAll(tt => tt.ININame.StartsWith("TC0"));
+            var singleTreeTerrainTypes = new List<TerrainType>();
+            string[] conifers = new string[] { "T01", "T02", "T05", "T06", "T07", "T08", "T09", "T16" };
+            Array.ForEach(conifers, c => singleTreeTerrainTypes.Add(terrainTypes.Find(tt => tt.ININame == c)));
+
+            var treeGroups = new List<TerrainGeneratorTerrainTypeGroup>();
+            treeGroups.Add(new TerrainGeneratorTerrainTypeGroup(treeGroupTerrainTypes, 0.125, 0.0));
+            treeGroups.Add(new TerrainGeneratorTerrainTypeGroup(singleTreeTerrainTypes, 0.15, 0.15));
+
+            var tileGroups = new List<TerrainGeneratorTileGroup>();
+            tileGroups.Add(new TerrainGeneratorTileGroup(tileSets.Find(ts => ts.LoadedTileCount > 0 && ts.SetName == "Pebbles"), null, 0.3, 0.25));
+            tileGroups.Add(new TerrainGeneratorTileGroup(tileSets.Find(ts => ts.LoadedTileCount > 0 && ts.SetName == "Small Rocks"), null, 0.05, 0.0));
+            tileGroups.Add(new TerrainGeneratorTileGroup(tileSets.Find(ts => ts.LoadedTileCount > 0 && ts.SetName == "Debris/Dirt"), null, 0.02, 0.02));
+            tileGroups.Add(new TerrainGeneratorTileGroup(tileSets.Find(ts => ts.LoadedTileCount > 0 && ts.SetName == "Tall Grass"), null, 0.6, 0.3));
+
+            new ForestGenerator().Generate(CursorActionTarget.Map, cells, treeGroups, tileGroups);
             CursorActionTarget.InvalidateMap();
             ExitAction();
         }
