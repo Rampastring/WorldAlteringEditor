@@ -2,21 +2,25 @@
 using Rampastring.XNAUI;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations;
+using TSMapEditor.Rendering;
 using TSMapEditor.UI.Controls;
+using TSMapEditor.UI.CursorActions;
 using TSMapEditor.UI.Windows;
 
 namespace TSMapEditor.UI.TopBar
 {
     class TopBarMenu : EditorPanel
     {
-        public TopBarMenu(WindowManager windowManager, MutationManager mutationManager, Map map, WindowController windowController) : base(windowManager)
+        public TopBarMenu(WindowManager windowManager, MutationManager mutationManager, MapView mapView, Map map, WindowController windowController) : base(windowManager)
         {
             this.mutationManager = mutationManager;
+            this.mapView = mapView;
             this.map = map;
             this.windowController = windowController;
         }
 
         private readonly MutationManager mutationManager;
+        private readonly MapView mapView;
         private readonly Map map;
         private readonly WindowController windowController;
 
@@ -25,7 +29,6 @@ namespace TSMapEditor.UI.TopBar
         public override void Initialize()
         {
             Name = nameof(TopBarMenu);
-
 
             var fileContextMenu = new EditorContextMenu(WindowManager);
             fileContextMenu.Name = nameof(fileContextMenu);
@@ -80,6 +83,7 @@ namespace TSMapEditor.UI.TopBar
             // toolsContextMenu.AddItem("Options");
             toolsContextMenu.AddItem("Apply Impassable Overlay", () => windowController.AutoApplyImpassableOverlayWindow.Open(), null, null, null);
             toolsContextMenu.AddItem("Terrain Generator Options", () => windowController.TerrainGeneratorConfigWindow.Open(), null, null, null);
+            toolsContextMenu.AddItem("Generate Terrain", () => EnterTerrainGenerator(), null, null, null);
             // toolsContextMenu.AddItem("Tool Scripts");
 
             var toolsButton = new MenuButton(WindowManager, toolsContextMenu);
@@ -105,6 +109,21 @@ namespace TSMapEditor.UI.TopBar
 
             menuButtons = new MenuButton[] { fileButton, editButton, toolsButton, aboutButton };
             Array.ForEach(menuButtons, b => b.MouseEnter += MenuButton_MouseEnter);
+
+            KeyboardCommands.Instance.GenerateTerrain.Triggered += (s, e) => EnterTerrainGenerator();
+        }
+
+        private void EnterTerrainGenerator()
+        {
+            if (windowController.TerrainGeneratorConfigWindow.TerrainGeneratorConfiguration == null)
+            {
+                windowController.TerrainGeneratorConfigWindow.Open();
+                return;
+            }
+
+            var generateForestCursorAction = new GenerateForestCursorAction(mapView);
+            generateForestCursorAction.TerrainGeneratorConfiguration = windowController.TerrainGeneratorConfigWindow.TerrainGeneratorConfiguration;
+            mapView.CursorAction = generateForestCursorAction;
         }
 
         private void SaveAs()

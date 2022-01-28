@@ -138,7 +138,7 @@ namespace TSMapEditor.UI
             tileInfoDisplay.X = Width - tileInfoDisplay.Width;
             mapView.TileInfoDisplay = tileInfoDisplay;
 
-            var topBarMenu = new TopBarMenu(WindowManager, mutationManager, map, windowController);
+            var topBarMenu = new TopBarMenu(WindowManager, mutationManager, mapView, map, windowController);
             AddChild(topBarMenu);
             topBarMenu.Width = editorSidebar.Width;
 

@@ -820,19 +820,6 @@ namespace TSMapEditor.Rendering
                 CursorAction = pasteTerrainCursorAction;
             }
 
-            if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.F11)
-            {
-                if (windowController.TerrainGeneratorConfigWindow.TerrainGeneratorConfiguration == null)
-                {
-                    windowController.TerrainGeneratorConfigWindow.Open();
-                    return;
-                }
-
-                var generateForestCursorAction = new GenerateForestCursorAction(this);
-                generateForestCursorAction.TerrainGeneratorConfiguration = windowController.TerrainGeneratorConfigWindow.TerrainGeneratorConfiguration;
-                CursorAction = generateForestCursorAction;
-            }
-
             if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.F1)
             {
                 var text = new StringBuilder();
