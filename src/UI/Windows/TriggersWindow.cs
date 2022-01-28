@@ -146,7 +146,7 @@ namespace TSMapEditor.UI.Windows
 
             selectHouseWindow = new SelectHouseWindow(WindowManager, map);
             var houseDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectHouseWindow);
-            houseDarkeningPanel.Hidden += HouseDarkeningPAnel_Hidden;
+            houseDarkeningPanel.Hidden += HouseDarkeningPanel_Hidden;
 
             contextMenu = new XNAContextMenu(WindowManager);
             contextMenu.Name = nameof(contextMenu);
@@ -326,7 +326,7 @@ namespace TSMapEditor.UI.Windows
             }
         }
 
-        private void HouseDarkeningPAnel_Hidden(object sender, EventArgs e)
+        private void HouseDarkeningPanel_Hidden(object sender, EventArgs e)
         {
             if (selectHouseWindow.SelectedObject == null)
                 return;

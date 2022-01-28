@@ -498,6 +498,11 @@ namespace TSMapEditor.Models
             TerrainObjects.Add(terrainObject);
         }
 
+        public void RemoveTerrainObject(TerrainObject terrainObject)
+        {
+            RemoveTerrainObject(terrainObject.Position);
+        }
+
         public void RemoveTerrainObject(Point2D cellCoords)
         {
             var cell = GetTile(cellCoords);

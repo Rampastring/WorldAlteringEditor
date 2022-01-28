@@ -2,21 +2,23 @@
 using Rampastring.XNAUI;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TSMapEditor.GameMath;
-using TSMapEditor.Models;
+using TSMapEditor.Mutations.Classes;
 using TSMapEditor.Rendering;
 using TSMapEditor.Scripts;
 
 namespace TSMapEditor.UI.CursorActions
 {
+    /// <summary>
+    /// A cursor action that allows the user to select an area for terrain generation.
+    /// </summary>
     class GenerateForestCursorAction : CursorAction
     {
         public GenerateForestCursorAction(ICursorActionTarget cursorActionTarget) : base(cursorActionTarget)
         {
         }
+
+        public TerrainGeneratorConfiguration TerrainGeneratorConfiguration { get; set; }
 
         public Point2D? StartCellCoords { get; set; } = null;
 
@@ -47,26 +49,9 @@ namespace TSMapEditor.UI.CursorActions
                 }
             }
 
-            var terrainTypes = CursorActionTarget.Map.Rules.TerrainTypes;
-            var tileSets = CursorActionTarget.Map.TheaterInstance.Theater.TileSets;
+            var mutation = new TerrainGenerationMutation(CursorActionTarget.MutationTarget, cells, TerrainGeneratorConfiguration);
+            CursorActionTarget.MutationManager.PerformMutation(mutation);
 
-            var treeGroupTerrainTypes = terrainTypes.FindAll(tt => tt.ININame.StartsWith("TC0"));
-            var singleTreeTerrainTypes = new List<TerrainType>();
-            string[] conifers = new string[] { "T01", "T02", "T05", "T06", "T07", "T08", "T09", "T16" };
-            Array.ForEach(conifers, c => singleTreeTerrainTypes.Add(terrainTypes.Find(tt => tt.ININame == c)));
-
-            var treeGroups = new List<TerrainGeneratorTerrainTypeGroup>();
-            treeGroups.Add(new TerrainGeneratorTerrainTypeGroup(treeGroupTerrainTypes, 0.125, 0.0));
-            treeGroups.Add(new TerrainGeneratorTerrainTypeGroup(singleTreeTerrainTypes, 0.15, 0.15));
-
-            var tileGroups = new List<TerrainGeneratorTileGroup>();
-            tileGroups.Add(new TerrainGeneratorTileGroup(tileSets.Find(ts => ts.LoadedTileCount > 0 && ts.SetName == "Pebbles"), null, 0.3, 0.25));
-            tileGroups.Add(new TerrainGeneratorTileGroup(tileSets.Find(ts => ts.LoadedTileCount > 0 && ts.SetName == "Small Rocks"), null, 0.05, 0.0));
-            tileGroups.Add(new TerrainGeneratorTileGroup(tileSets.Find(ts => ts.LoadedTileCount > 0 && ts.SetName == "Debris/Dirt"), null, 0.02, 0.02));
-            tileGroups.Add(new TerrainGeneratorTileGroup(tileSets.Find(ts => ts.LoadedTileCount > 0 && ts.SetName == "Tall Grass"), null, 0.6, 0.3));
-
-            new ForestGenerator().Generate(CursorActionTarget.Map, cells, treeGroups, tileGroups);
-            CursorActionTarget.InvalidateMap();
             ExitAction();
         }
 

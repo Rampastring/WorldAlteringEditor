@@ -23,6 +23,7 @@ namespace TSMapEditor.UI.Windows
         public HousesWindow HousesWindow { get; private set; }
         public SaveMapAsWindow SaveMapAsWindow { get; private set; }
         public AutoApplyImpassableOverlayWindow AutoApplyImpassableOverlayWindow { get; private set; }
+        public TerrainGeneratorConfigWindow TerrainGeneratorConfigWindow { get; private set; }
 
         public void Initialize(XNAControl windowParentControl, Map map, EditorState editorState, ICursorActionTarget cursorActionTarget)
         {
@@ -64,6 +65,9 @@ namespace TSMapEditor.UI.Windows
 
             AutoApplyImpassableOverlayWindow = new AutoApplyImpassableOverlayWindow(windowParentControl.WindowManager, map, cursorActionTarget.MutationTarget);
             Windows.Add(AutoApplyImpassableOverlayWindow);
+
+            TerrainGeneratorConfigWindow = new TerrainGeneratorConfigWindow(windowParentControl.WindowManager, map);
+            Windows.Add(TerrainGeneratorConfigWindow);
 
             foreach (var window in Windows)
             {

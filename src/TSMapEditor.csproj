@@ -216,6 +216,7 @@
     <Compile Include="Mutations\Classes\MoveObjectMutation.cs" />
     <Compile Include="Mutations\Classes\OriginalCellTerrainData.cs" />
     <Compile Include="Mutations\Classes\OriginalOverlayInfo.cs" />
+    <Compile Include="Mutations\Classes\OriginalTerrainData.cs" />
     <Compile Include="Mutations\Classes\PasteTerrainMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceBuildingMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceCellTagMutation.cs" />
@@ -227,6 +228,7 @@
     <Compile Include="Mutations\Classes\PlaceTerrainObjectMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceVehicleMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceWaypointMutation.cs" />
+    <Compile Include="Mutations\Classes\TerrainGenerationMutation.cs" />
     <Compile Include="Mutations\Mutation.cs" />
     <Compile Include="Mutations\MutationManager.cs" />
     <Compile Include="Program.cs" />
@@ -238,7 +240,6 @@
     <Compile Include="Rendering\Refresh.cs" />
     <Compile Include="Rendering\TheaterGraphics.cs" />
     <Compile Include="Scripts\ApplyAnimatedWaterScript.cs" />
-    <Compile Include="Scripts\ForestGenerator.cs" />
     <Compile Include="Settings\BoolSetting.cs" />
     <Compile Include="Settings\IntSetting.cs" />
     <Compile Include="Settings\SettingBase.cs" />
@@ -324,10 +325,12 @@
     <Compile Include="UI\Windows\SelectTagWindow.cs" />
     <Compile Include="UI\Windows\SelectTaskForceWindow.cs" />
     <Compile Include="UI\Windows\SelectTeamTypeWindow.cs" />
+    <Compile Include="UI\Windows\SelectTileSetWindow.cs" />
     <Compile Include="UI\Windows\SelectTriggerWindow.cs" />
     <Compile Include="UI\Windows\StructureOptionsWindow.cs" />
     <Compile Include="UI\Windows\TaskforcesWindow.cs" />
     <Compile Include="UI\Windows\TeamTypesWindow.cs" />
+    <Compile Include="UI\Windows\TerrainGeneratorConfigWindow.cs" />
     <Compile Include="UI\Windows\TriggersWindow.cs" />
     <Compile Include="UI\Windows\VehicleOptionsWindow.cs" />
     <Compile Include="UI\Windows\WindowController.cs" />
@@ -368,6 +371,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Config\UI\SelectTeamTypeWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\UI\SelectTileSetWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Config\UI\SelectTriggerWindow.ini">

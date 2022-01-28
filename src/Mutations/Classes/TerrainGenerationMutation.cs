@@ -1,15 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
+using TSMapEditor.Scripts;
 
-namespace TSMapEditor.Scripts
+namespace TSMapEditor.Mutations.Classes
 {
+    public class TerrainGeneratorConfiguration
+    {
+        public TerrainGeneratorConfiguration(List<TerrainGeneratorTerrainTypeGroup> terrainTypeGroups, List<TerrainGeneratorTileGroup> tileGroups)
+        {
+            TerrainTypeGroups = terrainTypeGroups;
+            TileGroups = tileGroups;
+        }
+
+        public List<TerrainGeneratorTerrainTypeGroup> TerrainTypeGroups { get; }
+        public List<TerrainGeneratorTileGroup> TileGroups { get; }
+    }
+
     public class TerrainGeneratorTerrainTypeGroup
     {
         public TerrainGeneratorTerrainTypeGroup(List<TerrainType> terrainTypes, double openChance, double overlapChance)
@@ -40,21 +51,63 @@ namespace TSMapEditor.Scripts
         public double OverlapChance { get; }
     }
 
-    public class ForestGenerator
+    public class TerrainGenerationMutation : Mutation
     {
-        private Map map;
-        private List<Point2D> cells = new List<Point2D>();
+        public TerrainGenerationMutation(IMutationTarget mutationTarget, List<Point2D> cells, TerrainGeneratorConfiguration configuration) : base(mutationTarget)
+        {
+            seed = DateTime.Now.Millisecond;
+            random = new Random();
+            this.cells = cells;
+            this.terrainGeneratorConfiguration = configuration;
+        }
+
+        private readonly int seed;
+        private readonly List<Point2D> cells;
+        private readonly TerrainGeneratorConfiguration terrainGeneratorConfiguration;
+
         private HashSet<Point2D> occupiedCells = new HashSet<Point2D>();
         private Random random;
 
-        public void Generate(Map map, List<Point2D> cells, List<TerrainGeneratorTerrainTypeGroup> terrainTypeGroups, List<TerrainGeneratorTileGroup> tileGroups)
+        private List<OriginalTerrainData> undoData;
+        private List<TerrainObject> placedTerrainObjects;
+
+        public override void Perform()
         {
-            this.map = map;
-            this.cells = cells;
-            
-            random = new Random();
+            Generate();
+        }
+
+        public override void Undo()
+        {
+            foreach (var originalTerrainData in undoData)
+            {
+                var mapCell = MutationTarget.Map.GetTile(originalTerrainData.CellCoords);
+
+                mapCell.TileImage = null;
+                mapCell.TileIndex = originalTerrainData.TileIndex;
+                mapCell.SubTileIndex = (byte)originalTerrainData.SubTileIndex;
+            }
+
+            foreach (var terrainObject in placedTerrainObjects)
+            {
+                MutationTarget.Map.RemoveTerrainObject(terrainObject);
+            }
+
+            MutationTarget.InvalidateMap();
+
+            occupiedCells.Clear();
+        }
+
+        public void Generate()
+        {
+            random = new Random(seed);
+
+            undoData = new List<OriginalTerrainData>();
+            placedTerrainObjects = new List<TerrainObject>();
 
             // Place terrain objects
+
+            var terrainTypeGroups = terrainGeneratorConfiguration.TerrainTypeGroups;
+            var tileGroups = terrainGeneratorConfiguration.TileGroups;
 
             foreach (var terrainTypeGroup in terrainTypeGroups)
             {
@@ -84,7 +137,7 @@ namespace TSMapEditor.Scripts
                     else
                         indexInSet = regularTileGroup.TileIndicesInSet[random.Next(0, regularTileGroup.TileIndicesInSet.Count)];
                     int totalIndex = regularTileGroup.TileSet.StartTileIndex + indexInSet;
-                    var tile = map.TheaterInstance.GetTile(totalIndex);
+                    var tile = MutationTarget.Map.TheaterInstance.GetTile(totalIndex);
 
                     double chance = regularTileGroup.OpenChance;
                     if (IsPlacingTileOnOccupiedArea(cellCoords, tile))
@@ -95,7 +148,7 @@ namespace TSMapEditor.Scripts
                         if (!AllowPlacingTileOnCell(cellCoords, tile))
                             continue;
 
-                        map.PlaceTerrainTileAt(tile, cellCoords);
+                        PlaceTerrainTileAt(tile, cellCoords);
                     }
                 }
             }
@@ -111,11 +164,29 @@ namespace TSMapEditor.Scripts
             minX--;
             maxX++;
             ApplyAutoLAT(minX, minY, maxX, maxY);
+            MutationTarget.InvalidateMap();
         }
 
-        private TileSet FindTileSet(string tileSetUIName)
+        private void PlaceTerrainTileAt(ITileImage tile, Point2D cellCoords)
         {
-            return map.TheaterInstance.Theater.TileSets.Find(ts => ts.SetName == tileSetUIName && ts.FileName != "blank");
+            for (int i = 0; i < tile.SubTileCount; i++)
+            {
+                var subTile = tile.GetSubTile(i);
+                if (subTile.TmpImage == null)
+                    continue;
+
+                Point2D offset = tile.GetSubTileCoordOffset(i).Value;
+
+                var mapTile = MutationTarget.Map.GetTile(cellCoords + offset);
+                if (mapTile == null)
+                    continue;
+
+                undoData.Add(new OriginalTerrainData(mapTile.TileIndex, mapTile.SubTileIndex, cellCoords + offset));
+
+                mapTile.TileImage = null;
+                mapTile.TileIndex = tile.TileID;
+                mapTile.SubTileIndex = (byte)i;
+            }
         }
 
         private void ApplyAutoLAT(int minX, int minY, int maxX, int maxY)
@@ -144,20 +215,20 @@ namespace TSMapEditor.Scripts
             {
                 for (int x = minX; x < maxX; x++)
                 {
-                    var mapTile = map.GetTile(x, y);
+                    var mapTile = MutationTarget.Map.GetTile(x, y);
                     if (mapTile == null)
                         continue;
 
-                    int tileSetIndex = map.TheaterInstance.GetTileSetId(mapTile.TileIndex);
+                    int tileSetIndex = MutationTarget.Map.TheaterInstance.GetTileSetId(mapTile.TileIndex);
                     // Don't auto-lat ground that is a base for our placed ground type
                     // if ((baseTileSet != null && tileSetIndex == baseTileSet.Index) ||
                     //     (altBaseTileSet != null && tileSetIndex == altBaseTileSet.Index))
                     //     return;
 
-                    var autoLatGround = map.TheaterInstance.Theater.LATGrounds.Find(g => g.GroundTileSet.Index == tileSetIndex || g.TransitionTileSet.Index == tileSetIndex);
+                    var autoLatGround = MutationTarget.Map.TheaterInstance.Theater.LATGrounds.Find(g => g.GroundTileSet.Index == tileSetIndex || g.TransitionTileSet.Index == tileSetIndex);
                     if (autoLatGround != null)
                     {
-                        int autoLatIndex = map.GetAutoLATIndex(mapTile, autoLatGround.GroundTileSet.Index, autoLatGround.TransitionTileSet.Index);
+                        int autoLatIndex = MutationTarget.Map.GetAutoLATIndex(mapTile, autoLatGround.GroundTileSet.Index, autoLatGround.TransitionTileSet.Index);
                         if (autoLatIndex == -1)
                         {
                             mapTile.TileIndex = autoLatGround.GroundTileSet.StartTileIndex;
@@ -184,7 +255,7 @@ namespace TSMapEditor.Scripts
 
                 Point2D offset = tile.GetSubTileCoordOffset(i).Value;
 
-                var mapTile = map.GetTile(cellCoords + offset);
+                var mapTile = MutationTarget.Map.GetTile(cellCoords + offset);
 
                 if (mapTile == null || !mapTile.IsClearGround())
                     return false;
@@ -212,7 +283,7 @@ namespace TSMapEditor.Scripts
 
         private bool AllowTreeGroupOnCell(Point2D cellCoords, TerrainType treeGroup)
         {
-            var cell = map.GetTile(cellCoords);
+            var cell = MutationTarget.Map.GetTile(cellCoords);
             if (cell == null)
                 return false;
 
@@ -225,7 +296,7 @@ namespace TSMapEditor.Scripts
             foreach (var offset in treeGroup.ImpassableCells)
             {
                 var otherCellCoords = cellCoords + offset;
-                var otherCell = map.GetTile(otherCellCoords);
+                var otherCell = MutationTarget.Map.GetTile(otherCellCoords);
                 if (otherCell == null)
                     continue;
 
@@ -241,8 +312,9 @@ namespace TSMapEditor.Scripts
 
         private void PlaceTreeGroupOnCell(Point2D cellCoords, TerrainType treeGroup)
         {
-            var cell = map.GetTile(cellCoords);
-            map.AddTerrainObject(new TerrainObject(treeGroup, cellCoords));
+            var cell = MutationTarget.Map.GetTile(cellCoords);
+            var terrainObject = new TerrainObject(treeGroup, cellCoords);
+            MutationTarget.Map.AddTerrainObject(new TerrainObject(treeGroup, cellCoords));
 
             if (treeGroup.ImpassableCells != null)
             {
@@ -253,6 +325,8 @@ namespace TSMapEditor.Scripts
             {
                 occupiedCells.Add(cellCoords);
             }
+
+            placedTerrainObjects.Add(terrainObject);
         }
     }
 }

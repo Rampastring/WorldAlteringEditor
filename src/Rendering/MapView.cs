@@ -130,7 +130,9 @@ namespace TSMapEditor.Rendering
         private CopyTerrainCursorAction copyTerrainCursorAction;
         private PasteTerrainCursorAction pasteTerrainCursorAction;
 
-        public void AddRefreshPoint(Point2D point, int size = 10)
+        private Texture2D mapWideOverlayTexture;
+
+        public void AddRefreshPoint(Point2D point, int size = 1)
         {
             // if (!mapInvalidated)
             //     refreshes.Add(new RefreshPoint(point, size));
@@ -153,6 +155,10 @@ namespace TSMapEditor.Rendering
         public override void Initialize()
         {
             base.Initialize();
+
+            const string MapWideOverlayTextureName = "mapwideoverlay.png";
+            if (AssetLoader.AssetExists(MapWideOverlayTextureName))
+                mapWideOverlayTexture = AssetLoader.LoadTexture(MapWideOverlayTextureName);
 
             mapRenderTarget = CreateFullMapRenderTarget();
             objectRenderTarget = CreateFullMapRenderTarget();
@@ -815,6 +821,19 @@ namespace TSMapEditor.Rendering
                 CursorAction = pasteTerrainCursorAction;
             }
 
+            if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.F11)
+            {
+                if (windowController.TerrainGeneratorConfigWindow.TerrainGeneratorConfiguration == null)
+                {
+                    windowController.TerrainGeneratorConfigWindow.Open();
+                    return;
+                }
+
+                var generateForestCursorAction = new GenerateForestCursorAction(this);
+                generateForestCursorAction.TerrainGeneratorConfiguration = windowController.TerrainGeneratorConfigWindow.TerrainGeneratorConfiguration;
+                CursorAction = generateForestCursorAction;
+            }
+
             if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.F1)
             {
                 var text = new StringBuilder();
@@ -985,6 +1004,11 @@ namespace TSMapEditor.Rendering
             {
                 CursorAction.PostMapDraw(tileUnderCursor.CoordsToPoint());
                 CursorAction.DrawPreview(tileUnderCursor.CoordsToPoint(), cameraTopLeftPoint);
+            }
+
+            if (mapWideOverlayTexture != null)
+            {
+                Renderer.DrawTexture(mapWideOverlayTexture, new Rectangle(-cameraTopLeftPoint.X, -cameraTopLeftPoint.Y, mapRenderTarget.Width, mapRenderTarget.Height), Color.White * 0.25f);
             }
 
             DrawCursorTile();

@@ -11,17 +11,19 @@ namespace TSMapEditor.UI.Controls
         }
 
         public int DefaultValue { get; set; } = 0;
+        public double DoubleDefaultValue { get; set; } = 0.0;
+
+        public bool AllowDecimals { get; set; }
 
         protected override bool AllowCharacterInput(char character)
         {
-            return (character >= '0' && character <= '9') || (character == '-' && Text.Length == 0);
+            return (character >= '0' && character <= '9') || (character == '-' && Text.Length == 0) || (AllowDecimals && character == '.');
         }
 
         public int Value
         {
             get
             {
-                Conversions.IntFromString(Text, DefaultValue);
                 int firstNonDigitIndex = -1;
                 int i = 0;
                 while (i < Text.Length)
@@ -39,6 +41,31 @@ namespace TSMapEditor.UI.Controls
                     return Conversions.IntFromString(Text, DefaultValue);
 
                 return Conversions.IntFromString(Text.Substring(0, firstNonDigitIndex), DefaultValue);
+            }
+            set => Text = value.ToString(CultureInfo.InvariantCulture);
+        }
+
+        public double DoubleValue
+        {
+            get
+            {
+                int firstNonDigitIndex = -1;
+                int i = 0;
+                while (i < Text.Length)
+                {
+                    if (!char.IsDigit(Text[i]) && Text[i] != '-' && Text[i] != '.')
+                    {
+                        firstNonDigitIndex = i;
+                        break;
+                    }
+
+                    i++;
+                }
+
+                if (firstNonDigitIndex == -1)
+                    return Conversions.DoubleFromString(Text, DoubleDefaultValue);
+
+                return Conversions.DoubleFromString(Text.Substring(0, firstNonDigitIndex), DefaultValue);
             }
             set => Text = value.ToString(CultureInfo.InvariantCulture);
         }
