@@ -10,11 +10,14 @@ namespace TSMapEditor.Rendering
 {
     class Refresh
     {
+        private const int RedrawObjectsMax = 1000;
+
         public Refresh(Map map)
         {
             this.map = map;
         }
 
+        
         private readonly Map map;
 
         public Dictionary<int, MapTile> tilesToRedraw = new Dictionary<int, MapTile>();
@@ -22,6 +25,9 @@ namespace TSMapEditor.Rendering
 
         public void RedrawFromObject(GameObject gameObject)
         {
+            if (objectsToRedraw.Count >= RedrawObjectsMax)
+                return;
+
             int hash = GetGameObjectHash(gameObject);
             if (objectsToRedraw.ContainsKey(hash))
                 return;
@@ -32,6 +38,8 @@ namespace TSMapEditor.Rendering
             if (gameObject.WhatAmI() == RTTIType.Infantry)
                 redrawArea = 0;
             else if (gameObject.WhatAmI() == RTTIType.Unit || gameObject.WhatAmI() == RTTIType.Aircraft)
+                redrawArea = 1;
+            else if (gameObject.WhatAmI() == RTTIType.Terrain)
                 redrawArea = 1;
 
             for (int y = -redrawArea; y <= redrawArea; y++)
@@ -60,6 +68,9 @@ namespace TSMapEditor.Rendering
 
         private void RedrawTile(MapTile mapTile)
         {
+            if (objectsToRedraw.Count >= RedrawObjectsMax)
+                return;
+
             if (AddTileToRedraw(mapTile))
             {
                 // Point2D eastCellCoords = mapTile.CoordsToPoint() + new Point2D(1, -1);
