@@ -5,7 +5,6 @@ using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
-using TSMapEditor.Scripts;
 
 namespace TSMapEditor.Mutations.Classes
 {

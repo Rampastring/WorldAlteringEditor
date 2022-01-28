@@ -1,7 +1,4 @@
-﻿using Rampastring.Tools;
-using System;
-
-namespace TSMapEditor.Models
+﻿namespace TSMapEditor.Models
 {
     public abstract class AbstractObject : INIDefineable
     {

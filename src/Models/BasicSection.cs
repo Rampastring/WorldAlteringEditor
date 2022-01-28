@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TSMapEditor.Models
+﻿namespace TSMapEditor.Models
 {
     /// <summary>
     /// Contains information specified in the [Basic] section of a map.

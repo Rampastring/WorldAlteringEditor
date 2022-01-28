@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using TSMapEditor.GameMath;
 using TSMapEditor.Mutations.Classes;
 using TSMapEditor.Rendering;
-using TSMapEditor.Scripts;
 
 namespace TSMapEditor.UI.CursorActions
 {

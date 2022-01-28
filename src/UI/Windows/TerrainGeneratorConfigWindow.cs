@@ -8,7 +8,6 @@ using System.Linq;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations.Classes;
-using TSMapEditor.Scripts;
 using TSMapEditor.UI.Controls;
 
 namespace TSMapEditor.UI.Windows

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TSMapEditor.Models
+﻿namespace TSMapEditor.Models
 {
     /// <summary>
     /// Could also be called 'vehicle', but let's respect the original game's naming.
