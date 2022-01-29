@@ -2,11 +2,20 @@
 
 namespace TSMapEditor.Models
 {
+    public interface IMovable
+    {
+        Point2D Position { get; set; }
+
+        RTTIType WhatAmI();
+
+        bool IsTechno();
+    }
+
     /// <summary>
     /// A base class for game objects.
     /// Represents ObjectClass in the original game's class hierarchy.
     /// </summary>
-    public abstract class GameObject : AbstractObject
+    public abstract class GameObject : AbstractObject, IMovable
     {
         public Point2D Position { get; set; }
 

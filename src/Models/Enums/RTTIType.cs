@@ -34,6 +34,7 @@
         ScriptType,
         TeamType,
         OverlayType,
-        Overlay
+        Overlay,
+        Waypoint
     }
 }

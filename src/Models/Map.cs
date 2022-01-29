@@ -515,25 +515,32 @@ namespace TSMapEditor.Models
             AddTerrainObject(terrainObject);
         }
 
+        public void MoveWaypoint(Waypoint waypoint, Point2D newCoords)
+        {
+            RemoveWaypoint(waypoint);
+            waypoint.Position = newCoords;
+            AddWaypoint(waypoint);
+        }
+
         /// <summary>
         /// Determines whether an object can be moved to a specific location.
         /// </summary>
-        /// <param name="gameObject">The type of the object to move.</param>
+        /// <param name="gameObject">The object to move.</param>
         /// <param name="newCoords">The new coordinates of the object.</param>
         /// <returns>True if the object can be moved, otherwise false.</returns>
-        public bool CanMoveObject(GameObject gameObject, Point2D newCoords)
+        public bool CanMoveObject(IMovable movable, Point2D newCoords)
         {
-            if (gameObject.WhatAmI() == RTTIType.Building)
+            if (movable.WhatAmI() == RTTIType.Building)
             {
                 bool canPlace = true;
 
-                ((Structure)gameObject).ObjectType.ArtConfig.DoForFoundationCoords(offset =>
+                ((Structure)movable).ObjectType.ArtConfig.DoForFoundationCoords(offset =>
                 {
                     MapTile foundationCell = GetTile(newCoords + offset);
                     if (foundationCell == null)
                         return;
 
-                    if (foundationCell.Structure != null && foundationCell.Structure != gameObject)
+                    if (foundationCell.Structure != null && foundationCell.Structure != movable)
                         canPlace = false;
                 });
 
@@ -542,7 +549,10 @@ namespace TSMapEditor.Models
             }
 
             MapTile cell = GetTile(newCoords);
-            return cell.CanAddObject(gameObject);
+            if (movable.WhatAmI() == RTTIType.Waypoint)
+                return cell.Waypoint == null;
+
+            return cell.CanAddObject((GameObject)movable);
         }
 
         public void DeleteObjectFromCell(Point2D cellCoords)

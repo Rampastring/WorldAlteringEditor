@@ -111,7 +111,7 @@ namespace TSMapEditor.Rendering
 
         private bool isDraggingObject = false;
         private bool isRotatingObject = false;
-        private GameObject draggedOrRotatedObject = null;
+        private IMovable draggedOrRotatedObject = null;
 
         // For right-click scrolling
         private bool isRightClickScrolling = false;
@@ -663,16 +663,28 @@ namespace TSMapEditor.Rendering
                 }
             }
 
-            if (CursorAction == null && tileUnderCursor != null && Cursor.LeftDown && !isDraggingObject && !isRotatingObject && tileUnderCursor.GetObject() != null)
-            {
-                draggedOrRotatedObject = tileUnderCursor.GetObject();
+           
 
-                if (draggedOrRotatedObject != null)
+            if (CursorAction == null && tileUnderCursor != null && Cursor.LeftDown && !isDraggingObject && !isRotatingObject)
+            {
+                var cellObject = tileUnderCursor.GetObject();
+
+                if (cellObject != null)
                 {
-                    if (KeyboardCommands.Instance.RotateUnit.AreKeysDown(Keyboard))
-                        isRotatingObject = true;
-                    else
-                        isDraggingObject = true;
+                    draggedOrRotatedObject = tileUnderCursor.GetObject();
+
+                    if (draggedOrRotatedObject != null)
+                    {
+                        if (KeyboardCommands.Instance.RotateUnit.AreKeysDown(Keyboard))
+                            isRotatingObject = true;
+                        else
+                            isDraggingObject = true;
+                    }
+                }
+                else if (tileUnderCursor.Waypoint != null)
+                {
+                    draggedOrRotatedObject = tileUnderCursor.Waypoint;
+                    isDraggingObject = true;
                 }
             }
 

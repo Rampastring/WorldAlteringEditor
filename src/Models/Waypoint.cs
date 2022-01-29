@@ -3,7 +3,7 @@ using TSMapEditor.GameMath;
 
 namespace TSMapEditor.Models
 {
-    public class Waypoint
+    public class Waypoint : AbstractObject, IMovable
     {
         private const int Coefficient = 1000;
 
@@ -26,5 +26,7 @@ namespace TSMapEditor.Models
 
             return new Waypoint() { Identifier = waypointIndex, Position = coords.Value };
         }
+
+        public override RTTIType WhatAmI() => RTTIType.Waypoint;
     }
 }

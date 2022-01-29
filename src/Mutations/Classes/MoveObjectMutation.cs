@@ -9,35 +9,38 @@ namespace TSMapEditor.Mutations.Classes
     /// </summary>
     public class MoveObjectMutation : Mutation
     {
-        public MoveObjectMutation(IMutationTarget mutationTarget, GameObject gameObject, Point2D newPosition) : base(mutationTarget)
+        public MoveObjectMutation(IMutationTarget mutationTarget, IMovable movable, Point2D newPosition) : base(mutationTarget)
         {
-            this.gameObject = gameObject;
-            oldPosition = gameObject.Position;
+            this.movable = movable;
+            oldPosition = movable.Position;
             this.newPosition = newPosition;
         }
 
-        private GameObject gameObject;
+        private IMovable movable;
         private Point2D oldPosition;
         private Point2D newPosition;
 
         private void MoveObject(Point2D position)
         {
-            switch (gameObject.WhatAmI())
+            switch (movable.WhatAmI())
             {
                 case RTTIType.Aircraft:
-                    MutationTarget.Map.MoveAircraft((Aircraft)gameObject, position);
+                    MutationTarget.Map.MoveAircraft((Aircraft)movable, position);
                     break;
                 case RTTIType.Building:
-                    MutationTarget.Map.MoveBuilding((Structure)gameObject, position);
+                    MutationTarget.Map.MoveBuilding((Structure)movable, position);
                     break;
                 case RTTIType.Unit:
-                    MutationTarget.Map.MoveUnit((Unit)gameObject, position);
+                    MutationTarget.Map.MoveUnit((Unit)movable, position);
                     break;
                 case RTTIType.Infantry:
-                    MutationTarget.Map.MoveInfantry((Infantry)gameObject, position);
+                    MutationTarget.Map.MoveInfantry((Infantry)movable, position);
                     break;
                 case RTTIType.Terrain:
-                    MutationTarget.Map.MoveTerrainObject((TerrainObject)gameObject, position);
+                    MutationTarget.Map.MoveTerrainObject((TerrainObject)movable, position);
+                    break;
+                case RTTIType.Waypoint:
+                    MutationTarget.Map.MoveWaypoint((Waypoint)movable, position);
                     break;
             }
 
