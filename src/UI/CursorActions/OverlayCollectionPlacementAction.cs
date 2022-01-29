@@ -61,6 +61,18 @@ namespace TSMapEditor.UI.CursorActions
 
                 OverlayType overlayType = OverlayCollection.OverlayTypes[randomizedOverlayTypeIndexes[tileIndex]];
 
+                // Do not place tiberium on impassable tiles
+                if (overlayType.Tiberium)
+                {
+                    ITileImage tileImage = CursorActionTarget.Map.TheaterInstance.GetTile(tile.TileIndex);
+                    ISubTileImage subCellImage = tileImage.GetSubTile(tile.SubTileIndex);
+                    if (Helpers.IsLandTypeImpassable(subCellImage.TmpImage.TerrainType))
+                    {
+                        tileIndex++;
+                        return;
+                    }
+                }
+
                 // Apply new overlay info
                 if (tile.Overlay == null)
                 {
@@ -93,6 +105,17 @@ namespace TSMapEditor.UI.CursorActions
                 var tile = CursorActionTarget.Map.GetTile(cellCoords + offset);
                 if (tile == null)
                     return;
+
+                if (OverlayCollection.OverlayTypes[0].Tiberium)
+                {
+                    ITileImage tileImage = CursorActionTarget.Map.TheaterInstance.GetTile(tile.TileIndex);
+                    ISubTileImage subCellImage = tileImage.GetSubTile(tile.SubTileIndex);
+                    if (Helpers.IsLandTypeImpassable(subCellImage.TmpImage.TerrainType))
+                    {
+                        index++;
+                        return;
+                    }
+                }
 
                 var originalOverlayData = originalOverlay[index];
 
