@@ -95,7 +95,7 @@ namespace TSMapEditor.UI
             lbTileSetList.SelectedIndex--;
         }
 
-        public override void OnMouseMove()
+        public override void OnMouseLeftDown()
         {
             if (IsActive)
             {
@@ -107,7 +107,7 @@ namespace TSMapEditor.UI
                 }
             }
 
-            base.OnMouseMove();
+            base.OnMouseLeftDown();
         }
 
         public override void Update(GameTime gameTime)
