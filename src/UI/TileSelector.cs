@@ -104,6 +104,7 @@ namespace TSMapEditor.UI
                 if (!isBeingDragged && cursorPoint.Y > 0 && cursorPoint.Y < ResizeDragThreshold && Cursor.LeftDown)
                 {
                     isBeingDragged = true;
+                    previousMouseY = GetCursorPoint().Y;
                 }
             }
 
