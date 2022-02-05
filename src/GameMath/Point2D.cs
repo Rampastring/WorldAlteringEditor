@@ -67,5 +67,16 @@ namespace TSMapEditor.GameMath
         {
             return (float)Math.Atan2(Y, X);
         }
+
+        public byte[] GetData()
+        {
+            byte[] buffer = new byte[sizeof(int) * 2];
+
+            byte[] xb = BitConverter.GetBytes(X);
+            byte[] yb = BitConverter.GetBytes(Y);
+            Array.Copy(xb, buffer, xb.Length);
+            Array.Copy(yb, 0, buffer, xb.Length, yb.Length);
+            return buffer;
+        }
     }
 }

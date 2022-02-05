@@ -19,6 +19,7 @@ namespace TSMapEditor.CCEngine
         public int NonMarbleMadness { get; set; } = -1;
         public bool AllowTiberium { get; set; }
         public bool AllowToPlace { get; set; } = true;
+        public bool Only1x1 { get; set; }
 
         /// <summary>
         /// The unique tile ID of the first tile of this tileset.
@@ -33,6 +34,8 @@ namespace TSMapEditor.CCEngine
         public void Read(IniSection iniSection)
         {
             ReadPropertiesFromIniSection(iniSection);
+            if (SetName.ToLowerInvariant().Contains("cliffs"))
+                Only1x1 = true;
         }
     }
 }

@@ -59,6 +59,9 @@ namespace TSMapEditor.UI.TopBar
 
             var editContextMenu = new EditorContextMenu(WindowManager);
             editContextMenu.Name = nameof(editContextMenu);
+            editContextMenu.AddItem("Configure Copied Objects", () => windowController.CopiedEntryTypesWindow.Open(), null, null, null);
+            editContextMenu.AddItem("Copy", () => KeyboardCommands.Instance.Copy.DoTrigger(), null, null, null);
+            editContextMenu.AddItem("Paste", () => KeyboardCommands.Instance.Paste.DoTrigger(), null, null, null);
             editContextMenu.AddItem("Undo", () => mutationManager.Undo(), () => mutationManager.CanUndo(), null, null);
             editContextMenu.AddItem("Redo", () => mutationManager.Redo(), () => mutationManager.CanRedo(), null, null);
             editContextMenu.AddItem(" ", null, () => false, null, null);
@@ -84,6 +87,7 @@ namespace TSMapEditor.UI.TopBar
             toolsContextMenu.AddItem("Apply Impassable Overlay", () => windowController.AutoApplyImpassableOverlayWindow.Open(), null, null, null);
             toolsContextMenu.AddItem("Terrain Generator Options", () => windowController.TerrainGeneratorConfigWindow.Open(), null, null, null);
             toolsContextMenu.AddItem("Generate Terrain", () => EnterTerrainGenerator(), null, null, null);
+            toolsContextMenu.AddItem("View Minimap", () => windowController.MinimapWindow.Open(), null, null, null);
             // toolsContextMenu.AddItem("Tool Scripts");
 
             var toolsButton = new MenuButton(WindowManager, toolsContextMenu);

@@ -142,6 +142,12 @@ namespace TSMapEditor.UI.TopBar
 
             editorState.AutoLATEnabledChanged += EditorState_AutoLATEnabledChanged;
             editorState.OnlyPaintOnClearGroundChanged += EditorState_OnlyPaintOnClearGroundChanged;
+            editorState.BrushSizeChanged += EditorState_BrushSizeChanged;
+        }
+
+        private void EditorState_BrushSizeChanged(object sender, EventArgs e)
+        {
+            ddBrushSize.SelectedIndex = map.EditorConfig.BrushSizes.FindIndex(bs => bs == editorState.BrushSize);
         }
 
         private void BtnDeletionMode_LeftClick(object sender, EventArgs e)

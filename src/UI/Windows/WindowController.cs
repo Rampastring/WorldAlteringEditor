@@ -24,6 +24,8 @@ namespace TSMapEditor.UI.Windows
         public SaveMapAsWindow SaveMapAsWindow { get; private set; }
         public AutoApplyImpassableOverlayWindow AutoApplyImpassableOverlayWindow { get; private set; }
         public TerrainGeneratorConfigWindow TerrainGeneratorConfigWindow { get; private set; }
+        public MegamapWindow MinimapWindow { get; private set; }
+        public CopiedEntryTypesWindow CopiedEntryTypesWindow { get; private set; }
 
         public void Initialize(XNAControl windowParentControl, Map map, EditorState editorState, ICursorActionTarget cursorActionTarget)
         {
@@ -68,6 +70,14 @@ namespace TSMapEditor.UI.Windows
 
             TerrainGeneratorConfigWindow = new TerrainGeneratorConfigWindow(windowParentControl.WindowManager, map);
             Windows.Add(TerrainGeneratorConfigWindow);
+
+            MinimapWindow = new MegamapWindow(windowParentControl.WindowManager, cursorActionTarget.MegamapTexture);
+            MinimapWindow.Width = 300;
+            MinimapWindow.Height = 150;
+            Windows.Add(MinimapWindow);
+
+            CopiedEntryTypesWindow = new CopiedEntryTypesWindow(windowParentControl.WindowManager);
+            Windows.Add(CopiedEntryTypesWindow);
 
             foreach (var window in Windows)
             {

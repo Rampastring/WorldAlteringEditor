@@ -39,5 +39,7 @@
         public const float RemapBrightenFactor = 1.25f;
 
         public const bool DrawShadows = true;
+
+        public const string ClipboardMapDataFormatValue = "ScenarioEditorCopiedMapData";
     }
 }

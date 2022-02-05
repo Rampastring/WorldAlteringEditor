@@ -16,6 +16,7 @@ namespace TSMapEditor.Rendering
         public event EventHandler ObjectOwnerChanged;
         public event EventHandler AutoLATEnabledChanged;
         public event EventHandler OnlyPaintOnClearGroundChanged;
+        public event EventHandler BrushSizeChanged;
 
         public bool IsMarbleMadness { get; set; } = false;
 
@@ -36,6 +37,9 @@ namespace TSMapEditor.Rendering
                     _cursorAction = value;
                     if (value != null)
                         value.OnExitingAction += CursorAction_OnExitingAction;
+
+                    if (_cursorAction != null)
+                        _cursorAction.OnActionEnter();
 
                     CursorActionChanged?.Invoke(this, EventArgs.Empty);
                 }
@@ -61,7 +65,19 @@ namespace TSMapEditor.Rendering
             }
         }
 
-        public BrushSize BrushSize { get; set; } = new BrushSize(1, 1);
+        private BrushSize _brushSize;
+        public BrushSize BrushSize 
+        {
+            get => _brushSize; 
+            set
+            {
+                if (_brushSize != value)
+                {
+                    _brushSize = value;
+                    BrushSizeChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
 
         public Randomizer Randomizer { get; } = new Randomizer();
 
@@ -93,6 +109,6 @@ namespace TSMapEditor.Rendering
             }
         }
 
-        public List<CopiedTerrainData> CopiedTerrainData { get; } = new List<CopiedTerrainData>();
+        public CopiedMapData CopiedMapData { get; set; }
     }
 }

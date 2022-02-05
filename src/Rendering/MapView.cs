@@ -50,7 +50,8 @@ namespace TSMapEditor.Rendering
         Randomizer Randomizer { get; }
         bool AutoLATEnabled { get; }
         bool OnlyPaintOnClearGround { get; }
-        List<CopiedTerrainData> CopiedTerrainData { get; }
+        CopiedMapData CopiedMapData { get; set; }
+        Texture2D MegamapTexture { get; }
     }
 
     struct RefreshPoint
@@ -88,7 +89,12 @@ namespace TSMapEditor.Rendering
         public Randomizer Randomizer => EditorState.Randomizer;
         public bool AutoLATEnabled => EditorState.AutoLATEnabled;
         public bool OnlyPaintOnClearGround => EditorState.OnlyPaintOnClearGround;
-        public List<CopiedTerrainData> CopiedTerrainData => EditorState.CopiedTerrainData;
+        public CopiedMapData CopiedMapData 
+        {
+            get => EditorState.CopiedMapData;
+            set => EditorState.CopiedMapData = value;
+        }
+        public Texture2D MegamapTexture => mapRenderTarget;
 
         public TileInfoDisplay TileInfoDisplay { get; set; }
         
@@ -171,11 +177,25 @@ namespace TSMapEditor.Rendering
             KeyboardCommands.Instance.ViewMegamap.Triggered += (s, e) =>
             {
                 var mmw = new MegamapWindow(WindowManager, mapRenderTarget);
+                mmw.Width = WindowManager.RenderResolutionX;
+                mmw.Height = WindowManager.RenderResolutionY;
                 WindowManager.AddAndInitializeControl(mmw);
             };
 
             copyTerrainCursorAction = new CopyTerrainCursorAction(this);
             pasteTerrainCursorAction = new PasteTerrainCursorAction(this);
+
+            KeyboardCommands.Instance.Copy.Triggered += (s, e) =>
+            {
+                copyTerrainCursorAction.StartCellCoords = null;
+                copyTerrainCursorAction.EntryTypes = windowController.CopiedEntryTypesWindow.GetEnabledEntryTypes();
+                CursorAction = copyTerrainCursorAction;
+            };
+
+            KeyboardCommands.Instance.Paste.Triggered += (s, e) =>
+            {
+                CursorAction = pasteTerrainCursorAction;
+            };
         }
 
         private void FrameworkMode_Triggered(object sender, EventArgs e)
@@ -820,17 +840,6 @@ namespace TSMapEditor.Rendering
         {
             if (!IsActive)
                 return;
-
-            if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.C && Keyboard.IsCtrlHeldDown())
-            {
-                copyTerrainCursorAction.StartCellCoords = null;
-                CursorAction = copyTerrainCursorAction;
-            }
-
-            if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.V && Keyboard.IsCtrlHeldDown())
-            {
-                CursorAction = pasteTerrainCursorAction;
-            }
 
             if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.F1)
             {

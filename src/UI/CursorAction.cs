@@ -30,6 +30,11 @@ namespace TSMapEditor.UI
         protected ICursorActionTarget CursorActionTarget { get; }
 
         /// <summary>
+        /// Called when the action is activated (when it becomes the cursor action that the user is using).
+        /// </summary>
+        public virtual void OnActionEnter() { }
+
+        /// <summary>
         /// Called prior to drawing the map.
         /// </summary>
         /// <param name="cellCoords">The coords of the cell under the cursor.</param>

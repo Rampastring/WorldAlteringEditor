@@ -29,8 +29,6 @@ namespace TSMapEditor.UI.CursorActions
                 return;
             }
 
-            CursorActionTarget.CopiedTerrainData.Clear();
-
             Point2D startCellCoords = StartCellCoords.Value;
             int startY = Math.Min(cellCoords.Y, startCellCoords.Y);
             int endY = Math.Max(cellCoords.Y, startCellCoords.Y);

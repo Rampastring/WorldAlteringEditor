@@ -101,6 +101,9 @@
     <None Include="Config\UI\BasicSectionConfigWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Config\UI\CopiedEntryTypesWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Config\UI\CreateNewMapWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -304,6 +307,7 @@
     <Compile Include="Settings\UserSettings.cs" />
     <Compile Include="UI\Windows\AutoApplyImpassableOverlayWindow.cs" />
     <Compile Include="UI\Windows\BasicSectionConfigWindow.cs" />
+    <Compile Include="UI\Windows\CopiedEntryTypesWindow.cs" />
     <Compile Include="UI\Windows\EditorMessageBox.cs" />
     <Compile Include="UI\Windows\GenerateStandardHousesWindow.cs" />
     <Compile Include="UI\Windows\HousesWindow.cs" />

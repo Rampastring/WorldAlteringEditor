@@ -93,6 +93,8 @@ namespace TSMapEditor.UI
 
             var windowController = new WindowController();
             editorState = new EditorState();
+            editorState.BrushSize = map.EditorConfig.BrushSizes[0];
+
             mutationManager = new MutationManager();
 
             mapView = new MapView(WindowManager, map, theaterGraphics, editorState, mutationManager, windowController);
@@ -262,6 +264,12 @@ namespace TSMapEditor.UI
         {
             mapView.CursorAction = placeTerrainCursorAction;
             placeTerrainCursorAction.Tile = tileSelector.TileDisplay.SelectedTile;
+            if (placeTerrainCursorAction.Tile != null)
+            {
+                // Check if this is a tile that is not benefical to place as larger than 1x1
+                if (theaterGraphics.Theater.TileSets[placeTerrainCursorAction.Tile.TileSetId].Only1x1)
+                    editorState.BrushSize = map.EditorConfig.BrushSizes.Find(bs => bs.Height == 1 && bs.Width == 1);
+            }
         }
 
         private void OverlayFrameSelector_SelectedFrameChanged(object sender, EventArgs e)

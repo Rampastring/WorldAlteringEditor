@@ -27,6 +27,22 @@ namespace TSMapEditor.Models
         public Unit Vehicle { get; set; }
         public Aircraft Aircraft { get; set; }
         public Infantry[] Infantry { get; set; } = new Infantry[SubCellCount];
+        public TileImage PreviewTileImage { get; set; }
+        public int PreviewSubTileIndex { get; set; }
+
+        public Overlay Overlay { get; set; }
+
+        public Waypoint Waypoint { get; set; }
+
+        public CellTag CellTag { get; set; }
+
+        /// <summary>
+        /// A list of objects that graphically overlap with this tile.
+        /// When this tile is re-drawn, all the objects in the list should
+        /// be re-drawn as well.
+        /// </summary>
+        public List<AbstractObject> OverlapList { get; set; }
+
 
         public void AddInfantry(Infantry infantry)
         {
@@ -134,22 +150,6 @@ namespace TSMapEditor.Models
         {
             return TileIndex == 0;
         }
-
-        public TileImage PreviewTileImage { get; set; }
-        public int PreviewSubTileIndex { get; set; }
-
-        public Overlay Overlay { get; set; }
-
-        public Waypoint Waypoint { get; set; }
-
-        public CellTag CellTag { get; set; }
-
-        /// <summary>
-        /// A list of objects that graphically overlap with this tile.
-        /// When this tile is re-drawn, all the objects in the list should
-        /// be re-drawn as well.
-        /// </summary>
-        public List<AbstractObject> OverlapList { get; set; }
 
         public Point2D CoordsToPoint() => new Point2D(X, Y);
     }

@@ -17,6 +17,8 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public CopiedEntryType EntryTypes { get; set; }
+
         public Point2D? StartCellCoords { get; set; } = null;
 
         public override void LeftClick(Point2D cellCoords)
@@ -27,7 +29,7 @@ namespace TSMapEditor.UI.CursorActions
                 return;
             }
 
-            CursorActionTarget.CopiedTerrainData.Clear();
+            var copiedMapData = new CopiedMapData();
 
             Point2D startCellCoords = StartCellCoords.Value;
             int startY = Math.Min(cellCoords.Y, startCellCoords.Y);
@@ -39,14 +41,31 @@ namespace TSMapEditor.UI.CursorActions
             {
                 for (int x = startX; x <= endX; x++)
                 {
+                    var offset = new Point2D(x - startX, y - startY);
                     MapTile cell = CursorActionTarget.Map.GetTile(x, y);
-                    if (cell != null)
+                    if (cell == null)
+                        continue;
+
+                    if ((EntryTypes & CopiedEntryType.Terrain) == CopiedEntryType.Terrain)
                     {
-                        CursorActionTarget.CopiedTerrainData.Add(
-                            new CopiedTerrainData(cell.TileIndex, cell.SubTileIndex, new Point2D(x - startX, y - startY)));
+                        copiedMapData.CopiedMapEntries.Add(new CopiedTerrainEntry(offset, cell.TileIndex, cell.SubTileIndex));
+                    }
+                    
+                    if ((EntryTypes & CopiedEntryType.Overlay) == CopiedEntryType.Overlay)
+                    {
+                        if (cell.Overlay != null)
+                            copiedMapData.CopiedMapEntries.Add(new CopiedOverlayEntry(offset, cell.Overlay.OverlayType.ININame, cell.Overlay.FrameIndex));
+                    }
+
+                    if ((EntryTypes & CopiedEntryType.TerrainObject) == CopiedEntryType.TerrainObject)
+                    {
+                        if (cell.TerrainObject != null)
+                            copiedMapData.CopiedMapEntries.Add(new CopiedTerrainObjectEntry(offset, cell.TerrainObject.TerrainType.ININame));
                     }
                 }
             }
+
+            System.Windows.Forms.Clipboard.SetData(Constants.ClipboardMapDataFormatValue, copiedMapData.Serialize());
 
             ExitAction();
         }
