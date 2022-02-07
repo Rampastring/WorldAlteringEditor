@@ -176,7 +176,7 @@ namespace TSMapEditor.Rendering
             KeyboardCommands.Instance.FrameworkMode.Triggered += FrameworkMode_Triggered;
             KeyboardCommands.Instance.ViewMegamap.Triggered += (s, e) =>
             {
-                var mmw = new MegamapWindow(WindowManager, mapRenderTarget);
+                var mmw = new MegamapWindow(WindowManager, mapRenderTarget, false);
                 mmw.Width = WindowManager.RenderResolutionX;
                 mmw.Height = WindowManager.RenderResolutionY;
                 WindowManager.AddAndInitializeControl(mmw);

@@ -71,7 +71,7 @@ namespace TSMapEditor.UI.Windows
             TerrainGeneratorConfigWindow = new TerrainGeneratorConfigWindow(windowParentControl.WindowManager, map);
             Windows.Add(TerrainGeneratorConfigWindow);
 
-            MinimapWindow = new MegamapWindow(windowParentControl.WindowManager, cursorActionTarget.MegamapTexture);
+            MinimapWindow = new MegamapWindow(windowParentControl.WindowManager, cursorActionTarget.MegamapTexture, true);
             MinimapWindow.Width = 300;
             MinimapWindow.Height = 150;
             Windows.Add(MinimapWindow);
