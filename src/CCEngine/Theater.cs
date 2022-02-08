@@ -71,31 +71,47 @@ namespace TSMapEditor.CCEngine
             i = 1;
             while (true)
             {
-                int groundTileSetIndex = theaterIni.GetIntValue("General", $"Ground{i}Tile", -1);
-                int transitionTileSetIndex = theaterIni.GetIntValue("General", $"Ground{i}Lat", -1);
-                int baseTileSetIndex = theaterIni.GetIntValue("General", $"Ground{i}Base", -1);
-                
-                if (groundTileSetIndex < 0 || transitionTileSetIndex < 0)
+                if (!InitLATGround(theaterIni, $"Ground{i}Tile", $"Ground{i}Lat", $"Ground{i}Base", $"Ground{i}Name", null))
                     break;
-
-                if (groundTileSetIndex >= TileSets.Count || transitionTileSetIndex >= TileSets.Count)
-                    break;
-
-                string displayName = theaterIni.GetStringValue("General", $"Ground{i}Name", null);
-                if (displayName == null)
-                {
-                    string groundTileSetName = TileSets[groundTileSetIndex].SetName;
-                    displayName = groundTileSetName.Substring(0, Math.Min(groundTileSetName.Length, 4));
-                }
-
-                LATGrounds.Add(new LATGround(
-                    displayName,
-                    TileSets[groundTileSetIndex],
-                    TileSets[transitionTileSetIndex],
-                    baseTileSetIndex > -1 ? TileSets[baseTileSetIndex] : null));
 
                 i++;
             }
+
+            InitLATGround(theaterIni, "PvmntTile", "ClearToPvmntLat", null, null, "Pavement");
+        }
+
+        private bool InitLATGround(IniFile theaterIni, string tileSetKey, string transitionTileSetKey, string baseTileSetKey, string nameKey, string defaultName)
+        {
+            int groundTileSetIndex = theaterIni.GetIntValue("General", tileSetKey, -1);
+            int transitionTileSetIndex = theaterIni.GetIntValue("General", transitionTileSetKey, -1);
+
+            int baseTileSetIndex = -1;
+            if (!string.IsNullOrEmpty(baseTileSetKey))
+                baseTileSetIndex = theaterIni.GetIntValue("General", baseTileSetKey, -1);
+
+            if (groundTileSetIndex < 0 || transitionTileSetIndex < 0)
+                return false;
+
+            if (groundTileSetIndex >= TileSets.Count || transitionTileSetIndex >= TileSets.Count)
+                return false;
+
+            string displayName = defaultName;
+            if (!string.IsNullOrEmpty(nameKey))
+                displayName = theaterIni.GetStringValue("General", nameKey, displayName);
+
+            if (displayName == null)
+            {
+                string groundTileSetName = TileSets[groundTileSetIndex].SetName;
+                displayName = groundTileSetName.Substring(0, Math.Min(groundTileSetName.Length, 4));
+            }
+
+            LATGrounds.Add(new LATGround(
+                displayName,
+                TileSets[groundTileSetIndex],
+                TileSets[transitionTileSetIndex],
+                baseTileSetIndex > -1 ? TileSets[baseTileSetIndex] : null));
+
+            return true;
         }
 
         public List<TileSet> TileSets = new List<TileSet>();
