@@ -92,6 +92,9 @@
     <None Include="Config\Events.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Config\TerrainGeneratorPresets.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Config\TerrainTypeImpassability.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -199,6 +202,7 @@
     <Compile Include="Models\RulesColor.cs" />
     <Compile Include="Models\Script.cs" />
     <Compile Include="Models\Enums\SpotlightType.cs" />
+    <Compile Include="Models\SmudgeType.cs" />
     <Compile Include="Models\Structure.cs" />
     <Compile Include="Models\SubCell.cs" />
     <Compile Include="Models\Tag.cs" />
@@ -294,6 +298,7 @@
     <Compile Include="UI\Sidebar\ObjectListPanel.cs" />
     <Compile Include="UI\Sidebar\OverlayListPanel.cs" />
     <Compile Include="UI\Sidebar\SidebarMode.cs" />
+    <Compile Include="UI\Sidebar\SmudgeListPanel.cs" />
     <Compile Include="UI\Sidebar\TerrainObjectListPanel.cs" />
     <Compile Include="UI\Sidebar\TreeView.cs" />
     <Compile Include="UI\Sidebar\UnitListPanel.cs" />

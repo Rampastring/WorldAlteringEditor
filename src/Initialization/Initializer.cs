@@ -34,13 +34,15 @@ namespace TSMapEditor.Initialization
                 { typeof(UnitType), InitUnitType },
                 { typeof(AircraftType), InitAircraftType },
                 { typeof(OverlayType), InitOverlayType },
-                { typeof(TerrainType), InitTerrainType }
+                { typeof(TerrainType), InitTerrainType },
+                { typeof(SmudgeType), InitSmudgeType }
             };
 
         private Dictionary<Type, Action<IMap, AbstractObject, IniFile, IniSection>> objectTypeArtInitializers
             = new Dictionary<Type, Action<IMap, AbstractObject, IniFile, IniSection>>()
             {
                 { typeof(TerrainType), InitTerrainTypeArt },
+                { typeof(SmudgeType), InitSmudgeTypeArt },
                 { typeof(BuildingType), InitArtConfigGeneric },
                 { typeof(OverlayType), InitArtConfigGeneric },
                 { typeof(UnitType), InitArtConfigGeneric },
@@ -135,6 +137,16 @@ namespace TSMapEditor.Initialization
             var terrainType = (TerrainType)obj;
             terrainType.Theater = artSection.GetBooleanValue("Theater", terrainType.Theater);
             terrainType.Image = artSection.GetStringValue("Image", terrainType.Image);
+        }
+
+        private static void InitSmudgeType(AbstractObject obj, IniFile rulesIni, IniSection section)
+        {
+        }
+
+        private static void InitSmudgeTypeArt(IMap map, AbstractObject obj, IniFile artIni, IniSection artSection)
+        {
+            var smudgeType = (SmudgeType)obj;
+            smudgeType.Theater = artSection.GetBooleanValue("Theater", smudgeType.Theater);
         }
     }
 }

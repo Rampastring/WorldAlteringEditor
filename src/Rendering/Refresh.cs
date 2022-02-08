@@ -6,7 +6,7 @@ namespace TSMapEditor.Rendering
 {
     class Refresh
     {
-        private const int RedrawObjectsMax = 1000;
+        private const int RedrawObjectsMax = 1400;
 
         public Refresh(Map map)
         {
@@ -35,7 +35,7 @@ namespace TSMapEditor.Rendering
                 redrawArea = 0;
             else if (gameObject.WhatAmI() == RTTIType.Unit || gameObject.WhatAmI() == RTTIType.Aircraft)
                 redrawArea = 1;
-            else if (gameObject.WhatAmI() == RTTIType.Terrain)
+            else if (gameObject.WhatAmI() == RTTIType.Terrain || gameObject.WhatAmI() == RTTIType.Smudge)
                 redrawArea = 1;
 
             for (int y = -redrawArea; y <= redrawArea; y++)

@@ -168,7 +168,7 @@ namespace TSMapEditor.UI.Sidebar
 
                 if (string.IsNullOrEmpty(overlayType.EditorCategory))
                 {
-                    category = FindOrMakeCategory("Unspecified", categories);
+                    category = FindOrMakeCategory("Uncategorized", categories);
                 }
                 else
                 {

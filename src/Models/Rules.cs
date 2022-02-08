@@ -15,6 +15,7 @@ namespace TSMapEditor.Models
         public List<AircraftType> AircraftTypes = new List<AircraftType>();
         public List<TerrainType> TerrainTypes = new List<TerrainType>();
         public List<OverlayType> OverlayTypes = new List<OverlayType>();
+        public List<SmudgeType> SmudgeTypes = new List<SmudgeType>();
 
         public List<string> Sides = new List<string>();
         public List<InfantrySequence> InfantrySequences = new List<InfantrySequence>();
@@ -34,14 +35,16 @@ namespace TSMapEditor.Models
             InitFromTypeSection(iniFile, "AircraftTypes", AircraftTypes);
             InitFromTypeSection(iniFile, "TerrainTypes", TerrainTypes);
             InitFromTypeSection(iniFile, "OverlayTypes", OverlayTypes);
+            InitFromTypeSection(iniFile, "SmudgeTypes", SmudgeTypes);
 
             // Go through all the lists and get object properties
-            UnitTypes.ForEach(ut => initializer.ReadObjectTypePropertiesFromINI(ut, iniFile));
-            InfantryTypes.ForEach(ut => initializer.ReadObjectTypePropertiesFromINI(ut, iniFile));
-            BuildingTypes.ForEach(ut => initializer.ReadObjectTypePropertiesFromINI(ut, iniFile));
-            AircraftTypes.ForEach(ut => initializer.ReadObjectTypePropertiesFromINI(ut, iniFile));
-            TerrainTypes.ForEach(ut => initializer.ReadObjectTypePropertiesFromINI(ut, iniFile));
-            OverlayTypes.ForEach(ut => initializer.ReadObjectTypePropertiesFromINI(ut, iniFile));
+            UnitTypes.ForEach(ot => initializer.ReadObjectTypePropertiesFromINI(ot, iniFile));
+            InfantryTypes.ForEach(ot => initializer.ReadObjectTypePropertiesFromINI(ot, iniFile));
+            BuildingTypes.ForEach(ot => initializer.ReadObjectTypePropertiesFromINI(ot, iniFile));
+            AircraftTypes.ForEach(ot => initializer.ReadObjectTypePropertiesFromINI(ot, iniFile));
+            TerrainTypes.ForEach(ot => initializer.ReadObjectTypePropertiesFromINI(ot, iniFile));
+            OverlayTypes.ForEach(ot => initializer.ReadObjectTypePropertiesFromINI(ot, iniFile));
+            SmudgeTypes.ForEach(ot => initializer.ReadObjectTypePropertiesFromINI(ot, iniFile));
 
             var colorsSection = iniFile.GetSection("Colors");
             if (colorsSection != null)
@@ -80,6 +83,8 @@ namespace TSMapEditor.Models
         public void InitArt(IniFile iniFile, IInitializer initializer)
         {
             TerrainTypes.ForEach(tt => initializer.ReadObjectTypeArtPropertiesFromINI(tt, iniFile));
+
+            SmudgeTypes.ForEach(st => initializer.ReadObjectTypeArtPropertiesFromINI(st, iniFile));
 
             BuildingTypes.ForEach(bt => initializer.ReadObjectTypeArtPropertiesFromINI(bt, iniFile,
                 string.IsNullOrWhiteSpace(bt.Image) ? bt.ININame : bt.Image));

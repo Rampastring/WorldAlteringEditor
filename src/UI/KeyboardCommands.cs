@@ -98,6 +98,7 @@ namespace TSMapEditor.UI
         public KeyboardCommand InfantryMenu { get; } = new KeyboardCommand("InfantryMenu", "Infantry Menu", new KeyboardCommandInput(Keys.D4, KeyboardModifiers.None));
         public KeyboardCommand TerrainObjectMenu { get; } = new KeyboardCommand("TerrainObjectMenu", "Terrain Objects Menu", new KeyboardCommandInput(Keys.D5, KeyboardModifiers.None));
         public KeyboardCommand OverlayMenu { get; } = new KeyboardCommand("OverlayMenu", "Overlay Menu", new KeyboardCommandInput(Keys.D6, KeyboardModifiers.None));
+        public KeyboardCommand SmudgeMenu { get; } = new KeyboardCommand("SmudgeMenu", "Smudge Menu", new KeyboardCommandInput(Keys.D7, KeyboardModifiers.None));
 
         public Keys SkipConfirmationKey { get; } = Keys.LeftAlt;
     }

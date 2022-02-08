@@ -7,20 +7,22 @@ using System.Collections.Generic;
 using System.Linq;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
-using TSMapEditor.UI.CursorActions;
 
 namespace TSMapEditor.UI.Sidebar
 {
-    public class TerrainObjectListPanel : XNAPanel, ISearchBoxContainer
+    class SmudgeListPanel : XNAPanel, ISearchBoxContainer
     {
-        public TerrainObjectListPanel(WindowManager windowManager, EditorState editorState,
-            Map map, TheaterGraphics theaterGraphics, ICursorActionTarget cursorActionTarget) : base(windowManager)
+        public SmudgeListPanel(WindowManager windowManager, EditorState editorState,
+            Map map, TheaterGraphics theaterGraphics, ICursorActionTarget cursorActionTarget,
+            object smudgePlacementAction) : base(windowManager)
         {
             EditorState = editorState;
             Map = map;
             TheaterGraphics = theaterGraphics;
             this.cursorActionTarget = cursorActionTarget;
+            this.smudgePlacementAction = smudgePlacementAction;
         }
+
 
         protected EditorState EditorState { get; }
         protected Map Map { get; }
@@ -30,8 +32,8 @@ namespace TSMapEditor.UI.Sidebar
         public TreeView ObjectTreeView { get; private set; }
 
         private readonly ICursorActionTarget cursorActionTarget;
+        private readonly object smudgePlacementAction;
 
-        private TerrainObjectPlacementAction terrainObjectPlacementAction;
 
         public override void Initialize()
         {
@@ -41,7 +43,7 @@ namespace TSMapEditor.UI.Sidebar
             SearchBox.Y = Constants.UIEmptyTopSpace;
             SearchBox.Width = Width - Constants.UIEmptySideSpace * 2;
             SearchBox.Height = Constants.UITextBoxHeight;
-            SearchBox.Suggestion = "Search object... (CTRL + F)";
+            SearchBox.Suggestion = "Search smudge... (CTRL + F)";
             AddChild(SearchBox);
             SearchBox.TextChanged += SearchBox_TextChanged;
             SearchBox.EnterPressed += SearchBox_EnterPressed;
@@ -56,13 +58,27 @@ namespace TSMapEditor.UI.Sidebar
 
             base.Initialize();
 
-            terrainObjectPlacementAction = new TerrainObjectPlacementAction(cursorActionTarget);
             ObjectTreeView.SelectedItemChanged += ObjectTreeView_SelectedItemChanged;
+            // overlayPlacementAction.ActionExited += (s, e) => ObjectTreeView.SelectedNode = null;
 
-            InitTerrainObjects();
+            InitOverlays();
 
             KeyboardCommands.Instance.NextSidebarNode.Triggered += NextSidebarNode_Triggered;
             KeyboardCommands.Instance.PreviousSidebarNode.Triggered += PreviousSidebarNode_Triggered;
+        }
+
+        private void ObjectTreeView_SelectedItemChanged(object sender, EventArgs e)
+        {
+            if (ObjectTreeView.SelectedNode == null)
+                return;
+
+            var tag = ObjectTreeView.SelectedNode.Tag;
+            if (tag == null)
+                return;
+
+            // Assume this to be the smudge removal entry
+            // overlayPlacementAction.OverlayType = null;
+            // EditorState.CursorAction = overlayPlacementAction;
         }
 
         private void NextSidebarNode_Triggered(object sender, EventArgs e)
@@ -75,16 +91,6 @@ namespace TSMapEditor.UI.Sidebar
         {
             if (Enabled)
                 ObjectTreeView.SelectPreviousNode();
-        }
-
-        private void ObjectTreeView_SelectedItemChanged(object sender, EventArgs e)
-        {
-            if (ObjectTreeView.SelectedNode == null)
-                return;
-
-            var terrainType = (TerrainType)ObjectTreeView.SelectedNode.Tag;
-            terrainObjectPlacementAction.TerrainType = terrainType;
-            EditorState.CursorAction = terrainObjectPlacementAction;
         }
 
         private void SearchBox_EnterPressed(object sender, EventArgs e)
@@ -100,27 +106,34 @@ namespace TSMapEditor.UI.Sidebar
             ObjectTreeView.FindNode(SearchBox.Text, false);
         }
 
-        private void InitTerrainObjects()
+        private void InitOverlays()
         {
             var categories = new List<TreeViewCategory>();
-            for (int i = 0; i < Map.Rules.TerrainTypes.Count; i++)
+
+            categories.Add(new TreeViewCategory()
+            {
+                Text = "Erase Smudges",
+                Tag = new object()
+            });
+
+            for (int i = 0; i < Map.Rules.SmudgeTypes.Count; i++)
             {
                 TreeViewCategory category = null;
-                TerrainType terrainType = Map.Rules.TerrainTypes[i];
+                SmudgeType smudgeType = Map.Rules.SmudgeTypes[i];
 
-                if (string.IsNullOrEmpty(terrainType.EditorCategory))
+                if (string.IsNullOrEmpty(smudgeType.EditorCategory))
                 {
                     category = FindOrMakeCategory("Uncategorized", categories);
                 }
                 else
                 {
-                    category = FindOrMakeCategory(terrainType.EditorCategory, categories);
+                    category = FindOrMakeCategory(smudgeType.EditorCategory, categories);
                 }
 
                 Texture2D texture = null;
-                if (TheaterGraphics.TerrainObjectTextures[i] != null)
+                if (TheaterGraphics.SmudgeTextures[i] != null)
                 {
-                    var frames = TheaterGraphics.TerrainObjectTextures[i].Frames;
+                    var frames = TheaterGraphics.SmudgeTextures[i].Frames;
                     if (frames.Length > 0)
                     {
                         // Find the first valid frame and use that as our texture
@@ -134,9 +147,9 @@ namespace TSMapEditor.UI.Sidebar
 
                 category.Nodes.Add(new TreeViewNode()
                 {
-                    Text = terrainType.FSName + " (" + terrainType.ININame + ")",
+                    Text = smudgeType.Name + " (" + smudgeType.ININame + ")",
                     Texture = texture,
-                    Tag = terrainType
+                    Tag = smudgeType
                 });
 
                 category.Nodes = category.Nodes.OrderBy(n => n.Text).ToList();

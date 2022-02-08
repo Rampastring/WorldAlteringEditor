@@ -77,6 +77,10 @@ namespace TSMapEditor.UI.Sidebar
             overlayListPanel.Name = nameof(overlayListPanel);
             InitPanel(overlayListPanel);
 
+            var smudgeListPanel = new SmudgeListPanel(WindowManager, editorState, map, theaterGraphics, cursorActionTarget, new object());
+            smudgeListPanel.Name = nameof(smudgeListPanel);
+            InitPanel(smudgeListPanel);
+
             modePanels = new XNAPanel[]
             {
                 aircraftListPanel,
@@ -84,7 +88,8 @@ namespace TSMapEditor.UI.Sidebar
                 unitListPanel,
                 infantryListPanel,
                 terrainObjectListPanel,
-                overlayListPanel
+                overlayListPanel,
+                smudgeListPanel
             };
             lbSelection.SelectedIndexChanged += LbSelection_SelectedIndexChanged;
             lbSelection.SelectedIndex = 0;
@@ -97,6 +102,7 @@ namespace TSMapEditor.UI.Sidebar
             KeyboardCommands.Instance.InfantryMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 3;
             KeyboardCommands.Instance.TerrainObjectMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 4;
             KeyboardCommands.Instance.OverlayMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 5;
+            KeyboardCommands.Instance.SmudgeMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 6;
 
             Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
         }

@@ -146,7 +146,7 @@ namespace TSMapEditor.UI.Sidebar
 
                 if (string.IsNullOrEmpty(objectType.Owner))
                 {
-                    category = FindOrMakeCategory("Unspecified", sideCategories);
+                    category = FindOrMakeCategory("Uncategorized", sideCategories);
                 }
                 else
                 {

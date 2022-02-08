@@ -12,6 +12,7 @@
         Infantry = 4,
         TerrainObjects = 5,
         Overlay = 6,
+        Smudges = 7,
         SidebarModeCount
     }
 }

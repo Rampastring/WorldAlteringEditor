@@ -24,7 +24,7 @@ namespace TSMapEditor.Models
 
         /// <summary>
         /// Defined in Art.ini. If set to true,
-        /// the art for this terrain type is terrain-specific;
+        /// the art for this terrain type is theater-specific;
         /// if false, the art is a generic .SHP used for every theater.
         /// </summary>
         public bool Theater { get; set; }

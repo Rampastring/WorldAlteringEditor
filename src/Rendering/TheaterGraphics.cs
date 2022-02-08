@@ -291,7 +291,8 @@ namespace TSMapEditor.Rendering
             var task4 = Task.Factory.StartNew(() => ReadUnitTextures(graphicsDevice, rules.UnitTypes));
             var task5 = Task.Factory.StartNew(() => ReadInfantryTextures(graphicsDevice, rules.InfantryTypes));
             var task6 = Task.Factory.StartNew(() => ReadOverlayTextures(graphicsDevice, rules.OverlayTypes));
-            Task.WaitAll(task1, task2, task3, task4, task5, task6);
+            var task7 = Task.Factory.StartNew(() => ReadSmudgeTextures(graphicsDevice, rules.SmudgeTypes));
+            Task.WaitAll(task1, task2, task3, task4, task5, task6, task7);
         }
 
         private void ReadTileTextures(GraphicsDevice graphicsDevice)
@@ -570,6 +571,27 @@ namespace TSMapEditor.Rendering
             }
         }
 
+        public void ReadSmudgeTextures(GraphicsDevice graphicsDevice, List<SmudgeType> smudgeTypes)
+        {
+            SmudgeTextures = new ObjectImage[smudgeTypes.Count];
+            for (int i = 0; i < smudgeTypes.Count; i++)
+            {
+                var smudgeType = smudgeTypes[i];
+
+                string imageName = smudgeType.ININame;
+                string fileExtension = smudgeType.Theater ? Theater.FileExtension : SHP_FILE_EXTENSION;
+                byte[] shpData = fileManager.LoadFile(imageName + fileExtension);
+
+                if (shpData == null)
+                    continue;
+
+                var shpFile = new ShpFile();
+                shpFile.ParseFromBuffer(shpData);
+                Palette palette = theaterPalette;
+                SmudgeTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, palette);
+            }
+        }
+
         private Random random = new Random();
 
         public Theater Theater { get; }
@@ -595,6 +617,7 @@ namespace TSMapEditor.Rendering
         public ObjectImage[] UnitTextures { get; set; }
         public ObjectImage[] InfantryTextures { get; set; }
         public ObjectImage[] OverlayTextures { get; set; }
+        public ObjectImage[] SmudgeTextures { get; set; }
 
         private Palette GetPaletteOrFail(string paletteFileName)
         {
