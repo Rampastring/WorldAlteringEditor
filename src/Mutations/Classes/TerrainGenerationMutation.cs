@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Rampastring.Tools;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TSMapEditor.CCEngine;
@@ -10,14 +11,81 @@ namespace TSMapEditor.Mutations.Classes
 {
     public class TerrainGeneratorConfiguration
     {
-        public TerrainGeneratorConfiguration(List<TerrainGeneratorTerrainTypeGroup> terrainTypeGroups, List<TerrainGeneratorTileGroup> tileGroups)
+        private const string TerrainTypeGroupString = "TerrainTypeGroup";
+        private const string TileGroupString = "TileGroup";
+
+        public TerrainGeneratorConfiguration(string name, List<TerrainGeneratorTerrainTypeGroup> terrainTypeGroups, List<TerrainGeneratorTileGroup> tileGroups)
         {
+            Name = name;
             TerrainTypeGroups = terrainTypeGroups;
             TileGroups = tileGroups;
         }
 
+        public string Name { get; }
         public List<TerrainGeneratorTerrainTypeGroup> TerrainTypeGroups { get; }
         public List<TerrainGeneratorTileGroup> TileGroups { get; }
+
+        public IniSection GetIniConfigSection(string sectionName)
+        {
+            var iniSection = new IniSection(sectionName);
+
+            for (int i = 0; i < TerrainTypeGroups.Count; i++)
+            {
+                iniSection.SetStringValue(TerrainTypeGroupString + i, TerrainTypeGroups[i].GetConfigString());
+            }
+
+            for (int i = 0; i < TileGroups.Count; i++)
+            {
+                iniSection.SetStringValue(TileGroupString + i, TileGroups[i].GetConfigString());
+            }
+
+            return iniSection;
+        }
+
+        public static TerrainGeneratorConfiguration FromConfigSection(IniSection section, List<TerrainType> terrainTypes, List<TileSet> tilesets)
+        {
+            var terrainTypeGroups = new List<TerrainGeneratorTerrainTypeGroup>();
+            var tileGroups = new List<TerrainGeneratorTileGroup>();
+
+            string configName = section.GetStringValue("Name", "Unnamed Configuration");
+
+            int i = 0;
+            while (true)
+            {
+                string value = section.GetStringValue(TerrainTypeGroupString + i, null);
+                if (string.IsNullOrWhiteSpace(value))
+                    break;
+
+                var terrainTypeGroup = TerrainGeneratorTerrainTypeGroup.FromConfigString(terrainTypes, value);
+                if (terrainTypeGroup == null)
+                    continue;
+
+                terrainTypeGroups.Add(terrainTypeGroup);
+
+                i++;
+            }
+
+            i = 0;
+            while (true)
+            {
+                string value = section.GetStringValue(TileGroupString + i, null);
+                if (string.IsNullOrWhiteSpace(value))
+                    break;
+
+                var tileGroup = TerrainGeneratorTileGroup.FromConfigString(tilesets, value);
+                if (tileGroup == null)
+                    continue;
+
+                tileGroups.Add(tileGroup);
+
+                i++;
+            }
+
+            if (terrainTypeGroups.Count > 0 || tileGroups.Count > 0)
+                return new TerrainGeneratorConfiguration(configName, terrainTypeGroups, tileGroups);
+
+            return null;
+        }
     }
 
     public class TerrainGeneratorTerrainTypeGroup
@@ -32,6 +100,33 @@ namespace TSMapEditor.Mutations.Classes
         public List<TerrainType> TerrainTypes { get; }
         public double OpenChance { get; }
         public double OverlapChance { get; }
+
+        public string GetConfigString()
+        {
+            return $",{OpenChance},{OverlapChance}," + string.Join(",", TerrainTypes.Select(tt => tt.ININame));
+        }
+
+        public static TerrainGeneratorTerrainTypeGroup FromConfigString(List<TerrainType> allTerrainTypes, string config)
+        {
+            string[] parts = config.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length < 3)
+                return null;
+
+            double openChance = Conversions.DoubleFromString(parts[0], 0.0);
+            double overlapChance = Conversions.DoubleFromString(parts[1], 0.0);
+
+            string[] terrainTypeStrings = new string[parts.Length - 2];
+            Array.Copy(parts, 2, terrainTypeStrings, 0, terrainTypeStrings.Length);
+            var terrainTypes = new List<TerrainType>();
+            Array.ForEach(terrainTypeStrings, (terrainTypeName) =>
+            {
+                var terrainType = allTerrainTypes.Find(tt => tt.ININame == terrainTypeName);
+                if (terrainType != null)
+                    terrainTypes.Add(terrainType);
+            });
+
+            return new TerrainGeneratorTerrainTypeGroup(terrainTypes, openChance, overlapChance);
+        }
     }
 
     public class TerrainGeneratorTileGroup
@@ -48,6 +143,41 @@ namespace TSMapEditor.Mutations.Classes
         public List<int> TileIndicesInSet { get; }
         public double OpenChance { get; }
         public double OverlapChance { get; }
+
+        public string GetConfigString()
+        {
+            string config = $"{OpenChance},{OverlapChance},{TileSet.SetName}";
+            if (TileIndicesInSet != null && TileIndicesInSet.Count > 0)
+            {
+                config += "," + string.Join(",", TileIndicesInSet);
+            }
+
+            return config;
+        }
+
+        public static TerrainGeneratorTileGroup FromConfigString(List<TileSet> allTileSets, string config)
+        {
+            string[] parts = config.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length < 3)
+                return null;
+
+            double openChance = Conversions.DoubleFromString(parts[0], 0.0);
+            double overlapChance = Conversions.DoubleFromString(parts[1], 0.0);
+            var tileSet = allTileSets.Find(ts => ts.AllowToPlace && ts.LoadedTileCount > 0 && ts.SetName == parts[2]);
+            List<int> tileIndices = null;
+            if (parts.Length > 3)
+            {
+                tileIndices = new List<int>();
+
+                for (int i = 3; i < parts.Length; i++)
+                {
+                    tileIndices.Add(Conversions.IntFromString(parts[i], 0));
+                }
+            }
+
+            return new TerrainGeneratorTileGroup(tileSet, tileIndices, openChance, overlapChance);
+        }
     }
 
     public class TerrainGenerationMutation : Mutation
@@ -289,6 +419,11 @@ namespace TSMapEditor.Mutations.Classes
             if (cell.TerrainObject != null)
                 return false;
 
+            ITileImage tile = MutationTarget.Map.TheaterInstance.GetTile(cell.TileIndex);
+            ISubTileImage subTile = tile.GetSubTile(cell.SubTileIndex);
+            if (subTile.TmpImage.TerrainType != 0x0)
+                return false;
+
             if (treeGroup.ImpassableCells == null)
                 return !occupiedCells.Contains(cellCoords);
 
@@ -298,6 +433,11 @@ namespace TSMapEditor.Mutations.Classes
                 var otherCell = MutationTarget.Map.GetTile(otherCellCoords);
                 if (otherCell == null)
                     continue;
+
+                tile = MutationTarget.Map.TheaterInstance.GetTile(otherCell.TileIndex);
+                subTile = tile.GetSubTile(otherCell.SubTileIndex);
+                if (subTile.TmpImage.TerrainType != 0x0)
+                    return false;
 
                 if (otherCell.TerrainObject != null)
                     return false;

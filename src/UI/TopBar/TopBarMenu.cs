@@ -119,14 +119,14 @@ namespace TSMapEditor.UI.TopBar
 
         private void EnterTerrainGenerator()
         {
-            if (windowController.TerrainGeneratorConfigWindow.TerrainGeneratorConfiguration == null)
+            if (windowController.TerrainGeneratorConfigWindow.TerrainGeneratorConfig == null)
             {
                 windowController.TerrainGeneratorConfigWindow.Open();
                 return;
             }
 
             var generateForestCursorAction = new GenerateForestCursorAction(mapView);
-            generateForestCursorAction.TerrainGeneratorConfiguration = windowController.TerrainGeneratorConfigWindow.TerrainGeneratorConfiguration;
+            generateForestCursorAction.TerrainGeneratorConfiguration = windowController.TerrainGeneratorConfigWindow.TerrainGeneratorConfig;
             mapView.CursorAction = generateForestCursorAction;
         }
 

@@ -4,6 +4,7 @@ using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Models;
@@ -24,7 +25,7 @@ namespace TSMapEditor.UI.Windows
 
         private readonly Map map;
 
-        public TerrainGeneratorConfiguration TerrainGeneratorConfiguration { get; private set; }
+        public TerrainGeneratorConfiguration TerrainGeneratorConfig { get; private set; }
 
         private EditorTextBox[] terrainTypeTextBoxes;
         private EditorNumberTextBox[] terrainTypeOpenChances;
@@ -39,12 +40,14 @@ namespace TSMapEditor.UI.Windows
 
         private EditorPopUpSelector openedTileSetSelector;
 
+        private XNADropDown ddPresets;
+
         public override void Initialize()
         {
             Width = 800;
             Name = nameof(TerrainGeneratorConfigWindow);
 
-            const int MaxTerrainTypeGroupCount = 4;
+            const int MaxTerrainTypeGroupCount = 5;
             const int MaxTileGroupCount = 6;
 
             terrainTypeTextBoxes = new EditorTextBox[MaxTerrainTypeGroupCount];
@@ -70,7 +73,23 @@ namespace TSMapEditor.UI.Windows
             AddChild(lblHeader);
             lblHeader.CenterOnParentHorizontally();
 
-            y = lblHeader.Bottom + Constants.UIEmptyTopSpace;
+            var lblPresets = new XNALabel(WindowManager);
+            lblPresets.Name = nameof(lblPresets);
+            lblPresets.Y = lblHeader.Bottom + Constants.UIEmptyTopSpace;
+            lblPresets.X = Constants.UIEmptySideSpace;
+            lblPresets.Text = "Presets:";
+            AddChild(lblPresets);
+
+            ddPresets = new XNADropDown(WindowManager);
+            ddPresets.Name = nameof(ddPresets);
+            ddPresets.Width = 150;
+            ddPresets.Y = lblPresets.Y - 1;
+            ddPresets.X = lblPresets.Right + Constants.UIHorizontalSpacing;
+            AddChild(ddPresets);
+            ddPresets.SelectedIndexChanged += DdPresets_SelectedIndexChanged;
+            InitPresets();
+
+            y = ddPresets.Bottom + Constants.UIEmptyTopSpace;
 
             for (int i = 0; i < MaxTerrainTypeGroupCount; i++)
             {
@@ -220,6 +239,32 @@ namespace TSMapEditor.UI.Windows
             base.Initialize();
         }
 
+        private void InitPresets()
+        {
+            ddPresets.Items.Clear();
+
+            var presetsIni = new IniFile(Environment.CurrentDirectory + "/Config/TerrainGeneratorPresets.ini");
+            foreach (string sectionName in presetsIni.GetSections())
+            {
+                var presetConfiguration = TerrainGeneratorConfiguration.FromConfigSection(presetsIni.GetSection(sectionName),
+                    map.Rules.TerrainTypes,
+                    map.TheaterInstance.Theater.TileSets);
+
+                if (presetConfiguration != null)
+                    ddPresets.AddItem(new XNADropDownItem() { Text = presetConfiguration.Name, Tag = presetConfiguration });
+            }
+        }
+
+        private void DdPresets_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (ddPresets.SelectedIndex < 0)
+                return;
+
+            var config = ddPresets.SelectedItem.Tag as TerrainGeneratorConfiguration;
+            LoadConfig(config);
+            ddPresets.SelectedIndex = -1;
+        }
+
         private void BtnApply_LeftClick(object sender, EventArgs e)
         {
             var terrainTypeGroups = new List<TerrainGeneratorTerrainTypeGroup>();
@@ -282,7 +327,7 @@ namespace TSMapEditor.UI.Windows
                 tileGroups.Add(tileGroup);
             }
 
-            TerrainGeneratorConfiguration = new TerrainGeneratorConfiguration(terrainTypeGroups, tileGroups);
+            TerrainGeneratorConfig = new TerrainGeneratorConfiguration("Customized Configuration", terrainTypeGroups, tileGroups);
 
             Hide();
         }
@@ -307,7 +352,7 @@ namespace TSMapEditor.UI.Windows
         {
             Show();
 
-            if (TerrainGeneratorConfiguration == null)
+            if (TerrainGeneratorConfig == null)
             {
                 // Generate default config
                 // Just a reasonable example for now
@@ -330,7 +375,7 @@ namespace TSMapEditor.UI.Windows
                 tileGroups.Add(new TerrainGeneratorTileGroup(tileSets.Find(ts => ts.LoadedTileCount > 0 && ts.SetName == "Debris/Dirt"), null, 0.02, 0.02));
                 tileGroups.Add(new TerrainGeneratorTileGroup(tileSets.Find(ts => ts.LoadedTileCount > 0 && ts.SetName == "Tall Grass"), null, 0.6, 0.3));
 
-                var config = new TerrainGeneratorConfiguration(treeGroups, tileGroups);
+                var config = new TerrainGeneratorConfiguration("Default Configuration", treeGroups, tileGroups);
                 LoadConfig(config);
             }
         }
