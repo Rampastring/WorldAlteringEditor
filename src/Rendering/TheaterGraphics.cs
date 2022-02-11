@@ -19,6 +19,7 @@ namespace TSMapEditor.Rendering
     {
         int GetTileSetId(int uniqueTileIndex);
         ITileImage GetTile(int id);
+        int GetOverlayFrameCount(OverlayType overlayType);
         Theater Theater { get; }
     }
 
@@ -611,6 +612,11 @@ namespace TSMapEditor.Rendering
         public TileImage GetMarbleMadnessTileGraphics(int id) => mmTerrainGraphicsList[id][0];
 
         public ITileImage GetTile(int id) => GetTileGraphics(id);
+
+        public int GetOverlayFrameCount(OverlayType overlayType)
+        {
+            return OverlayTextures[overlayType.Index].Frames.Length;
+        }
 
         public ObjectImage[] TerrainObjectTextures { get; set; }
         public ObjectImage[] BuildingTextures { get; set; }

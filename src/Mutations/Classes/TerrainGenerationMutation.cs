@@ -13,17 +13,23 @@ namespace TSMapEditor.Mutations.Classes
     {
         private const string TerrainTypeGroupString = "TerrainTypeGroup";
         private const string TileGroupString = "TileGroup";
+        private const string OverlayGroupString = "OverlayGroup";
 
-        public TerrainGeneratorConfiguration(string name, List<TerrainGeneratorTerrainTypeGroup> terrainTypeGroups, List<TerrainGeneratorTileGroup> tileGroups)
+        public TerrainGeneratorConfiguration(string name,
+            List<TerrainGeneratorTerrainTypeGroup> terrainTypeGroups,
+            List<TerrainGeneratorTileGroup> tileGroups,
+            List<TerrainGeneratorOverlayGroup> overlayGroups)
         {
             Name = name;
             TerrainTypeGroups = terrainTypeGroups;
             TileGroups = tileGroups;
+            OverlayGroups = overlayGroups;
         }
 
         public string Name { get; }
         public List<TerrainGeneratorTerrainTypeGroup> TerrainTypeGroups { get; }
         public List<TerrainGeneratorTileGroup> TileGroups { get; }
+        public List<TerrainGeneratorOverlayGroup> OverlayGroups { get; }
 
         public IniSection GetIniConfigSection(string sectionName)
         {
@@ -39,13 +45,19 @@ namespace TSMapEditor.Mutations.Classes
                 iniSection.SetStringValue(TileGroupString + i, TileGroups[i].GetConfigString());
             }
 
+            for (int i = 0; i < OverlayGroups.Count; i++)
+            {
+                iniSection.SetStringValue(OverlayGroupString + i, OverlayGroups[i].GetConfigString());
+            }
+
             return iniSection;
         }
 
-        public static TerrainGeneratorConfiguration FromConfigSection(IniSection section, List<TerrainType> terrainTypes, List<TileSet> tilesets)
+        public static TerrainGeneratorConfiguration FromConfigSection(IniSection section, List<TerrainType> terrainTypes, List<TileSet> tilesets, List<OverlayType> overlayTypes)
         {
             var terrainTypeGroups = new List<TerrainGeneratorTerrainTypeGroup>();
             var tileGroups = new List<TerrainGeneratorTileGroup>();
+            var overlayGroups = new List<TerrainGeneratorOverlayGroup>();
 
             string configName = section.GetStringValue("Name", "Unnamed Configuration");
 
@@ -81,8 +93,24 @@ namespace TSMapEditor.Mutations.Classes
                 i++;
             }
 
-            if (terrainTypeGroups.Count > 0 || tileGroups.Count > 0)
-                return new TerrainGeneratorConfiguration(configName, terrainTypeGroups, tileGroups);
+            i = 0;
+            while (true)
+            {
+                string value = section.GetStringValue(OverlayGroupString + i, null);
+                if (string.IsNullOrWhiteSpace(value))
+                    break;
+
+                var overlayGroup = TerrainGeneratorOverlayGroup.FromConfigString(overlayTypes, value);
+                if (overlayGroup == null)
+                    continue;
+
+                overlayGroups.Add(overlayGroup);
+
+                i++;
+            }
+
+            if (terrainTypeGroups.Count > 0 || tileGroups.Count > 0 || overlayGroups.Count > 0)
+                return new TerrainGeneratorConfiguration(configName, terrainTypeGroups, tileGroups, overlayGroups);
 
             return null;
         }
@@ -180,6 +208,57 @@ namespace TSMapEditor.Mutations.Classes
         }
     }
 
+    public class TerrainGeneratorOverlayGroup
+    {
+        public TerrainGeneratorOverlayGroup(OverlayType overlayType, List<int> frameIndices, double openChance, double overlapChance)
+        {
+            OverlayType = overlayType;
+            FrameIndices = frameIndices;
+            OpenChance = openChance;
+            OverlapChance = overlapChance;
+        }
+
+        public OverlayType OverlayType { get; }
+        public List<int> FrameIndices { get; }
+        public double OpenChance { get; }
+        public double OverlapChance { get; }
+
+        public string GetConfigString()
+        {
+            string config = $"{OpenChance},{OverlapChance},{OverlayType.ININame}";
+            if (FrameIndices != null && FrameIndices.Count > 0)
+            {
+                config += "," + string.Join(",", FrameIndices);
+            }
+
+            return config;
+        }
+
+        public static TerrainGeneratorOverlayGroup FromConfigString(List<OverlayType> allOverlayTypes, string config)
+        {
+            string[] parts = config.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length < 3)
+                return null;
+
+            double openChance = Conversions.DoubleFromString(parts[0], 0.0);
+            double overlapChance = Conversions.DoubleFromString(parts[1], 0.0);
+            var overlayType = allOverlayTypes.Find(ot => ot.ININame == parts[2]);
+            List<int> frameIndices = null;
+            if (parts.Length > 3)
+            {
+                frameIndices = new List<int>();
+
+                for (int i = 3; i < parts.Length; i++)
+                {
+                    frameIndices.Add(Conversions.IntFromString(parts[i], 0));
+                }
+            }
+
+            return new TerrainGeneratorOverlayGroup(overlayType, frameIndices, openChance, overlapChance);
+        }
+    }
+
     public class TerrainGenerationMutation : Mutation
     {
         public TerrainGenerationMutation(IMutationTarget mutationTarget, List<Point2D> cells, TerrainGeneratorConfiguration configuration) : base(mutationTarget)
@@ -199,6 +278,7 @@ namespace TSMapEditor.Mutations.Classes
 
         private List<OriginalTerrainData> undoData;
         private List<TerrainObject> placedTerrainObjects;
+        private List<Point2D> placedOverlayCellCoords;
 
         public override void Perform()
         {
@@ -221,6 +301,12 @@ namespace TSMapEditor.Mutations.Classes
                 MutationTarget.Map.RemoveTerrainObject(terrainObject);
             }
 
+            foreach (var cellCoords in placedOverlayCellCoords)
+            {
+                var mapCell = MutationTarget.Map.GetTile(cellCoords);
+                mapCell.Overlay = null;
+            }
+
             MutationTarget.InvalidateMap();
 
             occupiedCells.Clear();
@@ -232,12 +318,13 @@ namespace TSMapEditor.Mutations.Classes
 
             undoData = new List<OriginalTerrainData>();
             placedTerrainObjects = new List<TerrainObject>();
-
-            // Place terrain objects
+            placedOverlayCellCoords = new List<Point2D>();
 
             var terrainTypeGroups = terrainGeneratorConfiguration.TerrainTypeGroups;
             var tileGroups = terrainGeneratorConfiguration.TileGroups;
+            var overlayGroups = terrainGeneratorConfiguration.OverlayGroups;
 
+            // Place terrain objects
             foreach (var terrainTypeGroup in terrainTypeGroups)
             {
                 foreach (Point2D cellCoords in cells)
@@ -278,6 +365,44 @@ namespace TSMapEditor.Mutations.Classes
                             continue;
 
                         PlaceTerrainTileAt(tile, cellCoords);
+                    }
+                }
+            }
+
+            // Place overlay
+            foreach (var overlayGroup in overlayGroups)
+            {
+                foreach (Point2D cellCoords in cells)
+                {
+                    double chance = overlayGroup.OpenChance;
+
+                    var cell = MutationTarget.Map.GetTile(cellCoords);
+                    ITileImage tile = MutationTarget.Map.TheaterInstance.GetTile(cell.TileIndex);
+                    ISubTileImage subTile = tile.GetSubTile(cell.SubTileIndex);
+                    if (subTile.TmpImage.TerrainType != 0x0)
+                        continue;
+
+                    if (cell.TerrainObject != null)
+                        chance = overlayGroup.OverlapChance;
+
+                    if (cell.Overlay != null)
+                        continue;
+
+                    if (random.NextDouble() < chance)
+                    {
+                        int frameIndex;
+                        if (overlayGroup.FrameIndices != null && overlayGroup.FrameIndices.Count > 0)
+                            frameIndex = overlayGroup.FrameIndices[random.Next(overlayGroup.FrameIndices.Count)];
+                        else
+                            frameIndex = random.Next(MutationTarget.Map.TheaterInstance.GetOverlayFrameCount(overlayGroup.OverlayType));
+
+                        placedOverlayCellCoords.Add(cellCoords);
+                        cell.Overlay = new Overlay()
+                        {
+                            OverlayType = overlayGroup.OverlayType,
+                            FrameIndex = frameIndex,
+                            Position = cellCoords
+                        };
                     }
                 }
             }

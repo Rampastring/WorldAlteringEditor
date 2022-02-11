@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI.Controls;
+using TSMapEditor.UI.Windows.TerrainGenerator;
 
 namespace TSMapEditor.UI.Windows
 {

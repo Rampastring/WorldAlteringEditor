@@ -247,6 +247,7 @@
     <Compile Include="Rendering\Refresh.cs" />
     <Compile Include="Rendering\TheaterGraphics.cs" />
     <Compile Include="Scripts\ApplyAnimatedWaterScript.cs" />
+    <Compile Include="Scripts\RemoveIMTOs.cs" />
     <Compile Include="Settings\BoolSetting.cs" />
     <Compile Include="Settings\IntSetting.cs" />
     <Compile Include="Settings\SettingBase.cs" />
@@ -339,7 +340,10 @@
     <Compile Include="UI\Windows\StructureOptionsWindow.cs" />
     <Compile Include="UI\Windows\TaskforcesWindow.cs" />
     <Compile Include="UI\Windows\TeamTypesWindow.cs" />
-    <Compile Include="UI\Windows\TerrainGeneratorConfigWindow.cs" />
+    <Compile Include="UI\Windows\TerrainGenerator\TerrainGeneratorConfigWindow.cs" />
+    <Compile Include="UI\Windows\TerrainGenerator\TerrainGeneratorOverlayGroupsPanel.cs" />
+    <Compile Include="UI\Windows\TerrainGenerator\TerrainGeneratorTerrainTypeGroupsPanel.cs" />
+    <Compile Include="UI\Windows\TerrainGenerator\TerrainGeneratorTileGroupsPanel.cs" />
     <Compile Include="UI\Windows\TriggersWindow.cs" />
     <Compile Include="UI\Windows\VehicleOptionsWindow.cs" />
     <Compile Include="UI\Windows\WindowController.cs" />

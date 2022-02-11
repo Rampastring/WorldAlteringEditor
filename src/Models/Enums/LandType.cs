@@ -3,6 +3,7 @@
     public enum LandType
     {
         Clear,
+        Ice,
         Beach,
         Rough,
         Road,
