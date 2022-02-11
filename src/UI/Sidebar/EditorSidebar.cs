@@ -77,7 +77,7 @@ namespace TSMapEditor.UI.Sidebar
             overlayListPanel.Name = nameof(overlayListPanel);
             InitPanel(overlayListPanel);
 
-            var smudgeListPanel = new SmudgeListPanel(WindowManager, editorState, map, theaterGraphics, cursorActionTarget, new object());
+            var smudgeListPanel = new SmudgeListPanel(WindowManager, editorState, map, theaterGraphics, cursorActionTarget);
             smudgeListPanel.Name = nameof(smudgeListPanel);
             InitPanel(smudgeListPanel);
 

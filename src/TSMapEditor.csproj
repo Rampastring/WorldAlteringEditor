@@ -202,6 +202,7 @@
     <Compile Include="Models\RulesColor.cs" />
     <Compile Include="Models\Script.cs" />
     <Compile Include="Models\Enums\SpotlightType.cs" />
+    <Compile Include="Models\Smudge.cs" />
     <Compile Include="Models\SmudgeType.cs" />
     <Compile Include="Models\Structure.cs" />
     <Compile Include="Models\SubCell.cs" />
@@ -229,6 +230,7 @@
     <Compile Include="Mutations\Classes\PlaceCellTagMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceOverlayCollectionMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceOverlayMutation.cs" />
+    <Compile Include="Mutations\Classes\PlaceSmudgeMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceTerrainTileMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceAircraftMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceInfantryMutation.cs" />
@@ -276,6 +278,7 @@
     <Compile Include="UI\CursorActions\OverlayPlacementAction.cs" />
     <Compile Include="UI\CursorActions\PasteTerrainCursorAction.cs" />
     <Compile Include="UI\CursorActions\PlaceCellTagCursorAction.cs" />
+    <Compile Include="UI\CursorActions\PlaceSmudgeCursorAction.cs" />
     <Compile Include="UI\CursorActions\PlaceWaypointCursorAction.cs" />
     <Compile Include="UI\CursorActions\TerrainObjectPlacementAction.cs" />
     <Compile Include="UI\CursorActions\PlaceTerrainCursorAction.cs" />

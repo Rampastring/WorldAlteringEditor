@@ -7,22 +7,22 @@ using System.Collections.Generic;
 using System.Linq;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
+using TSMapEditor.UI.CursorActions;
 
 namespace TSMapEditor.UI.Sidebar
 {
     class SmudgeListPanel : XNAPanel, ISearchBoxContainer
     {
         public SmudgeListPanel(WindowManager windowManager, EditorState editorState,
-            Map map, TheaterGraphics theaterGraphics, ICursorActionTarget cursorActionTarget,
-            object smudgePlacementAction) : base(windowManager)
+            Map map, TheaterGraphics theaterGraphics, ICursorActionTarget cursorActionTarget) : base(windowManager)
         {
             EditorState = editorState;
             Map = map;
             TheaterGraphics = theaterGraphics;
             this.cursorActionTarget = cursorActionTarget;
-            this.smudgePlacementAction = smudgePlacementAction;
+            smudgePlacementAction = new PlaceSmudgeCursorAction(cursorActionTarget);
+            smudgePlacementAction.ActionExited += SmudgePlacementAction_ActionExited;
         }
-
 
         protected EditorState EditorState { get; }
         protected Map Map { get; }
@@ -32,7 +32,7 @@ namespace TSMapEditor.UI.Sidebar
         public TreeView ObjectTreeView { get; private set; }
 
         private readonly ICursorActionTarget cursorActionTarget;
-        private readonly object smudgePlacementAction;
+        private readonly PlaceSmudgeCursorAction smudgePlacementAction;
 
 
         public override void Initialize()
@@ -61,7 +61,7 @@ namespace TSMapEditor.UI.Sidebar
             ObjectTreeView.SelectedItemChanged += ObjectTreeView_SelectedItemChanged;
             // overlayPlacementAction.ActionExited += (s, e) => ObjectTreeView.SelectedNode = null;
 
-            InitOverlays();
+            InitSmudges();
 
             KeyboardCommands.Instance.NextSidebarNode.Triggered += NextSidebarNode_Triggered;
             KeyboardCommands.Instance.PreviousSidebarNode.Triggered += PreviousSidebarNode_Triggered;
@@ -73,12 +73,13 @@ namespace TSMapEditor.UI.Sidebar
                 return;
 
             var tag = ObjectTreeView.SelectedNode.Tag;
-            if (tag == null)
-                return;
+            smudgePlacementAction.SmudgeType = tag as SmudgeType;
+            EditorState.CursorAction = smudgePlacementAction;
+        }
 
-            // Assume this to be the smudge removal entry
-            // overlayPlacementAction.OverlayType = null;
-            // EditorState.CursorAction = overlayPlacementAction;
+        private void SmudgePlacementAction_ActionExited(object sender, EventArgs e)
+        {
+            ObjectTreeView.SelectedNode = null;
         }
 
         private void NextSidebarNode_Triggered(object sender, EventArgs e)
@@ -106,7 +107,7 @@ namespace TSMapEditor.UI.Sidebar
             ObjectTreeView.FindNode(SearchBox.Text, false);
         }
 
-        private void InitOverlays()
+        private void InitSmudges()
         {
             var categories = new List<TreeViewCategory>();
 

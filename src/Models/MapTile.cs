@@ -31,6 +31,7 @@ namespace TSMapEditor.Models
         public int PreviewSubTileIndex { get; set; }
 
         public Overlay Overlay { get; set; }
+        public Smudge Smudge { get; set; }
 
         public Waypoint Waypoint { get; set; }
 

@@ -98,10 +98,13 @@ namespace TSMapEditor.Rendering
                         var cell = map.GetTile(mapTile.CoordsToPoint() + new Point2D(x, y));
                         if (cell != null)
                         {
-                             if (cell.GetObject() != null)
+                            if (cell.GetObject() != null)
                                 RedrawFromObject(cell.GetObject());
 
                             if (cell.Overlay != null)
+                                RedrawTile(cell);
+
+                            if (cell.Smudge != null)
                                 RedrawTile(cell);
                         }
                             

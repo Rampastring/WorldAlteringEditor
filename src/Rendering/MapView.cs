@@ -242,6 +242,7 @@ namespace TSMapEditor.Rendering
                 }
             }
 
+            DrawSmudges();
             DrawOverlays();
 
             DrawObjects();
@@ -253,6 +254,15 @@ namespace TSMapEditor.Rendering
 
             sw.Stop();
             Console.WriteLine("Map render time: " + sw.Elapsed.TotalMilliseconds);
+        }
+
+        private void DrawSmudges()
+        {
+            Map.DoForAllValidTiles(t =>
+            {
+                if (t.Smudge != null)
+                    DrawObject(t.Smudge);
+            });
         }
 
         private void DrawOverlays()
@@ -354,6 +364,11 @@ namespace TSMapEditor.Rendering
 
             Renderer.PushRenderTarget(mapRenderTarget);
             tilesToRedraw.ForEach(t => DrawTerrainTile(t));
+            tilesToRedraw.ForEach(t => 
+            { 
+                if (t.Smudge != null)
+                    DrawObject(t.Smudge); 
+            });
             tilesToRedraw.ForEach(t =>
             {
                 if (t.Overlay != null)
@@ -438,6 +453,14 @@ namespace TSMapEditor.Rendering
                     graphics = TheaterGraphics.OverlayTextures[overlay.OverlayType.Index];
                     replacementColor = Color.LimeGreen;
                     iniName = overlay.OverlayType.ININame;
+                    break;
+                case RTTIType.Smudge:
+                    var smudge = (Smudge)gameObject;
+                    if (smudge.SmudgeType == null)
+                        return;
+                    graphics = TheaterGraphics.SmudgeTextures[smudge.SmudgeType.Index];
+                    replacementColor = Color.Cyan;
+                    iniName = smudge.SmudgeType.ININame;
                     break;
             }
 
@@ -968,6 +991,7 @@ namespace TSMapEditor.Rendering
                 foreach (var refresh in newRefreshes)
                 {
                     var overlaysToRedraw = new List<Overlay>();
+                    var smudgesToRedraw = new List<Smudge>();
                     var waypointsToRedraw = new List<Waypoint>();
                     var cellTagsToRedraw = new List<CellTag>();
 
@@ -978,6 +1002,8 @@ namespace TSMapEditor.Rendering
 
                         if (tile.Overlay != null)
                             overlaysToRedraw.Add(tile.Overlay);
+                        if (tile.Smudge != null)
+                            smudgesToRedraw.Add(tile.Smudge);
                         if (tile.Waypoint != null)
                             waypointsToRedraw.Add(tile.Waypoint);
                         if (tile.CellTag != null)
@@ -985,6 +1011,7 @@ namespace TSMapEditor.Rendering
                     }
 
                     overlaysToRedraw.ForEach(o => DrawObject(o));
+                    smudgesToRedraw.ForEach(o => DrawObject(o));
                     var sortedObjects = refresh.objectsToRedraw.Select(kvp => kvp.Value).OrderBy(go => go.GetYPositionForDrawOrder()).ThenBy(go => go.GetXPositionForDrawOrder()).ToArray();
                     Array.ForEach(sortedObjects, obj => DrawObject(obj));
                     waypointsToRedraw.ForEach(wp => DrawWaypoint(wp));
