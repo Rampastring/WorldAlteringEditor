@@ -115,6 +115,7 @@ namespace TSMapEditor.Models
 
             MapLoader.ReadHouses(this, mapIni);
 
+            MapLoader.ReadSmudges(this, mapIni);
             MapLoader.ReadOverlays(this, mapIni);
             MapLoader.ReadTerrainObjects(this, mapIni);
 
@@ -143,6 +144,7 @@ namespace TSMapEditor.Models
 
             MapWriter.WriteHouses(this, LoadedINI);
 
+            MapWriter.WriteSmudges(this, LoadedINI);
             MapWriter.WriteOverlays(this, LoadedINI);
             MapWriter.WriteTerrainObjects(this, LoadedINI);
 

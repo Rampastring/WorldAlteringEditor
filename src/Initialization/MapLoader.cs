@@ -451,6 +451,32 @@ namespace TSMapEditor.Initialization
             }
         }
 
+        public static void ReadSmudges(IMap map, IniFile mapIni)
+        {
+            var smudgesSection = mapIni.GetSection("Smudge");
+            if (smudgesSection == null)
+                return;
+
+            foreach (var kvp in smudgesSection.Keys)
+            {
+                string[] values = kvp.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (values.Length < 3)
+                    continue;
+
+                string smudgeTypeId = values[0];
+                int x = Conversions.IntFromString(values[1], -1);
+                int y = Conversions.IntFromString(values[2], -1);
+                if (values.Length > 3 && values[3] != "0")
+                    continue;
+
+                var smudgeType = map.Rules.SmudgeTypes.Find(st => st.ININame == smudgeTypeId);
+                var cell = map.GetTile(x, y);
+                if (cell != null)
+                    cell.Smudge = new Smudge() { SmudgeType = smudgeType, Position = new Point2D(x, y) };
+            }
+        }
+
         public static void ReadOverlays(IMap map, IniFile mapIni)
         {
             var overlayPackSection = mapIni.GetSection("OverlayPack");

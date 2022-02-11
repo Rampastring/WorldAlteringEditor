@@ -2,6 +2,7 @@
 using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using TSMapEditor.Models;
 using TSMapEditor.Models.MapFormat;
@@ -175,6 +176,33 @@ namespace TSMapEditor.Initialization
             var overlayDataPackSection = new IniSection(overlayDataPackSectionName);
             mapIni.AddSection(overlayDataPackSection);
             WriteBase64ToSection(compressedOverlayDataArray, overlayDataPackSection);
+        }
+
+        public static void WriteSmudges(IMap map, IniFile mapIni)
+        {
+            const string sectionName = "Smudge";
+            mapIni.RemoveSection(sectionName);
+
+            var smudges = new List<Smudge>();
+
+            map.DoForAllValidTiles(cell =>
+            {
+                if (cell.Smudge != null)
+                    smudges.Add(cell.Smudge);
+            });
+
+            if (smudges.Count > 0)
+            {
+                var section = new IniSection(sectionName);
+                
+                for (int i = 0; i < smudges.Count; i++)
+                {
+                    var smudge = smudges[i];
+                    section.SetStringValue(i.ToString(CultureInfo.InvariantCulture), $"{smudge.SmudgeType},{smudge.Position.X},{smudge.Position.Y},0");
+                }
+
+                mapIni.AddSection(section);
+            }
         }
 
         public static void WriteTerrainObjects(IMap map, IniFile mapIni)
