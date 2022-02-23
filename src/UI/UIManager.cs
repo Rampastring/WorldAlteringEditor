@@ -2,13 +2,17 @@
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
+using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations;
 using TSMapEditor.Rendering;
+using TSMapEditor.Settings;
+using TSMapEditor.UI.Controls;
 using TSMapEditor.UI.CursorActions;
 using TSMapEditor.UI.Sidebar;
 using TSMapEditor.UI.TopBar;
 using TSMapEditor.UI.Windows;
+using TSMapEditor.UI.Windows.MainMenuWindows;
 
 namespace TSMapEditor.UI
 {
@@ -45,6 +49,9 @@ namespace TSMapEditor.UI
         private OverlayPlacementAction overlayPlacementAction;
 
         private MutationManager mutationManager;
+
+        private int loadMapStage;
+        private string loadMapFilePath;
 
 
         public override void Initialize()
@@ -94,7 +101,6 @@ namespace TSMapEditor.UI
             var windowController = new WindowController();
             editorState = new EditorState();
             editorState.BrushSize = map.EditorConfig.BrushSizes[0];
-
             mutationManager = new MutationManager();
 
             mapView = new MapView(WindowManager, map, theaterGraphics, editorState, mutationManager, windowController);
@@ -161,6 +167,36 @@ namespace TSMapEditor.UI
 
             editorState.CursorActionChanged += EditorState_CursorActionChanged;
             overlayPlacementAction.OverlayTypeChanged += OverlayPlacementAction_OverlayTypeChanged;
+
+            windowController.OpenMapWindow.OnFileSelected += OpenMapWindow_OnFileSelected;
+        }
+
+        private void OpenMapWindow_OnFileSelected(object sender, FileSelectedEventArgs e)
+        {
+            var messageBox = new EditorMessageBox(WindowManager, "Loading", "Please wait, loading map...", MessageBoxButtons.None);
+            var dp = new DarkeningPanel(WindowManager);
+            AddChild(dp);
+            dp.AddChild(messageBox);
+
+            loadMapFilePath = e.FilePath;
+            loadMapStage = 1;
+            ((OpenMapWindow)sender).OnFileSelected -= OpenMapWindow_OnFileSelected;
+        }
+
+        private void LoadMap()
+        {
+            // We need to free memory of everything that we've ever created and then load the new map file
+            Disable();
+            foreach (var child in Children)
+                child.Disable();
+
+            // TODO free up memory of textures created for controls - they should be mostly 
+            // insignificant compared to the map textures though, so it shouldn't be too bad like this
+
+            WindowManager.RemoveControl(this);
+            theaterGraphics.DisposeAll();
+
+            MapSetup.InitializeMap(WindowManager, UserSettings.Instance.GameDirectory, false, loadMapFilePath, null, Point2D.Zero);
         }
 
         private void OverlayPlacementAction_OverlayTypeChanged(object sender, EventArgs e)
@@ -288,6 +324,19 @@ namespace TSMapEditor.UI
         private void RedoAction()
         {
             mutationManager.Redo();
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+
+            if (loadMapStage > 0)
+            {
+                loadMapStage++;
+
+                if (loadMapStage > 3)
+                    LoadMap();
+            }
         }
     }
 }

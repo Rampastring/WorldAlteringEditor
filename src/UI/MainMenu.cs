@@ -207,6 +207,7 @@ namespace TSMapEditor.UI
         {
             settingsPanel.ApplySettings();
 
+            UserSettings.Instance.GameDirectory.UserDefinedValue = tbGameDirectory.Text;
             UserSettings.Instance.LastScenarioPath.UserDefinedValue = tbMapPath.Text;
 
             bool fullscreenWindowed = UserSettings.Instance.FullscreenWindowed.GetValue();

@@ -37,6 +37,13 @@ namespace TSMapEditor.Rendering
         public TmpImage TmpImage { get; private set; }
         public Palette Palette { get; private set; }
 
+
+        public void Dispose()
+        {
+            if (Texture != null)
+                Texture.Dispose();
+        }
+
         private Texture2D TextureFromTmpImage(GraphicsDevice graphicsDevice, TmpImage image, Palette palette)
         {
             Texture2D texture = new Texture2D(graphicsDevice, Constants.CellSizeX, Constants.CellSizeY, false, SurfaceFormat.Color);

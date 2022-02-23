@@ -9,6 +9,7 @@ namespace TSMapEditor.UI.Windows
 {
     public enum MessageBoxButtons
     {
+        None,
         OK,
         YesNo
     }
@@ -72,20 +73,24 @@ namespace TSMapEditor.UI.Windows
             Width = Math.Max((int)textDimensions.X, captionWidth) + Constants.UIEmptySideSpace * 2;
             line.Width = Width - (Constants.UIEmptySideSpace * 2);
 
-            if (messageBoxButtons == MessageBoxButtons.OK)
+            switch (messageBoxButtons)
             {
-                AddOKButton();
-            }
-            else if (messageBoxButtons == MessageBoxButtons.YesNo)
-            {
-                AddYesNoButtons();
-            }
-            else
-            {
-                throw new NotImplementedException("Unknown message box button enum value of " + messageBoxButtons);
+                case MessageBoxButtons.OK:
+                    AddOKButton();
+                    break;
+                case MessageBoxButtons.YesNo:
+                    AddYesNoButtons();
+                    break;
+                case MessageBoxButtons.None:
+                    break;
+                default:
+                    throw new NotImplementedException("Unknown message box button enum value of " + messageBoxButtons);
             }
 
-            Height = buttons[0].Bottom + Constants.UIEmptyBottomSpace;
+            if (buttons.Count > 0)
+                Height = buttons[0].Bottom + Constants.UIEmptyBottomSpace;
+            else
+                Height = lblDescription.Bottom + Constants.UIEmptyBottomSpace;
 
             base.Initialize();
 

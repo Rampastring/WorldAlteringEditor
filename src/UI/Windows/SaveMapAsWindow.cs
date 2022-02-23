@@ -25,7 +25,6 @@ namespace TSMapEditor.UI.Windows
 
         public override void Initialize()
         {
-            Width = 300;
             Name = nameof(SaveMapAsWindow);
 
             var lblHeader = new XNALabel(WindowManager);

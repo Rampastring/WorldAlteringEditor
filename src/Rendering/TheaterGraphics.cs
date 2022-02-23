@@ -174,6 +174,15 @@ namespace TSMapEditor.Rendering
 
             return height;
         }
+
+        public void Dispose()
+        {
+            Array.ForEach(TMPImages, tmp =>
+            {
+                if (tmp != null)
+                    tmp.Dispose();
+            });
+        }
     }
 
     public class ObjectImage
@@ -249,6 +258,24 @@ namespace TSMapEditor.Rendering
             }
         }
 
+        public void Dispose()
+        {
+            Array.ForEach(Frames, f =>
+            {
+                if (f != null)
+                    f.Dispose();
+            });
+
+            if (RemapFrames != null)
+            {
+                Array.ForEach(RemapFrames, f =>
+                {
+                    if (f != null)
+                        f.Dispose();
+                });
+            }
+        }
+
         public PositionedTexture[] Frames { get; set; }
         public PositionedTexture[] RemapFrames { get; set; }
     }
@@ -268,6 +295,12 @@ namespace TSMapEditor.Rendering
             OffsetX = offsetX;
             OffsetY = offsetY;
             Texture = texture;
+        }
+
+        public void Dispose()
+        {
+            if (Texture != null)
+                Texture.Dispose();
         }
     }
 
@@ -624,6 +657,40 @@ namespace TSMapEditor.Rendering
         public ObjectImage[] InfantryTextures { get; set; }
         public ObjectImage[] OverlayTextures { get; set; }
         public ObjectImage[] SmudgeTextures { get; set; }
+
+
+        /// <summary>
+        /// Frees up all memory used by the theater graphics textures
+        /// (or more precisely, diposes them so the garbage collector can free them).
+        /// Make sure no rendering is attempted afterwards!
+        /// </summary>
+        public void DisposeAll()
+        {
+            var task1 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(TerrainObjectTextures));
+            var task2 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(BuildingTextures));
+            var task3 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(UnitTextures));
+            var task4 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(InfantryTextures));
+            var task5 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(OverlayTextures));
+            var task6 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(SmudgeTextures));
+            var task7 = Task.Factory.StartNew(() => terrainGraphicsList.ForEach(tileImageArray => Array.ForEach(tileImageArray, tileImage => tileImage.Dispose())));
+            var task8 = Task.Factory.StartNew(() => mmTerrainGraphicsList.ForEach(tileImageArray => Array.ForEach(tileImageArray, tileImage => tileImage.Dispose())));
+            Task.WaitAll(task1, task2, task3, task4, task5, task6, task7, task8);
+
+            terrainGraphicsList.Clear();
+            mmTerrainGraphicsList.Clear();
+
+            TerrainObjectTextures = null;
+            BuildingTextures = null;
+            UnitTextures = null;
+            InfantryTextures = null;
+            OverlayTextures = null;
+            SmudgeTextures = null;
+        }
+
+        private void DisposeObjectImagesFromArray(ObjectImage[] objImageArray)
+        {
+            Array.ForEach(objImageArray, objectImage => { if (objectImage != null) objectImage.Dispose(); });
+        }
 
         private Palette GetPaletteOrFail(string paletteFileName)
         {

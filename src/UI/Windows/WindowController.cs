@@ -23,6 +23,7 @@ namespace TSMapEditor.UI.Windows
         public InfantryOptionsWindow InfantryOptionsWindow { get; private set; }
         public HousesWindow HousesWindow { get; private set; }
         public SaveMapAsWindow SaveMapAsWindow { get; private set; }
+        public OpenMapWindow OpenMapWindow { get; private set; }
         public AutoApplyImpassableOverlayWindow AutoApplyImpassableOverlayWindow { get; private set; }
         public TerrainGeneratorConfigWindow TerrainGeneratorConfigWindow { get; private set; }
         public MegamapWindow MinimapWindow { get; private set; }
@@ -65,6 +66,9 @@ namespace TSMapEditor.UI.Windows
 
             SaveMapAsWindow = new SaveMapAsWindow(windowParentControl.WindowManager, map);
             Windows.Add(SaveMapAsWindow);
+
+            OpenMapWindow = new OpenMapWindow(windowParentControl.WindowManager);
+            Windows.Add(OpenMapWindow);
 
             AutoApplyImpassableOverlayWindow = new AutoApplyImpassableOverlayWindow(windowParentControl.WindowManager, map, cursorActionTarget.MutationTarget);
             Windows.Add(AutoApplyImpassableOverlayWindow);

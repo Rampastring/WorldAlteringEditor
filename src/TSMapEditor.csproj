@@ -324,6 +324,7 @@
     <Compile Include="UI\Windows\LocalVariablesWindow.cs" />
     <Compile Include="UI\Windows\MainMenuWindows\MapSetup.cs" />
     <Compile Include="UI\Windows\MegamapWindow.cs" />
+    <Compile Include="UI\Windows\OpenMapWindow.cs" />
     <Compile Include="UI\Windows\PlaceWaypointWindow.cs" />
     <Compile Include="UI\Windows\SaveMapAsWindow.cs" />
     <Compile Include="UI\Windows\ScriptsWindow.cs" />
