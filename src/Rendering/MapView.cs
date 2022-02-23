@@ -943,9 +943,13 @@ namespace TSMapEditor.Rendering
                         {
                             angle = angle - ((float)Math.PI * 2.0f);
                         }
+                        else if (angle < 0f)
+                        {
+                            angle += (float)Math.PI * 2.0f;
+                        }
 
                         float percent = angle / ((float)Math.PI * 2.0f);
-                        byte facing = (byte)(percent * (float)byte.MaxValue);
+                        byte facing = (byte)Math.Ceiling(percent * (float)byte.MaxValue);
 
                         techno.Facing = facing;
                         AddRefreshPoint(techno.Position, 2);
