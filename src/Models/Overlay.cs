@@ -20,7 +20,10 @@
 
         public override int GetYDrawOffset()
         {
-            return Constants.CellSizeY / -2;
+            if (OverlayType.Tiberium || OverlayType.Wall)
+                return Constants.CellSizeY / -2;
+
+            return 0;
         }
     }
 }
