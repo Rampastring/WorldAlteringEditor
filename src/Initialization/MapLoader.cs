@@ -37,6 +37,18 @@ namespace TSMapEditor.Initialization
             int height = int.Parse(parts[3]);
             map.Size = new Point2D(width, height);
 
+            if (width * Constants.CellSizeX > Constants.TextureSizeLimit)
+            {
+                throw new MapLoadException($"Map width cannot be greater than " +
+                    $"{Constants.TextureSizeLimit / Constants.CellSizeX} cells; the map is {width} cells wide!");
+            }
+            
+            if (height * Constants.CellSizeY > Constants.TextureSizeLimit)
+            {
+                throw new MapLoadException("Map height cannot be greater than " +
+                    $"{Constants.TextureSizeLimit / Constants.CellSizeY} cells; the map is {height} cells high!");
+            }
+
             string localSize = section.GetStringValue("LocalSize", null);
             if (localSize == null)
                 throw new MapLoadException("Invalid [Map] LocalSize=");

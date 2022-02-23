@@ -5,6 +5,8 @@
         public const int CellSizeX = 48;
         public const int CellSizeY = 24;
 
+        public const int TextureSizeLimit = 16384;
+
         public const int ObjectHealthMax = 256;
         public const int FacingMax = 255;
 
