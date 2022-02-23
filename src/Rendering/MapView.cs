@@ -138,6 +138,8 @@ namespace TSMapEditor.Rendering
         private Texture2D mapWideOverlayTexture;
         private float mapWideOverlayTextureOpacity;
 
+        private Point lastClickedPoint;
+
         public void AddRefreshPoint(Point2D point, int size = 1)
         {
             // if (!mapInvalidated)
@@ -712,8 +714,6 @@ namespace TSMapEditor.Rendering
                 }
             }
 
-           
-
             if (CursorAction == null && tileUnderCursor != null && Cursor.LeftDown && !isDraggingObject && !isRotatingObject)
             {
                 var cellObject = tileUnderCursor.GetObject();
@@ -755,11 +755,23 @@ namespace TSMapEditor.Rendering
             {
                 CursorAction.LeftClick(tileUnderCursor.CoordsToPoint());
             }
+            else
+            {
+                var cursorPoint = GetCursorPoint();
+                if (cursorPoint == lastClickedPoint)
+                {
+                    HandleDoubleClick();
+                }
+                else
+                {
+                    lastClickedPoint = cursorPoint;
+                }
+            }
 
             base.OnLeftClick();
         }
 
-        public override void OnDoubleLeftClick()
+        private void HandleDoubleClick()
         {
             if (tileUnderCursor != null && CursorAction == null)
             {
@@ -773,8 +785,6 @@ namespace TSMapEditor.Rendering
                 if (infantry != null)
                     windowController.InfantryOptionsWindow.Open(infantry);
             }
-
-            base.OnDoubleLeftClick();
         }
 
         public override void OnRightClick()
