@@ -408,16 +408,21 @@ namespace TSMapEditor.Mutations.Classes
             }
 
             // Apply auto-LAT
-            int minY = cells.Select(p => p.Y).Aggregate((y1, y2) => Math.Min(y1, y2));
-            int maxY = cells.Select(p => p.Y).Aggregate((y1, y2) => Math.Max(y1, y2));
-            int minX = cells.Select(p => p.X).Aggregate((x1, x2) => Math.Min(x1, x2));
-            int maxX = cells.Select(p => p.X).Aggregate((x1, x2) => Math.Max(x1, x2));
+            // TODO: apply undo for auto-lat
+            if (MutationTarget.AutoLATEnabled)
+            {
+                int minY = cells.Select(p => p.Y).Aggregate((y1, y2) => Math.Min(y1, y2));
+                int maxY = cells.Select(p => p.Y).Aggregate((y1, y2) => Math.Max(y1, y2));
+                int minX = cells.Select(p => p.X).Aggregate((x1, x2) => Math.Min(x1, x2));
+                int maxX = cells.Select(p => p.X).Aggregate((x1, x2) => Math.Max(x1, x2));
 
-            minY--;
-            maxY++;
-            minX--;
-            maxX++;
-            ApplyAutoLAT(minX, minY, maxX, maxY);
+                minY--;
+                maxY++;
+                minX--;
+                maxX++;
+                ApplyAutoLAT(minX, minY, maxX, maxY);
+            }
+
             MutationTarget.InvalidateMap();
         }
 
@@ -511,7 +516,10 @@ namespace TSMapEditor.Mutations.Classes
 
                 var mapTile = MutationTarget.Map.GetTile(cellCoords + offset);
 
-                if (mapTile == null || !mapTile.IsClearGround())
+                var tileSetId = MutationTarget.Map.TheaterInstance.GetTileSetId(mapTile.TileIndex);
+                bool isBase = MutationTarget.Map.TheaterInstance.Theater.LATGrounds.Exists(latg => latg.BaseTileSet != null && latg.BaseTileSet.Index == tileSetId);
+
+                if (mapTile == null || (!mapTile.IsClearGround() && !isBase))
                     return false;
             }
 
