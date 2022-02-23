@@ -37,6 +37,7 @@ namespace TSMapEditor.UI.TopBar
         private XNADropDown ddBrushSize;
         private XNACheckBox chkAutoLat;
         private XNACheckBox chkOnlyPaintOnClearGround;
+        private XNACheckBox chkDrawMapWideOverlay;
 
         public override void Initialize()
         {
@@ -112,6 +113,18 @@ namespace TSMapEditor.UI.TopBar
             AddChild(chkOnlyPaintOnClearGround);
             chkOnlyPaintOnClearGround.CheckedChanged += ChkOnlyPaintOnClearGround_CheckedChanged;
 
+            if (editorState.MapWideOverlayExists)
+            {
+                chkDrawMapWideOverlay = new XNACheckBox(WindowManager);
+                chkDrawMapWideOverlay.Name = nameof(chkDrawMapWideOverlay);
+                chkDrawMapWideOverlay.X = chkAutoLat.X;
+                chkDrawMapWideOverlay.Y = chkOnlyPaintOnClearGround.Bottom + Constants.UIVerticalSpacing;
+                chkDrawMapWideOverlay.Checked = editorState.DrawMapWideOverlay;
+                chkDrawMapWideOverlay.Text = "Draw Map-Wide Overlay";
+                AddChild(chkDrawMapWideOverlay);
+                chkDrawMapWideOverlay.CheckedChanged += ChkDrawMapWideOverlay_CheckedChanged;
+            }
+
             Width = chkOnlyPaintOnClearGround.Right + Constants.UIEmptySideSpace;
 
             var btnPlaceWaypoint = new EditorButton(WindowManager);
@@ -137,12 +150,24 @@ namespace TSMapEditor.UI.TopBar
             KeyboardCommands.Instance.NextBrushSize.Triggered += NextBrushSize_Triggered;
             KeyboardCommands.Instance.PreviousBrushSize.Triggered += PreviousBrushSize_Triggered;
             KeyboardCommands.Instance.ToggleAutoLAT.Triggered += ToggleAutoLAT_Triggered;
+            KeyboardCommands.Instance.ToggleMapWideOverlay.Triggered += (s, e) => chkDrawMapWideOverlay.Checked = !chkDrawMapWideOverlay.Checked;
 
             base.Initialize();
 
             editorState.AutoLATEnabledChanged += EditorState_AutoLATEnabledChanged;
             editorState.OnlyPaintOnClearGroundChanged += EditorState_OnlyPaintOnClearGroundChanged;
+            editorState.DrawMapWideOverlayChanged += EditorState_DrawMapWideOverlayChanged;
             editorState.BrushSizeChanged += EditorState_BrushSizeChanged;
+        }
+
+        private void EditorState_DrawMapWideOverlayChanged(object sender, EventArgs e)
+        {
+            chkDrawMapWideOverlay.Checked = editorState.DrawMapWideOverlay;
+        }
+
+        private void ChkDrawMapWideOverlay_CheckedChanged(object sender, EventArgs e)
+        {
+            editorState.DrawMapWideOverlay = chkDrawMapWideOverlay.Checked;
         }
 
         private void EditorState_BrushSizeChanged(object sender, EventArgs e)

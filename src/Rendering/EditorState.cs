@@ -16,6 +16,7 @@ namespace TSMapEditor.Rendering
         public event EventHandler ObjectOwnerChanged;
         public event EventHandler AutoLATEnabledChanged;
         public event EventHandler OnlyPaintOnClearGroundChanged;
+        public event EventHandler DrawMapWideOverlayChanged;
         public event EventHandler BrushSizeChanged;
 
         public bool IsMarbleMadness { get; set; } = false;
@@ -105,6 +106,22 @@ namespace TSMapEditor.Rendering
                 {
                     _onlyPaintOnClearGround = value;
                     OnlyPaintOnClearGroundChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+        
+        public bool MapWideOverlayExists { get; set; }
+
+        private bool _drawMapWideOverlay = true;
+        public bool DrawMapWideOverlay 
+        {
+            get => _drawMapWideOverlay; 
+            set
+            {
+                if (value != _drawMapWideOverlay)
+                {
+                    _drawMapWideOverlay = value;
+                    DrawMapWideOverlayChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }

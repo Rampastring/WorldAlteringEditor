@@ -29,6 +29,7 @@ namespace TSMapEditor.Settings
                 FullscreenWindowed,
 
                 ScrollRate,
+                MapWideOverlayOpacity,
 
                 UpscaleUI,
 
@@ -65,6 +66,7 @@ namespace TSMapEditor.Settings
         public BoolSetting FullscreenWindowed = new BoolSetting(Display, "FullscreenWindowed", false);
 
         public IntSetting ScrollRate = new IntSetting(MapView, nameof(ScrollRate), 15);
+        public IntSetting MapWideOverlayOpacity = new IntSetting(MapView, "MapWideOverlayOpacity", 50);
 
         public BoolSetting UpscaleUI = new BoolSetting(General, "UpscaleUI", false);
 

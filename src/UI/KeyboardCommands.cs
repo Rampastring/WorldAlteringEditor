@@ -26,6 +26,7 @@ namespace TSMapEditor.UI
                 PreviousBrushSize,
                 DeleteObject,
                 ToggleAutoLAT,
+                ToggleMapWideOverlay,
                 RotateUnit,
                 PlaceTerrainBelow,
                 FillTerrain,
@@ -86,6 +87,7 @@ namespace TSMapEditor.UI
         public KeyboardCommand PreviousBrushSize { get; } = new KeyboardCommand("PreviousBrushSize", "Previous Brush Size", new KeyboardCommandInput(Keys.D0, KeyboardModifiers.None));
         public KeyboardCommand DeleteObject { get; } = new KeyboardCommand("DeleteObject", "Delete Object", new KeyboardCommandInput(Keys.Delete, KeyboardModifiers.None));
         public KeyboardCommand ToggleAutoLAT { get; } = new KeyboardCommand("ToggleAutoLAT", "Toggle AutoLAT", new KeyboardCommandInput(Keys.L, KeyboardModifiers.Ctrl));
+        public KeyboardCommand ToggleMapWideOverlay { get; } = new KeyboardCommand("ToggleMapWideOverlay", "Toggle Map-Wide Overlay", new KeyboardCommandInput(Keys.F2, KeyboardModifiers.None));
         public KeyboardCommand RotateUnit { get; } = new KeyboardCommand("RotateUnit", "Rotate Unit", new KeyboardCommandInput(Keys.A, KeyboardModifiers.None));
         public KeyboardCommand PlaceTerrainBelow { get; } = new KeyboardCommand("PlaceTerrainBelow", "Place Terrain Below Cursor", new KeyboardCommandInput(Keys.None, KeyboardModifiers.Alt), true);
         public KeyboardCommand FillTerrain { get; } = new KeyboardCommand("FillTerrain", "Fill Terrain (1x1 tiles only)", new KeyboardCommandInput(Keys.None, KeyboardModifiers.Ctrl), true);
