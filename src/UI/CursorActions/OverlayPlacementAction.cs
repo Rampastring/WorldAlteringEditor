@@ -122,7 +122,7 @@ namespace TSMapEditor.UI.CursorActions
 
             originalOverlay.Clear();
 
-            CursorActionTarget.AddRefreshPoint(cellCoords, Math.Max(CursorActionTarget.BrushSize.Height, CursorActionTarget.BrushSize.Width));
+            CursorActionTarget.AddRefreshPoint(cellCoords, Math.Max(CursorActionTarget.BrushSize.Height, CursorActionTarget.BrushSize.Width) + 1);
         }
 
         public override void LeftDown(Point2D cellCoords)

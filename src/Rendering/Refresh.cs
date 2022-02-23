@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 
@@ -6,8 +7,6 @@ namespace TSMapEditor.Rendering
 {
     class Refresh
     {
-        private const int RedrawObjectsMax = 1400;
-
         public Refresh(Map map)
         {
             this.map = map;
@@ -19,11 +18,15 @@ namespace TSMapEditor.Rendering
         public Dictionary<int, MapTile> tilesToRedraw = new Dictionary<int, MapTile>();
         public Dictionary<int, GameObject> objectsToRedraw = new Dictionary<int, GameObject>();
 
+        public bool IsInitiated { get; private set; } = false;
+        public bool IsComplete { get; private set; } = false;
+        
+
+        private LinkedList<MapTile> tilesToProcess = new LinkedList<MapTile>();
+        private HashSet<int> processedTiles = new HashSet<int>();
+
         public void RedrawFromObject(GameObject gameObject)
         {
-            if (objectsToRedraw.Count >= RedrawObjectsMax)
-                return;
-
             int hash = GetGameObjectHash(gameObject);
             if (objectsToRedraw.ContainsKey(hash))
                 return;
@@ -47,26 +50,48 @@ namespace TSMapEditor.Rendering
             }
         }
 
-        public void RedrawFromCell(int areaSize, Point2D cellCoords)
+        public void Initiate(int areaSize, Point2D cellCoords)
         {
+            if (IsInitiated)
+                throw new InvalidOperationException("RedrawFromCell should only be called once for a Refresh instance.");
+
+            IsInitiated = true;
+
             for (int y = -areaSize; y <= areaSize; y++)
             {
                 for (int x = -areaSize; x <= areaSize; x++)
                 {
-                    var tile = map.GetTile(cellCoords + new Point2D(x, y));
-                    if (tile == null)
+                    var coords = cellCoords + new Point2D(x, y);
+                    var cell = map.GetTile(coords);
+                    if (cell == null)
                         continue;
 
-                    RedrawTile(tile);
+                    tilesToProcess.AddLast(cell);
+                    processedTiles.Add(GetMapTileHash(cell));
                 }
+            }
+        }
+
+        public void Process()
+        {
+            const int singleFrameProcessLimit = 1500;
+            int i = 0;
+            while (i < singleFrameProcessLimit && tilesToProcess.First != null)
+            {
+                var cell = tilesToProcess.First.Value;
+                RedrawTile(cell);
+                tilesToProcess.RemoveFirst();
+                i++;
+            }
+
+            if (tilesToProcess.First == null)
+            {
+                IsComplete = true;
             }
         }
 
         private void RedrawTile(MapTile mapTile)
         {
-            if (objectsToRedraw.Count >= RedrawObjectsMax)
-                return;
-
             if (AddTileToRedraw(mapTile))
             {
                 // Point2D eastCellCoords = mapTile.CoordsToPoint() + new Point2D(1, -1);
@@ -117,7 +142,13 @@ namespace TSMapEditor.Rendering
         {
             var mapTile = map.GetTile(cellCoords);
             if (mapTile != null)
-                RedrawTile(mapTile);
+            {
+                int hash = GetMapTileHash(mapTile);
+                if (!processedTiles.Contains(hash))
+                {
+                    tilesToProcess.AddLast(mapTile);
+                }
+            }
         }
 
         private bool AddTileToRedraw(MapTile mapTile)
@@ -126,18 +157,7 @@ namespace TSMapEditor.Rendering
             if (!tilesToRedraw.ContainsKey(hash))
             {
                 tilesToRedraw.Add(hash, mapTile);
-                return true;
-            }
-
-            return false;
-        }
-
-        private bool AddObjectToRedraw(GameObject gameObject)
-        {
-            int hash = GetGameObjectHash(gameObject);
-            if (!objectsToRedraw.ContainsKey(hash))
-            {
-                objectsToRedraw.Add(hash, gameObject);
+                processedTiles.Add(hash);
                 return true;
             }
 

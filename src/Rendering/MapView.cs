@@ -136,6 +136,7 @@ namespace TSMapEditor.Rendering
         private PasteTerrainCursorAction pasteTerrainCursorAction;
 
         private Texture2D mapWideOverlayTexture;
+        private float mapWideOverlayTextureOpacity;
 
         public void AddRefreshPoint(Point2D point, int size = 1)
         {
@@ -145,8 +146,11 @@ namespace TSMapEditor.Rendering
             if (mapInvalidated)
                 return;
 
+            if (newRefreshes.Count > 0)
+                return;
+
             var newRefresh = new Refresh(Map);
-            newRefresh.RedrawFromCell(size, point);
+            newRefresh.Initiate(size, point);
             newRefreshes.Add(newRefresh);
         }
 
@@ -164,6 +168,8 @@ namespace TSMapEditor.Rendering
             const string MapWideOverlayTextureName = "mapwideoverlay.png";
             if (AssetLoader.AssetExists(MapWideOverlayTextureName))
                 mapWideOverlayTexture = AssetLoader.LoadTexture(MapWideOverlayTextureName);
+            EditorState.MapWideOverlayExists = mapWideOverlayTexture != null;
+            mapWideOverlayTextureOpacity = UserSettings.Instance.MapWideOverlayOpacity / 255.0f;
 
             mapRenderTarget = CreateFullMapRenderTarget();
             objectRenderTarget = CreateFullMapRenderTarget();
@@ -977,6 +983,7 @@ namespace TSMapEditor.Rendering
             {
                 DrawWholeMap();
                 mapInvalidated = false;
+                newRefreshes.Clear();
             }
 
             if (IsActive && tileUnderCursor != null && CursorAction != null)
@@ -988,40 +995,55 @@ namespace TSMapEditor.Rendering
             {
                 Renderer.PushRenderTarget(mapRenderTarget);
 
-                foreach (var refresh in newRefreshes)
+                int i = 0;
+                while (i < newRefreshes.Count)
                 {
+                    var refresh = newRefreshes[i];
+
+                    if (!refresh.IsComplete)
+                    {
+                        refresh.Process();
+
+                        if (!refresh.IsComplete)
+                        {
+                            i++;
+                            continue;
+                        }
+                    }
+
                     var overlaysToRedraw = new List<Overlay>();
                     var smudgesToRedraw = new List<Smudge>();
                     var waypointsToRedraw = new List<Waypoint>();
                     var cellTagsToRedraw = new List<CellTag>();
 
-                    foreach (var kvp in refresh.tilesToRedraw)
-                    {
-                        MapTile tile = kvp.Value;
-                        DrawTerrainTile(tile);
+                    var sortedCells = refresh.tilesToRedraw.Select(kvp => kvp.Value).OrderBy(cell => cell.Y).ThenBy(cell => cell.X).ToArray();
 
-                        if (tile.Overlay != null)
-                            overlaysToRedraw.Add(tile.Overlay);
-                        if (tile.Smudge != null)
-                            smudgesToRedraw.Add(tile.Smudge);
-                        if (tile.Waypoint != null)
-                            waypointsToRedraw.Add(tile.Waypoint);
-                        if (tile.CellTag != null)
-                            cellTagsToRedraw.Add(tile.CellTag);
+                    foreach (var cell in sortedCells)
+                    {
+                        DrawTerrainTile(cell);
+
+                        if (cell.Overlay != null)
+                            overlaysToRedraw.Add(cell.Overlay);
+                        if (cell.Smudge != null)
+                            smudgesToRedraw.Add(cell.Smudge);
+                        if (cell.Waypoint != null)
+                            waypointsToRedraw.Add(cell.Waypoint);
+                        if (cell.CellTag != null)
+                            cellTagsToRedraw.Add(cell.CellTag);
                     }
 
                     overlaysToRedraw.ForEach(o => DrawObject(o));
                     smudgesToRedraw.ForEach(o => DrawObject(o));
-                    var sortedObjects = refresh.objectsToRedraw.Select(kvp => kvp.Value).OrderBy(go => go.GetYPositionForDrawOrder()).ThenBy(go => go.GetXPositionForDrawOrder()).ToArray();
+                    var sortedObjects = refresh.objectsToRedraw.Select(kvp => kvp.Value).OrderBy(go => go.GetYPositionForDrawOrder()).ThenBy(go => go.GetXPositionForDrawOrder()).ThenBy(go => go.WhatAmI()).ToArray();
                     Array.ForEach(sortedObjects, obj => DrawObject(obj));
                     waypointsToRedraw.ForEach(wp => DrawWaypoint(wp));
                     cellTagsToRedraw.ForEach(ct => DrawCellTag(ct));
+
+                    newRefreshes.RemoveAt(i);
                 }
 
                 DrawMapBorder();
                 Renderer.PopRenderTarget();
-
-                newRefreshes.Clear();
             }
 
 
@@ -1040,9 +1062,11 @@ namespace TSMapEditor.Rendering
                 CursorAction.DrawPreview(tileUnderCursor.CoordsToPoint(), cameraTopLeftPoint);
             }
 
-            if (mapWideOverlayTexture != null)
+            if (mapWideOverlayTexture != null && EditorState.DrawMapWideOverlay)
             {
-                Renderer.DrawTexture(mapWideOverlayTexture, new Rectangle(-cameraTopLeftPoint.X, -cameraTopLeftPoint.Y, mapRenderTarget.Width, mapRenderTarget.Height), Color.White * 0.25f);
+                Renderer.DrawTexture(mapWideOverlayTexture,
+                    new Rectangle(-cameraTopLeftPoint.X, -cameraTopLeftPoint.Y, mapRenderTarget.Width, mapRenderTarget.Height),
+                    Color.White * mapWideOverlayTextureOpacity);
             }
 
             DrawCursorTile();
