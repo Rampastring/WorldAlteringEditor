@@ -748,6 +748,21 @@ namespace TSMapEditor.Rendering
             using (var memstream = new MemoryStream(data))
             {
                 var tex2d = Texture2D.FromStream(graphicsDevice, memstream);
+
+                // premultiply alpha
+                Color[] colorData = new Color[tex2d.Width * tex2d.Height];
+                tex2d.GetData(colorData);
+                for (int i = 0; i < colorData.Length; i++)
+                {
+                    var color = colorData[i];
+                    color.R = (byte)((color.R * color.A) / byte.MaxValue);
+                    color.G = (byte)((color.G * color.A) / byte.MaxValue);
+                    color.B = (byte)((color.B * color.A) / byte.MaxValue);
+                    colorData[i] = color;
+                }
+
+                tex2d.SetData(colorData);
+
                 return new PositionedTexture(tex2d.Width, tex2d.Height, 0, 0, tex2d);
             }
         }
