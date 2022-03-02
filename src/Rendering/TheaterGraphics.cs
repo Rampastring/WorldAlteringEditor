@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using TSMapEditor.CCEngine;
@@ -187,8 +188,14 @@ namespace TSMapEditor.Rendering
 
     public class ObjectImage
     {
-        public ObjectImage(GraphicsDevice graphicsDevice, ShpFile shp, byte[] shpFileData, Palette palette, List<int> framesToLoad = null, bool remapable = false)
+        public ObjectImage(GraphicsDevice graphicsDevice, ShpFile shp, byte[] shpFileData, Palette palette, List<int> framesToLoad = null, bool remapable = false, PositionedTexture pngTexture = null)
         {
+            if (pngTexture != null && !remapable)
+            {
+                Frames = new PositionedTexture[] { pngTexture };
+                return;
+            }
+
             Frames = new PositionedTexture[shp.FrameCount];
             if (remapable && Constants.HQRemap)
                 RemapFrames = new PositionedTexture[Frames.Length];
@@ -310,26 +317,31 @@ namespace TSMapEditor.Rendering
     public class TheaterGraphics : ITheater
     {
         private const string SHP_FILE_EXTENSION = ".SHP";
+        private const string PNG_FILE_EXTENSION = ".PNG";
 
         public TheaterGraphics(GraphicsDevice graphicsDevice, Theater theater, CCFileManager fileManager, Rules rules)
         {
+            this.graphicsDevice = graphicsDevice;
             Theater = theater;
             this.fileManager = fileManager;
 
             theaterPalette = GetPaletteOrFail(theater.TerrainPaletteName);
             unitPalette = GetPaletteOrFail(Theater.UnitPaletteName);
 
-            var task1 = Task.Factory.StartNew(() => ReadTileTextures(graphicsDevice));
-            var task2 = Task.Factory.StartNew(() => ReadTerrainObjectTextures(graphicsDevice, rules.TerrainTypes));
-            var task3 = Task.Factory.StartNew(() => ReadBuildingTextures(graphicsDevice, rules.BuildingTypes));
-            var task4 = Task.Factory.StartNew(() => ReadUnitTextures(graphicsDevice, rules.UnitTypes));
-            var task5 = Task.Factory.StartNew(() => ReadInfantryTextures(graphicsDevice, rules.InfantryTypes));
-            var task6 = Task.Factory.StartNew(() => ReadOverlayTextures(graphicsDevice, rules.OverlayTypes));
-            var task7 = Task.Factory.StartNew(() => ReadSmudgeTextures(graphicsDevice, rules.SmudgeTypes));
+            var task1 = Task.Factory.StartNew(() => ReadTileTextures());
+            var task2 = Task.Factory.StartNew(() => ReadTerrainObjectTextures(rules.TerrainTypes));
+            var task3 = Task.Factory.StartNew(() => ReadBuildingTextures(rules.BuildingTypes));
+            var task4 = Task.Factory.StartNew(() => ReadUnitTextures(rules.UnitTypes));
+            var task5 = Task.Factory.StartNew(() => ReadInfantryTextures(rules.InfantryTypes));
+            var task6 = Task.Factory.StartNew(() => ReadOverlayTextures(rules.OverlayTypes));
+            var task7 = Task.Factory.StartNew(() => ReadSmudgeTextures(rules.SmudgeTypes));
             Task.WaitAll(task1, task2, task3, task4, task5, task6, task7);
         }
 
-        private void ReadTileTextures(GraphicsDevice graphicsDevice)
+        private readonly GraphicsDevice graphicsDevice;
+
+
+        private void ReadTileTextures()
         {
             int currentTileIndex = 0; // Used for setting the starting tile ID of a tileset
 
@@ -416,7 +428,7 @@ namespace TSMapEditor.Rendering
             }
         }
 
-        public void ReadTerrainObjectTextures(GraphicsDevice graphicsDevice, List<TerrainType> terrainTypes)
+        public void ReadTerrainObjectTextures(List<TerrainType> terrainTypes)
         {
             var unitPalette = GetPaletteOrFail(Theater.UnitPaletteName);
 
@@ -424,23 +436,39 @@ namespace TSMapEditor.Rendering
             for (int i = 0; i < terrainTypes.Count; i++)
             {
                 string shpFileName = terrainTypes[i].Image != null ? terrainTypes[i].Image : terrainTypes[i].ININame;
+                string pngFileName = shpFileName + PNG_FILE_EXTENSION;
+
                 if (terrainTypes[i].Theater)
                     shpFileName += Theater.FileExtension;
                 else
                     shpFileName += SHP_FILE_EXTENSION;
 
-                byte[] data = fileManager.LoadFile(shpFileName);
-                if (data == null)
-                    continue;
+                byte[] data = fileManager.LoadFile(pngFileName);
 
-                var shpFile = new ShpFile();
-                shpFile.ParseFromBuffer(data);
-                TerrainObjectTextures[i] = new ObjectImage(graphicsDevice, shpFile, data, 
-                    terrainTypes[i].SpawnsTiberium ? unitPalette : theaterPalette);
+                if (data != null)
+                {
+                    // Load graphics as PNG
+
+                    TerrainObjectTextures[i] = new ObjectImage(graphicsDevice, null, null, null, null, false, PositionedTextureFromBytes(data));
+                }
+                else
+                {
+                    // Try to load graphics as SHP
+
+                    data = fileManager.LoadFile(shpFileName);
+
+                    if (data == null)
+                        continue;
+
+                    var shpFile = new ShpFile();
+                    shpFile.ParseFromBuffer(data);
+                    TerrainObjectTextures[i] = new ObjectImage(graphicsDevice, shpFile, data,
+                        terrainTypes[i].SpawnsTiberium ? unitPalette : theaterPalette);
+                }
             }
         }
 
-        public void ReadBuildingTextures(GraphicsDevice graphicsDevice, List<BuildingType> buildingTypes)
+        public void ReadBuildingTextures(List<BuildingType> buildingTypes)
         {
             BuildingTextures = new ObjectImage[buildingTypes.Count];
             for (int i = 0; i < buildingTypes.Count; i++)
@@ -479,7 +507,7 @@ namespace TSMapEditor.Rendering
             }
         }
 
-        public void ReadUnitTextures(GraphicsDevice graphicsDevice, List<UnitType> unitTypes)
+        public void ReadUnitTextures(List<UnitType> unitTypes)
         {
             var loadedTextures = new Dictionary<string, ObjectImage>();
             UnitTextures = new ObjectImage[unitTypes.Count];
@@ -525,7 +553,7 @@ namespace TSMapEditor.Rendering
             }
         }
 
-        public void ReadInfantryTextures(GraphicsDevice graphicsDevice, List<InfantryType> infantryTypes)
+        public void ReadInfantryTextures(List<InfantryType> infantryTypes)
         {
             var loadedTextures = new Dictionary<string, ObjectImage>();
             InfantryTextures = new ObjectImage[infantryTypes.Count];
@@ -574,7 +602,7 @@ namespace TSMapEditor.Rendering
             }
         }
 
-        public void ReadOverlayTextures(GraphicsDevice graphicsDevice, List<OverlayType> overlayTypes)
+        public void ReadOverlayTextures(List<OverlayType> overlayTypes)
         {
             OverlayTextures = new ObjectImage[overlayTypes.Count];
             for (int i = 0; i < overlayTypes.Count; i++)
@@ -588,24 +616,39 @@ namespace TSMapEditor.Rendering
                     imageName = overlayType.Image;
 
                 string fileExtension = overlayType.ArtConfig.Theater ? Theater.FileExtension : SHP_FILE_EXTENSION;
-                byte[] shpData = fileManager.LoadFile(imageName + fileExtension);
+                string pngFileName = imageName + PNG_FILE_EXTENSION;
 
-                if (shpData == null)
-                    continue;
+                byte[] pngData = fileManager.LoadFile(pngFileName);
 
-                var shpFile = new ShpFile();
-                shpFile.ParseFromBuffer(shpData);
-                Palette palette = theaterPalette;
-                if (overlayType.Wall)
-                    palette = unitPalette;
-                // This should be done in vanilla TS, but not in DTA
-                // if (overlayType.Tiberium)
-                //     palette = unitPalette;
-                OverlayTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, palette);
+                if (pngData != null)
+                {
+                    // Load graphics as PNG
+
+                    OverlayTextures[i] = new ObjectImage(graphicsDevice, null, null, null, null, false, PositionedTextureFromBytes(pngData));
+                }
+                else
+                {
+                    // Load graphics as SHP
+
+                    byte[] shpData = fileManager.LoadFile(imageName + fileExtension);
+
+                    if (shpData == null)
+                        continue;
+
+                    var shpFile = new ShpFile();
+                    shpFile.ParseFromBuffer(shpData);
+                    Palette palette = theaterPalette;
+                    if (overlayType.Wall)
+                        palette = unitPalette;
+                    // This should be done in vanilla TS, but not in DTA
+                    // if (overlayType.Tiberium)
+                    //     palette = unitPalette;
+                    OverlayTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, palette);
+                }
             }
         }
 
-        public void ReadSmudgeTextures(GraphicsDevice graphicsDevice, List<SmudgeType> smudgeTypes)
+        public void ReadSmudgeTextures(List<SmudgeType> smudgeTypes)
         {
             SmudgeTextures = new ObjectImage[smudgeTypes.Count];
             for (int i = 0; i < smudgeTypes.Count; i++)
@@ -698,6 +741,15 @@ namespace TSMapEditor.Rendering
             if (paletteData == null)
                 throw new KeyNotFoundException(paletteFileName + " not found from loaded MIX files!");
             return new Palette(paletteData);
+        }
+
+        private PositionedTexture PositionedTextureFromBytes(byte[] data)
+        {
+            using (var memstream = new MemoryStream(data))
+            {
+                var tex2d = Texture2D.FromStream(graphicsDevice, memstream);
+                return new PositionedTexture(tex2d.Width, tex2d.Height, 0, 0, tex2d);
+            }
         }
 
         public int GetTileSetId(int uniqueTileIndex)
