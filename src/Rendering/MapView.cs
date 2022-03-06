@@ -258,6 +258,8 @@ namespace TSMapEditor.Rendering
             DrawWaypoints();
             DrawMapBorder();
 
+            DrawTubes();
+
             Renderer.PopRenderTarget();
 
             sw.Stop();
@@ -991,6 +993,73 @@ namespace TSMapEditor.Rendering
             Map.DeleteObjectFromCell(cellCoords);
         }
 
+        private void DrawTubes()
+        {
+            foreach (var tube in Map.Tubes)
+            {
+                var entryCellCenterPoint = CellMath.CellCenterPointFromCellCoords(tube.EntryPoint, Map.Size.X);
+                var exitCellCenterPoint = CellMath.CellCenterPointFromCellCoords(tube.ExitPoint, Map.Size.X);
+
+                DrawStringWithShadow("ENTRY", 1, entryCellCenterPoint.ToXNAVector(), Color.LimeGreen);
+
+                Point2D currentPoint = tube.EntryPoint;
+
+                foreach (var direction in tube.Directions)
+                {
+                    Point2D nextPoint = NextPoint(currentPoint, direction);
+
+                    if (nextPoint != currentPoint)
+                    {
+                        var currentPixelPoint = CellMath.CellCenterPointFromCellCoords(currentPoint, Map.Size.X);
+                        var nextPixelPoint = CellMath.CellCenterPointFromCellCoords(nextPoint, Map.Size.X);
+
+                        DrawArrow(currentPixelPoint.ToXNAVector(), nextPixelPoint.ToXNAVector(), Color.LimeGreen, 0.25f, 10f, 2);
+                    }
+
+                    currentPoint = nextPoint;
+                }
+            }
+        }
+
+        private Point2D NextPoint(Point2D currentPoint, TubeDirection direction)
+        {
+            switch (direction)
+            {
+                case TubeDirection.NorthEast:
+                    return currentPoint + new Point2D(0, -1);
+                case TubeDirection.East:
+                    return currentPoint + new Point2D(1, -1);
+                case TubeDirection.SouthEast:
+                    return currentPoint + new Point2D(1, 0);
+                case TubeDirection.South:
+                    return currentPoint + new Point2D(1, 1);
+                case TubeDirection.SouthWest:
+                    return currentPoint + new Point2D(0, 1);
+                case TubeDirection.West:
+                    return currentPoint + new Point2D(-1, 1);
+                case TubeDirection.NorthWest:
+                    return currentPoint + new Point2D(-1, 0);
+                case TubeDirection.North:
+                    return currentPoint + new Point2D(-1, -1);
+                default:
+                case TubeDirection.None:
+                    return currentPoint;
+            }
+        }
+
+        private static void DrawArrow(Vector2 start, Vector2 end,
+            Color color, float angleDiff, float sideLineLength, int thickness = 1)
+        {
+            Vector2 line = end - start;
+            float angle = Helpers.AngleFromVector(line) - (float)Math.PI;
+            Renderer.DrawLine(start,
+                end, color, thickness);
+            Renderer.DrawLine(end, end + Helpers.VectorFromLengthAndAngle(sideLineLength, angle + angleDiff),
+                color, thickness);
+            Renderer.DrawLine(end, end + Helpers.VectorFromLengthAndAngle(sideLineLength, angle - angleDiff),
+                color, thickness);
+        }
+
         public override void Draw(GameTime gameTime)
         {
             if (mapInvalidated)
@@ -998,6 +1067,7 @@ namespace TSMapEditor.Rendering
                 DrawWholeMap();
                 mapInvalidated = false;
                 newRefreshes.Clear();
+                DrawTubes();
             }
 
             if (IsActive && tileUnderCursor != null && CursorAction != null)
@@ -1056,6 +1126,7 @@ namespace TSMapEditor.Rendering
                     newRefreshes.RemoveAt(i);
                 }
 
+                DrawTubes();
                 DrawMapBorder();
                 Renderer.PopRenderTarget();
             }

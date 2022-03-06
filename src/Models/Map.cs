@@ -61,6 +61,7 @@ namespace TSMapEditor.Models
         public List<Script> Scripts { get; } = new List<Script>();
         public List<TeamType> TeamTypes { get; } = new List<TeamType>();
         public List<LocalVariable> LocalVariables { get; } = new List<LocalVariable>();
+        public List<Tube> Tubes { get; } = new List<Tube>();
 
         public Point2D Size { get; set; }
         public Rectangle LocalSize { get; set; }
@@ -118,6 +119,7 @@ namespace TSMapEditor.Models
             MapLoader.ReadSmudges(this, mapIni);
             MapLoader.ReadOverlays(this, mapIni);
             MapLoader.ReadTerrainObjects(this, mapIni);
+            MapLoader.ReadTubes(this, mapIni);
 
             MapLoader.ReadWaypoints(this, mapIni);
             MapLoader.ReadTaskForces(this, mapIni);

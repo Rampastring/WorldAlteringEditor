@@ -209,5 +209,10 @@ namespace TSMapEditor
         {
             return (float)Math.Atan2(vector.Y, vector.X);
         }
+
+        public static Vector2 VectorFromLengthAndAngle(float length, float angle)
+        {
+            return new Vector2(length * (float)Math.Cos(angle), length * (float)Math.Sin(angle));
+        }
     }
 }

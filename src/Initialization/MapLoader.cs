@@ -779,5 +779,42 @@ namespace TSMapEditor.Initialization
                 map.LocalVariables.Add(localVariable);
             }
         }
+
+        public static void ReadTubes(IMap map, IniFile mapIni)
+        {
+            var section = mapIni.GetSection("Tubes");
+            if (section == null)
+                return;
+
+            foreach (var kvp in section.Keys)
+            {
+                // Index=ENTER_X,ENTER_Y,FACING,EXIT_X,EXIT_Y,DIRECTIONS
+
+                string[] parts = kvp.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts.Length < 6)
+                    return;
+
+                int enterX = Conversions.IntFromString(parts[0], -1);
+                int enterY = Conversions.IntFromString(parts[1], -1);
+                TubeDirection initialFacing = (TubeDirection)Conversions.IntFromString(parts[2], -1);
+                int exitX = Conversions.IntFromString(parts[3], -1);
+                int exitY = Conversions.IntFromString(parts[4], -1);
+                var directions = new List<TubeDirection>();
+                for (int i = 5; i < parts.Length; i++)
+                {
+                    directions.Add((TubeDirection)Conversions.IntFromString(parts[i], -1));
+                }
+
+                if (enterX < 1 || enterY < 1 || exitX < 1 || exitY < 1 || (int)initialFacing < -1 || initialFacing > TubeDirection.Max)
+                {
+                    Logger.Log("Invalid tube entry: " + kvp.Value);
+                    continue;
+                }
+
+                var tube = new Tube(new Point2D(enterX, enterY), new Point2D(exitX, exitY), initialFacing, directions);
+                map.Tubes.Add(tube);
+            }
+        }
     }
 }

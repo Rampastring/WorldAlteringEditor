@@ -32,6 +32,7 @@ namespace TSMapEditor.Initialization
         List<TaskForce> TaskForces { get; }
         List<TeamType> TeamTypes { get; }
         List<LocalVariable> LocalVariables { get; }
+        List<Tube> Tubes { get; }
 
         Point2D Size { get; set; }
         Rectangle LocalSize { get; set; }

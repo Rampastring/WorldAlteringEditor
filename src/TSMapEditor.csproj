@@ -216,6 +216,7 @@
     <Compile Include="Models\Trigger.cs" />
     <Compile Include="Models\TriggerAction.cs" />
     <Compile Include="Models\TriggerCondition.cs" />
+    <Compile Include="Models\Tube.cs" />
     <Compile Include="Models\Unit.cs" />
     <Compile Include="Models\UnitType.cs" />
     <Compile Include="Models\Waypoint.cs" />
