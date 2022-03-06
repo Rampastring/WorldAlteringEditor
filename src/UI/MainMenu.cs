@@ -117,18 +117,22 @@ namespace TSMapEditor.UI
             AddChild(settingsPanel);
             Width += settingsPanel.Width + Constants.UIEmptySideSpace;
 
-            string directoryPath;
+            string directoryPath = string.Empty;
 
-            if (Path.IsPathRooted(tbMapPath.Text))
+            if (!string.IsNullOrWhiteSpace(tbGameDirectory.Text))
             {
-                directoryPath = Path.GetDirectoryName(tbMapPath.Text);
-            }
-            else
-            {
-                directoryPath = Path.GetDirectoryName(tbGameDirectory.Text + tbMapPath.Text);
+                if (Path.IsPathRooted(tbMapPath.Text))
+                {
+                    directoryPath = Path.GetDirectoryName(tbMapPath.Text);
+                }
+                else
+                {
+                    directoryPath = Path.GetDirectoryName(tbGameDirectory.Text + tbMapPath.Text);
+                }
+
+                directoryPath = directoryPath.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
             }
 
-            directoryPath = directoryPath.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
             lbFileList.DirectoryPath = directoryPath;
 
             base.Initialize();
