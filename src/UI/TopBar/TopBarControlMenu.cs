@@ -78,11 +78,27 @@ namespace TSMapEditor.UI.TopBar
             {
                 LATGround autoLATGround = map.TheaterInstance.Theater.LATGrounds[i];
 
+                // If we already have a button for this ground type, then skip it
+                // The editor can automatically place the correct LAT variations
+                // of a tile based on its surroundings
+                bool alreadyExists = false;
+                for (int j = i - 1; j > -1; j--)
+                {
+                    if (map.TheaterInstance.Theater.LATGrounds[j].GroundTileSet == autoLATGround.GroundTileSet)
+                    {
+                        alreadyExists = true;
+                        break;
+                    }
+                }
+
+                if (alreadyExists)
+                    continue;
+
                 var btn = new EditorButton(WindowManager);
                 btn.Name = "btn" + autoLATGround.GroundTileSet.SetName;
                 btn.X = prevRight + Constants.UIHorizontalSpacing;
                 btn.Y = ddBrushSize.Y;
-                btn.Width = 50;
+                btn.Width = 60;
                 btn.Text = autoLATGround.DisplayName;
                 btn.Tag = autoLATGround;
                 btn.LeftClick += GroundButton_LeftClick;

@@ -109,7 +109,7 @@ namespace TSMapEditor.CCEngine
                 displayName,
                 TileSets[groundTileSetIndex],
                 TileSets[transitionTileSetIndex],
-                baseTileSetIndex > -1 ? TileSets[baseTileSetIndex] : null));
+                baseTileSetIndex > -1 ? TileSets[baseTileSetIndex] : TileSets[0]));
 
             return true;
         }
