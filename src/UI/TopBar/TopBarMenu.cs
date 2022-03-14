@@ -26,9 +26,13 @@ namespace TSMapEditor.UI.TopBar
 
         private MenuButton[] menuButtons;
 
+        private DeleteTubeCursorAction deleteTunnelCursorAction;
+
         public override void Initialize()
         {
             Name = nameof(TopBarMenu);
+
+            deleteTunnelCursorAction = new DeleteTubeCursorAction(mapView);
 
             var fileContextMenu = new EditorContextMenu(WindowManager);
             fileContextMenu.Name = nameof(fileContextMenu);
@@ -70,8 +74,10 @@ namespace TSMapEditor.UI.TopBar
             editContextMenu.AddItem("Scripts", () => windowController.ScriptsWindow.Open(), null, null, null);
             editContextMenu.AddItem("TeamTypes", () => windowController.TeamTypesWindow.Open(), null, null, null);
             editContextMenu.AddItem("Local Variables", () => windowController.LocalVariablesWindow.Open(), null, null, null);
-            editContextMenu.Items[0].HintText = KeyboardCommands.Instance.Undo.GetKeyDisplayString();
-            editContextMenu.Items[1].HintText = KeyboardCommands.Instance.Redo.GetKeyDisplayString();
+            editContextMenu.AddItem(" ", null, () => false, null, null);
+            editContextMenu.AddItem("Delete Tunnel", () => mapView.EditorState.CursorAction = deleteTunnelCursorAction, null, null, null);
+            editContextMenu.Items[1].HintText = KeyboardCommands.Instance.Undo.GetKeyDisplayString();
+            editContextMenu.Items[2].HintText = KeyboardCommands.Instance.Redo.GetKeyDisplayString();
 
             var editButton = new MenuButton(WindowManager, editContextMenu);
             editButton.Name = nameof(editButton);

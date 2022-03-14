@@ -142,13 +142,10 @@ namespace TSMapEditor.Rendering
 
         public void AddRefreshPoint(Point2D point, int size = 1)
         {
-            // if (!mapInvalidated)
-            //     refreshes.Add(new RefreshPoint(point, size));
-
             if (mapInvalidated)
                 return;
 
-            if (newRefreshes.Count > 0)
+            if (newRefreshes.Exists(nr => point == nr.InitPoint))
                 return;
 
             var newRefresh = new Refresh(Map);
@@ -1006,7 +1003,7 @@ namespace TSMapEditor.Rendering
 
                 foreach (var direction in tube.Directions)
                 {
-                    Point2D nextPoint = NextPoint(currentPoint, direction);
+                    Point2D nextPoint = currentPoint.NextPointFromTubeDirection(direction);
 
                     if (nextPoint != currentPoint)
                     {
@@ -1018,32 +1015,6 @@ namespace TSMapEditor.Rendering
 
                     currentPoint = nextPoint;
                 }
-            }
-        }
-
-        private Point2D NextPoint(Point2D currentPoint, TubeDirection direction)
-        {
-            switch (direction)
-            {
-                case TubeDirection.NorthEast:
-                    return currentPoint + new Point2D(0, -1);
-                case TubeDirection.East:
-                    return currentPoint + new Point2D(1, -1);
-                case TubeDirection.SouthEast:
-                    return currentPoint + new Point2D(1, 0);
-                case TubeDirection.South:
-                    return currentPoint + new Point2D(1, 1);
-                case TubeDirection.SouthWest:
-                    return currentPoint + new Point2D(0, 1);
-                case TubeDirection.West:
-                    return currentPoint + new Point2D(-1, 1);
-                case TubeDirection.NorthWest:
-                    return currentPoint + new Point2D(-1, 0);
-                case TubeDirection.North:
-                    return currentPoint + new Point2D(-1, -1);
-                default:
-                case TubeDirection.None:
-                    return currentPoint;
             }
         }
 

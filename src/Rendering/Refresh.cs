@@ -20,7 +20,8 @@ namespace TSMapEditor.Rendering
 
         public bool IsInitiated { get; private set; } = false;
         public bool IsComplete { get; private set; } = false;
-        
+        public Point2D InitPoint { get; private set; }
+
 
         private LinkedList<MapTile> tilesToProcess = new LinkedList<MapTile>();
         private HashSet<int> processedTiles = new HashSet<int>();
@@ -56,6 +57,7 @@ namespace TSMapEditor.Rendering
                 throw new InvalidOperationException("RedrawFromCell should only be called once for a Refresh instance.");
 
             IsInitiated = true;
+            InitPoint = cellCoords;
 
             for (int y = -areaSize; y <= areaSize; y++)
             {

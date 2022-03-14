@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Rampastring.Tools;
 using System;
+using TSMapEditor.Models;
 
 namespace TSMapEditor.GameMath
 {
@@ -61,6 +62,42 @@ namespace TSMapEditor.GameMath
         public static bool operator ==(Point2D p1, Point2D p2)
         {
             return p1.X == p2.X && p1.Y == p2.Y;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Point2D objAsPoint)
+            {
+                return objAsPoint == this;
+            }
+
+            return false;
+        }
+
+        public Point2D NextPointFromTubeDirection(TubeDirection direction)
+        {
+            switch (direction)
+            {
+                case TubeDirection.NorthEast:
+                    return this + new Point2D(0, -1);
+                case TubeDirection.East:
+                    return this + new Point2D(1, -1);
+                case TubeDirection.SouthEast:
+                    return this + new Point2D(1, 0);
+                case TubeDirection.South:
+                    return this + new Point2D(1, 1);
+                case TubeDirection.SouthWest:
+                    return this + new Point2D(0, 1);
+                case TubeDirection.West:
+                    return this + new Point2D(-1, 1);
+                case TubeDirection.NorthWest:
+                    return this + new Point2D(-1, 0);
+                case TubeDirection.North:
+                    return this + new Point2D(-1, -1);
+                default:
+                case TubeDirection.None:
+                    return this;
+            }
         }
 
         public float Angle()
