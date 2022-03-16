@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TSMapEditor.GameMath;
 
 namespace TSMapEditor.Models
@@ -10,6 +7,7 @@ namespace TSMapEditor.Models
     public enum TubeDirection
     {
         None = -1,
+        First = 0,
         NorthEast = 0,
         East = 1,
         SouthEast = 2,
@@ -44,5 +42,46 @@ namespace TSMapEditor.Models
         public Point2D ExitPoint { get; set; }
         public TubeDirection UnitInitialFacing { get; set; }
         public List<TubeDirection> Directions { get; set; } = new List<TubeDirection>();
+
+
+        private TubeDirection GetOpposingDirection(TubeDirection direction)
+        {
+            switch (direction)
+            {
+                case TubeDirection.NorthEast:
+                    return TubeDirection.SouthWest;
+                case TubeDirection.East:
+                    return TubeDirection.West;
+                case TubeDirection.SouthEast:
+                    return TubeDirection.NorthWest;
+                case TubeDirection.South:
+                    return TubeDirection.North;
+                case TubeDirection.SouthWest:
+                    return TubeDirection.NorthEast;
+                case TubeDirection.West:
+                    return TubeDirection.East;
+                case TubeDirection.NorthWest:
+                    return TubeDirection.SouthEast;
+                case TubeDirection.North:
+                    return TubeDirection.South;
+                default:
+                    throw new ArgumentException("Unknown tube direction: " + direction);
+            }
+        } 
+
+        public Tube GetReversedTube()
+        {
+            var reversedTube = new Tube();
+            reversedTube.EntryPoint = ExitPoint;
+            reversedTube.ExitPoint = EntryPoint;
+
+            for (int i = Directions.Count - 1; i > -1; i--)
+            {
+                reversedTube.Directions.Add(GetOpposingDirection(Directions[i]));
+            }
+
+            reversedTube.UnitInitialFacing = reversedTube.Directions[0];
+            return reversedTube;
+        }
     }
 }

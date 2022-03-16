@@ -27,7 +27,7 @@ namespace TSMapEditor.Mutations.Classes
                 deletedTube = MutationTarget.Map.Tubes[index];
                 MutationTarget.Map.Tubes.RemoveAt(index);
 
-                RefreshTube(deletedTube);
+                TubeRefreshHelper.MapViewRefreshTube(deletedTube, MutationTarget);
             }
             else
             {
@@ -38,38 +38,7 @@ namespace TSMapEditor.Mutations.Classes
         public override void Undo()
         {
             MutationTarget.Map.Tubes.Insert(deletedTubeIndex, deletedTube);
-            RefreshTube(deletedTube);
-        }
-        
-        private void RefreshTube(Tube tube)
-        {
-            Point2D point = tube.EntryPoint;
-            MutationTarget.AddRefreshPoint(point, 1);
-            tube.Directions.ForEach(td =>
-            {
-                point = point.NextPointFromTubeDirection(td);
-
-                int refreshSize = 0;
-
-                switch (td)
-                {
-                    case TubeDirection.NorthEast:
-                    case TubeDirection.NorthWest:
-                    case TubeDirection.SouthEast:
-                    case TubeDirection.SouthWest:
-                        refreshSize = 0;
-                        break;
-                    case TubeDirection.North:
-                    case TubeDirection.East:
-                    case TubeDirection.South:
-                    case TubeDirection.West:
-                        refreshSize = 1;
-                        break;
-                }
-
-                MutationTarget.AddRefreshPoint(point, refreshSize);
-            });
-            MutationTarget.AddRefreshPoint(tube.ExitPoint, 1);
+            TubeRefreshHelper.MapViewRefreshTube(deletedTube, MutationTarget);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework.Input;
+using System;
 using TSMapEditor.GameMath;
 using TSMapEditor.Rendering;
 
@@ -27,12 +28,31 @@ namespace TSMapEditor.UI
 
         public void ExitAction() => OnExitingAction?.Invoke(this, EventArgs.Empty);
 
+        /// <summary>
+        /// Override in derived classes to enable this cursor action to receive
+        /// keyboard events through <see cref="OnKeyPressed"/>.
+        /// </summary>
+        public virtual bool HandlesKeyboardInput => false;
+
+        /// <summary>
+        /// Override in derived classes to enable the cell cursor to be drawn
+        /// while this cursor action is active.
+        /// </summary>
+        public virtual bool DrawCellCursor => false;
+
+
         protected ICursorActionTarget CursorActionTarget { get; }
 
         /// <summary>
         /// Called when the action is activated (when it becomes the cursor action that the user is using).
         /// </summary>
         public virtual void OnActionEnter() { }
+
+        /// <summary>
+        /// Called when a keyboard key is pressed while the cursor action is active.
+        /// </summary>
+        /// <param name="e">The key press event from the XNAUI library.</param>
+        public virtual void OnKeyPressed(Rampastring.XNAUI.Input.KeyPressEventArgs e) { }
 
         /// <summary>
         /// Called prior to drawing the map.

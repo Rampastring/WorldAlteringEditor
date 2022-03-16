@@ -221,7 +221,7 @@
     <Compile Include="Models\UnitType.cs" />
     <Compile Include="Models\Waypoint.cs" />
     <Compile Include="Mutations\Classes\ChangeTechnoOwnerMutation.cs" />
-    <Compile Include="Mutations\Classes\DeleteTunnelMutation.cs" />
+    <Compile Include="Mutations\Classes\DeleteTubeMutation.cs" />
     <Compile Include="Mutations\Classes\FillTerrainAreaMutation.cs" />
     <Compile Include="Mutations\Classes\MoveObjectMutation.cs" />
     <Compile Include="Mutations\Classes\OriginalCellTerrainData.cs" />
@@ -237,6 +237,7 @@
     <Compile Include="Mutations\Classes\PlaceAircraftMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceInfantryMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceTerrainObjectMutation.cs" />
+    <Compile Include="Mutations\Classes\PlaceTubeMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceVehicleMutation.cs" />
     <Compile Include="Mutations\Classes\PlaceWaypointMutation.cs" />
     <Compile Include="Mutations\Classes\TerrainGenerationMutation.cs" />
@@ -250,6 +251,7 @@
     <Compile Include="Rendering\MGTMPImage.cs" />
     <Compile Include="Rendering\Refresh.cs" />
     <Compile Include="Rendering\TheaterGraphics.cs" />
+    <Compile Include="Rendering\TubeRefreshHelper.cs" />
     <Compile Include="Scripts\ApplyAnimatedWaterScript.cs" />
     <Compile Include="Scripts\RemoveIMTOs.cs" />
     <Compile Include="Settings\BoolSetting.cs" />
@@ -273,7 +275,7 @@
     <Compile Include="UI\CursorActions\BuildingPlacementAction.cs" />
     <Compile Include="UI\CursorActions\ChangeTechnoOwnerAction.cs" />
     <Compile Include="UI\CursorActions\CopyTerrainCursorAction.cs" />
-    <Compile Include="UI\CursorActions\DeleteTunnelCursorAction.cs" />
+    <Compile Include="UI\CursorActions\DeleteTubeCursorAction.cs" />
     <Compile Include="UI\CursorActions\DeletionModeAction.cs" />
     <Compile Include="UI\CursorActions\GenerateForestCursorAction.cs" />
     <Compile Include="UI\CursorActions\InfantryPlacementAction.cs" />
@@ -282,6 +284,7 @@
     <Compile Include="UI\CursorActions\PasteTerrainCursorAction.cs" />
     <Compile Include="UI\CursorActions\PlaceCellTagCursorAction.cs" />
     <Compile Include="UI\CursorActions\PlaceSmudgeCursorAction.cs" />
+    <Compile Include="UI\CursorActions\PlaceTubeCursorAction.cs" />
     <Compile Include="UI\CursorActions\PlaceWaypointCursorAction.cs" />
     <Compile Include="UI\CursorActions\TerrainObjectPlacementAction.cs" />
     <Compile Include="UI\CursorActions\PlaceTerrainCursorAction.cs" />

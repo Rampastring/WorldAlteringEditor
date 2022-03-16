@@ -27,12 +27,14 @@ namespace TSMapEditor.UI.TopBar
         private MenuButton[] menuButtons;
 
         private DeleteTubeCursorAction deleteTunnelCursorAction;
+        private PlaceTubeCursorAction placeTubeCursorAction;
 
         public override void Initialize()
         {
             Name = nameof(TopBarMenu);
 
             deleteTunnelCursorAction = new DeleteTubeCursorAction(mapView);
+            placeTubeCursorAction = new PlaceTubeCursorAction(mapView);
 
             var fileContextMenu = new EditorContextMenu(WindowManager);
             fileContextMenu.Name = nameof(fileContextMenu);
@@ -64,8 +66,8 @@ namespace TSMapEditor.UI.TopBar
             editContextMenu.AddItem("Configure Copied Objects", () => windowController.CopiedEntryTypesWindow.Open(), null, null, null);
             editContextMenu.AddItem("Copy", () => KeyboardCommands.Instance.Copy.DoTrigger(), null, null, null);
             editContextMenu.AddItem("Paste", () => KeyboardCommands.Instance.Paste.DoTrigger(), null, null, null);
-            editContextMenu.AddItem("Undo", () => mutationManager.Undo(), () => mutationManager.CanUndo(), null, null);
-            editContextMenu.AddItem("Redo", () => mutationManager.Redo(), () => mutationManager.CanRedo(), null, null);
+            editContextMenu.AddItem("Undo", () => mutationManager.Undo(), () => mutationManager.CanUndo(), null, null, KeyboardCommands.Instance.Undo.GetKeyDisplayString());
+            editContextMenu.AddItem("Redo", () => mutationManager.Redo(), () => mutationManager.CanRedo(), null, null, KeyboardCommands.Instance.Redo.GetKeyDisplayString());
             editContextMenu.AddItem(" ", null, () => false, null, null);
             editContextMenu.AddItem("Basic", () => windowController.BasicSectionConfigWindow.Open(), null, null, null);
             editContextMenu.AddItem("Houses", () => windowController.HousesWindow.Open(), null, null, null);
@@ -75,9 +77,8 @@ namespace TSMapEditor.UI.TopBar
             editContextMenu.AddItem("TeamTypes", () => windowController.TeamTypesWindow.Open(), null, null, null);
             editContextMenu.AddItem("Local Variables", () => windowController.LocalVariablesWindow.Open(), null, null, null);
             editContextMenu.AddItem(" ", null, () => false, null, null);
+            editContextMenu.AddItem("Place Tunnel", () => mapView.EditorState.CursorAction = placeTubeCursorAction, null, null, null, KeyboardCommands.Instance.PlaceTunnel.GetKeyDisplayString());
             editContextMenu.AddItem("Delete Tunnel", () => mapView.EditorState.CursorAction = deleteTunnelCursorAction, null, null, null);
-            editContextMenu.Items[1].HintText = KeyboardCommands.Instance.Undo.GetKeyDisplayString();
-            editContextMenu.Items[2].HintText = KeyboardCommands.Instance.Redo.GetKeyDisplayString();
 
             var editButton = new MenuButton(WindowManager, editContextMenu);
             editButton.Name = nameof(editButton);
@@ -90,7 +91,7 @@ namespace TSMapEditor.UI.TopBar
             // toolsContextMenu.AddItem("Options");
             toolsContextMenu.AddItem("Apply Impassable Overlay", () => windowController.AutoApplyImpassableOverlayWindow.Open(), null, null, null);
             toolsContextMenu.AddItem("Terrain Generator Options", () => windowController.TerrainGeneratorConfigWindow.Open(), null, null, null);
-            toolsContextMenu.AddItem("Generate Terrain", () => EnterTerrainGenerator(), null, null, null);
+            toolsContextMenu.AddItem("Generate Terrain", () => EnterTerrainGenerator(), null, null, null, KeyboardCommands.Instance.GenerateTerrain.GetKeyDisplayString());
             toolsContextMenu.AddItem("View Minimap", () => windowController.MinimapWindow.Open(), null, null, null);
             // toolsContextMenu.AddItem("Tool Scripts");
 
@@ -119,6 +120,7 @@ namespace TSMapEditor.UI.TopBar
             Array.ForEach(menuButtons, b => b.MouseEnter += MenuButton_MouseEnter);
 
             KeyboardCommands.Instance.GenerateTerrain.Triggered += (s, e) => EnterTerrainGenerator();
+            KeyboardCommands.Instance.PlaceTunnel.Triggered += (s, e) => mapView.EditorState.CursorAction = placeTubeCursorAction;
         }
 
         private void EnterTerrainGenerator()

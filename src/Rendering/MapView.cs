@@ -891,9 +891,14 @@ namespace TSMapEditor.Rendering
 
                 EditorMessageBox.Show(WindowManager, "Hotkey Help", text.ToString(), MessageBoxButtons.OK);
             }
+
+            if (!e.Handled && CursorAction != null && CursorAction.HandlesKeyboardInput)
+            {
+                CursorAction.OnKeyPressed(e);
+            }
         }
 
-        private void DrawCursorTile()
+        private void DrawOnTileUnderCursor()
         {
             if (!IsActive)
                 return;
@@ -901,83 +906,96 @@ namespace TSMapEditor.Rendering
             if (tileUnderCursor == null)
             {
                 DrawString("Null tile", 0, new Vector2(0f, 40f), Color.White);
+                return;
             }
-            else if (CursorAction == null)
+
+            if (CursorAction != null)
             {
-                if (isDraggingObject)
+                if (CursorAction.DrawCellCursor)
+                    DrawTileCursor();
+
+                return;
+            }
+
+
+            if (isDraggingObject)
+            {
+                Color lineColor = Color.White;
+                if (!Map.CanMoveObject(draggedOrRotatedObject, tileUnderCursor.CoordsToPoint()))
+                    lineColor = Color.Red;
+
+                Point2D cameraAndCellCenterOffset = new Point2D(-cameraTopLeftPoint.X + Constants.CellSizeX / 2,
+                                                 -cameraTopLeftPoint.Y + Constants.CellSizeY / 2);
+
+                Point2D startDrawPoint = CellMath.CellTopLeftPointFromCellCoords(draggedOrRotatedObject.Position, Map.Size.X) + cameraAndCellCenterOffset;
+
+                Point2D endDrawPoint = CellMath.CellTopLeftPointFromCellCoords(tileUnderCursor.CoordsToPoint(), Map.Size.X) + cameraAndCellCenterOffset;
+
+                DrawLine(startDrawPoint.ToXNAVector(), endDrawPoint.ToXNAVector(), lineColor, 1);
+            }
+            else if (isRotatingObject)
+            {
+                Color lineColor = Color.Yellow;
+
+                Point2D cameraAndCellCenterOffset = new Point2D(-cameraTopLeftPoint.X + Constants.CellSizeX / 2,
+                                                 -cameraTopLeftPoint.Y + Constants.CellSizeY / 2);
+
+                Point2D startDrawPoint = CellMath.CellTopLeftPointFromCellCoords(draggedOrRotatedObject.Position, Map.Size.X) + cameraAndCellCenterOffset;
+
+                Point2D endDrawPoint = CellMath.CellTopLeftPointFromCellCoords(tileUnderCursor.CoordsToPoint(), Map.Size.X) + cameraAndCellCenterOffset;
+
+                DrawLine(startDrawPoint.ToXNAVector(), endDrawPoint.ToXNAVector(), lineColor, 1);
+
+                if (draggedOrRotatedObject.IsTechno())
                 {
-                    Color lineColor = Color.White;
-                    if (!Map.CanMoveObject(draggedOrRotatedObject, tileUnderCursor.CoordsToPoint()))
-                        lineColor = Color.Red;
+                    var techno = (TechnoBase)draggedOrRotatedObject;
+                    Point2D point = tileUnderCursor.CoordsToPoint() - draggedOrRotatedObject.Position;
 
-                    Point2D cameraAndCellCenterOffset = new Point2D(-cameraTopLeftPoint.X + Constants.CellSizeX / 2,
-                                                     -cameraTopLeftPoint.Y + Constants.CellSizeY / 2);
-
-                    Point2D startDrawPoint = CellMath.CellTopLeftPointFromCellCoords(draggedOrRotatedObject.Position, Map.Size.X) + cameraAndCellCenterOffset;
-
-                    Point2D endDrawPoint = CellMath.CellTopLeftPointFromCellCoords(tileUnderCursor.CoordsToPoint(), Map.Size.X) + cameraAndCellCenterOffset;
-
-                    DrawLine(startDrawPoint.ToXNAVector(), endDrawPoint.ToXNAVector(), lineColor, 1);
-                }
-                else if (isRotatingObject)
-                {
-                    Color lineColor = Color.Yellow;
-
-                    Point2D cameraAndCellCenterOffset = new Point2D(-cameraTopLeftPoint.X + Constants.CellSizeX / 2,
-                                                     -cameraTopLeftPoint.Y + Constants.CellSizeY / 2);
-
-                    Point2D startDrawPoint = CellMath.CellTopLeftPointFromCellCoords(draggedOrRotatedObject.Position, Map.Size.X) + cameraAndCellCenterOffset;
-
-                    Point2D endDrawPoint = CellMath.CellTopLeftPointFromCellCoords(tileUnderCursor.CoordsToPoint(), Map.Size.X) + cameraAndCellCenterOffset;
-
-                    DrawLine(startDrawPoint.ToXNAVector(), endDrawPoint.ToXNAVector(), lineColor, 1);
-
-                    if (draggedOrRotatedObject.IsTechno())
+                    float angle = point.Angle() + ((float)Math.PI / 2.0f);
+                    if (angle > (float)Math.PI * 2.0f)
                     {
-                        var techno = (TechnoBase)draggedOrRotatedObject;
-                        Point2D point = tileUnderCursor.CoordsToPoint() - draggedOrRotatedObject.Position;
-
-                        float angle = point.Angle() + ((float)Math.PI / 2.0f);
-                        if (angle > (float)Math.PI * 2.0f)
-                        {
-                            angle = angle - ((float)Math.PI * 2.0f);
-                        }
-                        else if (angle < 0f)
-                        {
-                            angle += (float)Math.PI * 2.0f;
-                        }
-
-                        float percent = angle / ((float)Math.PI * 2.0f);
-                        byte facing = (byte)Math.Ceiling(percent * (float)byte.MaxValue);
-
-                        techno.Facing = facing;
-                        AddRefreshPoint(techno.Position, 2);
+                        angle = angle - ((float)Math.PI * 2.0f);
                     }
-                }
-                else
-                {
-                    Color lineColor = new Color(96, 168, 96, 128);
-                    Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(new Point2D(tileUnderCursor.X, tileUnderCursor.Y), Map.Size.X) - cameraTopLeftPoint;
+                    else if (angle < 0f)
+                    {
+                        angle += (float)Math.PI * 2.0f;
+                    }
 
-                    var cellTopPoint = new Vector2(cellTopLeftPoint.X + Constants.CellSizeX / 2, cellTopLeftPoint.Y);
-                    var cellLeftPoint = new Vector2(cellTopLeftPoint.X, cellTopLeftPoint.Y + Constants.CellSizeY / 2);
-                    var cellRightPoint = new Vector2(cellTopLeftPoint.X + Constants.CellSizeX, cellLeftPoint.Y);
-                    var cellBottomPoint = new Vector2(cellTopPoint.X, cellTopLeftPoint.Y + Constants.CellSizeY);
+                    float percent = angle / ((float)Math.PI * 2.0f);
+                    byte facing = (byte)Math.Ceiling(percent * (float)byte.MaxValue);
 
-                    DrawLine(cellTopPoint, cellLeftPoint, lineColor, 1);
-                    DrawLine(cellRightPoint, cellTopPoint, lineColor, 1);
-                    DrawLine(cellBottomPoint, cellLeftPoint, lineColor, 1);
-                    DrawLine(cellRightPoint, cellBottomPoint, lineColor, 1);
-
-                    var shadowColor = new Color(0, 0, 0, 128);
-                    var down = new Vector2(0, 1f);
-
-                    DrawLine(cellTopPoint + down, cellLeftPoint + down, shadowColor, 1);
-                    DrawLine(cellRightPoint + down, cellTopPoint + down, shadowColor, 1);
-                    DrawLine(cellBottomPoint + down, cellLeftPoint + down, shadowColor, 1);
-                    DrawLine(cellRightPoint + down, cellBottomPoint + down, shadowColor, 1);
+                    techno.Facing = facing;
+                    AddRefreshPoint(techno.Position, 2);
                 }
             }
+            else
+            {
+                DrawTileCursor();
+            }
+        }
+
+        private void DrawTileCursor()
+        {
+            Color lineColor = new Color(96, 168, 96, 128);
+            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(new Point2D(tileUnderCursor.X, tileUnderCursor.Y), Map.Size.X) - cameraTopLeftPoint;
+
+            var cellTopPoint = new Vector2(cellTopLeftPoint.X + Constants.CellSizeX / 2, cellTopLeftPoint.Y);
+            var cellLeftPoint = new Vector2(cellTopLeftPoint.X, cellTopLeftPoint.Y + Constants.CellSizeY / 2);
+            var cellRightPoint = new Vector2(cellTopLeftPoint.X + Constants.CellSizeX, cellLeftPoint.Y);
+            var cellBottomPoint = new Vector2(cellTopPoint.X, cellTopLeftPoint.Y + Constants.CellSizeY);
+
+            DrawLine(cellTopPoint, cellLeftPoint, lineColor, 1);
+            DrawLine(cellRightPoint, cellTopPoint, lineColor, 1);
+            DrawLine(cellBottomPoint, cellLeftPoint, lineColor, 1);
+            DrawLine(cellRightPoint, cellBottomPoint, lineColor, 1);
+
+            var shadowColor = new Color(0, 0, 0, 128);
+            var down = new Vector2(0, 1f);
+
+            DrawLine(cellTopPoint + down, cellLeftPoint + down, shadowColor, 1);
+            DrawLine(cellRightPoint + down, cellTopPoint + down, shadowColor, 1);
+            DrawLine(cellBottomPoint + down, cellLeftPoint + down, shadowColor, 1);
+            DrawLine(cellRightPoint + down, cellBottomPoint + down, shadowColor, 1);
         }
 
         public void DeleteObjectFromCell(Point2D cellCoords)
@@ -1125,7 +1143,7 @@ namespace TSMapEditor.Rendering
                     Color.White * mapWideOverlayTextureOpacity);
             }
 
-            DrawCursorTile();
+            DrawOnTileUnderCursor();
 
             base.Draw(gameTime);
         }
