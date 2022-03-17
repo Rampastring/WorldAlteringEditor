@@ -156,33 +156,45 @@ namespace TSMapEditor.UI.Controls
             if (section == null)
                 return;
 
-            var children = Children.ToList();
+            var children = control.Children.ToList();
             foreach (var child in children)
             {
-                // This logic should also be enabled for other types in the future,
-                // but it requires changes in XNAUI
-                if (!(child is XNATextBox))
-                    continue;
-
                 var childSection = ConfigIni.GetSection(child.Name);
-                if (childSection == null)
-                    continue;
 
-                string nextControl = childSection.GetStringValue("NextControl", null);
-                if (!string.IsNullOrWhiteSpace(nextControl))
+                if (childSection != null)
                 {
-                    var otherChild = children.Find(c => c.Name == nextControl);
-                    if (otherChild != null)
-                        ((XNATextBox)child).NextControl = otherChild;
-                }
+                    // This logic should also be enabled for other types in the future,
+                    // but it requires changes in XNAUI
+                    if (child is XNATextBox)
+                    {
+                        string nextControl = childSection.GetStringValue("NextControl", null);
 
-                string previousControl = childSection.GetStringValue("PreviousControl", null);
-                if (!string.IsNullOrWhiteSpace(previousControl))
-                {
-                    var otherChild = children.Find(c => c.Name == previousControl);
-                    if (otherChild != null)
-                        ((XNATextBox)child).PreviousControl = otherChild;
+                        if (!string.IsNullOrWhiteSpace(nextControl))
+                        {
+                            var otherChild = children.Find(c => c.Name == nextControl);
+                            if (otherChild != null)
+                            {
+                                ((XNATextBox)child).NextControl = otherChild;
+
+                                if (otherChild is XNATextBox otherAsTb)
+                                {
+                                    if (otherAsTb.PreviousControl == null)
+                                        otherAsTb.PreviousControl = child;
+                                }
+                            }
+                        }
+
+                        string previousControl = childSection.GetStringValue("PreviousControl", null);
+                        if (!string.IsNullOrWhiteSpace(previousControl))
+                        {
+                            var otherChild = children.Find(c => c.Name == previousControl);
+                            if (otherChild != null)
+                                ((XNATextBox)child).PreviousControl = otherChild;
+                        }
+                    }
                 }
+                    
+                ReadLateAttributesForControl(child);
             }
         }
 

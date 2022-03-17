@@ -119,6 +119,9 @@
     <None Include="Config\UI\InfantryOptionsWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Config\UI\LightingSettingsWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Config\UI\LocalVariablesWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -327,6 +330,7 @@
     <Compile Include="UI\Windows\GenerateStandardHousesWindow.cs" />
     <Compile Include="UI\Windows\HousesWindow.cs" />
     <Compile Include="UI\Windows\InfantryOptionsWindow.cs" />
+    <Compile Include="UI\Windows\LightingSettingsWindow.cs" />
     <Compile Include="UI\Windows\LocalVariablesWindow.cs" />
     <Compile Include="UI\Windows\MainMenuWindows\MapSetup.cs" />
     <Compile Include="UI\Windows\MegamapWindow.cs" />

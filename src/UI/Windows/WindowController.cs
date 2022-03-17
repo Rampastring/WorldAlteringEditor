@@ -28,6 +28,7 @@ namespace TSMapEditor.UI.Windows
         public TerrainGeneratorConfigWindow TerrainGeneratorConfigWindow { get; private set; }
         public MegamapWindow MinimapWindow { get; private set; }
         public CopiedEntryTypesWindow CopiedEntryTypesWindow { get; private set; }
+        public LightingSettingsWindow LightingSettingsWindow { get; private set; }
 
         public void Initialize(XNAControl windowParentControl, Map map, EditorState editorState, ICursorActionTarget cursorActionTarget)
         {
@@ -83,6 +84,9 @@ namespace TSMapEditor.UI.Windows
 
             CopiedEntryTypesWindow = new CopiedEntryTypesWindow(windowParentControl.WindowManager);
             Windows.Add(CopiedEntryTypesWindow);
+
+            LightingSettingsWindow = new LightingSettingsWindow(windowParentControl.WindowManager, map);
+            Windows.Add(LightingSettingsWindow);
 
             foreach (var window in Windows)
             {

@@ -69,5 +69,16 @@ namespace TSMapEditor.UI.Controls
             }
             set => Text = value.ToString(CultureInfo.InvariantCulture);
         }
+
+        public override void ParseAttributeFromINI(IniFile iniFile, string key, string value)
+        {
+            if (key == nameof(AllowDecimals))
+            {
+                AllowDecimals = Conversions.BooleanFromString(value, AllowDecimals);
+                return;
+            }
+
+            base.ParseAttributeFromINI(iniFile, key, value);
+        }
     }
 }
