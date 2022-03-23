@@ -64,6 +64,8 @@ namespace TSMapEditor.Models
                     return TubeDirection.SouthEast;
                 case TubeDirection.North:
                     return TubeDirection.South;
+                case TubeDirection.None:
+                    return TubeDirection.None;
                 default:
                     throw new ArgumentException("Unknown tube direction: " + direction);
             }
@@ -77,8 +79,14 @@ namespace TSMapEditor.Models
 
             for (int i = Directions.Count - 1; i > -1; i--)
             {
+                if (Directions[i] == TubeDirection.None)
+                    continue;
+
                 reversedTube.Directions.Add(GetOpposingDirection(Directions[i]));
             }
+
+            if (reversedTube.Directions[reversedTube.Directions.Count - 1] != TubeDirection.None)
+                reversedTube.Directions.Add(TubeDirection.None); // Tube direction list must end in -1 aka no direction
 
             reversedTube.UnitInitialFacing = reversedTube.Directions[0];
             return reversedTube;

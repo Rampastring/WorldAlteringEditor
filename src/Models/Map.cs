@@ -149,6 +149,7 @@ namespace TSMapEditor.Models
             MapWriter.WriteSmudges(this, LoadedINI);
             MapWriter.WriteOverlays(this, LoadedINI);
             MapWriter.WriteTerrainObjects(this, LoadedINI);
+            MapWriter.WriteTubes(this, LoadedINI);
 
             MapWriter.WriteWaypoints(this, LoadedINI);
             MapWriter.WriteTaskForces(this, LoadedINI);

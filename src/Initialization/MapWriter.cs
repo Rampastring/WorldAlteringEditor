@@ -537,6 +537,30 @@ namespace TSMapEditor.Initialization
             }
         }
 
+        public static void WriteTubes(IMap map, IniFile mapIni)
+        {
+            const string sectionName = "Tubes";
+            mapIni.RemoveSection(sectionName);
+            if (map.Tubes.Count == 0)
+                return;
+
+            var section = new IniSection(sectionName);
+            mapIni.AddSection(section);
+
+            for (int i = 0; i < map.Tubes.Count; i++)
+            {
+                var tube = map.Tubes[i];
+
+                // Index=ENTER_X,ENTER_Y,FACING,EXIT_X,EXIT_Y,DIRECTIONS
+
+                string directionsString = string.Join(",", tube.Directions.Select(dir => (int)dir));
+                if (!directionsString.EndsWith("-1"))
+                    directionsString += ",-1"; // Directions need to end with -1
+
+                section.SetStringValue(i.ToString(), $"{tube.EntryPoint.X},{tube.EntryPoint.Y},{(int)tube.UnitInitialFacing},{tube.ExitPoint.X},{tube.ExitPoint.Y},{directionsString}");
+            }
+        }
+
         private static string BoolToObjectStyle(bool value)
         {
             return Conversions.BooleanToString(value, BooleanStringStyle.ONEZERO);

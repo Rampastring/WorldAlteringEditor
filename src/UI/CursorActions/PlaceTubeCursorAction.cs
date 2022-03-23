@@ -70,6 +70,8 @@ namespace TSMapEditor.UI.CursorActions
                 tube.UnitInitialFacing = tube.Directions[0];
                 CursorActionTarget.MutationManager.PerformMutation(new PlaceTubeMutation(CursorActionTarget.MutationTarget, tube));
 
+                tube.Directions.Add(TubeDirection.None);
+
                 if (CursorActionTarget.WindowManager.Keyboard.IsShiftHeldDown())
                 {
                     Tube reversedTube = tube.GetReversedTube();

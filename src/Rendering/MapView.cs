@@ -1015,8 +1015,6 @@ namespace TSMapEditor.Rendering
                 var entryCellCenterPoint = CellMath.CellCenterPointFromCellCoords(tube.EntryPoint, Map.Size.X);
                 var exitCellCenterPoint = CellMath.CellCenterPointFromCellCoords(tube.ExitPoint, Map.Size.X);
 
-                DrawStringWithShadow("ENTRY", 1, entryCellCenterPoint.ToXNAVector(), Color.LimeGreen);
-
                 Point2D currentPoint = tube.EntryPoint;
 
                 foreach (var direction in tube.Directions)
