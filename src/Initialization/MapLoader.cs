@@ -20,7 +20,7 @@ namespace TSMapEditor.Initialization
         private const int INFANTRY_PROPERTY_FIELD_COUNT = 14;
         private const int AIRCRAFT_PROPERTY_FIELD_COUNT = 12;
 
-        public static void ReadMapSection(IMap map, IniFile mapIni)
+        public static void PreCheckMapIni(IniFile mapIni)
         {
             var section = mapIni.GetSection("Map");
             if (section == null)
@@ -35,19 +35,32 @@ namespace TSMapEditor.Initialization
 
             int width = int.Parse(parts[2]);
             int height = int.Parse(parts[3]);
-            map.Size = new Point2D(width, height);
 
             if (width * Constants.CellSizeX > Constants.TextureSizeLimit)
             {
                 throw new MapLoadException($"Map width cannot be greater than " +
                     $"{Constants.TextureSizeLimit / Constants.CellSizeX} cells; the map is {width} cells wide!");
             }
-            
+
             if (height * Constants.CellSizeY > Constants.TextureSizeLimit)
             {
                 throw new MapLoadException("Map height cannot be greater than " +
                     $"{Constants.TextureSizeLimit / Constants.CellSizeY} cells; the map is {height} cells high!");
             }
+        }
+
+        public static void ReadMapSection(IMap map, IniFile mapIni)
+        {
+            var section = mapIni.GetSection("Map");
+            if (section == null)
+                throw new MapLoadException("[Map] does not exist in the loaded file!");
+
+            string size = section.GetStringValue("Size", null);
+            string[] parts = size.Split(',');
+
+            int width = int.Parse(parts[2]);
+            int height = int.Parse(parts[3]);
+            map.Size = new Point2D(width, height);
 
             string localSize = section.GetStringValue("LocalSize", null);
             if (localSize == null)

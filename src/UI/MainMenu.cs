@@ -280,8 +280,17 @@ namespace TSMapEditor.UI
 
         private void LoadExisting(string mapPath)
         {
-            MapSetup.InitializeMap(WindowManager, gameDirectory, false, mapPath, null, Point2D.Zero);
-            WindowManager.RemoveControl(this);
+            string error = MapSetup.InitializeMap(WindowManager, gameDirectory, false, mapPath, null, Point2D.Zero);
+
+            if (error == null)
+            {
+                WindowManager.RemoveControl(this);
+            }
+            else
+            {
+                loadingStage = 0;
+                EditorMessageBox.Show(WindowManager, "Error Loading File", error, MessageBoxButtons.OK);
+            }
         }
     }
 }

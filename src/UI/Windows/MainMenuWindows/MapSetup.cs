@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
+using TSMapEditor.Initialization;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 
@@ -14,7 +15,19 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
     /// </summary>
     public static class MapSetup
     {
-        public static void InitializeMap(WindowManager windowManager, string gameDirectory, bool createNew, string existingMapPath, string newMapTheater, Point2D newMapSize)
+        /// <summary>
+        /// Tries to load a map. If successful, loads graphics for the theater and
+        /// sets up the editor UI, and returns null once done. If loading the map
+        /// fails, returns an error message.
+        /// </summary>
+        /// <param name="windowManager">The window manager.</param>
+        /// <param name="gameDirectory">The path to the game directory.</param>
+        /// <param name="createNew">Whether a new map should be created (instead of loading an existing map).</param>
+        /// <param name="existingMapPath">The path to the existing map file to load, if loading an existing map. Can be null if creating a new map.</param>
+        /// <param name="newMapTheater">The theater of the map, if creating a new map.</param>
+        /// <param name="newMapSize">The size of the map, if creating a new map.</param>
+        /// <returns>Null of loading the map was successful, otherwise an error message.</returns>
+        public static string InitializeMap(WindowManager windowManager, string gameDirectory, bool createNew, string existingMapPath, string newMapTheater, Point2D newMapSize)
         {
             IniFile rulesIni = new IniFile(Path.Combine(gameDirectory, "INI/Rules.ini"));
             IniFile firestormIni = new IniFile(Path.Combine(gameDirectory, "INI/Enhance.ini"));
@@ -31,8 +44,22 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
             }
             else
             {
-                IniFile mapIni = new IniFile(Path.Combine(gameDirectory, existingMapPath));
-                map.LoadExisting(rulesIni, firestormIni, artIni, artFSIni, mapIni);
+                try
+                {
+                    IniFile mapIni = new IniFile(Path.Combine(gameDirectory, existingMapPath));
+
+                    MapLoader.PreCheckMapIni(mapIni);
+
+                    map.LoadExisting(rulesIni, firestormIni, artIni, artFSIni, mapIni);
+                }
+                catch (IniParseException ex)
+                {
+                    return "The selected file does not appear to be a proper map file (INI file). Maybe it's corrupted?\r\n\r\nReturned error: " + ex.Message;
+                }
+                catch (MapLoadException ex)
+                {
+                    return "Failed to load the selected map file.\r\n\r\nReturned error: " + ex.Message;
+                }
             }
 
             Console.WriteLine();
@@ -55,6 +82,8 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
 
             var uiManager = new UIManager(windowManager, map, theaterGraphics);
             windowManager.AddAndInitializeControl(uiManager);
+
+            return null;
         }
     }
 }
