@@ -11,7 +11,7 @@
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
+    <Deterministic>false</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -96,6 +96,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Config\TerrainTypeImpassability.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\UI\AboutWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Config\UI\AutoApplyImpassableOverlayWindow.ini">
@@ -267,6 +270,7 @@
     <Compile Include="UI\Controls\EditorDescriptionPanel.cs" />
     <Compile Include="UI\Controls\EditorButton.cs" />
     <Compile Include="UI\Controls\EditorGUICreator.cs" />
+    <Compile Include="UI\Controls\EditorLinkLabel.cs" />
     <Compile Include="UI\Controls\EditorListBox.cs" />
     <Compile Include="UI\Controls\EditorPopUpSelector.cs" />
     <Compile Include="UI\Controls\EditorSuggestionTextBox.cs" />
@@ -324,6 +328,7 @@
     <Compile Include="UI\TopBar\TopBarMenu.cs" />
     <Compile Include="UI\UIManager.cs" />
     <Compile Include="Settings\UserSettings.cs" />
+    <Compile Include="UI\Windows\AboutWindow.cs" />
     <Compile Include="UI\Windows\AutoApplyImpassableOverlayWindow.cs" />
     <Compile Include="UI\Windows\BasicSectionConfigWindow.cs" />
     <Compile Include="UI\Windows\CopiedEntryTypesWindow.cs" />

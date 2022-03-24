@@ -29,6 +29,7 @@ namespace TSMapEditor.UI.Windows
         public MegamapWindow MinimapWindow { get; private set; }
         public CopiedEntryTypesWindow CopiedEntryTypesWindow { get; private set; }
         public LightingSettingsWindow LightingSettingsWindow { get; private set; }
+        public AboutWindow AboutWindow { get; private set; }
 
         public void Initialize(XNAControl windowParentControl, Map map, EditorState editorState, ICursorActionTarget cursorActionTarget)
         {
@@ -87,6 +88,9 @@ namespace TSMapEditor.UI.Windows
 
             LightingSettingsWindow = new LightingSettingsWindow(windowParentControl.WindowManager, map);
             Windows.Add(LightingSettingsWindow);
+
+            AboutWindow = new AboutWindow(windowParentControl.WindowManager);
+            Windows.Add(AboutWindow);
 
             foreach (var window in Windows)
             {

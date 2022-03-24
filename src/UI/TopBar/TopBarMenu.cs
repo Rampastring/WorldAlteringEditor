@@ -105,7 +105,7 @@ namespace TSMapEditor.UI.TopBar
 
             var aboutContextMenu = new EditorContextMenu(WindowManager);
             aboutContextMenu.Name = nameof(aboutContextMenu);
-            aboutContextMenu.AddItem("About");
+            aboutContextMenu.AddItem("About", () => windowController.AboutWindow.Open(), null, null, null, null);
 
             var aboutButton = new MenuButton(WindowManager, aboutContextMenu);
             aboutButton.Name = nameof(aboutButton);
