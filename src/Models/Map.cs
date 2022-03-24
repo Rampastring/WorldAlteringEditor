@@ -63,6 +63,8 @@ namespace TSMapEditor.Models
         public List<LocalVariable> LocalVariables { get; } = new List<LocalVariable>();
         public List<Tube> Tubes { get; } = new List<Tube>();
 
+        public Lighting Lighting { get; } = new Lighting();
+
         public Point2D Size { get; set; }
         public Rectangle LocalSize { get; set; }
         public string TheaterName { get; set; }
@@ -134,6 +136,8 @@ namespace TSMapEditor.Models
             MapLoader.ReadAircraft(this, mapIni);
             MapLoader.ReadUnits(this, mapIni);
             MapLoader.ReadInfantry(this, mapIni);
+
+            Lighting.ReadFromIniFile(mapIni);
         }
 
         public void Write()
@@ -143,6 +147,8 @@ namespace TSMapEditor.Models
             MapWriter.WriteMapSection(this, LoadedINI);
             MapWriter.WriteBasicSection(this, LoadedINI);
             MapWriter.WriteIsoMapPack5(this, LoadedINI);
+
+            Lighting.WriteToIniFile(LoadedINI);
 
             MapWriter.WriteHouses(this, LoadedINI);
 

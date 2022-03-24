@@ -188,6 +188,7 @@
     <Compile Include="Models\InfantryType.cs" />
     <Compile Include="Models\INIDefineable.cs" />
     <Compile Include="Models\INIDefined.cs" />
+    <Compile Include="Models\Lighting.cs" />
     <Compile Include="Models\LocalVariable.cs" />
     <Compile Include="Models\Map.cs" />
     <Compile Include="Models\MapFormat\Format5.cs" />
