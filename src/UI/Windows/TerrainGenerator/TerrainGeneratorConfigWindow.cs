@@ -53,7 +53,7 @@ namespace TSMapEditor.UI.Windows.TerrainGenerator
             lblPresets.Name = nameof(lblPresets);
             lblPresets.Y = lblHeader.Bottom + Constants.UIEmptyTopSpace;
             lblPresets.X = Constants.UIEmptySideSpace;
-            lblPresets.Text = "Presets:";
+            lblPresets.Text = "Load Preset Config:";
             AddChild(lblPresets);
 
             ddPresets = new XNADropDown(WindowManager);
@@ -167,6 +167,10 @@ namespace TSMapEditor.UI.Windows.TerrainGenerator
             var presetsIni = new IniFile(Environment.CurrentDirectory + "/Config/TerrainGeneratorPresets.ini");
             foreach (string sectionName in presetsIni.GetSections())
             {
+                string theater = presetsIni.GetStringValue(sectionName, "Theater", string.Empty);
+                if (!string.IsNullOrWhiteSpace(theater) && !theater.Equals(map.TheaterName, StringComparison.InvariantCultureIgnoreCase))
+                    continue;
+
                 var presetConfiguration = TerrainGeneratorConfiguration.FromConfigSection(presetsIni.GetSection(sectionName),
                     map.Rules.TerrainTypes,
                     map.TheaterInstance.Theater.TileSets,
@@ -208,10 +212,20 @@ namespace TSMapEditor.UI.Windows.TerrainGenerator
 
             if (TerrainGeneratorConfig == null)
             {
-                // Load first preset as default config
+                // Load first preset as default config if one exists
 
-                var config = ddPresets.Items[0].Tag as TerrainGeneratorConfiguration;
-                LoadConfig(config);
+                if (ddPresets.Items.Count > 0)
+                {
+                    var config = ddPresets.Items[0].Tag as TerrainGeneratorConfiguration;
+                    LoadConfig(config);
+                }
+                else
+                {
+                    LoadConfig(new TerrainGeneratorConfiguration("Blank Config",
+                        new List<TerrainGeneratorTerrainTypeGroup>(),
+                        new List<TerrainGeneratorTileGroup>(),
+                        new List<TerrainGeneratorOverlayGroup>()));
+                }
             }
         }
 
