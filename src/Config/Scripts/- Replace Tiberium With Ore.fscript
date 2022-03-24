@@ -1,0 +1,37 @@
+// FinalSun Script file
+// Name: Replace green tiberium with ore
+// Written By: Bittah Commander
+// Last Change:Jul,12,2014
+// Be careful when editing scripts, they may cause damage to maps if used improperly
+
+
+AskContinue("This script will change the appearance of green tiberium to ore (note: the effects won't be visible in the map editor). Continue?");
+
+SetSafeMode("FALSE","To change the image of green tiberium.");
+
+SetIniKey("Tiberiums","0","Riparius");
+SetIniKey("Tiberiums","1","Cruentus");
+SetIniKey("Tiberiums","2","Vinifera");
+SetIniKey("Tiberiums","3","Aboreus");
+SetIniKey("Riparius","Name","Ore");
+SetIniKey("Riparius","Power","0");
+SetIniKey("OREMINE","TiberiumToSpawn","0");
+SetIniKey("OREMINEA","TiberiumToSpawn","0");
+SetIniKey("OREMINE2","TiberiumToSpawn","0");
+SetIniKey("OREMINE3","TiberiumToSpawn","0");
+SetIniKey("TIBSPRDA","Image","TIBSPRDR3");
+SetIniKey("RTIB01","Image","ORE01");
+SetIniKey("RTIB02","Image","ORE02");
+SetIniKey("RTIB03","Image","ORE03");
+SetIniKey("RTIB04","Image","ORE04");
+SetIniKey("RTIB05","Image","ORE01");
+SetIniKey("RTIB06","Image","ORE02");
+SetIniKey("RTIB07","Image","ORE03");
+SetIniKey("RTIB08","Image","ORE04");
+SetIniKey("RTIB09","Image","ORE01");
+SetIniKey("RTIB10","Image","ORE02");
+SetIniKey("RTIB11","Image","ORE03");
+SetIniKey("RTIB12","Image","ORE04");
+Message("Code for changing the image of green tiberium has been added to the map.","Success");
+
+

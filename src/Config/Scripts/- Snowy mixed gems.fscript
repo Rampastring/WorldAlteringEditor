@@ -1,0 +1,26 @@
+// FinalSun Script file
+// Name: Cover mixed gems in snow
+// Written By: Bittah Commander
+// Last Change:Jun,28,2014
+// Be careful when editing scripts, they may cause damage to maps if used improperly
+
+
+AskContinue("This script will change the appearance of the mixed gems to a snowy version (note: the effects won't be visible in the map editor). Continue?");
+
+SetSafeMode("FALSE","To change the image of the gems.");
+
+SetIniKey("MIXGEM01","Image","GEMSRA01");
+SetIniKey("MIXGEM02","Image","GEMSRA02");
+SetIniKey("MIXGEM03","Image","GEMSRA03");
+SetIniKey("MIXGEM04","Image","GEMSRA04");
+SetIniKey("GRNGEM01","Image","GEMSRA01");
+SetIniKey("GRNGEM02","Image","GEMSRA02");
+SetIniKey("GRNGEM03","Image","GEMSRA03");
+SetIniKey("GRNGEM04","Image","GEMSRA04");
+SetIniKey("BLUGEM01","Image","GEMSRA01");
+SetIniKey("BLUGEM02","Image","GEMSRA02");
+SetIniKey("BLUGEM03","Image","GEMSRA03");
+SetIniKey("BLUGEM04","Image","GEMSRA04");
+Message("Code for changing the image of the gems has been added to the map.","Success");
+
+
