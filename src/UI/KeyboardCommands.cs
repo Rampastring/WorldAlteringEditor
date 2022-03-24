@@ -32,6 +32,7 @@ namespace TSMapEditor.UI
                 FillTerrain,
                 ViewMegamap,
                 GenerateTerrain,
+                ConfigureTerrainGenerator,
                 PlaceTunnel,
 
                 AircraftMenu,
@@ -94,6 +95,7 @@ namespace TSMapEditor.UI
         public KeyboardCommand FillTerrain { get; } = new KeyboardCommand("FillTerrain", "Fill Terrain (1x1 tiles only)", new KeyboardCommandInput(Keys.None, KeyboardModifiers.Ctrl), true);
         public KeyboardCommand ViewMegamap { get; } = new KeyboardCommand("ViewMegamap", "View Megamap", new KeyboardCommandInput(Keys.F12, KeyboardModifiers.None));
         public KeyboardCommand GenerateTerrain { get; } = new KeyboardCommand("GenerateTerrain", "Generate Terrain", new KeyboardCommandInput(Keys.G, KeyboardModifiers.Ctrl));
+        public KeyboardCommand ConfigureTerrainGenerator { get; } = new KeyboardCommand("ConfigureTerrainGenerator", "Configure Terrain Generator", new KeyboardCommandInput(Keys.G, KeyboardModifiers.Alt));
         public KeyboardCommand PlaceTunnel { get; } = new KeyboardCommand("PlaceTunnel", "Place Tunnel", new KeyboardCommandInput(Keys.OemPeriod, KeyboardModifiers.None));
 
         public KeyboardCommand AircraftMenu { get; } = new KeyboardCommand("AircraftMenu", "Aircraft Menu", new KeyboardCommandInput(Keys.D1, KeyboardModifiers.None));

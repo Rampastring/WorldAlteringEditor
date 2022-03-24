@@ -8,7 +8,7 @@ namespace TSMapEditor.UI
     {
         public EditorContextMenu(WindowManager windowManager) : base(windowManager)
         {
-            Width = 200;
+            Width = 250;
             TextHorizontalPadding = Constants.UIEmptySideSpace;
             FontIndex = Constants.UIBoldFont;
             ItemHeight = 25;
