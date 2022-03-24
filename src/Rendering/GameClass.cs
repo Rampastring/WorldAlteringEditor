@@ -3,8 +3,10 @@ using Microsoft.Xna.Framework.Graphics;
 using Rampastring.Tools;
 using Rampastring.XNAUI;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
+using System.Threading;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Settings;
 using TSMapEditor.UI;
@@ -77,6 +79,9 @@ namespace TSMapEditor.Rendering
         protected override void Initialize()
         {
             base.Initialize();
+
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
             AssetLoader.Initialize(GraphicsDevice, Content);
             AssetLoader.AssetSearchPaths.Add(Environment.CurrentDirectory + DSC + "Content" + DSC);
