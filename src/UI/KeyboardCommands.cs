@@ -64,8 +64,7 @@ namespace TSMapEditor.UI
 
             foreach (var command in Commands)
             {
-                if (command.Key != command.DefaultKey)
-                    iniFile.SetStringValue("Keybinds", command.ININame, command.Key.GetDataString());
+                iniFile.SetStringValue("Keybinds", command.ININame, command.Key.GetDataString());
             }
         }
 

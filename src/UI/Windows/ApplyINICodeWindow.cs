@@ -47,7 +47,6 @@ namespace TSMapEditor.UI.Windows
             }
 
             stagingINI = new IniFile((string)lbINIFiles.SelectedItem.Tag);
-
             
             string confirmation = stagingINI.GetStringValue(EditorSection, "Confirmation", null);
             if (!string.IsNullOrWhiteSpace(confirmation))

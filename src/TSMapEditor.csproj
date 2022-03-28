@@ -125,36 +125,6 @@
     <None Include="Config\MapCode\Snowy Smudges.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Config\Scripts\- Enable Blue Tiberium Spreader Lighting.fscript">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\Scripts\- Enable Green Tiberium Spreader Lighting.fscript">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\Scripts\- Enable Ore Spreader Lighting.fscript">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\Scripts\- Enable Spreading Ore.fscript">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\Scripts\- Mixed gems only use blue-green colors.fscript">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\Scripts\- Replace Tiberium With Ore.fscript">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\Scripts\- Replace Tiberium With Snowy Ore.fscript">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\Scripts\- Snowy mixed gems.fscript">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\Scripts\- Snowy Ore.fscript">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\Scripts\- Snowy Smudges.fscript">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="Config\TerrainGeneratorPresets.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -180,6 +150,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Config\UI\GenerateStandardHousesWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\UI\HotkeyConfigurationWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Config\UI\HousesWindow.ini">
@@ -326,7 +299,6 @@
     <Compile Include="Rendering\TheaterGraphics.cs" />
     <Compile Include="Rendering\TubeRefreshHelper.cs" />
     <Compile Include="Scripts\ApplyAnimatedWaterScript.cs" />
-    <Compile Include="Scripts\FinalSunScriptEngine.cs" />
     <Compile Include="Scripts\RemoveIMTOs.cs" />
     <Compile Include="Settings\BoolSetting.cs" />
     <Compile Include="Settings\IntSetting.cs" />
@@ -402,6 +374,7 @@
     <Compile Include="UI\Windows\CopiedEntryTypesWindow.cs" />
     <Compile Include="UI\Windows\EditorMessageBox.cs" />
     <Compile Include="UI\Windows\GenerateStandardHousesWindow.cs" />
+    <Compile Include="UI\Windows\HotkeyConfigurationWindow.cs" />
     <Compile Include="UI\Windows\HousesWindow.cs" />
     <Compile Include="UI\Windows\InfantryOptionsWindow.cs" />
     <Compile Include="UI\Windows\LightingSettingsWindow.cs" />

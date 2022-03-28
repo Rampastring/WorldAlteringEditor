@@ -94,6 +94,8 @@ namespace TSMapEditor.UI.TopBar
             toolsContextMenu.AddItem("Generate Terrain", () => EnterTerrainGenerator(), null, null, null, KeyboardCommands.Instance.GenerateTerrain.GetKeyDisplayString());
             toolsContextMenu.AddItem("View Minimap", () => windowController.MinimapWindow.Open(), null, null, null);
             toolsContextMenu.AddItem("Apply INI Code...", () => windowController.ApplyINICodeWindow.Open(), null, null, null);
+            toolsContextMenu.AddItem(" ", null, () => false, null, null);
+            toolsContextMenu.AddItem("Configure Hotkeys...", () => windowController.HotkeyConfigurationWindow.Open(), null, null, null);
 
             var toolsButton = new MenuButton(WindowManager, toolsContextMenu);
             toolsButton.Name = nameof(toolsButton);
