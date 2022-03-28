@@ -92,6 +92,15 @@
     <None Include="Config\Events.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Config\MapCode\Mixed gems only use blue-green colors.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\MapCode\Snowy Ore.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\MapCode\Snowy Smudges.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Config\Scripts\- Enable Blue Tiberium Spreader Lighting.fscript">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -129,6 +138,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Config\UI\AboutWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\UI\ApplyINICodeWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Config\UI\AutoApplyImpassableOverlayWindow.ini">
@@ -360,6 +372,7 @@
     <Compile Include="UI\UIManager.cs" />
     <Compile Include="Settings\UserSettings.cs" />
     <Compile Include="UI\Windows\AboutWindow.cs" />
+    <Compile Include="UI\Windows\ApplyINICodeWindow.cs" />
     <Compile Include="UI\Windows\AutoApplyImpassableOverlayWindow.cs" />
     <Compile Include="UI\Windows\BasicSectionConfigWindow.cs" />
     <Compile Include="UI\Windows\CopiedEntryTypesWindow.cs" />
