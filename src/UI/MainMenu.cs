@@ -150,7 +150,15 @@ namespace TSMapEditor.UI
 
             ApplySettings();
             WindowManager.RemoveControl(this);
-            WindowManager.AddAndInitializeControl(new CreateNewMapWindow(WindowManager, gameDirectory));
+            var createMapWindow = new CreateNewMapWindow(WindowManager, false);
+            createMapWindow.OnCreateNewMap += CreateMapWindow_OnCreateNewMap;
+            WindowManager.AddAndInitializeControl(createMapWindow);
+        }
+
+        private void CreateMapWindow_OnCreateNewMap(object sender, CreateNewMapEventArgs e)
+        {
+            MapSetup.InitializeMap(WindowManager, gameDirectory, true, null, e.Theater, e.MapSize);
+            ((CreateNewMapWindow)sender).OnCreateNewMap -= CreateMapWindow_OnCreateNewMap;
         }
 
         private void ReadGameInstallDirectoryFromRegistry()

@@ -48,10 +48,13 @@ namespace TSMapEditor.UI
         private PlaceWaypointCursorAction placeWaypointCursorAction;
         private OverlayPlacementAction overlayPlacementAction;
 
+        private WindowController windowController;
+
         private MutationManager mutationManager;
 
         private int loadMapStage;
         private string loadMapFilePath;
+        private CreateNewMapEventArgs newMapInfo;
 
 
         public override void Initialize()
@@ -98,7 +101,7 @@ namespace TSMapEditor.UI
             KeyboardCommands.Instance.Redo.Action = RedoAction;
             KeyboardCommands.Instance.ReadFromSettings();
 
-            var windowController = new WindowController();
+            windowController = new WindowController();
             editorState = new EditorState();
             editorState.BrushSize = map.EditorConfig.BrushSizes[0];
             mutationManager = new MutationManager();
@@ -169,18 +172,37 @@ namespace TSMapEditor.UI
             overlayPlacementAction.OverlayTypeChanged += OverlayPlacementAction_OverlayTypeChanged;
 
             windowController.OpenMapWindow.OnFileSelected += OpenMapWindow_OnFileSelected;
+            windowController.CreateNewMapWindow.OnCreateNewMap += CreateNewMapWindow_OnCreateNewMap;
+        }
+
+        private void CreateNewMapWindow_OnCreateNewMap(object sender, CreateNewMapEventArgs e)
+        {
+            loadMapFilePath = null;
+            newMapInfo = e;
+            StartLoadingMap();
         }
 
         private void OpenMapWindow_OnFileSelected(object sender, FileSelectedEventArgs e)
+        {
+            loadMapFilePath = e.FilePath;
+            StartLoadingMap();
+        }
+
+        private void StartLoadingMap()
         {
             var messageBox = new EditorMessageBox(WindowManager, "Loading", "Please wait, loading map...", MessageBoxButtons.None);
             var dp = new DarkeningPanel(WindowManager);
             AddChild(dp);
             dp.AddChild(messageBox);
 
-            loadMapFilePath = e.FilePath;
             loadMapStage = 1;
-            ((OpenMapWindow)sender).OnFileSelected -= OpenMapWindow_OnFileSelected;
+            Clear();
+        }
+
+        private void Clear()
+        {
+            windowController.OpenMapWindow.OnFileSelected -= OpenMapWindow_OnFileSelected;
+            windowController.CreateNewMapWindow.OnCreateNewMap -= CreateNewMapWindow_OnCreateNewMap;
         }
 
         private void LoadMap()
@@ -196,7 +218,9 @@ namespace TSMapEditor.UI
             WindowManager.RemoveControl(this);
             theaterGraphics.DisposeAll();
 
-            MapSetup.InitializeMap(WindowManager, UserSettings.Instance.GameDirectory, false, loadMapFilePath, null, Point2D.Zero);
+            bool createNew = loadMapFilePath == null;
+
+            MapSetup.InitializeMap(WindowManager, UserSettings.Instance.GameDirectory, createNew, loadMapFilePath, newMapInfo.Theater, createNew ? newMapInfo.MapSize : Point2D.Zero);
         }
 
         private void OverlayPlacementAction_OverlayTypeChanged(object sender, EventArgs e)

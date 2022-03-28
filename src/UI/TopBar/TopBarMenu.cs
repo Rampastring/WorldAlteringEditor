@@ -38,9 +38,7 @@ namespace TSMapEditor.UI.TopBar
 
             var fileContextMenu = new EditorContextMenu(WindowManager);
             fileContextMenu.Name = nameof(fileContextMenu);
-            fileContextMenu.AddItem("New", () => EditorMessageBox.Show(WindowManager, "Not Implemented",
-                "Creating a new map while a map is open is not " + Environment.NewLine +
-                "implemented yet. Restart the editor to create a new map.", MessageBoxButtons.OK), null, null, null);
+            fileContextMenu.AddItem("New", () => windowController.CreateNewMapWindow.Open(), null, null, null);
             fileContextMenu.AddItem("Open", () => windowController.OpenMapWindow.Open(), null, null, null);
 
             fileContextMenu.AddItem("Save", () =>

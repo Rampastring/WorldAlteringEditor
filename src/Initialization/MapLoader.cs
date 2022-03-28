@@ -36,16 +36,16 @@ namespace TSMapEditor.Initialization
             int width = int.Parse(parts[2]);
             int height = int.Parse(parts[3]);
 
-            if (width * Constants.CellSizeX > Constants.TextureSizeLimit)
+            if (width > Constants.MaxMapWidth)
             {
                 throw new MapLoadException($"Map width cannot be greater than " +
-                    $"{Constants.TextureSizeLimit / Constants.CellSizeX} cells; the map is {width} cells wide!");
+                    $"{Constants.MaxMapWidth} cells; the map is {width} cells wide!");
             }
 
-            if (height * Constants.CellSizeY > Constants.TextureSizeLimit)
+            if (height > Constants.MaxMapHeight)
             {
                 throw new MapLoadException("Map height cannot be greater than " +
-                    $"{Constants.TextureSizeLimit / Constants.CellSizeY} cells; the map is {height} cells high!");
+                    $"{Constants.MaxMapHeight} cells; the map is {height} cells high!");
             }
         }
 

@@ -7,6 +7,9 @@
 
         public const int TextureSizeLimit = 16384;
 
+        public const int MaxMapWidth = TextureSizeLimit / CellSizeX;
+        public const int MaxMapHeight = TextureSizeLimit / CellSizeY;
+
         public const int ObjectHealthMax = 256;
         public const int FacingMax = 255;
 

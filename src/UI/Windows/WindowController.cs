@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI.Controls;
+using TSMapEditor.UI.Windows.MainMenuWindows;
 using TSMapEditor.UI.Windows.TerrainGenerator;
 
 namespace TSMapEditor.UI.Windows
@@ -23,6 +24,7 @@ namespace TSMapEditor.UI.Windows
         public InfantryOptionsWindow InfantryOptionsWindow { get; private set; }
         public HousesWindow HousesWindow { get; private set; }
         public SaveMapAsWindow SaveMapAsWindow { get; private set; }
+        public CreateNewMapWindow CreateNewMapWindow { get; private set; }
         public OpenMapWindow OpenMapWindow { get; private set; }
         public AutoApplyImpassableOverlayWindow AutoApplyImpassableOverlayWindow { get; private set; }
         public TerrainGeneratorConfigWindow TerrainGeneratorConfigWindow { get; private set; }
@@ -69,6 +71,9 @@ namespace TSMapEditor.UI.Windows
 
             SaveMapAsWindow = new SaveMapAsWindow(windowParentControl.WindowManager, map);
             Windows.Add(SaveMapAsWindow);
+
+            CreateNewMapWindow = new CreateNewMapWindow(windowParentControl.WindowManager, true);
+            Windows.Add(CreateNewMapWindow);
 
             OpenMapWindow = new OpenMapWindow(windowParentControl.WindowManager);
             Windows.Add(OpenMapWindow);
