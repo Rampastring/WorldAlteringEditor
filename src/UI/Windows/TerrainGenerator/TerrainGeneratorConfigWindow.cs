@@ -31,6 +31,7 @@ namespace TSMapEditor.UI.Windows.TerrainGenerator
         private TerrainGeneratorTerrainTypeGroupsPanel terrainTypeGroupsPanel;
         private TerrainGeneratorTileGroupsPanel tileGroupsPanel;
         private TerrainGeneratorOverlayGroupsPanel overlayGroupsPanel;
+        private TerrainGeneratorSmudgeGroupsPanel smudgeGroupsPanel;
 
         private XNADropDown ddPresets;
 
@@ -89,7 +90,7 @@ namespace TSMapEditor.UI.Windows.TerrainGenerator
             tabControl.AddTab("Terrain Types", idleTexture, selectedTexture);
             tabControl.AddTab("Terrain Tiles", idleTexture, selectedTexture);
             tabControl.AddTab("Overlays", idleTexture, selectedTexture);
-            tabControl.AddTab("Smudges (TODO)", idleTexture, selectedTexture, false);
+            tabControl.AddTab("Smudges", idleTexture, selectedTexture);
             AddChild(tabControl);
             tabControl.SelectedIndexChanged += (s, e) => { HideAllPanels(); panels[tabControl.SelectedTab].Enable(); };
 
@@ -121,6 +122,15 @@ namespace TSMapEditor.UI.Windows.TerrainGenerator
             overlayGroupsPanel.Height = terrainTypeGroupsPanel.Height;
             AddChild(overlayGroupsPanel);
             panels[2] = overlayGroupsPanel;
+
+            smudgeGroupsPanel = new TerrainGeneratorSmudgeGroupsPanel(WindowManager, map);
+            smudgeGroupsPanel.Name = nameof(smudgeGroupsPanel);
+            smudgeGroupsPanel.X = terrainTypeGroupsPanel.X;
+            smudgeGroupsPanel.Y = terrainTypeGroupsPanel.Y;
+            smudgeGroupsPanel.Width = terrainTypeGroupsPanel.Width;
+            smudgeGroupsPanel.Height = terrainTypeGroupsPanel.Height;
+            AddChild(smudgeGroupsPanel);
+            panels[3] = smudgeGroupsPanel;
 
             HideAllPanels();
 
@@ -174,7 +184,8 @@ namespace TSMapEditor.UI.Windows.TerrainGenerator
                 var presetConfiguration = TerrainGeneratorConfiguration.FromConfigSection(presetsIni.GetSection(sectionName),
                     map.Rules.TerrainTypes,
                     map.TheaterInstance.Theater.TileSets,
-                    map.Rules.OverlayTypes);
+                    map.Rules.OverlayTypes,
+                    map.Rules.SmudgeTypes);
 
                 if (presetConfiguration != null)
                     ddPresets.AddItem(new XNADropDownItem() { Text = presetConfiguration.Name, Tag = presetConfiguration });
@@ -196,12 +207,13 @@ namespace TSMapEditor.UI.Windows.TerrainGenerator
             var terrainTypeGroups = terrainTypeGroupsPanel.GetTerrainTypeGroups();
             var tileGroups = tileGroupsPanel.GetTileGroups();
             var overlayGroups = overlayGroupsPanel.GetOverlayGroups();
+            var smudgeGroups = smudgeGroupsPanel.GetSmudgeGroups();
 
             // One of the panels returning null means there's an error condition
-            if (terrainTypeGroups == null || tileGroups == null || overlayGroups == null)
+            if (terrainTypeGroups == null || tileGroups == null || overlayGroups == null || smudgeGroups == null)
                 return;
 
-            TerrainGeneratorConfig = new TerrainGeneratorConfiguration("Customized Configuration", terrainTypeGroups, tileGroups, overlayGroups);
+            TerrainGeneratorConfig = new TerrainGeneratorConfiguration("Customized Configuration", terrainTypeGroups, tileGroups, overlayGroups, smudgeGroups);
 
             Hide();
         }
@@ -224,7 +236,8 @@ namespace TSMapEditor.UI.Windows.TerrainGenerator
                     LoadConfig(new TerrainGeneratorConfiguration("Blank Config",
                         new List<TerrainGeneratorTerrainTypeGroup>(),
                         new List<TerrainGeneratorTileGroup>(),
-                        new List<TerrainGeneratorOverlayGroup>()));
+                        new List<TerrainGeneratorOverlayGroup>(),
+                        new List<TerrainGeneratorSmudgeGroup>()));
                 }
             }
         }
@@ -237,6 +250,7 @@ namespace TSMapEditor.UI.Windows.TerrainGenerator
             terrainTypeGroupsPanel.LoadConfig(configuration);
             tileGroupsPanel.LoadConfig(configuration);
             overlayGroupsPanel.LoadConfig(configuration);
+            smudgeGroupsPanel.LoadConfig(configuration);
         }
     }
 }

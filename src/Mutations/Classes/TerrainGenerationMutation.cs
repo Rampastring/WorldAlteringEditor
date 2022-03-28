@@ -14,22 +14,26 @@ namespace TSMapEditor.Mutations.Classes
         private const string TerrainTypeGroupString = "TerrainTypeGroup";
         private const string TileGroupString = "TileGroup";
         private const string OverlayGroupString = "OverlayGroup";
+        private const string SmudgeGroupString = "SmudgeGroup";
 
         public TerrainGeneratorConfiguration(string name,
             List<TerrainGeneratorTerrainTypeGroup> terrainTypeGroups,
             List<TerrainGeneratorTileGroup> tileGroups,
-            List<TerrainGeneratorOverlayGroup> overlayGroups)
+            List<TerrainGeneratorOverlayGroup> overlayGroups,
+            List<TerrainGeneratorSmudgeGroup> smudgeGroups)
         {
             Name = name;
             TerrainTypeGroups = terrainTypeGroups;
             TileGroups = tileGroups;
             OverlayGroups = overlayGroups;
+            SmudgeGroups = smudgeGroups;
         }
 
         public string Name { get; }
         public List<TerrainGeneratorTerrainTypeGroup> TerrainTypeGroups { get; }
         public List<TerrainGeneratorTileGroup> TileGroups { get; }
         public List<TerrainGeneratorOverlayGroup> OverlayGroups { get; }
+        public List<TerrainGeneratorSmudgeGroup> SmudgeGroups { get; }
 
         public IniSection GetIniConfigSection(string sectionName)
         {
@@ -50,14 +54,20 @@ namespace TSMapEditor.Mutations.Classes
                 iniSection.SetStringValue(OverlayGroupString + i, OverlayGroups[i].GetConfigString());
             }
 
+            for (int i = 0; i < SmudgeGroups.Count; i++)
+            {
+                iniSection.SetStringValue(SmudgeGroupString + i, SmudgeGroups[i].GetConfigString());
+            }
+
             return iniSection;
         }
 
-        public static TerrainGeneratorConfiguration FromConfigSection(IniSection section, List<TerrainType> terrainTypes, List<TileSet> tilesets, List<OverlayType> overlayTypes)
+        public static TerrainGeneratorConfiguration FromConfigSection(IniSection section, List<TerrainType> terrainTypes, List<TileSet> tilesets, List<OverlayType> overlayTypes, List<SmudgeType> smudgeTypes)
         {
             var terrainTypeGroups = new List<TerrainGeneratorTerrainTypeGroup>();
             var tileGroups = new List<TerrainGeneratorTileGroup>();
             var overlayGroups = new List<TerrainGeneratorOverlayGroup>();
+            var smudgeGroups = new List<TerrainGeneratorSmudgeGroup>();
 
             string configName = section.GetStringValue("Name", "Unnamed Configuration");
 
@@ -109,8 +119,24 @@ namespace TSMapEditor.Mutations.Classes
                 i++;
             }
 
+            i = 0;
+            while (true)
+            {
+                string value = section.GetStringValue(SmudgeGroupString + i, null);
+                if (string.IsNullOrWhiteSpace(value))
+                    break;
+
+                var smudgeGroup = TerrainGeneratorSmudgeGroup.FromConfigString(smudgeTypes, value);
+                if (smudgeGroup == null)
+                    continue;
+
+                smudgeGroups.Add(smudgeGroup);
+
+                i++;
+            }
+
             if (terrainTypeGroups.Count > 0 || tileGroups.Count > 0 || overlayGroups.Count > 0)
-                return new TerrainGeneratorConfiguration(configName, terrainTypeGroups, tileGroups, overlayGroups);
+                return new TerrainGeneratorConfiguration(configName, terrainTypeGroups, tileGroups, overlayGroups, smudgeGroups);
 
             return null;
         }
@@ -259,6 +285,47 @@ namespace TSMapEditor.Mutations.Classes
         }
     }
 
+    public class TerrainGeneratorSmudgeGroup
+    {
+        public TerrainGeneratorSmudgeGroup(List<SmudgeType> smudgeTypes, double openChance, double overlapChance)
+        {
+            SmudgeTypes = smudgeTypes;
+            OpenChance = openChance;
+            OverlapChance = overlapChance;
+        }
+
+        public List<SmudgeType> SmudgeTypes { get; }
+        public double OpenChance { get; }
+        public double OverlapChance { get; }
+
+        public string GetConfigString()
+        {
+            return $",{OpenChance},{OverlapChance}," + string.Join(",", SmudgeTypes.Select(tt => tt.ININame));
+        }
+
+        public static TerrainGeneratorSmudgeGroup FromConfigString(List<SmudgeType> allSmudgeTypes, string config)
+        {
+            string[] parts = config.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length < 3)
+                return null;
+
+            double openChance = Conversions.DoubleFromString(parts[0], 0.0);
+            double overlapChance = Conversions.DoubleFromString(parts[1], 0.0);
+
+            string[] smudgeTypeStrings = new string[parts.Length - 2];
+            Array.Copy(parts, 2, smudgeTypeStrings, 0, smudgeTypeStrings.Length);
+            var smudgeTypes = new List<SmudgeType>();
+            Array.ForEach(smudgeTypeStrings, (smudgeTypeName) =>
+            {
+                var smudgeType = allSmudgeTypes.Find(st => st.ININame == smudgeTypeName);
+                if (smudgeType != null)
+                    smudgeTypes.Add(smudgeType);
+            });
+
+            return new TerrainGeneratorSmudgeGroup(smudgeTypes, openChance, overlapChance);
+        }
+    }
+
     public class TerrainGenerationMutation : Mutation
     {
         public TerrainGenerationMutation(IMutationTarget mutationTarget, List<Point2D> cells, TerrainGeneratorConfiguration configuration) : base(mutationTarget)
@@ -279,6 +346,7 @@ namespace TSMapEditor.Mutations.Classes
         private List<OriginalTerrainData> undoData;
         private List<TerrainObject> placedTerrainObjects;
         private List<Point2D> placedOverlayCellCoords;
+        private List<Point2D> placedSmudgeCellCoords;
 
         public override void Perform()
         {
@@ -307,6 +375,12 @@ namespace TSMapEditor.Mutations.Classes
                 mapCell.Overlay = null;
             }
 
+            foreach (var cellCoords in placedSmudgeCellCoords)
+            {
+                var mapCell = MutationTarget.Map.GetTile(cellCoords);
+                mapCell.Smudge = null;
+            }
+
             MutationTarget.InvalidateMap();
 
             occupiedCells.Clear();
@@ -319,10 +393,12 @@ namespace TSMapEditor.Mutations.Classes
             undoData = new List<OriginalTerrainData>();
             placedTerrainObjects = new List<TerrainObject>();
             placedOverlayCellCoords = new List<Point2D>();
+            placedSmudgeCellCoords = new List<Point2D>();
 
             var terrainTypeGroups = terrainGeneratorConfiguration.TerrainTypeGroups;
             var tileGroups = terrainGeneratorConfiguration.TileGroups;
             var overlayGroups = terrainGeneratorConfiguration.OverlayGroups;
+            var smudgeGroups = terrainGeneratorConfiguration.SmudgeGroups;
 
             // Place terrain objects
             foreach (var terrainTypeGroup in terrainTypeGroups)
@@ -403,6 +479,27 @@ namespace TSMapEditor.Mutations.Classes
                             FrameIndex = frameIndex,
                             Position = cellCoords
                         };
+                    }
+                }
+            }
+
+            // Place smudges
+            foreach (var smudgeGroup in smudgeGroups)
+            {
+                foreach (Point2D cellCoords in cells)
+                {
+                    bool isOccupied = occupiedCells.Contains(cellCoords);
+                    double chance = isOccupied ? smudgeGroup.OverlapChance : smudgeGroup.OpenChance;
+
+                    if (random.NextDouble() < chance)
+                    {
+                        int index = random.Next(0, smudgeGroup.SmudgeTypes.Count);
+                        var smudgeType = smudgeGroup.SmudgeTypes[index];
+                        var mapCell = MutationTarget.Map.GetTile(cellCoords);
+                        if (mapCell.Smudge == null)
+                            mapCell.Smudge = new Smudge() { SmudgeType = smudgeType, Position = cellCoords };
+
+                        placedSmudgeCellCoords.Add(cellCoords);
                     }
                 }
             }

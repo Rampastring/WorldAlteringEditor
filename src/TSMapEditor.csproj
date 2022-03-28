@@ -406,6 +406,7 @@
     <Compile Include="UI\Windows\TeamTypesWindow.cs" />
     <Compile Include="UI\Windows\TerrainGenerator\TerrainGeneratorConfigWindow.cs" />
     <Compile Include="UI\Windows\TerrainGenerator\TerrainGeneratorOverlayGroupsPanel.cs" />
+    <Compile Include="UI\Windows\TerrainGenerator\TerrainGeneratorSmudgeGroupsPanel.cs" />
     <Compile Include="UI\Windows\TerrainGenerator\TerrainGeneratorTerrainTypeGroupsPanel.cs" />
     <Compile Include="UI\Windows\TerrainGenerator\TerrainGeneratorTileGroupsPanel.cs" />
     <Compile Include="UI\Windows\TriggersWindow.cs" />
