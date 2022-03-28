@@ -29,10 +29,10 @@ namespace TSMapEditor.UI.Windows
             base.Initialize();
 
             lbINIFiles = FindChild<EditorListBox>(nameof(lbINIFiles));
-            FindChild<EditorButton>("btnApplyFile").LeftClick += ApplyINICodeWindow_LeftClick;
+            FindChild<EditorButton>("btnApplyFile").LeftClick += BtnApplyFile_LeftClick;
         }
 
-        private void ApplyINICodeWindow_LeftClick(object sender, EventArgs e)
+        private void BtnApplyFile_LeftClick(object sender, EventArgs e)
         {
             if (lbINIFiles.SelectedItem == null)
                 return;
