@@ -198,7 +198,7 @@ namespace TSMapEditor.Initialization
                 for (int i = 0; i < smudges.Count; i++)
                 {
                     var smudge = smudges[i];
-                    section.SetStringValue(i.ToString(CultureInfo.InvariantCulture), $"{smudge.SmudgeType},{smudge.Position.X},{smudge.Position.Y},0");
+                    section.SetStringValue(i.ToString(CultureInfo.InvariantCulture), $"{smudge.SmudgeType.ININame},{smudge.Position.X},{smudge.Position.Y},0");
                 }
 
                 mapIni.AddSection(section);
