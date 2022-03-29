@@ -201,6 +201,14 @@ namespace TSMapEditor.Rendering
             {
                 CursorAction = pasteTerrainCursorAction;
             };
+
+            windowController.Initialized += (s, e) => windowController.MinimapWindow.MegamapClicked += MinimapWindow_MegamapClicked;
+        }
+
+        private void MinimapWindow_MegamapClicked(object sender, MegamapClickedEventArgs e)
+        {
+            cameraTopLeftPoint = e.ClickedPoint - new Point2D(Width / 2, Height / 2);
+            ConstrainCamera();
         }
 
         private void FrameworkMode_Triggered(object sender, EventArgs e)

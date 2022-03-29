@@ -19,9 +19,9 @@ namespace TSMapEditor.UI.Controls
 
         public event EventHandler Closed;
 
-        protected bool CanBeMoved { get; private set; } = true;
+        protected bool CanBeMoved { get; set; } = true;
 
-        private bool isDragged;
+        protected bool IsDragged;
         private Point lastCursorPoint;
 
         public override void Initialize()
@@ -78,14 +78,14 @@ namespace TSMapEditor.UI.Controls
             {
                 if (Cursor.LeftPressedDown)
                 {
-                    isDragged = true;
+                    IsDragged = true;
                     lastCursorPoint = GetCursorPoint();
                 }
                 else
                 {
-                    isDragged = Cursor.LeftDown;
+                    IsDragged = Cursor.LeftDown;
 
-                    if (isDragged)
+                    if (IsDragged)
                     {
                         Point newCursorPoint = GetCursorPoint();
                         X = X + (newCursorPoint.X - lastCursorPoint.X) * Scaling;
@@ -106,7 +106,7 @@ namespace TSMapEditor.UI.Controls
             }
             else
             {
-                isDragged = false;
+                IsDragged = false;
             }
         }
     }

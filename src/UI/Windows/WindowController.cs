@@ -1,4 +1,5 @@
 ﻿using Rampastring.XNAUI.XNAControls;
+using System;
 using System.Collections.Generic;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
@@ -11,6 +12,8 @@ namespace TSMapEditor.UI.Windows
     public class WindowController
     {
         private List<EditorWindow> Windows { get; } = new List<EditorWindow>();
+
+        public event EventHandler Initialized;
 
         public BasicSectionConfigWindow BasicSectionConfigWindow { get; private set; }
         public TaskforcesWindow TaskForcesWindow { get; private set; }
@@ -112,6 +115,8 @@ namespace TSMapEditor.UI.Windows
                 window.Disable();
                 window.CenterOnParent();
             }
+
+            Initialized?.Invoke(this, EventArgs.Empty);
         }
     }
 }

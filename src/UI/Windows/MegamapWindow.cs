@@ -3,10 +3,24 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Rampastring.XNAUI;
 using System;
+using TSMapEditor.GameMath;
 using TSMapEditor.UI.Controls;
 
 namespace TSMapEditor.UI.Windows
 {
+    public class MegamapClickedEventArgs : EventArgs
+    {
+        public MegamapClickedEventArgs(Point2D clickedPoint)
+        {
+            ClickedPoint = clickedPoint;
+        }
+
+        /// <summary>
+        /// The pixel point on the entire map that was clicked on.
+        /// </summary>
+        public Point2D ClickedPoint { get; }
+    }
+
     public class MegamapWindow : EditorWindow
     {
         public MegamapWindow(WindowManager windowManager, Texture2D megamapTexture, bool enableToolbar) : base(windowManager)
@@ -15,6 +29,8 @@ namespace TSMapEditor.UI.Windows
             this.megamapTexture = megamapTexture;
             ClientRectangleUpdated += MegamapWindow_ClientRectangleUpdated;
         }
+
+        public event EventHandler<MegamapClickedEventArgs> MegamapClicked;
 
         public Rectangle CameraRectangle { get; set; }
 
@@ -54,6 +70,9 @@ namespace TSMapEditor.UI.Windows
         private EditorButton closeButton;
 
         private Rectangle textureDrawRectangle;
+
+        private bool wasLeftDown = false;
+        private Point2D oldWindowPosition;
 
         public override void Initialize()
         {
@@ -99,10 +118,49 @@ namespace TSMapEditor.UI.Windows
             Show();
         }
 
+        private void MoveCamera()
+        {
+            var cursorPoint = GetCursorPoint();
+
+            double x = cursorPoint.X - textureDrawRectangle.X;
+            x /= textureDrawRectangle.Width;
+            x *= megamapTexture.Width;
+
+            double y = cursorPoint.Y - textureDrawRectangle.Y;
+            y /= textureDrawRectangle.Height;
+            y *= megamapTexture.Height;
+
+            MegamapClicked?.Invoke(this, new MegamapClickedEventArgs(new Point2D((int)x, (int)y)));
+        }
+
         public override void Update(GameTime gameTime)
         {
             if (Keyboard.IsKeyHeldDown(Keys.Escape))
                 WindowManager.RemoveControl(this);
+
+            if (!IsChildActive)
+            {
+                if (IsActive && Cursor.LeftDown)
+                {
+                    if (!wasLeftDown)
+                        oldWindowPosition = new Point2D(X, Y);
+
+                    CanBeMoved = !Keyboard.IsShiftHeldDown();
+                    if (!CanBeMoved)
+                        MoveCamera();
+
+                    wasLeftDown = true;
+                }
+                else if (wasLeftDown)
+                {
+                    if (oldWindowPosition == new Point2D(X, Y))
+                    {
+                        MoveCamera();
+                    }
+
+                    wasLeftDown = false;
+                }
+            }
 
             base.Update(gameTime);
         }
