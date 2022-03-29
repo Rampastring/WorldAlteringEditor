@@ -33,6 +33,8 @@ namespace TSMapEditor.GameMath
 
         public Vector2 ToXNAVector() => new Vector2(X, Y);
 
+        public Point ToXNAPoint() => new Point(X, Y);
+
         public override int GetHashCode()
         {
             return Y * 1000 + X;

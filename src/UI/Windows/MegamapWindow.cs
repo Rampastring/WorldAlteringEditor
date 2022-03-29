@@ -16,6 +16,8 @@ namespace TSMapEditor.UI.Windows
             ClientRectangleUpdated += MegamapWindow_ClientRectangleUpdated;
         }
 
+        public Rectangle CameraRectangle { get; set; }
+
         private void MegamapWindow_ClientRectangleUpdated(object sender, EventArgs e)
         {
             int startY;
@@ -111,11 +113,21 @@ namespace TSMapEditor.UI.Windows
 
             DrawTexture(megamapTexture, textureDrawRectangle, Color.White);
             
+            if (CameraRectangle.Width > 0 && CameraRectangle.Height > 0)
+            {
+                double xPos = (CameraRectangle.X / (double)megamapTexture.Width) * textureDrawRectangle.Width;
+                double yPos = (CameraRectangle.Y / (double)megamapTexture.Height) * textureDrawRectangle.Height;
+                double width = (CameraRectangle.Width / (double)megamapTexture.Width) * textureDrawRectangle.Width;
+                double height = (CameraRectangle.Height / (double)megamapTexture.Height) * textureDrawRectangle.Height;
+
+                DrawRectangle(new Rectangle(textureDrawRectangle.X + (int)xPos, textureDrawRectangle.Y + (int)yPos, (int)width, (int)height), Color.White, 1);
+            }
+
             DrawChildren(gameTime);
 
             if (!enableToolbar)
             {
-                DrawStringWithShadow("Press ESC to exit", 1, new Vector2(Constants.UIEmptySideSpace, Constants.UIEmptyTopSpace), Color.Red, 1.0f);
+                DrawStringWithShadow("Press ESC to close", 1, new Vector2(Constants.UIEmptySideSpace, Constants.UIEmptyTopSpace), Color.Red, 1.0f);
             }
 
             DrawPanelBorders();

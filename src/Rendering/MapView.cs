@@ -820,6 +820,8 @@ namespace TSMapEditor.Rendering
                 ConstrainCamera();
             }
 
+            windowController.MinimapWindow.CameraRectangle = new Rectangle(cameraTopLeftPoint.ToXNAPoint(), new Point(Width, Height));
+
             Point2D cursorMapPoint = GetCursorMapPoint();
             Point2D tileCoords = CellMath.CellCoordsFromPixelCoords(cursorMapPoint, Map.Size);
             var tile = Map.GetTile(tileCoords.X, tileCoords.Y);
