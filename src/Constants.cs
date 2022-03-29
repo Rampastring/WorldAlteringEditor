@@ -1,14 +1,17 @@
-﻿namespace TSMapEditor
+﻿using Rampastring.Tools;
+using System;
+
+namespace TSMapEditor
 {
-    public class Constants
+    public static class Constants
     {
-        public const int CellSizeX = 48;
-        public const int CellSizeY = 24;
+        public static int CellSizeX = 48;
+        public static int CellSizeY = 24;
 
         public const int TextureSizeLimit = 16384;
 
-        public const int MaxMapWidth = TextureSizeLimit / CellSizeX;
-        public const int MaxMapHeight = TextureSizeLimit / CellSizeY;
+        public static int MaxMapWidth = TextureSizeLimit / CellSizeX;
+        public static int MaxMapHeight = TextureSizeLimit / CellSizeY;
 
         public const int ObjectHealthMax = 256;
         public const int FacingMax = 255;
@@ -46,5 +49,12 @@
         public const bool DrawShadows = true;
 
         public const string ClipboardMapDataFormatValue = "ScenarioEditorCopiedMapData";
+
+        public static void Init()
+        {
+            IniFile constantsIni = new IniFile(Environment.CurrentDirectory + "/Config/Constants.ini");
+            CellSizeX = constantsIni.GetIntValue("Constants", nameof(CellSizeX), CellSizeX);
+            CellSizeY = constantsIni.GetIntValue("Constants", nameof(CellSizeY), CellSizeY);
+        }
     }
 }

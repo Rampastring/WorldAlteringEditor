@@ -21,6 +21,7 @@ namespace TSMapEditor.Rendering
         {
             AutoLATType.InitArray();
 
+            Constants.Init();
             new UserSettings();
 
             graphics = new GraphicsDeviceManager(this);
