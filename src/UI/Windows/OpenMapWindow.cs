@@ -54,9 +54,9 @@ namespace TSMapEditor.UI.Windows
 
             var btnLoad = new EditorButton(WindowManager);
             btnLoad.Name = nameof(btnLoad);
-            btnLoad.X = Constants.UIEmptySideSpace;
-            btnLoad.Y = lbFileList.Bottom + Constants.UIEmptyTopSpace;
             btnLoad.Width = 100;
+            btnLoad.X = Width - Constants.UIEmptySideSpace - btnLoad.Width;
+            btnLoad.Y = lbFileList.Bottom + Constants.UIEmptyTopSpace;
             btnLoad.Text = "Open";
             AddChild(btnLoad);
             btnLoad.LeftClick += BtnLoad_LeftClick;
@@ -64,7 +64,7 @@ namespace TSMapEditor.UI.Windows
             var btnCancel = new EditorButton(WindowManager);
             btnCancel.Name = nameof(btnCancel);
             btnCancel.Width = 100;
-            btnCancel.X = Width - Constants.UIEmptySideSpace - btnCancel.Width;
+            btnCancel.X = Constants.UIEmptySideSpace;
             btnCancel.Y = btnLoad.Y;
             btnCancel.Text = "Cancel";
             AddChild(btnCancel);
