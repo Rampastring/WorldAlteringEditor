@@ -220,7 +220,10 @@ namespace TSMapEditor.UI
 
             bool createNew = loadMapFilePath == null;
 
-            MapSetup.InitializeMap(WindowManager, UserSettings.Instance.GameDirectory, createNew, loadMapFilePath, newMapInfo.Theater, createNew ? newMapInfo.MapSize : Point2D.Zero);
+            MapSetup.InitializeMap(WindowManager, UserSettings.Instance.GameDirectory, createNew,
+                loadMapFilePath,
+                createNew ? newMapInfo.Theater : null,
+                createNew ? newMapInfo.MapSize : Point2D.Zero);
         }
 
         private void OverlayPlacementAction_OverlayTypeChanged(object sender, EventArgs e)
