@@ -3,6 +3,7 @@ using Rampastring.XNAUI;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations;
 using TSMapEditor.Rendering;
+using TSMapEditor.Scripts;
 using TSMapEditor.UI.Controls;
 using TSMapEditor.UI.CursorActions;
 using TSMapEditor.UI.Windows;
@@ -95,6 +96,8 @@ namespace TSMapEditor.UI.TopBar
             toolsContextMenu.AddItem("View Minimap", () => windowController.MinimapWindow.Open(), null, null, null);
             toolsContextMenu.AddItem("Apply INI Code...", () => windowController.ApplyINICodeWindow.Open(), null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
+            toolsContextMenu.AddItem("Generate Animated Water", GenerateAnimatedWater, null, null, null, null);
+            toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("Configure Hotkeys...", () => windowController.HotkeyConfigurationWindow.Open(), null, null, null);
 
             var toolsButton = new MenuButton(WindowManager, toolsContextMenu);
@@ -124,6 +127,16 @@ namespace TSMapEditor.UI.TopBar
             KeyboardCommands.Instance.GenerateTerrain.Triggered += (s, e) => EnterTerrainGenerator();
             KeyboardCommands.Instance.ConfigureTerrainGenerator.Triggered += (s, e) => windowController.TerrainGeneratorConfigWindow.Open();
             KeyboardCommands.Instance.PlaceTunnel.Triggered += (s, e) => mapView.EditorState.CursorAction = placeTubeCursorAction;
+        }
+
+        private void GenerateAnimatedWater()
+        {
+            var messageBox = EditorMessageBox.Show(WindowManager, "Are you sure?",
+                "This will automatically replace water tiles on the map with animated water.\r\n\r\n" +
+                "Make sure to save your map first, as NO UN-DO IS AVAILABLE!\r\n\r\n" +
+                "Do you wish to continue?", MessageBoxButtons.YesNo);
+
+            messageBox.YesClickedAction = (_) => { new ApplyAnimatedWaterScript().Perform(map); mapView.InvalidateMap(); };
         }
 
         private void EnterTerrainGenerator()
