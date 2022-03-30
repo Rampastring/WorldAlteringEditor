@@ -653,10 +653,9 @@ namespace TSMapEditor.Rendering
         {
             // TODO this algorithm seems correct for the x-axis, but it's wrong for the y-axis
             int x = Map.LocalSize.X * Constants.CellSizeX;
-            int y = Map.LocalSize.Y * (Constants.CellSizeY * 3) / 4;
+            int y = (int)(((double)Map.LocalSize.Y - 2.5) * Constants.CellSizeY);
             int width = Map.LocalSize.Width * Constants.CellSizeX;
-            int bottom = (Map.Size.Y - (Map.Size.Y - Map.LocalSize.Y - Map.LocalSize.Height)) * Constants.CellSizeY;
-            int height = bottom - y;
+            int height = (Map.LocalSize.Height + 4) * Constants.CellSizeY;
 
             DrawRectangle(new Rectangle(x, y, width, height), Color.Blue, 4);
         }
