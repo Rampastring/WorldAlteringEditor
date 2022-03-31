@@ -69,6 +69,8 @@ namespace TSMapEditor.UI.TopBar
             editContextMenu.AddItem("Redo", () => mutationManager.Redo(), () => mutationManager.CanRedo(), null, null, KeyboardCommands.Instance.Redo.GetKeyDisplayString());
             editContextMenu.AddItem(" ", null, () => false, null, null);
             editContextMenu.AddItem("Basic", () => windowController.BasicSectionConfigWindow.Open(), null, null, null);
+            editContextMenu.AddItem("Map Size", () => windowController.MapSizeWindow.Open(), null, null, null, null);
+            editContextMenu.AddItem(" ", null, () => false, null, null);
             editContextMenu.AddItem("Houses", () => windowController.HousesWindow.Open(), null, null, null);
             editContextMenu.AddItem("Triggers", () => windowController.TriggersWindow.Open(), null, null, null);
             editContextMenu.AddItem("TaskForces", () => windowController.TaskForcesWindow.Open(), null, null, null);

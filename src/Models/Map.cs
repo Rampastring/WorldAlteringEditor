@@ -13,6 +13,7 @@ namespace TSMapEditor.Models
     public class Map : IMap
     {
         public event EventHandler HousesChanged;
+        public event EventHandler LocalSizeChanged;
 
         public IniFile LoadedINI { get; set; }
 
@@ -66,7 +67,18 @@ namespace TSMapEditor.Models
         public Lighting Lighting { get; } = new Lighting();
 
         public Point2D Size { get; set; }
-        public Rectangle LocalSize { get; set; }
+
+        private Rectangle _localSize;
+        public Rectangle LocalSize 
+        {
+            get => _localSize;
+            set
+            {
+                _localSize = value;
+                LocalSizeChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
         public string TheaterName { get; set; }
         public ITheater TheaterInstance { get; set; }
 
@@ -247,6 +259,31 @@ namespace TSMapEditor.Models
                 ox++;
                 oy++;
             }
+        }
+
+        public int GetCellCount()
+        {
+            int cellCount = 0;
+
+            int ox = 1;
+            int oy = Size.X;
+            while (ox <= Size.Y)
+            {
+                int tx = ox;
+                int ty = oy;
+                while (tx < Size.X + ox)
+                {
+                    cellCount += 2;
+
+                    tx++;
+                    ty--;
+                }
+
+                ox++;
+                oy++;
+            }
+
+            return cellCount;
         }
 
         public void PlaceTerrainTileAt(ITileImage tile, Point2D cellCoords)

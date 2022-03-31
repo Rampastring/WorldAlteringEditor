@@ -36,6 +36,7 @@ namespace TSMapEditor.UI.Windows
         public LightingSettingsWindow LightingSettingsWindow { get; private set; }
         public ApplyINICodeWindow ApplyINICodeWindow { get; private set; }
         public HotkeyConfigurationWindow HotkeyConfigurationWindow { get; private set; }
+        public MapSizeWindow MapSizeWindow { get; private set; }
         public AboutWindow AboutWindow { get; private set; }
 
 
@@ -105,6 +106,9 @@ namespace TSMapEditor.UI.Windows
 
             HotkeyConfigurationWindow = new HotkeyConfigurationWindow(windowParentControl.WindowManager);
             Windows.Add(HotkeyConfigurationWindow);
+
+            MapSizeWindow = new MapSizeWindow(windowParentControl.WindowManager, map);
+            Windows.Add(MapSizeWindow);
 
             AboutWindow = new AboutWindow(windowParentControl.WindowManager);
             Windows.Add(AboutWindow);

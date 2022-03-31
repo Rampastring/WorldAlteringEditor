@@ -203,6 +203,7 @@ namespace TSMapEditor.Rendering
             };
 
             windowController.Initialized += (s, e) => windowController.MinimapWindow.MegamapClicked += MinimapWindow_MegamapClicked;
+            Map.LocalSizeChanged += (s, e) => InvalidateMap();
         }
 
         private void MinimapWindow_MegamapClicked(object sender, MegamapClickedEventArgs e)
