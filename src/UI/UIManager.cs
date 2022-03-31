@@ -163,9 +163,6 @@ namespace TSMapEditor.UI
             windowController.Initialize(this, map, editorState, mapView);
             placeWaypointCursorAction.PlaceWaypointWindow = windowController.PlaceWaypointWindow;
 
-            if (map.Houses.Count > 0)
-                editorState.ObjectOwner = map.Houses[0];
-
             Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
 
             editorState.CursorActionChanged += EditorState_CursorActionChanged;
@@ -173,6 +170,10 @@ namespace TSMapEditor.UI
 
             windowController.OpenMapWindow.OnFileSelected += OpenMapWindow_OnFileSelected;
             windowController.CreateNewMapWindow.OnCreateNewMap += CreateNewMapWindow_OnCreateNewMap;
+
+            // Try to select "Neutral" as default house
+            editorState.ObjectOwner = map.GetHouses().Find(h => h.ININame == "Neutral");
+            editorState.CursorAction = null;
         }
 
         private void CreateNewMapWindow_OnCreateNewMap(object sender, CreateNewMapEventArgs e)
