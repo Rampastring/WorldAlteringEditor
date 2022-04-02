@@ -69,6 +69,7 @@ namespace TSMapEditor.Settings
         public IntSetting MapWideOverlayOpacity = new IntSetting(MapView, "MapWideOverlayOpacity", 50);
 
         public BoolSetting UpscaleUI = new BoolSetting(General, "UpscaleUI", false);
+        public StringSetting Theme = new StringSetting(General, "Theme", "Default");
 
         public StringSetting GameDirectory = new StringSetting(General, "GameDirectory", string.Empty);
         public StringSetting LastScenarioPath = new StringSetting(General, nameof(LastScenarioPath), "Maps/Custom/");

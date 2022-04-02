@@ -80,12 +80,12 @@ namespace TSMapEditor.UI
                 UISettings.ActiveSettings.ButtonTextColor = Color.Black;
             }
 
-            bool greenTheme = false;
+            bool greenTheme = UserSettings.Instance.Theme == "Tiberium";
             if (greenTheme)
             {
                 // ((CustomUISettings)UISettings.ActiveSettings).ButtonSecondaryBackgroundColor = new Color(0, 164, 0);
                 // ((CustomUISettings)UISettings.ActiveSettings).ButtonTertiaryBackgroundColor = Color.LimeGreen;
-                UISettings.ActiveSettings.TextColor = new Color(0,185,0);
+                UISettings.ActiveSettings.TextColor = new Color(0,222,0);
                 UISettings.ActiveSettings.AltColor = Color.LimeGreen;
                 UISettings.ActiveSettings.FocusColor = new Color(0, 96, 0);
                 UISettings.ActiveSettings.ButtonTextColor = Color.LimeGreen;

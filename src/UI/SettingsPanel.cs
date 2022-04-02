@@ -76,6 +76,7 @@ namespace TSMapEditor.UI
         private XNADropDown ddRenderResolution;
         private XNACheckBox chkBorderless;
         private XNACheckBox chkUpscaleUI;
+        private XNADropDown ddTheme;
 
         public override void Initialize()
         {
@@ -117,10 +118,26 @@ namespace TSMapEditor.UI
             ddRenderResolution.Width = Width - ddRenderResolution.X - Constants.UIEmptySideSpace;
             AddChild(ddRenderResolution);
 
+            var lblTheme = new XNALabel(WindowManager);
+            lblTheme.Name = nameof(lblTheme);
+            lblTheme.Text = "Theme:";
+            lblTheme.X = lblDisplayResolution.X;
+            lblTheme.Y = ddRenderResolution.Bottom + Constants.UIEmptyTopSpace;
+            AddChild(lblTheme);
+
+            ddTheme = new XNADropDown(WindowManager);
+            ddTheme.Name = nameof(ddTheme);
+            ddTheme.X = ddDisplayResolution.X;
+            ddTheme.Y = lblTheme.Y - 1;
+            ddTheme.Width = ddDisplayResolution.Width;
+            AddChild(ddTheme);
+            ddTheme.AddItem("Default");
+            ddTheme.AddItem("Tiberium");
+
             chkBorderless = new XNACheckBox(WindowManager);
             chkBorderless.Name = nameof(chkBorderless);
             chkBorderless.X = Constants.UIEmptySideSpace;
-            chkBorderless.Y = ddRenderResolution.Bottom + Constants.UIVerticalSpacing;
+            chkBorderless.Y = ddTheme.Bottom + Constants.UIVerticalSpacing;
             chkBorderless.Text = "Borderless Mode";
             AddChild(chkBorderless);
 
@@ -155,6 +172,8 @@ namespace TSMapEditor.UI
             string renderResolution = userSettings.RenderResolutionWidth.GetValue() + "x" + userSettings.RenderResolutionHeight.GetValue();
             ddRenderResolution.SelectedIndex = ddRenderResolution.Items.FindIndex(i => i.Text == renderResolution);
 
+            ddTheme.SelectedIndex = userSettings.Theme == "Tiberium" ? 1 : 0;
+
             chkBorderless.Checked = userSettings.Borderless;
             chkUpscaleUI.Checked = userSettings.UpscaleUI;
         }
@@ -168,6 +187,8 @@ namespace TSMapEditor.UI
 
             userSettings.Borderless.UserDefinedValue = chkBorderless.Checked;
             userSettings.UpscaleUI.UserDefinedValue = chkUpscaleUI.Checked;
+
+            userSettings.Theme.UserDefinedValue = ddTheme.SelectedItem.Text;
 
             if (ddDisplayResolution.SelectedItem != null)
             {
