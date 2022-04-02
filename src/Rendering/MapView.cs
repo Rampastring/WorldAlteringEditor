@@ -1028,7 +1028,7 @@ namespace TSMapEditor.Rendering
             if (tile == null)
                 return;
 
-            AddRefreshPoint(cellCoords);
+            AddRefreshPoint(cellCoords, 2);
             Map.DeleteObjectFromCell(cellCoords);
         }
 
