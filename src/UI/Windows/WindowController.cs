@@ -37,6 +37,7 @@ namespace TSMapEditor.UI.Windows
         public ApplyINICodeWindow ApplyINICodeWindow { get; private set; }
         public HotkeyConfigurationWindow HotkeyConfigurationWindow { get; private set; }
         public MapSizeWindow MapSizeWindow { get; private set; }
+        public ExpandMapWindow ExpandMapWindow { get; private set; }
         public AboutWindow AboutWindow { get; private set; }
 
 
@@ -109,6 +110,10 @@ namespace TSMapEditor.UI.Windows
 
             MapSizeWindow = new MapSizeWindow(windowParentControl.WindowManager, map);
             Windows.Add(MapSizeWindow);
+
+            ExpandMapWindow = new ExpandMapWindow(windowParentControl.WindowManager, map);
+            Windows.Add(ExpandMapWindow);
+            MapSizeWindow.OnResizeMapButtonClicked += (s, e) => ExpandMapWindow.Open();
 
             AboutWindow = new AboutWindow(windowParentControl.WindowManager);
             Windows.Add(AboutWindow);

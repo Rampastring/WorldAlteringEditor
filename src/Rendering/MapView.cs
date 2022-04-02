@@ -204,6 +204,20 @@ namespace TSMapEditor.Rendering
 
             windowController.Initialized += (s, e) => windowController.MinimapWindow.MegamapClicked += MinimapWindow_MegamapClicked;
             Map.LocalSizeChanged += (s, e) => InvalidateMap();
+            Map.MapResized += Map_MapResized;
+        }
+
+        private void Map_MapResized(object sender, EventArgs e)
+        {
+            // We need to re-create our map texture
+            mapRenderTarget?.Dispose();
+            objectRenderTarget?.Dispose();
+
+            mapRenderTarget = CreateFullMapRenderTarget();
+            objectRenderTarget = CreateFullMapRenderTarget();
+
+            // And then re-draw the whole map
+            InvalidateMap();
         }
 
         private void MinimapWindow_MegamapClicked(object sender, MegamapClickedEventArgs e)

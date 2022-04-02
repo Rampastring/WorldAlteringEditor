@@ -3,6 +3,7 @@ using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
 using TSMapEditor.Initialization;
@@ -12,8 +13,11 @@ namespace TSMapEditor.Models
 {
     public class Map : IMap
     {
+        private const int TileBufferSize = 600; // for now
+
         public event EventHandler HousesChanged;
         public event EventHandler LocalSizeChanged;
+        public event EventHandler MapResized;
 
         public IniFile LoadedINI { get; set; }
 
@@ -22,7 +26,7 @@ namespace TSMapEditor.Models
 
         public BasicSection Basic { get; private set; } = new BasicSection();
 
-        public MapTile[][] Tiles { get; private set; } = new MapTile[600][]; // for now
+        public MapTile[][] Tiles { get; private set; }
         public MapTile GetTile(int x, int y)
         {
             if (y < 0 || y >= Tiles.Length)
@@ -36,10 +40,10 @@ namespace TSMapEditor.Models
 
         public MapTile GetTile(Point2D cellCoords) => GetTile(cellCoords.X, cellCoords.Y);
         public MapTile GetTileOrFail(Point2D cellCoords) => GetTile(cellCoords.X, cellCoords.Y) ?? throw new InvalidOperationException("Invalid cell coords: " + cellCoords);
-        public List<Aircraft> Aircraft { get; } = new List<Aircraft>();
-        public List<Infantry> Infantry { get; } = new List<Infantry>();
-        public List<Unit> Units { get; } = new List<Unit>();
-        public List<Structure> Structures { get; } = new List<Structure>();
+        public List<Aircraft> Aircraft { get; private set; } = new List<Aircraft>();
+        public List<Infantry> Infantry { get; private set; } = new List<Infantry>();
+        public List<Unit> Units { get; private set; } = new List<Unit>();
+        public List<Structure> Structures { get; private set; } = new List<Structure>();
 
         /// <summary>
         /// The list of standard houses loaded from Rules.ini.
@@ -52,17 +56,17 @@ namespace TSMapEditor.Models
         public List<House> Houses { get; } = new List<House>();
         public List<House> GetHouses() => Houses.Count > 0 ? Houses : StandardHouses;
 
-        public List<TerrainObject> TerrainObjects { get; } = new List<TerrainObject>();
-        public List<Waypoint> Waypoints { get; } = new List<Waypoint>();
+        public List<TerrainObject> TerrainObjects { get; private set; } = new List<TerrainObject>();
+        public List<Waypoint> Waypoints { get; private set; } = new List<Waypoint>();
 
         public List<TaskForce> TaskForces { get; } = new List<TaskForce>();
         public List<Trigger> Triggers { get; } = new List<Trigger>();
         public List<Tag> Tags { get; } = new List<Tag>();
-        public List<CellTag> CellTags { get; } = new List<CellTag>();
+        public List<CellTag> CellTags { get; private set; } = new List<CellTag>();
         public List<Script> Scripts { get; } = new List<Script>();
         public List<TeamType> TeamTypes { get; } = new List<TeamType>();
         public List<LocalVariable> LocalVariables { get; } = new List<LocalVariable>();
-        public List<Tube> Tubes { get; } = new List<Tube>();
+        public List<Tube> Tubes { get; private set; } = new List<Tube>();
 
         public Lighting Lighting { get; } = new Lighting();
 
@@ -84,12 +88,10 @@ namespace TSMapEditor.Models
 
         private readonly Initializer initializer;
 
+
         public Map()
         {
-            for (int i = 0; i < Tiles.Length; i++)
-            {
-                Tiles[i] = new MapTile[600];
-            }
+            InitCells();
 
             initializer = new Initializer(this);
         }
@@ -222,12 +224,42 @@ namespace TSMapEditor.Models
             return StandardHouses.Find(h => h.ININame == houseName);
         }
 
+        private bool IsCoordWithinMap(Point2D coord)
+        {
+            if (coord.X <= 0 || coord.Y <= 0)
+                return false;
+
+            // Filter out cells that would be above (to the north of) the map area
+            if (coord.X + coord.Y < Size.X + 1)
+                return false;
+
+            // Filter out cells that would be to the right (east) of the map area
+            if (coord.X - coord.Y > Size.X - 1)
+                return false;
+
+            // Filter out cells that would be to the left (west) of the map area
+            if (coord.Y - coord.X > Size.X - 1)
+                return false;
+
+            // Filter out cells that would be below (to the south of) the map area
+            if (coord.Y + coord.X > Size.Y * 2 + Size.X)
+                return false;
+
+            return true;
+        }
+
         public void SetTileData(List<MapTile> tiles)
         {
             if (tiles != null)
             {
                 foreach (var tile in tiles)
                 {
+                    if (!IsCoordWithinMap(tile.CoordsToPoint()))
+                    {
+                        Logger.Log("Dropping cell " + tile.CoordsToPoint() + " that would be outside of the allowed map area.");
+                        continue;
+                    }
+
                     Tiles[tile.Y][tile.X] = tile;
                 }
             }
@@ -284,6 +316,107 @@ namespace TSMapEditor.Models
             }
 
             return cellCount;
+        }
+
+        /// <summary>
+        /// Resizes the map. Handles moving map elements (objects, waypoints etc.) as required.
+        /// Deletes elements that would end up outside of the new map borders.
+        /// </summary>
+        /// <param name="newSize">The new size of the map.</param>
+        /// <param name="eastShift">Defines how many coords existing cells and 
+        /// objects should be moved to the east.</param>
+        /// <param name="southShift">Defines by how many coords existing cells and 
+        /// objects should be moved to the south.</param>
+        public void Resize(Point2D newSize, int eastShift, int southShift)
+        {
+            // Copy current cell list to preserve it
+            MapTile[][] cells = Tiles;
+
+            // Combine all cells into one single-dimensional list
+            List<MapTile> allCellsInList = cells.Aggregate(new List<MapTile>(), (totalCellList, rowCellList) =>
+            {
+                var nonNullValues = rowCellList.Where(mapcell => mapcell != null);
+                return totalCellList.Concat(nonNullValues).ToList();
+            });
+
+            // Handle east-shift
+            // We can shift a cell one point towards the east by 
+            // adding 1 to its X coordinate and subtracting 1 from its Y coordinate
+            allCellsInList.ForEach(mapCell => { mapCell.ShiftPosition(eastShift, -eastShift); });
+
+            // Handle south-shift
+            // We can shift a cell one point towards the south by 
+            // adding 1 to both its X and Y coordinates
+            allCellsInList.ForEach(mapCell => { mapCell.ShiftPosition(southShift, southShift); });
+
+
+            // Then the "fun" part. Shift every object, waypoint, celltag etc. similarly!
+            ShiftObjectsInList(Aircraft, eastShift, southShift);
+            ShiftObjectsInList(Infantry, eastShift, southShift);
+            ShiftObjectsInList(Units, eastShift, southShift);
+            ShiftObjectsInList(Structures, eastShift, southShift);
+            ShiftObjectsInList(TerrainObjects, eastShift, southShift);
+            ShiftObjectsInList(Waypoints, eastShift, southShift);
+            ShiftObjectsInList(CellTags, eastShift, southShift);
+
+            // Tubes are slightly more complicated...
+            Tubes.ForEach(tube =>
+            {
+                tube.ShiftPosition(eastShift, -eastShift);
+                tube.ShiftPosition(southShift, southShift);
+            });
+
+
+            // Now let's apply our changes and remove stuff that would end up outside of the map
+
+            Size = newSize;
+
+            // Re-init cell list
+            // This will automatically get rid of cells that would end up outside of the map
+            InitCells();
+            SetTileData(allCellsInList);
+
+            // Objects we have to check manually
+            // Luckily functional programming and our design makes this relatively painless!
+            Aircraft = Aircraft.Where(a => IsCoordWithinMap(a.Position)).ToList();
+            Infantry = Infantry.Where(i => IsCoordWithinMap(i.Position)).ToList();
+            Units = Units.Where(u => IsCoordWithinMap(u.Position)).ToList();
+            Structures = Structures.Where(s => IsCoordWithinMap(s.Position)).ToList();
+            TerrainObjects = TerrainObjects.Where(t => IsCoordWithinMap(t.Position)).ToList();
+            Waypoints = Waypoints.Where(wp => IsCoordWithinMap(wp.Position)).ToList();
+            CellTags = CellTags.Where(ct => IsCoordWithinMap(ct.Position)).ToList();
+            Tubes = Tubes.Where(tube => IsCoordWithinMap(tube.EntryPoint) && IsCoordWithinMap(tube.ExitPoint)).ToList();
+
+            // We're done!
+            MapResized?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void ShiftObjectsInList<T>(List<T> list, int eastShift, int southShift) where T : IMovable
+        {
+            list.ForEach(element => ShiftObject(element, eastShift, southShift));
+        }
+
+        private void ShiftObject(IMovable movableObject, int eastShift, int southShift)
+        {
+            int x = movableObject.Position.X;
+            int y = movableObject.Position.Y;
+
+            x += eastShift;
+            y -= eastShift;
+
+            x += southShift;
+            y += southShift;
+
+            movableObject.Position = new Point2D(x, y);
+        }
+
+        private void InitCells()
+        {
+            Tiles = new MapTile[TileBufferSize][];
+            for (int i = 0; i < Tiles.Length; i++)
+            {
+                Tiles[i] = new MapTile[TileBufferSize];
+            }
         }
 
         public void PlaceTerrainTileAt(ITileImage tile, Point2D cellCoords)

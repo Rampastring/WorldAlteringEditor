@@ -44,6 +44,13 @@ namespace TSMapEditor.Models
         public List<TubeDirection> Directions { get; set; } = new List<TubeDirection>();
 
 
+        public void ShiftPosition(int xChange, int yChange)
+        {
+            EntryPoint += new Point2D(xChange, yChange);
+            ExitPoint += new Point2D(xChange, yChange);
+        }
+
+
         private TubeDirection GetOpposingDirection(TubeDirection direction)
         {
             switch (direction)

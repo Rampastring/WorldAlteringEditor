@@ -45,6 +45,19 @@ namespace TSMapEditor.Models
         public List<AbstractObject> OverlapList { get; set; }
 
 
+        public void ShiftPosition(int x, int y)
+        {
+            X += (short)x; 
+            Y += (short)y;
+
+            // If we have overlay and/or a smudge, also move their position
+            if (Overlay != null)
+                Overlay.Position += new Point2D(x, y);
+
+            if (Smudge != null)
+                Smudge.Position += new Point2D(x, y);
+        }
+
         public void AddInfantry(Infantry infantry)
         {
             Infantry[(int)infantry.SubCell] = infantry;

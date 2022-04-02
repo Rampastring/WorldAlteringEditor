@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
+using System;
 using TSMapEditor.Models;
 using TSMapEditor.UI.Controls;
 
@@ -15,6 +16,8 @@ namespace TSMapEditor.UI.Windows
         {
             this.map = map;
         }
+
+        public event EventHandler OnResizeMapButtonClicked;
 
         private readonly Map map;
 
@@ -43,7 +46,14 @@ namespace TSMapEditor.UI.Windows
             tbWidth = FindChild<EditorNumberTextBox>(nameof(tbWidth));
             tbHeight = FindChild<EditorNumberTextBox>(nameof(tbHeight));
 
+            FindChild<EditorButton>("btnChangeMapSize").LeftClick += BtnChangeMapSize_LeftClick;
             FindChild<EditorButton>("btnApplyChanges").LeftClick += BtnApplyChanges_LeftClick;
+        }
+
+        private void BtnChangeMapSize_LeftClick(object sender, EventArgs e)
+        {
+            OnResizeMapButtonClicked?.Invoke(this, EventArgs.Empty);
+            Hide();
         }
 
         private void BtnApplyChanges_LeftClick(object sender, System.EventArgs e)

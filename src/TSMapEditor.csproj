@@ -199,6 +199,9 @@
     <None Include="Config\UI\SelectHouseWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Config\UI\ExpandMapWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Compile Include="Constants.cs" />
     <Compile Include="GameMath\CellMath.cs" />
     <Compile Include="GameMath\Point2D.cs" />
@@ -239,6 +242,7 @@
     <Compile Include="Models\InfantryType.cs" />
     <Compile Include="Models\INIDefineable.cs" />
     <Compile Include="Models\INIDefined.cs" />
+    <Compile Include="Models\IPositioned.cs" />
     <Compile Include="Models\Lighting.cs" />
     <Compile Include="Models\LocalVariable.cs" />
     <Compile Include="Models\Map.cs" />
@@ -382,6 +386,7 @@
     <Compile Include="UI\Windows\BasicSectionConfigWindow.cs" />
     <Compile Include="UI\Windows\CopiedEntryTypesWindow.cs" />
     <Compile Include="UI\Windows\EditorMessageBox.cs" />
+    <Compile Include="UI\Windows\ExpandMapWindow.cs" />
     <Compile Include="UI\Windows\GenerateStandardHousesWindow.cs" />
     <Compile Include="UI\Windows\HotkeyConfigurationWindow.cs" />
     <Compile Include="UI\Windows\HousesWindow.cs" />

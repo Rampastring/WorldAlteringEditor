@@ -35,6 +35,7 @@
         TeamType,
         OverlayType,
         Overlay,
-        Waypoint
+        Waypoint,
+        CellTag
     }
 }

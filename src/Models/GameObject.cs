@@ -2,10 +2,8 @@
 
 namespace TSMapEditor.Models
 {
-    public interface IMovable
+    public interface IMovable : IPositioned
     {
-        Point2D Position { get; set; }
-
         RTTIType WhatAmI();
 
         bool IsTechno();
