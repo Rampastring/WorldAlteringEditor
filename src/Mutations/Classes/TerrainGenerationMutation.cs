@@ -348,6 +348,8 @@ namespace TSMapEditor.Mutations.Classes
         private List<Point2D> placedOverlayCellCoords;
         private List<Point2D> placedSmudgeCellCoords;
 
+        private bool wasPerformedWithAutoLatOn;
+
         public override void Perform()
         {
             Generate();
@@ -379,6 +381,11 @@ namespace TSMapEditor.Mutations.Classes
             {
                 var mapCell = MutationTarget.Map.GetTile(cellCoords);
                 mapCell.Smudge = null;
+            }
+
+            if (wasPerformedWithAutoLatOn)
+            {
+                ApplyAutoLATOnArea();
             }
 
             MutationTarget.InvalidateMap();
@@ -505,22 +512,27 @@ namespace TSMapEditor.Mutations.Classes
             }
 
             // Apply auto-LAT
-            // TODO: apply undo for auto-lat
             if (MutationTarget.AutoLATEnabled)
             {
-                int minY = cells.Select(p => p.Y).Aggregate((y1, y2) => Math.Min(y1, y2));
-                int maxY = cells.Select(p => p.Y).Aggregate((y1, y2) => Math.Max(y1, y2));
-                int minX = cells.Select(p => p.X).Aggregate((x1, x2) => Math.Min(x1, x2));
-                int maxX = cells.Select(p => p.X).Aggregate((x1, x2) => Math.Max(x1, x2));
-
-                minY--;
-                maxY++;
-                minX--;
-                maxX++;
-                ApplyAutoLAT(minX, minY, maxX, maxY);
+                ApplyAutoLATOnArea();
+                wasPerformedWithAutoLatOn = true;
             }
 
             MutationTarget.InvalidateMap();
+        }
+
+        private void ApplyAutoLATOnArea()
+        {
+            int minY = cells.Select(p => p.Y).Aggregate((y1, y2) => Math.Min(y1, y2));
+            int maxY = cells.Select(p => p.Y).Aggregate((y1, y2) => Math.Max(y1, y2));
+            int minX = cells.Select(p => p.X).Aggregate((x1, x2) => Math.Min(x1, x2));
+            int maxX = cells.Select(p => p.X).Aggregate((x1, x2) => Math.Max(x1, x2));
+
+            minY--;
+            maxY++;
+            minX--;
+            maxX++;
+            ApplyAutoLAT(minX, minY, maxX, maxY);
         }
 
         private void PlaceTerrainTileAt(ITileImage tile, Point2D cellCoords)
