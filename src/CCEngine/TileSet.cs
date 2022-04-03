@@ -31,11 +31,17 @@ namespace TSMapEditor.CCEngine
         /// </summary>
         public int LoadedTileCount { get; set; }
 
+        private static string[] only1x1TileSets = new string[] { "cliffs", "rivers", "shores", "dirt road" };
+
         public void Read(IniSection iniSection)
         {
             ReadPropertiesFromIniSection(iniSection);
-            if (SetName.ToLowerInvariant().Contains("cliffs"))
-                Only1x1 = true;
+
+            foreach (string namepart in only1x1TileSets)
+            {
+                if (SetName.ToLowerInvariant().Contains(namepart))
+                    Only1x1 = true;
+            }
         }
     }
 }
