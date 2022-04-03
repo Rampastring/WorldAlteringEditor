@@ -32,6 +32,8 @@ namespace TSMapEditor.Settings
                 MapWideOverlayOpacity,
 
                 UpscaleUI,
+                Theme,
+                UseBoldFont,
 
                 GameDirectory,
                 LastScenarioPath
@@ -70,6 +72,7 @@ namespace TSMapEditor.Settings
 
         public BoolSetting UpscaleUI = new BoolSetting(General, "UpscaleUI", false);
         public StringSetting Theme = new StringSetting(General, "Theme", "Default");
+        public BoolSetting UseBoldFont = new BoolSetting(General, "UseBoldFont", false);
 
         public StringSetting GameDirectory = new StringSetting(General, "GameDirectory", string.Empty);
         public StringSetting LastScenarioPath = new StringSetting(General, nameof(LastScenarioPath), "Maps/Custom/");

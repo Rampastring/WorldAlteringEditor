@@ -77,6 +77,7 @@ namespace TSMapEditor.UI
         private XNACheckBox chkBorderless;
         private XNACheckBox chkUpscaleUI;
         private XNADropDown ddTheme;
+        private XNACheckBox chkUseBoldFont;
 
         public override void Initialize()
         {
@@ -148,6 +149,13 @@ namespace TSMapEditor.UI
             chkUpscaleUI.Text = "Upscale Windows";
             AddChild(chkUpscaleUI);
 
+            chkUseBoldFont = new XNACheckBox(WindowManager);
+            chkUseBoldFont.Name = nameof(chkUseBoldFont);
+            chkUseBoldFont.X = Constants.UIEmptySideSpace;
+            chkUseBoldFont.Y = chkUpscaleUI.Bottom + Constants.UIVerticalSpacing;
+            chkUseBoldFont.Text = "Use Bold Font";
+            AddChild(chkUseBoldFont);
+
             const int MinWidth = 1024;
             const int MinHeight = 600;
             const int MaxWidth = 16384;
@@ -176,6 +184,7 @@ namespace TSMapEditor.UI
 
             chkBorderless.Checked = userSettings.Borderless;
             chkUpscaleUI.Checked = userSettings.UpscaleUI;
+            chkUseBoldFont.Checked = userSettings.UseBoldFont;
         }
 
         public void ApplySettings()
@@ -187,6 +196,7 @@ namespace TSMapEditor.UI
 
             userSettings.Borderless.UserDefinedValue = chkBorderless.Checked;
             userSettings.UpscaleUI.UserDefinedValue = chkUpscaleUI.Checked;
+            userSettings.UseBoldFont.UserDefinedValue = chkUseBoldFont.Checked;
 
             userSettings.Theme.UserDefinedValue = ddTheme.SelectedItem.Text;
 

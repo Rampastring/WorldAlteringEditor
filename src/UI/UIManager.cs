@@ -64,9 +64,16 @@ namespace TSMapEditor.UI
             UISettings.ActiveSettings.PanelBackgroundColor = new Color(0, 0, 0, 128);
             UISettings.ActiveSettings.PanelBorderColor = new Color(128, 128, 128, 255);
 
+            bool boldFont = UserSettings.Instance.UseBoldFont;
+            if (boldFont)
+            {
+                Renderer.GetFontList()[0] = Renderer.GetFontList()[1];
+            }
+
             bool lightTheme = false;
             if (lightTheme)
             {
+                UISettings.ActiveSettings.TextShadowColor = Color.Gray;
                 UISettings.ActiveSettings.TextShadowDistance = 0;
                 ((CustomUISettings)UISettings.ActiveSettings).ListBoxBackgroundColor = Color.White * 0.77f;
                 ((CustomUISettings)UISettings.ActiveSettings).ButtonMainBackgroundColor = Color.White * 0.77f;
