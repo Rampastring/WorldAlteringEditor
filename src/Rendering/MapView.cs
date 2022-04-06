@@ -745,6 +745,14 @@ namespace TSMapEditor.Rendering
             base.OnMouseOnControl();
         }
 
+        public override void OnMouseEnter()
+        {
+            if (isRightClickScrolling)
+                rightClickScrollInitPos = GetCursorPoint();
+
+            base.OnMouseEnter();
+        }
+
         public override void OnMouseMove()
         {
             base.OnMouseMove();
@@ -849,6 +857,8 @@ namespace TSMapEditor.Rendering
             // Scroll rate is designed for 60 FPS
             // 1000 ms (1 second) divided by 60 frames =~ 16.667 ms / frame
             int scrollRate = (int)(this.scrollRate * (gameTime.ElapsedGameTime.TotalMilliseconds / 16.667));
+
+
 
             if (IsActive && !(WindowManager.SelectedControl is XNATextBox))
             {
