@@ -129,9 +129,7 @@ namespace TSMapEditor.UI.Sidebar
             var sideCategories = new List<TreeViewCategory>();
             for (int i = 0; i < objectTypeList.Count; i++)
             {
-                TreeViewCategory category = null;
                 var objectType = objectTypeList[i];
-                Color remapColor = Color.White;
 
                 if (objectType.WhatAmI() == RTTIType.BuildingType)
                 {
@@ -143,28 +141,44 @@ namespace TSMapEditor.UI.Sidebar
                     }
                 }
 
+                List<Color> remapColors = new List<Color>(1);
+                List<string> categories = new List<string>(1);
 
-                if (string.IsNullOrEmpty(objectType.Owner))
+                string categoriesString = objectType.EditorCategory;
+                if (categoriesString == null)
+                    categoriesString = objectType.Owner;
+
+                if (string.IsNullOrWhiteSpace(categoriesString))
                 {
-                    category = FindOrMakeCategory("Uncategorized", sideCategories);
+                    categories.Add("Uncategorized");
+                    remapColors.Add(Color.White);
                 }
                 else
                 {
-                    string[] owners = objectType.Owner.Split(',');
-                    string primaryOwnerName = owners[0];
-                    var house = Map.StandardHouses.Find(h => h.ININame == primaryOwnerName);
-                    if (house != null)
+                    string[] owners = categoriesString.Split(',');
+
+                    for (int ownerIndex = 0; ownerIndex < owners.Length; ownerIndex++)
                     {
-                        int actsLike = house.ActsLike;
-                        if (actsLike > -1)
-                            primaryOwnerName = Map.StandardHouses[actsLike].ININame;
+                        Color remapColor = Color.White;
+
+                        string ownerName = owners[ownerIndex];
+                        ownerName = Map.EditorConfig.EditorRulesIni.GetStringValue("ObjectCategoryOverrides", ownerName, ownerName);
+
+                        House house = Map.StandardHouses.Find(h => h.ININame == ownerName);
+                        if (house != null)
+                        {
+                            int actsLike = house.ActsLike;
+                            if (actsLike > -1)
+                                ownerName = Map.StandardHouses[actsLike].ININame;
+                        }
+
+                        House ownerHouse = Map.Houses.Find(h => h.ININame == ownerName);
+                        if (ownerHouse != null)
+                            remapColor = ownerHouse.XNAColor;
+
+                        categories.Add(ownerName);
+                        remapColors.Add(remapColor);
                     }
-
-                    var ownerHouse = Map.Houses.Find(h => h.ININame == primaryOwnerName);
-                    if (ownerHouse != null)
-                        remapColor = ownerHouse.XNAColor;
-
-                    category = FindOrMakeCategory(primaryOwnerName, sideCategories);
                 }
 
                 Texture2D texture = null;
@@ -188,17 +202,24 @@ namespace TSMapEditor.UI.Sidebar
                     }
                 }
 
-                category.Nodes.Add(new TreeViewNode()
-                {
-                    Text = (objectType.ININame.StartsWith("AI") ? "AI - " : "") + objectType.Name + " (" + objectType.ININame + ")",
-                    Texture = texture,
-                    RemapTexture = remapTexture,
-                    RemapColor = remapColor,
-                    Tag = objectType
-                });
 
-                category.Nodes = category.Nodes.OrderBy(n => n.Text).ToList();
+                for (int categoryIndex = 0; categoryIndex < categories.Count; categoryIndex++)
+                {
+                    var category = FindOrMakeCategory(categories[categoryIndex], sideCategories);
+
+                    category.Nodes.Add(new TreeViewNode()
+                    {
+                        Text = objectType.GetEditorDisplayName() + " (" + objectType.ININame + ")",
+                        Texture = texture,
+                        RemapTexture = remapTexture,
+                        RemapColor = remapColors[categoryIndex],
+                        Tag = objectType
+                    });
+                }
             }
+
+            for (int i = 0; i < sideCategories.Count; i++)
+                sideCategories[i].Nodes = sideCategories[i].Nodes.OrderBy(n => n.Text).ToList();
 
             sideCategories.ForEach(c => ObjectTreeView.AddCategory(c));
         }
