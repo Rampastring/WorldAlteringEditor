@@ -78,6 +78,7 @@ namespace TSMapEditor.UI
         private XNACheckBox chkUpscaleUI;
         private XNADropDown ddTheme;
         private XNACheckBox chkUseBoldFont;
+        private XNACheckBox chkMoreAccurateRendering;
 
         public override void Initialize()
         {
@@ -156,6 +157,13 @@ namespace TSMapEditor.UI
             chkUseBoldFont.Text = "Use Bold Font";
             AddChild(chkUseBoldFont);
 
+            chkMoreAccurateRendering = new XNACheckBox(WindowManager);
+            chkMoreAccurateRendering.Name = nameof(chkMoreAccurateRendering);
+            chkMoreAccurateRendering.X = Constants.UIEmptySideSpace;
+            chkMoreAccurateRendering.Y = chkUseBoldFont.Bottom + Constants.UIEmptyTopSpace;
+            chkMoreAccurateRendering.Text = "More aggressive view refreshing\r\n(more accurate rendering at\r\nthe expense of performance)";
+            AddChild(chkMoreAccurateRendering);
+
             const int MinWidth = 1024;
             const int MinHeight = 600;
             const int MaxWidth = 16384;
@@ -185,6 +193,7 @@ namespace TSMapEditor.UI
             chkBorderless.Checked = userSettings.Borderless;
             chkUpscaleUI.Checked = userSettings.UpscaleUI;
             chkUseBoldFont.Checked = userSettings.UseBoldFont;
+            chkMoreAccurateRendering.Checked = userSettings.RefreshSize > 1;
         }
 
         public void ApplySettings()
@@ -197,6 +206,7 @@ namespace TSMapEditor.UI
             userSettings.Borderless.UserDefinedValue = chkBorderless.Checked;
             userSettings.UpscaleUI.UserDefinedValue = chkUpscaleUI.Checked;
             userSettings.UseBoldFont.UserDefinedValue = chkUseBoldFont.Checked;
+            userSettings.RefreshSize.UserDefinedValue = chkMoreAccurateRendering.Checked ? 2 : 1;
 
             userSettings.Theme.UserDefinedValue = ddTheme.SelectedItem.Text;
 

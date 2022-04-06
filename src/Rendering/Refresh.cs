@@ -7,13 +7,15 @@ namespace TSMapEditor.Rendering
 {
     class Refresh
     {
-        public Refresh(Map map)
+        public Refresh(Map map, int refreshSizeSetting)
         {
             this.map = map;
+            this.refreshSizeSetting = refreshSizeSetting;
         }
 
         
         private readonly Map map;
+        private int refreshSizeSetting;
 
         public Dictionary<int, MapTile> tilesToRedraw = new Dictionary<int, MapTile>();
         public Dictionary<int, GameObject> objectsToRedraw = new Dictionary<int, GameObject>();
@@ -117,7 +119,7 @@ namespace TSMapEditor.Rendering
                 if (mapTile.TerrainObject != null)
                     RedrawFromObject(mapTile.TerrainObject);
 
-                const int size = 1;
+                int size = refreshSizeSetting;
                 for (int y = -size; y <= size; y++)
                 {
                     for (int x = -size; x <= size; x++)

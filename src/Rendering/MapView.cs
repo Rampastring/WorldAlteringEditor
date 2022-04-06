@@ -113,6 +113,7 @@ namespace TSMapEditor.Rendering
         private bool mapInvalidated = true;
         private Point2D cameraTopLeftPoint = new Point2D(0, 0);
 
+        private int refreshSizeSetting;
         private int scrollRate;
 
         private bool isDraggingObject = false;
@@ -148,7 +149,7 @@ namespace TSMapEditor.Rendering
             if (newRefreshes.Exists(nr => point == nr.InitPoint))
                 return;
 
-            var newRefresh = new Refresh(Map);
+            var newRefresh = new Refresh(Map, refreshSizeSetting);
             newRefresh.Initiate(size, point);
             newRefreshes.Add(newRefresh);
         }
@@ -173,6 +174,7 @@ namespace TSMapEditor.Rendering
             mapRenderTarget = CreateFullMapRenderTarget();
             objectRenderTarget = CreateFullMapRenderTarget();
 
+            refreshSizeSetting = UserSettings.Instance.RefreshSize;
             scrollRate = UserSettings.Instance.ScrollRate;
 
             EditorState.CursorActionChanged += EditorState_CursorActionChanged;
