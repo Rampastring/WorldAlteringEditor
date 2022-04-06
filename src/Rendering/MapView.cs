@@ -205,6 +205,27 @@ namespace TSMapEditor.Rendering
             windowController.Initialized += (s, e) => windowController.MinimapWindow.MegamapClicked += MinimapWindow_MegamapClicked;
             Map.LocalSizeChanged += (s, e) => InvalidateMap();
             Map.MapResized += Map_MapResized;
+
+            KeyboardCommands.Instance.RotateUnitOneStep.Triggered += RotateUnitOneStep_Triggered;
+        }
+
+        private void RotateUnitOneStep_Triggered(object sender, EventArgs e)
+        {
+            if (tileUnderCursor == null)
+                return;
+
+            var firstObject = tileUnderCursor.GetObject() as TechnoBase;
+            if (firstObject == null)
+                return;
+
+            const int step = 32;
+
+            if (firstObject.Facing + step > byte.MaxValue)
+                firstObject.Facing = (byte)(firstObject.Facing + step - byte.MaxValue);
+            else
+                firstObject.Facing += step;
+
+            AddRefreshPoint(tileUnderCursor.CoordsToPoint());
         }
 
         private void Map_MapResized(object sender, EventArgs e)

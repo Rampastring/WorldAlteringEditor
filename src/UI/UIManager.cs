@@ -312,13 +312,13 @@ namespace TSMapEditor.UI
                 {
                     // Key matches, check modifiers
 
-                    if ((keyboardCommand.Key.Modifiers & KeyboardModifiers.Alt) == KeyboardModifiers.Alt && !Keyboard.IsAltHeldDown())
+                    if (((keyboardCommand.Key.Modifiers & KeyboardModifiers.Alt) == KeyboardModifiers.Alt) != Keyboard.IsAltHeldDown())
                         continue;
 
-                    if ((keyboardCommand.Key.Modifiers & KeyboardModifiers.Ctrl) == KeyboardModifiers.Ctrl && !Keyboard.IsCtrlHeldDown())
+                    if (((keyboardCommand.Key.Modifiers & KeyboardModifiers.Ctrl) == KeyboardModifiers.Ctrl) != Keyboard.IsCtrlHeldDown())
                         continue;
 
-                    if ((keyboardCommand.Key.Modifiers & KeyboardModifiers.Shift) == KeyboardModifiers.Shift && !Keyboard.IsShiftHeldDown())
+                    if (((keyboardCommand.Key.Modifiers & KeyboardModifiers.Shift)) == KeyboardModifiers.Shift != Keyboard.IsShiftHeldDown())
                         continue;
 
                     // All keys match, perform the command!
