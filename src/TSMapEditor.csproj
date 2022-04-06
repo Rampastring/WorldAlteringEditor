@@ -279,6 +279,7 @@
     <Compile Include="Models\Unit.cs" />
     <Compile Include="Models\UnitType.cs" />
     <Compile Include="Models\Waypoint.cs" />
+    <Compile Include="Mutations\Classes\ChangeAttachedTagMutation.cs" />
     <Compile Include="Mutations\Classes\ChangeTechnoOwnerMutation.cs" />
     <Compile Include="Mutations\Classes\DeleteTubeMutation.cs" />
     <Compile Include="Mutations\Classes\FillTerrainAreaMutation.cs" />
@@ -333,6 +334,7 @@
     <Compile Include="UI\CursorAction.cs" />
     <Compile Include="UI\CursorActions\AircraftPlacementAction.cs" />
     <Compile Include="UI\CursorActions\BuildingPlacementAction.cs" />
+    <Compile Include="UI\CursorActions\ChangeAttachedTagCursorAction.cs" />
     <Compile Include="UI\CursorActions\ChangeTechnoOwnerAction.cs" />
     <Compile Include="UI\CursorActions\CopyTerrainCursorAction.cs" />
     <Compile Include="UI\CursorActions\DeleteTubeCursorAction.cs" />

@@ -126,9 +126,23 @@ namespace TSMapEditor.Models
             return Array.Find(Infantry, inf => inf != null && predicate(inf));
         }
 
+        public TechnoBase GetTechno()
+        {
+            if (Structure != null)
+                return Structure;
+
+            if (Vehicle != null)
+                return Vehicle;
+
+            if (Aircraft != null)
+                return Aircraft;
+
+            return Array.Find(Infantry, inf => inf != null);
+        }
+
         public GameObject GetObject()
         {
-            GameObject obj = GetFirstTechnoThatPassesCheck(_ => true);
+            GameObject obj = GetTechno();
             if (obj != null)
                 return obj;
 

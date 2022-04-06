@@ -23,11 +23,14 @@ namespace TSMapEditor.UI.Windows
         {
             this.map = map;
             this.editorState = editorState;
-            this.placeCellTagCursorAction = new PlaceCellTagCursorAction(cursorActionTarget);
+
+            placeCellTagCursorAction = new PlaceCellTagCursorAction(cursorActionTarget);
+            changeAttachedTagCursorAction = new ChangeAttachedTagCursorAction(cursorActionTarget);
         }
 
         private readonly Map map;
         private readonly PlaceCellTagCursorAction placeCellTagCursorAction;
+        private readonly ChangeAttachedTagCursorAction changeAttachedTagCursorAction;
         private readonly EditorState editorState;
 
         // Trigger list
@@ -80,6 +83,7 @@ namespace TSMapEditor.UI.Windows
             ddHouse = FindChild<XNADropDown>(nameof(ddHouse));
             ddType = FindChild<XNADropDown>(nameof(ddType));
             selAttachedTrigger = FindChild<EditorPopUpSelector>(nameof(selAttachedTrigger));
+            FindChild<EditorButton>("btnAttachToObjects").LeftClick += BtnAttachToObjects_LeftClick;
             FindChild<EditorButton>("btnViewAttachedObjects").LeftClick += BtnViewAttachedObjects_LeftClick;
             chkDisabled = FindChild<XNACheckBox>(nameof(chkDisabled));
             chkEasy = FindChild<XNACheckBox>(nameof(chkEasy));
@@ -153,6 +157,27 @@ namespace TSMapEditor.UI.Windows
             AddChild(contextMenu);
 
             lbTriggers.SelectedIndexChanged += LbTriggers_SelectedIndexChanged;
+        }
+
+        private void BtnAttachToObjects_LeftClick(object sender, EventArgs e)
+        {
+            if (editedTrigger == null)
+                return;
+
+            var tag = map.Tags.Find(t => t.Trigger == editedTrigger);
+            if (tag == null)
+            {
+                EditorMessageBox.Show(WindowManager, "No tag found",
+                    $"The selected trigger '{editedTrigger.Name}' has no" +
+                    $"associated tag. As such, it cannot be attached to any objects." + Environment.NewLine + Environment.NewLine +
+                    "This should never happen, have you modified the map with another editor?",
+                    MessageBoxButtons.OK);
+
+                return;
+            }
+
+            changeAttachedTagCursorAction.TagToAttach = tag;
+            editorState.CursorAction = changeAttachedTagCursorAction;
         }
 
         #region Viewing linked objects
