@@ -336,6 +336,7 @@
     <Compile Include="UI\CursorActions\BuildingPlacementAction.cs" />
     <Compile Include="UI\CursorActions\ChangeAttachedTagCursorAction.cs" />
     <Compile Include="UI\CursorActions\ChangeTechnoOwnerAction.cs" />
+    <Compile Include="UI\CursorActions\CheckDistanceCursorAction.cs" />
     <Compile Include="UI\CursorActions\CopyTerrainCursorAction.cs" />
     <Compile Include="UI\CursorActions\DeleteTubeCursorAction.cs" />
     <Compile Include="UI\CursorActions\DeletionModeAction.cs" />

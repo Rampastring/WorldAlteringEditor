@@ -29,6 +29,7 @@ namespace TSMapEditor.UI.TopBar
 
         private DeleteTubeCursorAction deleteTunnelCursorAction;
         private PlaceTubeCursorAction placeTubeCursorAction;
+        private CheckDistanceCursorAction checkDistanceCursorAction;
 
         public override void Initialize()
         {
@@ -36,6 +37,7 @@ namespace TSMapEditor.UI.TopBar
 
             deleteTunnelCursorAction = new DeleteTubeCursorAction(mapView);
             placeTubeCursorAction = new PlaceTubeCursorAction(mapView);
+            checkDistanceCursorAction = new CheckDistanceCursorAction(mapView);
 
             var fileContextMenu = new EditorContextMenu(WindowManager);
             fileContextMenu.Name = nameof(fileContextMenu);
@@ -99,6 +101,8 @@ namespace TSMapEditor.UI.TopBar
             toolsContextMenu.AddItem("Apply INI Code...", () => windowController.ApplyINICodeWindow.Open(), null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("Generate Animated Water", GenerateAnimatedWater, null, null, null, null);
+            toolsContextMenu.AddItem(" ", null, () => false, null, null);
+            toolsContextMenu.AddItem("Check Distance...", () => mapView.EditorState.CursorAction = checkDistanceCursorAction, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("Configure Hotkeys...", () => windowController.HotkeyConfigurationWindow.Open(), null, null, null);
 
