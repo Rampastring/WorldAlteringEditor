@@ -579,9 +579,9 @@ namespace TSMapEditor.Mutations.Classes
             //     }
             // }
 
-            for (int y = minY; y < maxY; y++)
+            for (int y = minY; y <= maxY; y++)
             {
-                for (int x = minX; x < maxX; x++)
+                for (int x = minX; x <= maxX; x++)
                 {
                     var mapTile = MutationTarget.Map.GetTile(x, y);
                     if (mapTile == null)
