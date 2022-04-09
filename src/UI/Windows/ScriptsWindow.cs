@@ -157,7 +157,12 @@ namespace TSMapEditor.UI.Windows
             }
 
             ScriptActionEntry entry = editedScript.Actions[lbActions.SelectedIndex];
-            selectScriptActionWindow.Open(entry.Action);
+
+            ScriptAction scriptAction = null;
+            if (entry.Action > -1 && entry.Action < map.EditorConfig.ScriptActions.Count)
+                scriptAction = map.EditorConfig.ScriptActions[entry.Action];
+
+            selectScriptActionWindow.Open(scriptAction);
         }
 
         private void DarkeningPanel_Hidden(object sender, EventArgs e)
@@ -167,9 +172,12 @@ namespace TSMapEditor.UI.Windows
                 return;
             }
 
-            ScriptActionEntry entry = editedScript.Actions[lbActions.SelectedIndex];
-            entry.Action = selectScriptActionWindow.SelectedActionIndex;
-            lbActions.Items[lbActions.SelectedIndex].Text = GetActionEntryText(lbActions.SelectedIndex, entry);
+            if (selectScriptActionWindow.SelectedObject != null)
+            {
+                ScriptActionEntry entry = editedScript.Actions[lbActions.SelectedIndex];
+                entry.Action = selectScriptActionWindow.SelectedObject.Index;
+                lbActions.Items[lbActions.SelectedIndex].Text = GetActionEntryText(lbActions.SelectedIndex, entry);
+            }
 
             LbActions_SelectedIndexChanged(this, EventArgs.Empty);
         }

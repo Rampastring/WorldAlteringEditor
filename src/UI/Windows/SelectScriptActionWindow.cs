@@ -1,11 +1,12 @@
 ﻿using Rampastring.XNAUI;
+using Rampastring.XNAUI.XNAControls;
 using System;
+using TSMapEditor.CCEngine;
 using TSMapEditor.Models;
-using TSMapEditor.UI.Controls;
 
 namespace TSMapEditor.UI.Windows
 {
-    public class SelectScriptActionWindow : INItializableWindow
+    public class SelectScriptActionWindow : SelectObjectWindow<ScriptAction>
     {
         public SelectScriptActionWindow(WindowManager windowManager, EditorConfig editorConfig) : base(windowManager)
         {
@@ -14,46 +15,33 @@ namespace TSMapEditor.UI.Windows
 
         private EditorConfig editorConfig;
 
-        private EditorSuggestionTextBox tbSearchAction;
-        private EditorListBox lbScriptActions;
-
-        public int SelectedActionIndex 
-        {
-            get => lbScriptActions.SelectedIndex;
-            set => lbScriptActions.SelectedIndex = value;
-        }
-
         public override void Initialize()
         {
             Name = nameof(SelectScriptActionWindow);
             base.Initialize();
-
-            tbSearchAction = FindChild<EditorSuggestionTextBox>(nameof(tbSearchAction));
-            lbScriptActions = FindChild<EditorListBox>(nameof(lbScriptActions));
-
-            lbScriptActions.AllowRightClickUnselect = false;
-            lbScriptActions.DoubleLeftClick += LbScriptActions_DoubleLeftClick;
-            var btnSelect = FindChild<EditorButton>("btnSelect");
-            btnSelect.LeftClick += BtnSelect_LeftClick;
-
-            editorConfig.ScriptActions.ForEach(a => lbScriptActions.AddItem(a.Index + " " + a.Name));
         }
 
-        private void LbScriptActions_DoubleLeftClick(object sender, EventArgs e)
+        protected override void LbObjectList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Hide();
+            if (lbObjectList.SelectedItem == null)
+            {
+                SelectedObject = null;
+                return;
+            }
+
+            SelectedObject = (ScriptAction)lbObjectList.SelectedItem.Tag;
         }
 
-        private void BtnSelect_LeftClick(object sender, EventArgs e)
+        protected override void ListObjects()
         {
-            Hide();
-        }
+            lbObjectList.Clear();
 
-        public void Open(int index)
-        {
-            SelectedActionIndex = index;
-            Show();
-            Alpha = 1.0f;
+            foreach (ScriptAction scriptAction in editorConfig.ScriptActions)
+            {
+                lbObjectList.AddItem(new XNAListBoxItem() { Text = $"{scriptAction.Index} {scriptAction.Name}", Tag = scriptAction });
+                if (scriptAction == SelectedObject)
+                    lbObjectList.SelectedIndex = lbObjectList.Items.Count - 1;
+            }
         }
     }
 }
