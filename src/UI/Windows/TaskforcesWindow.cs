@@ -317,6 +317,8 @@ namespace TSMapEditor.UI.Windows
                 return;
             }
 
+            tbSearchUnit.Text = tbSearchUnit.Suggestion;
+
             tbTaskForceName.Text = taskForce.Name;
             tbGroup.Value = taskForce.Group;
 
