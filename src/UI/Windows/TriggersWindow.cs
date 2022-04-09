@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using Microsoft.Xna.Framework;
 using Rampastring.Tools;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
@@ -783,6 +784,7 @@ namespace TSMapEditor.UI.Windows
             }
 
             tbActionParameterValue.Text = GetParamValueText(triggerAction.Parameters[paramNumber], triggerParamType);
+            tbActionParameterValue.TextColor = GetParamValueColor(triggerAction.Parameters[paramNumber], triggerParamType);
 
             tbActionParameterValue.TextChanged += TbActionParameterValue_TextChanged;
         }
@@ -955,6 +957,29 @@ namespace TSMapEditor.UI.Windows
                 return null;
 
             return map.EditorConfig.TriggerActionTypes[index];
+        }
+
+        private Color GetParamValueColor(string paramValue, TriggerParamType paramType)
+        {
+            bool intParseSuccess = int.TryParse(paramValue, NumberStyles.None, CultureInfo.InvariantCulture, out int intValue);
+
+            switch (paramType)
+            {
+                case TriggerParamType.House:
+                    if (intParseSuccess)
+                    {
+                        var houses = map.GetHouses();
+                        if (intValue >= houses.Count)
+                            goto case TriggerParamType.Unused;
+
+                        return houses[intValue].XNAColor;
+                    }
+                    goto case TriggerParamType.Unused;
+
+                case TriggerParamType.Unused:
+                default:
+                    return UISettings.ActiveSettings.AltColor;
+            }
         }
 
         private string GetParamValueText(string paramValue, TriggerParamType paramType)
