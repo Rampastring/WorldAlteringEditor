@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Rendering;
+using TSMapEditor.UI.CursorActions;
 
 namespace TSMapEditor.UI
 {
@@ -29,10 +30,11 @@ namespace TSMapEditor.UI
         private const int TILE_PADDING = 3;
         private const int SCROLL_RATE = 10;
 
-        public TileDisplay(WindowManager windowManager, TheaterGraphics theaterGraphics) : base(windowManager)
+        public TileDisplay(WindowManager windowManager, TheaterGraphics theaterGraphics, PlaceTerrainCursorAction placeTerrainCursorAction) : base(windowManager)
         {
             this.theaterGraphics = theaterGraphics;
             DrawMode = ControlDrawMode.UNIQUE_RENDER_TARGET;
+            placeTerrainCursorAction.ActionExited += (s, e) => _selectedTile = null;
         }
 
         public event EventHandler SelectedTileChanged;

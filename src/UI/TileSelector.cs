@@ -4,6 +4,7 @@ using Rampastring.XNAUI.XNAControls;
 using System;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Rendering;
+using TSMapEditor.UI.CursorActions;
 
 namespace TSMapEditor.UI
 {
@@ -12,9 +13,10 @@ namespace TSMapEditor.UI
         private const int TileSetListWidth = 180;
         private const int ResizeDragThreshold = 30;
 
-        public TileSelector(WindowManager windowManager, TheaterGraphics theaterGraphics) : base(windowManager)
+        public TileSelector(WindowManager windowManager, TheaterGraphics theaterGraphics, PlaceTerrainCursorAction placeTerrainCursorAction) : base(windowManager)
         {
             this.theaterGraphics = theaterGraphics;
+            this.placeTerrainCursorAction = placeTerrainCursorAction;
         }
 
         protected override void OnClientRectangleUpdated()
@@ -30,9 +32,11 @@ namespace TSMapEditor.UI
             base.OnClientRectangleUpdated();
         }
 
-        public TileDisplay TileDisplay { get; private set; }
+        private readonly TheaterGraphics theaterGraphics;
+        private readonly PlaceTerrainCursorAction placeTerrainCursorAction;
 
-        private TheaterGraphics theaterGraphics;
+        public TileDisplay TileDisplay { get; private set; }
+        
         private XNAListBox lbTileSetList;
 
         private bool isBeingDragged = false;
@@ -49,7 +53,7 @@ namespace TSMapEditor.UI
             lbTileSetList.SelectedIndexChanged += LbTileSetList_SelectedIndexChanged;
             AddChild(lbTileSetList);
 
-            TileDisplay = new TileDisplay(WindowManager, theaterGraphics);
+            TileDisplay = new TileDisplay(WindowManager, theaterGraphics, placeTerrainCursorAction);
             TileDisplay.Name = nameof(TileDisplay);
             TileDisplay.Height = Height;
             TileDisplay.Width = Width - TileSetListWidth;
