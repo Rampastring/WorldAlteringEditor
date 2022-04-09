@@ -403,6 +403,7 @@ namespace TSMapEditor.Initialization
                 string value = $"{aircraft.Owner.ININame},{aircraft.ObjectType.ININame},{aircraft.HP}," +
                                $"{aircraft.Position.X},{aircraft.Position.Y},{aircraft.Facing}," +
                                $"{aircraft.Mission},{attachedTag},{aircraft.Veterancy}," +
+                               $"{aircraft.Group}," + 
                                $"{BoolToObjectStyle(aircraft.AutocreateNoRecruitable)}," +
                                $"{BoolToObjectStyle(aircraft.AutocreateYesRecruitable)}";
 
