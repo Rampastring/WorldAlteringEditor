@@ -431,7 +431,7 @@ namespace TSMapEditor.UI.Windows
 
         private void BtnNewTrigger_LeftClick(object sender, EventArgs e)
         {
-            var newTrigger = new Trigger(map.GetNewUniqueInternalId()) { Name = "New trigger" };
+            var newTrigger = new Trigger(map.GetNewUniqueInternalId()) { Name = "New trigger", House = "Neutral" };
             map.Triggers.Add(newTrigger);
             map.Tags.Add(new Tag() { ID = map.GetNewUniqueInternalId(), Name = "New tag", Trigger = newTrigger });
             ListTriggers();
@@ -443,9 +443,11 @@ namespace TSMapEditor.UI.Windows
             if (editedTrigger == null)
                 return;
 
+            var originalTag = map.Tags.Find(t => t.Trigger == editedTrigger);
+
             var clone = editedTrigger.Clone(map.GetNewUniqueInternalId());
             map.Triggers.Add(clone);
-            map.Tags.Add(new Tag() { ID = map.GetNewUniqueInternalId(), Name = clone.Name + " (tag)", Trigger = clone });
+            map.Tags.Add(new Tag() { ID = map.GetNewUniqueInternalId(), Name = clone.Name + " (tag)", Trigger = clone, Repeating = originalTag == null ? 0 : originalTag.Repeating });
             ListTriggers();
             SelectLastTrigger();
         }
