@@ -35,6 +35,8 @@ namespace TSMapEditor.UI.Windows
         {
             lbObjectList.Clear();
 
+            lbObjectList.AddItem(new XNAListBoxItem() { Text = "None" });
+
             foreach (Tag tag in map.Tags)
             {
                 lbObjectList.AddItem(new XNAListBoxItem() { Text = $"{tag.Name} ({tag.ID})", Tag = tag });
