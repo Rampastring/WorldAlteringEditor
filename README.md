@@ -21,9 +21,9 @@ but with modernizations and changes to make the editor smoother and more efficie
 
 ## Current state of the project
 
-The editor is in an usable state and covers roughly 90-95% of what can be done with FinalSun. 
-Most basic and commonly used editing tools are included and you can code triggers with way more efficiency
-than with FinalSun, but some advanced functionality is still missing.
+The editor is in an usable state and covers almost everything of what can be done with FinalSun. 
+Most basic and commonly used editing tools are included and they're generally more
+efficient than the FinalSun equivalents.
 
 There are also some limitations in the editor, particularly on the rendering side of things.
 The current map renderer, while functional and usable, is very primitive and does not
@@ -44,9 +44,9 @@ Dawn of the Tiberium Age, the editor appears to allocate roughly 500 MB of VRAM.
 
 ## Downloads
 
-There is currently no publicly hosted download. It's easiest to clone the source and compile it
-yourself using Visual Studio 2017 or newer.
-If you want a download, you can, however, contact me and ask for one on DTA's Discord server: https://discord.gg/6UtC289
+There is currently no publicly hosted download, but the editor will be included with Dawn of the Tiberium Age later on.
+Currently, it's easiest to clone the source and compile it yourself using Visual Studio 2017 or newer.
+If you want a separate download, you can contact me and ask for one on DTA's Discord server: https://discord.gg/6UtC289
 
 ## License
 
@@ -58,13 +58,17 @@ Please see LICENSE.txt for more details.
 
 As DTA runs on the Tiberian Sun game engine, the editor is compatible with the TS/RA2 map format. 
 However, because DTA's terrain is flat, the editor does not presently support height levels in
-either rendering or input. Implementing support for those is possible, but it takes some work.
+either rendering or input. Voxels are also unspported. Implementing support for those is possible, but it takes some work.
 
-Since I'm personally mostly focused on DTA, I don't have active plans of implementing height
-level support into the editor. However, I'll gladly accept contributions and provide assistance
+I'm planning to look into supporting height levels later, but I can't currently promise anything regarding the outcome.
+Regarding voxels, I don't have any plans of implementing support for them. However, I'll gladly accept contributions and provide assistance
 with implementation if someone in the community wants to adopt this editor for TS or RA2/YR and
-is willing to write the required code for height level support.
+is willing to write the required code for voxels or height support.
 
 ## Screenshot
 
 ![Screenshot of the editor](https://github.com/Rampastring/TSMapEditor/raw/master/mapeditor.jpg "Map Editor Screenshot")
+
+## Introduction video
+
+[![Dawn of the Tiberium Age Scenario Editor Introduction](https://github.com/Rampastring/TSMapEditor/raw/master/videopreview.jpg)](https://www.youtube.com/watch?v=jIcr3nCqx7M "Dawn of the Tiberium Age Scenario Editor Introduction")
