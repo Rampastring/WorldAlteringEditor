@@ -37,7 +37,8 @@ namespace TSMapEditor.Mutations.Classes
             var tileCheckHashSet = new HashSet<int>();    // hash set of tiles that have been added to the list of
                                                           // tiles to check at some point and so should not be added there again
             tilesToCheck.AddFirst(targetTile.CoordsToPoint());
-            
+            tileCheckHashSet.Add(targetTile.CoordsToPoint().GetHashCode());
+
             var tilesToSkip = new HashSet<int>();         // tiles that have been confirmed as not being part of the area to fill
             var tilesToProcess = new List<Point2D>();     // tiles that have been confirmed as being part of the area to fill
 
