@@ -914,6 +914,7 @@ namespace TSMapEditor.UI.Windows
             }
 
             tbEventParameterValue.Text = GetParamValueText(paramValue.ToString(), triggerParamType);
+            tbEventParameterValue.TextColor = GetParamValueColor(paramValue.ToString(), triggerParamType);
 
             tbEventParameterValue.TextChanged += TbEventParameterValue_TextChanged;
         }
