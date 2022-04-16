@@ -36,6 +36,8 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
             IniFile artOverridesIni = new IniFile(Path.Combine(Environment.CurrentDirectory, "Config/ArtOverrides.ini"));
             IniFile.ConsolidateIniFiles(artFSIni, artOverridesIni);
 
+            var tutorialLines = new TutorialLines(Path.Combine(gameDirectory, "INI/Tutorial.ini"));
+
             Map map = new Map();
 
             if (createNew)
@@ -61,6 +63,8 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
                     return "Failed to load the selected map file.\r\n\r\nReturned error: " + ex.Message;
                 }
             }
+
+            map.Rules.TutorialLines = tutorialLines;
 
             Console.WriteLine();
             Console.WriteLine("Map created.");

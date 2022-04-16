@@ -276,6 +276,7 @@
     <Compile Include="Models\TriggerAction.cs" />
     <Compile Include="Models\TriggerCondition.cs" />
     <Compile Include="Models\Tube.cs" />
+    <Compile Include="Models\TutorialLines.cs" />
     <Compile Include="Models\Unit.cs" />
     <Compile Include="Models\UnitType.cs" />
     <Compile Include="Models\Waypoint.cs" />
@@ -416,6 +417,7 @@
     <Compile Include="UI\Windows\SelectTeamTypeWindow.cs" />
     <Compile Include="UI\Windows\SelectTileSetWindow.cs" />
     <Compile Include="UI\Windows\SelectTriggerWindow.cs" />
+    <Compile Include="UI\Windows\SelectTutorialLineWindow.cs" />
     <Compile Include="UI\Windows\StructureOptionsWindow.cs" />
     <Compile Include="UI\Windows\TaskforcesWindow.cs" />
     <Compile Include="UI\Windows\TeamTypesWindow.cs" />
@@ -470,6 +472,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Config\UI\SelectTriggerWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\UI\SelectTutorialLineWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Config\UI\StructureOptionsWindow.ini">

@@ -68,6 +68,7 @@ namespace TSMapEditor.UI.Windows
         private SelectGlobalVariableWindow selectGlobalVariableWindow;
         private SelectLocalVariableWindow selectLocalVariableWindow;
         private SelectHouseWindow selectHouseWindow;
+        private SelectTutorialLineWindow selectTutorialLineWindow;
 
         private XNAContextMenu contextMenu;
 
@@ -151,6 +152,10 @@ namespace TSMapEditor.UI.Windows
             selectHouseWindow = new SelectHouseWindow(WindowManager, map);
             var houseDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectHouseWindow);
             houseDarkeningPanel.Hidden += HouseDarkeningPanel_Hidden;
+
+            selectTutorialLineWindow = new SelectTutorialLineWindow(WindowManager, map);
+            var tutorialDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTutorialLineWindow);
+            tutorialDarkeningPanel.Hidden += TutorialDarkeningPanel_Hidden;
 
             contextMenu = new XNAContextMenu(WindowManager);
             contextMenu.Name = nameof(contextMenu);
@@ -346,9 +351,20 @@ namespace TSMapEditor.UI.Windows
                     else
                         selectHouseWindow.Open(null);
                     break;
+                case TriggerParamType.Text:
+                    selectTutorialLineWindow.Open(new TutorialLine(Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1), string.Empty));
+                    break;
                 default:
                     break;
             }
+        }
+
+        private void TutorialDarkeningPanel_Hidden(object sender, EventArgs e)
+        {
+            if (selectTutorialLineWindow.SelectedObject.ID < 0)
+                return;
+
+            AssignParamValue(selectTutorialLineWindow.IsForEvent, selectTutorialLineWindow.SelectedObject.ID);
         }
 
         private void HouseDarkeningPanel_Hidden(object sender, EventArgs e)
@@ -1045,6 +1061,11 @@ namespace TSMapEditor.UI.Windows
                     return GetObjectValueText(RTTIType.Infantry, map.Rules.InfantryTypes, paramValue);
                 case TriggerParamType.Unit:
                     return GetObjectValueText(RTTIType.Unit, map.Rules.UnitTypes, paramValue);
+                case TriggerParamType.Text:
+                    if (!intParseSuccess)
+                        return paramValue + " Unknown text line";
+
+                    return paramValue + " " + map.Rules.TutorialLines.GetStringByIdOrEmptyString(intValue);
                 case TriggerParamType.Boolean:
                 default:
                     return paramValue;
