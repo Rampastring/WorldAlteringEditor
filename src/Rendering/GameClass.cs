@@ -19,6 +19,15 @@ namespace TSMapEditor.Rendering
 
         public GameClass()
         {
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+
+            Logger.WriteToConsole = true;
+            Logger.WriteLogFile = true;
+            Logger.Initialize(Environment.CurrentDirectory + "/", "MapEditorLog.log");
+            File.Delete(Environment.CurrentDirectory + "/MapEditorLog.log");
+
+            Logger.Log("Dawn of the Tiberium Age Scenario Editor version " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString());
+
             AutoLATType.InitArray();
 
             Constants.Init();
@@ -33,8 +42,6 @@ namespace TSMapEditor.Rendering
 
             //IsFixedTimeStep = false;
             TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / UserSettings.Instance.TargetFPS);
-
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
         }
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -59,7 +66,7 @@ namespace TSMapEditor.Rendering
 
             Logger.Log("Exiting.");
 
-            windowManager.HideWindow();
+            windowManager?.HideWindow();
             System.Windows.Forms.MessageBox.Show("The map editor has crashed. Go bash Rampastring." + Environment.NewLine + Environment.NewLine +
                 "Exception information logged into except.txt:" + Environment.NewLine + Environment.NewLine +
                 sb.ToString());

@@ -83,9 +83,22 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
 
             TheaterGraphics theaterGraphics = new TheaterGraphics(windowManager.GraphicsDevice, theater, ccFileManager, map.Rules);
             map.TheaterInstance = theaterGraphics;
+            MapLoader.PostCheckMap(map, theaterGraphics);
 
             var uiManager = new UIManager(windowManager, map, theaterGraphics);
             windowManager.AddAndInitializeControl(uiManager);
+
+            const int MaxErrors = 100;
+            if (MapLoader.MapLoadErrors.Count > MaxErrors)
+            {
+                EditorMessageBox.Show(windowManager, "Errors while loading map",
+                    "A massive number of errors was encountered while loading the map. See MapEditorLog.log for details.", MessageBoxButtons.OK);
+            }
+            else if (MapLoader.MapLoadErrors.Count > 0)
+            {
+                EditorMessageBox.Show(windowManager, "Errors while loading map",
+                    "One of more errors were encountered while loading the map:\r\n\r\n" + string.Join("\r\n\r\n", MapLoader.MapLoadErrors), MessageBoxButtons.OK);
+            }
 
             return null;
         }

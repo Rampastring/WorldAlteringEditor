@@ -75,7 +75,7 @@ namespace TSMapEditor.UI
             textRenderer.AddTextPart(new XNATextPart(tileSet.SetName + " (" + tileGraphics.TileSetId + ")", Constants.UIDefaultFont, baseTextColor));
 
             MGTMPImage subCellImage = tileGraphics.TMPImages[MapTile.SubTileIndex];
-            string terrainType = subCellImage != null ? Helpers.LandTypeToString(subCellImage.TmpImage.TerrainType) : "Unknown";
+            string terrainType = subCellImage != null && subCellImage.TmpImage != null ? Helpers.LandTypeToString(subCellImage.TmpImage.TerrainType) : "Unknown";
 
             textRenderer.AddTextLine(new XNATextPart("Terrain Type: ", Constants.UIDefaultFont, subtleTextColor));
             textRenderer.AddTextPart(new XNATextPart(terrainType, Constants.UIDefaultFont, baseTextColor));

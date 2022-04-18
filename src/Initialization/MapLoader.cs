@@ -7,6 +7,7 @@ using System.Text;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Models.MapFormat;
+using TSMapEditor.Rendering;
 
 namespace TSMapEditor.Initialization
 {
@@ -19,6 +20,14 @@ namespace TSMapEditor.Initialization
         private const int UNIT_PROPERTY_FIELD_COUNT = 14;
         private const int INFANTRY_PROPERTY_FIELD_COUNT = 14;
         private const int AIRCRAFT_PROPERTY_FIELD_COUNT = 12;
+
+        public static List<string> MapLoadErrors = new List<string>();
+
+        private static void AddMapLoadError(string error)
+        {
+            Logger.Log(error);
+            MapLoadErrors.Add(error);
+        }
 
         public static void PreCheckMapIni(IniFile mapIni)
         {
@@ -47,6 +56,32 @@ namespace TSMapEditor.Initialization
                 throw new MapLoadException("Map height cannot be greater than " +
                     $"{Constants.MaxMapHeight} cells; the map is {height} cells high!");
             }
+        }
+
+        public static void PostCheckMap(IMap map, TheaterGraphics theaterGraphics)
+        {
+            map.DoForAllValidTiles(t =>
+            {
+                if (t.TileIndex >= theaterGraphics.TileCount)
+                {
+                    AddMapLoadError($"Invalid tile index {t.TileIndex} for cell at {t.CoordsToPoint()} - setting it to 0");
+                    t.TileIndex = 0;
+                    t.SubTileIndex = 0;
+                }
+
+                int maxSubTileIndex = theaterGraphics.GetTile(t.TileIndex).SubTileCount - 1;
+                if (t.SubTileIndex > maxSubTileIndex)
+                {
+                    AddMapLoadError($"Invalid sub-tile index {t.SubTileIndex} for cell at {t.CoordsToPoint()} (max: {maxSubTileIndex}) - setting it to 0");
+                    t.SubTileIndex = 0;
+
+                    if (maxSubTileIndex < 0)
+                    {
+                        AddMapLoadError($"    Maximum sub-tile count of 0 detected for tile at {t.CoordsToPoint()}, also setting the cell's tile index to 0.");
+                        t.TileIndex = 0;
+                    }
+                }
+            });
         }
 
         public static void ReadMapSection(IMap map, IniFile mapIni)
@@ -169,7 +204,7 @@ namespace TSMapEditor.Initialization
                 TerrainType terrainType = map.Rules.TerrainTypes.Find(tt => tt.ININame == kvp.Value);
                 if (terrainType == null)
                 {
-                    Logger.Log($"Skipping loading of terrain type {kvp.Value} because it does not exist in Rules");
+                    AddMapLoadError($"Skipping loading of terrain type {kvp.Value} because it does not exist in Rules");
                     continue;
                 }
 
@@ -188,7 +223,7 @@ namespace TSMapEditor.Initialization
                 Tag tag = map.Tags.Find(t => t.ID == attachedTagString);
                 if (tag == null)
                 {
-                    Logger.Log($"Unable to find tag {attachedTagString} attached to {techno.WhatAmI()}");
+                    AddMapLoadError($"Unable to find tag {attachedTagString} attached to {techno.WhatAmI()}");
                     return;
                 }
 
@@ -239,7 +274,7 @@ namespace TSMapEditor.Initialization
                 var buildingType = map.Rules.BuildingTypes.Find(bt => bt.ININame == buildingTypeId);
                 if (buildingType == null)
                 {
-                    Logger.Log($"Unable to find building type {buildingTypeId} - skipping it.");
+                    AddMapLoadError($"Unable to find building type {buildingTypeId} - skipping adding it to map.");
                     continue;
                 }
 
@@ -316,7 +351,7 @@ namespace TSMapEditor.Initialization
                 var aircraftType = map.Rules.AircraftTypes.Find(ut => ut.ININame == aircraftTypeId);
                 if (aircraftType == null)
                 {
-                    Logger.Log($"Unable to find aircraft type {aircraftTypeId} - skipping it.");
+                    AddMapLoadError($"Unable to find aircraft type {aircraftTypeId} - skipping adding it to map.");
                     continue;
                 }
 
@@ -375,7 +410,7 @@ namespace TSMapEditor.Initialization
                 var unitType = map.Rules.UnitTypes.Find(ut => ut.ININame == unitTypeId);
                 if (unitType == null)
                 {
-                    Logger.Log($"Unable to find unit type {unitTypeId} - skipping it.");
+                    AddMapLoadError($"Unable to find unit type {unitTypeId} - skipping adding it to map.");
                     continue;
                 }
 
@@ -448,7 +483,7 @@ namespace TSMapEditor.Initialization
                 var infantryType = map.Rules.InfantryTypes.Find(it => it.ININame == infantryTypeId);
                 if (infantryType == null)
                 {
-                    Logger.Log($"Unable to find infantry type {infantryTypeId} - skipping it.");
+                    AddMapLoadError($"Unable to find infantry type {infantryTypeId} - skipping adding it to map.");
                     continue;
                 }
 
@@ -536,7 +571,7 @@ namespace TSMapEditor.Initialization
 
                     if (overlayTypeIndex >= map.Rules.OverlayTypes.Count)
                     {
-                        Logger.Log("Ignoring overlay on tile at " + x + ", " + y + " because it's out of bounds compared to Rules.ini overlay list");
+                        AddMapLoadError("Ignoring overlay on tile at " + x + ", " + y + " because it's out of bounds compared to Rules.ini overlay list");
                         continue;
                     }
 
@@ -562,10 +597,23 @@ namespace TSMapEditor.Initialization
             {
                 var waypoint = Waypoint.ParseWaypoint(kvp.Key, kvp.Value);
                 if (waypoint == null)
+                {
+                    AddMapLoadError($"Invalid syntax encountered for waypoint: {kvp.Key}={kvp.Value}");
                     continue;
+                }
 
-                if (map.GetTile(waypoint.Position.X, waypoint.Position.Y) == null)
+                var mapCell = map.GetTile(waypoint.Position.X, waypoint.Position.Y);
+                if (mapCell == null)
+                {
+                    AddMapLoadError($"Waypoint at {waypoint.Position} is not within the valid map area");
                     continue;
+                }
+                
+                if (mapCell.Waypoint != null)
+                {
+                    AddMapLoadError($"Cell at {waypoint.Position} has multiple waypoints placed on it. Skipping adding waypoint #{waypoint.Identifier} there.");
+                    return;
+                }
 
                 map.AddWaypoint(waypoint);
             }
@@ -646,7 +694,7 @@ namespace TSMapEditor.Initialization
                 Trigger trigger = map.Triggers.Find(t => t.ID == triggerId);
                 if (trigger == null)
                 {
-                    Logger.Log("Ignoring tag " + kvp.Key + " because its related trigger " + triggerId + " does not exist!");
+                    AddMapLoadError("Ignoring tag " + kvp.Key + " because its related trigger " + triggerId + " does not exist!");
                     continue;
                 }
 
@@ -699,18 +747,20 @@ namespace TSMapEditor.Initialization
 
                 if (teamType.House == null)
                 {
-                    Logger.Log($"TeamType {teamType.ININame} has an invalid house ({houseIniName}) specified!");
+                    AddMapLoadError($"TeamType {teamType.ININame} has an invalid house ({houseIniName}) specified!");
                     return;
                 }
 
                 if (teamType.Script == null)
                 {
-                    Logger.Log($"TeamType {teamType.ININame} has an invalid script ({scriptId}) specified!");
+                    AddMapLoadError($"TeamType {teamType.ININame} has an invalid script ({scriptId}) specified!");
+                    return;
                 }
 
                 if (teamType.TaskForce == null)
                 {
-                    Logger.Log($"TeamType {teamType.ININame} has an invalid TaskForce ({taskForceId}) specified!");
+                    AddMapLoadError($"TeamType {teamType.ININame} has an invalid TaskForce ({taskForceId}) specified!");
+                    return;
                 }
 
                 map.AddTeamType(teamType);
@@ -781,7 +831,7 @@ namespace TSMapEditor.Initialization
 
                 if (parts.Length != 2)
                 {
-                    Logger.Log($"Invalid local variable syntax in entry {kvp.Key}: {kvp.Value}, skipping reading locals");
+                    AddMapLoadError($"Invalid local variable syntax in entry {kvp.Key}: {kvp.Value}, skipping reading local variables.");
                     return;
                 }
 
@@ -821,7 +871,7 @@ namespace TSMapEditor.Initialization
 
                 if (enterX < 1 || enterY < 1 || exitX < 1 || exitY < 1 || (int)initialFacing < -1 || initialFacing > TubeDirection.Max)
                 {
-                    Logger.Log("Invalid tube entry: " + kvp.Value);
+                    AddMapLoadError("Invalid tube entry: " + kvp.Value);
                     continue;
                 }
 

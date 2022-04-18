@@ -19,6 +19,7 @@ namespace TSMapEditor.Rendering
     public interface ITheater
     {
         int GetTileSetId(int uniqueTileIndex);
+        int TileCount { get; }
         ITileImage GetTile(int id);
         int GetOverlayFrameCount(OverlayType overlayType);
         Theater Theater { get; }

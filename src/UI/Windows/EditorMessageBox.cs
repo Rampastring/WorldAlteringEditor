@@ -106,6 +106,7 @@ namespace TSMapEditor.UI.Windows
             btnOK.Width = 75;
             btnOK.Name = "btnOK";
             btnOK.Text = "OK";
+            btnOK.HotKey = Microsoft.Xna.Framework.Input.Keys.Enter;
             btnOK.LeftClick += BtnOK_LeftClick;
             buttons.Add(btnOK);
 

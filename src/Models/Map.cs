@@ -126,6 +126,8 @@ namespace TSMapEditor.Models
             Rules.InitFromINI(mapIni, initializer, true);
             InitEditorConfig();
 
+            MapLoader.MapLoadErrors.Clear();
+
             MapLoader.ReadBasicSection(this, mapIni);
             MapLoader.ReadMapSection(this, mapIni);
             MapLoader.ReadIsoMapPack(this, mapIni);
@@ -444,7 +446,9 @@ namespace TSMapEditor.Models
             Waypoints.Add(waypoint);
             var cell = GetTile(waypoint.Position.X, waypoint.Position.Y);
             if (cell.Waypoint != null)
-                throw new InvalidOperationException("Cannot add waypoint to a cell that already has a waypoint!");
+            {
+                throw new InvalidOperationException($"Cell at {cell.CoordsToPoint()} already has a waypoint, skipping adding waypoint {waypoint.Identifier}");
+            }
 
             cell.Waypoint = waypoint;
         }
