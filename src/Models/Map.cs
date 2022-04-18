@@ -543,6 +543,12 @@ namespace TSMapEditor.Models
             return false;
         }
 
+        public void UpdateHouseInfo(House house)
+        {
+            // This achieves the job of updating the sidebar's house list for now
+            HousesChanged?.Invoke(this, EventArgs.Empty);
+        }
+
         public void PlaceBuilding(Structure structure)
         {
             structure.ObjectType.ArtConfig.DoForFoundationCoords(offset =>

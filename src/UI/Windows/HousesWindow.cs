@@ -252,6 +252,7 @@ namespace TSMapEditor.UI.Windows
         {
             editedHouse.Color = ddColor.SelectedItem.Text;
             editedHouse.XNAColor = ddColor.SelectedItem.TextColor.Value;
+            map.UpdateHouseInfo(editedHouse);
             ListHouses();
         }
 
