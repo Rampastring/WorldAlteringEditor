@@ -87,6 +87,7 @@ namespace TSMapEditor.UI.Controls
 
         private void ListFiles()
         {
+            ViewTop = 0;
             SelectedIndex = -1;
             Clear();
 
