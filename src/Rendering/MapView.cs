@@ -689,13 +689,20 @@ namespace TSMapEditor.Rendering
 
         private void DrawMapBorder()
         {
-            // TODO this algorithm seems correct for the x-axis, but it's wrong for the y-axis
-            int x = Map.LocalSize.X * Constants.CellSizeX;
-            int y = (int)(((double)Map.LocalSize.Y - 2.5) * Constants.CellSizeY);
-            int width = Map.LocalSize.Width * Constants.CellSizeX;
-            int height = (Map.LocalSize.Height + 4) * Constants.CellSizeY;
+            const int BorderThickness = 4;
+            const double InitialHeight = 2.5; // TS engine assumes that the first cell is at a height of 2.5
+            const int HeightAddition = 4; // TS engine adds 4 to specified map height <3
+            const int TopImpassableCellCount = 3; // The northernmost 3 cells are impassable in the TS engine, we'll also display this border
 
-            DrawRectangle(new Rectangle(x, y, width, height), Color.Blue, 4);
+            int x = Map.LocalSize.X * Constants.CellSizeX;
+            int y = (int)(((double)Map.LocalSize.Y - InitialHeight) * Constants.CellSizeY);
+            int width = Map.LocalSize.Width * Constants.CellSizeX;
+            int height = (Map.LocalSize.Height + HeightAddition) * Constants.CellSizeY;
+
+            DrawRectangle(new Rectangle(x, y, width, height), Color.Blue, BorderThickness);
+
+            int impassableY = y + (Constants.CellSizeY * TopImpassableCellCount);
+            FillRectangle(new Rectangle(x, impassableY - (BorderThickness / 2), width, BorderThickness), Color.Teal * 0.25f);
         }
 
         public override void OnMouseOnControl()
