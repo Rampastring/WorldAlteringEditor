@@ -94,131 +94,136 @@ namespace TSMapEditor.Mutations.Classes
             // Apply autoLAT if necessary
             if (MutationTarget.AutoLATEnabled)
             {
-                // Get potential base tilesets of the placed LAT (if we're placing LAT)
-                // This allows placing certain LATs on top of other LATs (example: snowy dirt on snow, when snow is also placed on grass)
-                TileSet baseTileSet = null;
-                TileSet altBaseTileSet = null;
-                var tileAutoLatGround = MutationTarget.Map.TheaterInstance.Theater.LATGrounds.Find(
-                    g => g.GroundTileSet.Index == tile.TileSetId || g.TransitionTileSet.Index == tile.TileSetId);
-
-                if (tileAutoLatGround != null && tileAutoLatGround.BaseTileSet != null)
-                {
-                    int baseTileSetId = tileAutoLatGround.BaseTileSet.Index;
-                    var baseLatGround = MutationTarget.Map.TheaterInstance.Theater.LATGrounds.Find(
-                        g => g.GroundTileSet.Index == baseTileSetId || g.TransitionTileSet.Index == baseTileSetId);
-
-                    if (baseLatGround != null)
-                    {
-                        baseTileSet = baseLatGround.GroundTileSet;
-                        altBaseTileSet = baseLatGround.TransitionTileSet;
-                    }
-                }
-
-                brushSize.DoForBrushSizeAndSurroundings(offset =>
-                {
-                    var mapTile = MutationTarget.Map.GetTile(targetCellCoords + offset);
-                    if (mapTile == null)
-                        return;
-
-                    int x = mapTile.X;
-                    int y = mapTile.Y;
-
-                    int tileSetIndex = MutationTarget.Map.TheaterInstance.GetTileSetId(mapTile.TileIndex);
-
-                    var latGrounds = MutationTarget.Map.TheaterInstance.Theater.LATGrounds;
-
-                    // If we're not on a tile can be auto-LAT'd in the first place, skip
-                    var ourLatGround = latGrounds.Find(lg => lg.GroundTileSet.Index == tileSetIndex || lg.TransitionTileSet.Index == tileSetIndex);
-                    if (ourLatGround == null)
-                        return;
-
-                    // For Auto-LAT purposes, consider our current tile set not to be transitional if it is so
-                    var matchingLatGround = latGrounds.Find(lg => lg.TransitionTileSet.Index == tileSetIndex);
-                    if (matchingLatGround != null)
-                        tileSetIndex = matchingLatGround.GroundTileSet.Index;
-
-                    // Don't auto-lat ground that is a base for our placed ground type
-                    if ((baseTileSet != null && tileSetIndex == baseTileSet.Index) ||
-                        (altBaseTileSet != null && tileSetIndex == altBaseTileSet.Index))
-                        return;
-
-                    // Look at the surrounding tiles to figure out the base tile set ID we should use
-                    int baseTileSetId = -1;
-
-                    foreach (var otherTileOffset in surroundingTiles)
-                    {
-                        var otherTile = MutationTarget.Map.GetTile(x + otherTileOffset.X, y + otherTileOffset.Y);
-                        if (otherTile == null)
-                            continue;
-
-                        int otherTileSetId = MutationTarget.Map.TheaterInstance.GetTileSetId(otherTile.TileIndex);
-                        if (otherTileSetId != tileSetIndex)
-                        {
-                            // Check that the other tile is not a transitional tile type
-                            var otherLatGround = latGrounds.Find(lg => lg.TransitionTileSet.Index == otherTileSetId);
-
-                            if (otherLatGround == null)
-                            {
-                                if (otherTileSetId == 0 || latGrounds.Exists(lg => lg.BaseTileSet.Index == otherTileSetId))
-                                {
-                                    baseTileSetId = otherTileSetId;
-                                    break;
-                                }
-                                else if (otherTileSetId != 0 && !latGrounds.Exists(lg => lg.BaseTileSet.Index == otherTileSetId))
-                                {
-                                    baseTileSetId = 0;
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                // If it is a transitional tile type, then take its base tile set for our base tile set
-                                // .. UNLESS we can connect to the transition smoothly as indicated by the non-transition
-                                // ground tileset of the other cell's LAT being our base tileset,
-                                // then take the actual non-transition ground for our base
-                                if (ourLatGround.BaseTileSet == otherLatGround.GroundTileSet)
-                                    baseTileSetId = otherLatGround.GroundTileSet.Index;
-                                else
-                                    baseTileSetId = otherLatGround.BaseTileSet.Index;
-
-                                break;
-                            }
-                        }
-                    }
-
-                    if (baseTileSetId == -1)
-                    {
-                        // Based on the surrounding tiles, we shouldn't need to use any base tile set
-                        mapTile.TileIndex = MutationTarget.Map.TheaterInstance.Theater.TileSets[tileSetIndex].StartTileIndex;
-                        mapTile.SubTileIndex = 0;
-                        mapTile.TileImage = null;
-                        return;
-                    }
-
-                    var autoLatGround = latGrounds.Find(g => g.GroundTileSet.Index == tileSetIndex && 
-                        g.TransitionTileSet.Index != baseTileSetId && g.BaseTileSet.Index == baseTileSetId);
-
-                    if (autoLatGround != null)
-                    {
-                        int autoLatIndex = MutationTarget.Map.GetAutoLATIndex(mapTile, autoLatGround.GroundTileSet.Index, autoLatGround.TransitionTileSet.Index);
-
-                        if (autoLatIndex == -1)
-                        {
-                            // There's an edge case where this code path is hit unintentionally
-                            mapTile.TileIndex = autoLatGround.GroundTileSet.StartTileIndex;
-                        }
-                        else
-                        {
-                            mapTile.TileIndex = autoLatGround.TransitionTileSet.StartTileIndex + autoLatIndex;
-                        }
-
-                        mapTile.SubTileIndex = 0;
-                        mapTile.TileImage = null;
-                    }
-                });
+                ApplyAutoLAT();
             }
 
             MutationTarget.AddRefreshPoint(targetCellCoords, Math.Max(tile.Width, tile.Height) * Math.Max(brushSize.Width, brushSize.Height));
+        }
+
+        private void ApplyAutoLAT()
+        {
+            // Get potential base tilesets of the placed LAT (if we're placing LAT)
+            // This allows placing certain LATs on top of other LATs (example: snowy dirt on snow, when snow is also placed on grass)
+            TileSet baseTileSet = null;
+            TileSet altBaseTileSet = null;
+            var tileAutoLatGround = MutationTarget.Map.TheaterInstance.Theater.LATGrounds.Find(
+                g => g.GroundTileSet.Index == tile.TileSetId || g.TransitionTileSet.Index == tile.TileSetId);
+
+            if (tileAutoLatGround != null && tileAutoLatGround.BaseTileSet != null)
+            {
+                int baseTileSetId = tileAutoLatGround.BaseTileSet.Index;
+                var baseLatGround = MutationTarget.Map.TheaterInstance.Theater.LATGrounds.Find(
+                    g => g.GroundTileSet.Index == baseTileSetId || g.TransitionTileSet.Index == baseTileSetId);
+
+                if (baseLatGround != null)
+                {
+                    baseTileSet = baseLatGround.GroundTileSet;
+                    altBaseTileSet = baseLatGround.TransitionTileSet;
+                }
+            }
+
+            brushSize.DoForBrushSizeAndSurroundings(offset =>
+            {
+                var mapTile = MutationTarget.Map.GetTile(targetCellCoords + offset);
+                if (mapTile == null)
+                    return;
+
+                int x = mapTile.X;
+                int y = mapTile.Y;
+
+                int tileSetIndex = MutationTarget.Map.TheaterInstance.GetTileSetId(mapTile.TileIndex);
+
+                var latGrounds = MutationTarget.Map.TheaterInstance.Theater.LATGrounds;
+
+                // If we're not on a tile can be auto-LAT'd in the first place, skip
+                var ourLatGround = latGrounds.Find(lg => lg.GroundTileSet.Index == tileSetIndex || lg.TransitionTileSet.Index == tileSetIndex);
+                if (ourLatGround == null)
+                    return;
+
+                // For Auto-LAT purposes, consider our current tile set not to be transitional if it is so
+                var matchingLatGround = latGrounds.Find(lg => lg.TransitionTileSet.Index == tileSetIndex);
+                if (matchingLatGround != null)
+                    tileSetIndex = matchingLatGround.GroundTileSet.Index;
+
+                // Don't auto-lat ground that is a base for our placed ground type
+                if ((baseTileSet != null && tileSetIndex == baseTileSet.Index) ||
+                (altBaseTileSet != null && tileSetIndex == altBaseTileSet.Index))
+                    return;
+
+                // Look at the surrounding tiles to figure out the base tile set ID we should use
+                int baseTileSetId = -1;
+
+                foreach (var otherTileOffset in surroundingTiles)
+                {
+                    var otherTile = MutationTarget.Map.GetTile(x + otherTileOffset.X, y + otherTileOffset.Y);
+                    if (otherTile == null)
+                        continue;
+
+                    int otherTileSetId = MutationTarget.Map.TheaterInstance.GetTileSetId(otherTile.TileIndex);
+                    if (otherTileSetId != tileSetIndex)
+                    {
+                        // Check that the other tile is not a transitional tile type
+                        var otherLatGround = latGrounds.Find(lg => lg.TransitionTileSet.Index == otherTileSetId);
+
+                        if (otherLatGround == null)
+                        {
+                            if (otherTileSetId == 0 || latGrounds.Exists(lg => lg.BaseTileSet.Index == otherTileSetId))
+                            {
+                                baseTileSetId = otherTileSetId;
+                                break;
+                            }
+                            else if (otherTileSetId != 0 && !latGrounds.Exists(lg => lg.BaseTileSet.Index == otherTileSetId))
+                            {
+                                baseTileSetId = 0;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            // If it is a transitional tile type, then take its base tile set for our base tile set
+                            // .. UNLESS we can connect to the transition smoothly as indicated by the non-transition
+                            // ground tileset of the other cell's LAT being our base tileset,
+                            // then take the actual non-transition ground for our base
+                            if (ourLatGround.BaseTileSet == otherLatGround.GroundTileSet)
+                                baseTileSetId = otherLatGround.GroundTileSet.Index;
+                            else
+                                baseTileSetId = otherLatGround.BaseTileSet.Index;
+
+                            break;
+                        }
+                    }
+                }
+
+                if (baseTileSetId == -1)
+                {
+                    // Based on the surrounding tiles, we shouldn't need to use any base tile set
+                    mapTile.TileIndex = MutationTarget.Map.TheaterInstance.Theater.TileSets[tileSetIndex].StartTileIndex;
+                    mapTile.SubTileIndex = 0;
+                    mapTile.TileImage = null;
+                    return;
+                }
+
+                var autoLatGround = latGrounds.Find(g => g.GroundTileSet.Index == tileSetIndex &&
+                    g.TransitionTileSet.Index != baseTileSetId && g.BaseTileSet.Index == baseTileSetId);
+
+                if (autoLatGround != null)
+                {
+                    int autoLatIndex = MutationTarget.Map.GetAutoLATIndex(mapTile, autoLatGround.GroundTileSet.Index, autoLatGround.TransitionTileSet.Index);
+
+                    if (autoLatIndex == -1)
+                    {
+                        // There's an edge case where this code path is hit unintentionally
+                        mapTile.TileIndex = autoLatGround.GroundTileSet.StartTileIndex;
+                    }
+                    else
+                    {
+                        mapTile.TileIndex = autoLatGround.TransitionTileSet.StartTileIndex + autoLatIndex;
+                    }
+
+                    mapTile.SubTileIndex = 0;
+                    mapTile.TileImage = null;
+                }
+            });
         }
 
         public override void Undo()
