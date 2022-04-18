@@ -24,7 +24,7 @@ namespace TSMapEditor.UI.CursorActions
             // but slightly above it - FinalSun also does this to not obstruct
             // the user's map view with the cursor
             int height = Tile.GetHeight();
-            int cellHeight = height / Constants.CellSizeY;
+            int cellHeight = (height / Constants.CellSizeY) - 1;
 
             Point2D newCellCoords = cellCoords - new Point2D(cellHeight, cellHeight);
 
@@ -73,7 +73,7 @@ namespace TSMapEditor.UI.CursorActions
                 }
             });
 
-            CursorActionTarget.AddRefreshPoint(adjustedCellCoords, Math.Max(Tile.Width, Tile.Height) * Math.Max(brush.Width, brush.Height));
+            CursorActionTarget.AddRefreshPoint(adjustedCellCoords, Math.Max(Tile.Width, Tile.Height) * Math.Max(brush.Width, brush.Height) + 1);
         }
 
         public override void LeftDown(Point2D cellCoords)
