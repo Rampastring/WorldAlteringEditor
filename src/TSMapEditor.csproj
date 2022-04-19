@@ -304,6 +304,7 @@
     <Compile Include="Mutations\Classes\TerrainGenerationMutation.cs" />
     <Compile Include="Mutations\Mutation.cs" />
     <Compile Include="Mutations\MutationManager.cs" />
+    <Compile Include="NativeMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rendering\EditorState.cs" />

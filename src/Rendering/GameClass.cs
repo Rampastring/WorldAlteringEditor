@@ -99,12 +99,21 @@ namespace TSMapEditor.Rendering
 
             new Parser(windowManager);
 
-            const int menuWidth = 800;
-            const int menuHeight = 600;
+            const int menuRenderWidth = 800;
+            const int menuRenderHeight = 600;
+
+            int menuWidth = menuRenderWidth;
+            int menuHeight = menuRenderHeight;
+
+            int dpi = NativeMethods.GetScreenDPI();
+            double dpi_ratio = dpi / 96.0;
+
+            menuWidth = (int)(menuWidth * dpi_ratio);
+            menuHeight = (int)(menuHeight * dpi_ratio);
 
             windowManager.InitGraphicsMode(menuWidth, menuHeight, false);
 
-            windowManager.SetRenderResolution(menuWidth, menuHeight);
+            windowManager.SetRenderResolution(menuRenderWidth, menuRenderHeight);
             windowManager.CenterOnScreen();
             windowManager.Cursor.LoadNativeCursor(Environment.CurrentDirectory + DSC + "Content" + DSC + "cursor.cur");
             windowManager.SetBorderlessMode(false);
