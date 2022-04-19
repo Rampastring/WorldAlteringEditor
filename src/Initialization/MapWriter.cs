@@ -231,6 +231,8 @@ namespace TSMapEditor.Initialization
             if (map.Waypoints.Count == 0)
                 return;
 
+            map.SortWaypoints();
+
             var section = new IniSection(sectionName);
             mapIni.AddSection(section);
 

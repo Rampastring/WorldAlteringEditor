@@ -56,6 +56,8 @@ namespace TSMapEditor.Initialization
 
         void DoForAllValidTiles(Action<MapTile> action);
 
+        void SortWaypoints();
+
         void Write();
     }
 }

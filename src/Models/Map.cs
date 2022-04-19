@@ -847,6 +847,8 @@ namespace TSMapEditor.Models
             }
         }
 
+        public void SortWaypoints() => Waypoints = Waypoints.OrderBy(wp => wp.Identifier).ToList();
+
         public int GetAutoLATIndex(MapTile mapTile, int baseLATTileSetIndex, int transitionLATTileSetIndex)
         {
             foreach (var autoLatData in AutoLATType.AutoLATData)
@@ -859,6 +861,8 @@ namespace TSMapEditor.Models
 
             return -1;
         }
+
+
 
         /// <summary>
         /// Convenience structure for <see cref="TransitionArrayDataMatches(int[], MapTile, int, int)"/>.
