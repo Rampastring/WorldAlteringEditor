@@ -19,6 +19,7 @@ namespace TSMapEditor.CCEngine
         {
             var iniFile = new IniFile(Environment.CurrentDirectory + "/Config/FileManagerConfig.ini");
 
+            AddSearchDirectory(Environment.CurrentDirectory);
             iniFile.DoForEveryValueInSection("SearchDirectories", v => AddSearchDirectory(Path.Combine(GameDirectory, v)));
             iniFile.DoForEveryValueInSection("PrimaryMIXFiles", v => LoadPrimaryMixFile(v));
             iniFile.DoForEveryValueInSection("SecondaryMIXFiles", v => LoadSecondaryMixFile(v));
