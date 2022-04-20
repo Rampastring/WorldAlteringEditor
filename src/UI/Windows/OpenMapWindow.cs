@@ -1,6 +1,7 @@
 ﻿using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
+using System.IO;
 using TSMapEditor.Settings;
 using TSMapEditor.UI.Controls;
 
@@ -78,7 +79,7 @@ namespace TSMapEditor.UI.Windows
         public void Open()
         {
             Show();
-            lbFileList.DirectoryPath = UserSettings.Instance.GameDirectory;
+            lbFileList.DirectoryPath = Path.GetDirectoryName(UserSettings.Instance.LastScenarioPath);
         }
 
         private void BtnLoad_LeftClick(object sender, EventArgs e)
