@@ -35,7 +35,7 @@ namespace TSMapEditor.UI
         public override void Initialize()
         {
             Name = nameof(MainMenu);
-            Width = 370;
+            Width = 570;
 
             var lblGameDirectory = new XNALabel(WindowManager);
             lblGameDirectory.Name = nameof(lblGameDirectory);
@@ -84,14 +84,14 @@ namespace TSMapEditor.UI
             lbFileList.X = Constants.UIEmptySideSpace;
             lbFileList.Y = lblDirectoryListing.Bottom + Constants.UIVerticalSpacing;
             lbFileList.Width = Width - Constants.UIEmptySideSpace * 2;
-            lbFileList.Height = 300;
+            lbFileList.Height = 420;
             lbFileList.FileSelected += LbFileList_FileSelected;
             lbFileList.FileDoubleLeftClick += LbFileList_FileDoubleLeftClick;
             AddChild(lbFileList);
 
             btnLoad = new EditorButton(WindowManager);
             btnLoad.Name = nameof(btnLoad);
-            btnLoad.Width = 100;
+            btnLoad.Width = 150;
             btnLoad.Text = "Load";
             btnLoad.Y = lbFileList.Bottom + Constants.UIEmptyTopSpace;
             btnLoad.X = lbFileList.Right - btnLoad.Width;
@@ -100,7 +100,7 @@ namespace TSMapEditor.UI
 
             var btnCreateNewMap = new EditorButton(WindowManager);
             btnCreateNewMap.Name = nameof(btnCreateNewMap);
-            btnCreateNewMap.Width = 100;
+            btnCreateNewMap.Width = 150;
             btnCreateNewMap.Text = "New Map...";
             btnCreateNewMap.X = lbFileList.X;
             btnCreateNewMap.Y = btnLoad.Y;
