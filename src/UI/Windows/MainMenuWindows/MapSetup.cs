@@ -15,19 +15,19 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
     /// </summary>
     public static class MapSetup
     {
+        private static Map LoadedMap;
+
         /// <summary>
-        /// Tries to load a map. If successful, loads graphics for the theater and
-        /// sets up the editor UI, and returns null once done. If loading the map
+        /// Tries to load a map. If successful, returns null. If loading the map
         /// fails, returns an error message.
         /// </summary>
-        /// <param name="windowManager">The window manager.</param>
         /// <param name="gameDirectory">The path to the game directory.</param>
         /// <param name="createNew">Whether a new map should be created (instead of loading an existing map).</param>
         /// <param name="existingMapPath">The path to the existing map file to load, if loading an existing map. Can be null if creating a new map.</param>
         /// <param name="newMapTheater">The theater of the map, if creating a new map.</param>
         /// <param name="newMapSize">The size of the map, if creating a new map.</param>
         /// <returns>Null of loading the map was successful, otherwise an error message.</returns>
-        public static string InitializeMap(WindowManager windowManager, string gameDirectory, bool createNew, string existingMapPath, string newMapTheater, Point2D newMapSize)
+        public static string InitializeMap(string gameDirectory, bool createNew, string existingMapPath, string newMapTheater, Point2D newMapSize)
         {
             IniFile rulesIni = new IniFile(Path.Combine(gameDirectory, "INI/Rules.ini"));
             IniFile firestormIni = new IniFile(Path.Combine(gameDirectory, "INI/Enhance.ini"));
@@ -69,10 +69,22 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
             Console.WriteLine();
             Console.WriteLine("Map created.");
 
-            Theater theater = map.EditorConfig.Theaters.Find(t => t.UIName.Equals(map.TheaterName, StringComparison.InvariantCultureIgnoreCase));
+            LoadedMap = map;
+
+            return null;
+        }
+
+        /// <summary>
+        /// Loads the theater graphics for the last-loaded map.
+        /// </summary>
+        /// <param name="windowManager">The window manager.</param>
+        /// <param name="gameDirectory">The path to the game directory.</param>
+        public static void LoadTheaterGraphics(WindowManager windowManager, string gameDirectory)
+        {
+            Theater theater = LoadedMap.EditorConfig.Theaters.Find(t => t.UIName.Equals(LoadedMap.TheaterName, StringComparison.InvariantCultureIgnoreCase));
             if (theater == null)
             {
-                throw new InvalidOperationException("Theater of map not found: " + map.TheaterName);
+                throw new InvalidOperationException("Theater of map not found: " + LoadedMap.TheaterName);
             }
             theater.ReadConfigINI(gameDirectory);
 
@@ -81,11 +93,11 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
             ccFileManager.ReadConfig();
             ccFileManager.LoadPrimaryMixFile(theater.ContentMIXName);
 
-            TheaterGraphics theaterGraphics = new TheaterGraphics(windowManager.GraphicsDevice, theater, ccFileManager, map.Rules);
-            map.TheaterInstance = theaterGraphics;
-            MapLoader.PostCheckMap(map, theaterGraphics);
+            TheaterGraphics theaterGraphics = new TheaterGraphics(windowManager.GraphicsDevice, theater, ccFileManager, LoadedMap.Rules);
+            LoadedMap.TheaterInstance = theaterGraphics;
+            MapLoader.PostCheckMap(LoadedMap, theaterGraphics);
 
-            var uiManager = new UIManager(windowManager, map, theaterGraphics);
+            var uiManager = new UIManager(windowManager, LoadedMap, theaterGraphics);
             windowManager.AddAndInitializeControl(uiManager);
 
             const int MaxErrors = 100;
@@ -99,8 +111,6 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
                 EditorMessageBox.Show(windowManager, "Errors while loading map",
                     "One of more errors were encountered while loading the map:\r\n\r\n" + string.Join("\r\n\r\n", MapLoader.MapLoadErrors), MessageBoxButtons.OK);
             }
-
-            return null;
         }
     }
 }

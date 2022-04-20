@@ -157,7 +157,11 @@ namespace TSMapEditor.UI
 
         private void CreateMapWindow_OnCreateNewMap(object sender, CreateNewMapEventArgs e)
         {
-            MapSetup.InitializeMap(WindowManager, gameDirectory, true, null, e.Theater, e.MapSize);
+            string error = MapSetup.InitializeMap(gameDirectory, true, null, e.Theater, e.MapSize);
+            if (!string.IsNullOrWhiteSpace(error))
+                throw new InvalidOperationException("Failed to create new map! Returned error message: " + error);
+
+            MapSetup.LoadTheaterGraphics(WindowManager, gameDirectory);
             ((CreateNewMapWindow)sender).OnCreateNewMap -= CreateMapWindow_OnCreateNewMap;
         }
 
@@ -262,16 +266,15 @@ namespace TSMapEditor.UI
                 return;
             }
 
-            btnLoad.Text = "Loading";
             loadingStage = 1;
-
-            ApplySettings();
         }
 
         public override void Update(GameTime gameTime)
         {
-            if (loadingStage > 2)
-                LoadExisting(tbMapPath.Text);
+            if (loadingStage == 3)
+                LoadMap(tbMapPath.Text);
+            else if (loadingStage == 5)
+                LoadTheater();
 
             base.Update(gameTime);
         }
@@ -286,19 +289,30 @@ namespace TSMapEditor.UI
             }
         }
 
-        private void LoadExisting(string mapPath)
+        private void LoadMap(string mapPath)
         {
-            string error = MapSetup.InitializeMap(WindowManager, gameDirectory, false, mapPath, null, Point2D.Zero);
+            string error = MapSetup.InitializeMap(gameDirectory, false, mapPath, null, Point2D.Zero);
 
             if (error == null)
             {
-                WindowManager.RemoveControl(this);
+                ApplySettings();
+
+                var messageBox = new EditorMessageBox(WindowManager, "Loading", "Please wait, loading map...", MessageBoxButtons.None);
+                var dp = new DarkeningPanel(WindowManager);
+                AddChild(dp);
+                dp.AddChild(messageBox);
+
+                return;
             }
-            else
-            {
-                loadingStage = 0;
-                EditorMessageBox.Show(WindowManager, "Error Loading File", error, MessageBoxButtons.OK);
-            }
+
+            loadingStage = 0;
+            EditorMessageBox.Show(WindowManager, "Error Loading File", error, MessageBoxButtons.OK);
+        }
+
+        private void LoadTheater()
+        {
+            MapSetup.LoadTheaterGraphics(WindowManager, gameDirectory);
+            WindowManager.RemoveControl(this);
         }
     }
 }

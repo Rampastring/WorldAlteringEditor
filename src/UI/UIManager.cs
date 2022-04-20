@@ -28,6 +28,7 @@ namespace TSMapEditor.UI
     {
         public UIManager(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics) : base(windowManager)
         {
+            DrawMode = ControlDrawMode.UNIQUE_RENDER_TARGET;
             this.map = map;
             this.theaterGraphics = theaterGraphics;
         }
@@ -55,6 +56,7 @@ namespace TSMapEditor.UI
         private int loadMapStage;
         private string loadMapFilePath;
         private CreateNewMapEventArgs newMapInfo;
+        private DarkeningPanel mapLoadDarkeningPanel;
 
 
         public override void Initialize()
@@ -181,6 +183,8 @@ namespace TSMapEditor.UI
             // Try to select "Neutral" as default house
             editorState.ObjectOwner = map.GetHouses().Find(h => h.ININame == "Neutral");
             editorState.CursorAction = null;
+
+            Alpha = 0f;
         }
 
         private void CreateNewMapWindow_OnCreateNewMap(object sender, CreateNewMapEventArgs e)
@@ -199,12 +203,11 @@ namespace TSMapEditor.UI
         private void StartLoadingMap()
         {
             var messageBox = new EditorMessageBox(WindowManager, "Loading", "Please wait, loading map...", MessageBoxButtons.None);
-            var dp = new DarkeningPanel(WindowManager);
-            AddChild(dp);
-            dp.AddChild(messageBox);
+            mapLoadDarkeningPanel = new DarkeningPanel(WindowManager);
+            AddChild(mapLoadDarkeningPanel);
+            mapLoadDarkeningPanel.AddChild(messageBox);
 
             loadMapStage = 1;
-            Clear();
         }
 
         private void Clear()
@@ -215,7 +218,29 @@ namespace TSMapEditor.UI
 
         private void LoadMap()
         {
-            // We need to free memory of everything that we've ever created and then load the new map file
+            bool createNew = loadMapFilePath == null;
+
+            string error = MapSetup.InitializeMap(UserSettings.Instance.GameDirectory, createNew,
+                loadMapFilePath,
+                createNew ? newMapInfo.Theater : null,
+                createNew ? newMapInfo.MapSize : Point2D.Zero);
+
+            if (error != null)
+            {
+                EditorMessageBox.Show(WindowManager, "Failed to open map",
+                    error, MessageBoxButtons.OK);
+                loadMapStage = 0;
+                RemoveChild(mapLoadDarkeningPanel);
+                mapLoadDarkeningPanel.Kill();
+                mapLoadDarkeningPanel = null;
+                return;
+            }
+
+            if (!createNew)
+                UserSettings.Instance.LastScenarioPath.UserDefinedValue = loadMapFilePath;
+
+            // We need to free memory of everything that we've ever created and then load the map's theater graphics
+            Clear();
             Disable();
             foreach (var child in Children)
                 child.Disable();
@@ -226,12 +251,7 @@ namespace TSMapEditor.UI
             WindowManager.RemoveControl(this);
             theaterGraphics.DisposeAll();
 
-            bool createNew = loadMapFilePath == null;
-
-            MapSetup.InitializeMap(WindowManager, UserSettings.Instance.GameDirectory, createNew,
-                loadMapFilePath,
-                createNew ? newMapInfo.Theater : null,
-                createNew ? newMapInfo.MapSize : Point2D.Zero);
+            MapSetup.LoadTheaterGraphics(WindowManager, UserSettings.Instance.GameDirectory);
         }
 
         private void OverlayPlacementAction_OverlayTypeChanged(object sender, EventArgs e)
@@ -371,6 +391,11 @@ namespace TSMapEditor.UI
 
                 if (loadMapStage > 3)
                     LoadMap();
+            }
+
+            if (Alpha < 1.0f)
+            {
+                Alpha += (float)(gameTime.ElapsedGameTime.TotalSeconds * 1.0f);
             }
         }
     }
