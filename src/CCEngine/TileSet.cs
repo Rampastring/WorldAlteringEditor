@@ -8,9 +8,11 @@ namespace TSMapEditor.CCEngine
         public TileSet(int index)
         {
             Index = index;
+            SortID = index.ToString();
         }
 
         public int Index { get; }
+        public string SortID { get; set; }
         public string SetName { get; set; }
         public string FileName { get; set; }
         public int TilesInSet { get; set; }

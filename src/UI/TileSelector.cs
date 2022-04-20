@@ -2,6 +2,7 @@
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
+using System.Linq;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI.CursorActions;
@@ -170,7 +171,9 @@ namespace TSMapEditor.UI
         private void RefreshTileSets()
         {
             lbTileSetList.Clear();
-            foreach (TileSet tileSet in theaterGraphics.Theater.TileSets)
+            var sortedTileSets = theaterGraphics.Theater.TileSets.ToList(); // TODO sort tilesets
+
+            foreach (TileSet tileSet in sortedTileSets)
             {
                 if (tileSet.NonMarbleMadness > -1)
                     continue;
