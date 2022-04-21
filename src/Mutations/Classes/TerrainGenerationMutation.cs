@@ -625,10 +625,13 @@ namespace TSMapEditor.Mutations.Classes
 
                 var mapTile = MutationTarget.Map.GetTile(cellCoords + offset);
 
+                if (mapTile == null)
+                    return false;
+
                 var tileSetId = MutationTarget.Map.TheaterInstance.GetTileSetId(mapTile.TileIndex);
                 bool isBase = MutationTarget.Map.TheaterInstance.Theater.LATGrounds.Exists(latg => latg.BaseTileSet != null && latg.BaseTileSet.Index == tileSetId);
 
-                if (mapTile == null || (!mapTile.IsClearGround() && !isBase))
+                if (!mapTile.IsClearGround() && !isBase)
                     return false;
             }
 
