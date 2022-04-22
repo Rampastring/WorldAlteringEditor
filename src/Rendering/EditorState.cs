@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations.Classes;
@@ -17,6 +16,7 @@ namespace TSMapEditor.Rendering
         public event EventHandler AutoLATEnabledChanged;
         public event EventHandler OnlyPaintOnClearGroundChanged;
         public event EventHandler DrawMapWideOverlayChanged;
+        public event EventHandler HighlightImpassableCellsChanged;
         public event EventHandler BrushSizeChanged;
 
         public bool IsMarbleMadness { get; set; } = false;
@@ -122,6 +122,20 @@ namespace TSMapEditor.Rendering
                 {
                     _drawMapWideOverlay = value;
                     DrawMapWideOverlayChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+
+        private bool _highlightImpassableCells;
+        public bool HighlightImpassableCells
+        {
+            get => _highlightImpassableCells;
+            set
+            {
+                if (value != _highlightImpassableCells)
+                {
+                    _highlightImpassableCells = value;
+                    HighlightImpassableCellsChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }

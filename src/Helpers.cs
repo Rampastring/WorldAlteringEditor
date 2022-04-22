@@ -81,6 +81,7 @@ namespace TSMapEditor
                 case 0xD:
                     return "Clear";
                 case 0xE:
+                    return "Road";
                 case 0xF:
                     return "Rock";
                 default:
@@ -96,7 +97,6 @@ namespace TSMapEditor
                     return considerLandUnitsOnly;
                 case 0x7:
                 case 0x8:
-                case 0xE:
                 case 0xF:
                     return true;
                 default:

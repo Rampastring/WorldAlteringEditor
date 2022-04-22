@@ -208,6 +208,8 @@ namespace TSMapEditor.Rendering
             Map.LocalSizeChanged += (s, e) => InvalidateMap();
             Map.MapResized += Map_MapResized;
 
+            EditorState.HighlightImpassableCellsChanged += (s, e) => InvalidateMap();
+
             KeyboardCommands.Instance.RotateUnitOneStep.Triggered += RotateUnitOneStep_Triggered;
         }
 
@@ -302,6 +304,14 @@ namespace TSMapEditor.Rendering
             DrawMapBorder();
 
             DrawTubes();
+
+            if (EditorState.HighlightImpassableCells)
+            {
+                Map.DoForAllValidTiles(cell =>
+                {
+                    DrawImpassableHighlight(cell);
+                });
+            }
 
             Renderer.PopRenderTarget();
 
@@ -1062,6 +1072,36 @@ namespace TSMapEditor.Rendering
             DrawLine(cellRightPoint + down, cellBottomPoint + down, shadowColor, 1);
         }
 
+        private void DrawImpassableHighlight(MapTile cell)
+        {
+            if (!Helpers.IsLandTypeImpassable(TheaterGraphics.GetTileGraphics(cell.TileIndex).GetSubTile(cell.SubTileIndex).TmpImage.TerrainType, false) && 
+                (cell.Overlay == null || !Helpers.IsLandTypeImpassable(cell.Overlay.OverlayType.Land, false)))
+            {
+                return;
+            }
+
+            Color lineColor = new Color(255, 0, 0, 255);
+            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cell.CoordsToPoint(), Map.Size.X);
+
+            var cellTopPoint = new Vector2(cellTopLeftPoint.X + Constants.CellSizeX / 2, cellTopLeftPoint.Y);
+            var cellLeftPoint = new Vector2(cellTopLeftPoint.X, cellTopLeftPoint.Y + Constants.CellSizeY / 2);
+            var cellRightPoint = new Vector2(cellTopLeftPoint.X + Constants.CellSizeX, cellLeftPoint.Y);
+            var cellBottomPoint = new Vector2(cellTopPoint.X, cellTopLeftPoint.Y + Constants.CellSizeY);
+
+            DrawLine(cellTopPoint, cellLeftPoint, lineColor, 1);
+            DrawLine(cellRightPoint, cellTopPoint, lineColor, 1);
+            DrawLine(cellBottomPoint, cellLeftPoint, lineColor, 1);
+            DrawLine(cellRightPoint, cellBottomPoint, lineColor, 1);
+
+            var shadowColor = new Color(0, 0, 0, 255);
+            var down = new Vector2(0, 1f);
+
+            DrawLine(cellTopPoint + down, cellLeftPoint + down, shadowColor, 1);
+            DrawLine(cellRightPoint + down, cellTopPoint + down, shadowColor, 1);
+            DrawLine(cellBottomPoint + down, cellLeftPoint + down, shadowColor, 1);
+            DrawLine(cellRightPoint + down, cellBottomPoint + down, shadowColor, 1);
+        }
+
         public void DeleteObjectFromCell(Point2D cellCoords)
         {
             var tile = Map.GetTile(cellCoords.X, cellCoords.Y);
@@ -1173,6 +1213,14 @@ namespace TSMapEditor.Rendering
                     Array.ForEach(sortedObjects, obj => DrawObject(obj));
                     waypointsToRedraw.ForEach(wp => DrawWaypoint(wp));
                     cellTagsToRedraw.ForEach(ct => DrawCellTag(ct));
+
+                    if (EditorState.HighlightImpassableCells)
+                    {
+                        foreach (var cell in sortedCells)
+                        {
+                            DrawImpassableHighlight(cell);
+                        }
+                    }
 
                     newRefreshes.RemoveAt(i);
                 }
