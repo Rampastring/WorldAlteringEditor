@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Rampastring.Tools;
 using System;
 using TSMapEditor.GameMath;
+using TSMapEditor.Models.Enums;
 
 namespace TSMapEditor
 {
@@ -87,10 +88,12 @@ namespace TSMapEditor
             }
         }
 
-        public static bool IsLandTypeImpassable(int landType)
+        public static bool IsLandTypeImpassable(int landType, bool considerLandUnitsOnly = false)
         {
             switch (landType)
             {
+                case 0x9:
+                    return considerLandUnitsOnly;
                 case 0x7:
                 case 0x8:
                 case 0xE:
@@ -99,6 +102,11 @@ namespace TSMapEditor
                 default:
                     return false;
             }
+        }
+
+        public static bool IsLandTypeImpassable(LandType landType, bool considerLandUnitsOnly)
+        {
+            return landType == LandType.Rock || (considerLandUnitsOnly && landType == LandType.Water);
         }
 
         public static int GetWaypointNumberFromAlphabeticalString(string str)

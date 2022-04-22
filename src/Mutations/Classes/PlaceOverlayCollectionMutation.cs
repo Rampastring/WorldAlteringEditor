@@ -44,7 +44,7 @@ namespace TSMapEditor.Mutations.Classes
 
                     TileImage tileGraphics = MutationTarget.TheaterGraphics.GetTileGraphics(tile.TileIndex);
                     MGTMPImage subCellImage = tileGraphics.TMPImages[tile.SubTileIndex];
-                    if (Helpers.IsLandTypeImpassable(subCellImage.TmpImage.TerrainType))
+                    if (Helpers.IsLandTypeImpassable(subCellImage.TmpImage.TerrainType, true))
                         return;
                 }
 
