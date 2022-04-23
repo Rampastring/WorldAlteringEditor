@@ -9,6 +9,7 @@ namespace TSMapEditor
         public static int CellSizeY = 24;
 
         public static string ExpectedClientExecutableName = "DTA.exe";
+        public static string GameRegistryInstallPath = "SOFTWARE\\DawnOfTheTiberiumAge";
 
         public const int TextureSizeLimit = 16384;
 
@@ -57,9 +58,11 @@ namespace TSMapEditor
             const string SectionName = "Constants";
 
             IniFile constantsIni = new IniFile(Environment.CurrentDirectory + "/Config/Constants.ini");
+
             CellSizeX = constantsIni.GetIntValue(SectionName, nameof(CellSizeX), CellSizeX);
             CellSizeY = constantsIni.GetIntValue(SectionName, nameof(CellSizeY), CellSizeY);
             ExpectedClientExecutableName = constantsIni.GetStringValue(SectionName, nameof(ExpectedClientExecutableName), ExpectedClientExecutableName);
+            GameRegistryInstallPath = constantsIni.GetStringValue(SectionName, nameof(GameRegistryInstallPath), GameRegistryInstallPath);
         }
     }
 }

@@ -170,7 +170,7 @@ namespace TSMapEditor.UI
             try
             {
                 RegistryKey key;
-                key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\DawnOfTheTiberiumAge");
+                key = Registry.CurrentUser.OpenSubKey(Constants.GameRegistryInstallPath);
                 object value = key.GetValue("InstallPath", string.Empty);
                 if (!(value is string valueAsString))
                 {
