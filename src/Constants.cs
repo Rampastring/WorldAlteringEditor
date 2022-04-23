@@ -8,6 +8,8 @@ namespace TSMapEditor
         public static int CellSizeX = 48;
         public static int CellSizeY = 24;
 
+        public static string ExpectedClientExecutableName = "DTA.exe";
+
         public const int TextureSizeLimit = 16384;
 
         public static int MaxMapWidth = TextureSizeLimit / CellSizeX;
@@ -52,9 +54,12 @@ namespace TSMapEditor
 
         public static void Init()
         {
+            const string SectionName = "Constants";
+
             IniFile constantsIni = new IniFile(Environment.CurrentDirectory + "/Config/Constants.ini");
-            CellSizeX = constantsIni.GetIntValue("Constants", nameof(CellSizeX), CellSizeX);
-            CellSizeY = constantsIni.GetIntValue("Constants", nameof(CellSizeY), CellSizeY);
+            CellSizeX = constantsIni.GetIntValue(SectionName, nameof(CellSizeX), CellSizeX);
+            CellSizeY = constantsIni.GetIntValue(SectionName, nameof(CellSizeY), CellSizeY);
+            ExpectedClientExecutableName = constantsIni.GetStringValue(SectionName, nameof(ExpectedClientExecutableName), ExpectedClientExecutableName);
         }
     }
 }

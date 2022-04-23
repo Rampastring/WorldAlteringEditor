@@ -202,11 +202,11 @@ namespace TSMapEditor.UI
 
         private bool CheckGameDirectory()
         {
-            if (!File.Exists(Path.Combine(tbGameDirectory.Text, "DTA.exe")))
+            if (!File.Exists(Path.Combine(tbGameDirectory.Text, Constants.ExpectedClientExecutableName)))
             {
                 EditorMessageBox.Show(WindowManager,
                     "Invalid game directory",
-                    "DTA.exe not found, please check that you typed the correct game directory.",
+                    $"{Constants.ExpectedClientExecutableName} not found, please check that you typed the correct game directory.",
                     MessageBoxButtons.OK);
 
                 return false;
