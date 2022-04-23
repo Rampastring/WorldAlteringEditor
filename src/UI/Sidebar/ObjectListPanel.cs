@@ -172,12 +172,18 @@ namespace TSMapEditor.UI.Sidebar
                                 ownerName = Map.StandardHouses[actsLike].ININame;
                         }
 
-                        House ownerHouse = Map.Houses.Find(h => h.ININame == ownerName);
+                        House ownerHouse = Map.StandardHouses.Find(h => h.ININame == ownerName);
                         if (ownerHouse != null)
                             remapColor = ownerHouse.XNAColor;
 
-                        categories.Add(ownerName);
-                        remapColors.Add(remapColor);
+                        // Prevent duplicates that can occur due to category overrides
+                        // (For example, if objects owned by "Soviet1" are overridden to be listed under
+                        // "Soviet", and a structure has both "Soviet" and "Soviet1" listed as its owner)
+                        if (!categories.Contains(ownerName))
+                        {
+                            categories.Add(ownerName);
+                            remapColors.Add(remapColor);
+                        }
                     }
                 }
 
