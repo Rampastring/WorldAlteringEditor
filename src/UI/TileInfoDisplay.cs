@@ -218,6 +218,13 @@ namespace TSMapEditor.UI
             textRenderer.AddTextPart(new XNATextPart( techno.ObjectType.Name + " (" + techno.ObjectType.ININame + "), Owner:",
                     Constants.UIDefaultFont, Color.White));
             textRenderer.AddTextPart(new XNATextPart(techno.Owner.ININame, Constants.UIBoldFont, techno.Owner.XNAColor));
+
+            if (techno.WhatAmI() == RTTIType.Unit)
+            {
+                int id = map.Units.IndexOf(techno as Unit);
+                textRenderer.AddTextPart(new XNATextPart("ID: " + id, Constants.UIDefaultFont, Color.White));
+            }
+            
             if (techno.AttachedTag != null)
             {
                 textRenderer.AddTextPart(new XNATextPart(",", Constants.UIDefaultFont, Color.White));
