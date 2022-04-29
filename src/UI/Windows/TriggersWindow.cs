@@ -34,6 +34,8 @@ namespace TSMapEditor.UI.Windows
         private readonly ChangeAttachedTagCursorAction changeAttachedTagCursorAction;
         private readonly EditorState editorState;
 
+        private XNADropDown ddActions;
+
         // Trigger list
         private EditorListBox lbTriggers;
 
@@ -85,8 +87,6 @@ namespace TSMapEditor.UI.Windows
             ddHouse = FindChild<XNADropDown>(nameof(ddHouse));
             ddType = FindChild<XNADropDown>(nameof(ddType));
             selAttachedTrigger = FindChild<EditorPopUpSelector>(nameof(selAttachedTrigger));
-            FindChild<EditorButton>("btnAttachToObjects").LeftClick += BtnAttachToObjects_LeftClick;
-            FindChild<EditorButton>("btnViewAttachedObjects").LeftClick += BtnViewAttachedObjects_LeftClick;
             chkDisabled = FindChild<XNACheckBox>(nameof(chkDisabled));
             chkEasy = FindChild<XNACheckBox>(nameof(chkEasy));
             chkMedium = FindChild<XNACheckBox>(nameof(chkMedium));
@@ -114,7 +114,13 @@ namespace TSMapEditor.UI.Windows
             FindChild<EditorButton>("btnNewTrigger").LeftClick += BtnNewTrigger_LeftClick;
             FindChild<EditorButton>("btnDeleteTrigger").LeftClick += BtnDeleteTrigger_LeftClick;
             FindChild<EditorButton>("btnCloneTrigger").LeftClick += BtnCloneTrigger_LeftClick;
-            FindChild<EditorButton>("btnPlaceCellTag").LeftClick += BtnPlaceCellTag_LeftClick;
+            ddActions = FindChild<XNADropDown>(nameof(ddActions));
+            ddActions.AddItem("Advanced...");
+            ddActions.AddItem("Place CellTag");
+            ddActions.AddItem("Attach to Objects");
+            ddActions.AddItem("View Attached Objects");
+            ddActions.SelectedIndex = 0;
+            ddActions.SelectedIndexChanged += DdActions_SelectedIndexChanged;
 
             FindChild<EditorButton>("btnAddEvent").LeftClick += BtnAddEvent_LeftClick;
             FindChild<EditorButton>("btnDeleteEvent").LeftClick += BtnDeleteEvent_LeftClick;
@@ -165,12 +171,52 @@ namespace TSMapEditor.UI.Windows
             lbTriggers.SelectedIndexChanged += LbTriggers_SelectedIndexChanged;
         }
 
-        private void BtnAttachToObjects_LeftClick(object sender, EventArgs e)
+        private void DdActions_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (ddActions.SelectedIndex)
+            {
+                case 1:
+                    PlaceCellTag();
+                    break;
+                case 2:
+                    AttachTagToObjects();
+                    break;
+                case 3:
+                    ShowAttachedObjects();
+                    break;
+                case 0:
+                default:
+                    return;
+            }
+
+            ddActions.SelectedIndexChanged -= DdActions_SelectedIndexChanged;
+            ddActions.SelectedIndex = 0;
+            ddActions.SelectedIndexChanged += DdActions_SelectedIndexChanged;
+        }
+
+        private void PlaceCellTag()
         {
             if (editedTrigger == null)
                 return;
 
-            var tag = map.Tags.Find(t => t.Trigger == editedTrigger);
+            Tag tag = map.Tags.Find(t => t.Trigger == editedTrigger);
+
+            if (tag == null)
+            {
+                return;
+            }
+
+            placeCellTagCursorAction.Tag = tag;
+            editorState.CursorAction = placeCellTagCursorAction;
+        }
+
+        private void AttachTagToObjects()
+        {
+            if (editedTrigger == null)
+                return;
+
+            Tag tag = map.Tags.Find(t => t.Trigger == editedTrigger);
+
             if (tag == null)
             {
                 EditorMessageBox.Show(WindowManager, "No tag found",
@@ -188,7 +234,7 @@ namespace TSMapEditor.UI.Windows
 
         #region Viewing linked objects
 
-        private void BtnViewAttachedObjects_LeftClick(object sender, EventArgs e)
+        private void ShowAttachedObjects()
         {
             if (editedTrigger == null)
                 return;
@@ -210,14 +256,12 @@ namespace TSMapEditor.UI.Windows
             map.Structures.ForEach(structure => AddObjectToListIfLinkedToTag(structure, objectList, tag));
             map.Aircraft.ForEach(aircraft => AddObjectToListIfLinkedToTag(aircraft, objectList, tag));
 
-            var stringBuilder = new StringBuilder(Environment.NewLine + Environment.NewLine);
+            var stringBuilder = new StringBuilder();
 
-            if (objectList.Count == 0)
+            if (objectList.Count > 0)
             {
-                stringBuilder.Append("No attached objects found." + Environment.NewLine);
-            }
-            else
-            {
+                stringBuilder.Append($"The selected trigger '{editedTrigger.Name}' is linked to the following objects: ");
+
                 objectList.ForEach(techno =>
                 {
                     switch (techno.WhatAmI())
@@ -247,9 +291,46 @@ namespace TSMapEditor.UI.Windows
                 stringBuilder.Append("The trigger is linked to one or more celltags (first match at " + celltag.Position + ").");
             }
 
-            EditorMessageBox.Show(WindowManager, "Linked Objects",
-                $"The selected trigger '{editedTrigger.Name}' is linked to the following objects: " + stringBuilder.ToString(),
-                MessageBoxButtons.OK);
+            // Check other triggers to see whether this trigger is referenced to by them
+            var allReferringTriggers = map.Triggers.FindAll(trig => {
+                foreach (var triggerAction in trig.Actions)
+                {
+                    var actionType = map.EditorConfig.TriggerActionTypes[triggerAction.ActionIndex];
+
+                    for (int i = 0; i < triggerAction.Parameters.Length && i < actionType.Parameters.Length; i++)
+                    {
+                        string paramValue = triggerAction.Parameters[i];
+                        if (actionType.Parameters[i].TriggerParamType == TriggerParamType.Trigger && paramValue == editedTrigger.ID)
+                        {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            });
+
+            if (allReferringTriggers.Count > 0)
+            {
+                stringBuilder.Append(Environment.NewLine);
+                stringBuilder.Append("The trigger is referenced to by the following other triggers:");
+                stringBuilder.Append(Environment.NewLine);
+                allReferringTriggers.ForEach(trig => stringBuilder.Append($"    - {trig.Name} ({trig.ID})"));
+            }
+
+            if (stringBuilder.Length == 0)
+            {
+                EditorMessageBox.Show(WindowManager, "Linked Objects",
+                    $"The selected trigger '{editedTrigger.Name}' is not linked to any objects, CellTags or other triggers.",
+                    MessageBoxButtons.OK);
+            }
+            else
+            {
+                if (stringBuilder[0] == Environment.NewLine[0])
+                    stringBuilder.Remove(0, Environment.NewLine.Length);
+
+                EditorMessageBox.Show(WindowManager, "Linked Objects", stringBuilder.ToString(), MessageBoxButtons.OK);
+            }
 
             return;
         }
@@ -260,7 +341,7 @@ namespace TSMapEditor.UI.Windows
             string name = techno.ObjectType.Name;
             string position = techno.Position.ToString();
 
-            stringBuilder.Append($"{rtti}: {name} at {position}{Environment.NewLine}");
+            stringBuilder.Append($"    - {rtti}: {name} at {position}{Environment.NewLine}");
         }
 
         private void AddObjectToListIfLinkedToTag(TechnoBase techno, List<TechnoBase> technoList, Tag tag)
@@ -479,21 +560,6 @@ namespace TSMapEditor.UI.Windows
             editedTrigger = null;
 
             ListTriggers();
-        }
-
-        private void BtnPlaceCellTag_LeftClick(object sender, EventArgs e)
-        {
-            if (editedTrigger == null)
-                return;
-
-            var tag = map.Tags.Find(t => t.Trigger == editedTrigger);
-            if (tag == null)
-            {
-                return;
-            }
-
-            placeCellTagCursorAction.Tag = tag;
-            editorState.CursorAction = placeCellTagCursorAction;
         }
 
         private void SelectLastTrigger()
