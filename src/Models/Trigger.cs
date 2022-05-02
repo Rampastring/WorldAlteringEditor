@@ -1,13 +1,46 @@
-﻿using Rampastring.Tools;
+﻿using Microsoft.Xna.Framework;
+using Rampastring.Tools;
+using System;
 using System.Collections.Generic;
 
 namespace TSMapEditor.Models
 {
+    public struct NamedColor
+    {
+        public string Name;
+        public Color Value;
+
+        public NamedColor(string name, Color value)
+        {
+            Name = name;
+            Value = value;
+        }
+    }
+
     /// <summary>
     /// A map trigger.
     /// </summary>
     public class Trigger
     {
+        public static NamedColor[] SupportedColors = new NamedColor[]
+        {
+            new NamedColor("Teal", new Color(0, 196, 196)),
+            new NamedColor("Green", new Color(0, 255, 0)),
+            new NamedColor("Dark Green", Color.Green),
+            new NamedColor("Lime Green", Color.LimeGreen),
+            new NamedColor("Yellow", Color.Yellow),
+            new NamedColor("Orange", Color.Orange),
+            new NamedColor("Red", Color.Red),
+            new NamedColor("Blood Red", Color.DarkRed),
+            new NamedColor("Pink", Color.HotPink),
+            new NamedColor("Cherry", Color.Pink),
+            new NamedColor("Purple", Color.MediumPurple),
+            new NamedColor("Sky Blue", Color.SkyBlue),
+            new NamedColor("Blue", new Color(40, 40, 255)),
+            new NamedColor("Brown", Color.Brown),
+            new NamedColor("Metalic", new Color(160, 160, 200)),
+        };
+
         public Trigger(string id) { ID = id; }
 
         public string ID { get; private set; }
@@ -27,6 +60,38 @@ namespace TSMapEditor.Models
 
         public List<TriggerCondition> Conditions { get; private set; } = new List<TriggerCondition>();
         public List<TriggerAction> Actions { get; private set; } = new List<TriggerAction>();
+
+
+        private string _editorColor;
+        /// <summary>
+        /// Editor-only. The color of the trigger in the UI.
+        /// If null, the trigger should be displayed with the default UI text color.
+        /// </summary>
+        public string EditorColor
+        {
+            get => _editorColor;
+            set
+            {
+                _editorColor = value;
+
+                if (_editorColor != null)
+                {
+                    int index = Array.FindIndex(SupportedColors, c => c.Name == value);
+                    if (index > -1)
+                    {
+                        XNAColor = SupportedColors[index].Value;
+                    }
+                    else
+                    {
+                        // Only allow assigning coors that actually exist in the color table
+                        _editorColor = null;
+                    }
+                }
+                    
+            }
+        }
+
+        public Color XNAColor;
 
         /// <summary>
         /// Creates and returns a deep clone of this trigger.
@@ -87,6 +152,15 @@ namespace TSMapEditor.Models
             }
 
             iniFile.SetStringValue("Actions", ID, actionDataString.ToString());
+
+            // Write entry to [EditorTriggerInfo]
+            if (EditorColor != null)
+                iniFile.SetStringValue("EditorTriggerInfo", ID, EditorColor);
+        }
+
+        public void ParseEditorInfo(IniFile iniFile)
+        {
+            EditorColor = iniFile.GetStringValue("EditorTriggerInfo", ID, null);
         }
 
         public void ParseConditions(string data)

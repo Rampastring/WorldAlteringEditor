@@ -273,6 +273,7 @@ namespace TSMapEditor.Initialization
             mapIni.RemoveSection("Triggers");
             mapIni.RemoveSection("Events");
             mapIni.RemoveSection("Actions");
+            mapIni.RemoveSection("EditorTriggerInfo");
 
             if (map.Triggers.Count == 0)
                 return;

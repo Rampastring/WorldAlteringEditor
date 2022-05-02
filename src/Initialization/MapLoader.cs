@@ -656,6 +656,8 @@ namespace TSMapEditor.Initialization
 
                 string conditionData = mapIni.GetStringValue("Events", trigger.ID, null);
                 trigger.ParseConditions(conditionData);
+
+                trigger.ParseEditorInfo(mapIni);
             }
 
             // Parse and apply linked triggers

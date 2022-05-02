@@ -44,6 +44,7 @@ namespace TSMapEditor.UI.Windows
         private XNADropDown ddHouse;
         private XNADropDown ddType;
         private EditorPopUpSelector selAttachedTrigger;
+        private XNADropDown ddTriggerColor;
         private XNACheckBox chkDisabled;
         private XNACheckBox chkEasy;
         private XNACheckBox chkMedium;
@@ -91,6 +92,14 @@ namespace TSMapEditor.UI.Windows
             chkEasy = FindChild<XNACheckBox>(nameof(chkEasy));
             chkMedium = FindChild<XNACheckBox>(nameof(chkMedium));
             chkHard = FindChild<XNACheckBox>(nameof(chkHard));
+
+            // Init color dropdown options
+            ddTriggerColor = FindChild<XNADropDown>(nameof(ddTriggerColor));
+            ddTriggerColor.AddItem("None");
+            Array.ForEach(Trigger.SupportedColors, sc =>
+            {
+                ddTriggerColor.AddItem(sc.Name, sc.Value);
+            });
 
             lbEvents = FindChild<EditorListBox>(nameof(lbEvents));
             selEventType = FindChild<EditorPopUpSelector>(nameof(selEventType));
@@ -680,7 +689,12 @@ namespace TSMapEditor.UI.Windows
 
             foreach (Trigger trigger in map.Triggers)
             {
-                lbTriggers.AddItem(new XNAListBoxItem() { Text = trigger.Name, Tag = trigger });
+                lbTriggers.AddItem(new XNAListBoxItem() 
+                { 
+                    Text = trigger.Name, 
+                    Tag = trigger, 
+                    TextColor = trigger.EditorColor == null ? lbTriggers.DefaultItemColor : trigger.XNAColor 
+                });
             }
 
             LbTriggers_SelectedIndexChanged(this, EventArgs.Empty);
@@ -694,6 +708,7 @@ namespace TSMapEditor.UI.Windows
             ddHouse.SelectedIndexChanged -= DdHouse_SelectedIndexChanged;
             ddType.SelectedIndexChanged -= DdType_SelectedIndexChanged;
             chkDisabled.CheckedChanged -= ChkDisabled_CheckedChanged;
+            ddTriggerColor.SelectedIndexChanged -= DdTriggerColor_SelectedIndexChanged;
 
             editedTrigger = trigger;
 
@@ -743,6 +758,9 @@ namespace TSMapEditor.UI.Windows
             chkEasy.Checked = editedTrigger.Easy;
             chkMedium.Checked = editedTrigger.Normal;
             chkHard.Checked = editedTrigger.Hard;
+            ddTriggerColor.SelectedIndex = ddTriggerColor.Items.FindIndex(item => item.Text == editedTrigger.EditorColor);
+            if (ddTriggerColor.SelectedIndex < 0)
+                ddTriggerColor.SelectedIndex = 0;
 
             lbEvents.Clear();
             editedTrigger.Conditions.ForEach(c => AddEvent(c));
@@ -759,6 +777,20 @@ namespace TSMapEditor.UI.Windows
             ddHouse.SelectedIndexChanged += DdHouse_SelectedIndexChanged;
             ddType.SelectedIndexChanged += DdType_SelectedIndexChanged;
             chkDisabled.CheckedChanged += ChkDisabled_CheckedChanged;
+            ddTriggerColor.SelectedIndexChanged += DdTriggerColor_SelectedIndexChanged;
+        }
+
+        private void DdTriggerColor_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (ddTriggerColor.SelectedIndex < 1)
+            {
+                editedTrigger.EditorColor = null;
+                lbTriggers.SelectedItem.TextColor = lbTriggers.DefaultItemColor;
+                return;
+            }
+
+            editedTrigger.EditorColor = ddTriggerColor.SelectedItem.Text;
+            lbTriggers.SelectedItem.TextColor = ddTriggerColor.SelectedItem.TextColor.Value;
         }
 
         private void DdType_SelectedIndexChanged(object sender, EventArgs e)
