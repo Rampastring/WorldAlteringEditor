@@ -736,7 +736,7 @@ namespace TSMapEditor.UI.Windows
 
             foreach (Trigger trigger in sortedTriggers)
             {
-                lbTriggers.AddItem(new XNAListBoxItem() 
+                lbTriggers.AddItem(new XNAListBoxItem()
                 { 
                     Text = trigger.Name, 
                     Tag = trigger, 

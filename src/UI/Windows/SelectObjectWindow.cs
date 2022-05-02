@@ -55,6 +55,7 @@ namespace TSMapEditor.UI.Windows
                 if (lbObjectList.Items[i].Text.ToUpperInvariant().Contains(tbSearch.Text.ToUpperInvariant()))
                 {
                     lbObjectList.SelectedIndex = i;
+                    lbObjectList.ViewTop = lbObjectList.SelectedIndex * lbObjectList.LineHeight;
                     break;
                 }
             }
