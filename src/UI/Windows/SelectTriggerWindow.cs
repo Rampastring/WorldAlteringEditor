@@ -35,6 +35,8 @@ namespace TSMapEditor.UI.Windows
         {
             lbObjectList.Clear();
 
+            lbObjectList.AddItem("None");
+
             foreach (Trigger trigger in map.Triggers)
             {
                 lbObjectList.AddItem(new XNAListBoxItem() { Text = $"{trigger.ID} {trigger.Name}", Tag = trigger });

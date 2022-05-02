@@ -86,6 +86,12 @@ namespace TSMapEditor.UI.Windows
 
         private Trigger editedTrigger;
 
+        /// <summary>
+        /// Used to determine what we should do when the trigger selection window closes.
+        /// (apply selected trigger to a parameter for an action or attach selected trigger to our trigger)
+        /// </summary>
+        private bool isAttachingTrigger;
+
         private TriggerSortMode _triggerSortMode;
         private TriggerSortMode TriggerSortMode
         {
@@ -301,7 +307,7 @@ namespace TSMapEditor.UI.Windows
 
             if (objectList.Count > 0)
             {
-                stringBuilder.Append($"The selected trigger '{editedTrigger.Name}' is linked to the following objects: ");
+                stringBuilder.Append($"The selected trigger '{editedTrigger.Name}' is linked to the following objects:\r\n");
 
                 objectList.ForEach(techno =>
                 {
@@ -347,6 +353,9 @@ namespace TSMapEditor.UI.Windows
                         }
                     }
                 }
+
+                if (trig.LinkedTrigger == editedTrigger)
+                    return true;
 
                 return false;
             });
@@ -453,6 +462,7 @@ namespace TSMapEditor.UI.Windows
                     break;
                 case TriggerParamType.Trigger:
                     Trigger existingTrigger = map.Triggers.Find(tt => tt.ID == triggerAction.Parameters[paramIndex]);
+                    isAttachingTrigger = false;
                     selectTriggerWindow.Open(existingTrigger);
                     break;
                 case TriggerParamType.GlobalVariable:
@@ -537,6 +547,13 @@ namespace TSMapEditor.UI.Windows
 
         private void TriggerWindowDarkeningPanel_Hidden(object sender, EventArgs e)
         {
+            if (isAttachingTrigger)
+            {
+                editedTrigger.LinkedTrigger = selectTriggerWindow.SelectedObject;
+                EditTrigger(editedTrigger);
+                return;
+            }
+
             if (selectTriggerWindow.SelectedObject == null)
                 return;
 
@@ -755,6 +772,7 @@ namespace TSMapEditor.UI.Windows
             ddHouse.SelectedIndexChanged -= DdHouse_SelectedIndexChanged;
             ddType.SelectedIndexChanged -= DdType_SelectedIndexChanged;
             chkDisabled.CheckedChanged -= ChkDisabled_CheckedChanged;
+            selAttachedTrigger.LeftClick -= SelAttachedTrigger_LeftClick;
             ddTriggerColor.SelectedIndexChanged -= DdTriggerColor_SelectedIndexChanged;
 
             editedTrigger = trigger;
@@ -801,6 +819,7 @@ namespace TSMapEditor.UI.Windows
             ddHouse.SelectedIndex = map.GetHouses().FindIndex(h => h.ININame == trigger.House);
             ddType.SelectedIndex = tag == null ? 3 : tag.Repeating;
             selAttachedTrigger.Text = editedTrigger.LinkedTrigger == null ? Constants.NoneValue1 : editedTrigger.LinkedTrigger.Name;
+            selAttachedTrigger.Tag = editedTrigger.LinkedTrigger;
             chkDisabled.Checked = editedTrigger.Disabled;
             chkEasy.Checked = editedTrigger.Easy;
             chkMedium.Checked = editedTrigger.Normal;
@@ -824,7 +843,14 @@ namespace TSMapEditor.UI.Windows
             ddHouse.SelectedIndexChanged += DdHouse_SelectedIndexChanged;
             ddType.SelectedIndexChanged += DdType_SelectedIndexChanged;
             chkDisabled.CheckedChanged += ChkDisabled_CheckedChanged;
+            selAttachedTrigger.LeftClick += SelAttachedTrigger_LeftClick;
             ddTriggerColor.SelectedIndexChanged += DdTriggerColor_SelectedIndexChanged;
+        }
+
+        private void SelAttachedTrigger_LeftClick(object sender, EventArgs e)
+        {
+            isAttachingTrigger = true;
+            selectTriggerWindow.Open((Trigger)selAttachedTrigger.Tag);
         }
 
         private void DdTriggerColor_SelectedIndexChanged(object sender, EventArgs e)
