@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Rampastring.Tools;
@@ -15,6 +16,13 @@ using TSMapEditor.UI.CursorActions;
 
 namespace TSMapEditor.UI.Windows
 {
+    public enum TriggerSortMode
+    {
+        ID,
+        Name,
+        Color
+    }
+
     public class TriggersWindow : INItializableWindow
     {
         private const int EVENT_PARAM_FIRST = 0;
@@ -73,10 +81,24 @@ namespace TSMapEditor.UI.Windows
         private SelectHouseWindow selectHouseWindow;
         private SelectTutorialLineWindow selectTutorialLineWindow;
 
-        private XNAContextMenu contextMenu;
+        private XNAContextMenu actionParameterContextMenu;
+        private XNAContextMenu triggerListContextMenu;
 
         private Trigger editedTrigger;
 
+        private TriggerSortMode _triggerSortMode;
+        private TriggerSortMode TriggerSortMode
+        {
+            get => _triggerSortMode;
+            set
+            {
+                if (value != _triggerSortMode)
+                {
+                    _triggerSortMode = value;
+                    ListTriggers();
+                }
+            }
+        }
 
         public override void Initialize()
         {
@@ -172,11 +194,21 @@ namespace TSMapEditor.UI.Windows
             var tutorialDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTutorialLineWindow);
             tutorialDarkeningPanel.Hidden += TutorialDarkeningPanel_Hidden;
 
-            contextMenu = new XNAContextMenu(WindowManager);
-            contextMenu.Name = nameof(contextMenu);
-            contextMenu.Width = tbActionParameterValue.Width;
-            AddChild(contextMenu);
+            actionParameterContextMenu = new XNAContextMenu(WindowManager);
+            actionParameterContextMenu.Name = nameof(actionParameterContextMenu);
+            actionParameterContextMenu.Width = tbActionParameterValue.Width;
+            AddChild(actionParameterContextMenu);
 
+            triggerListContextMenu = new XNAContextMenu(WindowManager);
+            triggerListContextMenu.Name = nameof(triggerListContextMenu);
+            triggerListContextMenu.Width = lbTriggers.Width;
+            triggerListContextMenu.AddItem("Sort by ID", () => TriggerSortMode = TriggerSortMode.ID);
+            triggerListContextMenu.AddItem("Sort by Name", () => TriggerSortMode = TriggerSortMode.Name);
+            triggerListContextMenu.AddItem("Sort by Color", () => TriggerSortMode = TriggerSortMode.Color);
+            AddChild(triggerListContextMenu);
+
+            lbTriggers.AllowRightClickUnselect = false;
+            lbTriggers.RightClick += (s, e) => triggerListContextMenu.Open(GetCursorPoint());
             lbTriggers.SelectedIndexChanged += LbTriggers_SelectedIndexChanged;
         }
 
@@ -687,7 +719,22 @@ namespace TSMapEditor.UI.Windows
         {
             lbTriggers.Clear();
 
-            foreach (Trigger trigger in map.Triggers)
+            List<Trigger> sortedTriggers = map.Triggers;
+            switch (TriggerSortMode)
+            {
+                case TriggerSortMode.Color:
+                    sortedTriggers = sortedTriggers.OrderBy(t => t.EditorColor).ThenBy(t => t.ID).ToList();
+                    break;
+                case TriggerSortMode.Name:
+                    sortedTriggers = sortedTriggers.OrderBy(t => t.Name).ThenBy(t => t.ID).ToList();
+                    break;
+                case TriggerSortMode.ID:
+                default:
+                    sortedTriggers = sortedTriggers.OrderBy(t => t.ID).ToList();
+                    break;
+            }
+
+            foreach (Trigger trigger in sortedTriggers)
             {
                 lbTriggers.AddItem(new XNAListBoxItem() 
                 { 
