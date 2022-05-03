@@ -41,6 +41,9 @@ namespace TSMapEditor.Initialization
             const string sectionName = "Basic";
 
             var section = FindOrMakeSection(sectionName, mapIni);
+            if (string.IsNullOrWhiteSpace(map.Basic.Player))
+                map.Basic.MaxPlayer = map.Waypoints.Count(wp => wp.Identifier < 8);
+
             map.Basic.WritePropertiesToIniSection(section);
         }
 
