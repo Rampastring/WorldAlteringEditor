@@ -175,7 +175,7 @@ namespace TSMapEditor.Mutations.Classes
                             else if (otherTileSetId != 0 && !latGrounds.Exists(lg => lg.BaseTileSet.Index == otherTileSetId))
                             {
                                 baseTileSetId = 0;
-                                break;
+                                continue;
                             }
                         }
                         else
