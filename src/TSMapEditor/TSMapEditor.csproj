@@ -47,7 +47,7 @@
   <ItemGroup>
     <Reference Include="MonoGame.Framework, Version=3.6.0.1625, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Rampastring.XNAUI\References\Windows\MonoGame.Framework.dll</HintPath>
+      <HintPath>..\..\..\Rampastring.XNAUI\References\Windows\MonoGame.Framework.dll</HintPath>
     </Reference>
     <Reference Include="Rampastring.Tools">
       <HintPath>..\..\Rampastring.Tools\bin\Release\Rampastring.Tools.dll</HintPath>
@@ -309,6 +309,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rendering\EditorState.cs" />
     <Compile Include="Rendering\GameClass.cs" />
+    <Compile Include="Rendering\GraphicalBaseNode.cs" />
     <Compile Include="Rendering\MapView.cs" />
     <Compile Include="Rendering\MGTMPImage.cs" />
     <Compile Include="Rendering\Refresh.cs" />

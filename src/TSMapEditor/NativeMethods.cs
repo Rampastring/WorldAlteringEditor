@@ -22,11 +22,30 @@ namespace TSMapEditor
         private const int LOGPIXELSY = 90;
 
 
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool AllocConsole();
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool FreeConsole();
+
+
         public static int GetScreenDPI()
         {
             // This function currently only works on Windows
             IntPtr hdc = GetDC(IntPtr.Zero);
             return GetDeviceCaps(hdc, LOGPIXELSX);
+        }
+
+        public static void CreateConsole()
+        {
+            AllocConsole();
+        }
+
+        public static void DisableConsole()
+        {
+            FreeConsole();
         }
     }
 }
