@@ -105,7 +105,7 @@ namespace TSMapEditor.Rendering
         }
 
         private RenderTarget2D mapRenderTarget;
-        private RenderTarget2D objectRenderTarget;
+        private RenderTarget2D transparencyRenderTarget;
 
         private MapTile tileUnderCursor;
         private MapTile lastTileUnderCursor;
@@ -172,7 +172,7 @@ namespace TSMapEditor.Rendering
             mapWideOverlayTextureOpacity = UserSettings.Instance.MapWideOverlayOpacity / 255.0f;
 
             mapRenderTarget = CreateFullMapRenderTarget();
-            objectRenderTarget = CreateFullMapRenderTarget();
+            transparencyRenderTarget = CreateFullMapRenderTarget();
 
             refreshSizeSetting = UserSettings.Instance.RefreshSize;
             scrollRate = UserSettings.Instance.ScrollRate;
@@ -236,10 +236,10 @@ namespace TSMapEditor.Rendering
         {
             // We need to re-create our map texture
             mapRenderTarget?.Dispose();
-            objectRenderTarget?.Dispose();
+            transparencyRenderTarget?.Dispose();
 
             mapRenderTarget = CreateFullMapRenderTarget();
-            objectRenderTarget = CreateFullMapRenderTarget();
+            transparencyRenderTarget = CreateFullMapRenderTarget();
 
             // And then re-draw the whole map
             InvalidateMap();
@@ -301,7 +301,6 @@ namespace TSMapEditor.Rendering
             DrawObjects();
             DrawCellTags();
             DrawWaypoints();
-            DrawMapBorder();
 
             DrawTubes();
 
@@ -365,83 +364,6 @@ namespace TSMapEditor.Rendering
             gameObjects = gameObjects.OrderBy(s => s.GetYPositionForDrawOrder())
                 .ThenBy(s => s.GetXPositionForDrawOrder()).ToList();
             gameObjects.ForEach(go => DrawObject(go));
-        }
-
-        private void RefreshOverArea(RefreshPoint refreshPoint)
-        {
-            var tilesToRedraw = new List<MapTile>();
-            var waypointsToRedraw = new List<Waypoint>();
-            var cellTagsToRedraw = new List<CellTag>();
-            var objectsToRedraw = new List<GameObject>();
-            //const int tileRefreshArea = 10;
-            int objectRefreshArea = refreshPoint.Size + 3;
-
-            for (int y = -refreshPoint.Size; y <= refreshPoint.Size; y++)
-            {
-                for (int x = -refreshPoint.Size; x <= refreshPoint.Size; x++)
-                {
-                    var tile = Map.GetTile(refreshPoint.CellCoords.X + x, refreshPoint.CellCoords.Y + y);
-                    if (tile == null)
-                        continue;
-
-                    tilesToRedraw.Add(tile);
-
-                    if (tile.Waypoint != null)
-                        waypointsToRedraw.Add(tile.Waypoint);
-
-                    if (tile.CellTag != null)
-                        cellTagsToRedraw.Add(tile.CellTag);
-                }
-            }
-
-            for (int y = -objectRefreshArea; y <= objectRefreshArea; y++)
-            {
-                for (int x = -objectRefreshArea; x <= objectRefreshArea; x++)
-                {
-                    var tile = Map.GetTile(refreshPoint.CellCoords.X + x, refreshPoint.CellCoords.Y + y);
-                    if (tile == null)
-                        continue;
-
-                    for (int i = 0; i < tile.Infantry.Length; i++)
-                    {
-                        if (tile.Infantry[i] != null)
-                            objectsToRedraw.Add(tile.Infantry[i]);
-                    }
-
-                    if (tile.Aircraft != null)
-                        objectsToRedraw.Add(tile.Aircraft);
-
-                    if (tile.Vehicle != null)
-                        objectsToRedraw.Add(tile.Vehicle);
-
-                    if (tile.Structure != null && !objectsToRedraw.Contains(tile.Structure))
-                        objectsToRedraw.Add(tile.Structure);
-
-                    if (tile.TerrainObject != null)
-                        objectsToRedraw.Add(tile.TerrainObject);
-                }
-            }
-
-            objectsToRedraw = objectsToRedraw.OrderBy(s => s.GetYPositionForDrawOrder())
-                .ThenBy(s => s.GetXPositionForDrawOrder()).ToList();
-
-            Renderer.PushRenderTarget(mapRenderTarget);
-            tilesToRedraw.ForEach(t => DrawTerrainTile(t));
-            tilesToRedraw.ForEach(t => 
-            { 
-                if (t.Smudge != null)
-                    DrawObject(t.Smudge); 
-            });
-            tilesToRedraw.ForEach(t =>
-            {
-                if (t.Overlay != null)
-                    DrawObject(t.Overlay);
-            });
-            objectsToRedraw.ForEach(o => DrawObject(o));
-            cellTagsToRedraw.ForEach(c => DrawCellTag(c));
-            waypointsToRedraw.ForEach(w => DrawWaypoint(w));
-            DrawMapBorder();
-            Renderer.PopRenderTarget();
         }
 
         private void DrawObject(GameObject gameObject)
@@ -593,6 +515,7 @@ namespace TSMapEditor.Rendering
             if (gameObject.WhatAmI() == RTTIType.Unit)
             {
                 var unit = (Unit)gameObject;
+
                 if (unit.UnitType.Turret)
                 {
                     int turretFrameIndex = unit.GetTurretFrameIndex();
@@ -614,6 +537,43 @@ namespace TSMapEditor.Rendering
                         }
                     }
                 }
+            }
+        }
+
+        private void DrawBaseNode(GraphicalBaseNode graphicalBaseNode)
+        {
+            Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(graphicalBaseNode.BaseNode.Location, Map.Size.X);
+
+            ObjectImage graphics = TheaterGraphics.BuildingTextures[graphicalBaseNode.BuildingType.Index];
+            Color replacementColor = Color.Yellow;
+            string iniName = graphicalBaseNode.BuildingType.ININame;
+            Color remapColor = graphicalBaseNode.BuildingType.ArtConfig.Remapable ? graphicalBaseNode.Owner.XNAColor : Color.White;
+            Color foundationLineColor = graphicalBaseNode.Owner.XNAColor;
+
+            if (graphics == null || graphics.Frames.Length == 0)
+            {
+                DrawStringWithShadow(iniName, 1, drawPoint.ToXNAVector(), replacementColor, 1.0f);
+                return;
+            }
+
+            int yDrawOffset = Constants.CellSizeY / -2;
+            int frameIndex = 0;
+
+
+            var frame = graphics.Frames[frameIndex];
+            if (frame == null)
+                return;
+
+            var texture = frame.Texture;
+            DrawTexture(texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
+                drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
+                texture.Width, texture.Height), Constants.HQRemap ? Color.White : remapColor);
+
+            if (Constants.HQRemap && graphics.RemapFrames != null)
+            {
+                DrawTexture(graphics.RemapFrames[frameIndex].Texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
+                    drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
+                    texture.Width, texture.Height), remapColor);
             }
         }
 
@@ -704,8 +664,8 @@ namespace TSMapEditor.Rendering
             const int HeightAddition = 4; // TS engine adds 4 to specified map height <3
             const int TopImpassableCellCount = 3; // The northernmost 3 cells are impassable in the TS engine, we'll also display this border
 
-            int x = Map.LocalSize.X * Constants.CellSizeX;
-            int y = (int)(((double)Map.LocalSize.Y - InitialHeight) * Constants.CellSizeY);
+            int x = Map.LocalSize.X * Constants.CellSizeX - cameraTopLeftPoint.X;
+            int y = (int)(((double)Map.LocalSize.Y - InitialHeight) * Constants.CellSizeY) - cameraTopLeftPoint.Y;
             int width = Map.LocalSize.Width * Constants.CellSizeX;
             int height = (Map.LocalSize.Height + HeightAddition) * Constants.CellSizeY;
 
@@ -1226,7 +1186,6 @@ namespace TSMapEditor.Rendering
                 }
 
                 DrawTubes();
-                DrawMapBorder();
                 Renderer.PopRenderTarget();
             }
 
@@ -1239,6 +1198,14 @@ namespace TSMapEditor.Rendering
 
             DrawTexture(mapRenderTarget, new Rectangle(cameraTopLeftPoint.X, cameraTopLeftPoint.Y,
                 Width, Height), new Rectangle(0, 0, Width, Height), Color.White);
+
+            DrawMapBorder();
+            Renderer.PushRenderTarget(transparencyRenderTarget);
+            GraphicsDevice.Clear(Color.Transparent);
+            Map.GraphicalBaseNodes.ForEach(bn => DrawBaseNode(bn));
+            Renderer.PopRenderTarget();
+            DrawTexture(transparencyRenderTarget, new Rectangle(cameraTopLeftPoint.X, cameraTopLeftPoint.Y, Width, Height),
+                new Rectangle(0, 0, Width, Height), new Color(128, 128, 255) * 0.5f);
 
             if (IsActive && tileUnderCursor != null && CursorAction != null)
             {

@@ -70,6 +70,8 @@ namespace TSMapEditor.Models
 
         public Lighting Lighting { get; } = new Lighting();
 
+        public List<GraphicalBaseNode> GraphicalBaseNodes { get; } = new List<GraphicalBaseNode>();
+
         public Point2D Size { get; set; }
 
         private Rectangle _localSize;
@@ -185,7 +187,7 @@ namespace TSMapEditor.Models
                         }
 
                         var graphicalBaseNode = new GraphicalBaseNode(baseNode, buildingType, house);
-                        cell.GraphicalBaseNodes.Add(graphicalBaseNode);
+                        GraphicalBaseNodes.Add(graphicalBaseNode);
                     }
                 }
             }
