@@ -53,60 +53,35 @@ namespace TSMapEditor.Scripts
                 int tileWidth = tileImage.Width;
                 int tileHeight = tileImage.Height;
 
-                // Set up parameters for looping through rows of the map
-                int initialX = mapEdgeMargin;
-                int initialY = map.Size.X;
-
-                bool incrementY = false;
-
-                // 2nd loop - loops through rows of the map
-                while (initialX + initialY < map.Size.X * 2 + map.Size.Y - mapEdgeMargin)
+                map.DoForAllValidTiles(mapCell =>
                 {
-                    Logger.Log("Looping through row starting at " + initialX + ", " + initialY);
+                    const int margin = 4;
 
-                    int x = initialX;
-                    int y = initialY;
+                    // As an animation, animated water slows down the game, so don't place it outside of the visible map area
+                    var pixelCoords = CellMath.CellTopLeftPointFromCellCoords(mapCell.CoordsToPoint(), map.Size.X);
+                    if (pixelCoords.Y < Constants.CellSizeY * margin || pixelCoords.Y > map.Size.Y * Constants.CellSizeY - (Constants.CellSizeY * margin))
+                        return;
 
-                    // 3rd loop - loops through cells of one specific row
-                    int traversedTiles = 0;
-                    while (traversedTiles < map.Size.X - mapEdgeMargin)
-                    {
-                        Point2D point = new Point2D(x, y);
-                        var mapCell = map.GetTile(point);
+                    if (pixelCoords.X < Constants.CellSizeX * margin || pixelCoords.X > map.Size.X * Constants.CellSizeX - (Constants.CellSizeX * margin))
+                        return;
 
-                        // Increase the loop variables here so we are able to 'continue' in the code parts below this one
-                        traversedTiles++;
-                        x++;
-                        y--;
+                    // Check whether this cell contains water
+                    if (!IsWaterTile(mapCell.TileIndex))
+                        return;
 
-                        if (mapCell == null)
-                            continue;
+                    // We know that we're on a water cell, check if we can fit the animated water tile here
+                    if (!CanFitAnimatedWaterTileHere(map, mapCell.X, mapCell.Y, tileWidth, tileHeight))
+                        return;
 
-                        // Check whether this cell contains water
-                        if (!IsWaterTile(mapCell.TileIndex))
-                            continue;
+                    // If we can fit the animated water tile here, then proceed to
+                    // randomly select a tile from the list of animated water tiles
+                    // of the current size
+                    int[] potentialTileIndexes = tileIndexesToPickFrom[sizeTypeIndex];
+                    tileImage = map.TheaterInstance.GetTile(animatedWaterTileSet.StartTileIndex + potentialTileIndexes[random.Next(potentialTileIndexes.Length)]);
 
-                        // We know that we're on a water cell, check if we can fit the animated water tile here
-                        if (!CanFitAnimatedWaterTileHere(map, point.X, point.Y, tileWidth, tileHeight))
-                            continue;
-
-                        // If we can fit the animated water tile here, then proceed to
-                        // randomly select a tile from the list of animated water tiles
-                        // of the current size
-                        int[] potentialTileIndexes = tileIndexesToPickFrom[sizeTypeIndex];
-                        tileImage = map.TheaterInstance.GetTile(animatedWaterTileSet.StartTileIndex + potentialTileIndexes[random.Next(potentialTileIndexes.Length)]);
-
-                        // Place the tile!
-                        map.PlaceTerrainTileAt(tileImage, point);
-                    }
-
-                    if (incrementY)
-                        initialX++;
-                    else
-                        initialY++;
-
-                    incrementY = !incrementY;
-                }
+                    // Place the tile!
+                    map.PlaceTerrainTileAt(tileImage, mapCell.CoordsToPoint());
+                });
             }
         }
 
