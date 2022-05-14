@@ -42,12 +42,16 @@ namespace TSMapEditor.UI.Windows
             Name = nameof(AutoApplyImpassableOverlayWindow);
             base.Initialize();
 
-            impassableOverlayType = map.Rules.OverlayTypes.Find(ovt => ovt.ININame == overlayTypeName) ?? 
-                throw new INIConfigException(nameof(AutoApplyImpassableOverlayWindow) + ": Invalid impassable overlay type " + overlayTypeName);
+            impassableOverlayType = map.Rules.OverlayTypes.Find(ovt => ovt.ININame == overlayTypeName);
+            
+            if (impassableOverlayType == null)
+            {
+                Logger.Log(nameof(AutoApplyImpassableOverlayWindow) + ": Invalid impassable overlay type " + overlayTypeName);
+            }
 
             chkRemoveExistingImpassableOverlay = FindChild<XNACheckBox>(nameof(chkRemoveExistingImpassableOverlay));
             chkOverrideExistingOverlay = FindChild<XNACheckBox>(nameof(chkOverrideExistingOverlay));
-            FindChild<EditorButton>("btnApply").LeftClick += AutoApplyImpassableOverlayWindow_LeftClick;
+            FindChild<EditorButton>("btnApply").LeftClick += BtnApply_LeftClick;
         }
 
         public void Open()
@@ -55,8 +59,17 @@ namespace TSMapEditor.UI.Windows
             Show();
         }
 
-        private void AutoApplyImpassableOverlayWindow_LeftClick(object sender, EventArgs e)
+        private void BtnApply_LeftClick(object sender, EventArgs e)
         {
+            if (impassableOverlayType == null)
+            {
+                EditorMessageBox.Show(WindowManager, "Cannot apply impassable overlay",
+                    "The editor has not been configured properly for applying impassable overlay.\r\n\r\n" +
+                    "Expected overlay type not found, name: " + overlayTypeName, MessageBoxButtons.OK);
+
+                return;
+            }
+
             if (chkRemoveExistingImpassableOverlay.Checked)
             {
                 map.DoForAllValidTiles(tile =>
