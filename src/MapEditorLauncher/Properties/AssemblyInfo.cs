@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("MapEditorLauncher")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("DTA Scenario Editor Launcher")]
+[assembly: AssemblyDescription("DTA Scenario Editor Launcher")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("MapEditorLauncher")]
-[assembly: AssemblyCopyright("Copyright ©  2022")]
+[assembly: AssemblyCompany("Rampastring")]
+[assembly: AssemblyProduct("Dawn of the Tiberium Age")]
+[assembly: AssemblyCopyright("Copyright © Rami 'Rampastring' Pasanen 2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -1,5 +1,4 @@
-﻿using Rampastring.Tools;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -18,10 +17,6 @@ namespace MapEditorLauncher
             Console.WriteLine("By Rampastring");
             Console.WriteLine("http://rampastring.net");
             Console.WriteLine();
-
-            Logger.WriteToConsole = true;
-            Logger.WriteLogFile = false;
-            Logger.Initialize(Environment.CurrentDirectory + "/", "LauncherLog.log");
 
             new UpdaterLink().Run();
 
@@ -49,6 +44,8 @@ namespace MapEditorLauncher
                 LogLineGenerate("Stack trace: " + ex.InnerException.StackTrace, sb, exceptLogPath);
             }
 
+            Console.WriteLine("An error was encountered while starting or updating the map editor.");
+            Console.WriteLine("If the problem persists, please contact the developers for support.");
             Console.WriteLine("Press any key to exit.");
             Console.ReadLine();
 
@@ -58,7 +55,7 @@ namespace MapEditorLauncher
         private static void LogLineGenerate(string text, StringBuilder sb, string exceptLogPath)
         {
             sb.Append(text + Environment.NewLine);
-            Logger.ForceLog(text, exceptLogPath);
+            Console.WriteLine(text + Environment.NewLine);
         }
     }
 }

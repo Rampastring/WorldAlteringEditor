@@ -1,5 +1,4 @@
-﻿using Rampastring.Tools;
-using Rampastring.Updater;
+﻿using Rampastring.Updater;
 using System;
 using System.IO;
 using System.Threading;
@@ -14,7 +13,7 @@ namespace MapEditorLauncher
         public UpdaterLink()
         {
             buildHandler = new BuildHandler(Environment.CurrentDirectory,
-                "Updater/SecondStageUpdater.exe");
+                "SecondStageUpdater/SecondStageUpdater.exe");
             buildHandler.AddUpdateMirror("https://rampastring.cnc-comm.com/DTAScenarioEditorUpdates/", "CnCNet (cnc-comm.com)");
             buildHandler.ReadLocalBuildInfo();
             buildHandler.UpdateCheckFailed += BuildHandler_UpdateCheckFailed;

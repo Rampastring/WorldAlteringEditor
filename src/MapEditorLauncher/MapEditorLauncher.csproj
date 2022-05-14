@@ -32,10 +32,10 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>editoricon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Rampastring.Tools">
-      <HintPath>..\..\..\Rampastring.Tools\bin\Release\Rampastring.Tools.dll</HintPath>
-    </Reference>
     <Reference Include="Rampastring.Updater">
       <HintPath>..\..\..\Rampastring.Updater\Rampastring.Updater\bin\Release\Rampastring.Updater.dll</HintPath>
     </Reference>
@@ -49,21 +49,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Logger.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UpdaterLink.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="Updater\SecondStageUpdaterConfig.ini">
+    <None Include="SecondStageUpdater\SecondStageUpdaterConfig.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Updater\SecondStageUpdater.exe">
+    <Content Include="editoricon.ico" />
+    <Content Include="SecondStageUpdater\SecondStageUpdater.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Updater\SecondStageUpdater.pdb">
+    <Content Include="SecondStageUpdater\SecondStageUpdater.pdb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
