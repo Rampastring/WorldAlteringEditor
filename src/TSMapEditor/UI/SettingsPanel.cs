@@ -166,8 +166,8 @@ namespace TSMapEditor.UI
 
             const int MinWidth = 1024;
             const int MinHeight = 600;
-            const int MaxWidth = 16384;
-            const int MaxHeight = 16384;
+            int MaxWidth = Screen.PrimaryScreen.Bounds.Width;
+            int MaxHeight = Screen.PrimaryScreen.Bounds.Height;
 
             var resolutions = GetResolutions(MinWidth, MinHeight, MaxWidth, MaxHeight);
             resolutions.ForEach(res => ddDisplayResolution.AddItem(new XNADropDownItem() { Text = res.Width + "x" + res.Height, Tag = res }));
@@ -182,11 +182,24 @@ namespace TSMapEditor.UI
         {
             var userSettings = UserSettings.Instance;
 
-            string dispResolution = userSettings.ResolutionWidth.GetValue() + "x" + userSettings.ResolutionHeight.GetValue();
-            ddDisplayResolution.SelectedIndex = ddDisplayResolution.Items.FindIndex(i => i.Text == dispResolution);
+            int width = userSettings.ResolutionWidth.GetValue();
+            int height = userSettings.ResolutionHeight.GetValue();
 
-            string renderResolution = userSettings.RenderResolutionWidth.GetValue() + "x" + userSettings.RenderResolutionHeight.GetValue();
-            ddRenderResolution.SelectedIndex = ddRenderResolution.Items.FindIndex(i => i.Text == renderResolution);
+            if (width < 0 || height < 0)
+            {
+                // First run - default to first resolution that is smaller than the user's desktop resolution
+                ddDisplayResolution.SelectedIndex = ddDisplayResolution.Items.Count - 2;
+                ddRenderResolution.SelectedIndex = ddRenderResolution.Items.Count - 2;
+            }
+            else
+            {
+                string dispResolution = userSettings.ResolutionWidth.GetValue() + "x" + userSettings.ResolutionHeight.GetValue();
+                ddDisplayResolution.SelectedIndex = ddDisplayResolution.Items.FindIndex(i => i.Text == dispResolution);
+
+                string renderResolution = userSettings.RenderResolutionWidth.GetValue() + "x" + userSettings.RenderResolutionHeight.GetValue();
+                ddRenderResolution.SelectedIndex = ddRenderResolution.Items.FindIndex(i => i.Text == renderResolution);
+            }
+
 
             ddTheme.SelectedIndex = userSettings.Theme == "Tiberium" ? 1 : 0;
 
