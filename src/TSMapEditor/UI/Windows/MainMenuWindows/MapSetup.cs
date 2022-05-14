@@ -29,10 +29,10 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
         /// <returns>Null of loading the map was successful, otherwise an error message.</returns>
         public static string InitializeMap(string gameDirectory, bool createNew, string existingMapPath, string newMapTheater, Point2D newMapSize)
         {
-            IniFile rulesIni = new IniFile(Path.Combine(gameDirectory, "INI/Rules.ini"));
-            IniFile firestormIni = new IniFile(Path.Combine(gameDirectory, "INI/Enhance.ini"));
-            IniFile artIni = new IniFile(Path.Combine(gameDirectory, "INI/Art.ini"));
-            IniFile artFSIni = new IniFile(Path.Combine(gameDirectory, "INI/ArtE.INI"));
+            IniFile rulesIni = new IniFile(Path.Combine(gameDirectory, Constants.RulesIniPath));
+            IniFile firestormIni = new IniFile(Path.Combine(gameDirectory, Constants.FirestormIniPath));
+            IniFile artIni = new IniFile(Path.Combine(gameDirectory, Constants.ArtIniPath));
+            IniFile artFSIni = new IniFile(Path.Combine(gameDirectory, Constants.FirestormArtIniPath));
             IniFile artOverridesIni = new IniFile(Path.Combine(Environment.CurrentDirectory, "Config/ArtOverrides.ini"));
             IniFile.ConsolidateIniFiles(artFSIni, artOverridesIni);
 

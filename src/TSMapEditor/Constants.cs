@@ -11,6 +11,11 @@ namespace TSMapEditor
         public static string ExpectedClientExecutableName = "DTA.exe";
         public static string GameRegistryInstallPath = "SOFTWARE\\DawnOfTheTiberiumAge";
 
+        public static string RulesIniPath;
+        public static string FirestormIniPath;
+        public static string ArtIniPath;
+        public static string FirestormArtIniPath;
+
         public const int TextureSizeLimit = 16384;
 
         public static int MaxMapWidth = TextureSizeLimit / CellSizeX;
@@ -55,14 +60,20 @@ namespace TSMapEditor
 
         public static void Init()
         {
-            const string SectionName = "Constants";
+            const string ConstantsSectionName = "Constants";
+            const string FilePathsSectionName = "FilePaths";
 
             IniFile constantsIni = new IniFile(Environment.CurrentDirectory + "/Config/Constants.ini");
 
-            CellSizeX = constantsIni.GetIntValue(SectionName, nameof(CellSizeX), CellSizeX);
-            CellSizeY = constantsIni.GetIntValue(SectionName, nameof(CellSizeY), CellSizeY);
-            ExpectedClientExecutableName = constantsIni.GetStringValue(SectionName, nameof(ExpectedClientExecutableName), ExpectedClientExecutableName);
-            GameRegistryInstallPath = constantsIni.GetStringValue(SectionName, nameof(GameRegistryInstallPath), GameRegistryInstallPath);
+            CellSizeX = constantsIni.GetIntValue(ConstantsSectionName, nameof(CellSizeX), CellSizeX);
+            CellSizeY = constantsIni.GetIntValue(ConstantsSectionName, nameof(CellSizeY), CellSizeY);
+            ExpectedClientExecutableName = constantsIni.GetStringValue(ConstantsSectionName, nameof(ExpectedClientExecutableName), ExpectedClientExecutableName);
+            GameRegistryInstallPath = constantsIni.GetStringValue(ConstantsSectionName, nameof(GameRegistryInstallPath), GameRegistryInstallPath);
+
+            RulesIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Rules", "INI/Rules.ini");
+            FirestormIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Firestorm", "INI/Enhance.ini");
+            ArtIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Art", "INI/Art.ini");
+            FirestormArtIniPath = constantsIni.GetStringValue(FilePathsSectionName, "ArtFS", "INI/ArtE.ini");
         }
     }
 }
