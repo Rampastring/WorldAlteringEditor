@@ -41,7 +41,7 @@ namespace TSMapEditor.CCEngine
 
             foreach (string namepart in only1x1TileSets)
             {
-                if (SetName.ToLowerInvariant().Contains(namepart))
+                if (SetName != null && SetName.ToLowerInvariant().Contains(namepart))
                     Only1x1 = true;
             }
         }
