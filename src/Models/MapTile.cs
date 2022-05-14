@@ -37,6 +37,8 @@ namespace TSMapEditor.Models
 
         public CellTag CellTag { get; set; }
 
+        public List<GraphicalBaseNode> GraphicalBaseNodes { get; set; }
+
         /// <summary>
         /// A list of objects that graphically overlap with this tile.
         /// When this tile is re-drawn, all the objects in the list should

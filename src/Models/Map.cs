@@ -153,6 +153,43 @@ namespace TSMapEditor.Models
             MapLoader.ReadUnits(this, mapIni);
             MapLoader.ReadInfantry(this, mapIni);
 
+            // Check base nodes and create graphical base node instances from them
+            if (Houses.Count > 0)
+            {
+                foreach (var house in Houses)
+                {
+                    for (int i = 0; i < house.BaseNodes.Count; i++)
+                    {
+                        var baseNode = house.BaseNodes[i];
+
+                        BuildingType buildingType = Rules.BuildingTypes.Find(bt => bt.ININame == baseNode.StructureTypeName);
+                        bool remove = false;
+                        if (buildingType == null)
+                        {
+                            Logger.Log($"Building type {baseNode.StructureTypeName} not found for base node for house {house.ININame}! Removing the node.");
+                            remove = true;
+                        }
+                        
+                        var cell = GetTile(baseNode.Location);
+                        if (cell == null)
+                        {
+                            Logger.Log($"Base node for building type {baseNode.StructureTypeName} for house {house.ININame} is outside of the map! Coords: {baseNode.Location}. Removing the node.");
+                            remove = true;
+                        }
+
+                        if (remove)
+                        {
+                            house.BaseNodes.RemoveAt(i);
+                            i--;
+                            continue;
+                        }
+
+                        var graphicalBaseNode = new GraphicalBaseNode(baseNode, buildingType, house);
+                        cell.GraphicalBaseNodes.Add(graphicalBaseNode);
+                    }
+                }
+            }
+
             Lighting.ReadFromIniFile(mapIni);
         }
 

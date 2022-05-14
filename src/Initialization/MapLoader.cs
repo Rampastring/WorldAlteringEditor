@@ -786,7 +786,7 @@ namespace TSMapEditor.Initialization
                 var houseSection = mapIni.GetSection(houseName);
                 if (houseSection != null)
                 {
-                    house.ReadPropertiesFromIniSection(houseSection);
+                    house.ReadFromIniSection(houseSection);
 
                     var color = map.Rules.Colors.Find(c => c.Name == house.Color);
                     if (color == null)

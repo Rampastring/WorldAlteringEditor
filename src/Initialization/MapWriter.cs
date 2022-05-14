@@ -378,7 +378,7 @@ namespace TSMapEditor.Initialization
                 // TODO don't remove section until we can handle base nodes
                 // mapIni.RemoveSection(house.ININame);
                 var houseSection = FindOrMakeSection(house.ININame, mapIni);
-                house.WritePropertiesToIniSection(houseSection);
+                house.WriteToIniSection(houseSection);
             }
         }
 
