@@ -104,6 +104,8 @@ namespace TSMapEditor.Rendering
             set => EditorState.CursorAction = value;
         }
 
+        private Texture2D impassableCellHighlightTexture;
+
         private RenderTarget2D mapRenderTarget;
         private RenderTarget2D transparencyRenderTarget;
 
@@ -164,6 +166,8 @@ namespace TSMapEditor.Rendering
         public override void Initialize()
         {
             base.Initialize();
+
+            impassableCellHighlightTexture = AssetLoader.LoadTexture("impassablehighlight.png");
 
             const string MapWideOverlayTextureName = "mapwideoverlay.png";
             if (AssetLoader.AssetExists(MapWideOverlayTextureName))
@@ -1040,14 +1044,18 @@ namespace TSMapEditor.Rendering
                 return;
             }
 
-            Color lineColor = new Color(255, 0, 0, 255);
             Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cell.CoordsToPoint(), Map.Size.X);
+
+            DrawTexture(impassableCellHighlightTexture, cellTopLeftPoint.ToXNAPoint(), Color.White);
+
+            /*
+            Color lineColor = new Color(255, 0, 0, 255);
 
             var cellTopPoint = new Vector2(cellTopLeftPoint.X + Constants.CellSizeX / 2, cellTopLeftPoint.Y);
             var cellLeftPoint = new Vector2(cellTopLeftPoint.X, cellTopLeftPoint.Y + Constants.CellSizeY / 2);
             var cellRightPoint = new Vector2(cellTopLeftPoint.X + Constants.CellSizeX, cellLeftPoint.Y);
             var cellBottomPoint = new Vector2(cellTopPoint.X, cellTopLeftPoint.Y + Constants.CellSizeY);
-
+            
             DrawLine(cellTopPoint, cellLeftPoint, lineColor, 1);
             DrawLine(cellRightPoint, cellTopPoint, lineColor, 1);
             DrawLine(cellBottomPoint, cellLeftPoint, lineColor, 1);
@@ -1060,6 +1068,7 @@ namespace TSMapEditor.Rendering
             DrawLine(cellRightPoint + down, cellTopPoint + down, shadowColor, 1);
             DrawLine(cellBottomPoint + down, cellLeftPoint + down, shadowColor, 1);
             DrawLine(cellRightPoint + down, cellBottomPoint + down, shadowColor, 1);
+            */
         }
 
         public void DeleteObjectFromCell(Point2D cellCoords)
