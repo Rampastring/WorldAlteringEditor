@@ -454,7 +454,7 @@ namespace TSMapEditor.Initialization
             const string sectionName = "Infantry";
 
             mapIni.RemoveSection(sectionName);
-            if (map.Units.Count == 0)
+            if (map.Infantry.Count == 0)
                 return;
 
             var section = new IniSection(sectionName);
