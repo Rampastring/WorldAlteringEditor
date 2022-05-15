@@ -20,6 +20,7 @@ namespace TSMapEditor.Rendering
         public GameClass()
         {
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            Program.DisableExceptionHandler();
 
             Logger.WriteToConsole = true;
             Logger.WriteLogFile = true;

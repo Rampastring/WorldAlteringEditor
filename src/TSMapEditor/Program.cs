@@ -21,7 +21,12 @@ namespace TSMapEditor
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             var ex = (Exception)e.ExceptionObject;
-            MessageBox.Show(ex.Message);
+            MessageBox.Show("The map editor failed to launch.\r\n\r\nReason: " + ex.Message + "\r\n\r\n Stack trace: " + ex.StackTrace);
+        }
+
+        public static void DisableExceptionHandler()
+        {
+            AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
         }
     }
 }
