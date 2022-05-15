@@ -99,12 +99,15 @@ namespace TSMapEditor.CCEngine
     public class TmpImage
     {
         public const int IMAGE_HEADER_SIZE = 48;
-        public const int COLOR_SIZE = 576;
 
         public TmpImage(Stream stream)
         {
-            if (stream.Length < stream.Position + IMAGE_HEADER_SIZE + COLOR_SIZE)
-                throw new ArgumentException("buffer is not long enough");
+            long expectedLength = stream.Position + IMAGE_HEADER_SIZE + Constants.TileColorBufferSize;
+            if (stream.Length < expectedLength)
+            {
+                throw new ArgumentException($"TMP file buffer ran out unexpectedly: " +
+                    $"expected length of at least {expectedLength}, actual length: {stream.Length}");
+            }
 
             X = ReadIntFromStream(stream);
             Y = ReadIntFromStream(stream);
@@ -127,7 +130,7 @@ namespace TSMapEditor.CCEngine
             RadarRightColor = new RGBColor(buffer, 0);
             stream.Read(buffer, 0, Unknown.Length);
             Array.ConstrainedCopy(buffer, 0, Unknown, 0, Unknown.Length);
-            stream.Read(ColorData, 0, COLOR_SIZE);
+            stream.Read(ColorData, 0, Constants.TileColorBufferSize);
 
             //ExtraGraphicsData = new byte[ExtraWidth * ExtraHeight];
             //stream.Read(ExtraGraphicsData, 0, ExtraGraphicsData.Length);
@@ -164,7 +167,7 @@ namespace TSMapEditor.CCEngine
         public RGBColor RadarRightColor { get; set; }
         public byte[] Unknown = new byte[3];
 
-        public byte[] ColorData = new byte[COLOR_SIZE];
+        public byte[] ColorData = new byte[Constants.TileColorBufferSize];
         public byte[] ExtraGraphicsData = new byte[0];
     }
 

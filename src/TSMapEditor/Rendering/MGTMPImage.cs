@@ -65,7 +65,7 @@ namespace TSMapEditor.Rendering
                     tmpPixelIndex++;
                 }
 
-                if (i < 11)
+                if (i < (Constants.CellSizeY / 2) - 1)
                     w += 4;
                 else
                     w -= 4;
