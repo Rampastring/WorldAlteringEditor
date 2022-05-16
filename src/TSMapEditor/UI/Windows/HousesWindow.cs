@@ -92,7 +92,7 @@ namespace TSMapEditor.UI.Windows
         {
             if (ddHouseOfHumanPlayer.SelectedItem == null || ddHouseOfHumanPlayer.SelectedIndex == 0)
             {
-                map.Basic.Player = "none";
+                map.Basic.Player = null;
                 return;
             }
 

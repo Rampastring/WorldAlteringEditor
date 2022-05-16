@@ -121,6 +121,8 @@ namespace TSMapEditor.Models
 
                     if (value != null)
                         iniSection.SetStringValue(property.Name, value);
+                    else
+                        iniSection.RemoveKey(property.Name);
                 }
             }
         }
