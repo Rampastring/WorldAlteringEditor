@@ -93,6 +93,10 @@ namespace TSMapEditor
         {
             switch (landType)
             {
+                case 0x1:
+                case 0x2:
+                case 0x3:
+                case 0x4:
                 case 0x9:
                     return considerLandUnitsOnly;
                 case 0x7:
