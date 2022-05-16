@@ -1063,7 +1063,7 @@ namespace TSMapEditor.Models
             DoForAllValidTiles(cell =>
             {
                 // Check whether the cell has tiberium on an impassable terrain type
-                if (cell.Overlay != null && cell.Overlay.OverlayType != null && cell.Overlay.OverlayType.Tiberium)
+                if (cell.HasTiberium())
                 {
                     ITileImage tile = TheaterInstance.GetTile(cell.TileIndex);
                     ISubTileImage subTile = tile.GetSubTile(cell.SubTileIndex);

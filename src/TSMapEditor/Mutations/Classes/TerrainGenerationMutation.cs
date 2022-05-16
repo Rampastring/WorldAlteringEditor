@@ -468,7 +468,7 @@ namespace TSMapEditor.Mutations.Classes
                     if (cell.TerrainObject != null)
                         chance = overlayGroup.OverlapChance;
 
-                    if (cell.Overlay != null)
+                    if (cell.Overlay != null && cell.Overlay.OverlayType != null)
                         continue;
 
                     if (random.NextDouble() < chance)
@@ -632,6 +632,9 @@ namespace TSMapEditor.Mutations.Classes
                 bool isBase = MutationTarget.Map.TheaterInstance.Theater.LATGrounds.Exists(latg => latg.BaseTileSet != null && latg.BaseTileSet.Index == tileSetId);
 
                 if (!mapTile.IsClearGround() && !isBase)
+                    return false;
+
+                if (mapTile.HasTiberium() && Helpers.IsLandTypeImpassable(subTile.TmpImage.TerrainType, true))
                     return false;
             }
 

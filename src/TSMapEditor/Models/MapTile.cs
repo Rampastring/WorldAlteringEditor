@@ -179,6 +179,14 @@ namespace TSMapEditor.Models
             return TileIndex == 0;
         }
 
+        /// <summary>
+        /// Returns a value that tells whether the cell has a harvestable resource (tiberium or ore) on it.
+        /// </summary>
+        public bool HasTiberium()
+        {
+            return Overlay != null && Overlay.OverlayType != null && Overlay.OverlayType.Tiberium;
+        }
+
         public Point2D CoordsToPoint() => new Point2D(X, Y);
     }
 }
