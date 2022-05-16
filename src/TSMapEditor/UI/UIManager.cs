@@ -2,6 +2,7 @@
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
+using System.Linq;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations;
@@ -185,6 +186,27 @@ namespace TSMapEditor.UI
             editorState.CursorAction = null;
 
             Alpha = 0f;
+
+            map.MapWritten += Map_MapWritten;
+        }
+
+        private void Map_MapWritten(object sender, EventArgs e)
+        {
+            var issues = map.CheckForIssues();
+
+            if (issues.Count > 0)
+            {
+                if (issues.Count > 10)
+                    issues = issues.Take(10).ToList();
+
+                var newline = Environment.NewLine;
+
+                string issuesString = string.Join(newline + newline, issues);
+
+                EditorMessageBox.Show(WindowManager, "Issues Found",
+                    "The map has been saved, but one or more issues have been found in the map. Please consider resolving them." + newline + newline + issuesString,
+                    MessageBoxButtons.OK);
+            }
         }
 
         private void CreateNewMapWindow_OnCreateNewMap(object sender, CreateNewMapEventArgs e)

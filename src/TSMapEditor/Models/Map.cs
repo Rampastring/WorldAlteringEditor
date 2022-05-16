@@ -18,6 +18,7 @@ namespace TSMapEditor.Models
         public event EventHandler HousesChanged;
         public event EventHandler LocalSizeChanged;
         public event EventHandler MapResized;
+        public event EventHandler MapWritten;
 
         public IniFile LoadedINI { get; set; }
 
@@ -228,6 +229,8 @@ namespace TSMapEditor.Models
 
             //LoadedINI.WriteIniFile(LoadedINI.FileName.Substring(0, LoadedINI.FileName.Length - 4) + "_test.map");
             LoadedINI.WriteIniFile(LoadedINI.FileName);
+
+            MapWritten?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -1047,6 +1050,32 @@ namespace TSMapEditor.Models
                     tt.ImpassableCells.Add(point);
                 }
             });
+        }
+
+        /// <summary>
+        /// Checks the map for issues.
+        /// Returns a list of issues found.
+        /// </summary>
+        public List<string> CheckForIssues()
+        {
+            var issueList = new List<string>();
+
+            DoForAllValidTiles(cell =>
+            {
+                // Check whether the cell has tiberium on an impassable terrain type
+                if (cell.Overlay != null && cell.Overlay.OverlayType != null && cell.Overlay.OverlayType.Tiberium)
+                {
+                    ITileImage tile = TheaterInstance.GetTile(cell.TileIndex);
+                    ISubTileImage subTile = tile.GetSubTile(cell.SubTileIndex);
+
+                    if (Helpers.IsLandTypeImpassable(subTile.TmpImage.TerrainType, true))
+                    {
+                        issueList.Add($"Cell at {cell.CoordsToPoint()} has tiberium on an otherwise impassable cell. This can cause harvesters to get stuck.");
+                    }
+                }
+            });
+
+            return issueList;
         }
     }
 }
