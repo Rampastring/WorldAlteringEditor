@@ -23,10 +23,26 @@ namespace TSMapEditor.UI.Windows
 
     public class MegamapWindow : EditorWindow
     {
+        private const int DefaultSizeChange = 20;
+        private const int MinSize = 100;
+
         public MegamapWindow(WindowManager windowManager, Texture2D megamapTexture, bool enableToolbar) : base(windowManager)
         {
             this.enableToolbar = enableToolbar;
-            this.megamapTexture = megamapTexture;
+            MegamapTexture = megamapTexture;
+
+            double ratio = MegamapTexture.Width / (double)MegamapTexture.Height;
+            if (ratio > 2.0)
+            {
+                Width = 300;
+                Height = (int)(Width / ratio);
+            }
+            else
+            {
+                Height = 150;
+                Width = (int)(Height * ratio);
+            }
+
             ClientRectangleUpdated += MegamapWindow_ClientRectangleUpdated;
         }
 
@@ -35,6 +51,38 @@ namespace TSMapEditor.UI.Windows
         public Rectangle CameraRectangle { get; set; }
 
         private void MegamapWindow_ClientRectangleUpdated(object sender, EventArgs e)
+        {
+            CalculateTextureDrawRectangle();
+
+            if (closeButton != null)
+                closeButton.X = Width - closeButton.Width;
+        }
+
+        private bool enableToolbar;
+
+        private Texture2D _megamapTexture;
+        public Texture2D MegamapTexture
+        {
+            get => _megamapTexture;
+            set
+            {
+                if (value != _megamapTexture)
+                {
+                    _megamapTexture = value;
+                    CalculateTextureDrawRectangle();
+                }
+            }
+        }
+
+        private EditorButton closeButton;
+
+        private Rectangle textureDrawRectangle;
+
+        private bool wasLeftDown = false;
+        private Point2D oldWindowPosition;
+
+
+        private void CalculateTextureDrawRectangle()
         {
             int startY;
             int previewHeight;
@@ -50,29 +98,15 @@ namespace TSMapEditor.UI.Windows
                 previewHeight = Height;
             }
 
-            float xRatio = Width / (float)megamapTexture.Width;
-            float yRatio = previewHeight / (float)megamapTexture.Height;
+            float xRatio = Width / (float)MegamapTexture.Width;
+            float yRatio = previewHeight / (float)MegamapTexture.Height;
             float drawRatio = Math.Min(xRatio, yRatio);
 
-            int drawWidth = (int)(megamapTexture.Width * drawRatio);
-            int drawHeight = (int)(megamapTexture.Height * drawRatio);
+            int drawWidth = (int)(MegamapTexture.Width * drawRatio);
+            int drawHeight = (int)(MegamapTexture.Height * drawRatio);
 
             textureDrawRectangle = new Rectangle((Width - drawWidth) / 2, startY + (previewHeight - drawHeight) / 2, drawWidth, drawHeight);
-
-            if (closeButton != null)
-                closeButton.X = Width - closeButton.Width;
         }
-
-        private bool enableToolbar;
-
-        private Texture2D megamapTexture;
-
-        private EditorButton closeButton;
-
-        private Rectangle textureDrawRectangle;
-
-        private bool wasLeftDown = false;
-        private Point2D oldWindowPosition;
 
         public override void Initialize()
         {
@@ -96,7 +130,7 @@ namespace TSMapEditor.UI.Windows
                 btnIncreaseSize.X = 0;
                 btnIncreaseSize.Y = 0;
                 AddChild(btnIncreaseSize);
-                btnIncreaseSize.LeftClick += (s, e) => { if (Width < WindowManager.RenderResolutionX) Width += 20; if (Height < WindowManager.RenderResolutionY) Height += 10; };
+                btnIncreaseSize.LeftClick += (s, e) => IncreaseSize();
 
                 var btnDecreaseSize = new EditorButton(WindowManager);
                 btnDecreaseSize.Name = nameof(btnDecreaseSize);
@@ -106,11 +140,51 @@ namespace TSMapEditor.UI.Windows
                 btnDecreaseSize.X = btnIncreaseSize.Right;
                 btnDecreaseSize.Y = 0;
                 AddChild(btnDecreaseSize);
-                btnDecreaseSize.LeftClick += (s, e) => { if (Width > 100) Width -= 20; if (Height > 100) Height -= 10; };
+                btnDecreaseSize.LeftClick += (s, e) => DecreaseSize();
             }
 
             Name = nameof(MegamapWindow);
             base.Initialize();
+        }
+
+        private void IncreaseSize()
+        {
+            ChangeSize(DefaultSizeChange);
+        }
+
+        private void DecreaseSize()
+        {
+            ChangeSize(-DefaultSizeChange);
+        }
+
+        private void ChangeSize(int amount)
+        {
+            int increaseX;
+            int increaseY;
+
+            double ratio = MegamapTexture.Width / (double)MegamapTexture.Height;
+            if (ratio > Constants.CellSizeX / Constants.CellSizeY)
+            {
+                increaseX = amount;
+                increaseY = (int)(amount / ratio);
+            }
+            else
+            {
+                increaseY = (int)(amount / ratio);
+                increaseX = (int)(increaseY * ratio);
+            }
+
+            if ((amount > 0 && Width < WindowManager.RenderResolutionX) ||
+                (amount < 0 && Width > MinSize))
+            {
+                Width += increaseX;
+            }
+
+            if ((amount > 0 && Height < WindowManager.RenderResolutionY) ||
+                (amount < 0 && Height > MinSize))
+            {
+                Height += increaseY;
+            }
         }
 
         public void Open()
@@ -124,11 +198,11 @@ namespace TSMapEditor.UI.Windows
 
             double x = cursorPoint.X - textureDrawRectangle.X;
             x /= textureDrawRectangle.Width;
-            x *= megamapTexture.Width;
+            x *= MegamapTexture.Width;
 
             double y = cursorPoint.Y - textureDrawRectangle.Y;
             y /= textureDrawRectangle.Height;
-            y *= megamapTexture.Height;
+            y *= MegamapTexture.Height;
 
             MegamapClicked?.Invoke(this, new MegamapClickedEventArgs(new Point2D((int)x, (int)y)));
         }
@@ -169,14 +243,14 @@ namespace TSMapEditor.UI.Windows
         {
             DrawPanel();
 
-            DrawTexture(megamapTexture, textureDrawRectangle, Color.White);
+            DrawTexture(MegamapTexture, textureDrawRectangle, Color.White);
             
             if (CameraRectangle.Width > 0 && CameraRectangle.Height > 0)
             {
-                double xPos = (CameraRectangle.X / (double)megamapTexture.Width) * textureDrawRectangle.Width;
-                double yPos = (CameraRectangle.Y / (double)megamapTexture.Height) * textureDrawRectangle.Height;
-                double width = (CameraRectangle.Width / (double)megamapTexture.Width) * textureDrawRectangle.Width;
-                double height = (CameraRectangle.Height / (double)megamapTexture.Height) * textureDrawRectangle.Height;
+                double xPos = (CameraRectangle.X / (double)MegamapTexture.Width) * textureDrawRectangle.Width;
+                double yPos = (CameraRectangle.Y / (double)MegamapTexture.Height) * textureDrawRectangle.Height;
+                double width = (CameraRectangle.Width / (double)MegamapTexture.Width) * textureDrawRectangle.Width;
+                double height = (CameraRectangle.Height / (double)MegamapTexture.Height) * textureDrawRectangle.Height;
 
                 DrawRectangle(new Rectangle(textureDrawRectangle.X + (int)xPos, textureDrawRectangle.Y + (int)yPos, (int)width, (int)height), Color.White, 1);
             }

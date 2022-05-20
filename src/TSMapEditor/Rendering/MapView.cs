@@ -245,6 +245,8 @@ namespace TSMapEditor.Rendering
             mapRenderTarget = CreateFullMapRenderTarget();
             transparencyRenderTarget = CreateFullMapRenderTarget();
 
+            windowController.MinimapWindow.MegamapTexture = mapRenderTarget;
+
             // And then re-draw the whole map
             InvalidateMap();
         }
