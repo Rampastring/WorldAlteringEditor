@@ -166,7 +166,7 @@ namespace TSMapEditor.Models
                 case RTTIType.Unit:
                     return Vehicle == null;
                 case RTTIType.Infantry:
-                    return Array.Exists(Infantry, i => i == null);
+                    return GetFreeSubCellSpot() != SubCell.None;
                 case RTTIType.Terrain:
                     return TerrainObject == null;
             }
