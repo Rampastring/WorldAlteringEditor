@@ -588,15 +588,30 @@ namespace TSMapEditor.Mutations.Classes
                         continue;
 
                     int tileSetIndex = MutationTarget.Map.TheaterInstance.GetTileSetId(mapTile.TileIndex);
+                    var tileSet = MutationTarget.Map.TheaterInstance.Theater.TileSets[tileSetIndex];
                     // Don't auto-lat ground that is a base for our placed ground type
                     // if ((baseTileSet != null && tileSetIndex == baseTileSet.Index) ||
                     //     (altBaseTileSet != null && tileSetIndex == altBaseTileSet.Index))
                     //     return;
 
+                    // MutationTarget.Map.TheaterInstance.Theater.TileSets[tileSetIndex].SetName.StartsWith("~~~")
+
+                    var latGrounds = MutationTarget.Map.TheaterInstance.Theater.LATGrounds;
+                    Func<TileSet, bool> miscChecker = null;
+                    if (tileSet.SetName.StartsWith("~~~"))
+                    {
+                        miscChecker = (ts) =>
+                        {
+                            // On its own line so it's possible to debug this
+                            return ts.SetName.StartsWith("~~~") && !latGrounds.Exists(g => g.GroundTileSet == ts);
+                        };
+                    }
+
+
                     var autoLatGround = MutationTarget.Map.TheaterInstance.Theater.LATGrounds.Find(g => g.GroundTileSet.Index == tileSetIndex || g.TransitionTileSet.Index == tileSetIndex);
                     if (autoLatGround != null)
                     {
-                        int autoLatIndex = MutationTarget.Map.GetAutoLATIndex(mapTile, autoLatGround.GroundTileSet.Index, autoLatGround.TransitionTileSet.Index);
+                        int autoLatIndex = MutationTarget.Map.GetAutoLATIndex(mapTile, autoLatGround.GroundTileSet.Index, autoLatGround.TransitionTileSet.Index, miscChecker);
                         if (autoLatIndex == -1)
                         {
                             mapTile.TileIndex = autoLatGround.GroundTileSet.StartTileIndex;
