@@ -187,6 +187,13 @@ namespace TSMapEditor.Models
             return Overlay != null && Overlay.OverlayType != null && Overlay.OverlayType.Tiberium;
         }
 
+        public void ChangeTileIndex(int newTileIndex, byte newSubTileIndex)
+        {
+            TileImage = null;
+            TileIndex = newTileIndex;
+            SubTileIndex = newSubTileIndex;
+        }
+
         public Point2D CoordsToPoint() => new Point2D(X, Y);
     }
 }

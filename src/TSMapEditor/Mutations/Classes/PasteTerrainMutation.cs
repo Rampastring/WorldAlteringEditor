@@ -386,9 +386,7 @@ namespace TSMapEditor.Mutations.Classes
             foreach (var originalTerrainData in terrainUndoData)
             {
                 var cell = MutationTarget.Map.GetTile(originalTerrainData.CellCoords);
-                cell.TileImage = null;
-                cell.TileIndex = originalTerrainData.TileIndex;
-                cell.SubTileIndex = originalTerrainData.SubTileIndex;
+                cell.ChangeTileIndex(originalTerrainData.TileIndex, originalTerrainData.SubTileIndex);
             }
 
             foreach (OriginalOverlayInfo info in overlayUndoData)

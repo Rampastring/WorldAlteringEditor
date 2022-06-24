@@ -98,9 +98,7 @@ namespace TSMapEditor.Mutations.Classes
                 var cell = MutationTarget.Map.GetTile(cellCoords);
                 originalData.Add(new OriginalCellTerrainData(cellCoords, cell.TileIndex, cell.SubTileIndex));
 
-                cell.TileImage = null;
-                cell.TileIndex = tile.TileID;
-                cell.SubTileIndex = 0;
+                cell.ChangeTileIndex(tile.TileID, 0);
             }
 
             undoData = originalData.ToArray();
@@ -112,9 +110,7 @@ namespace TSMapEditor.Mutations.Classes
             foreach (var originalTerrainData in undoData)
             {
                 var cell = MutationTarget.Map.GetTile(originalTerrainData.CellCoords);
-                cell.TileImage = null;
-                cell.TileIndex = originalTerrainData.TileIndex;
-                cell.SubTileIndex = originalTerrainData.SubTileIndex;
+                cell.ChangeTileIndex(originalTerrainData.TileIndex, originalTerrainData.SubTileIndex);
             }
 
             MutationTarget.InvalidateMap();

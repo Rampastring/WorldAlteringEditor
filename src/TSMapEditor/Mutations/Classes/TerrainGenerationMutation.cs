@@ -360,10 +360,7 @@ namespace TSMapEditor.Mutations.Classes
             foreach (var originalTerrainData in undoData)
             {
                 var mapCell = MutationTarget.Map.GetTile(originalTerrainData.CellCoords);
-
-                mapCell.TileImage = null;
-                mapCell.TileIndex = originalTerrainData.TileIndex;
-                mapCell.SubTileIndex = (byte)originalTerrainData.SubTileIndex;
+                mapCell.ChangeTileIndex(originalTerrainData.TileIndex, originalTerrainData.SubTileIndex);
             }
 
             foreach (var terrainObject in placedTerrainObjects)

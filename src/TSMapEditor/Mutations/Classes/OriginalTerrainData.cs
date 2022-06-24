@@ -4,7 +4,7 @@ namespace TSMapEditor.Mutations.Classes
 {
     public struct OriginalTerrainData
     {
-        public OriginalTerrainData(int tileIndex, int subTileIndex, Point2D cellCoords)
+        public OriginalTerrainData(int tileIndex, byte subTileIndex, Point2D cellCoords)
         {
             TileIndex = tileIndex;
             SubTileIndex = subTileIndex;
@@ -12,7 +12,7 @@ namespace TSMapEditor.Mutations.Classes
         }
 
         public int TileIndex;
-        public int SubTileIndex;
+        public byte SubTileIndex;
         public Point2D CellCoords;
     }
 }

@@ -244,12 +244,10 @@ namespace TSMapEditor.Mutations.Classes
             {
                 OriginalTerrainData originalTerrainData = undoData[i];
 
-                var mapTile = MutationTarget.Map.GetTile(originalTerrainData.CellCoords);
-                if (mapTile != null)
+                var mapCell = MutationTarget.Map.GetTile(originalTerrainData.CellCoords);
+                if (mapCell != null)
                 {
-                    mapTile.TileImage = null;
-                    mapTile.TileIndex = originalTerrainData.TileIndex;
-                    mapTile.SubTileIndex = (byte)originalTerrainData.SubTileIndex;
+                    mapCell.ChangeTileIndex(originalTerrainData.TileIndex, originalTerrainData.SubTileIndex);
                 }
             }
 

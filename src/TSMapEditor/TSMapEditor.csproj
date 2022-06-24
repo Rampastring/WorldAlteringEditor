@@ -316,6 +316,7 @@
     <Compile Include="Rendering\TheaterGraphics.cs" />
     <Compile Include="Rendering\TubeRefreshHelper.cs" />
     <Compile Include="Scripts\ApplyAnimatedWaterScript.cs" />
+    <Compile Include="Scripts\CR04Script.cs" />
     <Compile Include="Scripts\RemoveIMTOs.cs" />
     <Compile Include="Settings\BoolSetting.cs" />
     <Compile Include="Settings\IntSetting.cs" />
