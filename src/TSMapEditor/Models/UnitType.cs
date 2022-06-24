@@ -20,7 +20,8 @@ namespace TSMapEditor.Models
         public override RTTIType WhatAmI() => RTTIType.Unit;
 
         public bool Turret { get; set; }
-
+        public string SpeedType { get; set; }
+        public string MovementZone { get; set; }
 
         public int GetTurretStartFrame()
         {

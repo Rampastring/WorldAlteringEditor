@@ -42,6 +42,7 @@ namespace TSMapEditor.UI.Sidebar
             lbSelection.X = 0;
             lbSelection.Y = 0;
             lbSelection.Width = Width;
+            lbSelection.FontIndex = Constants.UIBoldFont;
 
             for (int i = 1; i < (int)SidebarMode.SidebarModeCount; i++)
             {
@@ -61,9 +62,13 @@ namespace TSMapEditor.UI.Sidebar
             buildingListPanel.Name = nameof(buildingListPanel);
             InitPanel(buildingListPanel);
 
-            var unitListPanel = new UnitListPanel(WindowManager, editorState, map, theaterGraphics, cursorActionTarget);
+            var unitListPanel = new UnitListPanel(WindowManager, editorState, map, theaterGraphics, cursorActionTarget, false);
             unitListPanel.Name = nameof(unitListPanel);
             InitPanel(unitListPanel);
+
+            var navalUnitListPanel = new UnitListPanel(WindowManager, editorState, map, theaterGraphics, cursorActionTarget, true);
+            navalUnitListPanel.Name = nameof(navalUnitListPanel);
+            InitPanel(navalUnitListPanel);
 
             var infantryListPanel = new InfantryListPanel(WindowManager, editorState, map, theaterGraphics, cursorActionTarget);
             infantryListPanel.Name = nameof(infantryListPanel);
@@ -86,6 +91,7 @@ namespace TSMapEditor.UI.Sidebar
                 aircraftListPanel,
                 buildingListPanel,
                 unitListPanel,
+                navalUnitListPanel,
                 infantryListPanel,
                 terrainObjectListPanel,
                 overlayListPanel,
@@ -99,10 +105,11 @@ namespace TSMapEditor.UI.Sidebar
             KeyboardCommands.Instance.AircraftMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 0;
             KeyboardCommands.Instance.BuildingMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 1;
             KeyboardCommands.Instance.VehicleMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 2;
-            KeyboardCommands.Instance.InfantryMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 3;
-            KeyboardCommands.Instance.TerrainObjectMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 4;
-            KeyboardCommands.Instance.OverlayMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 5;
-            KeyboardCommands.Instance.SmudgeMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 6;
+            KeyboardCommands.Instance.NavalMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 3;
+            KeyboardCommands.Instance.InfantryMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 4;
+            KeyboardCommands.Instance.TerrainObjectMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 5;
+            KeyboardCommands.Instance.OverlayMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 6;
+            KeyboardCommands.Instance.SmudgeMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 7;
 
             Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
         }

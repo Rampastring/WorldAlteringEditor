@@ -125,7 +125,7 @@ namespace TSMapEditor.UI.Sidebar
 
         protected abstract void InitObjects();
 
-        protected void InitObjectsBase<T>(List<T> objectTypeList, ObjectImage[] textures) where T : TechnoType, IArtConfigContainer
+        protected void InitObjectsBase<T>(List<T> objectTypeList, ObjectImage[] textures, Func<T, bool> filter = null) where T : TechnoType, IArtConfigContainer
         {
             var sideCategories = new List<TreeViewCategory>();
             for (int i = 0; i < objectTypeList.Count; i++)
@@ -141,6 +141,9 @@ namespace TSMapEditor.UI.Sidebar
                         continue;
                     }
                 }
+
+                if (filter != null && !filter(objectType))
+                    continue;
 
                 List<Color> remapColors = new List<Color>(1);
                 List<string> categories = new List<string>(1);

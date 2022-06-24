@@ -1,4 +1,5 @@
 ﻿using Rampastring.XNAUI;
+using System;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI.CursorActions;
@@ -10,10 +11,12 @@ namespace TSMapEditor.UI.Sidebar
     /// </summary>
     public class UnitListPanel : ObjectListPanel
     {
-        public UnitListPanel(WindowManager windowManager, EditorState editorState, Map map, TheaterGraphics theaterGraphics, ICursorActionTarget cursorActionTarget) : base(windowManager, editorState, map, theaterGraphics)
+        public UnitListPanel(WindowManager windowManager, EditorState editorState, Map map, TheaterGraphics theaterGraphics, ICursorActionTarget cursorActionTarget, bool isNaval) : base(windowManager, editorState, map, theaterGraphics)
         {
             unitPlacementAction = new UnitPlacementAction(cursorActionTarget);
             unitPlacementAction.ActionExited += UnitPlacementAction_ActionExited;
+
+            this.isNaval = isNaval;
         }
 
         private void UnitPlacementAction_ActionExited(object sender, System.EventArgs e)
@@ -21,11 +24,23 @@ namespace TSMapEditor.UI.Sidebar
             ObjectTreeView.SelectedNode = null;
         }
 
-        private UnitPlacementAction unitPlacementAction;
+        private readonly bool isNaval;
+        private readonly UnitPlacementAction unitPlacementAction;
 
         protected override void InitObjects()
         {
-            InitObjectsBase(Map.Rules.UnitTypes, TheaterGraphics.UnitTextures);
+            Func<UnitType, bool> filterFunction = null;
+
+            if (isNaval)
+            {
+                filterFunction = u => u.SpeedType == "Float" || u.SpeedType == "Fly" || u.MovementZone == "Water";
+            }
+            else
+            {
+                filterFunction = u => u.SpeedType != "Float";
+            }
+
+            InitObjectsBase(Map.Rules.UnitTypes, TheaterGraphics.UnitTextures, filterFunction);
         }
 
         protected override void ObjectSelected()

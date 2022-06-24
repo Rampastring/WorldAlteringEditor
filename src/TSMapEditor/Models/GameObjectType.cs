@@ -19,10 +19,17 @@
 
         public string GetEditorDisplayName()
         {
-            if (string.IsNullOrWhiteSpace(FSName))
-                return Name ?? ININame;
+            string name;
 
-            return FSName;
+            if (string.IsNullOrWhiteSpace(FSName))
+                name = Name ?? ININame;
+            else
+                name = FSName;
+
+            if (ININame.StartsWith("AI") && !Name.StartsWith("AI"))
+                return "AI " + name;
+
+            return name;
         }
     }
 }
