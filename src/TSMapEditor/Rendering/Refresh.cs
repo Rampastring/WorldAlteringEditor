@@ -38,7 +38,7 @@ namespace TSMapEditor.Rendering
 
             int redrawArea = 2;
             if (gameObject.WhatAmI() == RTTIType.Infantry)
-                redrawArea = 0;
+                redrawArea = 1;
             else if (gameObject.WhatAmI() == RTTIType.Unit || gameObject.WhatAmI() == RTTIType.Aircraft)
                 redrawArea = 1;
             else if (gameObject.WhatAmI() == RTTIType.Terrain || gameObject.WhatAmI() == RTTIType.Smudge)
