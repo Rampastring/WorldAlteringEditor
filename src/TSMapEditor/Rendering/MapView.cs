@@ -265,6 +265,9 @@ namespace TSMapEditor.Rendering
 
         private void EditorState_CursorActionChanged(object sender, EventArgs e)
         {
+            if (lastTileUnderCursor != null)
+                AddRefreshPoint(lastTileUnderCursor.CoordsToPoint(), 3);
+
             lastTileUnderCursor = null;
         }
 

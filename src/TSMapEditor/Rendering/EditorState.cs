@@ -36,12 +36,12 @@ namespace TSMapEditor.Rendering
                     }
 
                     _cursorAction = value;
-                    if (value != null)
-                        value.OnExitingAction += CursorAction_OnExitingAction;
-
                     if (_cursorAction != null)
+                    {
+                        _cursorAction.OnExitingAction += CursorAction_OnExitingAction;
                         _cursorAction.OnActionEnter();
-
+                    }
+                        
                     CursorActionChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
