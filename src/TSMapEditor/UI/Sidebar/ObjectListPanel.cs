@@ -84,6 +84,7 @@ namespace TSMapEditor.UI.Sidebar
             KeyboardCommands.Instance.PreviousSidebarNode.Triggered += PreviousSidebarNode_Triggered;
 
             Map.HousesChanged += (s, e) => RefreshHouseList();
+            Map.HouseColorChanged += (s, e) => RefreshHouseList();
         }
 
         private void NextSidebarNode_Triggered(object sender, EventArgs e)

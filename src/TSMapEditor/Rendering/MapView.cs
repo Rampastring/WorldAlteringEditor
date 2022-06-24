@@ -68,6 +68,8 @@ namespace TSMapEditor.Rendering
 
     public class MapView : XNAControl, ICursorActionTarget, IMutationTarget
     {
+        private int MaxRefreshTimeInFrame = 24;
+
         public MapView(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics, EditorState editorState, MutationManager mutationManager, WindowController windowController) : base(windowManager)
         {
             EditorState = editorState;
@@ -143,6 +145,8 @@ namespace TSMapEditor.Rendering
 
         private Point lastClickedPoint;
 
+        private Stopwatch refreshStopwatch;
+
         public void AddRefreshPoint(Point2D point, int size = 1)
         {
             if (mapInvalidated)
@@ -212,9 +216,16 @@ namespace TSMapEditor.Rendering
             Map.LocalSizeChanged += (s, e) => InvalidateMap();
             Map.MapResized += Map_MapResized;
 
+            Map.HouseColorChanged += (s, e) =>
+            {
+                Map.DoForAllTechnos(obj => { if (obj.Owner == e.House) AddRefreshPoint(obj.Position, 0); });
+            };
+
             EditorState.HighlightImpassableCellsChanged += (s, e) => InvalidateMap();
 
             KeyboardCommands.Instance.RotateUnitOneStep.Triggered += RotateUnitOneStep_Triggered;
+
+            refreshStopwatch = new Stopwatch();
         }
 
         private void RotateUnitOneStep_Triggered(object sender, EventArgs e)
@@ -1144,9 +1155,14 @@ namespace TSMapEditor.Rendering
             {
                 Renderer.PushRenderTarget(mapRenderTarget);
 
+                refreshStopwatch.Reset();
+                refreshStopwatch.Start();
                 int i = 0;
                 while (i < newRefreshes.Count)
                 {
+                    if (refreshStopwatch.ElapsedMilliseconds > MaxRefreshTimeInFrame)
+                        break;
+
                     var refresh = newRefreshes[i];
 
                     if (!refresh.IsComplete)
@@ -1198,6 +1214,7 @@ namespace TSMapEditor.Rendering
 
                     newRefreshes.RemoveAt(i);
                 }
+                refreshStopwatch.Stop();
 
                 DrawTubes();
                 Renderer.PopRenderTarget();

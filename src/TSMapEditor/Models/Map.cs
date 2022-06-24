@@ -11,11 +11,22 @@ using TSMapEditor.Rendering;
 
 namespace TSMapEditor.Models
 {
+    public class HouseEventArgs : EventArgs
+    {
+        public HouseEventArgs(House house)
+        {
+            House = house;
+        }
+
+        public House House { get; }
+    }
+
     public class Map : IMap
     {
         private const int TileBufferSize = 600; // for now
 
         public event EventHandler HousesChanged;
+        public event EventHandler<HouseEventArgs> HouseColorChanged;
         public event EventHandler LocalSizeChanged;
         public event EventHandler MapResized;
         public event EventHandler MapWritten;
@@ -45,6 +56,14 @@ namespace TSMapEditor.Models
         public List<Infantry> Infantry { get; private set; } = new List<Infantry>();
         public List<Unit> Units { get; private set; } = new List<Unit>();
         public List<Structure> Structures { get; private set; } = new List<Structure>();
+
+        public void DoForAllTechnos(Action<TechnoBase> action)
+        {
+            Aircraft.ForEach(a => action(a));
+            Infantry.ForEach(i => action(i));
+            Units.ForEach(u => action(u));
+            Structures.ForEach(s => action(s));
+        }
 
         /// <summary>
         /// The list of standard houses loaded from Rules.ini.
@@ -589,10 +608,9 @@ namespace TSMapEditor.Models
             return false;
         }
 
-        public void UpdateHouseInfo(House house)
+        public void HouseColorUpdated(House house)
         {
-            // This achieves the job of updating the sidebar's house list for now
-            HousesChanged?.Invoke(this, EventArgs.Empty);
+            HouseColorChanged?.Invoke(this, new HouseEventArgs(house));
         }
 
         public void PlaceBuilding(Structure structure)
