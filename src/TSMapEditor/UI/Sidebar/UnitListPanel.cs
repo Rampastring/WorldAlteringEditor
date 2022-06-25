@@ -33,11 +33,11 @@ namespace TSMapEditor.UI.Sidebar
 
             if (isNaval)
             {
-                filterFunction = u => u.SpeedType == "Float" || u.SpeedType == "Fly" || u.MovementZone == "Water";
+                filterFunction = u => u.SpeedType == "Float" || u.SpeedType == "Amphibious" || u.SpeedType == "Hover" || u.MovementZone == "Water";
             }
             else
             {
-                filterFunction = u => u.SpeedType != "Float";
+                filterFunction = u => u.SpeedType != "Float" && u.MovementZone != "Water";
             }
 
             InitObjectsBase(Map.Rules.UnitTypes, TheaterGraphics.UnitTextures, filterFunction);

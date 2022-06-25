@@ -9,7 +9,7 @@
         Aircraft = 1,
         Buildings = 2,
         Vehicles = 3,
-        Ships = 4,
+        Naval = 4,
         Infantry = 5,
         TerrainObjects = 6,
         Overlay = 7,
