@@ -50,10 +50,10 @@
       <HintPath>..\..\..\Rampastring.XNAUI\References\Windows\MonoGame.Framework.dll</HintPath>
     </Reference>
     <Reference Include="Rampastring.Tools">
-      <HintPath>..\..\Rampastring.Tools\bin\Release\Rampastring.Tools.dll</HintPath>
+      <HintPath>..\..\..\Rampastring.Tools\bin\Release\Rampastring.Tools.dll</HintPath>
     </Reference>
     <Reference Include="Rampastring.XNAUI">
-      <HintPath>..\..\Rampastring.XNAUI\bin\Windows\Release\Rampastring.XNAUI.dll</HintPath>
+      <HintPath>..\..\..\Rampastring.XNAUI\bin\Windows\Release\Rampastring.XNAUI.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
