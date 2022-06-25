@@ -6,12 +6,16 @@ namespace TSMapEditor
 {
     static class Program
     {
+        public static string[] args;
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
+            Program.args = args;
+
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
             Environment.CurrentDirectory = Application.StartupPath.Replace('\\', '/');

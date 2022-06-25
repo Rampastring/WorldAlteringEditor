@@ -136,6 +136,15 @@ namespace TSMapEditor.UI
             lbFileList.DirectoryPath = directoryPath;
 
             base.Initialize();
+
+            if (Program.args.Length > 0 && !string.IsNullOrWhiteSpace(Program.args[0]))
+            {
+                if (CheckGameDirectory())
+                {
+                    tbMapPath.Text = Program.args[0];
+                    loadingStage++;
+                }
+            }
         }
 
         private void LbFileList_FileSelected(object sender, FileSelectionEventArgs e)
