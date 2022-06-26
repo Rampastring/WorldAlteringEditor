@@ -1094,6 +1094,16 @@ namespace TSMapEditor.Models
                 }
             });
 
+            // Check for teamtypes having no taskforce or script
+            TeamTypes.ForEach(tt =>
+            {
+                if (tt.TaskForce == null)
+                    issueList.Add($"TeamType \"{tt.Name}\" has no TaskForce set!");
+
+                if (tt.Script == null)
+                    issueList.Add($"TeamType \"{tt.Name}\" has no Script set!");
+            });
+
             return issueList;
         }
     }
