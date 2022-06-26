@@ -26,8 +26,9 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
         /// <param name="existingMapPath">The path to the existing map file to load, if loading an existing map. Can be null if creating a new map.</param>
         /// <param name="newMapTheater">The theater of the map, if creating a new map.</param>
         /// <param name="newMapSize">The size of the map, if creating a new map.</param>
+        /// <param name="windowManager">The XNAUI window manager.</param>
         /// <returns>Null of loading the map was successful, otherwise an error message.</returns>
-        public static string InitializeMap(string gameDirectory, bool createNew, string existingMapPath, string newMapTheater, Point2D newMapSize)
+        public static string InitializeMap(string gameDirectory, bool createNew, string existingMapPath, string newMapTheater, Point2D newMapSize, WindowManager windowManager)
         {
             IniFile rulesIni = new IniFile(Path.Combine(gameDirectory, Constants.RulesIniPath));
             IniFile firestormIni = new IniFile(Path.Combine(gameDirectory, Constants.FirestormIniPath));
@@ -36,7 +37,7 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
             IniFile artOverridesIni = new IniFile(Path.Combine(Environment.CurrentDirectory, "Config/ArtOverrides.ini"));
             IniFile.ConsolidateIniFiles(artFSIni, artOverridesIni);
 
-            var tutorialLines = new TutorialLines(Path.Combine(gameDirectory, "INI/Tutorial.ini"));
+            var tutorialLines = new TutorialLines(Path.Combine(gameDirectory, "INI/Tutorial.ini"), a => windowManager.AddCallback(a, null));
 
             Map map = new Map();
 

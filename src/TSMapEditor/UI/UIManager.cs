@@ -188,6 +188,15 @@ namespace TSMapEditor.UI
             Alpha = 0f;
 
             map.MapWritten += Map_MapWritten;
+
+            // This makes the exit process technically faster, but the editor stays longer on the
+            // screen so practically increases exit time from the user's perspective
+            // WindowManager.GameClosing += WindowManager_GameClosing;
+        }
+
+        private void WindowManager_GameClosing(object sender, EventArgs e)
+        {
+            ClearResources();
         }
 
         private void Map_MapWritten(object sender, EventArgs e)
@@ -234,6 +243,7 @@ namespace TSMapEditor.UI
 
         private void Clear()
         {
+            map.Rules.TutorialLines.ShutdownFSW();
             windowController.OpenMapWindow.OnFileSelected -= OpenMapWindow_OnFileSelected;
             windowController.CreateNewMapWindow.OnCreateNewMap -= CreateNewMapWindow_OnCreateNewMap;
         }
@@ -245,7 +255,8 @@ namespace TSMapEditor.UI
             string error = MapSetup.InitializeMap(UserSettings.Instance.GameDirectory, createNew,
                 loadMapFilePath,
                 createNew ? newMapInfo.Theater : null,
-                createNew ? newMapInfo.MapSize : Point2D.Zero);
+                createNew ? newMapInfo.MapSize : Point2D.Zero,
+                WindowManager);
 
             if (error != null)
             {
@@ -261,6 +272,14 @@ namespace TSMapEditor.UI
             if (!createNew)
                 UserSettings.Instance.LastScenarioPath.UserDefinedValue = loadMapFilePath;
 
+            ClearResources();
+            WindowManager.RemoveControl(this);
+
+            MapSetup.LoadTheaterGraphics(WindowManager, UserSettings.Instance.GameDirectory);
+        }
+
+        private void ClearResources()
+        {
             // We need to free memory of everything that we've ever created and then load the map's theater graphics
             Clear();
             Disable();
@@ -270,10 +289,7 @@ namespace TSMapEditor.UI
             // TODO free up memory of textures created for controls - they should be mostly 
             // insignificant compared to the map textures though, so it shouldn't be too bad like this
 
-            WindowManager.RemoveControl(this);
             theaterGraphics.DisposeAll();
-
-            MapSetup.LoadTheaterGraphics(WindowManager, UserSettings.Instance.GameDirectory);
         }
 
         private void OverlayPlacementAction_OverlayTypeChanged(object sender, EventArgs e)

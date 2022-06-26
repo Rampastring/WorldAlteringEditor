@@ -166,7 +166,7 @@ namespace TSMapEditor.UI
 
         private void CreateMapWindow_OnCreateNewMap(object sender, CreateNewMapEventArgs e)
         {
-            string error = MapSetup.InitializeMap(gameDirectory, true, null, e.Theater, e.MapSize);
+            string error = MapSetup.InitializeMap(gameDirectory, true, null, e.Theater, e.MapSize, WindowManager);
             if (!string.IsNullOrWhiteSpace(error))
                 throw new InvalidOperationException("Failed to create new map! Returned error message: " + error);
 
@@ -300,7 +300,7 @@ namespace TSMapEditor.UI
 
         private void LoadMap(string mapPath)
         {
-            string error = MapSetup.InitializeMap(gameDirectory, false, mapPath, null, Point2D.Zero);
+            string error = MapSetup.InitializeMap(gameDirectory, false, mapPath, null, Point2D.Zero, WindowManager);
 
             if (error == null)
             {
