@@ -134,6 +134,11 @@ namespace TSMapEditor.UI.Windows
         private void DeleteTaskForce()
         {
             map.TaskForces.Remove(editedTaskForce);
+            map.TeamTypes.ForEach(tt =>
+            {
+                if (tt.TaskForce == editedTaskForce)
+                    tt.TaskForce = null;
+            });
             ListTaskForces();
             lbTaskForces.SelectedIndex = -1;
         }
