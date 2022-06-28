@@ -21,7 +21,7 @@ namespace MapEditorLauncher
             new UpdaterLink().Run();
 
             Console.WriteLine("Launching scenario editor.");
-            Process.Start(new ProcessStartInfo("DTAScenarioEditor.exe") { UseShellExecute = false, Arguments = string.Join(" ", args) });
+            Process.Start(new ProcessStartInfo("DTAScenarioEditor.exe") { UseShellExecute = false, Arguments = "\"" + string.Join(" ", args) + "\"" });
         }
 
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
