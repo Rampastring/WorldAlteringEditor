@@ -1104,6 +1104,43 @@ namespace TSMapEditor.Models
                     issueList.Add($"TeamType \"{tt.Name}\" has no Script set!");
             });
 
+            const int EnableTriggerActionIndex = 53;
+            const int EnableTriggerParamIndex = 1;
+
+            // Check for triggers that are disabled and are never enabled by any other triggers
+            Triggers.ForEach(trigger =>
+            {
+                if (!trigger.Disabled)
+                    return;
+
+                const int RevealAllMapActionIndex = 16;
+
+                // If this trigger has a "reveal all map" action, don't create an issue - those are usually only for debugging
+                if (trigger.Actions.Exists(a => a.ActionIndex == RevealAllMapActionIndex))
+                    return;
+
+                // Allow the user to skip this warning by including "DEBUG" in the trigger's name
+                if (trigger.Name.ToUpperInvariant().Contains("DEBUG"))
+                    return;
+
+                // Is this trigger enabled by another trigger?
+                if (Triggers.Exists(otherTrigger => otherTrigger != trigger && otherTrigger.Actions.Exists(a => a.ActionIndex == EnableTriggerActionIndex && a.Parameters[EnableTriggerParamIndex] == trigger.ID)))
+                    return;
+
+                // If it's not enabled by another trigger, add an issue
+                issueList.Add($"Trigger \"{trigger.Name}\" ({trigger.ID}) is disabled and never enabled by another trigger." + Environment.NewLine +
+                    "Did you forget to enable it? If the trigger exists for debugging purposes, add DEBUG to its name to skip this warning.");
+            });
+
+            // Check for triggers that enable themselves, there's no need to ever do this -> either redundant action or a scripting error
+            Triggers.ForEach(trigger =>
+            {
+                if (!trigger.Actions.Exists(a => a.ActionIndex == EnableTriggerActionIndex && a.Parameters[EnableTriggerParamIndex] == trigger.ID))
+                    return;
+
+                issueList.Add($"Trigger \"{trigger.Name}\" ({trigger.ID}) has an action for enabling itself. Is it supposed to enable something else instead?");
+            });
+
             return issueList;
         }
     }
