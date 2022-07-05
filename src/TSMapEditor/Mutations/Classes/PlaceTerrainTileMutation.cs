@@ -207,8 +207,13 @@ namespace TSMapEditor.Mutations.Classes
                     g.TransitionTileSet.Index != baseTileSetId && g.BaseTileSet.Index == baseTileSetId);
 
                 var tileSet = MutationTarget.Map.TheaterInstance.Theater.TileSets[tileSetIndex];
+
+                // When applying auto-LAT to an alt. terrain tile set, don't apply a transition when we are
+                // evaluating a base alt. terrain tile set next to ground that is supposed on place on that
+                // alt. terrain
+                // For example, ~~~Snow shouldn't be auto-LAT'd when it's next to a tile belonging to ~~~Straight Dirt Roads
                 Func<TileSet, bool> miscChecker = null;
-                if (tileSet.SetName.StartsWith("~~~"))
+                if (tileSet.SetName.StartsWith("~~~") && latGrounds.Exists(g => g.BaseTileSet == tileSet))
                 {
                     miscChecker = (ts) =>
                     {
@@ -216,7 +221,6 @@ namespace TSMapEditor.Mutations.Classes
                         return ts.SetName.StartsWith("~~~") && !latGrounds.Exists(g => g.GroundTileSet == ts);
                     };
                 }
-
 
                 if (autoLatGround != null)
                 {
