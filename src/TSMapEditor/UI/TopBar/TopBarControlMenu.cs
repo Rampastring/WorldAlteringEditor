@@ -166,7 +166,7 @@ namespace TSMapEditor.UI.TopBar
             KeyboardCommands.Instance.NextBrushSize.Triggered += NextBrushSize_Triggered;
             KeyboardCommands.Instance.PreviousBrushSize.Triggered += PreviousBrushSize_Triggered;
             KeyboardCommands.Instance.ToggleAutoLAT.Triggered += ToggleAutoLAT_Triggered;
-            KeyboardCommands.Instance.ToggleMapWideOverlay.Triggered += (s, e) => chkDrawMapWideOverlay.Checked = !chkDrawMapWideOverlay.Checked;
+            KeyboardCommands.Instance.ToggleMapWideOverlay.Triggered += (s, e) => { if (editorState.MapWideOverlayExists) chkDrawMapWideOverlay.Checked = !chkDrawMapWideOverlay.Checked; };
 
             base.Initialize();
 
