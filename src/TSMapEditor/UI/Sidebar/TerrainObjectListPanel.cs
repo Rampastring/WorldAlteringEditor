@@ -134,7 +134,7 @@ namespace TSMapEditor.UI.Sidebar
 
                 category.Nodes.Add(new TreeViewNode()
                 {
-                    Text = terrainType.FSName + " (" + terrainType.ININame + ")",
+                    Text = terrainType.GetEditorDisplayName() + " (" + terrainType.ININame + ")",
                     Texture = texture,
                     Tag = terrainType
                 });
