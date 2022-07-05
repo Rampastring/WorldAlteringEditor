@@ -106,7 +106,6 @@ namespace TSMapEditor.UI.TopBar
 
                 var toolTip = new ToolTip(WindowManager, btn);
                 toolTip.Text = autoLATGround.GroundTileSet.SetName;
-                toolTip.ToolTipDelay = 500;
 
                 prevRight = btn.Right;
             }

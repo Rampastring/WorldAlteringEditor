@@ -20,7 +20,7 @@ namespace TSMapEditor.UI.Controls
         /// </summary>
         public bool Blocked { get; set; }
 
-        public int ToolTipDelay { get; set; } = 1000;
+        public int ToolTipDelay { get; set; } = 500;
 
         /// <summary>
         /// Creates a new tool tip and attaches it to the given control.
