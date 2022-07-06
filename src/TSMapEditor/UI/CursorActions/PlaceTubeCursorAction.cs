@@ -57,15 +57,18 @@ namespace TSMapEditor.UI.CursorActions
         {
             if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.Escape)
             {
-                TubeRefreshHelper.MapViewRefreshTube(tube, CursorActionTarget.MutationTarget);
-                tube = null;
+                if (tube != null)
+                {
+                    TubeRefreshHelper.MapViewRefreshTube(tube, CursorActionTarget.MutationTarget);
+                    tube = null;
+                }
 
                 if (CursorActionTarget.WindowManager.Keyboard.IsShiftHeldDown())
                     ExitAction();
 
                 e.Handled = true;
             }
-            else if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.Enter && tube.Directions.Count > 0)
+            else if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.Enter && tube != null && tube.Directions.Count > 0)
             {
                 tube.UnitInitialFacing = tube.Directions[0];
                 CursorActionTarget.MutationManager.PerformMutation(new PlaceTubeMutation(CursorActionTarget.MutationTarget, tube));
@@ -79,7 +82,6 @@ namespace TSMapEditor.UI.CursorActions
                 }
 
                 tube = null;
-                ExitAction();
 
                 e.Handled = true;
             }
