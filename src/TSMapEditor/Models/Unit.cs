@@ -44,7 +44,7 @@
             else if (UnitType.ArtConfig.Facings > 1)
             {
                 facingIndex = 1 + Facing / (256 / UnitType.ArtConfig.Facings);
-                if (facingIndex > UnitType.ArtConfig.Facings)
+                if (facingIndex >= UnitType.ArtConfig.Facings)
                     facingIndex = 0;
             }
 
