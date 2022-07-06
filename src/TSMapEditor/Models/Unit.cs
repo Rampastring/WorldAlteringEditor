@@ -5,8 +5,6 @@
     /// </summary>
     public class Unit : Foot<UnitType>
     {
-        
-
         public Unit(UnitType objectType) : base(objectType)
         {
             UnitType = objectType;
@@ -43,7 +41,8 @@
             }
             else if (UnitType.ArtConfig.Facings > 1)
             {
-                facingIndex = 1 + Facing / (256 / UnitType.ArtConfig.Facings);
+                facingIndex = Facing / (256 / UnitType.ArtConfig.Facings);
+
                 if (facingIndex >= UnitType.ArtConfig.Facings)
                     facingIndex = 0;
             }
@@ -54,6 +53,27 @@
         private int GetStandingFrame(int frameCount)
         {
             int facingIndex = GetFacingIndex();
+
+            if (!UnitType.AdvancedFacingsHack)
+            {
+                // The legacy facing hack has facing #31 as frame#0 and actually frame#1 is north-east,
+                // so offset facing index by one to take this into account
+                facingIndex++;
+
+                if (facingIndex >= UnitType.ArtConfig.Facings)
+                    facingIndex = 0;
+            }
+            else
+            {
+                // Facings start to the north instead of north-east, we need to offset the facing index accordingly
+                // by one "full facing" (one-eight of 256). How many frames this means depends on how many facings the unit has.
+
+                facingIndex += (UnitType.ArtConfig.Facings / 8);
+
+                // If the facing index turned out-of-bounds, spin it around
+                if (facingIndex >= UnitType.ArtConfig.Facings)
+                    facingIndex -= UnitType.ArtConfig.Facings;
+            }
 
             if (UnitType.ArtConfig.StartStandFrame == -1)
             {

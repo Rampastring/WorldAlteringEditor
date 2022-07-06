@@ -12,6 +12,12 @@ namespace TSMapEditor.Models.ArtConfig
         public int WalkFrames { get; set; } = 1;
         public int Facings { get; set; } = 1;
 
+        /// <summary>
+        /// Vinifera addition, override for start turret frame.
+        /// If not specified, it's negative.
+        /// </summary>
+        public int StartTurretFrame { get; set; } = -1;
+
         public void ReadFromIniSection(IniSection iniSection)
         {
             if (iniSection == null)
@@ -24,6 +30,7 @@ namespace TSMapEditor.Models.ArtConfig
             StartWalkFrame = iniSection.GetIntValue(nameof(StartWalkFrame), StartWalkFrame);
             WalkFrames = iniSection.GetIntValue(nameof(WalkFrames), WalkFrames);
             Facings = iniSection.GetIntValue(nameof(Facings), Facings);
+            StartTurretFrame = iniSection.GetIntValue(nameof(StartTurretFrame), StartTurretFrame);
         }
     }
 }

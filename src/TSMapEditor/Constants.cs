@@ -17,6 +17,8 @@ namespace TSMapEditor
         public static string ArtIniPath;
         public static string FirestormArtIniPath;
 
+        public static bool AdvancedFacingsHack = false;
+
         public const int TextureSizeLimit = 16384;
 
         public static int MaxMapWidth = TextureSizeLimit / CellSizeX;
@@ -71,6 +73,8 @@ namespace TSMapEditor
             TileColorBufferSize = constantsIni.GetIntValue(ConstantsSectionName, nameof(TileColorBufferSize), TileColorBufferSize);
             ExpectedClientExecutableName = constantsIni.GetStringValue(ConstantsSectionName, nameof(ExpectedClientExecutableName), ExpectedClientExecutableName);
             GameRegistryInstallPath = constantsIni.GetStringValue(ConstantsSectionName, nameof(GameRegistryInstallPath), GameRegistryInstallPath);
+
+            AdvancedFacingsHack = constantsIni.GetBooleanValue(ConstantsSectionName, nameof(AdvancedFacingsHack), AdvancedFacingsHack);
 
             RulesIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Rules", "INI/Rules.ini");
             FirestormIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Firestorm", "INI/Enhance.ini");
