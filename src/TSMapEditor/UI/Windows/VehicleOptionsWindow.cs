@@ -98,6 +98,8 @@ namespace TSMapEditor.UI.Windows
 
             if (unit.FollowsID > -1 && unit.FollowsID < map.Units.Count)
                 unit.FollowedUnit = map.Units[unit.FollowsID];
+            else
+                unit.FollowedUnit = null;
 
             unit.High = chkOnBridge.Checked;
             unit.AutocreateNoRecruitable = chkAutocreateNoRecruitable.Checked;

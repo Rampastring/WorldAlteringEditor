@@ -13,7 +13,7 @@
         public override RTTIType WhatAmI() => RTTIType.Unit;
 
         public UnitType UnitType { get; }
-        public int FollowsID { get; set; }
+        public int FollowsID { get; set; } = -1;
         public Unit FollowedUnit { get; set; }
 
         public override int GetFrameIndex(int frameCount)

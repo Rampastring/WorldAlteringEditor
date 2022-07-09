@@ -440,10 +440,7 @@ namespace TSMapEditor.Initialization
             // Process follow IDs
             foreach (var unit in map.Units)
             {
-                if (unit.FollowsID < 0)
-                    continue;
-
-                if (unit.FollowsID >= map.Units.Count)
+                if (unit.FollowsID < 0 || unit.FollowsID >= map.Units.Count)
                     continue;
 
                 unit.FollowedUnit = map.Units[unit.FollowsID];
