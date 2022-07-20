@@ -7,12 +7,11 @@
     {
         public Unit(UnitType objectType) : base(objectType)
         {
-            UnitType = objectType;
         }
 
         public override RTTIType WhatAmI() => RTTIType.Unit;
 
-        public UnitType UnitType { get; }
+        public UnitType UnitType => ObjectType;
         public int FollowsID { get; set; } = -1;
         public Unit FollowedUnit { get; set; }
 

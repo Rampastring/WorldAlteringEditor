@@ -635,6 +635,14 @@ namespace TSMapEditor.Models
             Structures.Add(structure);
         }
 
+        public void RemoveBuilding(Point2D cellCoords)
+        {
+            var cell = GetTile(cellCoords);
+
+            if (cell.Structure != null)
+                RemoveBuilding(cell.Structure);
+        }
+
         public void RemoveBuilding(Structure structure)
         {
             structure.ObjectType.ArtConfig.DoForFoundationCoords(offset =>
@@ -674,9 +682,14 @@ namespace TSMapEditor.Models
 
         public void RemoveUnit(Unit unit)
         {
-            var cell = GetTile(unit.Position);
+            RemoveUnit(unit.Position);
+        }
+
+        public void RemoveUnit(Point2D cellCoords)
+        {
+            var cell = GetTile(cellCoords);
+            Units.Remove(cell.Vehicle);
             cell.Vehicle = null;
-            Units.Remove(unit);
         }
 
         public void MoveUnit(Unit unit, Point2D newCoords)

@@ -62,6 +62,20 @@ namespace TSMapEditor.UI.CursorActions
                         if (cell.TerrainObject != null)
                             copiedMapData.CopiedMapEntries.Add(new CopiedTerrainObjectEntry(offset, cell.TerrainObject.TerrainType.ININame));
                     }
+
+                    if ((EntryTypes & CopiedEntryType.Vehicle) == CopiedEntryType.Vehicle)
+                    {
+                        if (cell.Vehicle != null)
+                            copiedMapData.CopiedMapEntries.Add(new CopiedVehicleEntry(offset, cell.Vehicle.ObjectType.ININame, cell.Vehicle.Owner.ININame, cell.Vehicle.HP, cell.Vehicle.Facing));
+                    }
+
+                    if ((EntryTypes & CopiedEntryType.Structure) == CopiedEntryType.Structure)
+                    {
+                        if (cell.Structure != null && cell.Structure.Position == new Point2D(x, y))
+                            copiedMapData.CopiedMapEntries.Add(new CopiedStructureEntry(offset, cell.Structure.ObjectType.ININame, cell.Structure.Owner.ININame, cell.Structure.HP, cell.Structure.Facing));
+                    }
+
+                    // TODO handle infantry
                 }
             }
 

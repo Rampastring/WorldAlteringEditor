@@ -186,31 +186,107 @@ namespace TSMapEditor.Mutations.Classes
         }
     }
 
-    public class CopiedTerrainObjectEntry : CopiedMapEntry
+    public class CopiedObjectEntry : CopiedMapEntry
     {
-        public string TerrainObjectTypeName;
+        public string ObjectTypeName;
 
-        public CopiedTerrainObjectEntry()
+        public CopiedObjectEntry() { }
+
+        public CopiedObjectEntry(Point2D offset, string objectTypeName) : base(offset)
         {
+            ObjectTypeName = objectTypeName;
         }
 
-        public CopiedTerrainObjectEntry(Point2D offset, string terrainObjectTypeName) : base(offset)
-        {
-            TerrainObjectTypeName = terrainObjectTypeName;
-        }
-
-        public override CopiedEntryType EntryType => CopiedEntryType.TerrainObject;
+        public override CopiedEntryType EntryType => throw new NotImplementedException();
 
         protected override byte[] GetCustomData()
         {
-            return ASCIIStringToBytes(TerrainObjectTypeName);
+            return ASCIIStringToBytes(ObjectTypeName);
         }
 
         protected override void ReadCustomData(Stream stream)
         {
-            TerrainObjectTypeName = ReadASCIIString(stream);
+            ObjectTypeName = ReadASCIIString(stream);
         }
     }
+
+    public class CopiedTerrainObjectEntry : CopiedObjectEntry
+    {
+        public CopiedTerrainObjectEntry()
+        {
+        }
+
+        public CopiedTerrainObjectEntry(Point2D offset, string terrainObjectTypeName) : base(offset, terrainObjectTypeName)
+        {
+        }
+
+        public override CopiedEntryType EntryType => CopiedEntryType.TerrainObject;
+    }
+
+    public class CopiedTechnoEntry : CopiedObjectEntry
+    {
+        public CopiedTechnoEntry()
+        {
+        }
+
+        public CopiedTechnoEntry(Point2D offset, string objectTypeName, string ownerName, int hp, byte facing) : base(offset, objectTypeName)
+        {
+            HP = hp;
+            Facing = facing;
+            OwnerHouseName = ownerName;
+        }
+
+        public int HP;
+        public byte Facing;
+        public string OwnerHouseName;
+
+        protected override byte[] GetCustomData()
+        {
+            byte[] objectTypeBuffer = ASCIIStringToBytes(ObjectTypeName);
+            byte[] ownerBuffer = ASCIIStringToBytes(OwnerHouseName);
+            byte[] result = new byte[sizeof(int) + 1 + objectTypeBuffer.Length + ownerBuffer.Length];
+            Array.Copy(BitConverter.GetBytes(HP), 0, result, 0, sizeof(int));
+            result[4] = Facing;
+            Array.Copy(objectTypeBuffer, 0, result, sizeof(int) + 1, objectTypeBuffer.Length);
+            Array.Copy(ownerBuffer, 0, result, sizeof(int) + 1 + objectTypeBuffer.Length, ownerBuffer.Length);
+            return result;
+        }
+
+        protected override void ReadCustomData(Stream stream)
+        {
+            HP = ReadInt(stream);
+            Facing = (byte)stream.ReadByte();
+            ObjectTypeName = ReadASCIIString(stream);
+            OwnerHouseName = ReadASCIIString(stream);
+        }
+    }
+
+    public class CopiedVehicleEntry : CopiedTechnoEntry
+    {
+        public CopiedVehicleEntry()
+        {
+        }
+
+        public CopiedVehicleEntry(Point2D offset, string vehicleTypeName, string ownerName, int hp, byte facing) : base(offset, vehicleTypeName, ownerName, hp, facing)
+        {
+        }
+
+        public override CopiedEntryType EntryType => CopiedEntryType.Vehicle;
+    }
+
+    public class CopiedStructureEntry : CopiedTechnoEntry
+    {
+        public CopiedStructureEntry()
+        {
+        }
+
+        public CopiedStructureEntry(Point2D offset, string structureTypeName, string ownerName, int hp, byte facing) : base(offset, structureTypeName, ownerName, hp, facing)
+        {
+        }
+
+        public override CopiedEntryType EntryType => CopiedEntryType.Structure;
+    }
+
 
     public class CopiedMapData
     {
@@ -268,6 +344,12 @@ namespace TSMapEditor.Mutations.Classes
                         case CopiedEntryType.TerrainObject:
                             entry = new CopiedTerrainObjectEntry();
                             break;
+                        case CopiedEntryType.Vehicle:
+                            entry = new CopiedVehicleEntry();
+                            break;
+                        case CopiedEntryType.Structure:
+                            entry = new CopiedStructureEntry();
+                            break;
                         default:
                         case CopiedEntryType.Invalid:
                             throw new CopiedMapDataSerializationException("Invalid map data entry type " + entryType);
@@ -297,6 +379,8 @@ namespace TSMapEditor.Mutations.Classes
         private OriginalCellTerrainData[] terrainUndoData;
         private OriginalOverlayInfo[] overlayUndoData;
         private Point2D[] terrainObjectCells;
+        private Point2D[] vehicleCells;
+        private Point2D[] structureCells;
 
         private void AddRefresh()
         {
@@ -369,7 +453,7 @@ namespace TSMapEditor.Mutations.Classes
                 if (cell.TerrainObject != null)
                     continue;
 
-                var terrainType = MutationTarget.Map.Rules.TerrainTypes.Find(tt => tt.ININame == copiedTerrainObjectEntry.TerrainObjectTypeName);
+                var terrainType = MutationTarget.Map.Rules.TerrainTypes.Find(tt => tt.ININame == copiedTerrainObjectEntry.ObjectTypeName);
                 if (terrainType == null)
                     continue;
 
@@ -377,6 +461,71 @@ namespace TSMapEditor.Mutations.Classes
                 MutationTarget.Map.AddTerrainObject(new TerrainObject(terrainType, cellCoords));
             }
             this.terrainObjectCells = terrainObjectCells.ToArray();
+
+            var vehicleCells = new List<Point2D>();
+            foreach (var entry in copiedMapData.CopiedMapEntries.FindAll(e => e.EntryType == CopiedEntryType.Vehicle))
+            {
+                var copiedVehicleEntry = entry as CopiedVehicleEntry;
+                Point2D cellCoords = origin + copiedVehicleEntry.Offset;
+                MapTile cell = MutationTarget.Map.GetTile(cellCoords);
+
+                if (cell == null)
+                    continue;
+
+                if (cell.Vehicle != null)
+                    continue;
+
+                var unitType = MutationTarget.Map.Rules.UnitTypes.Find(tt => tt.ININame == copiedVehicleEntry.ObjectTypeName);
+                if (unitType == null)
+                    continue;
+
+                House owner = MutationTarget.Map.GetHouses().Find(h => h.ININame == copiedVehicleEntry.OwnerHouseName);
+                if (owner == null)
+                    continue;
+
+                MutationTarget.Map.PlaceUnit(new Unit(unitType) { Position = cellCoords, Owner = owner, HP = copiedVehicleEntry.HP, Facing = copiedVehicleEntry.Facing });
+                vehicleCells.Add(cellCoords);
+            }
+            this.vehicleCells = vehicleCells.ToArray();
+
+            var structureCells = new List<Point2D>();
+            foreach (var entry in copiedMapData.CopiedMapEntries.FindAll(e => e.EntryType == CopiedEntryType.Structure))
+            {
+                var copiedStructureEntry = entry as CopiedStructureEntry;
+                Point2D cellCoords = origin + copiedStructureEntry.Offset;
+                MapTile cell = MutationTarget.Map.GetTile(cellCoords);
+
+                if (cell == null)
+                    continue;
+
+                if (cell.Structure != null)
+                    continue;
+
+                var buildingType = MutationTarget.Map.Rules.BuildingTypes.Find(tt => tt.ININame == copiedStructureEntry.ObjectTypeName);
+                if (buildingType == null)
+                    continue;
+
+                bool isFoundationClear = true;
+                buildingType.ArtConfig.DoForFoundationCoords(foundationPoint =>
+                {
+                    Point2D foundationCellCoords = foundationPoint + cellCoords;
+                    MapTile foundationCell = MutationTarget.Map.GetTile(foundationCellCoords);
+
+                    if (foundationCell.Structure != null)
+                        isFoundationClear = false;
+                });
+
+                if (!isFoundationClear)
+                    continue;
+                
+                House owner = MutationTarget.Map.GetHouses().Find(h => h.ININame == copiedStructureEntry.OwnerHouseName);
+                if (owner == null)
+                    continue;
+
+                MutationTarget.Map.PlaceBuilding(new Structure(buildingType) { Position = cellCoords, Owner = owner, HP = copiedStructureEntry.HP, Facing = copiedStructureEntry.Facing });
+                structureCells.Add(cellCoords);
+            }
+            this.structureCells = structureCells.ToArray();
 
             AddRefresh();
         }
@@ -409,6 +558,16 @@ namespace TSMapEditor.Mutations.Classes
             foreach (Point2D cellCoords in terrainObjectCells)
             {
                 MutationTarget.Map.RemoveTerrainObject(cellCoords);
+            }
+
+            foreach (Point2D cellCoords in vehicleCells)
+            {
+                MutationTarget.Map.RemoveUnit(cellCoords);
+            }
+
+            foreach (Point2D cellCoords in structureCells)
+            {
+                MutationTarget.Map.RemoveBuilding(cellCoords);
             }
 
             AddRefresh();
