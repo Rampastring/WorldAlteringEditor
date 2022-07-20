@@ -30,6 +30,7 @@ namespace TSMapEditor.UI.TopBar
         private DeleteTubeCursorAction deleteTunnelCursorAction;
         private PlaceTubeCursorAction placeTubeCursorAction;
         private CheckDistanceCursorAction checkDistanceCursorAction;
+        private ManageBaseNodesCursorAction manageBaseNodesCursorAction;
 
         public override void Initialize()
         {
@@ -38,6 +39,7 @@ namespace TSMapEditor.UI.TopBar
             deleteTunnelCursorAction = new DeleteTubeCursorAction(mapView);
             placeTubeCursorAction = new PlaceTubeCursorAction(mapView);
             checkDistanceCursorAction = new CheckDistanceCursorAction(mapView);
+            manageBaseNodesCursorAction = new ManageBaseNodesCursorAction(mapView);
 
             var fileContextMenu = new EditorContextMenu(WindowManager);
             fileContextMenu.Name = nameof(fileContextMenu);
@@ -84,6 +86,8 @@ namespace TSMapEditor.UI.TopBar
             editContextMenu.AddItem(" ", null, () => false, null, null);
             editContextMenu.AddItem("Place Tunnel", () => mapView.EditorState.CursorAction = placeTubeCursorAction, null, null, null, KeyboardCommands.Instance.PlaceTunnel.GetKeyDisplayString());
             editContextMenu.AddItem("Delete Tunnel", () => mapView.EditorState.CursorAction = deleteTunnelCursorAction, null, null, null);
+            editContextMenu.AddItem(" ", null, () => false, null, null);
+            editContextMenu.AddItem("Manage Base Nodes", () => mapView.EditorState.CursorAction = manageBaseNodesCursorAction, null, null, null);
 
             var editButton = new MenuButton(WindowManager, editContextMenu);
             editButton.Name = nameof(editButton);

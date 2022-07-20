@@ -608,6 +608,21 @@ namespace TSMapEditor.Models
             return false;
         }
 
+        public void RegisterBaseNode(House house, BaseNode baseNode)
+        {
+            var buildingType = Rules.BuildingTypes.Find(bt => bt.ININame == baseNode.StructureTypeName) ??
+                throw new KeyNotFoundException("Building type not found while adding base node: " + baseNode.StructureTypeName);
+
+            GraphicalBaseNodes.Add(new GraphicalBaseNode(baseNode, buildingType, house));
+        }
+
+        public void UnregisterBaseNode(BaseNode baseNode)
+        {
+            int index = GraphicalBaseNodes.FindIndex(gbn => gbn.BaseNode == baseNode);
+            if (index > -1)
+                GraphicalBaseNodes.RemoveAt(index);
+        }
+
         public void HouseColorUpdated(House house)
         {
             HouseColorChanged?.Invoke(this, new HouseEventArgs(house));
