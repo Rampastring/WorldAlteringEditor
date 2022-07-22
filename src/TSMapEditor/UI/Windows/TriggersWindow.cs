@@ -364,8 +364,7 @@ namespace TSMapEditor.UI.Windows
             {
                 stringBuilder.Append(Environment.NewLine);
                 stringBuilder.Append("The trigger is referenced to by the following other triggers:");
-                stringBuilder.Append(Environment.NewLine);
-                allReferringTriggers.ForEach(trig => stringBuilder.Append($"    - {trig.Name} ({trig.ID})"));
+                allReferringTriggers.ForEach(trig => stringBuilder.Append(Environment.NewLine + $"    - {trig.Name} ({trig.ID})"));
             }
 
             if (stringBuilder.Length == 0)
