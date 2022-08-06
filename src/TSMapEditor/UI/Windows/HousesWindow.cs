@@ -74,6 +74,8 @@ namespace TSMapEditor.UI.Windows
             FindChild<EditorButton>("btnAddHouse").LeftClick += BtnAddHouse_LeftClick;
             FindChild<EditorButton>("btnDeleteHouse").LeftClick += BtnDeleteHouse_LeftClick;
             FindChild<EditorButton>("btnStandardHouses").LeftClick += BtnStandardHouses_LeftClick;
+            FindChild<EditorButton>("btnMakeHouseRepairBuildings").LeftClick += BtnMakeHouseRepairBuildings_LeftClick;
+            FindChild<EditorButton>("btnMakeHouseNotRepairBuildings").LeftClick += BtnMakeHouseNotRepairBuildings_LeftClick;
 
             ddHouseOfHumanPlayer.SelectedIndexChanged += DdHouseOfHumanPlayer_SelectedIndexChanged;
             lbHouseList.SelectedIndexChanged += LbHouseList_SelectedIndexChanged;
@@ -146,6 +148,36 @@ namespace TSMapEditor.UI.Windows
             }
 
             generateStandardHousesWindow.Open();
+        }
+
+        private void BtnMakeHouseRepairBuildings_LeftClick(object sender, EventArgs e)
+        {
+            if (editedHouse == null)
+            {
+                EditorMessageBox.Show(WindowManager, "No House Selected", "Select a house first.", MessageBoxButtons.OK);
+                return;
+            }
+
+            var dialog = EditorMessageBox.Show(WindowManager,
+                "Are you sure?",
+                "This enables the \"AI Repairs\" flag on all buildings of the house, which makes the AI repair them." + Environment.NewLine + Environment.NewLine +
+                "No un-do is available. Do you wish to continue?", MessageBoxButtons.YesNo);
+            dialog.YesClickedAction = _ => map.Structures.FindAll(s => s.Owner == editedHouse).ForEach(b => b.AIRepairable = true);
+        }
+
+        private void BtnMakeHouseNotRepairBuildings_LeftClick(object sender, EventArgs e)
+        {
+            if (editedHouse == null)
+            {
+                EditorMessageBox.Show(WindowManager, "No House Selected", "Select a house first.", MessageBoxButtons.OK);
+                return;
+            }
+
+            var dialog = EditorMessageBox.Show(WindowManager,
+                "Are you sure?",
+                "This disables the \"AI Repairs\" flag on all buildings of the house, which makes the AI NOT repair them." + Environment.NewLine + Environment.NewLine +
+                "No un-do is available. Do you wish to continue?", MessageBoxButtons.YesNo);
+            dialog.YesClickedAction = _ => map.Structures.FindAll(s => s.Owner == editedHouse).ForEach(b => b.AIRepairable = false);
         }
 
         private void LbHouseList_SelectedIndexChanged(object sender, System.EventArgs e)
