@@ -272,6 +272,7 @@
     <Compile Include="Models\TechnoType.cs" />
     <Compile Include="Models\TerrainObject.cs" />
     <Compile Include="Models\TerrainType.cs" />
+    <Compile Include="Models\Themes.cs" />
     <Compile Include="Models\Trigger.cs" />
     <Compile Include="Models\TriggerAction.cs" />
     <Compile Include="Models\TriggerCondition.cs" />
@@ -419,6 +420,7 @@
     <Compile Include="UI\Windows\SelectTagWindow.cs" />
     <Compile Include="UI\Windows\SelectTaskForceWindow.cs" />
     <Compile Include="UI\Windows\SelectTeamTypeWindow.cs" />
+    <Compile Include="UI\Windows\SelectThemeWindow.cs" />
     <Compile Include="UI\Windows\SelectTileSetWindow.cs" />
     <Compile Include="UI\Windows\SelectTriggerWindow.cs" />
     <Compile Include="UI\Windows\SelectTutorialLineWindow.cs" />
@@ -464,6 +466,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Config\UI\SelectTagWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\UI\SelectThemeWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Config\UI\SelectTaskForceWindow.ini">

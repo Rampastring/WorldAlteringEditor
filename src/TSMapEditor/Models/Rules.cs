@@ -24,6 +24,7 @@ namespace TSMapEditor.Models
         public List<GlobalVariable> GlobalVariables = new List<GlobalVariable>();
 
         public TutorialLines TutorialLines { get; set; }
+        public Themes Themes { get; set; }
 
         /// <summary>
         /// Initializes rules types from an INI file.

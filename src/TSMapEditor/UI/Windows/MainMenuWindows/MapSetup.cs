@@ -38,6 +38,7 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
             IniFile.ConsolidateIniFiles(artFSIni, artOverridesIni);
 
             var tutorialLines = new TutorialLines(Path.Combine(gameDirectory, "INI/Tutorial.ini"), a => windowManager.AddCallback(a, null));
+            var themes = new Themes(gameDirectory);
 
             Map map = new Map();
 
@@ -66,6 +67,7 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
             }
 
             map.Rules.TutorialLines = tutorialLines;
+            map.Rules.Themes = themes;
 
             Console.WriteLine();
             Console.WriteLine("Map created.");

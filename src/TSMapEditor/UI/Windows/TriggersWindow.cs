@@ -80,6 +80,7 @@ namespace TSMapEditor.UI.Windows
         private SelectLocalVariableWindow selectLocalVariableWindow;
         private SelectHouseWindow selectHouseWindow;
         private SelectTutorialLineWindow selectTutorialLineWindow;
+        private SelectThemeWindow selectThemeWindow;
 
         private XNAContextMenu actionParameterContextMenu;
         private XNAContextMenu triggerListContextMenu;
@@ -199,6 +200,10 @@ namespace TSMapEditor.UI.Windows
             selectTutorialLineWindow = new SelectTutorialLineWindow(WindowManager, map);
             var tutorialDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTutorialLineWindow);
             tutorialDarkeningPanel.Hidden += TutorialDarkeningPanel_Hidden;
+
+            selectThemeWindow = new SelectThemeWindow(WindowManager, map);
+            var themeDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectThemeWindow);
+            themeDarkeningPanel.Hidden += ThemeDarkeningPanel_Hidden;
 
             actionParameterContextMenu = new XNAContextMenu(WindowManager);
             actionParameterContextMenu.Name = nameof(actionParameterContextMenu);
@@ -485,9 +490,20 @@ namespace TSMapEditor.UI.Windows
                 case TriggerParamType.Text:
                     selectTutorialLineWindow.Open(new TutorialLine(Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1), string.Empty));
                     break;
+                case TriggerParamType.Theme:
+                    selectThemeWindow.Open(map.Rules.Themes.GetByIndex(Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1)));
+                    break;
                 default:
                     break;
             }
+        }
+
+        private void ThemeDarkeningPanel_Hidden(object sender, EventArgs e)
+        {
+            if (selectThemeWindow.SelectedObject == null)
+                return;
+
+            AssignParamValue(selectThemeWindow.IsForEvent, selectThemeWindow.SelectedObject.Index);
         }
 
         private void TutorialDarkeningPanel_Hidden(object sender, EventArgs e)
@@ -1195,7 +1211,7 @@ namespace TSMapEditor.UI.Windows
                         return paramValue;
 
                     if (intValue >= map.Rules.GlobalVariables.Count)
-                        return intValue + " - nonexistant variable";
+                        return intValue + " - nonexistent variable";
 
                     return intValue + " " + map.Rules.GlobalVariables[intValue].Name;
                 case TriggerParamType.LocalVariable:
@@ -1203,7 +1219,7 @@ namespace TSMapEditor.UI.Windows
                         return paramValue;
 
                     if (intValue >= map.LocalVariables.Count)
-                        return intValue + " - nonexistant variable";
+                        return intValue + " - nonexistent variable";
 
                     return intValue + " " + map.LocalVariables[intValue].Name;
                 case TriggerParamType.WaypointZZ:
@@ -1236,6 +1252,15 @@ namespace TSMapEditor.UI.Windows
                         return paramValue + " Unknown text line";
 
                     return paramValue + " " + map.Rules.TutorialLines.GetStringByIdOrEmptyString(intValue);
+                case TriggerParamType.Theme:
+                    if (!intParseSuccess)
+                        return paramValue;
+
+                    Theme theme = map.Rules.Themes.GetByIndex(intValue);
+                    if (theme == null)
+                        return paramValue + " - nonexistent theme";
+
+                    return paramValue + " " + theme.Name;
                 case TriggerParamType.Boolean:
                 default:
                     return paramValue;

@@ -16,6 +16,7 @@ namespace TSMapEditor
         public static string FirestormIniPath;
         public static string ArtIniPath;
         public static string FirestormArtIniPath;
+        public static string ThemeIniPath;
 
         public static bool AdvancedFacingsHack = false;
 
@@ -80,6 +81,7 @@ namespace TSMapEditor
             FirestormIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Firestorm", "INI/Enhance.ini");
             ArtIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Art", "INI/Art.ini");
             FirestormArtIniPath = constantsIni.GetStringValue(FilePathsSectionName, "ArtFS", "INI/ArtE.ini");
+            ThemeIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Theme", "INI/Theme.ini");
         }
     }
 }
