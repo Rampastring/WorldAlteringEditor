@@ -1169,6 +1169,17 @@ namespace TSMapEditor.Models
                 issueList.Add($"Trigger \"{trigger.Name}\" ({trigger.ID}) has an action for enabling itself. Is it supposed to enable something else instead?");
             });
 
+            // Check that the primary player house has "Player Control" enabled in case [Basic] Player= is specified
+            // (iow. this is a singleplayer mission)
+            if (!string.IsNullOrWhiteSpace(Basic.Player) && !Helpers.IsStringNoneValue(Basic.Player))
+            {
+                House matchingHouse = GetHouses().Find(h => h.ININame == Basic.Player);
+                if (matchingHouse == null)
+                    issueList.Add("A nonexistent house has been specified in [Basic] Player= .");
+                else if (!matchingHouse.PlayerControl)
+                    issueList.Add("The human player's house does not have the \"Player-Controlled\" flag checked.");
+            }
+
             return issueList;
         }
     }
