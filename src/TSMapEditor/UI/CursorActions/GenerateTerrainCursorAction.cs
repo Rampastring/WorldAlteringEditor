@@ -11,9 +11,9 @@ namespace TSMapEditor.UI.CursorActions
     /// <summary>
     /// A cursor action that allows the user to select an area for terrain generation.
     /// </summary>
-    class GenerateForestCursorAction : CursorAction
+    class GenerateTerrainCursorAction : CursorAction
     {
-        public GenerateForestCursorAction(ICursorActionTarget cursorActionTarget) : base(cursorActionTarget)
+        public GenerateTerrainCursorAction(ICursorActionTarget cursorActionTarget) : base(cursorActionTarget)
         {
         }
 
@@ -69,6 +69,11 @@ namespace TSMapEditor.UI.CursorActions
             Point2D endPoint = CellMath.CellTopLeftPointFromCellCoords(new Point2D(endX, endY), CursorActionTarget.Map.Size.X) - cameraTopLeftPoint + new Point2D(Constants.CellSizeX / 2, Constants.CellSizeY);
             Point2D corner1 = CellMath.CellTopLeftPointFromCellCoords(new Point2D(startX, endY), CursorActionTarget.Map.Size.X) - cameraTopLeftPoint + new Point2D(0, Constants.CellSizeY / 2);
             Point2D corner2 = CellMath.CellTopLeftPointFromCellCoords(new Point2D(endX, startY), CursorActionTarget.Map.Size.X) - cameraTopLeftPoint + new Point2D(Constants.CellSizeX, Constants.CellSizeY / 2);
+
+            startPoint = startPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
+            endPoint = endPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
+            corner1 = corner1.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
+            corner2 = corner2.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
 
             Color lineColor = Color.Goldenrod;
             int thickness = 2;
