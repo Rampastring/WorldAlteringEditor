@@ -113,6 +113,11 @@ namespace TSMapEditor
             return landType == LandType.Rock || (considerLandUnitsOnly && landType == LandType.Water);
         }
 
+        public static bool IsLandTypeWater(int landType)
+        {
+            return landType == 0x9;
+        }
+
         public static int GetWaypointNumberFromAlphabeticalString(string str)
         {
             if (str.Length < 1 || str.Length > 2 ||

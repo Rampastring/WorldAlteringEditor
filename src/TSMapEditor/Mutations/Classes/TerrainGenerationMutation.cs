@@ -459,8 +459,16 @@ namespace TSMapEditor.Mutations.Classes
                     var cell = MutationTarget.Map.GetTile(cellCoords);
                     ITileImage tile = MutationTarget.Map.TheaterInstance.GetTile(cell.TileIndex);
                     ISubTileImage subTile = tile.GetSubTile(cell.SubTileIndex);
-                    if (subTile.TmpImage.TerrainType != 0x0)
+
+                    if (overlayGroup.OverlayType.WaterBound)
+                    {
+                        if (!Helpers.IsLandTypeWater(subTile.TmpImage.TerrainType))
+                            continue;
+                    }
+                    else if (Helpers.IsLandTypeImpassable(subTile.TmpImage.TerrainType, true))
+                    {
                         continue;
+                    }
 
                     if (cell.TerrainObject != null)
                         chance = overlayGroup.OverlapChance;
