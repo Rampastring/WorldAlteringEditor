@@ -18,6 +18,7 @@ namespace TSMapEditor.UI.CursorActions
         public override void DrawPreview(Point2D cellCoords, Point2D cameraTopLeftPoint)
         {
             Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cellCoords, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
+            cellTopLeftPoint = cellTopLeftPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
 
             var mapCell = CursorActionTarget.Map.GetTile(cellCoords);
             if (mapCell == null)

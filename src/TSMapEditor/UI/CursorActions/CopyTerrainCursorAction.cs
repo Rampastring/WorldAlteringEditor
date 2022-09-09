@@ -102,6 +102,11 @@ namespace TSMapEditor.UI.CursorActions
             Point2D corner1 = CellMath.CellTopLeftPointFromCellCoords(new Point2D(startX, endY), CursorActionTarget.Map.Size.X) - cameraTopLeftPoint + new Point2D(0, Constants.CellSizeY / 2);
             Point2D corner2 = CellMath.CellTopLeftPointFromCellCoords(new Point2D(endX, startY), CursorActionTarget.Map.Size.X) - cameraTopLeftPoint + new Point2D(Constants.CellSizeX, Constants.CellSizeY / 2);
 
+            startPoint = startPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
+            endPoint = endPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
+            corner1 = corner1.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
+            corner2 = corner2.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
+
             Color lineColor = Color.Red;
             int thickness = 2;
             Renderer.DrawLine(startPoint.ToXNAVector(), corner1.ToXNAVector(), lineColor, thickness);
