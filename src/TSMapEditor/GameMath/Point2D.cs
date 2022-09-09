@@ -107,6 +107,10 @@ namespace TSMapEditor.GameMath
             return (float)Math.Atan2(Y, X);
         }
 
+        public Point2D ScaleBy(double scale) => new Point2D((int)(X * scale), (int)(Y * scale));
+
+        public Point2D ScaleBy(float scale) => new Point2D((int)(X * scale), (int)(Y * scale));
+
         public byte[] GetData()
         {
             byte[] buffer = new byte[sizeof(int) * 2];

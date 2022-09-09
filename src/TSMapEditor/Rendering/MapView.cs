@@ -18,6 +18,7 @@ using TSMapEditor.UI.Windows;
 
 namespace TSMapEditor.Rendering
 {
+#if !ADVMAPVIEW
     /// <summary>
     /// An interface for an object that mutations use to interact with the map.
     /// </summary>
@@ -65,18 +66,30 @@ namespace TSMapEditor.Rendering
             Size = size;
         }
     }
+#endif
 
+#if !ADVMAPVIEW
     public class MapView : XNAControl, ICursorActionTarget, IMutationTarget
+#else
+    public class OldMapView : XNAControl, ICursorActionTarget, IMutationTarget
+#endif
     {
         private int MaxRefreshTimeInFrame = 24;
 
-        public MapView(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics, EditorState editorState, MutationManager mutationManager, WindowController windowController) : base(windowManager)
+#if !ADVMAPVIEW
+        public MapView(
+#else
+        public OldMapView(
+#endif
+        WindowManager windowManager, Map map, TheaterGraphics theaterGraphics, EditorState editorState, MutationManager mutationManager, WindowController windowController) : base(windowManager)
         {
             EditorState = editorState;
             Map = map;
             TheaterGraphics = theaterGraphics;
             MutationManager = mutationManager;
             this.windowController = windowController;
+
+            Camera = new Camera(WindowManager, Map);
         }
 
         public EditorState EditorState { get; }
@@ -109,16 +122,18 @@ namespace TSMapEditor.Rendering
         private Texture2D impassableCellHighlightTexture;
 
         private RenderTarget2D mapRenderTarget;
+        private RenderTarget2D objectsRenderTarget;
         private RenderTarget2D transparencyRenderTarget;
 
         private MapTile tileUnderCursor;
         private MapTile lastTileUnderCursor;
 
         private bool mapInvalidated = true;
-        private Point2D cameraTopLeftPoint = new Point2D(0, 0);
 
         private int refreshSizeSetting;
         private int scrollRate;
+
+        private Camera Camera;
 
         private bool isDraggingObject = false;
         private bool isRotatingObject = false;
@@ -127,7 +142,6 @@ namespace TSMapEditor.Rendering
         // For right-click scrolling
         private bool isRightClickScrolling = false;
         private Point rightClickScrollInitPos = new Point(-1, -1);
-        private Vector2 cameraFloatTopLeftPoint = new Vector2(-1, -1);
 
         /// <summary>
         /// A list of cells that have been invalidated.
@@ -180,6 +194,7 @@ namespace TSMapEditor.Rendering
             mapWideOverlayTextureOpacity = UserSettings.Instance.MapWideOverlayOpacity / 255.0f;
 
             mapRenderTarget = CreateFullMapRenderTarget();
+            objectsRenderTarget = CreateFullMapRenderTarget();
             transparencyRenderTarget = CreateFullMapRenderTarget();
 
             refreshSizeSetting = UserSettings.Instance.RefreshSize;
@@ -264,8 +279,7 @@ namespace TSMapEditor.Rendering
 
         private void MinimapWindow_MegamapClicked(object sender, MegamapClickedEventArgs e)
         {
-            cameraTopLeftPoint = e.ClickedPoint - new Point2D(Width / 2, Height / 2);
-            ConstrainCamera();
+            Camera.TopLeftPoint = e.ClickedPoint - new Point2D(Width / 2, Height / 2);
         }
 
         private void FrameworkMode_Triggered(object sender, EventArgs e)
@@ -287,7 +301,7 @@ namespace TSMapEditor.Rendering
            return new RenderTarget2D(GraphicsDevice,
                Map.Size.X * Constants.CellSizeX,
                Map.Size.Y * Constants.CellSizeY + Constants.CellSizeY / 2, false, SurfaceFormat.Color,
-               DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
+               DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.PreserveContents);
         }
 
         Stopwatch sw = new Stopwatch();
@@ -304,10 +318,8 @@ namespace TSMapEditor.Rendering
 
                 for (int j = 0; j < row.Length; j++)
                 {
-                    Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(new Point2D(i, j), Map.Size.X);
                     if (row[j] == null)
                     {
-                        DrawString("n", 0, drawPoint.ToXNAVector() + new Vector2(Constants.CellSizeX / 2, Constants.CellSizeY / 2), Color.Red, 0.5f);
                         continue;
                     }
 
@@ -585,15 +597,18 @@ namespace TSMapEditor.Rendering
                 return;
 
             var texture = frame.Texture;
-            DrawTexture(texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
-                drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
-                texture.Width, texture.Height), Constants.HQRemap ? Color.White : remapColor);
+
+            int x = drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2;
+            int y = drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset;
+            int width = texture.Width;
+            int height = texture.Height;
+            Rectangle drawRectangle = new Rectangle(x, y, width, height);
+
+            DrawTexture(texture, drawRectangle, Constants.HQRemap ? Color.White : remapColor);
 
             if (Constants.HQRemap && graphics.RemapFrames != null)
             {
-                DrawTexture(graphics.RemapFrames[frameIndex].Texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
-                    drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
-                    texture.Width, texture.Height), remapColor);
+                DrawTexture(graphics.RemapFrames[frameIndex].Texture, drawRectangle, remapColor);
             }
         }
 
@@ -684,15 +699,25 @@ namespace TSMapEditor.Rendering
             const int HeightAddition = 4; // TS engine adds 4 to specified map height <3
             const int TopImpassableCellCount = 3; // The northernmost 3 cells are impassable in the TS engine, we'll also display this border
 
-            int x = Map.LocalSize.X * Constants.CellSizeX - cameraTopLeftPoint.X;
-            int y = (int)(((double)Map.LocalSize.Y - InitialHeight) * Constants.CellSizeY) - cameraTopLeftPoint.Y;
-            int width = Map.LocalSize.Width * Constants.CellSizeX;
-            int height = (Map.LocalSize.Height + HeightAddition) * Constants.CellSizeY;
+            int x = (int)((Map.LocalSize.X * Constants.CellSizeX - Camera.TopLeftPoint.X) * Camera.ZoomLevel);
+            int y = (int)((((Map.LocalSize.Y - InitialHeight) * Constants.CellSizeY) - Camera.TopLeftPoint.Y) * Camera.ZoomLevel);
+            int width = (int)((Map.LocalSize.Width * Constants.CellSizeX) * Camera.ZoomLevel);
+            int height = (int)((Map.LocalSize.Height + HeightAddition) * Constants.CellSizeY * Camera.ZoomLevel);
 
             DrawRectangle(new Rectangle(x, y, width, height), Color.Blue, BorderThickness);
 
-            int impassableY = y + (Constants.CellSizeY * TopImpassableCellCount);
+            int impassableY = (int)(y + (Constants.CellSizeY * TopImpassableCellCount * Camera.ZoomLevel));
             FillRectangle(new Rectangle(x, impassableY - (BorderThickness / 2), width, BorderThickness), Color.Teal * 0.25f);
+        }
+
+        public override void OnMouseScrolled()
+        {
+            if (Cursor.ScrollWheelValue > 0)
+                Camera.ZoomLevel += 0.1;
+            else
+                Camera.ZoomLevel -= 0.1;
+
+            base.OnMouseScrolled();
         }
 
         public override void OnMouseOnControl()
@@ -729,13 +754,8 @@ namespace TSMapEditor.Rendering
                     var result = newCursorPosition - rightClickScrollInitPos;
                     float rightClickScrollRate = scrollRate / 64f;
 
-                    cameraFloatTopLeftPoint = new Vector2(cameraFloatTopLeftPoint.X + result.X * rightClickScrollRate,
-                        cameraFloatTopLeftPoint.Y + result.Y * rightClickScrollRate);
-
-                    cameraTopLeftPoint = new Point2D((int)cameraFloatTopLeftPoint.X,
-                        (int)cameraFloatTopLeftPoint.Y);
-
-                    ConstrainCamera();
+                    Camera.FloatTopLeftPoint = new Vector2(Camera.FloatTopLeftPoint.X + result.X * rightClickScrollRate,
+                        Camera.FloatTopLeftPoint.Y + result.Y * rightClickScrollRate);
                 }
             }
 
@@ -793,7 +813,7 @@ namespace TSMapEditor.Rendering
                 {
                     isRightClickScrolling = true;
                     rightClickScrollInitPos = GetCursorPoint();
-                    cameraFloatTopLeftPoint = cameraTopLeftPoint.ToXNAVector();
+                    Camera.FloatTopLeftPoint = Camera.TopLeftPoint.ToXNAVector();
                 }
             }
         }
@@ -855,24 +875,12 @@ namespace TSMapEditor.Rendering
             // 1000 ms (1 second) divided by 60 frames =~ 16.667 ms / frame
             int scrollRate = (int)(this.scrollRate * (gameTime.ElapsedGameTime.TotalMilliseconds / 16.667));
 
-
-
             if (IsActive && !(WindowManager.SelectedControl is XNATextBox))
             {
-                if (Keyboard.IsKeyHeldDown(Microsoft.Xna.Framework.Input.Keys.Left))
-                    cameraTopLeftPoint += new Point2D(-scrollRate, 0);
-                else if (Keyboard.IsKeyHeldDown(Microsoft.Xna.Framework.Input.Keys.Right))
-                    cameraTopLeftPoint += new Point2D(scrollRate, 0);
-
-                if (Keyboard.IsKeyHeldDown(Microsoft.Xna.Framework.Input.Keys.Up))
-                    cameraTopLeftPoint += new Point2D(0, -scrollRate);
-                else if (Keyboard.IsKeyHeldDown(Microsoft.Xna.Framework.Input.Keys.Down))
-                    cameraTopLeftPoint += new Point2D(0, scrollRate);
-
-                ConstrainCamera();
+                Camera.KeyboardUpdate(Keyboard, scrollRate);
             }
 
-            windowController.MinimapWindow.CameraRectangle = new Rectangle(cameraTopLeftPoint.ToXNAPoint(), new Point(Width, Height));
+            windowController.MinimapWindow.CameraRectangle = new Rectangle(Camera.TopLeftPoint.ToXNAPoint(), new Point(Width, Height));
 
             Point2D cursorMapPoint = GetCursorMapPoint();
             Point2D tileCoords = CellMath.CellCoordsFromPixelCoords(cursorMapPoint, Map.Size);
@@ -889,42 +897,11 @@ namespace TSMapEditor.Rendering
             base.Update(gameTime);
         }
 
-        private void ConstrainCamera()
-        {
-            int minX = -WindowManager.RenderResolutionX / 2;
-            if (cameraTopLeftPoint.X < minX)
-                cameraTopLeftPoint = new Point2D(minX, cameraTopLeftPoint.Y);
-
-            if (cameraFloatTopLeftPoint.X < minX)
-                cameraFloatTopLeftPoint = new Vector2(minX, cameraFloatTopLeftPoint.Y);
-
-            int minY = -WindowManager.RenderResolutionY / 2;
-            if (cameraTopLeftPoint.Y < minY)
-                cameraTopLeftPoint = new Point2D(cameraTopLeftPoint.X, minY);
-
-            if (cameraFloatTopLeftPoint.Y < minY)
-                cameraFloatTopLeftPoint = new Vector2(cameraFloatTopLeftPoint.X, minY);
-
-            int maxX = Map.Size.X * Constants.CellSizeX - WindowManager.RenderResolutionX / 2;
-            if (cameraTopLeftPoint.X > maxX)
-                cameraTopLeftPoint = new Point2D(maxX, cameraTopLeftPoint.Y);
-
-            if (cameraFloatTopLeftPoint.X > maxX)
-                cameraFloatTopLeftPoint = new Vector2(maxX, cameraFloatTopLeftPoint.Y);
-
-            int maxY = Map.Size.Y * Constants.CellSizeY - WindowManager.RenderResolutionY / 2;
-            if (cameraTopLeftPoint.Y > maxY)
-                cameraTopLeftPoint = new Point2D(cameraTopLeftPoint.X, maxY);
-
-            if (cameraFloatTopLeftPoint.Y > maxY)
-                cameraFloatTopLeftPoint = new Vector2(cameraFloatTopLeftPoint.X, maxY);
-        }
-
         private Point2D GetCursorMapPoint()
         {
             Point cursorPoint = GetCursorPoint();
-            Point2D cursorMapPoint = new Point2D(cameraTopLeftPoint.X + cursorPoint.X,
-                    cameraTopLeftPoint.Y + cursorPoint.Y);
+            Point2D cursorMapPoint = new Point2D(Camera.TopLeftPoint.X + (int)(cursorPoint.X / Camera.ZoomLevel),
+                    Camera.TopLeftPoint.Y + (int)(cursorPoint.Y / Camera.ZoomLevel));
             return cursorMapPoint;
         }
 
@@ -978,12 +955,15 @@ namespace TSMapEditor.Rendering
                 if (!Map.CanMoveObject(draggedOrRotatedObject, tileUnderCursor.CoordsToPoint()))
                     lineColor = Color.Red;
 
-                Point2D cameraAndCellCenterOffset = new Point2D(-cameraTopLeftPoint.X + Constants.CellSizeX / 2,
-                                                 -cameraTopLeftPoint.Y + Constants.CellSizeY / 2);
+                Point2D cameraAndCellCenterOffset = new Point2D(-Camera.TopLeftPoint.X + Constants.CellSizeX / 2,
+                                                 -Camera.TopLeftPoint.Y + Constants.CellSizeY / 2);
 
                 Point2D startDrawPoint = CellMath.CellTopLeftPointFromCellCoords(draggedOrRotatedObject.Position, Map.Size.X) + cameraAndCellCenterOffset;
 
                 Point2D endDrawPoint = CellMath.CellTopLeftPointFromCellCoords(tileUnderCursor.CoordsToPoint(), Map.Size.X) + cameraAndCellCenterOffset;
+
+                startDrawPoint = startDrawPoint.ScaleBy(Camera.ZoomLevel);
+                endDrawPoint = endDrawPoint.ScaleBy(Camera.ZoomLevel);
 
                 DrawLine(startDrawPoint.ToXNAVector(), endDrawPoint.ToXNAVector(), lineColor, 1);
             }
@@ -991,12 +971,15 @@ namespace TSMapEditor.Rendering
             {
                 Color lineColor = Color.Yellow;
 
-                Point2D cameraAndCellCenterOffset = new Point2D(-cameraTopLeftPoint.X + Constants.CellSizeX / 2,
-                                                 -cameraTopLeftPoint.Y + Constants.CellSizeY / 2);
+                Point2D cameraAndCellCenterOffset = new Point2D(-Camera.TopLeftPoint.X + Constants.CellSizeX / 2,
+                                                 -Camera.TopLeftPoint.Y + Constants.CellSizeY / 2);
 
                 Point2D startDrawPoint = CellMath.CellTopLeftPointFromCellCoords(draggedOrRotatedObject.Position, Map.Size.X) + cameraAndCellCenterOffset;
 
                 Point2D endDrawPoint = CellMath.CellTopLeftPointFromCellCoords(tileUnderCursor.CoordsToPoint(), Map.Size.X) + cameraAndCellCenterOffset;
+
+                startDrawPoint = startDrawPoint.ScaleBy(Camera.ZoomLevel);
+                endDrawPoint = endDrawPoint.ScaleBy(Camera.ZoomLevel);
 
                 DrawLine(startDrawPoint.ToXNAVector(), endDrawPoint.ToXNAVector(), lineColor, 1);
 
@@ -1031,12 +1014,14 @@ namespace TSMapEditor.Rendering
         private void DrawTileCursor()
         {
             Color lineColor = new Color(96, 168, 96, 128);
-            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(new Point2D(tileUnderCursor.X, tileUnderCursor.Y), Map.Size.X) - cameraTopLeftPoint;
+            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(new Point2D(tileUnderCursor.X, tileUnderCursor.Y), Map.Size.X) - Camera.TopLeftPoint;
 
-            var cellTopPoint = new Vector2(cellTopLeftPoint.X + Constants.CellSizeX / 2, cellTopLeftPoint.Y);
-            var cellLeftPoint = new Vector2(cellTopLeftPoint.X, cellTopLeftPoint.Y + Constants.CellSizeY / 2);
-            var cellRightPoint = new Vector2(cellTopLeftPoint.X + Constants.CellSizeX, cellLeftPoint.Y);
-            var cellBottomPoint = new Vector2(cellTopPoint.X, cellTopLeftPoint.Y + Constants.CellSizeY);
+            cellTopLeftPoint = new Point2D((int)(cellTopLeftPoint.X * Camera.ZoomLevel), (int)(cellTopLeftPoint.Y * Camera.ZoomLevel));
+
+            var cellTopPoint = new Vector2(cellTopLeftPoint.X + (int)((Constants.CellSizeX / 2) * Camera.ZoomLevel), cellTopLeftPoint.Y);
+            var cellLeftPoint = new Vector2(cellTopLeftPoint.X, cellTopLeftPoint.Y + (int)((Constants.CellSizeY / 2) * Camera.ZoomLevel));
+            var cellRightPoint = new Vector2(cellTopLeftPoint.X + (int)(Constants.CellSizeX * Camera.ZoomLevel), cellLeftPoint.Y);
+            var cellBottomPoint = new Vector2(cellTopPoint.X, cellTopLeftPoint.Y + (int)(Constants.CellSizeY * Camera.ZoomLevel));
 
             DrawLine(cellTopPoint, cellLeftPoint, lineColor, 1);
             DrawLine(cellRightPoint, cellTopPoint, lineColor, 1);
@@ -1227,33 +1212,91 @@ namespace TSMapEditor.Rendering
             // }
             // refreshes.Clear();
 
-            DrawTexture(mapRenderTarget, new Rectangle(cameraTopLeftPoint.X, cameraTopLeftPoint.Y,
-                Width, Height), new Rectangle(0, 0, Width, Height), Color.White);
+            DrawWorld();
 
             DrawMapBorder();
-            Renderer.PushRenderTarget(transparencyRenderTarget);
-            GraphicsDevice.Clear(Color.Transparent);
-            Map.GraphicalBaseNodes.ForEach(bn => DrawBaseNode(bn));
-            Renderer.PopRenderTarget();
-            DrawTexture(transparencyRenderTarget, new Rectangle(cameraTopLeftPoint.X, cameraTopLeftPoint.Y, Width, Height),
-                new Rectangle(0, 0, Width, Height), new Color(128, 128, 255) * 0.5f);
 
             if (IsActive && tileUnderCursor != null && CursorAction != null)
             {
                 CursorAction.PostMapDraw(tileUnderCursor.CoordsToPoint());
-                CursorAction.DrawPreview(tileUnderCursor.CoordsToPoint(), cameraTopLeftPoint);
+                CursorAction.DrawPreview(tileUnderCursor.CoordsToPoint(), Camera.TopLeftPoint);
             }
 
             if (mapWideOverlayTexture != null && EditorState.DrawMapWideOverlay)
             {
                 Renderer.DrawTexture(mapWideOverlayTexture,
-                    new Rectangle(-cameraTopLeftPoint.X, -cameraTopLeftPoint.Y, mapRenderTarget.Width, mapRenderTarget.Height),
+                    new Rectangle(
+                        (int)(-Camera.TopLeftPoint.X * Camera.ZoomLevel),
+                        (int)(-Camera.TopLeftPoint.Y * Camera.ZoomLevel),
+                        (int)(mapRenderTarget.Width * Camera.ZoomLevel),
+                        (int)(mapRenderTarget.Height * Camera.ZoomLevel)),
                     Color.White * mapWideOverlayTextureOpacity);
             }
 
             DrawOnTileUnderCursor();
 
             base.Draw(gameTime);
+        }
+
+        private void DrawWorld()
+        {
+            int zoomedWidth = (int)(Width / Camera.ZoomLevel);
+            int zoomedHeight = (int)(Height / Camera.ZoomLevel);
+
+            // Constrain draw coordinates so that we don't draw out of bounds and cause weird artifacts on map edge
+
+            int sourceX = Camera.TopLeftPoint.X;
+            int destinationX = 0;
+            int destinationWidth = Width;
+            if (sourceX < 0)
+            {
+                sourceX = 0;
+                destinationX = (int)(-Camera.TopLeftPoint.X * Camera.ZoomLevel);
+                destinationWidth -= destinationX;
+                zoomedWidth += Camera.TopLeftPoint.X;
+            }
+
+            int sourceY = Camera.TopLeftPoint.Y;
+            int destinationY = 0;
+            int destinationHeight = Height;
+            if (sourceY < 0)
+            {
+                sourceY = 0;
+                destinationY = (int)(-Camera.TopLeftPoint.Y * Camera.ZoomLevel);
+                destinationHeight -= destinationY;
+                zoomedHeight += Camera.TopLeftPoint.Y;
+            }
+
+            if (sourceX + zoomedWidth > mapRenderTarget.Width)
+            {
+                zoomedWidth = mapRenderTarget.Width - sourceX;
+                destinationWidth = (int)(zoomedWidth * Camera.ZoomLevel);
+            }
+
+            if (sourceY + zoomedHeight > mapRenderTarget.Height)
+            {
+                zoomedHeight = mapRenderTarget.Height - sourceY;
+                destinationHeight = (int)(zoomedHeight * Camera.ZoomLevel);
+            }
+
+            Renderer.PushSettings(new SpriteBatchSettings(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null));
+
+            DrawTexture(mapRenderTarget,
+                new Rectangle(sourceX, sourceY, zoomedWidth, zoomedHeight),
+                new Rectangle(destinationX, destinationY, destinationWidth, destinationHeight),
+                Color.White);
+
+            Renderer.PushRenderTarget(transparencyRenderTarget);
+            GraphicsDevice.Clear(Color.Transparent);
+            Map.GraphicalBaseNodes.ForEach(bn => DrawBaseNode(bn));
+            Renderer.PopRenderTarget();
+
+            DrawTexture(transparencyRenderTarget,
+                new Rectangle(sourceX, sourceY, zoomedWidth, zoomedHeight),
+                new Rectangle(destinationX, destinationY, destinationWidth, destinationHeight),
+                new Color(128, 128, 255) * 0.5f);
+
+            Renderer.PopSettings();
         }
     }
 }

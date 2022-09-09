@@ -5,7 +5,7 @@ namespace TSMapEditor.Models
     /// <summary>
     /// Attaches a <see cref="Tag"/> to a <see cref="MapTile"/>.
     /// </summary>
-    public class CellTag : IMovable
+    public class CellTag : AbstractObject, IMovable
     {
         public CellTag()
         {
@@ -20,11 +20,6 @@ namespace TSMapEditor.Models
         public Point2D Position { get; set; }
         public Tag Tag { get; set; }
 
-        public bool IsTechno()
-        {
-            return false;
-        }
-
-        public RTTIType WhatAmI() => RTTIType.CellTag;
+        public override RTTIType WhatAmI() => RTTIType.CellTag;
     }
 }
