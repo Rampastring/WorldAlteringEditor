@@ -70,6 +70,8 @@ namespace TSMapEditor.UI.CursorActions
             foreach (Point2D pathCell in pathCellCoords)
             {
                 Point2D pathCellCenterPoint = CellMath.CellCenterPointFromCellCoords(pathCell, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
+                pathCellCenterPoint = pathCellCenterPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
+
                 Renderer.FillRectangle(GetDrawRectangleForMarker(pathCellCenterPoint), Color.Yellow);
             }
 
@@ -80,6 +82,8 @@ namespace TSMapEditor.UI.CursorActions
         private void DrawText(Point2D cellCoords, Point2D cameraTopLeftPoint, string text, Color textColor)
         {
             Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cellCoords, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
+            cellTopLeftPoint = cellTopLeftPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
+
             var textDimensions = Renderer.GetTextDimensions(text, Constants.UIBoldFont);
             int x = cellTopLeftPoint.X - (int)(textDimensions.X - Constants.CellSizeX) / 2;
 
@@ -97,7 +101,7 @@ namespace TSMapEditor.UI.CursorActions
 
         private Rectangle GetDrawRectangleForMarker(Point2D cellCenterPoint)
         {
-            const int size = 10;
+            int size = (int)(10 * CursorActionTarget.Camera.ZoomLevel);
             return new Rectangle(cellCenterPoint.X - (size / 2), cellCenterPoint.Y - (size / 2), size, size);
         }
 
