@@ -36,6 +36,8 @@ namespace TSMapEditor.UI.CursorActions
         {
             Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cellCoords, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
 
+            cellTopLeftPoint = cellTopLeftPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
+
             const string text = "Hold left click to draw tunnel.\r\n\r\nENTER to confirm\r\nShift + ENTER to also create opposing tunnel\r\nESC to clear\r\nShift + ESC to exit";
             var textDimensions = Renderer.GetTextDimensions(text, Constants.UIBoldFont);
             int x = cellTopLeftPoint.X - (int)(textDimensions.X - Constants.CellSizeX) / 2;
