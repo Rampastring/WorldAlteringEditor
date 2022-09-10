@@ -83,10 +83,18 @@ namespace TSMapEditor.UI.Controls
 
             if ((!ContextMenu.Enabled && !contextMenuDisabledOnCurrentFrame) || contextMenuOpenedOnClick)
                 OpenContextMenu();
-            else
+            else if (!contextMenuOpenedOnClick)
                 ContextMenu.Disable();
 
             contextMenuOpenedOnClick = false;
+        }
+
+        public override void OnMouseLeave()
+        {
+            base.OnMouseLeave();
+
+            if (contextMenuOpenedOnClick)
+                contextMenuOpenedOnClick = false;
         }
 
         public void OpenContextMenu()
@@ -99,11 +107,16 @@ namespace TSMapEditor.UI.Controls
                 ContextMenu.Open(new Point(0, Height));
                 RemapColor = UISettings.ActiveSettings.FocusColor;
                 TextColorIdle = UISettings.ActiveSettings.ButtonHoverColor;
+
+                ContextMenu.InputEnabled = false;
             }
         }
 
         public override void Update(GameTime gameTime)
         {
+            if (ContextMenu.Enabled && !ContextMenu.InputEnabled && !contextMenuOpenedOnClick)
+                ContextMenu.InputEnabled = true;
+
             base.Update(gameTime);
             contextMenuDisabledOnCurrentFrame = false;
         }
