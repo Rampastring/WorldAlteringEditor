@@ -27,6 +27,7 @@ namespace TSMapEditor.UI.CursorActions
         {
             MapTile tile = CursorActionTarget.Map.GetTile(cellCoords);
             Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cellCoords, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
+            cellTopLeftPoint = cellTopLeftPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
 
             Renderer.FillRectangle(new Rectangle(cellTopLeftPoint.X, cellTopLeftPoint.Y, Constants.CellSizeX, Constants.CellSizeY),
                 Color.LimeGreen * 0.5f);
