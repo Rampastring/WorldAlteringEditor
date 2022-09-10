@@ -341,7 +341,6 @@ namespace TSMapEditor.Rendering
 
         private readonly GraphicsDevice graphicsDevice;
 
-
         private void ReadTileTextures()
         {
             int currentTileIndex = 0; // Used for setting the starting tile ID of a tileset
@@ -692,7 +691,20 @@ namespace TSMapEditor.Rendering
 
         public int GetOverlayFrameCount(OverlayType overlayType)
         {
-            return OverlayTextures[overlayType.Index].Frames.Length;
+            PositionedTexture[] overlayFrames = OverlayTextures[overlayType.Index].Frames;
+
+            // We only consider non-blank frames as valid frames, so we need to look up
+            // the first blank frame to get the proper frame count
+            // According to Bittah, when we find an empty overlay frame,
+            // we can assume the rest of the overlay frames to be empty too
+            for (int i = 0; i < overlayFrames.Length; i++)
+            {
+                if (overlayFrames[i] == null || overlayFrames[i].Texture == null)
+                    return i;
+            }
+
+            // No blank overlay frame existed - return the full frame count divided by two (the rest are used up by shadows)
+            return OverlayTextures[overlayType.Index].Frames.Length / 2;
         }
 
         public ObjectImage[] TerrainObjectTextures { get; set; }

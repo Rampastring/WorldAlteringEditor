@@ -6,7 +6,7 @@ using TSMapEditor.Models;
 
 namespace TSMapEditor.Rendering
 {
-    internal class Camera
+    public class Camera
     {
         private const double ZoomMax = 3.0;
         private const double ZoomMin = 0.2;

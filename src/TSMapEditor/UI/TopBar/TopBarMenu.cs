@@ -158,7 +158,7 @@ namespace TSMapEditor.UI.TopBar
                 return;
             }
 
-            var generateForestCursorAction = new GenerateForestCursorAction(mapView);
+            var generateForestCursorAction = new GenerateTerrainCursorAction(mapView);
             generateForestCursorAction.TerrainGeneratorConfiguration = windowController.TerrainGeneratorConfigWindow.TerrainGeneratorConfig;
             mapView.CursorAction = generateForestCursorAction;
         }

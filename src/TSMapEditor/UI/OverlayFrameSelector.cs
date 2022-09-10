@@ -170,7 +170,9 @@ namespace TSMapEditor.UI
             int x = Constants.UIEmptySideSpace;
             int currentLineHeight = 0;
 
-            for (int i = 0; i < textures.Frames.Length; i++)
+            int overlayFrameCount = theaterGraphics.GetOverlayFrameCount(overlayType);
+
+            for (int i = 0; i < overlayFrameCount; i++)
             {
                 var frame = textures.Frames[i];
 

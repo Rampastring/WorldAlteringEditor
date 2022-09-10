@@ -53,6 +53,7 @@ namespace TSMapEditor.Rendering
         bool OnlyPaintOnClearGround { get; }
         CopiedMapData CopiedMapData { get; set; }
         Texture2D MegamapTexture { get; }
+        Camera Camera { get; }
     }
 
     struct RefreshPoint
@@ -110,6 +111,7 @@ namespace TSMapEditor.Rendering
             set => EditorState.CopiedMapData = value;
         }
         public Texture2D MegamapTexture => mapRenderTarget;
+        public Camera Camera { get; private set; }
 
         public TileInfoDisplay TileInfoDisplay { get; set; }
         
@@ -132,8 +134,6 @@ namespace TSMapEditor.Rendering
 
         private int refreshSizeSetting;
         private int scrollRate;
-
-        private Camera Camera;
 
         private bool isDraggingObject = false;
         private bool isRotatingObject = false;
