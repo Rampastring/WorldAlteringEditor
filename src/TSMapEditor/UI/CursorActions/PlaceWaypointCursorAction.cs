@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Rampastring.XNAUI;
 using TSMapEditor.GameMath;
-using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI.Windows;
 
@@ -25,11 +24,12 @@ namespace TSMapEditor.UI.CursorActions
 
         public override void DrawPreview(Point2D cellCoords, Point2D cameraTopLeftPoint)
         {
-            MapTile tile = CursorActionTarget.Map.GetTile(cellCoords);
             Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cellCoords, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
             cellTopLeftPoint = cellTopLeftPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
 
-            Renderer.FillRectangle(new Rectangle(cellTopLeftPoint.X, cellTopLeftPoint.Y, Constants.CellSizeX, Constants.CellSizeY),
+            Renderer.FillRectangle(new Rectangle(cellTopLeftPoint.X, cellTopLeftPoint.Y, 
+                CursorActionTarget.Camera.ScaleIntWithZoom(Constants.CellSizeX),
+                CursorActionTarget.Camera.ScaleIntWithZoom(Constants.CellSizeY)),
                 Color.LimeGreen * 0.5f);
         }
     }
