@@ -110,6 +110,7 @@ namespace TSMapEditor.UI.Windows
             editedScript.Actions.Add(new ScriptActionEntry(0, 0));
             EditScript(editedScript);
             lbActions.SelectedIndex = lbActions.Items.Count - 1;
+            lbActions.ScrollToBottom();
         }
 
         private void BtnDeleteAction_LeftClick(object sender, EventArgs e)
