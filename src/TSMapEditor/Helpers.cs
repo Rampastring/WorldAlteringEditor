@@ -23,7 +23,7 @@ namespace TSMapEditor
         public static Point2D? CoordStringToPoint(string coordsString)
         {
             int coords = Conversions.IntFromString(coordsString, -1);
-            if (coords < 0 || coordsString.Length < 5)
+            if (coords < 0 || coordsString.Length < 4)
             {
                 Logger.Log("CoordStringToPoint: invalid coord string " + coordsString);
                 return null;
