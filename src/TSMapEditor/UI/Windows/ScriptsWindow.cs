@@ -3,6 +3,7 @@ using Rampastring.XNAUI.XNAControls;
 using System;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Models;
+using TSMapEditor.Models.Enums;
 using TSMapEditor.UI.Controls;
 
 namespace TSMapEditor.UI.Windows
@@ -216,6 +217,24 @@ namespace TSMapEditor.UI.Windows
 
             btnEditorPresetValues.ContextMenu.ClearItems();
             action.PresetOptions.ForEach(p => btnEditorPresetValues.ContextMenu.AddItem(new XNAContextMenuItem() { Text = p.GetOptionText() }));
+            if (action.ParamType == TriggerParamType.LocalVariable)
+            {
+                for (int i = 0; i < map.LocalVariables.Count; i++)
+                {
+                    btnEditorPresetValues.ContextMenu.AddItem(new XNAContextMenuItem() { Text = i + " - " + map.LocalVariables[i].Name });
+                }
+            }
+            else if (action.ParamType == TriggerParamType.Waypoint)
+            {
+                foreach (Waypoint waypoint in map.Waypoints)
+                {
+                    btnEditorPresetValues.ContextMenu.AddItem(new XNAContextMenuItem() { Text = waypoint.Identifier.ToString() });
+                }
+            }
+
+            var fittingItem = btnEditorPresetValues.ContextMenu.Items.Find(item => item.Text.StartsWith(entry.Argument.ToString()));
+            if (fittingItem != null)
+                tbParameterValue.Text = fittingItem.Text;
         }
 
         private void LbScriptTypes_SelectedIndexChanged(object sender, EventArgs e)
