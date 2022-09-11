@@ -74,6 +74,7 @@ namespace TSMapEditor.UI.Windows
 
         private SelectEventWindow selectEventWindow;
         private SelectActionWindow selectActionWindow;
+        private SelectBuildingTypeWindow selectBuildingTypeWindow;
         private SelectTeamTypeWindow selectTeamTypeWindow;
         private SelectTriggerWindow selectTriggerWindow;
         private SelectGlobalVariableWindow selectGlobalVariableWindow;
@@ -176,6 +177,10 @@ namespace TSMapEditor.UI.Windows
             selectActionWindow = new SelectActionWindow(WindowManager, map);
             var actionWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectActionWindow);
             actionWindowDarkeningPanel.Hidden += ActionWindowDarkeningPanel_Hidden;
+
+            selectBuildingTypeWindow = new SelectBuildingTypeWindow(WindowManager, map);
+            var buildingTypeWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectBuildingTypeWindow);
+            buildingTypeWindowDarkeningPanel.Hidden += BuildingTypeWindowDarkeningPanel_Hidden;
 
             selectTeamTypeWindow = new SelectTeamTypeWindow(WindowManager, map);
             var teamTypeWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTeamTypeWindow);
@@ -440,6 +445,11 @@ namespace TSMapEditor.UI.Windows
                     else
                         selectHouseWindow.Open(null);
                     break;
+                case TriggerParamType.Building:
+                    BuildingType existingBuilding = paramValue < 0 || paramValue >= map.Rules.BuildingTypes.Count ? null : map.Rules.BuildingTypes[paramValue];
+                    selectBuildingTypeWindow.IsForEvent = true;
+                    selectBuildingTypeWindow.Open(existingBuilding);
+                    break;
                 default:
                     break;
             }
@@ -496,6 +506,14 @@ namespace TSMapEditor.UI.Windows
                 default:
                     break;
             }
+        }
+
+        private void BuildingTypeWindowDarkeningPanel_Hidden(object sender, EventArgs e)
+        {
+            if (selectBuildingTypeWindow.SelectedObject == null)
+                return;
+
+            AssignParamValue(selectBuildingTypeWindow.IsForEvent, selectBuildingTypeWindow.SelectedObject.Index);
         }
 
         private void ThemeDarkeningPanel_Hidden(object sender, EventArgs e)
