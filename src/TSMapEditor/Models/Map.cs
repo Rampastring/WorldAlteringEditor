@@ -23,7 +23,8 @@ namespace TSMapEditor.Models
 
     public class Map : IMap
     {
-        private const int TileBufferSize = 600; // for now
+        private const int MaxTubes = 127;
+        public const int TileBufferSize = 600; // for now
 
         public event EventHandler HousesChanged;
         public event EventHandler<HouseEventArgs> HouseColorChanged;
@@ -1178,6 +1179,12 @@ namespace TSMapEditor.Models
                     issueList.Add("A nonexistent house has been specified in [Basic] Player= .");
                 else if (!matchingHouse.PlayerControl)
                     issueList.Add("The human player's house does not have the \"Player-Controlled\" flag checked.");
+            }
+
+            // Check for more than 127 tunnel tubes
+            if (Tubes.Count > MaxTubes)
+            {
+                issueList.Add($"The map has more than {MaxTubes} tunnel tubes. This might cause issues when units cross the tunnels.");
             }
 
             return issueList;
