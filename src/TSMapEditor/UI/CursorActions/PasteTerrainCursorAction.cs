@@ -44,6 +44,7 @@ namespace TSMapEditor.UI.CursorActions
             {
                 Logger.Log(nameof(PasteTerrainCursorAction) + ": invalid clipboard data format, exiting action");
                 ExitAction();
+                return;
             }
 
             byte[] data = (byte[])System.Windows.Forms.Clipboard.GetData(Constants.ClipboardMapDataFormatValue);
