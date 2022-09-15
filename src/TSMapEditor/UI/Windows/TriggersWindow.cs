@@ -440,8 +440,8 @@ namespace TSMapEditor.UI.Windows
                     break;
                 case TriggerParamType.House:
                     selectHouseWindow.IsForEvent = true;
-                    if (paramValue > -1 || paramValue < map.Houses.Count)
-                        selectHouseWindow.Open(map.Houses[paramValue]);
+                    if (paramValue > -1 && paramValue < map.GetHouses().Count)
+                        selectHouseWindow.Open(map.GetHouses()[paramValue]);
                     else
                         selectHouseWindow.Open(null);
                     break;
@@ -492,8 +492,8 @@ namespace TSMapEditor.UI.Windows
                 case TriggerParamType.House:
                     int houseIndex = Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1);
                     selectHouseWindow.IsForEvent = false;
-                    if (houseIndex > -1 && houseIndex < map.Houses.Count)
-                        selectHouseWindow.Open(map.Houses[houseIndex]);
+                    if (houseIndex > -1 && houseIndex < map.GetHouses().Count)
+                        selectHouseWindow.Open(map.GetHouses()[houseIndex]);
                     else
                         selectHouseWindow.Open(null);
                     break;
@@ -537,7 +537,7 @@ namespace TSMapEditor.UI.Windows
             if (selectHouseWindow.SelectedObject == null)
                 return;
 
-            int houseIndex = map.Houses.FindIndex(h => h == selectHouseWindow.SelectedObject);
+            int houseIndex = map.GetHouses().FindIndex(h => h == selectHouseWindow.SelectedObject);
             AssignParamValue(selectHouseWindow.IsForEvent, houseIndex);
         }
 

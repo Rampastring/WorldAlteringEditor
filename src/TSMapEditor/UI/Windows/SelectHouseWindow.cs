@@ -35,9 +35,9 @@ namespace TSMapEditor.UI.Windows
         {
             lbObjectList.Clear();
 
-            for (int i = 0; i < map.Houses.Count; i++)
+            for (int i = 0; i < map.GetHouses().Count; i++)
             {
-                House house = map.Houses[i];
+                House house = map.GetHouses()[i];
 
                 lbObjectList.AddItem(new XNAListBoxItem() { Text = $"{i} {house.ININame}", TextColor = house.XNAColor, Tag = house });
                 if (house == SelectedObject)
