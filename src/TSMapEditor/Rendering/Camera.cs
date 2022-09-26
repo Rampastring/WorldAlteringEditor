@@ -81,6 +81,8 @@ namespace TSMapEditor.Rendering
 
         public void KeyboardUpdate(RKeyboard keyboard, int scrollRate)
         {
+            scrollRate = (int)(scrollRate / ZoomLevel);
+
             if (keyboard.IsKeyHeldDown(Microsoft.Xna.Framework.Input.Keys.Left))
                 TopLeftPoint += new Point2D(-scrollRate, 0);
             else if (keyboard.IsKeyHeldDown(Microsoft.Xna.Framework.Input.Keys.Right))

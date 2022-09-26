@@ -76,6 +76,7 @@ namespace TSMapEditor.Rendering
 #endif
     {
         private int MaxRefreshTimeInFrame = 24;
+        private const float RightClickScrollRateDivisor = 64f;
 
 #if !ADVMAPVIEW
         public MapView(
@@ -279,7 +280,7 @@ namespace TSMapEditor.Rendering
 
         private void MinimapWindow_MegamapClicked(object sender, MegamapClickedEventArgs e)
         {
-            Camera.TopLeftPoint = e.ClickedPoint - new Point2D(Width / 2, Height / 2);
+            Camera.TopLeftPoint = e.ClickedPoint - new Point2D(Width / 2, Height / 2).ScaleBy(1.0 / Camera.ZoomLevel);
         }
 
         private void FrameworkMode_Triggered(object sender, EventArgs e)
@@ -752,7 +753,7 @@ namespace TSMapEditor.Rendering
                 {
                     var newCursorPosition = GetCursorPoint();
                     var result = newCursorPosition - rightClickScrollInitPos;
-                    float rightClickScrollRate = scrollRate / 64f;
+                    float rightClickScrollRate = (float)((scrollRate / RightClickScrollRateDivisor) / Camera.ZoomLevel);
 
                     Camera.FloatTopLeftPoint = new Vector2(Camera.FloatTopLeftPoint.X + result.X * rightClickScrollRate,
                         Camera.FloatTopLeftPoint.Y + result.Y * rightClickScrollRate);
@@ -880,7 +881,7 @@ namespace TSMapEditor.Rendering
                 Camera.KeyboardUpdate(Keyboard, scrollRate);
             }
 
-            windowController.MinimapWindow.CameraRectangle = new Rectangle(Camera.TopLeftPoint.ToXNAPoint(), new Point(Width, Height));
+            windowController.MinimapWindow.CameraRectangle = new Rectangle(Camera.TopLeftPoint.ToXNAPoint(), new Point2D(Width, Height).ScaleBy(1.0 / Camera.ZoomLevel).ToXNAPoint());
 
             Point2D cursorMapPoint = GetCursorMapPoint();
             Point2D tileCoords = CellMath.CellCoordsFromPixelCoords(cursorMapPoint, Map.Size);
