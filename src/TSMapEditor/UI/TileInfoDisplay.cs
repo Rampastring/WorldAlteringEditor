@@ -223,6 +223,7 @@ namespace TSMapEditor.UI
             {
                 int id = map.Units.IndexOf(techno as Unit);
                 textRenderer.AddTextPart(new XNATextPart("ID: " + id, Constants.UIDefaultFont, Color.White));
+                textRenderer.AddTextPart(new XNATextPart("Facing: " + techno.Facing, Constants.UIDefaultFont, Color.White));
             }
             
             if (techno.AttachedTag != null)
