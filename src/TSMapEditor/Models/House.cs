@@ -71,6 +71,8 @@ namespace TSMapEditor.Models
         public int PercentBuilt { get; set; }
         public bool PlayerControl { get; set; }
         public string Side { get; set; }
+
+        [INI(false)]
         public int ID { get; set; }
 
         [INI(false)]
