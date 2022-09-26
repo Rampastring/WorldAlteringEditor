@@ -115,8 +115,7 @@ namespace TSMapEditor.UI.Controls
         {
             if (Blocked)
             {
-                Alpha = 0f;
-                Visible = false;
+                HideToolTip();
                 return;
             }
 
@@ -127,9 +126,7 @@ namespace TSMapEditor.UI.Controls
                 if (cursorTime > TimeSpan.FromMilliseconds(ToolTipDelay))
                 {
                     Alpha += AlphaRate * (float)gameTime.ElapsedGameTime.TotalSeconds;
-                    Visible = true;
-                    if (Alpha > 1.0f)
-                        Alpha = 1.0f;
+                    ShowToolTip();
                     return;
                 }
             }
@@ -137,9 +134,28 @@ namespace TSMapEditor.UI.Controls
             Alpha -= AlphaRate * (float)gameTime.ElapsedGameTime.TotalSeconds;
             if (Alpha < 0f)
             {
-                Alpha = 0f;
-                Visible = false;
+                HideToolTip();
             }
+        }
+
+        private void ShowToolTip()
+        {
+            if (Alpha > 1.0f)
+                Alpha = 1.0f;
+
+            Visible = true;
+
+            if (!Detached)
+                Detach();
+        }
+
+        private void HideToolTip()
+        {
+            Alpha = 0f;
+            Visible = false;
+
+            if (Detached)
+                Attach();
         }
 
         public override void Draw(GameTime gameTime)

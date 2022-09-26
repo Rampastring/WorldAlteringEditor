@@ -27,6 +27,8 @@ namespace TSMapEditor.UI.Windows
             base.Initialize();
 
             tbSearch = FindChild<EditorSuggestionTextBox>(nameof(tbSearch));
+            UIHelpers.AddSearchTipsBoxToControl(tbSearch);
+
             lbObjectList = FindChild<EditorListBox>(nameof(lbObjectList));
 
             lbObjectList.AllowRightClickUnselect = false;

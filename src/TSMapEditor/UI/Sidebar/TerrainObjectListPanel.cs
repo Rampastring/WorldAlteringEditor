@@ -45,6 +45,7 @@ namespace TSMapEditor.UI.Sidebar
             AddChild(SearchBox);
             SearchBox.TextChanged += SearchBox_TextChanged;
             SearchBox.EnterPressed += SearchBox_EnterPressed;
+            UIHelpers.AddSearchTipsBoxToControl(SearchBox);
 
             ObjectTreeView = new TreeView(WindowManager);
             ObjectTreeView.Name = nameof(ObjectTreeView);

@@ -41,6 +41,8 @@ namespace TSMapEditor.UI.Windows
             lbUnitEntries = FindChild<EditorListBox>(nameof(lbUnitEntries));
             tbUnitCount = FindChild<EditorNumberTextBox>(nameof(tbUnitCount));
             tbSearchUnit = FindChild<EditorSuggestionTextBox>(nameof(tbSearchUnit));
+            UIHelpers.AddSearchTipsBoxToControl(tbSearchUnit);
+
             lbUnitType = FindChild<EditorListBox>(nameof(lbUnitType));
 
             var btnNewTaskForce = FindChild<EditorButton>("btnNewTaskForce");

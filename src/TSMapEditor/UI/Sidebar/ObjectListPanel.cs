@@ -60,15 +60,7 @@ namespace TSMapEditor.UI.Sidebar
             AddChild(SearchBox);
             SearchBox.TextChanged += SearchBox_TextChanged;
             SearchBox.EnterPressed += SearchBox_EnterPressed;
-
-            var lblSearchTips = new XNALabel(WindowManager);
-            lblSearchTips.Name = nameof(lblSearchTips);
-            lblSearchTips.Text = "?";
-            lblSearchTips.X = SearchBox.Width - Constants.UIEmptySideSpace - lblSearchTips.Width;
-            lblSearchTips.Y = (SearchBox.Height - lblSearchTips.Height) / 2;
-            SearchBox.AddChild(lblSearchTips);
-            var tooltip = new ToolTip(WindowManager, lblSearchTips);
-            tooltip.Text = "Search Tips\r\n\r\nWith the text box activated:\r\n- Press ENTER to move to next match in list\r\n- Press ESC to clear search query";
+            UIHelpers.AddSearchTipsBoxToControl(SearchBox);
 
             ObjectTreeView = new TreeView(WindowManager);
             ObjectTreeView.Name = nameof(ObjectTreeView);
