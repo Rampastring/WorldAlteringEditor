@@ -9,5 +9,15 @@ namespace TSMapEditor.UI.Controls
         {
             Height = Constants.UITextBoxHeight;
         }
+
+        public bool AllowComma { get; set; } = true;
+
+        protected override bool AllowCharacterInput(char character)
+        {
+            if (character == ',')
+                return AllowComma;
+
+            return base.AllowCharacterInput(character);
+        }
     }
 }

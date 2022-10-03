@@ -115,6 +115,8 @@ namespace TSMapEditor.UI.Windows
 
             lbTriggers = FindChild<EditorListBox>(nameof(lbTriggers));
             tbName = FindChild<EditorTextBox>(nameof(tbName));
+            tbName.AllowComma = false;
+
             ddHouse = FindChild<XNADropDown>(nameof(ddHouse));
             ddType = FindChild<XNADropDown>(nameof(ddType));
             selAttachedTrigger = FindChild<EditorPopUpSelector>(nameof(selAttachedTrigger));
