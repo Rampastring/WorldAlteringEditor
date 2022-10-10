@@ -59,6 +59,14 @@ namespace TSMapEditor.Mutations.Classes
             return BitConverter.ToInt32(buffer, 0);
         }
 
+        protected long ReadLong(Stream stream)
+        {
+            if (stream.Read(buffer, 0, 8) != 8)
+                throw new CopiedMapDataSerializationException("Failed to read integer from stream: end of stream");
+
+            return BitConverter.ToInt64(buffer, 0);
+        }
+
         protected string ReadASCIIString(Stream stream)
         {
             int length = ReadInt(stream);
@@ -287,6 +295,44 @@ namespace TSMapEditor.Mutations.Classes
         public override CopiedEntryType EntryType => CopiedEntryType.Structure;
     }
 
+    public class CopiedInfantryEntry : CopiedTechnoEntry
+    {
+        public CopiedInfantryEntry()
+        {
+        }
+
+        public CopiedInfantryEntry(Point2D offset, string infantryTypeName, string ownerName, int hp, byte facing, SubCell subCell) : base(offset, infantryTypeName, ownerName, hp, facing)
+        {
+            SubCell = subCell;
+        }
+
+        public SubCell SubCell { get; set; }
+
+        public override CopiedEntryType EntryType => CopiedEntryType.Infantry;
+
+        protected override byte[] GetCustomData()
+        {
+            byte[] objectTypeBuffer = ASCIIStringToBytes(ObjectTypeName);
+            byte[] ownerBuffer = ASCIIStringToBytes(OwnerHouseName);
+            byte[] result = new byte[sizeof(int) + sizeof(SubCell) + 1 + objectTypeBuffer.Length + ownerBuffer.Length];
+            Array.Copy(BitConverter.GetBytes(HP), 0, result, 0, sizeof(int));
+            Array.Copy(BitConverter.GetBytes((int)SubCell), 0, result, sizeof(int), sizeof(SubCell));
+            result[sizeof(int) + sizeof(SubCell)] = Facing;
+            Array.Copy(objectTypeBuffer, 0, result, sizeof(int) + sizeof(SubCell) + 1, objectTypeBuffer.Length);
+            Array.Copy(ownerBuffer, 0, result, sizeof(int) + sizeof(SubCell) + 1 + objectTypeBuffer.Length, ownerBuffer.Length);
+            return result;
+        }
+
+        protected override void ReadCustomData(Stream stream)
+        {
+            HP = ReadInt(stream);
+            SubCell = (SubCell)ReadInt(stream);
+            Facing = (byte)stream.ReadByte();
+            ObjectTypeName = ReadASCIIString(stream);
+            OwnerHouseName = ReadASCIIString(stream);
+        }
+    }
+
 
     public class CopiedMapData
     {
@@ -350,6 +396,9 @@ namespace TSMapEditor.Mutations.Classes
                         case CopiedEntryType.Structure:
                             entry = new CopiedStructureEntry();
                             break;
+                        case CopiedEntryType.Infantry:
+                            entry = new CopiedInfantryEntry();
+                            break;
                         default:
                         case CopiedEntryType.Invalid:
                             throw new CopiedMapDataSerializationException("Invalid map data entry type " + entryType);
@@ -373,6 +422,18 @@ namespace TSMapEditor.Mutations.Classes
             this.origin = origin;
         }
 
+        private struct PlacedInfantryInfo
+        {
+            public Point2D Coords;
+            public SubCell SubCell;
+
+            public PlacedInfantryInfo(Point2D coords, SubCell subCell)
+            {
+                Coords = coords;
+                SubCell = subCell;
+            }
+        }
+
         private readonly CopiedMapData copiedMapData;
         private readonly Point2D origin;
 
@@ -381,6 +442,7 @@ namespace TSMapEditor.Mutations.Classes
         private Point2D[] terrainObjectCells;
         private Point2D[] vehicleCells;
         private Point2D[] structureCells;
+        private PlacedInfantryInfo[] infantryLocations;
 
         private void AddRefresh()
         {
@@ -526,6 +588,32 @@ namespace TSMapEditor.Mutations.Classes
                 structureCells.Add(cellCoords);
             }
             this.structureCells = structureCells.ToArray();
+
+            var infantryLocations = new List<PlacedInfantryInfo>();
+            foreach (var entry in copiedMapData.CopiedMapEntries.FindAll(e => e.EntryType == CopiedEntryType.Infantry))
+            {
+                var copiedInfantryEntry = entry as CopiedInfantryEntry;
+                Point2D cellCoords = origin + copiedInfantryEntry.Offset;
+                MapTile cell = MutationTarget.Map.GetTile(cellCoords);
+
+                if (cell == null)
+                    continue;
+
+                if (cell.GetInfantryFromSubCellSpot(copiedInfantryEntry.SubCell) != null)
+                    continue;
+
+                var infantryType = MutationTarget.Map.Rules.InfantryTypes.Find(tt => tt.ININame == copiedInfantryEntry.ObjectTypeName);
+                if (infantryType == null)
+                    continue;
+
+                House owner = MutationTarget.Map.GetHouses().Find(h => h.ININame == copiedInfantryEntry.OwnerHouseName);
+                if (owner == null)
+                    continue;
+
+                MutationTarget.Map.PlaceInfantry(new Infantry(infantryType) { Position = cellCoords, Owner = owner, HP = copiedInfantryEntry.HP, Facing = copiedInfantryEntry.Facing, SubCell = copiedInfantryEntry.SubCell });
+                infantryLocations.Add(new PlacedInfantryInfo(cellCoords, copiedInfantryEntry.SubCell));
+            }
+            this.infantryLocations = infantryLocations.ToArray();
 
             AddRefresh();
         }

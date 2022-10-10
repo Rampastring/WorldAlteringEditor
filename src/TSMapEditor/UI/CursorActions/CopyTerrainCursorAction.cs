@@ -75,7 +75,10 @@ namespace TSMapEditor.UI.CursorActions
                             copiedMapData.CopiedMapEntries.Add(new CopiedStructureEntry(offset, cell.Structure.ObjectType.ININame, cell.Structure.Owner.ININame, cell.Structure.HP, cell.Structure.Facing));
                     }
 
-                    // TODO handle infantry
+                    if ((EntryTypes & CopiedEntryType.Infantry) == CopiedEntryType.Infantry)
+                    {
+                        cell.DoForAllInfantry(inf => copiedMapData.CopiedMapEntries.Add(new CopiedInfantryEntry(offset, inf.ObjectType.ININame, inf.Owner.ININame, inf.HP, inf.Facing, inf.SubCell)));
+                    }
                 }
             }
 
