@@ -2,12 +2,15 @@
 
 namespace TSMapEditor.Models
 {
-    public class TeamType : AbstractObject
+    public class TeamType : AbstractObject, IIDContainer
     {
         public TeamType(string iniName)
         {
             ININame = iniName;
         }
+
+        public string GetInternalID() => ININame;
+        public void SetInternalID(string id) => ININame = id;
 
         public string ININame { get; private set; }
 

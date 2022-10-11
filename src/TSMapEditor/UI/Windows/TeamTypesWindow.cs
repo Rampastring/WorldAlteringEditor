@@ -109,7 +109,7 @@ namespace TSMapEditor.UI.Windows
             if (lbTeamTypes.SelectedItem == null)
                 return;
 
-            map.TeamTypes.RemoveAt(lbTeamTypes.SelectedIndex);
+            map.RemoveTeamType((TeamType)lbTeamTypes.SelectedItem.Tag);
             ListTeamTypes();
             LbTeamTypes_SelectedIndexChanged(this, EventArgs.Empty);
         }

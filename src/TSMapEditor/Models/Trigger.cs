@@ -20,7 +20,7 @@ namespace TSMapEditor.Models
     /// <summary>
     /// A map trigger.
     /// </summary>
-    public class Trigger
+    public class Trigger : IIDContainer
     {
         public static NamedColor[] SupportedColors = new NamedColor[]
         {
@@ -42,6 +42,9 @@ namespace TSMapEditor.Models
         };
 
         public Trigger(string id) { ID = id; }
+
+        public string GetInternalID() => ID;
+        public void SetInternalID(string id) => ID = id;
 
         public string ID { get; private set; }
         public string House { get; set; }

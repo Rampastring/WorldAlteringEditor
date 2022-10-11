@@ -44,7 +44,7 @@ namespace TSMapEditor.Models
     /// <summary>
     /// A taskforce. A group of unit types that can be used in team types.
     /// </summary>
-    public class TaskForce
+    public class TaskForce : IIDContainer
     {
         public const int MaxTechnoCount = 6;
 
@@ -53,7 +53,10 @@ namespace TSMapEditor.Models
             ININame = iniName;
         }
 
-        public string ININame { get; }
+        public string GetInternalID() => ININame;
+        public void SetInternalID(string id) => ININame = id;
+
+        public string ININame { get; private set; }
 
         public string Name { get; set; }
 

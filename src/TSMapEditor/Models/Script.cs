@@ -32,7 +32,7 @@ namespace TSMapEditor.Models
         }
     }
 
-    public class Script
+    public class Script : IIDContainer
     {
         public const int MaxActionCount = 50;
 
@@ -41,7 +41,10 @@ namespace TSMapEditor.Models
             ININame = iniName;
         }
 
-        public string ININame { get; }
+        public string GetInternalID() => ININame;
+        public void SetInternalID(string id) => ININame = id;
+
+        public string ININame { get; private set; }
 
         public string Name { get; set; }
 

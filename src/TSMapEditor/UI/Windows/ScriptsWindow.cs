@@ -82,7 +82,7 @@ namespace TSMapEditor.UI.Windows
             if (lbScriptTypes.SelectedItem == null)
                 return;
 
-            map.Scripts.RemoveAt(lbScriptTypes.SelectedIndex);
+            map.RemoveScript((Script)lbScriptTypes.SelectedItem.Tag);
             lbScriptTypes.SelectedIndex = -1;
             ListScripts();
         }

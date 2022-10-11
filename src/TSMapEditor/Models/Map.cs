@@ -540,6 +540,13 @@ namespace TSMapEditor.Models
             TaskForces.Add(taskForce);
         }
 
+        public void RemoveTaskForce(TaskForce taskForce)
+        {
+            TaskForces.Remove(taskForce);
+            TeamTypes.FindAll(tt => tt.TaskForce == taskForce).ForEach(tt => tt.TaskForce = null);
+            LoadedINI.RemoveSection(taskForce.ININame);
+        }
+
         public void AddTrigger(Trigger trigger)
         {
             Triggers.Add(trigger);
@@ -578,9 +585,22 @@ namespace TSMapEditor.Models
             Scripts.Add(script);
         }
 
+        public void RemoveScript(Script script)
+        {
+            Scripts.Remove(script);
+            TeamTypes.FindAll(tt => tt.Script == script).ForEach(tt => tt.Script = null);
+            LoadedINI.RemoveSection(script.ININame);
+        }
+
         public void AddTeamType(TeamType teamType)
         {
             TeamTypes.Add(teamType);
+        }
+
+        public void RemoveTeamType(TeamType teamType)
+        {
+            TeamTypes.Remove(teamType);
+            LoadedINI.RemoveSection(teamType.ININame);
         }
 
         public void AddHouses(List<House> houses)
@@ -1021,7 +1041,6 @@ namespace TSMapEditor.Models
         /// Generates an unique internal ID.
         /// Used for new TaskForces, Scripts, TeamTypes and Triggers.
         /// </summary>
-        /// <returns></returns>
         public string GetNewUniqueInternalId()
         {
             int id = 1000000;
@@ -1046,6 +1065,43 @@ namespace TSMapEditor.Models
 
             return idString;
         }
+
+        /// <summary>
+        /// Re-generates internal IDs for all editor-generated scripting elements of the map.
+        /// </summary>
+        public void RegenerateInternalIds()
+        {
+            string idBeginning = "0100";
+            List<IIDContainer> scriptElements = new List<IIDContainer>();
+
+            Func<IIDContainer, bool> f = (scriptElement) => scriptElement.GetInternalID().StartsWith(idBeginning);
+
+            var tfs = TaskForces.FindAll(tf => f(tf));
+            var scripts = Scripts.FindAll(s => f(s));
+            var teamtypes = TeamTypes.FindAll(tt => f(tt));
+            var tags = Tags.FindAll(t => f(t));
+            var triggers = Triggers.FindAll(t => f(t));
+
+            scriptElements.AddRange(TaskForces.FindAll(tf => f(tf)));
+            scriptElements.AddRange(Scripts.FindAll(s => f(s)));
+            scriptElements.AddRange(TeamTypes.FindAll(tt => f(tt)));
+            scriptElements.AddRange(Triggers.FindAll(t => f(t)));
+            scriptElements.AddRange(Tags.FindAll(t => f(t)));
+            scriptElements = scriptElements.OrderBy(se => se.GetInternalID()).ToList();
+
+            tfs.ForEach(tf => LoadedINI.RemoveSection(tf.ININame));
+            scripts.ForEach(s => LoadedINI.RemoveSection(s.ININame));
+            teamtypes.ForEach(tt => LoadedINI.RemoveSection(tt.ININame));
+            // Our map writing system takes care of the tags and triggers, no need to manually remove their INI entries
+            // (they don't have sections)
+
+            // Zero out the internal IDs
+            scriptElements.ForEach(se => se.SetInternalID(string.Empty));
+
+            // Generate new internal IDs
+            scriptElements.ForEach(se => se.SetInternalID(GetNewUniqueInternalId()));
+        }
+
 
         // public void StartNew(IniFile rulesIni, IniFile firestormIni, TheaterType theaterType, Point2D size)
         // {

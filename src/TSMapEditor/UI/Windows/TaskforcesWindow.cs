@@ -135,7 +135,7 @@ namespace TSMapEditor.UI.Windows
 
         private void DeleteTaskForce()
         {
-            map.TaskForces.Remove(editedTaskForce);
+            map.RemoveTaskForce(editedTaskForce);
             map.TeamTypes.ForEach(tt =>
             {
                 if (tt.TaskForce == editedTaskForce)

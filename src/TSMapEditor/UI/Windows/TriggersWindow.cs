@@ -160,6 +160,8 @@ namespace TSMapEditor.UI.Windows
             ddActions.AddItem("Place CellTag");
             ddActions.AddItem("Attach to Objects");
             ddActions.AddItem("View Attached Objects");
+            ddActions.AddItem(new XNADropDownItem() { Text = string.Empty, Selectable = false });
+            ddActions.AddItem("Re-generate trigger IDs");
             ddActions.SelectedIndex = 0;
             ddActions.SelectedIndexChanged += DdActions_SelectedIndexChanged;
 
@@ -242,6 +244,9 @@ namespace TSMapEditor.UI.Windows
                     break;
                 case 3:
                     ShowAttachedObjects();
+                    break;
+                case 5:
+                    RegenerateIDs();
                     break;
                 case 0:
                 default:
@@ -412,6 +417,20 @@ namespace TSMapEditor.UI.Windows
         }
 
         #endregion
+
+        private void RegenerateIDs()
+        {
+            var messageBox = EditorMessageBox.Show(WindowManager, "Are you sure?",
+                "This will re-generate the internal IDs (01000000, 01000001 etc.) for ALL* of your map's script elements" + Environment.NewLine +
+                "that start their ID with 0100 (all editor-generated script elements do)." + Environment.NewLine + Environment.NewLine +
+                "It might make the list more sensible in case there are deleted triggers. However, this feature is" + Environment.NewLine +
+                "experimental and if it goes wrong, it can destroy all of your scripting. Do you want to continue?" + Environment.NewLine + Environment.NewLine +
+                "* AITriggers are not yet handled by the editor, so you might need to update them manually afterwards.",
+                MessageBoxButtons.YesNo);
+
+            messageBox.YesClickedAction += _ => map.RegenerateInternalIds();
+            ListTriggers();
+        }
 
         private void BtnEventParameterValuePreset_LeftClick(object sender, EventArgs e)
         {
@@ -625,7 +644,7 @@ namespace TSMapEditor.UI.Windows
             map.Triggers.Add(newTrigger);
             map.Tags.Add(new Tag() { ID = map.GetNewUniqueInternalId(), Name = "New tag", Trigger = newTrigger });
             ListTriggers();
-            SelectLastTrigger();
+            SelectTrigger(newTrigger);
         }
 
         private void BtnCloneTrigger_LeftClick(object sender, EventArgs e)
@@ -639,7 +658,7 @@ namespace TSMapEditor.UI.Windows
             map.Triggers.Add(clone);
             map.Tags.Add(new Tag() { ID = map.GetNewUniqueInternalId(), Name = clone.Name + " (tag)", Trigger = clone, Repeating = originalTag == null ? 0 : originalTag.Repeating });
             ListTriggers();
-            SelectLastTrigger();
+            SelectTrigger(clone);
         }
 
         private void BtnDeleteTrigger_LeftClick(object sender, EventArgs e)
@@ -655,10 +674,14 @@ namespace TSMapEditor.UI.Windows
             ListTriggers();
         }
 
-        private void SelectLastTrigger()
+        private void SelectTrigger(Trigger trigger)
         {
-            lbTriggers.SelectedIndex = map.Triggers.Count - 1;
-            lbTriggers.ScrollToBottom();
+            lbTriggers.SelectedIndex = lbTriggers.Items.FindIndex(item => item.Tag == trigger);
+
+            if (lbTriggers.LastIndex < lbTriggers.SelectedIndex)
+                lbTriggers.ScrollToBottom(); // TODO we don't actually have a good way to scroll the listbox into a specific place right now
+            else if (lbTriggers.TopIndex > lbTriggers.SelectedIndex)
+                lbTriggers.TopIndex = lbTriggers.SelectedIndex;
         }
 
         private void EventWindowDarkeningPanel_Hidden(object sender, EventArgs e)
