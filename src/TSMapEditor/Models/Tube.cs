@@ -42,6 +42,7 @@ namespace TSMapEditor.Models
         public Point2D ExitPoint { get; set; }
         public TubeDirection UnitInitialFacing { get; set; }
         public List<TubeDirection> Directions { get; set; } = new List<TubeDirection>();
+        public bool Pending { get; set; }
 
 
         public void ShiftPosition(int xChange, int yChange)

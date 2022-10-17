@@ -72,6 +72,7 @@ namespace TSMapEditor.UI.CursorActions
             }
             else if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.Enter && tube != null && tube.Directions.Count > 0)
             {
+                tube.Pending = false;
                 tube.UnitInitialFacing = tube.Directions[0];
                 CursorActionTarget.MutationManager.PerformMutation(new PlaceTubeMutation(CursorActionTarget.MutationTarget, tube));
 
@@ -98,6 +99,7 @@ namespace TSMapEditor.UI.CursorActions
                     return;
 
                 tube = new Tube();
+                tube.Pending = true;
                 tube.EntryPoint = cellCoords;
                 return;
             }

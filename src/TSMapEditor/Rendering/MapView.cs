@@ -1092,6 +1092,8 @@ namespace TSMapEditor.Rendering
 
                 Point2D currentPoint = tube.EntryPoint;
 
+                Color color = tube.Pending ? Color.Orange : Color.LimeGreen;
+
                 foreach (var direction in tube.Directions)
                 {
                     Point2D nextPoint = currentPoint.NextPointFromTubeDirection(direction);
@@ -1101,7 +1103,7 @@ namespace TSMapEditor.Rendering
                         var currentPixelPoint = CellMath.CellCenterPointFromCellCoords(currentPoint, Map.Size.X);
                         var nextPixelPoint = CellMath.CellCenterPointFromCellCoords(nextPoint, Map.Size.X);
 
-                        DrawArrow(currentPixelPoint.ToXNAVector(), nextPixelPoint.ToXNAVector(), Color.LimeGreen, 0.25f, 10f, 2);
+                        DrawArrow(currentPixelPoint.ToXNAVector(), nextPixelPoint.ToXNAVector(), color, 0.25f, 10f, 2);
                     }
 
                     currentPoint = nextPoint;
