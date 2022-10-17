@@ -29,6 +29,7 @@ namespace TSMapEditor.UI.TopBar
 
         private DeleteTubeCursorAction deleteTunnelCursorAction;
         private PlaceTubeCursorAction placeTubeCursorAction;
+        private PlaceLowBridgeCursorAction placeLowBridgeCursorAction;
         private CheckDistanceCursorAction checkDistanceCursorAction;
         private ManageBaseNodesCursorAction manageBaseNodesCursorAction;
 
@@ -38,6 +39,7 @@ namespace TSMapEditor.UI.TopBar
 
             deleteTunnelCursorAction = new DeleteTubeCursorAction(mapView);
             placeTubeCursorAction = new PlaceTubeCursorAction(mapView);
+            placeLowBridgeCursorAction = new PlaceLowBridgeCursorAction(mapView);
             checkDistanceCursorAction = new CheckDistanceCursorAction(mapView);
             manageBaseNodesCursorAction = new ManageBaseNodesCursorAction(mapView);
 
@@ -86,6 +88,8 @@ namespace TSMapEditor.UI.TopBar
             editContextMenu.AddItem(" ", null, () => false, null, null);
             editContextMenu.AddItem("Place Tunnel", () => mapView.EditorState.CursorAction = placeTubeCursorAction, null, null, null, KeyboardCommands.Instance.PlaceTunnel.GetKeyDisplayString());
             editContextMenu.AddItem("Delete Tunnel", () => mapView.EditorState.CursorAction = deleteTunnelCursorAction, null, null, null);
+            editContextMenu.AddItem(" ", null, () => false, null, null);
+            editContextMenu.AddItem("Place Low Bridge", () => mapView.EditorState.CursorAction = placeLowBridgeCursorAction, null, null, null);
             editContextMenu.AddItem(" ", null, () => false, null, null);
             editContextMenu.AddItem("Manage Base Nodes", () => mapView.EditorState.CursorAction = manageBaseNodesCursorAction, null, null, null);
 
