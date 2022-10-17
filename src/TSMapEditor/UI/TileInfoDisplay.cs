@@ -97,7 +97,7 @@ namespace TSMapEditor.UI
                     Constants.UIDefaultFont, subtleTextColor));
 
                 textRenderer.AddTextPart(new XNATextPart(
-                    overlay.OverlayType.Name + ", Frame: " + overlay.FrameIndex + ", Terrain Type: " + overlay.OverlayType.Land,
+                    overlay.OverlayType.Name + " (" + overlay.OverlayType.Index + " " + overlay.OverlayType.ININame + "), Frame: " + overlay.FrameIndex + ", Terrain Type: " + overlay.OverlayType.Land,
                     Constants.UIDefaultFont, baseTextColor));
             }
 
