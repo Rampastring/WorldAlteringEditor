@@ -30,8 +30,10 @@ namespace TSMapEditor.UI.TopBar
         private DeleteTubeCursorAction deleteTunnelCursorAction;
         private PlaceTubeCursorAction placeTubeCursorAction;
         private PlaceLowBridgeCursorAction placeLowBridgeCursorAction;
+        private ToggleIceGrowthCursorAction toggleIceGrowthCursorAction;
         private CheckDistanceCursorAction checkDistanceCursorAction;
         private ManageBaseNodesCursorAction manageBaseNodesCursorAction;
+        
 
         public override void Initialize()
         {
@@ -40,6 +42,7 @@ namespace TSMapEditor.UI.TopBar
             deleteTunnelCursorAction = new DeleteTubeCursorAction(mapView);
             placeTubeCursorAction = new PlaceTubeCursorAction(mapView);
             placeLowBridgeCursorAction = new PlaceLowBridgeCursorAction(mapView);
+            toggleIceGrowthCursorAction = new ToggleIceGrowthCursorAction(mapView);
             checkDistanceCursorAction = new CheckDistanceCursorAction(mapView);
             manageBaseNodesCursorAction = new ManageBaseNodesCursorAction(mapView);
 
@@ -90,6 +93,8 @@ namespace TSMapEditor.UI.TopBar
             editContextMenu.AddItem("Delete Tunnel", () => mapView.EditorState.CursorAction = deleteTunnelCursorAction, null, null, null);
             editContextMenu.AddItem(" ", null, () => false, null, null);
             editContextMenu.AddItem("Place Low Bridge", () => mapView.EditorState.CursorAction = placeLowBridgeCursorAction, null, null, null);
+            editContextMenu.AddItem("Toggle IceGrowth", () => { mapView.EditorState.CursorAction = toggleIceGrowthCursorAction; toggleIceGrowthCursorAction.ToggleIceGrowth = true; mapView.EditorState.HighlightIceGrowth = true; }, null, null, null);
+            editContextMenu.AddItem("Clear IceGrowth", () => { mapView.EditorState.CursorAction = toggleIceGrowthCursorAction; toggleIceGrowthCursorAction.ToggleIceGrowth = false; mapView.EditorState.HighlightIceGrowth = true; }, null, null, null);
             editContextMenu.AddItem(" ", null, () => false, null, null);
             editContextMenu.AddItem("Manage Base Nodes", () => mapView.EditorState.CursorAction = manageBaseNodesCursorAction, null, null, null);
 
@@ -108,6 +113,7 @@ namespace TSMapEditor.UI.TopBar
             toolsContextMenu.AddItem("Apply INI Code...", () => windowController.ApplyINICodeWindow.Open(), null, null, null);
             toolsContextMenu.AddItem("View Minimap", () => windowController.MinimapWindow.Open(), null, null, null);
             toolsContextMenu.AddItem("Toggle Impassable Cells", () => mapView.EditorState.HighlightImpassableCells = !mapView.EditorState.HighlightImpassableCells, null, null, null);
+            toolsContextMenu.AddItem("Toggle IceGrowth Preview", () => mapView.EditorState.HighlightIceGrowth = !mapView.EditorState.HighlightIceGrowth, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("Generate Animated Water", GenerateAnimatedWater, null, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
