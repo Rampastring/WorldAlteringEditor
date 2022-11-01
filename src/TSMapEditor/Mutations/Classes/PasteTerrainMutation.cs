@@ -573,7 +573,7 @@ namespace TSMapEditor.Mutations.Classes
                     Point2D foundationCellCoords = foundationPoint + cellCoords;
                     MapTile foundationCell = MutationTarget.Map.GetTile(foundationCellCoords);
 
-                    if (foundationCell.Structure != null)
+                    if (foundationCell == null || foundationCell.Structure != null)
                         isFoundationClear = false;
                 });
 
