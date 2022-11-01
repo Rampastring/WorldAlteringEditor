@@ -886,6 +886,9 @@ namespace TSMapEditor.UI.Windows
             if (ddTriggerColor.SelectedIndex < 0)
                 ddTriggerColor.SelectedIndex = 0;
 
+            lbEvents.ViewTop = 0;
+            lbActions.ViewTop = 0;
+
             lbEvents.Clear();
             editedTrigger.Conditions.ForEach(c => AddEvent(c));
 
