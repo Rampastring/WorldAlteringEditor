@@ -123,6 +123,7 @@ namespace TSMapEditor.Rendering
         }
 
         private Texture2D impassableCellHighlightTexture;
+        private Texture2D iceGrowthHighlightTexture;
 
         private RenderTarget2D mapRenderTarget;
         private RenderTarget2D objectsRenderTarget;
@@ -187,6 +188,7 @@ namespace TSMapEditor.Rendering
             base.Initialize();
 
             impassableCellHighlightTexture = AssetLoader.LoadTexture("impassablehighlight.png");
+            iceGrowthHighlightTexture = AssetLoader.LoadTexture("icehighlight.png");
 
             const string MapWideOverlayTextureName = "mapwideoverlay.png";
             if (AssetLoader.AssetExists(MapWideOverlayTextureName))
@@ -238,6 +240,7 @@ namespace TSMapEditor.Rendering
             };
 
             EditorState.HighlightImpassableCellsChanged += (s, e) => InvalidateMap();
+            EditorState.HighlightIceGrowthChanged += (s, e) => InvalidateMap();
 
             KeyboardCommands.Instance.RotateUnitOneStep.Triggered += RotateUnitOneStep_Triggered;
 
@@ -339,10 +342,12 @@ namespace TSMapEditor.Rendering
 
             if (EditorState.HighlightImpassableCells)
             {
-                Map.DoForAllValidTiles(cell =>
-                {
-                    DrawImpassableHighlight(cell);
-                });
+                Map.DoForAllValidTiles(cell => DrawImpassableHighlight(cell));
+            }
+
+            if (EditorState.HighlightIceGrowth)
+            {
+                Map.DoForAllValidTiles(cell => DrawIceGrowthHighlight(cell));
             }
 
             Renderer.PopRenderTarget();
@@ -1049,28 +1054,16 @@ namespace TSMapEditor.Rendering
             Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cell.CoordsToPoint(), Map.Size.X);
 
             DrawTexture(impassableCellHighlightTexture, cellTopLeftPoint.ToXNAPoint(), Color.White);
+        }
 
-            /*
-            Color lineColor = new Color(255, 0, 0, 255);
+        private void DrawIceGrowthHighlight(MapTile cell)
+        {
+            if (cell.IceGrowth <= 0)
+                return;
 
-            var cellTopPoint = new Vector2(cellTopLeftPoint.X + Constants.CellSizeX / 2, cellTopLeftPoint.Y);
-            var cellLeftPoint = new Vector2(cellTopLeftPoint.X, cellTopLeftPoint.Y + Constants.CellSizeY / 2);
-            var cellRightPoint = new Vector2(cellTopLeftPoint.X + Constants.CellSizeX, cellLeftPoint.Y);
-            var cellBottomPoint = new Vector2(cellTopPoint.X, cellTopLeftPoint.Y + Constants.CellSizeY);
-            
-            DrawLine(cellTopPoint, cellLeftPoint, lineColor, 1);
-            DrawLine(cellRightPoint, cellTopPoint, lineColor, 1);
-            DrawLine(cellBottomPoint, cellLeftPoint, lineColor, 1);
-            DrawLine(cellRightPoint, cellBottomPoint, lineColor, 1);
+            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cell.CoordsToPoint(), Map.Size.X);
 
-            var shadowColor = new Color(0, 0, 0, 255);
-            var down = new Vector2(0, 1f);
-
-            DrawLine(cellTopPoint + down, cellLeftPoint + down, shadowColor, 1);
-            DrawLine(cellRightPoint + down, cellTopPoint + down, shadowColor, 1);
-            DrawLine(cellBottomPoint + down, cellLeftPoint + down, shadowColor, 1);
-            DrawLine(cellRightPoint + down, cellBottomPoint + down, shadowColor, 1);
-            */
+            DrawTexture(iceGrowthHighlightTexture, cellTopLeftPoint.ToXNAPoint(), Color.White);
         }
 
         public void DeleteObjectFromCell(Point2D cellCoords)
@@ -1197,6 +1190,14 @@ namespace TSMapEditor.Rendering
                         foreach (var cell in sortedCells)
                         {
                             DrawImpassableHighlight(cell);
+                        }
+                    }
+
+                    if (EditorState.HighlightIceGrowth)
+                    {
+                        foreach (var cell in sortedCells)
+                        {
+                            DrawIceGrowthHighlight(cell);
                         }
                     }
 
