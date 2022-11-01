@@ -132,6 +132,9 @@ namespace TSMapEditor.Mutations.Classes
                 var cellCoords = coordGenerator(fixedCoordinate, variableCoordinateOffset);
                 var mapCell = MutationTarget.Map.GetTile(cellCoords);
 
+                if (mapCell == null)
+                    continue;
+
                 if (mapCell.Overlay == null || mapCell.Overlay.OverlayType == null)
                     originalOverlayInfos.Add(new OriginalOverlayInfo(-1, -1, cellCoords));
                 else
