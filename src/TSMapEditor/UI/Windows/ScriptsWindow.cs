@@ -270,6 +270,7 @@ namespace TSMapEditor.UI.Windows
             editedScript = script;
 
             lbActions.Clear();
+            lbActions.ViewTop = 0;
 
             if (editedScript == null)
             {
