@@ -119,5 +119,7 @@ namespace TSMapEditor.Models
                 iniSection.RemoveKey(i.ToString("D3"));
             }
         }
+
+        public bool HasDarkHouseColor() => XNAColor.R < 32 && XNAColor.G < 32 && XNAColor.B < 64;
     }
 }

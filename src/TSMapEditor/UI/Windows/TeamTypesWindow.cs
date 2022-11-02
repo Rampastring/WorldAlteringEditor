@@ -1,4 +1,5 @@
-﻿using Rampastring.XNAUI;
+﻿using Microsoft.Xna.Framework;
+using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;
@@ -209,7 +210,7 @@ namespace TSMapEditor.UI.Windows
 
             foreach (var teamType in map.TeamTypes)
             {
-                lbTeamTypes.AddItem(new XNAListBoxItem() { Text = teamType.Name, Tag = teamType });
+                lbTeamTypes.AddItem(new XNAListBoxItem() { Text = teamType.Name, Tag = teamType, TextColor = teamType.GetXNAColor() });
             }
         }
 

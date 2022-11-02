@@ -1,4 +1,6 @@
-﻿using Rampastring.Tools;
+﻿using Microsoft.Xna.Framework;
+using Rampastring.Tools;
+using Rampastring.XNAUI;
 
 namespace TSMapEditor.Models
 {
@@ -78,6 +80,14 @@ namespace TSMapEditor.Models
         public override RTTIType WhatAmI()
         {
             return RTTIType.TeamType;
+        }
+
+        public Color GetXNAColor()
+        {
+            if (House == null || House.HasDarkHouseColor())
+                return UISettings.ActiveSettings.AltColor;
+
+            return House.XNAColor;
         }
     }
 }

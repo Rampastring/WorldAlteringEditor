@@ -37,7 +37,7 @@ namespace TSMapEditor.UI.Windows
 
             foreach (TeamType teamType in map.TeamTypes)
             {
-                lbObjectList.AddItem(new XNAListBoxItem() { Text = $"{teamType.ININame} {teamType.Name}", Tag = teamType });
+                lbObjectList.AddItem(new XNAListBoxItem() { Text = $"{teamType.ININame} {teamType.Name}", TextColor = teamType.GetXNAColor(), Tag = teamType });
                 if (teamType == SelectedObject)
                     lbObjectList.SelectedIndex = lbObjectList.Items.Count - 1;
             }
