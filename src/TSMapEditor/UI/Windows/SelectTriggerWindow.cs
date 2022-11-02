@@ -39,7 +39,13 @@ namespace TSMapEditor.UI.Windows
 
             foreach (Trigger trigger in map.Triggers)
             {
-                lbObjectList.AddItem(new XNAListBoxItem() { Text = $"{trigger.ID} {trigger.Name}", Tag = trigger });
+                lbObjectList.AddItem(new XNAListBoxItem() 
+                { 
+                    Text = $"{trigger.ID} {trigger.Name}",
+                    Tag = trigger, 
+                    TextColor = trigger.EditorColor == null ? lbObjectList.DefaultItemColor : trigger.XNAColor
+                });
+                
                 if (trigger == SelectedObject)
                     lbObjectList.SelectedIndex = lbObjectList.Items.Count - 1;
             }
