@@ -17,6 +17,7 @@ namespace TSMapEditor.UI.Windows
 
         private XNACheckBox chkTerrainTiles;
         private XNACheckBox chkOverlay;
+        private XNACheckBox chkSmudges;
         private XNACheckBox chkTerrainObjects;
         private XNACheckBox chkStructures;
         private XNACheckBox chkVehicles;
@@ -30,6 +31,7 @@ namespace TSMapEditor.UI.Windows
 
             chkTerrainTiles = FindChild<XNACheckBox>(nameof(chkTerrainTiles));
             chkOverlay = FindChild<XNACheckBox>(nameof(chkOverlay));
+            chkSmudges = FindChild<XNACheckBox>(nameof(chkSmudges));
             chkTerrainObjects = FindChild<XNACheckBox>(nameof(chkTerrainObjects));
             chkStructures = FindChild<XNACheckBox>(nameof(chkStructures));
             chkVehicles = FindChild<XNACheckBox>(nameof(chkVehicles));
@@ -49,6 +51,8 @@ namespace TSMapEditor.UI.Windows
                 entryType |= CopiedEntryType.Terrain;
             if (chkOverlay.Checked)
                 entryType |= CopiedEntryType.Overlay;
+            if (chkSmudges.Checked)
+                entryType |= CopiedEntryType.Smudge;
             if (chkTerrainObjects.Checked)
                 entryType |= CopiedEntryType.TerrainObject;
             if (chkStructures.Checked)

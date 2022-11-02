@@ -57,6 +57,12 @@ namespace TSMapEditor.UI.CursorActions
                             copiedMapData.CopiedMapEntries.Add(new CopiedOverlayEntry(offset, cell.Overlay.OverlayType.ININame, cell.Overlay.FrameIndex));
                     }
 
+                    if ((EntryTypes & CopiedEntryType.Smudge) == CopiedEntryType.Smudge)
+                    {
+                        if (cell.Smudge != null)
+                            copiedMapData.CopiedMapEntries.Add(new CopiedSmudgeEntry(offset, cell.Smudge.SmudgeType.ININame));
+                    }
+
                     if ((EntryTypes & CopiedEntryType.TerrainObject) == CopiedEntryType.TerrainObject)
                     {
                         if (cell.TerrainObject != null)

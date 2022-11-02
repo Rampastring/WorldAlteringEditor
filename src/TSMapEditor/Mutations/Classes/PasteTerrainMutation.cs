@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Serialization;
 using System.Text;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
@@ -19,10 +18,11 @@ namespace TSMapEditor.Mutations.Classes
         Invalid = 0,
         Terrain = 1,
         Overlay = 2,
-        TerrainObject = 4,
-        Structure = 8,
-        Vehicle = 16,
-        Infantry = 32
+        Smudge = 4,
+        TerrainObject = 8,
+        Structure = 16,
+        Vehicle = 32,
+        Infantry = 64
     }
 
     public class CopiedMapDataSerializationException : Exception
@@ -191,6 +191,33 @@ namespace TSMapEditor.Mutations.Classes
         {
             OverlayTypeName = ReadASCIIString(stream);
             FrameIndex = ReadInt(stream);
+        }
+    }
+
+    public class CopiedSmudgeEntry : CopiedMapEntry
+    {
+        public string SmudgeTypeName;
+
+        public CopiedSmudgeEntry() 
+        {
+        }
+
+        public CopiedSmudgeEntry(Point2D offset, string smudgeTypeName) : base(offset)
+        {
+            SmudgeTypeName = smudgeTypeName;
+        }
+
+        public override CopiedEntryType EntryType => CopiedEntryType.Smudge;
+
+        protected override byte[] GetCustomData()
+        {
+            byte[] nameBytes = ASCIIStringToBytes(SmudgeTypeName);
+            return nameBytes;
+        }
+
+        protected override void ReadCustomData(Stream stream)
+        {
+            SmudgeTypeName = ReadASCIIString(stream);
         }
     }
 
@@ -387,6 +414,9 @@ namespace TSMapEditor.Mutations.Classes
                         case CopiedEntryType.Overlay:
                             entry = new CopiedOverlayEntry();
                             break;
+                        case CopiedEntryType.Smudge:
+                            entry = new CopiedSmudgeEntry();
+                            break;
                         case CopiedEntryType.TerrainObject:
                             entry = new CopiedTerrainObjectEntry();
                             break;
@@ -439,6 +469,7 @@ namespace TSMapEditor.Mutations.Classes
 
         private OriginalCellTerrainData[] terrainUndoData;
         private OriginalOverlayInfo[] overlayUndoData;
+        private Point2D[] smudgeCells;
         private Point2D[] terrainObjectCells;
         private Point2D[] vehicleCells;
         private Point2D[] structureCells;
@@ -454,7 +485,12 @@ namespace TSMapEditor.Mutations.Classes
 
         public override void Perform()
         {
+            // *******
+            // Terrain
+            // *******
+
             var terrainUndoData = new List<OriginalCellTerrainData>();
+
             foreach (var entry in copiedMapData.CopiedMapEntries.FindAll(e => e.EntryType == CopiedEntryType.Terrain))
             {
                 var copiedTerrainData = entry as CopiedTerrainEntry;
@@ -473,7 +509,12 @@ namespace TSMapEditor.Mutations.Classes
 
             this.terrainUndoData = terrainUndoData.ToArray();
 
+            // *******
+            // Overlay
+            // *******
+
             var overlayUndoData = new List<OriginalOverlayInfo>();
+
             foreach (var entry in copiedMapData.CopiedMapEntries.FindAll(e => e.EntryType == CopiedEntryType.Overlay))
             {
                 var copiedOverlayData = entry as CopiedOverlayEntry;
@@ -502,7 +543,40 @@ namespace TSMapEditor.Mutations.Classes
 
             this.overlayUndoData = overlayUndoData.ToArray();
 
+            // *******
+            // Smudges
+            // *******
+
+            var smudgeCells = new List<Point2D>();
+
+            foreach (var entry in copiedMapData.CopiedMapEntries.FindAll(e => e.EntryType == CopiedEntryType.Smudge))
+            {
+                var copiedSmudgeEntry = entry as CopiedSmudgeEntry;
+                Point2D cellCoords = origin + copiedSmudgeEntry.Offset;
+                MapTile cell = MutationTarget.Map.GetTile(cellCoords);
+
+                if (cell == null)
+                    continue;
+
+                if (cell.Smudge != null)
+                    continue;
+
+                var smudgeType = MutationTarget.Map.Rules.SmudgeTypes.Find(st => st.ININame == copiedSmudgeEntry.SmudgeTypeName);
+                if (smudgeType == null)
+                    continue;
+
+                smudgeCells.Add(cellCoords);
+                cell.Smudge = new Smudge() { Position = cellCoords, SmudgeType = smudgeType };
+            }
+
+            this.smudgeCells = smudgeCells.ToArray();
+
+            // ***************
+            // Terrain Objects
+            // ***************
+
             var terrainObjectCells = new List<Point2D>();
+
             foreach (var entry in copiedMapData.CopiedMapEntries.FindAll(e => e.EntryType == CopiedEntryType.TerrainObject))
             {
                 var copiedTerrainObjectEntry = entry as CopiedTerrainObjectEntry;
@@ -522,9 +596,15 @@ namespace TSMapEditor.Mutations.Classes
                 terrainObjectCells.Add(cellCoords);
                 MutationTarget.Map.AddTerrainObject(new TerrainObject(terrainType, cellCoords));
             }
+
             this.terrainObjectCells = terrainObjectCells.ToArray();
 
+            // ********
+            // Vehicles
+            // ********
+
             var vehicleCells = new List<Point2D>();
+
             foreach (var entry in copiedMapData.CopiedMapEntries.FindAll(e => e.EntryType == CopiedEntryType.Vehicle))
             {
                 var copiedVehicleEntry = entry as CopiedVehicleEntry;
@@ -548,9 +628,15 @@ namespace TSMapEditor.Mutations.Classes
                 MutationTarget.Map.PlaceUnit(new Unit(unitType) { Position = cellCoords, Owner = owner, HP = copiedVehicleEntry.HP, Facing = copiedVehicleEntry.Facing });
                 vehicleCells.Add(cellCoords);
             }
+
             this.vehicleCells = vehicleCells.ToArray();
 
+            // **********
+            // Structures
+            // **********
+
             var structureCells = new List<Point2D>();
+
             foreach (var entry in copiedMapData.CopiedMapEntries.FindAll(e => e.EntryType == CopiedEntryType.Structure))
             {
                 var copiedStructureEntry = entry as CopiedStructureEntry;
@@ -587,9 +673,15 @@ namespace TSMapEditor.Mutations.Classes
                 MutationTarget.Map.PlaceBuilding(new Structure(buildingType) { Position = cellCoords, Owner = owner, HP = copiedStructureEntry.HP, Facing = copiedStructureEntry.Facing });
                 structureCells.Add(cellCoords);
             }
+
             this.structureCells = structureCells.ToArray();
 
+            // ********
+            // Infantry
+            // ********
+
             var infantryLocations = new List<PlacedInfantryInfo>();
+
             foreach (var entry in copiedMapData.CopiedMapEntries.FindAll(e => e.EntryType == CopiedEntryType.Infantry))
             {
                 var copiedInfantryEntry = entry as CopiedInfantryEntry;
@@ -613,6 +705,7 @@ namespace TSMapEditor.Mutations.Classes
                 MutationTarget.Map.PlaceInfantry(new Infantry(infantryType) { Position = cellCoords, Owner = owner, HP = copiedInfantryEntry.HP, Facing = copiedInfantryEntry.Facing, SubCell = copiedInfantryEntry.SubCell });
                 infantryLocations.Add(new PlacedInfantryInfo(cellCoords, copiedInfantryEntry.SubCell));
             }
+
             this.infantryLocations = infantryLocations.ToArray();
 
             AddRefresh();
@@ -641,6 +734,11 @@ namespace TSMapEditor.Mutations.Classes
                     Position = info.CellCoords,
                     FrameIndex = info.FrameIndex
                 };
+            }
+
+            foreach (Point2D cellCoords in smudgeCells)
+            {
+                MutationTarget.Map.GetTile(cellCoords).Smudge = null;
             }
 
             foreach (Point2D cellCoords in terrainObjectCells)
