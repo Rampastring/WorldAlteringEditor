@@ -609,7 +609,7 @@ namespace TSMapEditor.Initialization
                 if (mapCell.Waypoint != null)
                 {
                     AddMapLoadError($"Cell at {waypoint.Position} has multiple waypoints placed on it. Skipping adding waypoint #{waypoint.Identifier} there.");
-                    return;
+                    continue;
                 }
 
                 map.AddWaypoint(waypoint);
@@ -747,19 +747,16 @@ namespace TSMapEditor.Initialization
                 if (teamType.House == null)
                 {
                     AddMapLoadError($"TeamType {teamType.ININame} has an invalid house ({houseIniName}) specified!");
-                    return;
                 }
 
                 if (teamType.Script == null)
                 {
                     AddMapLoadError($"TeamType {teamType.ININame} has an invalid script ({scriptId}) specified!");
-                    return;
                 }
 
                 if (teamType.TaskForce == null)
                 {
                     AddMapLoadError($"TeamType {teamType.ININame} has an invalid TaskForce ({taskForceId}) specified!");
-                    return;
                 }
 
                 map.AddTeamType(teamType);
