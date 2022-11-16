@@ -1,6 +1,7 @@
 ﻿using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using TSMapEditor.Models;
 
 namespace TSMapEditor.CCEngine
@@ -53,7 +54,7 @@ namespace TSMapEditor.CCEngine
         {
             TileSets.Clear();
 
-            IniFile theaterIni = new IniFile(baseDirectoryPath + ConfigINIPath);
+            IniFile theaterIni = new IniFile(Path.Combine(baseDirectoryPath, ConfigINIPath));
             int i;
 
             for (i = 0; i < 10000; i++)
