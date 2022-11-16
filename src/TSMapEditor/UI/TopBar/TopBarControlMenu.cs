@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using Microsoft.Xna.Framework;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using TSMapEditor.CCEngine;
@@ -67,10 +69,14 @@ namespace TSMapEditor.UI.TopBar
             btnClearTerrain.Name = nameof(btnClearTerrain);
             btnClearTerrain.X = ddBrushSize.Right + Constants.UIHorizontalSpacing;
             btnClearTerrain.Y = ddBrushSize.Y;
-            btnClearTerrain.Width = 50;
-            btnClearTerrain.Text = "Clear";
+            btnClearTerrain.Width = 60;
+            btnClearTerrain.Height = Constants.CellSizeY + 2;
+            btnClearTerrain.ExtraTexture = theaterGraphics.GetTileGraphics(0).TMPImages[0].Texture;
             btnClearTerrain.LeftClick += BtnClearTerrain_LeftClick;
             AddChild(btnClearTerrain);
+            var clearToolTip = new ToolTip(WindowManager, btnClearTerrain);
+            clearToolTip.Text = "Clear";
+            clearToolTip.ToolTipDelay = 0;
 
             int prevRight = btnClearTerrain.Right;
 
@@ -99,13 +105,26 @@ namespace TSMapEditor.UI.TopBar
                 btn.X = prevRight + Constants.UIHorizontalSpacing;
                 btn.Y = ddBrushSize.Y;
                 btn.Width = 60;
-                btn.Text = autoLATGround.DisplayName;
+                btn.Height = Constants.CellSizeY + 2;
+
+                // btn.Text = autoLATGround.DisplayName;
+                btn.ExtraTexture = theaterGraphics.GetTileGraphics(autoLATGround.GroundTileSet.StartTileIndex).TMPImages[0].Texture;
                 btn.Tag = autoLATGround;
                 btn.LeftClick += GroundButton_LeftClick;
                 AddChild(btn);
 
                 var toolTip = new ToolTip(WindowManager, btn);
-                toolTip.Text = autoLATGround.GroundTileSet.SetName;
+                string[] allBases = map.TheaterInstance.Theater.LATGrounds.FindAll(lg => lg.GroundTileSet == autoLATGround.GroundTileSet).Select(lg =>
+                {
+                    if (lg.BaseTileSet == null)
+                        return "Clear";
+
+                    return lg.BaseTileSet.SetName;
+                }).ToArray();
+
+                toolTip.Text = $"{autoLATGround.GroundTileSet.SetName} (placed on top of {string.Join(" or ", allBases)})";
+
+                toolTip.ToolTipDelay = 0;
 
                 prevRight = btn.Right;
             }
@@ -145,7 +164,7 @@ namespace TSMapEditor.UI.TopBar
             var btnPlaceWaypoint = new EditorButton(WindowManager);
             btnPlaceWaypoint.Name = nameof(btnPlaceWaypoint);
             btnPlaceWaypoint.X = Constants.UIEmptySideSpace;
-            btnPlaceWaypoint.Y = ddBrushSize.Bottom + Constants.UIVerticalSpacing;
+            btnPlaceWaypoint.Y = btnClearTerrain.Bottom + Constants.UIVerticalSpacing;
             btnPlaceWaypoint.Width = 120;
             btnPlaceWaypoint.Text = "Place Waypoint";
             btnPlaceWaypoint.LeftClick += BtnPlaceWaypoint_LeftClick;
