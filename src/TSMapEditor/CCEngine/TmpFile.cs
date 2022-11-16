@@ -125,9 +125,9 @@ namespace TSMapEditor.CCEngine
             TerrainType = buffer[1];
             RampType = buffer[2];
             stream.Read(buffer, 0, 3);
-            RadarLeftColor = new RGBColor(buffer, 0);
+            RadarLeftColor = new RGBColor(buffer, 0, 0);
             stream.Read(buffer, 0, 3);
-            RadarRightColor = new RGBColor(buffer, 0);
+            RadarRightColor = new RGBColor(buffer, 0, 0);
             stream.Read(buffer, 0, Unknown.Length);
             Array.ConstrainedCopy(buffer, 0, Unknown, 0, Unknown.Length);
             stream.Read(ColorData, 0, Constants.TileColorBufferSize);

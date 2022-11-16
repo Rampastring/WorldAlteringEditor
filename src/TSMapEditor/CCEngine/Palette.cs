@@ -16,7 +16,7 @@
         {
             for (int i = 0; i < Data.Length; i++)
             {
-                Data[i] = new RGBColor(buffer, i * 3);
+                Data[i] = new RGBColor(buffer, i * 3, 2);
             }
         }
     }

@@ -4,11 +4,11 @@ namespace TSMapEditor.CCEngine
 {
     public struct RGBColor
     {
-        public RGBColor(byte[] buffer, int offset)
+        public RGBColor(byte[] buffer, int offset, int shift)
         {
-            R = (byte)(buffer[offset] << 2);
-            G = (byte)(buffer[offset + 1] << 2);
-            B = (byte)(buffer[offset + 2] << 2);
+            R = (byte)(buffer[offset] << shift);
+            G = (byte)(buffer[offset + 1] << shift);
+            B = (byte)(buffer[offset + 2] << shift);
         }
 
         public RGBColor(byte r, byte g, byte b)
