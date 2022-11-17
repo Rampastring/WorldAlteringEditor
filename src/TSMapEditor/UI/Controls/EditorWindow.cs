@@ -18,6 +18,7 @@ namespace TSMapEditor.UI.Controls
         }
 
         public event EventHandler Closed;
+        public event EventHandler InteractedWith;
 
         protected bool CanBeMoved { get; set; } = true;
 
@@ -61,6 +62,8 @@ namespace TSMapEditor.UI.Controls
             Alpha = 0f;
             Enable();
 
+            InteractedWith?.Invoke(this, EventArgs.Empty);
+
             if (UserSettings.Instance.UpscaleUI && Width * 2 <= WindowManager.RenderResolutionX && Height * 2 <= WindowManager.RenderResolutionY)
                 Scaling = 2;
         }
@@ -78,6 +81,7 @@ namespace TSMapEditor.UI.Controls
             {
                 if (Cursor.LeftPressedDown)
                 {
+                    InteractedWith?.Invoke(this, EventArgs.Empty);
                     IsDragged = true;
                     lastCursorPoint = GetCursorPoint();
                 }

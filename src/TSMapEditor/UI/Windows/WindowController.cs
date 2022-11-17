@@ -1,4 +1,5 @@
-﻿using Rampastring.XNAUI.XNAControls;
+﻿using Rampastring.XNAUI;
+using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;
 using TSMapEditor.Models;
@@ -6,11 +7,23 @@ using TSMapEditor.Rendering;
 using TSMapEditor.UI.Controls;
 using TSMapEditor.UI.Windows.MainMenuWindows;
 using TSMapEditor.UI.Windows.TerrainGenerator;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace TSMapEditor.UI.Windows
 {
+    public interface IWindowParentControl
+    {
+        void AddChild(XNAControl child);
+
+        WindowManager WindowManager { get; }
+
+        void SetAutoUpdateChildOrder(bool value);
+    }
+
     public class WindowController
     {
+        private const int ChildWindowOrderValue = 10000;
+
         private List<EditorWindow> Windows { get; } = new List<EditorWindow>();
 
         public event EventHandler Initialized;
@@ -40,8 +53,40 @@ namespace TSMapEditor.UI.Windows
         public ExpandMapWindow ExpandMapWindow { get; private set; }
         public AboutWindow AboutWindow { get; private set; }
 
+        private IWindowParentControl windowParentControl;
 
-        public void Initialize(XNAControl windowParentControl, Map map, EditorState editorState, ICursorActionTarget cursorActionTarget)
+        private EditorWindow foregroundWindow;
+
+        /// <summary>
+        /// Handles window focus switching.
+        /// </summary>
+        private void Window_HandleFocusSwitch(object sender, EventArgs e)
+        {
+            var window = (EditorWindow)sender;
+
+            if (foregroundWindow != window)
+            {
+                windowParentControl.SetAutoUpdateChildOrder(false);
+
+                Windows.Remove(window);
+                Windows.Add(window);
+
+                for (int i = 0; i < Windows.Count; i++)
+                {
+                    Windows[i].UpdateOrder = ChildWindowOrderValue + i;
+                    Windows[i].DrawOrder = ChildWindowOrderValue + i;
+                }
+
+                windowParentControl.SetAutoUpdateChildOrder(true);
+
+                foregroundWindow = window;
+
+                foregroundWindow.UpdateOrder = ChildWindowOrderValue + Windows.Count;
+                foregroundWindow.DrawOrder = ChildWindowOrderValue + Windows.Count;
+            }
+        }
+
+        public void Initialize(IWindowParentControl windowParentControl, Map map, EditorState editorState, ICursorActionTarget cursorActionTarget)
         {
             BasicSectionConfigWindow = new BasicSectionConfigWindow(windowParentControl.WindowManager, map);
             Windows.Add(BasicSectionConfigWindow);
@@ -118,12 +163,31 @@ namespace TSMapEditor.UI.Windows
 
             foreach (var window in Windows)
             {
+                window.DrawOrder = ChildWindowOrderValue;
+                window.UpdateOrder = ChildWindowOrderValue;
+                window.LeftClick += Window_HandleFocusSwitch;
+                window.InteractedWith += Window_HandleFocusSwitch;
                 windowParentControl.AddChild(window);
+
+                AddFocusSwitchHandlerToChildrenRecursive(window, window);
+
                 window.Disable();
                 window.CenterOnParent();
             }
 
+            this.windowParentControl = windowParentControl;
+
             Initialized?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void AddFocusSwitchHandlerToChildrenRecursive(EditorWindow window, XNAControl control)
+        {
+            foreach (var child in control.Children)
+            {
+                child.MouseLeftDown += (s, e) => Window_HandleFocusSwitch(window, EventArgs.Empty);
+                child.LeftClick += (s, e) => Window_HandleFocusSwitch(window, EventArgs.Empty);
+                AddFocusSwitchHandlerToChildrenRecursive(window, child);
+            }
         }
     }
 }

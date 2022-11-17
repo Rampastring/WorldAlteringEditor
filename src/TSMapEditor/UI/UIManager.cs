@@ -25,7 +25,7 @@ namespace TSMapEditor.UI
         public Color ButtonTertiaryBackgroundColor { get; set; } = Color.White;
     }
 
-    class UIManager : XNAControl
+    class UIManager : XNAControl, IWindowParentControl
     {
         public UIManager(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics) : base(windowManager)
         {
@@ -58,6 +58,8 @@ namespace TSMapEditor.UI
         private string loadMapFilePath;
         private CreateNewMapEventArgs newMapInfo;
         private DarkeningPanel mapLoadDarkeningPanel;
+
+        public void SetAutoUpdateChildOrder(bool value) => AutoUpdateChildOrder = value;
 
 
         public override void Initialize()
