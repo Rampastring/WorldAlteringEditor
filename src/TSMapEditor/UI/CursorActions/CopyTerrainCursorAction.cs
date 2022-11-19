@@ -72,18 +72,18 @@ namespace TSMapEditor.UI.CursorActions
                     if ((EntryTypes & CopiedEntryType.Vehicle) == CopiedEntryType.Vehicle)
                     {
                         if (cell.Vehicle != null)
-                            copiedMapData.CopiedMapEntries.Add(new CopiedVehicleEntry(offset, cell.Vehicle.ObjectType.ININame, cell.Vehicle.Owner.ININame, cell.Vehicle.HP, cell.Vehicle.Facing));
+                            copiedMapData.CopiedMapEntries.Add(new CopiedVehicleEntry(offset, cell.Vehicle.ObjectType.ININame, cell.Vehicle.Owner.ININame, cell.Vehicle.HP, cell.Vehicle.Veterancy, cell.Vehicle.Facing, cell.Vehicle.Mission));
                     }
 
                     if ((EntryTypes & CopiedEntryType.Structure) == CopiedEntryType.Structure)
                     {
                         if (cell.Structure != null && cell.Structure.Position == new Point2D(x, y))
-                            copiedMapData.CopiedMapEntries.Add(new CopiedStructureEntry(offset, cell.Structure.ObjectType.ININame, cell.Structure.Owner.ININame, cell.Structure.HP, cell.Structure.Facing));
+                            copiedMapData.CopiedMapEntries.Add(new CopiedStructureEntry(offset, cell.Structure.ObjectType.ININame, cell.Structure.Owner.ININame, cell.Structure.HP, 0, cell.Structure.Facing, string.Empty));
                     }
 
                     if ((EntryTypes & CopiedEntryType.Infantry) == CopiedEntryType.Infantry)
                     {
-                        cell.DoForAllInfantry(inf => copiedMapData.CopiedMapEntries.Add(new CopiedInfantryEntry(offset, inf.ObjectType.ININame, inf.Owner.ININame, inf.HP, inf.Facing, inf.SubCell)));
+                        cell.DoForAllInfantry(inf => copiedMapData.CopiedMapEntries.Add(new CopiedInfantryEntry(offset, inf.ObjectType.ININame, inf.Owner.ININame, inf.HP, inf.Veterancy, inf.Facing, inf.Mission, inf.SubCell)));
                     }
                 }
             }

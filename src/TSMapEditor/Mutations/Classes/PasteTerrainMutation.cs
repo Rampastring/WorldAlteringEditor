@@ -264,35 +264,44 @@ namespace TSMapEditor.Mutations.Classes
         {
         }
 
-        public CopiedTechnoEntry(Point2D offset, string objectTypeName, string ownerName, int hp, byte facing) : base(offset, objectTypeName)
+        public CopiedTechnoEntry(Point2D offset, string objectTypeName, string ownerName, int hp, int veterancy, byte facing, string mission) : base(offset, objectTypeName)
         {
             HP = hp;
+            Veterancy = veterancy;
             Facing = facing;
             OwnerHouseName = ownerName;
+            Mission = mission;
         }
 
         public int HP;
+        public int Veterancy;
         public byte Facing;
         public string OwnerHouseName;
+        public string Mission;
 
         protected override byte[] GetCustomData()
         {
             byte[] objectTypeBuffer = ASCIIStringToBytes(ObjectTypeName);
             byte[] ownerBuffer = ASCIIStringToBytes(OwnerHouseName);
-            byte[] result = new byte[sizeof(int) + 1 + objectTypeBuffer.Length + ownerBuffer.Length];
+            byte[] missionBuffer = ASCIIStringToBytes(Mission);
+            byte[] result = new byte[sizeof(int) + sizeof(int) + 1 + objectTypeBuffer.Length + ownerBuffer.Length + missionBuffer.Length];
             Array.Copy(BitConverter.GetBytes(HP), 0, result, 0, sizeof(int));
-            result[4] = Facing;
-            Array.Copy(objectTypeBuffer, 0, result, sizeof(int) + 1, objectTypeBuffer.Length);
-            Array.Copy(ownerBuffer, 0, result, sizeof(int) + 1 + objectTypeBuffer.Length, ownerBuffer.Length);
+            Array.Copy(BitConverter.GetBytes(Veterancy), 0, result, sizeof(int), sizeof(int));
+            result[sizeof(int) * 2] = Facing;
+            Array.Copy(objectTypeBuffer, 0, result, sizeof(int) + sizeof(int) + 1, objectTypeBuffer.Length);
+            Array.Copy(ownerBuffer, 0, result, sizeof(int) + sizeof(int) + 1 + objectTypeBuffer.Length, ownerBuffer.Length);
+            Array.Copy(missionBuffer, 0, result, sizeof(int) + sizeof(int) + 1 + objectTypeBuffer.Length + ownerBuffer.Length, missionBuffer.Length);
             return result;
         }
 
         protected override void ReadCustomData(Stream stream)
         {
             HP = ReadInt(stream);
+            Veterancy = ReadInt(stream);
             Facing = (byte)stream.ReadByte();
             ObjectTypeName = ReadASCIIString(stream);
             OwnerHouseName = ReadASCIIString(stream);
+            Mission = ReadASCIIString(stream);
         }
     }
 
@@ -302,7 +311,7 @@ namespace TSMapEditor.Mutations.Classes
         {
         }
 
-        public CopiedVehicleEntry(Point2D offset, string vehicleTypeName, string ownerName, int hp, byte facing) : base(offset, vehicleTypeName, ownerName, hp, facing)
+        public CopiedVehicleEntry(Point2D offset, string vehicleTypeName, string ownerName, int hp, int veterancy, byte facing, string mission) : base(offset, vehicleTypeName, ownerName, hp, veterancy, facing, mission)
         {
         }
 
@@ -315,7 +324,7 @@ namespace TSMapEditor.Mutations.Classes
         {
         }
 
-        public CopiedStructureEntry(Point2D offset, string structureTypeName, string ownerName, int hp, byte facing) : base(offset, structureTypeName, ownerName, hp, facing)
+        public CopiedStructureEntry(Point2D offset, string structureTypeName, string ownerName, int hp, int veterancy, byte facing, string mission) : base(offset, structureTypeName, ownerName, hp, veterancy, facing, mission)
         {
         }
 
@@ -328,7 +337,7 @@ namespace TSMapEditor.Mutations.Classes
         {
         }
 
-        public CopiedInfantryEntry(Point2D offset, string infantryTypeName, string ownerName, int hp, byte facing, SubCell subCell) : base(offset, infantryTypeName, ownerName, hp, facing)
+        public CopiedInfantryEntry(Point2D offset, string infantryTypeName, string ownerName, int hp, int veterancy, byte facing, string mission, SubCell subCell) : base(offset, infantryTypeName, ownerName, hp, veterancy, facing, mission)
         {
             SubCell = subCell;
         }
@@ -339,24 +348,17 @@ namespace TSMapEditor.Mutations.Classes
 
         protected override byte[] GetCustomData()
         {
-            byte[] objectTypeBuffer = ASCIIStringToBytes(ObjectTypeName);
-            byte[] ownerBuffer = ASCIIStringToBytes(OwnerHouseName);
-            byte[] result = new byte[sizeof(int) + sizeof(SubCell) + 1 + objectTypeBuffer.Length + ownerBuffer.Length];
-            Array.Copy(BitConverter.GetBytes(HP), 0, result, 0, sizeof(int));
-            Array.Copy(BitConverter.GetBytes((int)SubCell), 0, result, sizeof(int), sizeof(SubCell));
-            result[sizeof(int) + sizeof(SubCell)] = Facing;
-            Array.Copy(objectTypeBuffer, 0, result, sizeof(int) + sizeof(SubCell) + 1, objectTypeBuffer.Length);
-            Array.Copy(ownerBuffer, 0, result, sizeof(int) + sizeof(SubCell) + 1 + objectTypeBuffer.Length, ownerBuffer.Length);
-            return result;
+            byte[] baseData = base.GetCustomData();
+            byte[] infantryData = new byte[baseData.Length + sizeof(SubCell)];
+            Array.Copy(baseData, 0, infantryData, 0, baseData.Length);
+            Array.Copy(BitConverter.GetBytes((int)SubCell), 0, infantryData, infantryData.Length - 4, sizeof(int));
+            return infantryData;
         }
 
         protected override void ReadCustomData(Stream stream)
         {
-            HP = ReadInt(stream);
+            base.ReadCustomData(stream);
             SubCell = (SubCell)ReadInt(stream);
-            Facing = (byte)stream.ReadByte();
-            ObjectTypeName = ReadASCIIString(stream);
-            OwnerHouseName = ReadASCIIString(stream);
         }
     }
 
@@ -625,7 +627,16 @@ namespace TSMapEditor.Mutations.Classes
                 if (owner == null)
                     continue;
 
-                MutationTarget.Map.PlaceUnit(new Unit(unitType) { Position = cellCoords, Owner = owner, HP = copiedVehicleEntry.HP, Facing = copiedVehicleEntry.Facing });
+                MutationTarget.Map.PlaceUnit(new Unit(unitType) 
+                { 
+                    Position = cellCoords, 
+                    Owner = owner, 
+                    HP = copiedVehicleEntry.HP, 
+                    Veterancy = copiedVehicleEntry.Veterancy,
+                    Facing = copiedVehicleEntry.Facing, 
+                    Mission = copiedVehicleEntry.Mission 
+                });
+
                 vehicleCells.Add(cellCoords);
             }
 
@@ -702,7 +713,17 @@ namespace TSMapEditor.Mutations.Classes
                 if (owner == null)
                     continue;
 
-                MutationTarget.Map.PlaceInfantry(new Infantry(infantryType) { Position = cellCoords, Owner = owner, HP = copiedInfantryEntry.HP, Facing = copiedInfantryEntry.Facing, SubCell = copiedInfantryEntry.SubCell });
+                MutationTarget.Map.PlaceInfantry(new Infantry(infantryType) 
+                { 
+                    Position = cellCoords, 
+                    Owner = owner, 
+                    HP = copiedInfantryEntry.HP, 
+                    Veterancy = copiedInfantryEntry.Veterancy, 
+                    Facing = copiedInfantryEntry.Facing, 
+                    Mission = copiedInfantryEntry.Mission, 
+                    SubCell = copiedInfantryEntry.SubCell 
+                });
+
                 infantryLocations.Add(new PlacedInfantryInfo(cellCoords, copiedInfantryEntry.SubCell));
             }
 
