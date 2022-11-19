@@ -1,6 +1,7 @@
 ﻿using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
+using System.Globalization;
 using TSMapEditor.Models;
 using TSMapEditor.UI.Controls;
 
@@ -53,6 +54,15 @@ namespace TSMapEditor.UI.Windows
             var tagDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTagWindow);
             tagDarkeningPanel.Hidden += (s, e) => SelectionWindow_ApplyEffect(w => unit.AttachedTag = w.SelectedObject, selectTagWindow);
 
+            try
+            {
+                ddVeterancy.Items.ForEach(ddItem => ddItem.Tag = int.Parse(ddItem.Text.Substring(0, ddItem.Text.IndexOf(' ')), CultureInfo.InvariantCulture));
+            }
+            catch (FormatException)
+            {
+                throw new INIConfigException($"Invalid options specified for {nameof(ddVeterancy)} in {nameof(VehicleOptionsWindow)}. Options must start with a number followed by a space.");
+            }
+
             FindChild<EditorButton>("btnOK").LeftClick += BtnOK_LeftClick;
         }
 
@@ -78,7 +88,8 @@ namespace TSMapEditor.UI.Windows
         {
             tbStrength.Value = unit.HP;
             ddMission.SelectedIndex = ddMission.Items.FindIndex(item => item.Text == unit.Mission);
-            ddVeterancy.SelectedIndex = unit.Veterancy;
+            int veterancyIndex = ddVeterancy.Items.FindIndex(i => (int)i.Tag == unit.Veterancy);
+            ddVeterancy.SelectedIndex = Math.Max(0, veterancyIndex);
             tbGroup.Value = unit.Group;
             tbFollowsID.Value = unit.FollowsID;
             chkOnBridge.Checked = unit.High;
@@ -92,7 +103,7 @@ namespace TSMapEditor.UI.Windows
         {
             unit.HP = Math.Min(Constants.ObjectHealthMax, Math.Max(tbStrength.Value, 0));
             unit.Mission = ddMission.SelectedItem == null ? unit.Mission : ddMission.SelectedItem.Text;
-            unit.Veterancy = ddVeterancy.SelectedIndex;
+            unit.Veterancy = (int)ddVeterancy.SelectedItem.Tag;
             unit.Group = tbGroup.Value;
             unit.FollowsID = tbFollowsID.Value;
 

@@ -1,6 +1,7 @@
 ﻿using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
+using System.Globalization;
 using TSMapEditor.Models;
 using TSMapEditor.UI.Controls;
 
@@ -53,6 +54,15 @@ namespace TSMapEditor.UI.Windows
                 attachedTagSelector.Text = tag == null ? string.Empty : tag.GetDisplayString();
             };
 
+            try
+            {
+                ddVeterancy.Items.ForEach(ddItem => ddItem.Tag = int.Parse(ddItem.Text.Substring(0, ddItem.Text.IndexOf(' ')), CultureInfo.InvariantCulture));
+            }
+            catch (FormatException)
+            {
+                throw new INIConfigException($"Invalid options specified for {nameof(ddVeterancy)} in {nameof(InfantryOptionsWindow)}. Options must start with a number followed by a space.");
+            }
+
             FindChild<EditorButton>("btnOK").LeftClick += BtnOK_LeftClick;
         }
 
@@ -72,7 +82,8 @@ namespace TSMapEditor.UI.Windows
         {
             tbStrength.Value = infantry.HP;
             ddMission.SelectedIndex = ddMission.Items.FindIndex(item => item.Text == infantry.Mission);
-            ddVeterancy.SelectedIndex = infantry.Veterancy;
+            int veterancyIndex = ddVeterancy.Items.FindIndex(i => (int)i.Tag == infantry.Veterancy);
+            ddVeterancy.SelectedIndex = Math.Max(0, veterancyIndex);
             tbGroup.Value = infantry.Group;
             chkOnBridge.Checked = infantry.High;
             chkAutocreateNoRecruitable.Checked = infantry.AutocreateNoRecruitable;
@@ -85,7 +96,7 @@ namespace TSMapEditor.UI.Windows
         {
             infantry.HP = Math.Min(Constants.ObjectHealthMax, Math.Max(tbStrength.Value, 0));
             infantry.Mission = ddMission.SelectedItem == null ? infantry.Mission : ddMission.SelectedItem.Text;
-            infantry.Veterancy = ddVeterancy.SelectedIndex;
+            infantry.Veterancy = (int)ddVeterancy.SelectedItem.Tag;
             infantry.Group = tbGroup.Value;
             infantry.High = chkOnBridge.Checked;
             infantry.AutocreateNoRecruitable = chkAutocreateNoRecruitable.Checked;
