@@ -237,6 +237,8 @@ namespace TSMapEditor.UI
         {
             var messageBox = new EditorMessageBox(WindowManager, "Loading", "Please wait, loading map...", MessageBoxButtons.None);
             mapLoadDarkeningPanel = new DarkeningPanel(WindowManager);
+            mapLoadDarkeningPanel.DrawOrder = int.MaxValue;
+            mapLoadDarkeningPanel.UpdateOrder = int.MaxValue;
             AddChild(mapLoadDarkeningPanel);
             mapLoadDarkeningPanel.AddChild(messageBox);
 

@@ -26,6 +26,15 @@ namespace TSMapEditor.UI.Windows
         {
             base.Initialize();
 
+            DrawOrder = WindowController.ChildWindowOrderValue * 2;
+            UpdateOrder = DrawOrder;
+
+            if (Parent != null)
+            {
+                Parent.DrawOrder = DrawOrder;
+                Parent.UpdateOrder = UpdateOrder;
+            }
+
             tbSearch = FindChild<EditorSuggestionTextBox>(nameof(tbSearch));
             UIHelpers.AddSearchTipsBoxToControl(tbSearch);
 

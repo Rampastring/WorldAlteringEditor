@@ -2,6 +2,7 @@
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
+using TSMapEditor.UI.Windows;
 
 namespace TSMapEditor.UI.Controls
 {
@@ -112,6 +113,8 @@ namespace TSMapEditor.UI.Controls
         public static void AddAndInitializeWithControl(WindowManager wm, XNAControl control, bool display)
         {
             var dp = new DarkeningPanel(wm);
+            dp.DrawOrder = int.MaxValue;
+            dp.UpdateOrder = int.MaxValue;
             wm.AddAndInitializeControl(dp);
             dp.AddChild(control);
 

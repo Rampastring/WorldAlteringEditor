@@ -22,7 +22,7 @@ namespace TSMapEditor.UI.Windows
 
     public class WindowController
     {
-        private const int ChildWindowOrderValue = 10000;
+        public const int ChildWindowOrderValue = 10000;
 
         private List<EditorWindow> Windows { get; } = new List<EditorWindow>();
 
