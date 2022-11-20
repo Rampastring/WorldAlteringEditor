@@ -255,6 +255,14 @@ namespace TSMapEditor.UI.Windows
             Show();
         }
 
+        public void SelectScript(Script script)
+        {
+            int index = lbScriptTypes.Items.FindIndex(lbi => lbi.Tag == script);
+
+            if (index > -1)
+                lbScriptTypes.SelectedIndex = index;
+        }
+
         private void ListScripts()
         {
             lbScriptTypes.Clear();

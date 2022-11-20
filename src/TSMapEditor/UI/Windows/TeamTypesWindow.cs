@@ -9,6 +9,26 @@ using TSMapEditor.UI.Controls;
 
 namespace TSMapEditor.UI.Windows
 {
+    public class TaskForceEventArgs : EventArgs
+    {
+        public TaskForceEventArgs(TaskForce taskForce)
+        {
+            TaskForce = taskForce;
+        }
+
+        public TaskForce TaskForce { get; }
+    }
+
+    public class ScriptEventArgs : EventArgs
+    {
+        public ScriptEventArgs(Script script)
+        {
+            Script = script;
+        }
+
+        public Script Script { get; }
+    }
+
     public class TeamTypesWindow : INItializableWindow
     {
         public TeamTypesWindow(WindowManager windowManager, Map map) : base(windowManager)
@@ -17,6 +37,9 @@ namespace TSMapEditor.UI.Windows
         }
 
         private readonly Map map;
+
+        public event EventHandler<TaskForceEventArgs> TaskForceOpened;
+        public event EventHandler<ScriptEventArgs> ScriptOpened;
 
         private EditorListBox lbTeamTypes;
         private EditorTextBox tbName;
@@ -81,9 +104,45 @@ namespace TSMapEditor.UI.Windows
             var tagDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTagWindow);
             tagDarkeningPanel.Hidden += (s, e) => SelectionWindow_ApplyEffect(w => editedTeamType.Tag = w.SelectedObject, selectTagWindow);
 
-            selTaskForce.LeftClick += (s, e) => selectTaskForceWindow.Open(editedTeamType.TaskForce);
-            selScript.LeftClick += (s, e) => selectScriptWindow.Open(editedTeamType.Script);
-            selTag.LeftClick += (s, e) => selectTagWindow.Open(editedTeamType.Tag);
+            selTaskForce.LeftClick += (s, e) => 
+            {
+                if (editedTeamType == null)
+                    return;
+
+                if (Keyboard.IsCtrlHeldDown() && editedTeamType.TaskForce != null)
+                {
+                    TaskForceOpened?.Invoke(this, new TaskForceEventArgs(editedTeamType.TaskForce));
+
+                    // hack time! allow the other window to show on top of this one,
+                    // we can't cancel the "left click" event on the child with current XNAUI
+                    WindowManager.AddCallback(new Action(() => { DrawOrder -= 500; UpdateOrder -= 500; }));
+                }
+                else
+                {
+                    selectTaskForceWindow.Open(editedTeamType.TaskForce);
+                }
+            };
+
+            selScript.LeftClick += (s, e) =>
+            {
+                if (editedTeamType == null)
+                    return;
+
+                if (Keyboard.IsCtrlHeldDown() && editedTeamType.Script != null)
+                {
+                    ScriptOpened?.Invoke(this, new ScriptEventArgs(editedTeamType.Script));
+
+                    // hack time! allow the other window to show on top of this one,
+                    // we can't cancel the "left click" event on the child with current XNAUI
+                    WindowManager.AddCallback(new Action(() => { DrawOrder -= 500; UpdateOrder -= 500; }));
+                }
+                else
+                {
+                    selectScriptWindow.Open(editedTeamType.Script);
+                }
+            };
+
+            selTag.LeftClick += (s, e) => { if (editedTeamType != null) selectTagWindow.Open(editedTeamType.Tag); };
         }
 
         private void SelectionWindow_ApplyEffect<T>(Action<T> action, T window)

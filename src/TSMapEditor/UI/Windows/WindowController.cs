@@ -161,6 +161,9 @@ namespace TSMapEditor.UI.Windows
             AboutWindow = new AboutWindow(windowParentControl.WindowManager);
             Windows.Add(AboutWindow);
 
+            TeamTypesWindow.TaskForceOpened += (s, e) => { TaskForcesWindow.Open(); TaskForcesWindow.SelectTaskForce(e.TaskForce); };
+            TeamTypesWindow.ScriptOpened += (s, e) => { ScriptsWindow.Open(); ScriptsWindow.SelectScript(e.Script); };
+
             foreach (var window in Windows)
             {
                 window.DrawOrder = ChildWindowOrderValue;

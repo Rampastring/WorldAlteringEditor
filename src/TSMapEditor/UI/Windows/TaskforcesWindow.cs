@@ -293,6 +293,14 @@ namespace TSMapEditor.UI.Windows
             ListTaskForces();
         }
 
+        public void SelectTaskForce(TaskForce taskForce)
+        {
+            int index = lbTaskForces.Items.FindIndex(lbi => lbi.Tag == taskForce);
+
+            if (index > -1)
+                lbTaskForces.SelectedIndex = index;
+        }
+
         private void ListTaskForces()
         {
             lbTaskForces.SelectedIndexChanged -= LbTaskForces_SelectedIndexChanged;
