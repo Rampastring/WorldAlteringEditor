@@ -117,6 +117,7 @@ namespace TSMapEditor.UI.TopBar
             toolsContextMenu.AddItem("Toggle IceGrowth Preview", () => mapView.EditorState.HighlightIceGrowth = !mapView.EditorState.HighlightIceGrowth, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("Generate Animated Water", GenerateAnimatedWater, null, null, null, null);
+            toolsContextMenu.AddItem("Smoothen Ice", SmoothenIce, null, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("Check Distance...", () => mapView.EditorState.CursorAction = checkDistanceCursorAction, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
@@ -160,6 +161,12 @@ namespace TSMapEditor.UI.TopBar
                 "Do you wish to continue?", MessageBoxButtons.YesNo);
 
             messageBox.YesClickedAction = (_) => { new ApplyAnimatedWaterScript().Perform(map); mapView.InvalidateMap(); };
+        }
+
+        private void SmoothenIce()
+        {
+            new SmoothenIceScript().Perform(map);
+            mapView.InvalidateMap();
         }
 
         private void EnterTerrainGenerator()

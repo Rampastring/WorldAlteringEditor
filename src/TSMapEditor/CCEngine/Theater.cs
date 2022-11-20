@@ -22,6 +22,27 @@ namespace TSMapEditor.CCEngine
         public TileSet BaseTileSet { get; }
     }
 
+    public class TheaterIceTileSets
+    {
+        public TheaterIceTileSets(Theater theater, IniFile theaterIni)
+        {
+            int ice1SetId = theaterIni.GetIntValue("General", "Ice1Set", -1);
+            int ice2SetId = theaterIni.GetIntValue("General", "Ice2Set", -1);
+            int ice3SetId = theaterIni.GetIntValue("General", "Ice3Set", -1);
+            int iceShoreSetId = theaterIni.GetIntValue("General", "IceShoreSet", -1);
+
+            Ice1Set = theater.TryGetTileSetById(ice1SetId);
+            Ice2Set = theater.TryGetTileSetById(ice2SetId);
+            Ice3Set = theater.TryGetTileSetById(ice3SetId);
+            IceShoreSet = theater.TryGetTileSetById(iceShoreSetId);
+        }
+
+        public TileSet Ice1Set { get; private set; }
+        public TileSet Ice2Set { get; private set; }
+        public TileSet Ice3Set { get; private set; }
+        public TileSet IceShoreSet { get; private set; }
+    }
+
     public class Theater : INIDefineable
     {
         public Theater(string name)
@@ -50,11 +71,20 @@ namespace TSMapEditor.CCEngine
         public string FileExtension { get; set; }
         public char NewTheaterBuildingLetter { get; set; }
 
+        public TheaterIceTileSets IceTileSetInfo { get; private set; }
+
         public void ReadConfigINI(string baseDirectoryPath)
         {
             TileSets.Clear();
 
-            IniFile theaterIni = new IniFile(Path.Combine(baseDirectoryPath, ConfigINIPath));
+            string iniPath = Path.Combine(baseDirectoryPath, ConfigINIPath);
+
+            if (!File.Exists(iniPath))
+            {
+                throw new FileNotFoundException("Theater config INI not found: " + ConfigINIPath);
+            }
+
+            var theaterIni = new IniFile(iniPath);
             int i;
 
             for (i = 0; i < 10000; i++)
@@ -69,6 +99,8 @@ namespace TSMapEditor.CCEngine
                 TileSets.Add(tileSet);
             }
 
+            IceTileSetInfo = new TheaterIceTileSets(this, theaterIni);
+
             i = 1;
             while (true)
             {
@@ -79,6 +111,14 @@ namespace TSMapEditor.CCEngine
             }
 
             InitLATGround(theaterIni, "PvmntTile", "ClearToPvmntLat", null, null, "Pavement");
+        }
+
+        public TileSet TryGetTileSetById(int id)
+        {
+            if (id < 0 || id >= TileSets.Count)
+                return null;
+
+            return TileSets[id];
         }
 
         private bool InitLATGround(IniFile theaterIni, string tileSetKey, string transitionTileSetKey, string baseTileSetKey, string nameKey, string defaultName)
