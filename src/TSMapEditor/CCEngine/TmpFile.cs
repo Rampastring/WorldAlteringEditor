@@ -119,7 +119,9 @@ namespace TSMapEditor.CCEngine
             ExtraWidth = ReadUIntFromStream(stream);
             ExtraHeight = ReadUIntFromStream(stream);
             stream.Read(buffer, 0, 4);
-            ImageFlags = (TmpImageFlags)BitConverter.ToUInt32(buffer, 0);
+            // The image flags of WW tiles contain
+            // trash / uninitialized memory which we have to clear
+            ImageFlags = (TmpImageFlags)(BitConverter.ToUInt32(buffer, 0) ^ 0b00011111);
             stream.Read(buffer, 0, 3);
             Height = buffer[0];
             TerrainType = buffer[1];
@@ -132,8 +134,11 @@ namespace TSMapEditor.CCEngine
             Array.ConstrainedCopy(buffer, 0, Unknown, 0, Unknown.Length);
             stream.Read(ColorData, 0, Constants.TileColorBufferSize);
 
-            //ExtraGraphicsData = new byte[ExtraWidth * ExtraHeight];
-            //stream.Read(ExtraGraphicsData, 0, ExtraGraphicsData.Length);
+            if ((ImageFlags & TmpImageFlags.HAS_EXTRA_DATA) == TmpImageFlags.HAS_EXTRA_DATA)
+            {
+                ExtraGraphicsData = new byte[ExtraWidth * ExtraHeight];
+                stream.Read(ExtraGraphicsData, 0, ExtraGraphicsData.Length);
+            }
         }
 
         private int ReadIntFromStream(Stream stream)
