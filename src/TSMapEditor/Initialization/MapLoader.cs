@@ -167,10 +167,11 @@ namespace TSMapEditor.Initialization
             {
                 // This could be optimized by not creating the tile at all if its tile index is 0xFFFF
                 var mapTile = new MapTile(uncompressedData.GetRange(position, IsoMapPack5Tile.Size).ToArray());
-                if (mapTile.TileIndex != ushort.MaxValue)
+                if (mapTile.TileIndex == ushort.MaxValue)
                 {
-                    tiles.Add(mapTile);
+                    mapTile.TileIndex = 0;
                 }
+                tiles.Add(mapTile);
                 position += IsoMapPack5Tile.Size;
             }
 
