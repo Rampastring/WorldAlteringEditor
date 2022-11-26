@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 
@@ -11,6 +12,8 @@ namespace TSMapEditor.UI.Controls
             FontIndex = Constants.UIBoldFont;
             Height = Constants.UIButtonHeight;
         }
+
+        public Texture2D ExtraTexture { get; set; }
 
         public override void Initialize()
         {
@@ -26,6 +29,19 @@ namespace TSMapEditor.UI.Controls
             HoverTexture = Helpers.CreateUITexture(GraphicsDevice, Width, Height,
                 new Color(128, 128, 128, 196),
                 new Color(128, 128, 128, 255), Color.White);
+        }
+
+        public override void Draw(GameTime gameTime)
+        {
+            base.Draw(gameTime);
+
+            if (ExtraTexture != null)
+            {
+                var rect = new Rectangle((Width - ExtraTexture.Width) / 2,
+                    (Height - ExtraTexture.Height) / 2, ExtraTexture.Width, ExtraTexture.Height);
+
+                DrawTexture(ExtraTexture, rect, Color.White);
+            }
         }
     }
 }
