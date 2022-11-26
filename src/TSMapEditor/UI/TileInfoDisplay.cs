@@ -80,6 +80,12 @@ namespace TSMapEditor.UI
             textRenderer.AddTextLine(new XNATextPart("Terrain Type: ", Constants.UIDefaultFont, subtleTextColor));
             textRenderer.AddTextPart(new XNATextPart(terrainType, Constants.UIDefaultFont, baseTextColor));
 
+            if (!Constants.IsFlatWorld)
+            {
+                textRenderer.AddTextLine(new XNATextPart("Height: ", Constants.UIDefaultFont, subtleTextColor));
+                textRenderer.AddTextPart(new XNATextPart(MapTile.Level.ToString(), Constants.UIDefaultFont, baseTextColor));
+            }
+
             CellTag cellTag = MapTile.CellTag;
             if (cellTag != null)
             {
