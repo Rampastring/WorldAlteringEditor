@@ -165,7 +165,6 @@ namespace TSMapEditor.Initialization
             position = 0;
             while (position < uncompressedData.Count - IsoMapPack5Tile.Size)
             {
-                // This could be optimized by not creating the tile at all if its tile index is 0xFFFF
                 var mapTile = new MapTile(uncompressedData.GetRange(position, IsoMapPack5Tile.Size).ToArray());
                 if (mapTile.TileIndex == ushort.MaxValue)
                 {

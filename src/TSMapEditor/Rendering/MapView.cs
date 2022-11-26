@@ -415,8 +415,9 @@ namespace TSMapEditor.Rendering
             string iniName = string.Empty;
 
             var mapCell = Map.GetTile(gameObject.Position);
+            int heightOffset = mapCell.Level * Constants.CellHeight;
             if (mapCell != null)
-                drawPoint -= new Point2D(0, mapCell.Level * Constants.CellHeight);
+                drawPoint -= new Point2D(0, heightOffset);
 
             // TODO refactor this to be more object-oriented
 
@@ -502,6 +503,11 @@ namespace TSMapEditor.Rendering
                     Point2D p2 = CellMath.CellTopLeftPointFromCellCoords(new Point2D(gameObject.Position.X + foundationX, gameObject.Position.Y), Map.Size.X) + new Point2D(Constants.CellSizeX / 2, 0);
                     Point2D p3 = CellMath.CellTopLeftPointFromCellCoords(new Point2D(gameObject.Position.X, gameObject.Position.Y + foundationY), Map.Size.X) + new Point2D(Constants.CellSizeX / 2, 0);
                     Point2D p4 = CellMath.CellTopLeftPointFromCellCoords(new Point2D(gameObject.Position.X + foundationX, gameObject.Position.Y + foundationY), Map.Size.X) + new Point2D(Constants.CellSizeX / 2, 0);
+
+                    p1 -= new Point2D(0, heightOffset);
+                    p2 -= new Point2D(0, heightOffset);
+                    p3 -= new Point2D(0, heightOffset);
+                    p4 -= new Point2D(0, heightOffset);
 
                     DrawLine(p1.ToXNAVector(), p2.ToXNAVector(), foundationLineColor, 1);
                     DrawLine(p1.ToXNAVector(), p3.ToXNAVector(), foundationLineColor, 1);
@@ -908,6 +914,20 @@ namespace TSMapEditor.Rendering
             Point2D cursorMapPoint = GetCursorMapPoint();
             Point2D tileCoords = CellMath.CellCoordsFromPixelCoords(cursorMapPoint, Map.Size);
             var tile = Map.GetTile(tileCoords.X, tileCoords.Y);
+
+            // traverse the cells to find one of fitting height
+            for (int i = 1; i < 14; i++)
+            {
+                var otherCellCoords = tileCoords + new Point2D(i, i);
+                var otherCell = Map.GetTile(otherCellCoords);
+                if (otherCell != null)
+                {
+                    int startingY = CellMath.CellTopLeftPointFromCellCoords(otherCellCoords, Map.Size.X).Y - (otherCell.Level * Constants.CellHeight);
+                    if (startingY <= cursorMapPoint.Y)
+                        tile = otherCell;
+                }
+            }
+
             tileUnderCursor = tile;
             TileInfoDisplay.MapTile = tile;
 
@@ -925,6 +945,7 @@ namespace TSMapEditor.Rendering
             Point cursorPoint = GetCursorPoint();
             Point2D cursorMapPoint = new Point2D(Camera.TopLeftPoint.X + (int)(cursorPoint.X / Camera.ZoomLevel),
                     Camera.TopLeftPoint.Y + (int)(cursorPoint.Y / Camera.ZoomLevel));
+
             return cursorMapPoint;
         }
 
@@ -1039,7 +1060,9 @@ namespace TSMapEditor.Rendering
             Color lineColor = new Color(96, 168, 96, 128);
             Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(new Point2D(tileUnderCursor.X, tileUnderCursor.Y), Map.Size.X) - Camera.TopLeftPoint;
 
-            cellTopLeftPoint = new Point2D((int)(cellTopLeftPoint.X * Camera.ZoomLevel), (int)(cellTopLeftPoint.Y * Camera.ZoomLevel));
+            int height = tileUnderCursor.Level * Constants.CellHeight;
+
+            cellTopLeftPoint = new Point2D((int)(cellTopLeftPoint.X * Camera.ZoomLevel), (int)((cellTopLeftPoint.Y - height) * Camera.ZoomLevel));
 
             var cellTopPoint = new Vector2(cellTopLeftPoint.X + (int)((Constants.CellSizeX / 2) * Camera.ZoomLevel), cellTopLeftPoint.Y);
             var cellLeftPoint = new Vector2(cellTopLeftPoint.X, cellTopLeftPoint.Y + (int)((Constants.CellSizeY / 2) * Camera.ZoomLevel));
@@ -1099,6 +1122,10 @@ namespace TSMapEditor.Rendering
             {
                 var entryCellCenterPoint = CellMath.CellCenterPointFromCellCoords(tube.EntryPoint, Map.Size.X);
                 var exitCellCenterPoint = CellMath.CellCenterPointFromCellCoords(tube.ExitPoint, Map.Size.X);
+                var entryCell = Map.GetTile(tube.EntryPoint);
+                int height = 0;
+                if (entryCell != null)
+                    height = entryCell.Level * Constants.CellHeight;
 
                 Point2D currentPoint = tube.EntryPoint;
 
@@ -1113,7 +1140,9 @@ namespace TSMapEditor.Rendering
                         var currentPixelPoint = CellMath.CellCenterPointFromCellCoords(currentPoint, Map.Size.X);
                         var nextPixelPoint = CellMath.CellCenterPointFromCellCoords(nextPoint, Map.Size.X);
 
-                        DrawArrow(currentPixelPoint.ToXNAVector(), nextPixelPoint.ToXNAVector(), color, 0.25f, 10f, 2);
+                        DrawArrow(currentPixelPoint.ToXNAVector() - new Vector2(0, height),
+                            nextPixelPoint.ToXNAVector() - new Vector2(0, height),
+                            color, 0.25f, 10f, 1);
                     }
 
                     currentPoint = nextPoint;
