@@ -20,6 +20,7 @@ namespace TSMapEditor.Models
         public List<string> Sides = new List<string>();
         public List<InfantrySequence> InfantrySequences = new List<InfantrySequence>();
         public List<RulesColor> Colors = new List<RulesColor>();
+        public List<TiberiumType> TiberiumTypes = new List<TiberiumType>();
 
         public List<GlobalVariable> GlobalVariables = new List<GlobalVariable>();
 
@@ -54,6 +55,27 @@ namespace TSMapEditor.Models
                 foreach (var kvp in colorsSection.Keys)
                 {
                     Colors.Add(new RulesColor(kvp.Key, kvp.Value));
+                }
+            }
+
+            var tiberiumsSection = iniFile.GetSection("Tiberiums");
+            if (tiberiumsSection != null && !isMapIni)
+            {
+                for (int i = 0; i < tiberiumsSection.Keys.Count; i++)
+                {
+                    var kvp = tiberiumsSection.Keys[i];
+                    var tiberiumType = new TiberiumType(kvp.Value, i);
+
+                    var tiberiumTypeSection = iniFile.GetSection(kvp.Value);
+                    if (tiberiumTypeSection != null)
+                    {
+                        tiberiumType.ReadPropertiesFromIniSection(tiberiumTypeSection);
+
+                        TiberiumTypes.Add(tiberiumType);
+                        var rulesColor = Colors.Find(c => c.Name == tiberiumType.Color);
+                        if (rulesColor != null)
+                            tiberiumType.XNAColor = rulesColor.XNAColor;
+                    }
                 }
             }
 

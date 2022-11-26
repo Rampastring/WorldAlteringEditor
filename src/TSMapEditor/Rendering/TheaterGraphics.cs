@@ -277,9 +277,11 @@ namespace TSMapEditor.Rendering
                                 value = 1.0f;
                             colorArray[j] = new Color(value, value, value);
                         }
+
+                        var remapTexture = new Texture2D(graphicsDevice, frameInfo.Width, frameInfo.Height, false, SurfaceFormat.Color);
+                        remapTexture.SetData<Color>(colorArray);
+                        Frames[i] = new PositionedTexture(shp.Width, shp.Height, frameInfo.XOffset, frameInfo.YOffset, remapTexture);
                     }
-
-
                 }
             }
         }
@@ -688,12 +690,13 @@ namespace TSMapEditor.Rendering
                     var shpFile = new ShpFile();
                     shpFile.ParseFromBuffer(shpData);
                     Palette palette = theaterPalette;
-                    if (overlayType.Wall)
+
+                    if (overlayType.Wall || (overlayType.Tiberium && !Constants.TheaterPaletteForTiberium))
                         palette = unitPalette;
-                    // This should be done in vanilla TS, but not in DTA
-                    // if (overlayType.Tiberium)
-                    //     palette = unitPalette;
-                    OverlayTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, palette);
+
+                    bool isRemapable = overlayType.Tiberium && !Constants.TheaterPaletteForTiberium;
+
+                    OverlayTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, palette, null, isRemapable, null);
                 }
             }
         }

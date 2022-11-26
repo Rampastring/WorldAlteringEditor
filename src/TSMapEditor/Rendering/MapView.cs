@@ -479,6 +479,9 @@ namespace TSMapEditor.Rendering
                     if (overlay.OverlayType == null)
                         return;
                     graphics = TheaterGraphics.OverlayTextures[overlay.OverlayType.Index];
+                    int tiberiumIndex = overlay.OverlayType.GetTiberiumIndex();
+                    if (tiberiumIndex > -1 && tiberiumIndex < Map.Rules.TiberiumTypes.Count)
+                        remapColor = Map.Rules.TiberiumTypes[tiberiumIndex].XNAColor;
                     replacementColor = Color.LimeGreen;
                     iniName = overlay.OverlayType.ININame;
                     break;
@@ -1165,17 +1168,17 @@ namespace TSMapEditor.Rendering
 
         public override void Draw(GameTime gameTime)
         {
+            if (IsActive && tileUnderCursor != null && CursorAction != null)
+            {
+                CursorAction.PreMapDraw(tileUnderCursor.CoordsToPoint());
+            }
+
             if (mapInvalidated)
             {
                 DrawWholeMap();
                 mapInvalidated = false;
                 newRefreshes.Clear();
                 DrawTubes();
-            }
-
-            if (IsActive && tileUnderCursor != null && CursorAction != null)
-            {
-                CursorAction.PreMapDraw(tileUnderCursor.CoordsToPoint());
             }
 
             if (newRefreshes.Count > 0)

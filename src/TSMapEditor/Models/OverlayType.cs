@@ -1,4 +1,5 @@
-﻿using TSMapEditor.Models.ArtConfig;
+﻿using Microsoft.Xna.Framework;
+using TSMapEditor.Models.ArtConfig;
 using TSMapEditor.Models.Enums;
 
 namespace TSMapEditor.Models
@@ -28,5 +29,90 @@ namespace TSMapEditor.Models
         public bool Tiberium { get; set; }
         public bool IsVeins { get; set; }
         public bool IsVeinholeMonster { get; set; }
+
+        public int GetTiberiumIndex()
+        {
+            switch (Index)
+            {
+                case 27:
+                case 28:
+                case 29:
+                case 30:
+                case 31:
+                case 32:
+                case 33:
+                case 34:
+                case 35:
+                case 36:
+                case 37:
+                case 38:
+                    return (int)TiberiumTypeEnum.Vinifera;
+                case 102:
+                case 103:
+                case 104:
+                case 105:
+                case 106:
+                case 107:
+                case 108:
+                case 109:
+                case 110:
+                case 111:
+                case 112:
+                case 113:
+                case 114:
+                case 115:
+                case 116:
+                case 117:
+                case 118:
+                case 119:
+                case 120:
+                case 121:
+                    return (int)TiberiumTypeEnum.Riparius;
+                case 127:
+                case 128:
+                case 129:
+                case 130:
+                case 131:
+                case 132:
+                case 133:
+                case 134:
+                case 135:
+                case 136:
+                case 137:
+                case 138:
+                case 139:
+                case 140:
+                case 141:
+                case 142:
+                case 143:
+                case 144:
+                case 145:
+                case 146:
+                    return (int)TiberiumTypeEnum.Cruentus;
+                case 147:
+                case 148:
+                case 149:
+                case 150:
+                case 151:
+                case 152:
+                case 153:
+                case 154:
+                case 155:
+                case 156:
+                case 157:
+                case 158:
+                case 159:
+                case 160:
+                case 161:
+                case 162:
+                case 163:
+                case 164:
+                case 165:
+                case 166:
+                    return (int)TiberiumTypeEnum.Aboreus;
+                default:
+                    return -1;
+            }
+        }
     }
 }
