@@ -66,7 +66,11 @@ namespace TSMapEditor.Rendering
                 int xPos = Constants.CellSizeY - (w / 2);
                 for (int x = 0; x < w; x++)
                 {
-                    colorData[i * Constants.CellSizeX + xPos] = XNAColorFromRGBColor(palette.Data[image.ColorData[tmpPixelIndex]]);
+                    if (image.ColorData[tmpPixelIndex] > 0)
+                    {
+                        colorData[i * Constants.CellSizeX + xPos] = XNAColorFromRGBColor(palette.Data[image.ColorData[tmpPixelIndex]]);
+                    }
+                    
                     xPos++;
                     tmpPixelIndex++;
                 }
