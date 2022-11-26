@@ -145,6 +145,13 @@ namespace TSMapEditor.Rendering
                 int cellRightXCoordinate = tmpData.X + Constants.CellSizeX;
                 if (cellRightXCoordinate > maxX)
                     maxX = cellRightXCoordinate;
+
+                if (TMPImages[i].ExtraTexture != null)
+                {
+                    int extraRightXCoordinate = tmpData.X + TMPImages[i].TmpImage.XExtra + TMPImages[i].ExtraTexture.Width;
+                    if (extraRightXCoordinate > maxX)
+                        maxX = extraRightXCoordinate;
+                }
             }
 
             outMinX = minX;
@@ -169,9 +176,20 @@ namespace TSMapEditor.Rendering
                 if (tmpData == null)
                     continue;
 
-                int cellBottomCoordinate = tmpData.Y + Constants.CellSizeY;
+                int heightOffset = (Constants.CellSizeY / 2) * tmpData.Height;
+                int cellBottomCoordinate = tmpData.Y + Constants.CellSizeY + heightOffset;
                 if (cellBottomCoordinate > height)
                     height = cellBottomCoordinate;
+
+                if (TMPImages[i].ExtraTexture != null)
+                {
+                    int extraCellBottomCoordinate = heightOffset + TMPImages[i].ExtraTexture.Height;
+                    if (extraCellBottomCoordinate > height)
+                        height = extraCellBottomCoordinate;
+
+                    if (TMPImages[i].TmpImage.YExtra < 0)
+                        height -= TMPImages[i].TmpImage.YExtra;
+                }
             }
 
             return height;
@@ -337,9 +355,41 @@ namespace TSMapEditor.Rendering
             var task6 = Task.Factory.StartNew(() => ReadOverlayTextures(rules.OverlayTypes));
             var task7 = Task.Factory.StartNew(() => ReadSmudgeTextures(rules.SmudgeTypes));
             Task.WaitAll(task1, task2, task3, task4, task5, task6, task7);
+
+            LoadBuildingZData();
         }
 
         private readonly GraphicsDevice graphicsDevice;
+
+
+        private void LoadBuildingZData()
+        {
+            return;
+
+            var buildingZData = fileManager.LoadFile("BUILDNGZ.SHP");
+
+            byte[] rgbBuffer = new byte[256 * 3];
+            for (int i = 0; i < 256; i++)
+            {
+                rgbBuffer[i * 3] = (byte)(i / 4);
+                rgbBuffer[(i * 3) + 1] = (byte)(i / 4);
+                rgbBuffer[(i * 3) + 2] = (byte)(i / 4);
+            }
+
+            // for (int i = 16; i < 108; i++)
+            // {
+            //     byte color = (byte)((i - 16) * (256 / 92.0));
+            //     rgbBuffer[i * 3] = (byte)(color / 4);
+            //     rgbBuffer[(i * 3) + 1] = (byte)(color / 4);
+            //     rgbBuffer[(i * 3) + 2] = (byte)(color / 4);
+            // }
+
+            var palette = new Palette(rgbBuffer);
+
+            var shpFile = new ShpFile();
+            shpFile.ParseFromBuffer(buildingZData);
+            BuildingZ = new ObjectImage(graphicsDevice, shpFile, buildingZData, palette);
+        }
 
         private void ReadTileTextures()
         {
@@ -714,6 +764,8 @@ namespace TSMapEditor.Rendering
         public ObjectImage[] OverlayTextures { get; set; }
         public ObjectImage[] SmudgeTextures { get; set; }
 
+
+        public ObjectImage BuildingZ { get; set; }
 
         /// <summary>
         /// Frees up all memory used by the theater graphics textures

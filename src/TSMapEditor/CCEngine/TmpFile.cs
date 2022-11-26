@@ -121,31 +121,28 @@ namespace TSMapEditor.CCEngine
             stream.Read(buffer, 0, 4);
             // The image flags of WW tiles contain
             // trash / uninitialized memory which we have to clear
-            ImageFlags = (TmpImageFlags)(BitConverter.ToUInt32(buffer, 0) ^ 0b00011111);
+            ImageFlags = (TmpImageFlags)(BitConverter.ToUInt32(buffer, 0));
             stream.Read(buffer, 0, 3);
             Height = buffer[0];
             TerrainType = buffer[1];
             RampType = buffer[2];
-            stream.Read(buffer, 0, 3);
-            RadarLeftColor = new RGBColor(buffer, 0, 0);
-            stream.Read(buffer, 0, 3);
-            RadarRightColor = new RGBColor(buffer, 0, 0);
-            stream.Read(buffer, 0, Unknown.Length);
-            Array.ConstrainedCopy(buffer, 0, Unknown, 0, Unknown.Length);
+            RadarLeftColor = ReadRGBColorFromStream(stream);
+            RadarRightColor = ReadRGBColorFromStream(stream);
+            stream.Read(buffer, 0, 3); // Discard 3 more bytes of WW trash data / uninitialized memory
             stream.Read(ColorData, 0, Constants.TileColorBufferSize);
 
-            if ((ImageFlags & TmpImageFlags.HAS_Z_DATA) == TmpImageFlags.HAS_Z_DATA)
+            if ((ImageFlags & TmpImageFlags.HasZData) == TmpImageFlags.HasZData)
             {
                 ZData = new byte[Constants.TileColorBufferSize];
                 stream.Read(ZData, 0, ZData.Length);
             }
-
-            if ((ImageFlags & TmpImageFlags.HAS_EXTRA_DATA) == TmpImageFlags.HAS_EXTRA_DATA)
+             
+            if ((ImageFlags & TmpImageFlags.HasExtraData) == TmpImageFlags.HasExtraData)
             {
                 ExtraGraphicsColorData = new byte[ExtraWidth * ExtraHeight];
                 stream.Read(ExtraGraphicsColorData, 0, ExtraGraphicsColorData.Length);
-
-                if ((ImageFlags & TmpImageFlags.HAS_Z_DATA) == TmpImageFlags.HAS_Z_DATA)
+            
+                if ((ImageFlags & TmpImageFlags.HasZData) == TmpImageFlags.HasZData && ExtraZDataOffset > 0)
                 {
                     ExtraGraphicsZData = new byte[ExtraWidth * ExtraHeight];
                     stream.Read(ExtraGraphicsZData, 0, ExtraGraphicsZData.Length);
@@ -165,6 +162,12 @@ namespace TSMapEditor.CCEngine
             return BitConverter.ToUInt32(buffer, 0);
         }
 
+        private RGBColor ReadRGBColorFromStream(Stream stream)
+        {
+            stream.Read(buffer, 0, 3);
+            return new RGBColor(buffer, 0, 0);
+        }
+
         byte[] buffer = new byte[4];
 
         public int X { get; private set; }
@@ -182,7 +185,6 @@ namespace TSMapEditor.CCEngine
         public byte RampType { get; private set; }
         public RGBColor RadarLeftColor { get; set; }
         public RGBColor RadarRightColor { get; set; }
-        public byte[] Unknown = new byte[3];
 
         public byte[] ColorData = new byte[Constants.TileColorBufferSize];
         public byte[] ZData = new byte[0];
@@ -191,11 +193,11 @@ namespace TSMapEditor.CCEngine
     }
 
     [Flags]
-    public enum TmpImageFlags
+    public enum TmpImageFlags : uint
     {
-        NONE = 0,
-        IS_RANDOMIZED = 2,
-        HAS_Z_DATA = 4,
-        HAS_EXTRA_DATA = 8
+        None = 0,
+        HasExtraData = 0x01,
+        HasZData = 0x02,
+        HasDamagedData = 0x04
     }
 }

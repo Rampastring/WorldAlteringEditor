@@ -645,6 +645,8 @@ namespace TSMapEditor.Rendering
             if (EditorState.IsMarbleMadness)
                 tileImage = TheaterGraphics.GetMarbleMadnessTileGraphics(tileImage.TileID);
 
+            drawPoint -= new Point2D(0, (Constants.CellSizeY / 2) * tile.Level);
+
             if (subTileIndex >= tileImage.TMPImages.Length)
             {
                 DrawString(subTileIndex.ToString(), 0, new Vector2(drawPoint.X, drawPoint.Y), Color.Red);
@@ -662,8 +664,8 @@ namespace TSMapEditor.Rendering
             if (tmpImage.ExtraTexture != null)
             {
                 DrawTexture(tmpImage.ExtraTexture,
-                    new Rectangle(drawPoint.X + tmpImage.TmpImage.XExtra,
-                    drawPoint.Y + tmpImage.TmpImage.YExtra,
+                    new Rectangle(drawPoint.X + tmpImage.TmpImage.XExtra - tmpImage.TmpImage.X,
+                    drawPoint.Y + tmpImage.TmpImage.YExtra - tmpImage.TmpImage.Y,
                     tmpImage.ExtraTexture.Width,
                     tmpImage.ExtraTexture.Height),
                     Color.White);

@@ -3,6 +3,7 @@ using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI.CursorActions;
@@ -210,7 +211,7 @@ namespace TSMapEditor.UI
         {
             foreach (var tile in line)
             {
-                tile.Location = new Point(tile.Location.X, tile.Location.Y + (lineHeight - tile.Size.Y) / 2);
+                tile.Location = new Point(tile.Location.X, tile.Location.Y + (lineHeight - tile.TileImage.GetHeight()) / 2);
             }
         }
 
@@ -252,14 +253,25 @@ namespace TSMapEditor.UI
                 var rectangle = new Rectangle(tile.Location.X, tile.Location.Y + viewY, tile.Size.X, tile.Size.Y);
                 FillRectangle(rectangle, Color.Black);
 
+                int totalHeightOffset = tile.TileImage.TMPImages.Max(tmp => { return tmp.TmpImage == null ? 0 : tmp.TmpImage.Height; }) * (Constants.CellSizeY / 2);
+
                 foreach (MGTMPImage image in tile.TileImage.TMPImages)
                 {
                     if (image == null || image.TmpImage == null)
                         continue;
 
+                    int subTileHeightOffset = image.TmpImage.Height * (Constants.CellSizeY / 2);
+
                     DrawTexture(image.Texture, new Rectangle(tile.Location.X + image.TmpImage.X + tile.Offset.X,
-                        viewY + tile.Location.Y + image.TmpImage.Y + tile.Offset.Y,
+                        viewY + tile.Location.Y + image.TmpImage.Y + tile.Offset.Y + totalHeightOffset - subTileHeightOffset,
                         Constants.CellSizeX, Constants.CellSizeY), Color.White);
+
+                    if (image.ExtraTexture != null)
+                    {
+                        DrawTexture(image.ExtraTexture, new Rectangle(tile.Location.X + image.TmpImage.XExtra + tile.Offset.X,
+                            viewY + tile.Location.Y + image.TmpImage.YExtra + tile.Offset.Y + totalHeightOffset - subTileHeightOffset,
+                            image.ExtraTexture.Width, image.ExtraTexture.Height), Color.White);
+                    }
                 }
 
                 if (tile.TileImage == SelectedTile)
