@@ -693,6 +693,10 @@ namespace TSMapEditor.Rendering
 
             Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(waypoint.Position, Map.Size.X);
 
+            var cell = Map.GetTile(waypoint.Position);
+            if (cell != null)
+                drawPoint -= new Point2D(0, cell.Level * Constants.CellHeight);
+
             var rect = new Rectangle(drawPoint.X + waypointBorderOffsetX,
                 drawPoint.Y + waypointBorderOffsetY,
                 Constants.CellSizeX - (waypointBorderOffsetX * 2),
@@ -1084,6 +1088,13 @@ namespace TSMapEditor.Rendering
             DrawLine(cellRightPoint + down, cellTopPoint + down, shadowColor, 1);
             DrawLine(cellBottomPoint + down, cellLeftPoint + down, shadowColor, 1);
             DrawLine(cellRightPoint + down, cellBottomPoint + down, shadowColor, 1);
+
+            int zoomedHeight = (int)(height * Camera.ZoomLevel);
+
+            Color heightBarColor = Color.Black * 0.25f;
+            FillRectangle(new Rectangle((int)cellLeftPoint.X, (int)cellLeftPoint.Y, 1, zoomedHeight), heightBarColor);
+            FillRectangle(new Rectangle((int)cellBottomPoint.X, (int)cellBottomPoint.Y, 1, zoomedHeight), heightBarColor);
+            FillRectangle(new Rectangle((int)cellRightPoint.X, (int)cellRightPoint.Y, 1, zoomedHeight), heightBarColor);
         }
 
         private void DrawImpassableHighlight(MapTile cell)
