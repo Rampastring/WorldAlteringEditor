@@ -116,6 +116,9 @@ namespace TSMapEditor.CCEngine
 
         public byte[] LoadFile(string name)
         {
+            if (File.Exists(Path.Combine(Environment.CurrentDirectory, name)))
+                return File.ReadAllBytes(Path.Combine(Environment.CurrentDirectory, name));
+
             uint id = MixFile.GetFileID(name);
 
             if (fileLocationInfos.TryGetValue(id, out FileLocationInfo value))
