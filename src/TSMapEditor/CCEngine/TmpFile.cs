@@ -134,10 +134,22 @@ namespace TSMapEditor.CCEngine
             Array.ConstrainedCopy(buffer, 0, Unknown, 0, Unknown.Length);
             stream.Read(ColorData, 0, Constants.TileColorBufferSize);
 
+            if ((ImageFlags & TmpImageFlags.HAS_Z_DATA) == TmpImageFlags.HAS_Z_DATA)
+            {
+                ZData = new byte[Constants.TileColorBufferSize];
+                stream.Read(ZData, 0, ZData.Length);
+            }
+
             if ((ImageFlags & TmpImageFlags.HAS_EXTRA_DATA) == TmpImageFlags.HAS_EXTRA_DATA)
             {
-                ExtraGraphicsData = new byte[ExtraWidth * ExtraHeight];
-                stream.Read(ExtraGraphicsData, 0, ExtraGraphicsData.Length);
+                ExtraGraphicsColorData = new byte[ExtraWidth * ExtraHeight];
+                stream.Read(ExtraGraphicsColorData, 0, ExtraGraphicsColorData.Length);
+
+                if ((ImageFlags & TmpImageFlags.HAS_Z_DATA) == TmpImageFlags.HAS_Z_DATA)
+                {
+                    ExtraGraphicsZData = new byte[ExtraWidth * ExtraHeight];
+                    stream.Read(ExtraGraphicsZData, 0, ExtraGraphicsZData.Length);
+                }
             }
         }
 
@@ -173,7 +185,9 @@ namespace TSMapEditor.CCEngine
         public byte[] Unknown = new byte[3];
 
         public byte[] ColorData = new byte[Constants.TileColorBufferSize];
-        public byte[] ExtraGraphicsData = new byte[0];
+        public byte[] ZData = new byte[0];
+        public byte[] ExtraGraphicsColorData = new byte[0];
+        public byte[] ExtraGraphicsZData = new byte[0];
     }
 
     [Flags]

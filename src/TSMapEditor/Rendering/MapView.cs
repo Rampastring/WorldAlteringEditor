@@ -651,11 +651,22 @@ namespace TSMapEditor.Rendering
                 return;
             }
 
-            Texture2D texture = tileImage.TMPImages[subTileIndex].Texture;
-            if (texture != null)
+            MGTMPImage tmpImage = tileImage.TMPImages[subTileIndex];
+
+            if (tmpImage.Texture != null)
             {
-                DrawTexture(texture, new Rectangle(drawPoint.X, drawPoint.Y,
+                DrawTexture(tmpImage.Texture, new Rectangle(drawPoint.X, drawPoint.Y,
                     Constants.CellSizeX, Constants.CellSizeY), Color.White);
+            }
+
+            if (tmpImage.ExtraTexture != null)
+            {
+                DrawTexture(tmpImage.ExtraTexture,
+                    new Rectangle(drawPoint.X + tmpImage.TmpImage.XExtra,
+                    drawPoint.Y + tmpImage.TmpImage.YExtra,
+                    tmpImage.ExtraTexture.Width,
+                    tmpImage.ExtraTexture.Height),
+                    Color.White);
             }
         }
 

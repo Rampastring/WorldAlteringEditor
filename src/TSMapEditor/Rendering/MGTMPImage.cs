@@ -26,12 +26,18 @@ namespace TSMapEditor.Rendering
                 TmpImage = tmpImage;
                 Palette = palette;
                 Texture = TextureFromTmpImage(gd, tmpImage, palette);
+
+                if (tmpImage.ExtraGraphicsColorData != null && tmpImage.ExtraGraphicsColorData.Length > 0)
+                {
+                    ExtraTexture = TextureFromExtraTmpData(gd, tmpImage, palette);
+                }
             }
 
             TileSetId = tileSetId;
         }
 
         public Texture2D Texture { get; }
+        public Texture2D ExtraTexture { get; }
 
         public int TileSetId { get; }
         public TmpImage TmpImage { get; private set; }
@@ -69,6 +75,35 @@ namespace TSMapEditor.Rendering
                     w += 4;
                 else
                     w -= 4;
+            }
+
+            texture.SetData(colorData);
+            return texture;
+        }
+
+        private Texture2D TextureFromExtraTmpData(GraphicsDevice graphicsDevice, TmpImage image, Palette palette)
+        {
+            int width = (int)image.ExtraWidth;
+            int height = (int)image.ExtraHeight;
+
+            var texture = new Texture2D(graphicsDevice, width, height);
+            Color[] colorData = new Color[width * height];
+            for (int i = 0; i < colorData.Length; i++)
+            {
+                colorData[i] = Color.Transparent;
+            }
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    int index = (y * width) + x;
+
+                    if (image.ExtraGraphicsColorData[index] > 0)
+                    {
+                        colorData[index] = XNAColorFromRGBColor(palette.Data[image.ExtraGraphicsColorData[index]]);
+                    }
+                }
             }
 
             texture.SetData(colorData);
