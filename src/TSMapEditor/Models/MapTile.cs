@@ -58,6 +58,15 @@ namespace TSMapEditor.Models
                 Smudge.Position += new Point2D(x, y);
         }
 
+        public void AddObjectsToList(List<AbstractObject> objects)
+        {
+            if (Structure != null)
+                objects.Add(Structure);
+
+            if (Vehicle != null)
+                objects.Add(Vehicle);
+        }
+
         public void AddInfantry(Infantry infantry)
         {
             Infantry[(int)infantry.SubCell] = infantry;
@@ -169,6 +178,31 @@ namespace TSMapEditor.Models
                     return GetFreeSubCellSpot() != SubCell.None;
                 case RTTIType.Terrain:
                     return TerrainObject == null;
+            }
+
+            return false;
+        }
+
+        public bool ContainsObject(AbstractObject abstractObject)
+        {
+            switch (abstractObject.WhatAmI())
+            {
+                case RTTIType.Aircraft:
+                    return Aircraft == abstractObject;
+                case RTTIType.Terrain:
+                    return TerrainObject == abstractObject;
+                case RTTIType.Building:
+                    return Structure == abstractObject;
+                case RTTIType.Unit:
+                    return Vehicle == abstractObject;
+                case RTTIType.Infantry:
+                    return Array.Exists(Infantry, inf => inf == abstractObject);
+                case RTTIType.Overlay:
+                    return Overlay == abstractObject;
+                case RTTIType.Smudge:
+                    return Smudge == abstractObject;
+                case RTTIType.Waypoint:
+                    return Waypoint == abstractObject;
             }
 
             return false;
