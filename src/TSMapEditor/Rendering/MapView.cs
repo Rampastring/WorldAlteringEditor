@@ -414,6 +414,10 @@ namespace TSMapEditor.Rendering
             Color foundationLineColor = Color.White;
             string iniName = string.Empty;
 
+            var mapCell = Map.GetTile(gameObject.Position);
+            if (mapCell != null)
+                drawPoint -= new Point2D(0, mapCell.Level * Constants.CellHeight);
+
             // TODO refactor this to be more object-oriented
 
             switch (gameObject.WhatAmI())
