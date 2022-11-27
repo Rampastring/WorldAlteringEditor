@@ -718,7 +718,7 @@ namespace TSMapEditor.UI.Windows
                     continue;
                 }
 
-                if (triggerActionType.Parameters[i].TriggerParamType == TriggerParamType.Unknown)
+                if (triggerActionType.Parameters[i].TriggerParamType == TriggerParamType.Unused)
                 {
                     action.Parameters[i] = "0";
                     continue;
