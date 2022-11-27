@@ -1011,7 +1011,13 @@ namespace TSMapEditor.Rendering
 
                 Point2D startDrawPoint = CellMath.CellTopLeftPointFromCellCoords(draggedOrRotatedObject.Position, Map.Size.X) + cameraAndCellCenterOffset;
 
+                var startCell = Map.GetTile(draggedOrRotatedObject.Position);
+                if (startCell != null)
+                    startDrawPoint -= new Point2D(0, Map.GetTile(draggedOrRotatedObject.Position).Level * Constants.CellHeight);
+
                 Point2D endDrawPoint = CellMath.CellTopLeftPointFromCellCoords(tileUnderCursor.CoordsToPoint(), Map.Size.X) + cameraAndCellCenterOffset;
+
+                endDrawPoint -= new Point2D(0, tileUnderCursor.Level * Constants.CellHeight);
 
                 startDrawPoint = startDrawPoint.ScaleBy(Camera.ZoomLevel);
                 endDrawPoint = endDrawPoint.ScaleBy(Camera.ZoomLevel);
@@ -1027,7 +1033,13 @@ namespace TSMapEditor.Rendering
 
                 Point2D startDrawPoint = CellMath.CellTopLeftPointFromCellCoords(draggedOrRotatedObject.Position, Map.Size.X) + cameraAndCellCenterOffset;
 
+                var startCell = Map.GetTile(draggedOrRotatedObject.Position);
+                if (startCell != null)
+                    startDrawPoint -= new Point2D(0, Map.GetTile(draggedOrRotatedObject.Position).Level * Constants.CellHeight);
+
                 Point2D endDrawPoint = CellMath.CellTopLeftPointFromCellCoords(tileUnderCursor.CoordsToPoint(), Map.Size.X) + cameraAndCellCenterOffset;
+
+                endDrawPoint -= new Point2D(0, tileUnderCursor.Level * Constants.CellHeight);
 
                 startDrawPoint = startDrawPoint.ScaleBy(Camera.ZoomLevel);
                 endDrawPoint = endDrawPoint.ScaleBy(Camera.ZoomLevel);
