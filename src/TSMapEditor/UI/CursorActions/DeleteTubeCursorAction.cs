@@ -17,7 +17,7 @@ namespace TSMapEditor.UI.CursorActions
             var tube = CursorActionTarget.Map.Tubes.Find(tb => tb.EntryPoint == cellCoords || tb.ExitPoint == cellCoords);
             Color color = tube == null ? Color.Gray : Color.Red;
 
-            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cellCoords, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
+            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cellCoords, CursorActionTarget.Map) - cameraTopLeftPoint;
 
             const string text = "Delete Tunnel";
             var textDimensions = Renderer.GetTextDimensions(text, Constants.UIBoldFont);

@@ -55,7 +55,7 @@ namespace TSMapEditor.UI.CursorActions
                 return;
             }
 
-            Point2D sourceCenterPoint = CellMath.CellCenterPointFromCellCoords(source.Value, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
+            Point2D sourceCenterPoint = CellMath.CellCenterPointFromCellCoords(source.Value, CursorActionTarget.Map) - cameraTopLeftPoint;
             Renderer.FillRectangle(GetDrawRectangleForMarker(sourceCenterPoint), sourceColor);
 
             if (destination == null)
@@ -64,12 +64,12 @@ namespace TSMapEditor.UI.CursorActions
                 return;
             }
 
-            Point2D destinationCenterPoint = CellMath.CellCenterPointFromCellCoords(destination.Value, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
+            Point2D destinationCenterPoint = CellMath.CellCenterPointFromCellCoords(destination.Value, CursorActionTarget.Map) - cameraTopLeftPoint;
             Renderer.FillRectangle(GetDrawRectangleForMarker(destinationCenterPoint), Color.Red);
 
             foreach (Point2D pathCell in pathCellCoords)
             {
-                Point2D pathCellCenterPoint = CellMath.CellCenterPointFromCellCoords(pathCell, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
+                Point2D pathCellCenterPoint = CellMath.CellCenterPointFromCellCoords(pathCell, CursorActionTarget.Map) - cameraTopLeftPoint;
                 pathCellCenterPoint = pathCellCenterPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
 
                 Renderer.FillRectangle(GetDrawRectangleForMarker(pathCellCenterPoint), Color.Yellow);
@@ -81,7 +81,7 @@ namespace TSMapEditor.UI.CursorActions
 
         private void DrawText(Point2D cellCoords, Point2D cameraTopLeftPoint, string text, Color textColor)
         {
-            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cellCoords, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
+            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cellCoords, CursorActionTarget.Map) - cameraTopLeftPoint;
             cellTopLeftPoint = cellTopLeftPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
 
             var textDimensions = Renderer.GetTextDimensions(text, Constants.UIBoldFont);

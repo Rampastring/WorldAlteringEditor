@@ -30,7 +30,7 @@ namespace TSMapEditor.UI.CursorActions
 
         private void DrawText(Point2D cellCoords, Point2D cameraTopLeftPoint, string text, Color textColor)
         {
-            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cellCoords, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
+            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cellCoords, CursorActionTarget.Map) - cameraTopLeftPoint;
             cellTopLeftPoint = cellTopLeftPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
 
             var textDimensions = Renderer.GetTextDimensions(text, Constants.UIBoldFont);

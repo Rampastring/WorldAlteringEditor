@@ -35,7 +35,7 @@ namespace TSMapEditor.UI.CursorActions
 
         public override void DrawPreview(Point2D cellCoords, Point2D cameraTopLeftPoint)
         {
-            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cellCoords, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
+            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cellCoords, CursorActionTarget.Map) - cameraTopLeftPoint;
 
             cellTopLeftPoint = cellTopLeftPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
 
@@ -82,19 +82,19 @@ namespace TSMapEditor.UI.CursorActions
                     cellEndPoint = new Point2D(actualEndPoint.X, actualStartPoint.Y);
 
                     corner1 = actualStartPoint + new Point2D(0, 1);
-                    corner1 = CellMath.CellCenterPointFromCellCoords(corner1, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
+                    corner1 = CellMath.CellCenterPointFromCellCoords(corner1, CursorActionTarget.Map) - cameraTopLeftPoint;
                     corner1 += new Point2D(Constants.CellSizeX / -2, 0);
 
                     corner2 = actualStartPoint + new Point2D(0, -1);
-                    corner2 = CellMath.CellCenterPointFromCellCoords(corner2, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
+                    corner2 = CellMath.CellCenterPointFromCellCoords(corner2, CursorActionTarget.Map) - cameraTopLeftPoint;
                     corner2 += new Point2D(0, Constants.CellSizeY / -2);
 
                     corner3 = cellEndPoint + new Point2D(0, 1);
-                    corner3 = CellMath.CellCenterPointFromCellCoords(corner3, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
+                    corner3 = CellMath.CellCenterPointFromCellCoords(corner3, CursorActionTarget.Map) - cameraTopLeftPoint;
                     corner3 += new Point2D(0, Constants.CellSizeY / 2);
 
                     corner4 = cellEndPoint + new Point2D(0, -1);
-                    corner4 = CellMath.CellCenterPointFromCellCoords(corner4, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
+                    corner4 = CellMath.CellCenterPointFromCellCoords(corner4, CursorActionTarget.Map) - cameraTopLeftPoint;
                     corner4 += new Point2D(Constants.CellSizeX / 2, 0);
                 }
                 else
@@ -111,19 +111,19 @@ namespace TSMapEditor.UI.CursorActions
                     cellEndPoint = new Point2D(actualStartPoint.X, actualEndPoint.Y);
 
                     corner1 = actualStartPoint + new Point2D(1, 0);
-                    corner1 = CellMath.CellCenterPointFromCellCoords(corner1, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
+                    corner1 = CellMath.CellCenterPointFromCellCoords(corner1, CursorActionTarget.Map) - cameraTopLeftPoint;
                     corner1 += new Point2D(Constants.CellSizeX / 2, 0);
                     
                     corner2 = actualStartPoint + new Point2D(-1, 0);
-                    corner2 = CellMath.CellCenterPointFromCellCoords(corner2, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
+                    corner2 = CellMath.CellCenterPointFromCellCoords(corner2, CursorActionTarget.Map) - cameraTopLeftPoint;
                     corner2 += new Point2D(0, Constants.CellSizeY / -2);
                     
                     corner3 = cellEndPoint + new Point2D(1, 0);
-                    corner3 = CellMath.CellCenterPointFromCellCoords(corner3, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
+                    corner3 = CellMath.CellCenterPointFromCellCoords(corner3, CursorActionTarget.Map) - cameraTopLeftPoint;
                     corner3 += new Point2D(0, Constants.CellSizeY / 2);
                     
                     corner4 = cellEndPoint + new Point2D(-1, 0);
-                    corner4 = CellMath.CellCenterPointFromCellCoords(corner4, CursorActionTarget.Map.Size.X) - cameraTopLeftPoint;
+                    corner4 = CellMath.CellCenterPointFromCellCoords(corner4, CursorActionTarget.Map) - cameraTopLeftPoint;
                     corner4 += new Point2D(Constants.CellSizeX / -2, 0);
                 }
 

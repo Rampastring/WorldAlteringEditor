@@ -1,23 +1,25 @@
-﻿namespace TSMapEditor.GameMath
+﻿using TSMapEditor.Models;
+
+namespace TSMapEditor.GameMath
 {
     /// <summary>
     /// Provides static methods for calculating math related to cells.
     /// </summary>
     public static class CellMath
     {
-        public static Point2D CellTopLeftPointFromCellCoords(Point2D cellCoords, int mapWidth)
+        public static Point2D CellTopLeftPointFromCellCoords(Point2D cellCoords, Map map)
         {
             int cx = (cellCoords.X - 1) * (Constants.CellSizeX / 2);
             int cy = (cellCoords.X - 1) * (Constants.CellSizeY / 2);
 
-            int diff = mapWidth - cellCoords.Y;
+            int diff = map.Size.X - cellCoords.Y;
             cx += diff * (Constants.CellSizeX / 2);
             cy -= diff * (Constants.CellSizeY / 2);
             return new Point2D(cx, cy);
         }
 
-        public static Point2D CellCenterPointFromCellCoords(Point2D cellCoords, int mapWidth)
-            => CellTopLeftPointFromCellCoords(cellCoords, mapWidth) + new Point2D(Constants.CellSizeX / 2, Constants.CellSizeY / 2);
+        public static Point2D CellCenterPointFromCellCoords(Point2D cellCoords, Map map)
+            => CellTopLeftPointFromCellCoords(cellCoords, map) + new Point2D(Constants.CellSizeX / 2, Constants.CellSizeY / 2);
 
         public static Point2D CellCoordsFromPixelCoords(Point2D pixelCoords, Point2D mapSize)
         {

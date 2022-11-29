@@ -406,7 +406,7 @@ namespace TSMapEditor.Rendering
 
         private void DrawObject(GameObject gameObject)
         {
-            Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(gameObject.Position, Map.Size.X);
+            Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(gameObject.Position, Map);
 
             ObjectImage graphics = null;
             Color replacementColor = Color.Red;
@@ -502,10 +502,10 @@ namespace TSMapEditor.Rendering
                 int foundationY = structure.ObjectType.ArtConfig.FoundationY;
                 if (foundationX > 0 && foundationY > 0)
                 {
-                    Point2D p1 = CellMath.CellTopLeftPointFromCellCoords(gameObject.Position, Map.Size.X) + new Point2D(Constants.CellSizeX / 2, 0);
-                    Point2D p2 = CellMath.CellTopLeftPointFromCellCoords(new Point2D(gameObject.Position.X + foundationX, gameObject.Position.Y), Map.Size.X) + new Point2D(Constants.CellSizeX / 2, 0);
-                    Point2D p3 = CellMath.CellTopLeftPointFromCellCoords(new Point2D(gameObject.Position.X, gameObject.Position.Y + foundationY), Map.Size.X) + new Point2D(Constants.CellSizeX / 2, 0);
-                    Point2D p4 = CellMath.CellTopLeftPointFromCellCoords(new Point2D(gameObject.Position.X + foundationX, gameObject.Position.Y + foundationY), Map.Size.X) + new Point2D(Constants.CellSizeX / 2, 0);
+                    Point2D p1 = CellMath.CellTopLeftPointFromCellCoords(gameObject.Position, Map) + new Point2D(Constants.CellSizeX / 2, 0);
+                    Point2D p2 = CellMath.CellTopLeftPointFromCellCoords(new Point2D(gameObject.Position.X + foundationX, gameObject.Position.Y), Map) + new Point2D(Constants.CellSizeX / 2, 0);
+                    Point2D p3 = CellMath.CellTopLeftPointFromCellCoords(new Point2D(gameObject.Position.X, gameObject.Position.Y + foundationY), Map) + new Point2D(Constants.CellSizeX / 2, 0);
+                    Point2D p4 = CellMath.CellTopLeftPointFromCellCoords(new Point2D(gameObject.Position.X + foundationX, gameObject.Position.Y + foundationY), Map) + new Point2D(Constants.CellSizeX / 2, 0);
 
                     p1 -= new Point2D(0, heightOffset);
                     p2 -= new Point2D(0, heightOffset);
@@ -593,7 +593,7 @@ namespace TSMapEditor.Rendering
 
         private void DrawBaseNode(GraphicalBaseNode graphicalBaseNode)
         {
-            Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(graphicalBaseNode.BaseNode.Location, Map.Size.X);
+            Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(graphicalBaseNode.BaseNode.Location, Map);
 
             ObjectImage graphics = TheaterGraphics.BuildingTextures[graphicalBaseNode.BuildingType.Index];
             Color replacementColor = Color.Yellow;
@@ -633,7 +633,7 @@ namespace TSMapEditor.Rendering
 
         public void DrawTerrainTile(MapTile tile)
         {
-            Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(new Point2D(tile.X, tile.Y), Map.Size.X);
+            Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(new Point2D(tile.X, tile.Y), Map);
             
             if (tile.TileIndex >= TheaterGraphics.TileCount)
                 return;
@@ -691,7 +691,7 @@ namespace TSMapEditor.Rendering
             const int waypointBorderOffsetY = 4;
             const int textOffset = 3;
 
-            Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(waypoint.Position, Map.Size.X);
+            Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(waypoint.Position, Map);
 
             var cell = Map.GetTile(waypoint.Position);
             if (cell != null)
@@ -717,7 +717,7 @@ namespace TSMapEditor.Rendering
             const int cellTagBorderOffsetX = 12;
             const int cellTagBorderOffsetY = 4;
 
-            Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(cellTag.Position, Map.Size.X);
+            Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(cellTag.Position, Map);
 
             var rect = new Rectangle(drawPoint.X + cellTagBorderOffsetX,
                 drawPoint.Y + cellTagBorderOffsetY,
@@ -929,7 +929,8 @@ namespace TSMapEditor.Rendering
                 var otherCell = Map.GetTile(otherCellCoords);
                 if (otherCell != null)
                 {
-                    int startingY = CellMath.CellTopLeftPointFromCellCoords(otherCellCoords, Map.Size.X).Y - (otherCell.Level * Constants.CellHeight);
+                    int startingY = CellMath.CellTopLeftPointFromCellCoords(otherCellCoords, Map).Y - (otherCell.Level * Constants.CellHeight);
+                    int endY = startingY + Constants.CellSizeY;
                     if (startingY <= cursorMapPoint.Y)
                         tile = otherCell;
                 }
@@ -1009,13 +1010,13 @@ namespace TSMapEditor.Rendering
                 Point2D cameraAndCellCenterOffset = new Point2D(-Camera.TopLeftPoint.X + Constants.CellSizeX / 2,
                                                  -Camera.TopLeftPoint.Y + Constants.CellSizeY / 2);
 
-                Point2D startDrawPoint = CellMath.CellTopLeftPointFromCellCoords(draggedOrRotatedObject.Position, Map.Size.X) + cameraAndCellCenterOffset;
+                Point2D startDrawPoint = CellMath.CellTopLeftPointFromCellCoords(draggedOrRotatedObject.Position, Map) + cameraAndCellCenterOffset;
 
                 var startCell = Map.GetTile(draggedOrRotatedObject.Position);
                 if (startCell != null)
                     startDrawPoint -= new Point2D(0, Map.GetTile(draggedOrRotatedObject.Position).Level * Constants.CellHeight);
 
-                Point2D endDrawPoint = CellMath.CellTopLeftPointFromCellCoords(tileUnderCursor.CoordsToPoint(), Map.Size.X) + cameraAndCellCenterOffset;
+                Point2D endDrawPoint = CellMath.CellTopLeftPointFromCellCoords(tileUnderCursor.CoordsToPoint(), Map) + cameraAndCellCenterOffset;
 
                 endDrawPoint -= new Point2D(0, tileUnderCursor.Level * Constants.CellHeight);
 
@@ -1031,13 +1032,13 @@ namespace TSMapEditor.Rendering
                 Point2D cameraAndCellCenterOffset = new Point2D(-Camera.TopLeftPoint.X + Constants.CellSizeX / 2,
                                                  -Camera.TopLeftPoint.Y + Constants.CellSizeY / 2);
 
-                Point2D startDrawPoint = CellMath.CellTopLeftPointFromCellCoords(draggedOrRotatedObject.Position, Map.Size.X) + cameraAndCellCenterOffset;
+                Point2D startDrawPoint = CellMath.CellTopLeftPointFromCellCoords(draggedOrRotatedObject.Position, Map) + cameraAndCellCenterOffset;
 
                 var startCell = Map.GetTile(draggedOrRotatedObject.Position);
                 if (startCell != null)
                     startDrawPoint -= new Point2D(0, Map.GetTile(draggedOrRotatedObject.Position).Level * Constants.CellHeight);
 
-                Point2D endDrawPoint = CellMath.CellTopLeftPointFromCellCoords(tileUnderCursor.CoordsToPoint(), Map.Size.X) + cameraAndCellCenterOffset;
+                Point2D endDrawPoint = CellMath.CellTopLeftPointFromCellCoords(tileUnderCursor.CoordsToPoint(), Map) + cameraAndCellCenterOffset;
 
                 endDrawPoint -= new Point2D(0, tileUnderCursor.Level * Constants.CellHeight);
 
@@ -1077,7 +1078,7 @@ namespace TSMapEditor.Rendering
         private void DrawTileCursor()
         {
             Color lineColor = new Color(96, 168, 96, 128);
-            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(new Point2D(tileUnderCursor.X, tileUnderCursor.Y), Map.Size.X) - Camera.TopLeftPoint;
+            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(new Point2D(tileUnderCursor.X, tileUnderCursor.Y), Map) - Camera.TopLeftPoint;
 
             int height = tileUnderCursor.Level * Constants.CellHeight;
 
@@ -1117,7 +1118,7 @@ namespace TSMapEditor.Rendering
                 return;
             }
 
-            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cell.CoordsToPoint(), Map.Size.X);
+            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cell.CoordsToPoint(), Map);
 
             DrawTexture(impassableCellHighlightTexture, cellTopLeftPoint.ToXNAPoint(), Color.White);
         }
@@ -1127,7 +1128,7 @@ namespace TSMapEditor.Rendering
             if (cell.IceGrowth <= 0)
                 return;
 
-            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cell.CoordsToPoint(), Map.Size.X);
+            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cell.CoordsToPoint(), Map);
 
             DrawTexture(iceGrowthHighlightTexture, cellTopLeftPoint.ToXNAPoint(), Color.White);
         }
@@ -1146,8 +1147,8 @@ namespace TSMapEditor.Rendering
         {
             foreach (var tube in Map.Tubes)
             {
-                var entryCellCenterPoint = CellMath.CellCenterPointFromCellCoords(tube.EntryPoint, Map.Size.X);
-                var exitCellCenterPoint = CellMath.CellCenterPointFromCellCoords(tube.ExitPoint, Map.Size.X);
+                var entryCellCenterPoint = CellMath.CellCenterPointFromCellCoords(tube.EntryPoint, Map);
+                var exitCellCenterPoint = CellMath.CellCenterPointFromCellCoords(tube.ExitPoint, Map);
                 var entryCell = Map.GetTile(tube.EntryPoint);
                 int height = 0;
                 if (entryCell != null)
@@ -1163,8 +1164,8 @@ namespace TSMapEditor.Rendering
 
                     if (nextPoint != currentPoint)
                     {
-                        var currentPixelPoint = CellMath.CellCenterPointFromCellCoords(currentPoint, Map.Size.X);
-                        var nextPixelPoint = CellMath.CellCenterPointFromCellCoords(nextPoint, Map.Size.X);
+                        var currentPixelPoint = CellMath.CellCenterPointFromCellCoords(currentPoint, Map);
+                        var nextPixelPoint = CellMath.CellCenterPointFromCellCoords(nextPoint, Map);
 
                         DrawArrow(currentPixelPoint.ToXNAVector() - new Vector2(0, height),
                             nextPixelPoint.ToXNAVector() - new Vector2(0, height),

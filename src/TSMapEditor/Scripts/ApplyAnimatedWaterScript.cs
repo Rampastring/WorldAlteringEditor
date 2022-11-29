@@ -58,7 +58,7 @@ namespace TSMapEditor.Scripts
                     const int margin = 4;
 
                     // As an animation, animated water slows down the game, so don't place it outside of the visible map area
-                    var pixelCoords = CellMath.CellTopLeftPointFromCellCoords(mapCell.CoordsToPoint(), map.Size.X);
+                    var pixelCoords = CellMath.CellTopLeftPointFromCellCoords(mapCell.CoordsToPoint(), map);
                     if (pixelCoords.Y < Constants.CellSizeY * margin || pixelCoords.Y > map.Size.Y * Constants.CellSizeY - (Constants.CellSizeY * margin))
                         return;
 
