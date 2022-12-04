@@ -44,12 +44,16 @@ namespace TSMapEditor.Models
                 if (callbackAdded)
                     return;
 
-                callbackAdded = true;
-
                 Logger.Log("Tutorial INI has been modified, adding callback to reload it.");
 
-                modifyEventCallback(HandleFSW);
+                AddCallback();
             }
+        }
+
+        private void AddCallback()
+        {
+            callbackAdded = true;
+            modifyEventCallback(HandleFSW);
         }
 
         private void HandleFSW()
@@ -106,7 +110,19 @@ namespace TSMapEditor.Models
 
             Logger.Log("Reading tutorial lines from " + iniPath);
 
-            IniFile tutorialIni = new IniFile(iniPath);
+            IniFile tutorialIni;
+
+            try
+            {
+                tutorialIni = new IniFile(iniPath);
+            }
+            catch (IOException ex)
+            {
+                Logger.Log(nameof(TutorialLines) + ": failed to read refreshed tutorial lines: " + ex.Message + ". Re-adding callback.");
+                AddCallback();
+                return;
+            }
+
             var keys = tutorialIni.GetSectionKeys(TutorialSectionName);
             if (keys == null)
                 return;
