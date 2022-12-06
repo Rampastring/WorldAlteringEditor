@@ -52,6 +52,7 @@ namespace TSMapEditor.UI.Windows
             lbFileList.Height = 300;
             AddChild(lbFileList);
             lbFileList.FileSelected += LbFileList_FileSelected;
+            lbFileList.FileDoubleLeftClick += (s, e) => BtnLoad_LeftClick(this, EventArgs.Empty);
 
             var btnLoad = new EditorButton(WindowManager);
             btnLoad.Name = nameof(btnLoad);
