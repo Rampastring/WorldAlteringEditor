@@ -288,7 +288,9 @@ namespace TSMapEditor.Models
             return StandardHouses.Find(h => h.ININame == houseName);
         }
 
-        private bool IsCoordWithinMap(Point2D coord)
+        public bool IsCoordWithinMap(int x, int y) => IsCoordWithinMap(new Point2D(x, y));
+
+        public bool IsCoordWithinMap(Point2D coord)
         {
             if (coord.X <= 0 || coord.Y <= 0)
                 return false;

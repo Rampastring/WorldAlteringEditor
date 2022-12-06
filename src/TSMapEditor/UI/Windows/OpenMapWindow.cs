@@ -80,7 +80,11 @@ namespace TSMapEditor.UI.Windows
         public void Open()
         {
             Show();
-            lbFileList.DirectoryPath = Path.GetDirectoryName(UserSettings.Instance.LastScenarioPath);
+
+            if (string.IsNullOrWhiteSpace(UserSettings.Instance.LastScenarioPath))
+                lbFileList.DirectoryPath = UserSettings.Instance.GameDirectory;
+            else
+                lbFileList.DirectoryPath = Path.GetDirectoryName(UserSettings.Instance.LastScenarioPath);
         }
 
         private void BtnLoad_LeftClick(object sender, EventArgs e)

@@ -42,6 +42,8 @@ namespace TSMapEditor.Initialization
         void PlaceTerrainTileAt(ITileImage tile, Point2D cellCoords);
         House FindOrMakeHouse(string houseName);
         House FindHouse(string houseName);
+        bool IsCoordWithinMap(int x, int y);
+        bool IsCoordWithinMap(Point2D coord);
         void AddWaypoint(Waypoint waypoint);
         void AddTaskForce(TaskForce taskForce);
         void AddTrigger(Trigger trigger);
