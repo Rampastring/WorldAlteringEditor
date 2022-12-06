@@ -118,7 +118,7 @@ namespace TSMapEditor.Models
             }
             catch (IOException ex)
             {
-                Logger.Log(nameof(TutorialLines) + ": failed to read refreshed tutorial lines: " + ex.Message + ". Re-adding callback.");
+                Logger.Log(nameof(TutorialLines) + ": failed to read tutorial lines: " + ex.Message + ". Re-adding callback.");
                 AddCallback();
                 return;
             }

@@ -5,8 +5,10 @@ using Rampastring.XNAUI;
 using System;
 using System.Globalization;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
+using System.Windows.Forms;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Settings;
 using TSMapEditor.UI;
@@ -19,7 +21,8 @@ namespace TSMapEditor.Rendering
 
         public GameClass()
         {
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            AppDomain.CurrentDomain.UnhandledException += (s, e) => HandleUnhandledException((Exception)e.ExceptionObject);
+            Application.ThreadException += (s, e) => HandleUnhandledException(e.Exception);
             Program.DisableExceptionHandler();
 
             Logger.WriteToConsole = true;
@@ -37,6 +40,7 @@ namespace TSMapEditor.Rendering
             graphics = new GraphicsDeviceManager(this);
             graphics.HardwareModeSwitch = false;
             graphics.GraphicsProfile = GraphicsProfile.HiDef;
+            graphics.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
             Content.RootDirectory = "Content";
             graphics.SynchronizeWithVerticalRetrace = false;
             Window.Title = "DTA Scenario Editor";
@@ -45,10 +49,9 @@ namespace TSMapEditor.Rendering
             TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / UserSettings.Instance.TargetFPS);
         }
 
-        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        private void HandleUnhandledException(Exception ex)
         {
             string exceptLogPath = Environment.CurrentDirectory + DSC + "except.txt";
-            Exception ex = (Exception)e.ExceptionObject;
             File.Delete(exceptLogPath);
 
             StringBuilder sb = new StringBuilder();

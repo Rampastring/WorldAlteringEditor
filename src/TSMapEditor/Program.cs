@@ -16,6 +16,10 @@ namespace TSMapEditor
         {
             Program.args = args;
 
+            Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
+
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);
+            Application.ThreadException += Application_ThreadException;
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
             Environment.CurrentDirectory = Application.StartupPath.Replace('\\', '/');
@@ -24,12 +28,22 @@ namespace TSMapEditor
 
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            var ex = (Exception)e.ExceptionObject;
+            HandleException((Exception)e.ExceptionObject);
+        }
+
+        private static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
+        {
+            HandleException(e.Exception);
+        }
+
+        private static void HandleException(Exception ex)
+        {
             MessageBox.Show("The map editor failed to launch.\r\n\r\nReason: " + ex.Message + "\r\n\r\n Stack trace: " + ex.StackTrace);
         }
 
         public static void DisableExceptionHandler()
         {
+            Application.ThreadException -= Application_ThreadException;
             AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
         }
     }

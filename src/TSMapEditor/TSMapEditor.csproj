@@ -1,46 +1,23 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7F1101DE-6849-404C-9141-0DF6A6BF12E7}</ProjectGuid>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>TSMapEditor</RootNamespace>
     <AssemblyName>DTAScenarioEditor</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>false</Deterministic>
-    <TargetFrameworkProfile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
-  <PropertyGroup />
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
@@ -48,602 +25,244 @@
     <ApplicationIcon>editoricon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.6.0.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=6.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.6.0.0\lib\net461\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="MonoGame.Framework, Version=3.8.0.1641, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MonoGame.Framework.WindowsDX.3.8.0.1641\lib\net452\MonoGame.Framework.dll</HintPath>
-    </Reference>
-    <Reference Include="Rampastring.Tools, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rampastring.Tools.2.0.1\lib\net48\Rampastring.Tools.dll</HintPath>
-    </Reference>
-    <Reference Include="Rampastring.XNAUI.WindowsDX, Version=2.2.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Rampastring.XNAUI.WindowsDX.2.2.1\lib\net48\Rampastring.XNAUI.WindowsDX.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.4.0.1\lib\net45\SharpDX.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.Direct2D1, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.Direct2D1.4.0.1\lib\net45\SharpDX.Direct2D1.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.Direct3D11, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.Direct3D11.4.0.1\lib\net45\SharpDX.Direct3D11.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.Direct3D9, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.Direct3D9.4.0.1\lib\net45\SharpDX.Direct3D9.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.DXGI, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.DXGI.4.0.1\lib\net45\SharpDX.DXGI.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.Mathematics, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.Mathematics.4.0.1\lib\net45\SharpDX.Mathematics.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.MediaFoundation, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.MediaFoundation.4.0.1\lib\net45\SharpDX.MediaFoundation.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.XAudio2, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.XAudio2.4.0.1\lib\net45\SharpDX.XAudio2.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.XInput, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.XInput.4.0.1\lib\net45\SharpDX.XInput.dll</HintPath>
-    </Reference>
-    <Reference Include="SixLabors.ImageSharp, Version=2.0.0.0, Culture=neutral, PublicKeyToken=d998eea7b14cab13, processorArchitecture=MSIL">
-      <HintPath>..\packages\SixLabors.ImageSharp.2.1.3\lib\net472\SixLabors.ImageSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Core" />
-    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.5.0.0\lib\net45\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.InteropServices.RuntimeInformation.4.3.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
-      <Private>True</Private>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Text.Encoding.CodePages, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Text.Encoding.CodePages.5.0.0\lib\net461\System.Text.Encoding.CodePages.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
-    <Reference Include="TextCopy, Version=1.0.0.0, Culture=neutral, PublicKeyToken=1ca091877d12ca03, processorArchitecture=MSIL">
-      <HintPath>..\packages\TextCopy.6.1.0\lib\net461\TextCopy.dll</HintPath>
-    </Reference>
+    <None Update="Config\Actions.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\ArtOverrides.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\BaseMap.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\Constants.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\EditorRules.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\Events.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\MapCode\Add Reveal Map Trigger.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\MapCode\Enable Blue Tiberium Spreader Lighting.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\MapCode\Enable Green Tiberium Spreader Lighting.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\MapCode\Enable Ore Spreader Lighting.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\MapCode\Enable Spreading Ore.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\MapCode\Mixed Gems Only Use Blue-Green Colors.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\MapCode\Replace Tiberium With Ore.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\MapCode\Replace Tiberium With Snowy Ore.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\MapCode\Snowy Mixed Gems.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\MapCode\Snowy Ore.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\MapCode\Snowy Smudges.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\TerrainGeneratorPresets.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\TerrainTypeImpassability.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\AboutWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\ApplyINICodeWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\AutoApplyImpassableOverlayWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\BasicSectionConfigWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\CopiedEntryTypesWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\CreateNewMapWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\GenerateStandardHousesWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\HotkeyConfigurationWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\HousesWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\InfantryOptionsWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\LightingSettingsWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\LocalVariablesWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\MapSizeWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\PlaceWaypointWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\SelectActionWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\SelectBuildingTypeWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\SelectEventWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\SelectGlobalVariableWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\SelectLocalVariableWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\SelectScriptActionWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\SelectHouseWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\ExpandMapWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\BrushSizes.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\FileManagerConfig.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\OverlayCollections.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\ScriptActions.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\Theaters.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\ScriptsWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\SelectScriptWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\SelectTagWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\SelectThemeWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\SelectTaskForceWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\SelectTeamTypeWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\SelectTileSetWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\SelectTriggerWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\SelectTutorialLineWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\StructureOptionsWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\TaskforcesWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\TeamTypesWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\TriggersWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\VehicleOptionsWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\checkBoxChecked.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\checkBoxCheckedD.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\checkBoxClear.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\checkBoxClearD.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\comboBoxArrow.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\cursor.cur">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\icehighlight.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\impassablehighlight.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\openedComboBoxArrow.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\sbBackground.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\sbDownArrow.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\sbMiddle.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\sbThumbBottom.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\sbThumbTop.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\sbUpArrow.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\SpriteFont0.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\SpriteFont1.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="MapEditorSettings.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CCEngine\AutoLATType.cs" />
-    <Compile Include="CCEngine\CCFileManager.cs" />
-    <Compile Include="CCEngine\MixCRC.cs" />
-    <Compile Include="CCEngine\MixFile.cs" />
-    <Compile Include="CCEngine\Palette.cs" />
-    <Compile Include="CCEngine\RGBColor.cs" />
-    <Compile Include="CCEngine\ScriptAction.cs" />
-    <Compile Include="CCEngine\ShpFile.cs" />
-    <Compile Include="CCEngine\Theater.cs" />
-    <Compile Include="CCEngine\TileSet.cs" />
-    <Compile Include="CCEngine\TmpFile.cs" />
-    <None Include="app.manifest" />
-    <None Include="Config\Actions.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\ArtOverrides.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\BaseMap.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\Constants.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\EditorRules.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\Events.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\MapCode\Add Reveal Map Trigger.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\MapCode\Enable Blue Tiberium Spreader Lighting.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\MapCode\Enable Green Tiberium Spreader Lighting.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\MapCode\Enable Ore Spreader Lighting.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\MapCode\Enable Spreading Ore.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\MapCode\Mixed Gems Only Use Blue-Green Colors.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\MapCode\Replace Tiberium With Ore.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\MapCode\Replace Tiberium With Snowy Ore.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\MapCode\Snowy Mixed Gems.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\MapCode\Snowy Ore.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\MapCode\Snowy Smudges.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\TerrainGeneratorPresets.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\TerrainTypeImpassability.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\AboutWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\ApplyINICodeWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\AutoApplyImpassableOverlayWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\BasicSectionConfigWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\CopiedEntryTypesWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\CreateNewMapWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\GenerateStandardHousesWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\HotkeyConfigurationWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\HousesWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\InfantryOptionsWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\LightingSettingsWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\LocalVariablesWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\MapSizeWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\PlaceWaypointWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\SelectActionWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\SelectEventWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\SelectGlobalVariableWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\SelectLocalVariableWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\SelectScriptActionWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <Compile Include="CCEngine\TriggerActionType.cs" />
-    <Compile Include="CCEngine\TriggerEventType.cs" />
-    <None Include="Config\UI\SelectHouseWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\ExpandMapWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <Compile Include="Constants.cs" />
-    <Compile Include="GameMath\CellMath.cs" />
-    <Compile Include="GameMath\Point2D.cs" />
-    <Compile Include="GameMath\Randomizer.cs" />
-    <Compile Include="Helpers.cs" />
-    <Compile Include="INIExtension.cs" />
-    <Compile Include="Initialization\IInitializer.cs" />
-    <Compile Include="Initialization\Initializer.cs" />
-    <Compile Include="Initialization\MapLoader.cs" />
-    <Compile Include="Initialization\MapWriter.cs" />
-    <Compile Include="Models\AbstractObject.cs" />
-    <Compile Include="Models\Aircraft.cs" />
-    <Compile Include="Models\AircraftType.cs" />
-    <Compile Include="Models\ArtConfig\BuildingArtConfig.cs" />
-    <Compile Include="Models\ArtConfig\IArtConfig.cs" />
-    <Compile Include="Models\ArtConfig\IArtConfigContainer.cs" />
-    <Compile Include="Models\ArtConfig\InfantryArtConfig.cs" />
-    <Compile Include="Models\ArtConfig\InfantrySequence.cs" />
-    <Compile Include="Models\ArtConfig\OverlayArtConfig.cs" />
-    <Compile Include="Models\ArtConfig\VehicleArtConfig.cs" />
-    <Compile Include="Models\BasicSection.cs" />
-    <Compile Include="Models\BuildingType.cs" />
-    <Compile Include="Models\CellTag.cs" />
-    <Compile Include="Models\EditorConfig.cs" />
-    <Compile Include="Models\Enums\AITriggerConditionType.cs" />
-    <Compile Include="Models\AITriggerType.cs" />
-    <Compile Include="Models\Enums\LandType.cs" />
-    <Compile Include="Models\Enums\TerrainOccupation.cs" />
-    <Compile Include="Models\Enums\TheaterType.cs" />
-    <Compile Include="Models\Enums\TriggerParamType.cs" />
-    <Compile Include="Models\Foot.cs" />
-    <Compile Include="Models\GameObject.cs" />
-    <Compile Include="Models\GameObjectType.cs" />
-    <Compile Include="Models\GlobalVariable.cs" />
-    <Compile Include="Models\House.cs" />
-    <Compile Include="Initialization\IMap.cs" />
-    <Compile Include="Models\Infantry.cs" />
-    <Compile Include="Models\InfantryType.cs" />
-    <Compile Include="Models\INIDefineable.cs" />
-    <Compile Include="Models\INIDefined.cs" />
-    <Compile Include="Models\IPositioned.cs" />
-    <Compile Include="Models\Lighting.cs" />
-    <Compile Include="Models\LocalVariable.cs" />
-    <Compile Include="Models\Map.cs" />
-    <Compile Include="Models\MapFormat\Format5.cs" />
-    <Compile Include="Models\MapFormat\Format80.cs" />
-    <Compile Include="Models\MapFormat\IsoMapPack5Tile.cs" />
-    <Compile Include="Models\MapFormat\MemoryFile.cs" />
-    <Compile Include="Models\MapFormat\MiniLZO.cs" />
-    <Compile Include="Models\MapFormat\VirtualFile.cs" />
-    <Compile Include="Models\MapTile.cs" />
-    <Compile Include="Models\Mission.cs" />
-    <Compile Include="Models\Enums\RTTIType.cs" />
-    <Compile Include="Models\Overlay.cs" />
-    <Compile Include="Models\OverlayType.cs" />
-    <Compile Include="Models\Rules.cs" />
-    <Compile Include="Models\RulesColor.cs" />
-    <Compile Include="Models\Script.cs" />
-    <Compile Include="Models\Enums\SpotlightType.cs" />
-    <Compile Include="Models\Smudge.cs" />
-    <Compile Include="Models\SmudgeType.cs" />
-    <Compile Include="Models\Structure.cs" />
-    <Compile Include="Models\SubCell.cs" />
-    <Compile Include="Models\Tag.cs" />
-    <Compile Include="Models\TaskForce.cs" />
-    <Compile Include="Models\TeamType.cs" />
-    <Compile Include="Models\Techno.cs" />
-    <Compile Include="Models\TechnoType.cs" />
-    <Compile Include="Models\TerrainObject.cs" />
-    <Compile Include="Models\TerrainType.cs" />
-    <Compile Include="Models\Themes.cs" />
-    <Compile Include="Models\Trigger.cs" />
-    <Compile Include="Models\TriggerAction.cs" />
-    <Compile Include="Models\TriggerCondition.cs" />
-    <Compile Include="Models\Tube.cs" />
-    <Compile Include="Models\TutorialLines.cs" />
-    <Compile Include="Models\Unit.cs" />
-    <Compile Include="Models\UnitType.cs" />
-    <Compile Include="Models\Waypoint.cs" />
-    <Compile Include="Mutations\Classes\ChangeAttachedTagMutation.cs" />
-    <Compile Include="Mutations\Classes\ChangeTechnoOwnerMutation.cs" />
-    <Compile Include="Mutations\Classes\DeleteTubeMutation.cs" />
-    <Compile Include="Mutations\Classes\FillTerrainAreaMutation.cs" />
-    <Compile Include="Mutations\Classes\MoveObjectMutation.cs" />
-    <Compile Include="Mutations\Classes\OriginalCellTerrainData.cs" />
-    <Compile Include="Mutations\Classes\OriginalOverlayInfo.cs" />
-    <Compile Include="Mutations\Classes\OriginalTerrainData.cs" />
-    <Compile Include="Mutations\Classes\PasteTerrainMutation.cs" />
-    <Compile Include="Mutations\Classes\PlaceBuildingMutation.cs" />
-    <Compile Include="Mutations\Classes\PlaceCellTagMutation.cs" />
-    <Compile Include="Mutations\Classes\PlaceOverlayCollectionMutation.cs" />
-    <Compile Include="Mutations\Classes\PlaceOverlayMutation.cs" />
-    <Compile Include="Mutations\Classes\PlaceSmudgeMutation.cs" />
-    <Compile Include="Mutations\Classes\PlaceTerrainTileMutation.cs" />
-    <Compile Include="Mutations\Classes\PlaceAircraftMutation.cs" />
-    <Compile Include="Mutations\Classes\PlaceInfantryMutation.cs" />
-    <Compile Include="Mutations\Classes\PlaceTerrainObjectMutation.cs" />
-    <Compile Include="Mutations\Classes\PlaceTubeMutation.cs" />
-    <Compile Include="Mutations\Classes\PlaceVehicleMutation.cs" />
-    <Compile Include="Mutations\Classes\PlaceWaypointMutation.cs" />
-    <Compile Include="Mutations\Classes\TerrainGenerationMutation.cs" />
-    <Compile Include="Mutations\Mutation.cs" />
-    <Compile Include="Mutations\MutationManager.cs" />
-    <Compile Include="NativeMethods.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Rendering\EditorState.cs" />
-    <Compile Include="Rendering\GameClass.cs" />
-    <Compile Include="Rendering\GraphicalBaseNode.cs" />
-    <Compile Include="Rendering\MapView.cs" />
-    <Compile Include="Rendering\MGTMPImage.cs" />
-    <Compile Include="Rendering\Refresh.cs" />
-    <Compile Include="Rendering\TheaterGraphics.cs" />
-    <Compile Include="Rendering\TubeRefreshHelper.cs" />
-    <Compile Include="Scripts\ApplyAnimatedWaterScript.cs" />
-    <Compile Include="Scripts\CR04Script.cs" />
-    <Compile Include="Scripts\RemoveIMTOs.cs" />
-    <Compile Include="Settings\BoolSetting.cs" />
-    <Compile Include="Settings\IntSetting.cs" />
-    <Compile Include="Settings\SettingBase.cs" />
-    <Compile Include="Settings\StringSetting.cs" />
-    <Compile Include="UI\BrushSize.cs" />
-    <Compile Include="UI\Controls\DarkeningPanel.cs" />
-    <Compile Include="UI\Controls\EditorDescriptionPanel.cs" />
-    <Compile Include="UI\Controls\EditorButton.cs" />
-    <Compile Include="UI\Controls\EditorGUICreator.cs" />
-    <Compile Include="UI\Controls\EditorLinkLabel.cs" />
-    <Compile Include="UI\Controls\EditorListBox.cs" />
-    <Compile Include="UI\Controls\EditorPopUpSelector.cs" />
-    <Compile Include="UI\Controls\EditorSuggestionTextBox.cs" />
-    <Compile Include="UI\Controls\EditorTextBox.cs" />
-    <Compile Include="UI\Controls\FileBrowserListBox.cs" />
-    <Compile Include="UI\Controls\INItializableWindow.cs" />
-    <Compile Include="UI\Controls\ToolTip.cs" />
-    <Compile Include="UI\CursorAction.cs" />
-    <Compile Include="UI\CursorActions\AircraftPlacementAction.cs" />
-    <Compile Include="UI\CursorActions\BuildingPlacementAction.cs" />
-    <Compile Include="UI\CursorActions\ChangeAttachedTagCursorAction.cs" />
-    <Compile Include="UI\CursorActions\ChangeTechnoOwnerAction.cs" />
-    <Compile Include="UI\CursorActions\CheckDistanceCursorAction.cs" />
-    <Compile Include="UI\CursorActions\CopyTerrainCursorAction.cs" />
-    <Compile Include="UI\CursorActions\ManageBaseNodesCursorAction.cs" />
-    <Compile Include="UI\CursorActions\DeleteTubeCursorAction.cs" />
-    <Compile Include="UI\CursorActions\DeletionModeAction.cs" />
-    <Compile Include="UI\CursorActions\GenerateForestCursorAction.cs" />
-    <Compile Include="UI\CursorActions\InfantryPlacementAction.cs" />
-    <Compile Include="UI\CursorActions\OverlayCollectionPlacementAction.cs" />
-    <Compile Include="UI\CursorActions\OverlayPlacementAction.cs" />
-    <Compile Include="UI\CursorActions\PasteTerrainCursorAction.cs" />
-    <Compile Include="UI\CursorActions\PlaceCellTagCursorAction.cs" />
-    <Compile Include="UI\CursorActions\PlaceSmudgeCursorAction.cs" />
-    <Compile Include="UI\CursorActions\PlaceTubeCursorAction.cs" />
-    <Compile Include="UI\CursorActions\PlaceWaypointCursorAction.cs" />
-    <Compile Include="UI\CursorActions\TerrainObjectPlacementAction.cs" />
-    <Compile Include="UI\CursorActions\PlaceTerrainCursorAction.cs" />
-    <Compile Include="UI\CursorActions\UnitPlacementAction.cs" />
-    <Compile Include="UI\EditorContextMenu.cs" />
-    <Compile Include="UI\EditorPanel.cs" />
-    <Compile Include="UI\Controls\EditorWindow.cs" />
-    <Compile Include="UI\INIConfigException.cs" />
-    <Compile Include="UI\KeyboardCommand.cs" />
-    <Compile Include="UI\KeyboardCommands.cs" />
-    <Compile Include="UI\MainMenu.cs" />
-    <Compile Include="UI\OverlayCollection.cs" />
-    <Compile Include="UI\OverlayFrameSelector.cs" />
-    <Compile Include="UI\Parser.cs" />
-    <Compile Include="UI\SettingsPanel.cs" />
-    <Compile Include="UI\Sidebar\AircraftListPanel.cs" />
-    <Compile Include="UI\Sidebar\BuildingListPanel.cs" />
-    <Compile Include="UI\Sidebar\EditorSidebar.cs" />
-    <Compile Include="UI\Sidebar\InfantryListPanel.cs" />
-    <Compile Include="UI\Sidebar\ISearchBoxContainer.cs" />
-    <Compile Include="UI\Sidebar\ObjectListPanel.cs" />
-    <Compile Include="UI\Sidebar\OverlayListPanel.cs" />
-    <Compile Include="UI\Sidebar\SidebarMode.cs" />
-    <Compile Include="UI\Sidebar\SmudgeListPanel.cs" />
-    <Compile Include="UI\Sidebar\TerrainObjectListPanel.cs" />
-    <Compile Include="UI\Sidebar\TreeView.cs" />
-    <Compile Include="UI\Sidebar\UnitListPanel.cs" />
-    <Compile Include="UI\TileDisplay.cs" />
-    <Compile Include="UI\TileInfoDisplay.cs" />
-    <Compile Include="UI\TileSelector.cs" />
-    <Compile Include="UI\Controls\MenuButton.cs" />
-    <Compile Include="UI\TopBar\TopBarControlMenu.cs" />
-    <Compile Include="UI\TopBar\TopBarMenu.cs" />
-    <Compile Include="UI\UIManager.cs" />
-    <Compile Include="Settings\UserSettings.cs" />
-    <Compile Include="UI\Windows\AboutWindow.cs" />
-    <Compile Include="UI\Windows\ApplyINICodeWindow.cs" />
-    <Compile Include="UI\Windows\AutoApplyImpassableOverlayWindow.cs" />
-    <Compile Include="UI\Windows\BasicSectionConfigWindow.cs" />
-    <Compile Include="UI\Windows\CopiedEntryTypesWindow.cs" />
-    <Compile Include="UI\Windows\EditorMessageBox.cs" />
-    <Compile Include="UI\Windows\ExpandMapWindow.cs" />
-    <Compile Include="UI\Windows\GenerateStandardHousesWindow.cs" />
-    <Compile Include="UI\Windows\HotkeyConfigurationWindow.cs" />
-    <Compile Include="UI\Windows\HousesWindow.cs" />
-    <Compile Include="UI\Windows\InfantryOptionsWindow.cs" />
-    <Compile Include="UI\Windows\LightingSettingsWindow.cs" />
-    <Compile Include="UI\Windows\LocalVariablesWindow.cs" />
-    <Compile Include="UI\Windows\MainMenuWindows\MapSetup.cs" />
-    <Compile Include="UI\Windows\MapSizeWindow.cs" />
-    <Compile Include="UI\Windows\MegamapWindow.cs" />
-    <Compile Include="UI\Windows\OpenMapWindow.cs" />
-    <Compile Include="UI\Windows\PlaceWaypointWindow.cs" />
-    <Compile Include="UI\Windows\SaveMapAsWindow.cs" />
-    <Compile Include="UI\Windows\ScriptsWindow.cs" />
-    <Compile Include="UI\Windows\SelectActionWindow.cs" />
-    <Compile Include="UI\Windows\SelectEventWindow.cs" />
-    <Compile Include="UI\Windows\SelectGlobalVariableWindow.cs" />
-    <Compile Include="UI\Windows\SelectHouseWindow.cs" />
-    <Compile Include="UI\Windows\SelectLocalVariableWindow.cs" />
-    <Compile Include="UI\Windows\SelectObjectWindow.cs" />
-    <Compile Include="UI\Windows\SelectScriptActionWindow.cs" />
-    <Compile Include="UI\Windows\SelectScriptWindow.cs" />
-    <Compile Include="UI\Windows\SelectTagWindow.cs" />
-    <Compile Include="UI\Windows\SelectTaskForceWindow.cs" />
-    <Compile Include="UI\Windows\SelectTeamTypeWindow.cs" />
-    <Compile Include="UI\Windows\SelectThemeWindow.cs" />
-    <Compile Include="UI\Windows\SelectTileSetWindow.cs" />
-    <Compile Include="UI\Windows\SelectTriggerWindow.cs" />
-    <Compile Include="UI\Windows\SelectTutorialLineWindow.cs" />
-    <Compile Include="UI\Windows\StructureOptionsWindow.cs" />
-    <Compile Include="UI\Windows\TaskforcesWindow.cs" />
-    <Compile Include="UI\Windows\TeamTypesWindow.cs" />
-    <Compile Include="UI\Windows\TerrainGenerator\TerrainGeneratorConfigWindow.cs" />
-    <Compile Include="UI\Windows\TerrainGenerator\TerrainGeneratorOverlayGroupsPanel.cs" />
-    <Compile Include="UI\Windows\TerrainGenerator\TerrainGeneratorSmudgeGroupsPanel.cs" />
-    <Compile Include="UI\Windows\TerrainGenerator\TerrainGeneratorTerrainTypeGroupsPanel.cs" />
-    <Compile Include="UI\Windows\TerrainGenerator\TerrainGeneratorTileGroupsPanel.cs" />
-    <Compile Include="UI\Windows\TriggersWindow.cs" />
-    <Compile Include="UI\Windows\VehicleOptionsWindow.cs" />
-    <Compile Include="UI\Windows\WindowController.cs" />
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <None Include="Config\BrushSizes.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\FileManagerConfig.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\OverlayCollections.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\ScriptActions.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\Theaters.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\ScriptsWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\SelectScriptWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\SelectTagWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\SelectThemeWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\SelectTaskForceWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\SelectTeamTypeWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\SelectTileSetWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\SelectTriggerWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\SelectTutorialLineWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\StructureOptionsWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\TaskforcesWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\TeamTypesWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\TriggersWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Config\UI\VehicleOptionsWindow.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Content\SpriteFont0.xnb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Content\SpriteFont1.xnb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="MapEditorSettings.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="packages.config" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-    <Compile Include="UI\Windows\MainMenuWindows\CreateNewMapWindow.cs" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="Rampastring.Tools" Version="2.0.4" />
+    <PackageReference Include="Rampastring.XNAUI.WindowsDX" Version="2.2.9" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Content\checkBoxChecked.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\checkBoxCheckedD.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\checkBoxClear.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\checkBoxClearD.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\comboBoxArrow.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\cursor.cur">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\impassablehighlight.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\openedComboBoxArrow.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\sbBackground.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\sbDownArrow.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\sbMiddle.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\sbThumbBottom.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\sbThumbTop.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\sbUpArrow.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Compile Include="UI\Controls\EditorNumberTextBox.cs" />
-    <Content Include="editoricon.ico" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\MonoGame.Framework.WindowsDX.3.8.0.1641\build\MonoGame.Framework.WindowsDX.targets" Condition="Exists('..\packages\MonoGame.Framework.WindowsDX.3.8.0.1641\build\MonoGame.Framework.WindowsDX.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\MonoGame.Framework.WindowsDX.3.8.0.1641\build\MonoGame.Framework.WindowsDX.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MonoGame.Framework.WindowsDX.3.8.0.1641\build\MonoGame.Framework.WindowsDX.targets'))" />
-  </Target>
 </Project>

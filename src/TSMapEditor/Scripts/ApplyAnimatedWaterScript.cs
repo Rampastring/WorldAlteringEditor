@@ -40,8 +40,6 @@ namespace TSMapEditor.Scripts
                 new int[] { 10, 11, 12, 13 } // 1x1 tiles
             };
 
-            const int mapEdgeMargin = 11;
-
             Random random = new Random();
 
             // 1st loop - loops through animated water tiles of different sizes

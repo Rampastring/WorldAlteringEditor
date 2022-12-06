@@ -188,8 +188,8 @@ namespace TSMapEditor.UI
             if (width < 0 || height < 0)
             {
                 // First run - default to first resolution that is smaller than the user's desktop resolution
-                ddDisplayResolution.SelectedIndex = ddDisplayResolution.Items.Count - 2;
-                ddRenderResolution.SelectedIndex = ddRenderResolution.Items.Count - 2;
+                ddDisplayResolution.SelectedIndex = ddDisplayResolution.Items.FindLastIndex(item => ((ScreenResolution)item.Tag).Height < Screen.PrimaryScreen.Bounds.Height);
+                ddRenderResolution.SelectedIndex = ddDisplayResolution.SelectedIndex;
             }
             else
             {
