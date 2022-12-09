@@ -555,7 +555,7 @@ namespace TSMapEditor.UI.Windows
                             map.AddTeamType(easyTeamType);
 
                             mediumTeamType.Name = teamType.Name.Replace("H ", "M ").Replace(" H", " M").Replace("Hard", "Medium");
-                            easyTeamType.Name = teamType.Name.Replace("H ", "M ").Replace(" H", " M").Replace("Hard", "Medium");
+                            easyTeamType.Name = teamType.Name.Replace("H ", "E ").Replace(" H", " E").Replace("Hard", "Easy");
 
                             mediumTeamType.TaskForce = mediumTaskForce;
                             easyTeamType.TaskForce = easyTaskForce;
