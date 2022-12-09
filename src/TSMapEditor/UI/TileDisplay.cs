@@ -253,6 +253,9 @@ namespace TSMapEditor.UI
                 var rectangle = new Rectangle(tile.Location.X, tile.Location.Y + viewY, tile.Size.X, tile.Size.Y);
                 FillRectangle(rectangle, Color.Black);
 
+                if (tile.TileImage.TMPImages.Length == 0)
+                    continue;
+
                 int totalHeightOffset = tile.TileImage.TMPImages.Max(tmp => { return tmp.TmpImage == null ? 0 : tmp.TmpImage.Height; }) * (Constants.CellSizeY / 2);
 
                 foreach (MGTMPImage image in tile.TileImage.TMPImages)
