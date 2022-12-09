@@ -162,6 +162,7 @@ namespace TSMapEditor.UI.Windows
             ddActions.AddItem("View Attached Objects");
             ddActions.AddItem(new XNADropDownItem() { Text = string.Empty, Selectable = false });
             ddActions.AddItem("Re-generate trigger IDs");
+            ddActions.AddItem("Clone for easier Difficulties");
             ddActions.SelectedIndex = 0;
             ddActions.SelectedIndexChanged += DdActions_SelectedIndexChanged;
 
@@ -247,6 +248,9 @@ namespace TSMapEditor.UI.Windows
                     break;
                 case 5:
                     RegenerateIDs();
+                    break;
+                case 6:
+                    CloneForEasierDifficulties();
                     break;
                 case 0:
                 default:
@@ -428,7 +432,141 @@ namespace TSMapEditor.UI.Windows
                 "* AITriggers are not yet handled by the editor, so you might need to update them manually afterwards.",
                 MessageBoxButtons.YesNo);
 
-            messageBox.YesClickedAction += _ => map.RegenerateInternalIds();
+            messageBox.YesClickedAction = _ => map.RegenerateInternalIds();
+            ListTriggers();
+        }
+
+        private void CloneForEasierDifficulties()
+        {
+            if (editedTrigger == null)
+                return;
+
+            var messageBox = EditorMessageBox.Show(WindowManager,
+                "Are you sure?",
+                "Cloning this trigger for easier difficulties will create duplicate instances" + Environment.NewLine +
+                "of this trigger for Medium and Easy difficulties, replacing Hard-mode globals" + Environment.NewLine +
+                "with respective globals of easier difficulties." + Environment.NewLine + Environment.NewLine +
+                "In case the trigger references TeamTypes, duplicates of the TeamTypes" + Environment.NewLine +
+                "and their TaskForces are also created for the easier-difficulty triggers." + Environment.NewLine + Environment.NewLine +
+                "No un-do is available. Do you want to continue?", MessageBoxButtons.YesNo);
+
+            messageBox.YesClickedAction = _ => DoCloneForEasierDifficulties();
+        }
+
+        private void DoCloneForEasierDifficulties()
+        {
+            var originalTag = map.Tags.Find(t => t.Trigger == editedTrigger);
+
+            var mediumDifficultyTrigger = editedTrigger.Clone(map.GetNewUniqueInternalId());
+            map.AddTrigger(mediumDifficultyTrigger);
+            map.Tags.Add(new Tag()
+            {
+                ID = map.GetNewUniqueInternalId(),
+                Name = mediumDifficultyTrigger.Name + " (tag)",
+                Trigger = mediumDifficultyTrigger,
+                Repeating = originalTag == null ? 0 : originalTag.Repeating
+            });
+
+            var easyDifficultyTrigger = editedTrigger.Clone(map.GetNewUniqueInternalId());
+            map.AddTrigger(easyDifficultyTrigger);
+            map.Tags.Add(new Tag()
+            {
+                ID = map.GetNewUniqueInternalId(),
+                Name = easyDifficultyTrigger.Name + " (tag)",
+                Trigger = easyDifficultyTrigger,
+                Repeating = originalTag == null ? 0 : originalTag.Repeating
+            });
+
+
+            mediumDifficultyTrigger.Name = editedTrigger.Name.Replace("H ", "M ").Replace(" H", " M").Replace("Hard", "Medium");
+            easyDifficultyTrigger.Name = editedTrigger.Name.Replace("H ", "E ").Replace(" H", " E").Replace("Hard", "Easy");
+
+            int mediumDiffGlobalVariableIndex = map.Rules.GlobalVariables.FindIndex(gv => gv.Name == "Difficulty Medium");
+            int easyDiffGlobalVariableIndex = map.Rules.GlobalVariables.FindIndex(gv => gv.Name == "Difficulty Easy");
+
+            if (mediumDiffGlobalVariableIndex < 0)
+            {
+                Logger.Log($"{nameof(TriggersWindow)}.{nameof(DoCloneForEasierDifficulties)}: Medium difficulty global variable not found!");
+            }
+
+            if (easyDiffGlobalVariableIndex < 0)
+            {
+                Logger.Log($"{nameof(TriggersWindow)}.{nameof(DoCloneForEasierDifficulties)}: Medium difficulty global variable not found!");
+            }
+
+            // Go through used events. If there's a reference to the
+            // "Difficulty Hard" global, replace it
+            // with references to the Medium and Easy globals.
+            for (int i = 0; i < editedTrigger.Conditions.Count; i++)
+            {
+                TriggerCondition condition = editedTrigger.Conditions[i];
+
+                if (map.EditorConfig.TriggerEventTypes[condition.ConditionIndex].P2Type == TriggerParamType.GlobalVariable)
+                {
+                    if (condition.Parameter2 < 0 && condition.Parameter2 >= map.Rules.GlobalVariables.Count)
+                        continue;
+
+                    if (map.Rules.GlobalVariables[condition.Parameter2].Name == "Difficulty Hard")
+                    {
+                        if (mediumDiffGlobalVariableIndex > -1)
+                        {
+                            mediumDifficultyTrigger.Conditions[i].Parameter2 = mediumDiffGlobalVariableIndex;
+                        }
+
+                        if (easyDiffGlobalVariableIndex > -1)
+                        {
+                            easyDifficultyTrigger.Conditions[i].Parameter2 = easyDiffGlobalVariableIndex;
+                        }
+                    }
+                }
+            }
+
+            // Go through used actions. If they refer to any TeamTypes, clone the
+            // TeamTypes and replace the references
+            for (int i = 0; i < editedTrigger.Actions.Count; i++)
+            {
+                TriggerAction action = editedTrigger.Actions[i];
+
+                TriggerActionType triggerActionType = map.EditorConfig.TriggerActionTypes[action.ActionIndex];
+
+                for (int j = 0; j < triggerActionType.Parameters.Length; j++)
+                {
+                    var param = triggerActionType.Parameters[j];
+
+                    if (param != null && param.TriggerParamType == TriggerParamType.TeamType)
+                    {
+                        TeamType teamType = map.TeamTypes.Find(tt => tt.ININame == action.ParamToString(j));
+
+                        if (teamType != null && teamType.TaskForce != null)
+                        {
+                            TaskForce mediumTaskForce = teamType.TaskForce.Clone(map.GetNewUniqueInternalId());
+                            map.AddTaskForce(mediumTaskForce);
+
+                            TaskForce easyTaskForce = teamType.TaskForce.Clone(map.GetNewUniqueInternalId());
+                            map.AddTaskForce(easyTaskForce);
+
+                            mediumTaskForce.Name = teamType.TaskForce.Name.Replace("H ", "M ").Replace(" H", " M").Replace("Hard", "Medium");
+                            easyTaskForce.Name = teamType.TaskForce.Name.Replace("H ", "E ").Replace(" H", " E").Replace("Hard", "Easy");
+
+                            TeamType mediumTeamType = teamType.Clone(map.GetNewUniqueInternalId());
+                            map.AddTeamType(mediumTeamType);
+
+                            TeamType easyTeamType = teamType.Clone(map.GetNewUniqueInternalId());
+                            map.AddTeamType(easyTeamType);
+
+                            mediumTeamType.Name = teamType.Name.Replace("H ", "M ").Replace(" H", " M").Replace("Hard", "Medium");
+                            easyTeamType.Name = teamType.Name.Replace("H ", "M ").Replace(" H", " M").Replace("Hard", "Medium");
+
+                            mediumTeamType.TaskForce = mediumTaskForce;
+                            easyTeamType.TaskForce = easyTaskForce;
+
+                            mediumDifficultyTrigger.Actions[i].Parameters[j] = mediumTeamType.ININame;
+                            easyDifficultyTrigger.Actions[i].Parameters[j] = easyTeamType.ININame;
+                        }
+                    }
+                }
+            }
+
             ListTriggers();
         }
 
