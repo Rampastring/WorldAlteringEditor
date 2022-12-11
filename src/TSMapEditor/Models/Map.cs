@@ -1097,6 +1097,8 @@ namespace TSMapEditor.Models
             // Our map writing system takes care of the tags and triggers, no need to manually remove their INI entries
             // (they don't have sections)
 
+            // TODO implement old-ID-to-new-ID lookup table, necessary for fixing up trigger references
+
             // Zero out the internal IDs
             scriptElements.ForEach(se => se.SetInternalID(string.Empty));
 
