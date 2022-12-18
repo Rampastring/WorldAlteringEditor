@@ -385,6 +385,7 @@ namespace TSMapEditor.UI.Windows
         private void DdHouse_SelectedIndexChanged(object sender, EventArgs e)
         {
             editedTeamType.House = map.GetHouses()[ddHouse.SelectedIndex];
+            lbTeamTypes.SelectedItem.TextColor = editedTeamType.House.XNAColor;
         }
 
         private void DdVeteranLevel_SelectedIndexChanged(object sender, EventArgs e)
