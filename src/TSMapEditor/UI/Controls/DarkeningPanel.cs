@@ -138,6 +138,8 @@ namespace TSMapEditor.UI.Controls
             darkeningPanel.AddChild(child);
             darkeningPanel.Hide();
             darkeningPanel.Alpha = 0f;
+            darkeningPanel.DrawOrder = WindowController.ChildWindowOrderValue * 2;
+            darkeningPanel.UpdateOrder = WindowController.ChildWindowOrderValue * 2;
             darkeningPanel.Disable();
             child.CenterOnParent();
 

@@ -7,7 +7,6 @@ using TSMapEditor.Rendering;
 using TSMapEditor.UI.Controls;
 using TSMapEditor.UI.Windows.MainMenuWindows;
 using TSMapEditor.UI.Windows.TerrainGenerator;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace TSMapEditor.UI.Windows
 {
