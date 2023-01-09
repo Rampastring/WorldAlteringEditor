@@ -82,7 +82,7 @@ namespace TSMapEditor.UI.Windows
         public void Open(T initialSelection)
         {
             SelectedObject = initialSelection;
-            initialSelection = SelectedObject;
+            this.initialSelection = SelectedObject;
             ListObjects();
 
             if (lbObjectList.SelectedItem == null)
