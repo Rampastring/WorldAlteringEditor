@@ -15,7 +15,7 @@ namespace TSMapEditor.UI.Controls
 
         public string URL { get; set; }
 
-        public override void ParseAttributeFromINI(IniFile iniFile, string key, string value)
+        protected override void ParseControlINIAttribute(IniFile iniFile, string key, string value)
         {
             if (key == "URL")
             {
@@ -23,7 +23,7 @@ namespace TSMapEditor.UI.Controls
                 return;
             }
 
-            base.ParseAttributeFromINI(iniFile, key, value);
+            base.ParseControlINIAttribute(iniFile, key, value);
         }
 
         public override void OnLeftClick()

@@ -41,14 +41,14 @@ namespace TSMapEditor.UI.Controls
             Closed?.Invoke(this, EventArgs.Empty);
         }
 
-        public override void ParseAttributeFromINI(IniFile iniFile, string key, string value)
+        protected override void ParseControlINIAttribute(IniFile iniFile, string key, string value)
         {
             if (key == nameof(CanBeMoved))
             {
                 CanBeMoved = Conversions.BooleanFromString(value, CanBeMoved);
             }
 
-            base.ParseAttributeFromINI(iniFile, key, value);
+            base.ParseControlINIAttribute(iniFile, key, value);
         }
 
         public void Hide()

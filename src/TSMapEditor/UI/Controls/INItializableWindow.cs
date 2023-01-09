@@ -85,12 +85,12 @@ namespace TSMapEditor.UI.Controls
             _initialized = true;
         }
 
-        public override void ParseAttributeFromINI(IniFile iniFile, string key, string value)
+        protected override void ParseControlINIAttribute(IniFile iniFile, string key, string value)
         {
-            if (key == "HasCloseButton")
+            if (key == nameof(HasCloseButton))
                 HasCloseButton = iniFile.GetBooleanValue(Name, key, HasCloseButton);
             
-            base.ParseAttributeFromINI(iniFile, key, value);
+            base.ParseControlINIAttribute(iniFile, key, value);
         }
 
         private void ReadINIForControl(XNAControl control)
@@ -144,7 +144,7 @@ namespace TSMapEditor.UI.Controls
                 }
                 else
                 {
-                    control.ParseAttributeFromINI(ConfigIni, kvp.Key, kvp.Value);
+                    control.ParseINIAttribute(ConfigIni, kvp.Key, kvp.Value);
                 }
             }
         }
