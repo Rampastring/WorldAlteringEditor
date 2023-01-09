@@ -96,6 +96,11 @@ namespace TSMapEditor.UI.Windows
                 lbObjectList.SelectedIndex = -1;
             }
 
+            if (lbObjectList.SelectedIndex > lbObjectList.LastIndex)
+            {
+                lbObjectList.LastIndex = lbObjectList.SelectedIndex;
+            }
+
             Show();
             WindowManager.SelectedControl = tbSearch;
         }
