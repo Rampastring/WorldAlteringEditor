@@ -685,7 +685,7 @@ namespace TSMapEditor.UI.Windows
 
         private void TutorialDarkeningPanel_Hidden(object sender, EventArgs e)
         {
-            if (selectTutorialLineWindow.SelectedObject.ID < 0)
+            if (selectTutorialLineWindow.SelectedObject.ID < 0 || selectTutorialLineWindow.SelectedObject.Text == null)
                 return;
 
             AssignParamValue(selectTutorialLineWindow.IsForEvent, selectTutorialLineWindow.SelectedObject.ID);
