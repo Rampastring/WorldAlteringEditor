@@ -8,6 +8,7 @@ namespace TSMapEditor.UI.Windows
     {
         public SelectObjectWindow(WindowManager windowManager) : base(windowManager)
         {
+            HasCloseButton = true;
         }
 
         protected EditorSuggestionTextBox tbSearch;
@@ -21,6 +22,8 @@ namespace TSMapEditor.UI.Windows
         public bool IsForEvent { get; set; }
 
         public T SelectedObject { get; protected set; }
+
+        private T initialSelection;
 
         public override void Initialize()
         {
@@ -48,6 +51,10 @@ namespace TSMapEditor.UI.Windows
 
             tbSearch.TextChanged += TbSearch_TextChanged;
             tbSearch.EnterPressed += (s, e) => FindNext();
+
+            // Make pressing X not save changes
+            if (btnClose != null)
+                btnClose.LeftClick += (s, e) => SelectedObject = initialSelection;
         }
 
         private void TbSearch_TextChanged(object sender, EventArgs e)
@@ -75,6 +82,7 @@ namespace TSMapEditor.UI.Windows
         public void Open(T initialSelection)
         {
             SelectedObject = initialSelection;
+            initialSelection = SelectedObject;
             ListObjects();
 
             if (lbObjectList.SelectedItem == null)

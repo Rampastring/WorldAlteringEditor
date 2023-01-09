@@ -24,6 +24,8 @@ namespace TSMapEditor.UI.Controls
 
         protected bool HasCloseButton { get; set; }
 
+        protected EditorButton btnClose { get; private set; }
+
         public T FindChild<T>(string childName, bool optional = false) where T : XNAControl
         {
             T child = FindChild<T>(Children, childName);
@@ -69,15 +71,15 @@ namespace TSMapEditor.UI.Controls
 
             if (HasCloseButton)
             {
-                var closeButton = new EditorButton(WindowManager);
-                closeButton.Name = "btnCloseX";
-                closeButton.Width = Constants.UIButtonHeight;
-                closeButton.Height = Constants.UIButtonHeight;
-                closeButton.Text = "X";
-                closeButton.X = Width - closeButton.Width;
-                closeButton.Y = 0;
-                AddChild(closeButton);
-                closeButton.LeftClick += (s, e) => Hide();
+                btnClose = new EditorButton(WindowManager);
+                btnClose.Name = "btnCloseX";
+                btnClose.Width = Constants.UIButtonHeight;
+                btnClose.Height = Constants.UIButtonHeight;
+                btnClose.Text = "X";
+                btnClose.X = Width - btnClose.Width;
+                btnClose.Y = 0;
+                AddChild(btnClose);
+                btnClose.LeftClick += (s, e) => Hide();
             }
 
             _initialized = true;
