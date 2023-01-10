@@ -919,22 +919,8 @@ namespace TSMapEditor.Rendering
             windowController.MinimapWindow.CameraRectangle = new Rectangle(Camera.TopLeftPoint.ToXNAPoint(), new Point2D(Width, Height).ScaleBy(1.0 / Camera.ZoomLevel).ToXNAPoint());
 
             Point2D cursorMapPoint = GetCursorMapPoint();
-            Point2D tileCoords = CellMath.CellCoordsFromPixelCoords(cursorMapPoint, Map.Size);
+            Point2D tileCoords = CellMath.CellCoordsFromPixelCoords(cursorMapPoint, Map);
             var tile = Map.GetTile(tileCoords.X, tileCoords.Y);
-
-            // traverse the cells to find one of fitting height
-            for (int i = 1; i < 14; i++)
-            {
-                var otherCellCoords = tileCoords + new Point2D(i, i);
-                var otherCell = Map.GetTile(otherCellCoords);
-                if (otherCell != null)
-                {
-                    int startingY = CellMath.CellTopLeftPointFromCellCoords(otherCellCoords, Map).Y - (otherCell.Level * Constants.CellHeight);
-                    int endY = startingY + Constants.CellSizeY;
-                    if (startingY <= cursorMapPoint.Y)
-                        tile = otherCell;
-                }
-            }
 
             tileUnderCursor = tile;
             TileInfoDisplay.MapTile = tile;
