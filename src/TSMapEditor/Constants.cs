@@ -29,10 +29,10 @@ namespace TSMapEditor
         public static int MaxMapWidth = TextureSizeLimit / CellSizeX;
         public static int MaxMapHeight = TextureSizeLimit / CellSizeY;
 
+        public static int MaxWaypoint = 100;
+
         public const int ObjectHealthMax = 256;
         public const int FacingMax = 255;
-
-        public const int MaxWaypoint = 100;
 
         // TODO parse from Rules.ini
         public const int ConditionYellowHP = 128;
@@ -80,6 +80,8 @@ namespace TSMapEditor
             TheaterPaletteForTiberium = constantsIni.GetBooleanValue(ConstantsSectionName, nameof(TheaterPaletteForTiberium), TheaterPaletteForTiberium);
             ExpectedClientExecutableName = constantsIni.GetStringValue(ConstantsSectionName, nameof(ExpectedClientExecutableName), ExpectedClientExecutableName);
             GameRegistryInstallPath = constantsIni.GetStringValue(ConstantsSectionName, nameof(GameRegistryInstallPath), GameRegistryInstallPath);
+
+            MaxWaypoint = constantsIni.GetIntValue(ConstantsSectionName, nameof(MaxWaypoint), MaxWaypoint);
 
             AdvancedFacingsHack = constantsIni.GetBooleanValue(ConstantsSectionName, nameof(AdvancedFacingsHack), AdvancedFacingsHack);
 

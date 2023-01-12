@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using Rampastring.XNAUI;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
@@ -11,8 +12,6 @@ namespace TSMapEditor.UI.Windows
 {
     public class PlaceWaypointWindow : INItializableWindow
     {
-        private const int MaxWaypoints = 100;
-
         public PlaceWaypointWindow(WindowManager windowManager, Map map, MutationManager mutationManager, IMutationTarget mutationTarget) : base(windowManager)
         {
             this.map = map;
@@ -34,6 +33,7 @@ namespace TSMapEditor.UI.Windows
             base.Initialize();
 
             tbWaypointNumber = FindChild<EditorNumberTextBox>(nameof(tbWaypointNumber));
+            tbWaypointNumber.MaximumTextLength = (Constants.MaxWaypoint - 1).ToString(CultureInfo.InvariantCulture).Length;
 
             FindChild<EditorButton>("btnPlace").LeftClick += BtnPlace_LeftClick;
         }
@@ -47,7 +47,7 @@ namespace TSMapEditor.UI.Windows
                 return;
             }
 
-            if (tbWaypointNumber.Value < 0 || tbWaypointNumber.Value >= MaxWaypoints)
+            if (tbWaypointNumber.Value < 0 || tbWaypointNumber.Value >= Constants.MaxWaypoint)
                 return;
 
             if (map.Waypoints.Exists(w => w.Identifier == tbWaypointNumber.Value))
@@ -69,7 +69,7 @@ namespace TSMapEditor.UI.Windows
         {
             this.cellCoords = cellCoords;
 
-            if (map.Waypoints.Count == MaxWaypoints)
+            if (map.Waypoints.Count == Constants.MaxWaypoint)
             {
                 EditorMessageBox.Show(WindowManager,
                     "Maximum waypoints reached",
@@ -79,7 +79,7 @@ namespace TSMapEditor.UI.Windows
                 return;
             }
 
-            for (int i = 0; i < MaxWaypoints; i++)
+            for (int i = 0; i < Constants.MaxWaypoint; i++)
             {
                 if (!map.Waypoints.Exists(w => w.Identifier == i))
                 {
