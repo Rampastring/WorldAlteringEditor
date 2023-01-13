@@ -1194,7 +1194,8 @@ namespace TSMapEditor.Models
             });
 
             const int EnableTriggerActionIndex = 53;
-            const int EnableTriggerParamIndex = 1;
+            const int TriggerParamIndex = 1;
+            const int DisableTriggerActionIndex = 54;
 
             // Check for triggers that are disabled and are never enabled by any other triggers
             Triggers.ForEach(trigger =>
@@ -1208,23 +1209,43 @@ namespace TSMapEditor.Models
                 if (trigger.Actions.Exists(a => a.ActionIndex == RevealAllMapActionIndex))
                     return;
 
-                // Allow the user to skip this warning by including "DEBUG" in the trigger's name
-                if (trigger.Name.ToUpperInvariant().Contains("DEBUG"))
+                // Allow the user to skip this warning by including "DEBUG" or "OBSOLETE" in the trigger's name
+                if (trigger.Name.ToUpperInvariant().Contains("DEBUG") || trigger.Name.ToUpperInvariant().Contains("OBSOLETE"))
                     return;
 
                 // Is this trigger enabled by another trigger?
-                if (Triggers.Exists(otherTrigger => otherTrigger != trigger && otherTrigger.Actions.Exists(a => a.ActionIndex == EnableTriggerActionIndex && a.Parameters[EnableTriggerParamIndex] == trigger.ID)))
+                if (Triggers.Exists(otherTrigger => otherTrigger != trigger && otherTrigger.Actions.Exists(a => a.ActionIndex == EnableTriggerActionIndex && a.Parameters[TriggerParamIndex] == trigger.ID)))
                     return;
 
                 // If it's not enabled by another trigger, add an issue
                 issueList.Add($"Trigger \"{trigger.Name}\" ({trigger.ID}) is disabled and never enabled by another trigger." + Environment.NewLine +
-                    "Did you forget to enable it? If the trigger exists for debugging purposes, add DEBUG to its name to skip this warning.");
+                    "Did you forget to enable it? If the trigger exists for debugging purposes, add DEBUG or OBSOLETE to its name to skip this warning.");
+            });
+
+            // Check for triggers that are enabled by other triggers, but never disabled - enabling them is
+            // useless in that case and likely means that there's a scripting issue
+            Triggers.ForEach(trigger =>
+            {
+                if (trigger.Disabled)
+                    return;
+
+                // If this trigger is never enabled by another trigger, skip
+                if (!Triggers.Exists(otherTrigger => otherTrigger != trigger && otherTrigger.Actions.Exists(a => a.ActionIndex == EnableTriggerActionIndex && a.Parameters[TriggerParamIndex] == trigger.ID)))
+                    return;
+
+                // If this trigger is disabled by some other trigger, skip
+                if (Triggers.Exists(otherTrigger => otherTrigger != trigger && otherTrigger.Actions.Exists(a => a.ActionIndex == DisableTriggerActionIndex && a.Parameters[TriggerParamIndex] == trigger.ID)))
+                    return;
+
+                // This trigger is never disabled, but it is enabled by at least 1 other trigger - add an issue
+                issueList.Add($"Trigger \"{trigger.Name}\" ({trigger.ID}) is enabled by another trigger, but it is never in a disabled state" + Environment.NewLine +
+                    "(it is neither disabled by default nor disabled by other triggers). Did you forget to disable it?");
             });
 
             // Check for triggers that enable themselves, there's no need to ever do this -> either redundant action or a scripting error
             Triggers.ForEach(trigger =>
             {
-                if (!trigger.Actions.Exists(a => a.ActionIndex == EnableTriggerActionIndex && a.Parameters[EnableTriggerParamIndex] == trigger.ID))
+                if (!trigger.Actions.Exists(a => a.ActionIndex == EnableTriggerActionIndex && a.Parameters[TriggerParamIndex] == trigger.ID))
                     return;
 
                 issueList.Add($"Trigger \"{trigger.Name}\" ({trigger.ID}) has an action for enabling itself. Is it supposed to enable something else instead?");
