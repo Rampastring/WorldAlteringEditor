@@ -874,6 +874,9 @@ namespace TSMapEditor.UI.Windows
             editedTrigger.Actions.Add(new TriggerAction());
             EditTrigger(editedTrigger);
             lbActions.SelectedIndex = lbActions.Items.Count - 1;
+
+            if (Keyboard.IsCtrlHeldDown())
+                SelActionType_LeftClick(this, EventArgs.Empty);
         }
 
         private void BtnDeleteAction_LeftClick(object sender, EventArgs e)
@@ -893,6 +896,9 @@ namespace TSMapEditor.UI.Windows
             editedTrigger.Conditions.Add(new TriggerCondition());
             EditTrigger(editedTrigger);
             lbEvents.SelectedIndex = lbEvents.Items.Count - 1;
+
+            if (Keyboard.IsCtrlHeldDown())
+                SelEventType_LeftClick(this, EventArgs.Empty);
         }
 
         private void BtnDeleteEvent_LeftClick(object sender, EventArgs e)
