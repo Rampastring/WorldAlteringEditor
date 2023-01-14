@@ -29,6 +29,7 @@ namespace TSMapEditor.Models
         public Infantry[] Infantry { get; set; } = new Infantry[SubCellCount];
         public TileImage PreviewTileImage { get; set; }
         public int PreviewSubTileIndex { get; set; }
+        public int PreviewLevel { get; set; } = -1;
 
         public Overlay Overlay { get; set; }
         public Smudge Smudge { get; set; }

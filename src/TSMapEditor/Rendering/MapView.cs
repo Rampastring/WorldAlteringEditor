@@ -643,22 +643,25 @@ namespace TSMapEditor.Rendering
 
             TileImage tileImage;
             int subTileIndex;
+            int level;
             if (tile.PreviewTileImage != null)
             {
                 tileImage = tile.PreviewTileImage;
                 subTileIndex = tile.PreviewSubTileIndex;
+                level = tile.PreviewLevel;
             }
             else
             {
                 tileImage = tile.TileImage;
                 subTileIndex = tile.SubTileIndex;
+                level = tile.Level;
             }
 
             // MM support
             if (EditorState.IsMarbleMadness)
                 tileImage = TheaterGraphics.GetMarbleMadnessTileGraphics(tileImage.TileID);
 
-            drawPoint -= new Point2D(0, (Constants.CellSizeY / 2) * tile.Level);
+            drawPoint -= new Point2D(0, (Constants.CellSizeY / 2) * level);
 
             if (subTileIndex >= tileImage.TMPImages.Length)
             {

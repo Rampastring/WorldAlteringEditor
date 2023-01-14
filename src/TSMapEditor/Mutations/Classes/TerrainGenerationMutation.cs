@@ -361,6 +361,7 @@ namespace TSMapEditor.Mutations.Classes
             {
                 var mapCell = MutationTarget.Map.GetTile(originalTerrainData.CellCoords);
                 mapCell.ChangeTileIndex(originalTerrainData.TileIndex, originalTerrainData.SubTileIndex);
+                mapCell.Level = originalTerrainData.Level;
             }
 
             foreach (var terrainObject in placedTerrainObjects)
@@ -554,7 +555,7 @@ namespace TSMapEditor.Mutations.Classes
                 if (mapTile == null)
                     continue;
 
-                undoData.Add(new OriginalTerrainData(mapTile.TileIndex, mapTile.SubTileIndex, cellCoords + offset));
+                undoData.Add(new OriginalTerrainData(mapTile.TileIndex, mapTile.SubTileIndex, mapTile.Level, cellCoords + offset));
 
                 mapTile.TileImage = null;
                 mapTile.TileIndex = tile.TileID;

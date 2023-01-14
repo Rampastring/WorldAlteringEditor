@@ -42,7 +42,7 @@ namespace TSMapEditor.Mutations.Classes
                 if (mapTile != null && (!MutationTarget.OnlyPaintOnClearGround || mapTile.IsClearGround()) &&
                     !undoData.Exists(otd => otd.CellCoords.X == cx && otd.CellCoords.Y == cy))
                 {
-                    undoData.Add(new OriginalTerrainData(mapTile.TileIndex, mapTile.SubTileIndex, mapTile.CoordsToPoint()));
+                    undoData.Add(new OriginalTerrainData(mapTile.TileIndex, mapTile.SubTileIndex, mapTile.Level, mapTile.CoordsToPoint()));
                 }
             }
         }
@@ -57,7 +57,7 @@ namespace TSMapEditor.Mutations.Classes
             // Get un-do data
             DoForArea(AddUndoDataForTile, MutationTarget.AutoLATEnabled);
 
-            // Place the terrain 
+            // Place the terrain
             brushSize.DoForBrushSize(offset =>
             {
                 for (int i = 0; i < tile.TMPImages.Length; i++)
@@ -73,9 +73,8 @@ namespace TSMapEditor.Mutations.Classes
                     var mapTile = MutationTarget.Map.GetTile(cx, cy);
                     if (mapTile != null && (!MutationTarget.OnlyPaintOnClearGround || mapTile.IsClearGround()))
                     {
-                        mapTile.TileImage = null;
-                        mapTile.TileIndex = tile.TileID;
-                        mapTile.SubTileIndex = (byte)i;
+                        mapTile.ChangeTileIndex(tile.TileID, (byte)i);
+                        mapTile.Level = (byte)Math.Min(mapTile.Level + image.TmpImage.Height, Constants.MaxMapHeightLevel);
                     }
                 }
             });
@@ -264,6 +263,7 @@ namespace TSMapEditor.Mutations.Classes
                 if (mapCell != null)
                 {
                     mapCell.ChangeTileIndex(originalTerrainData.TileIndex, originalTerrainData.SubTileIndex);
+                    mapCell.Level = originalTerrainData.Level;
                 }
             }
 

@@ -29,6 +29,8 @@ namespace TSMapEditor
         public static int MaxMapWidth = TextureSizeLimit / CellSizeX;
         public static int MaxMapHeight = TextureSizeLimit / CellSizeY;
 
+        public const int MaxMapHeightLevel = 14;
+
         public static int MaxWaypoint = 100;
 
         public const int ObjectHealthMax = 256;

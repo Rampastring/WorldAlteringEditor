@@ -263,7 +263,7 @@ namespace TSMapEditor.UI
                     if (image == null || image.TmpImage == null)
                         continue;
 
-                    int subTileHeightOffset = image.TmpImage.Height * (Constants.CellSizeY / 2);
+                    int subTileHeightOffset = image.TmpImage.Height * Constants.CellHeight;
 
                     DrawTexture(image.Texture, new Rectangle(tile.Location.X + image.TmpImage.X + tile.Offset.X,
                         viewY + tile.Location.Y + image.TmpImage.Y + tile.Offset.Y + totalHeightOffset - subTileHeightOffset,

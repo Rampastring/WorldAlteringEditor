@@ -68,6 +68,7 @@ namespace TSMapEditor.UI.CursorActions
                     if (mapTile != null && (!CursorActionTarget.OnlyPaintOnClearGround || mapTile.IsClearGround()))
                     {
                         mapTile.PreviewSubTileIndex = i;
+                        mapTile.PreviewLevel = Math.Min(mapTile.Level + image.TmpImage.Height, Constants.MaxMapHeightLevel);
                         action(mapTile);
                     }
                 }
