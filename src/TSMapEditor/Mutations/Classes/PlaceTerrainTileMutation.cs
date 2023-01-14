@@ -51,22 +51,11 @@ namespace TSMapEditor.Mutations.Classes
         {
             undoData = new List<OriginalTerrainData>(tile.TMPImages.Length * brushSize.Width * brushSize.Height);
 
+            int totalWidth = tile.Width * brushSize.Width;
+            int totalHeight = tile.Height * brushSize.Height;
+
             // Get un-do data
-            if (MutationTarget.AutoLATEnabled)
-            {
-                brushSize.DoForBrushSizeAndSurroundings(offset =>
-                {
-                    AddUndoDataForTile(offset);
-                });
-            }
-            else
-            {
-                // We don't need to include the surrounding tiles when AutoLAT is disabled
-                brushSize.DoForBrushSize(offset =>
-                {
-                    AddUndoDataForTile(offset);
-                });
-            }
+            DoForArea(AddUndoDataForTile, MutationTarget.AutoLATEnabled);
 
             // Place the terrain 
             brushSize.DoForBrushSize(offset =>
@@ -100,6 +89,29 @@ namespace TSMapEditor.Mutations.Classes
             MutationTarget.AddRefreshPoint(targetCellCoords, Math.Max(tile.Width, tile.Height) * Math.Max(brushSize.Width, brushSize.Height));
         }
 
+        private void DoForArea(Action<Point2D> action, bool doForSurroundings)
+        {
+            int totalWidth = tile.Width * brushSize.Width;
+            int totalHeight = tile.Height * brushSize.Height;
+
+            int initX = doForSurroundings ? -1 : 0;
+            int initY = doForSurroundings ? -1 : 0;
+
+            if (doForSurroundings)
+            {
+                totalWidth++;
+                totalHeight++;
+            }
+
+            for (int y = initY; y <= totalHeight; y++)
+            {
+                for (int x = initX; x <= totalWidth; x++)
+                {
+                    action(new Point2D(x, y));
+                }
+            }
+        }
+
         private void ApplyAutoLAT()
         {
             // Get potential base tilesets of the placed LAT (if we're placing LAT)
@@ -122,7 +134,7 @@ namespace TSMapEditor.Mutations.Classes
                 }
             }
 
-            brushSize.DoForBrushSizeAndSurroundings(offset =>
+            DoForArea(offset =>
             {
                 var mapTile = MutationTarget.Map.GetTile(targetCellCoords + offset);
                 if (mapTile == null)
@@ -239,7 +251,7 @@ namespace TSMapEditor.Mutations.Classes
                     mapTile.SubTileIndex = 0;
                     mapTile.TileImage = null;
                 }
-            });
+            }, true);
         }
 
         public override void Undo()
