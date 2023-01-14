@@ -1183,7 +1183,7 @@ namespace TSMapEditor.Rendering
                 CursorAction.PreMapDraw(tileUnderCursor.CoordsToPoint());
             }
 
-            if (mapInvalidated)
+            if (mapInvalidated || (!Constants.IsFlatWorld && newRefreshes.Count > 0))
             {
                 DrawWholeMap();
                 mapInvalidated = false;
