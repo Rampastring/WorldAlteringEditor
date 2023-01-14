@@ -72,8 +72,8 @@ namespace TSMapEditor.UI.Windows
         {
             Show();
 
-            tbName.Text = map.Basic.Name;
-            tbAuthor.Text = map.Basic.Author;
+            tbName.Text = map.Basic.Name ?? string.Empty;
+            tbAuthor.Text = map.Basic.Author ?? string.Empty;
             tbCarryOverCap.Value = map.Basic.CarryOverCap;
             tbPercent.Value = map.Basic.Percent;
             tbInitialTime.Value = map.Basic.InitTime;
