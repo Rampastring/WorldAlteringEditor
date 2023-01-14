@@ -256,7 +256,7 @@ namespace TSMapEditor.UI
                 if (tile.TileImage.TMPImages.Length == 0)
                     continue;
 
-                int totalHeightOffset = tile.TileImage.TMPImages.Max(tmp => { return tmp.TmpImage == null ? 0 : tmp.TmpImage.Height; }) * (Constants.CellSizeY / 2);
+                int totalHeightOffset = tile.TileImage.TMPImages.Max(tmp => { return tmp.TmpImage == null ? 0 : (int)Math.Max(tmp.TmpImage.Height * Constants.CellHeight, tmp.TmpImage.ExtraHeight); });
 
                 foreach (MGTMPImage image in tile.TileImage.TMPImages)
                 {
