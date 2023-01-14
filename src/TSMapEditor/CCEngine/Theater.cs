@@ -73,6 +73,9 @@ namespace TSMapEditor.CCEngine
 
         public TheaterIceTileSets IceTileSetInfo { get; private set; }
 
+        public List<TileSet> TileSets = new List<TileSet>();
+        public List<LATGround> LATGrounds = new List<LATGround>();
+
         public void ReadConfigINI(string baseDirectoryPath)
         {
             TileSets.Clear();
@@ -110,7 +113,14 @@ namespace TSMapEditor.CCEngine
                 i++;
             }
 
+            // DTA
             InitLATGround(theaterIni, "PvmntTile", "ClearToPvmntLat", null, null, "Pavement");
+
+            // TS terrain
+            InitLATGround(theaterIni, "RoughTile", "ClearToRoughLat", null, null, "Rough");
+            InitLATGround(theaterIni, "SandTile", "ClearToSandLat", null, null, "Sand");
+            InitLATGround(theaterIni, "PaveTile", "ClearToPaveLat", null, null, "Pavement");
+            InitLATGround(theaterIni, "GreenTile", "ClearToGreenLat", null, null, "Green");
         }
 
         public TileSet TryGetTileSetById(int id)
@@ -154,8 +164,5 @@ namespace TSMapEditor.CCEngine
 
             return true;
         }
-
-        public List<TileSet> TileSets = new List<TileSet>();
-        public List<LATGround> LATGrounds = new List<LATGround>();
     }
 }
