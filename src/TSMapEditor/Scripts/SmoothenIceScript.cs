@@ -2,9 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
@@ -167,8 +164,70 @@ namespace TSMapEditor.Scripts
                 return;
             }
 
+            // *****************************************************************************
+            // Step 1: Find all ice tile set 02 and 03 tiles and switch them to ice 01 tiles
+            // (this simplies the process for us)
+            // *****************************************************************************
+
+            map.DoForAllValidTiles(mapCell =>
+            {
+                int tileIndexInSet = -1;
+
+                if (iceTileSetInfo.Ice2Set.ContainsTile(mapCell.TileIndex))
+                {
+                    tileIndexInSet = mapCell.TileIndex - iceTileSetInfo.Ice2Set.StartTileIndex;
+                }
+                else if (iceTileSetInfo.Ice3Set.ContainsTile(mapCell.TileIndex))
+                {
+                    tileIndexInSet = mapCell.TileIndex - iceTileSetInfo.Ice3Set.StartTileIndex;
+                }
+
+                if (tileIndexInSet > -1)
+                {
+                    mapCell.ChangeTileIndex(iceTileSetInfo.Ice1Set.StartTileIndex + tileIndexInSet, mapCell.SubTileIndex);
+                }
+            });
+
+            // ***********************************************************
+            // Step 2: Find all ice edge tiles and replace them with water
+            // (more simplification, we re-generate the ice edges later)
+            // ***********************************************************
+
+            map.DoForAllValidTiles(mapCell =>
+            {
+                if (iceTileSetInfo.Ice1Set.ContainsTile(mapCell.TileIndex))
+                {
+                    int tileIndexInSet = mapCell.TileIndex - iceTileSetInfo.Ice1Set.StartTileIndex;
+
+                    const int firstIceToWaterTransitionIndex = 17;
+
+                    if (tileIndexInSet >= firstIceToWaterTransitionIndex)
+                    {
+                        mapCell.ChangeTileIndex(waterTileSet.StartTileIndex, 0);
+                    }
+                }
+            });
+
+            // ************************************************************
+            // Step 3: Find all cracked ice and replace it with regular ice
+            // (further simplification)
+            // ************************************************************
+
+            map.DoForAllValidTiles(mapCell =>
+            {
+                if (iceTileSetInfo.Ice1Set.ContainsTile(mapCell.TileIndex))
+                {
+                    int tileIndexInSet = mapCell.TileIndex - iceTileSetInfo.Ice1Set.StartTileIndex;
+
+                    if (tileIndexInSet > 0)
+                    {
+                        mapCell.ChangeTileIndex(iceTileSetInfo.Ice1Set.StartTileIndex, 0);
+                    }
+                }
+            });
+
             // *************************************************************************
-            // Step 1: Find all water tiles that border ice and apply smooth transitions
+            // Step 4: Find all water tiles that border ice and apply smooth transitions
             // *************************************************************************
 
             var directionsWithoutIce = new List<Direction>();
@@ -249,7 +308,7 @@ namespace TSMapEditor.Scripts
             }
 
             // ********************************************
-            // Step 2: Apply "Auto-LAT" for the cracked ice
+            // Step 5: Apply "Auto-LAT" for the cracked ice
             // (necessary for ice borders to look smooth)
             // ********************************************
 
@@ -313,7 +372,7 @@ namespace TSMapEditor.Scripts
             }
 
             // ***********************************************************************************
-            // Step 3: Find all ice tiles and randomize their tilesets between the 3 ice tile sets
+            // Step 6: Find all ice tiles and randomize their tilesets between the 3 ice tile sets
             // ***********************************************************************************
 
             var random = new Random();
