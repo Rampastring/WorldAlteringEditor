@@ -6,7 +6,7 @@ Work-in-progress scenario editor for Dawn of the Tiberium Age (DTA) https://www.
 
 ## Motivation
 
-The purpose of the project is to develop a new scenario editor for Dawn of the Tiberium Age, 
+The purpose of the project is to develop a new scenario editor for Dawn of the Tiberium Age, Tiberian Sun and Red Alert 2,
 replacing the old FinalSun map editor developed in the TS/RA2 modding community in the early 2000s.
 I think it has been sad to see the ancient map editor restrict the community as much as it has done,
 and instead of developing a proper replacement for it (which could be achieved relatively quickly),
@@ -21,13 +21,21 @@ but with modernizations and changes to make the editor smoother and more efficie
 
 ## Current state of the project
 
-The editor is in an usable state and covers almost everything of what can be done with FinalSun. 
-Most basic and commonly used editing tools are included and they're generally more
-efficient than the FinalSun equivalents.
+The editor has two operating modes: flat and non-flat.
+
+Flat mode is meant for mods like DTA that do not make use of height levels. For these
+mods, the editor covers almost everything of what can be done with FinalSun.
+All basic and commonly used editing tools are included and they're generally more
+efficient than the FinalSun equivalents. This mode is most complete as it was the original
+purpose that the editor was created for.
+
+For non-flat maps of TS and RA2, the editing tools are still work-in-progress. The scripting
+side is completely ready and can be used for efficient mission scripting,
+but editing tools that deal with terrain height are still being worked on.
 
 There are also some limitations in the editor, particularly on the rendering side of things.
 The current map renderer, while functional and usable, is very primitive and does not
-properly keep track of areas to refresh, which leads to graphical glitches at times.
+properly keep track of areas to refresh, which can lead to graphical glitches or poor performance at times.
 The current renderer should be considered more as a proof-of-concept of DTA/TS/RA2 map
 rendering done with MonoGame than an actual serious implementation.
 
@@ -37,16 +45,22 @@ If you browse the code, you might run into unfinished feature implementations.
 ## System requirements
 
 This editor uses MonoGame with Rampastring's custom XNAUI library. 
-No XNA build is available, so a DirectX11 compatible GPU is required.
-VRAM requirements might be steep, as the sprite graphics of the game are currently
+A DirectX11 compatible GPU and a 64-bit system is required.
+If you absolutely need a 32-bit build, you can modify the source to produce one.
+
+The editor needs considerable VRAM, as the sprite graphics of the game are currently
 converted into full 32-bit ARGB textures prior to drawing. In case of
 Dawn of the Tiberium Age, the editor appears to allocate roughly 500 MB of VRAM.
 
+The renderer for non-flat worlds is currently also heavy on both the CPU and GPU.
+
 ## Downloads
 
-There is currently no publicly hosted download, but the editor will be included with Dawn of the Tiberium Age later on.
-Currently, it's easiest to clone the source and compile it yourself using Visual Studio 2017 or newer.
-If you want a separate download, you can contact me and ask for one on DTA's Discord server: https://discord.gg/6UtC289
+There is a build workflow on new commits being pushed, which allows you to download the editor from the build artifacts:
+https://github.com/Rampastring/TSMapEditor/actions
+
+Aside from that, there is currently no publicly hosted download other than the editor being included with Dawn of the Tiberium Age.
+If you need a separate download, you can contact me and ask for one on DTA's Discord server: https://discord.gg/6UtC289
 
 ## License
 
@@ -54,16 +68,15 @@ The editor is licensed under the GNU General Public License, version 2.
 If you create and publish a derivate, you need to also release your source code for the fork.
 Please see LICENSE.txt for more details.
 
-## Why only DTA? What about Tiberian Sun or Red Alert 2?
+## On remaining TS&RA2 features
 
-As DTA runs on the Tiberian Sun game engine, the editor is compatible with the TS/RA2 map format. 
-However, because DTA's terrain is flat, the editor does not presently support height levels in
-either rendering or input. Voxels are also unspported. Implementing support for those is possible, but it takes some work.
+As the editor was originally developed for DTA, it is most feature-complete for DTA's purposes.
+However, Tiberian Sun and Red Alert 2 features are being worked on, particularly height support.
 
-I'm planning to look into supporting height levels later, but I can't currently promise anything regarding the outcome.
-Regarding voxels, I don't have any plans of implementing support for them. However, I'll gladly accept contributions and provide assistance
+Regarding voxel graphics of TS&RA2, I don't have any plans of implementing support for them right now.
+However, I'll gladly accept contributions and provide assistance
 with implementation if someone in the community wants to adopt this editor for TS or RA2/YR and
-is willing to write the required code for voxels or height support.
+is willing to write the required code for voxels.
 
 ## Screenshot
 
