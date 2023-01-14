@@ -176,14 +176,14 @@ namespace TSMapEditor.Rendering
                 if (tmpData == null)
                     continue;
 
-                int heightOffset = (Constants.CellSizeY / 2) * tmpData.Height;
+                int heightOffset = Constants.CellHeight * tmpData.Height;
                 int cellBottomCoordinate = tmpData.Y + Constants.CellSizeY + heightOffset;
                 if (cellBottomCoordinate > height)
                     height = cellBottomCoordinate;
 
                 if (TMPImages[i].ExtraTexture != null)
                 {
-                    int extraCellBottomCoordinate = heightOffset + TMPImages[i].ExtraTexture.Height;
+                    int extraCellBottomCoordinate = TMPImages[i].TmpImage.YExtra + TMPImages[i].ExtraTexture.Height;
                     if (extraCellBottomCoordinate > height)
                         height = extraCellBottomCoordinate;
 

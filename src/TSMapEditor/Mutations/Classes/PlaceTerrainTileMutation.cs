@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
+using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI;
 
@@ -57,6 +58,9 @@ namespace TSMapEditor.Mutations.Classes
             // Get un-do data
             DoForArea(AddUndoDataForTile, MutationTarget.AutoLATEnabled);
 
+            MapTile originCell = MutationTarget.Map.GetTile(targetCellCoords);
+            int originLevel = originCell != null ? originCell.Level : -1;
+
             // Place the terrain
             brushSize.DoForBrushSize(offset =>
             {
@@ -73,8 +77,11 @@ namespace TSMapEditor.Mutations.Classes
                     var mapTile = MutationTarget.Map.GetTile(cx, cy);
                     if (mapTile != null && (!MutationTarget.OnlyPaintOnClearGround || mapTile.IsClearGround()))
                     {
+                        if (originLevel < 0)
+                            originLevel = mapTile.Level;
+
                         mapTile.ChangeTileIndex(tile.TileID, (byte)i);
-                        mapTile.Level = (byte)Math.Min(mapTile.Level + image.TmpImage.Height, Constants.MaxMapHeightLevel);
+                        mapTile.Level = (byte)Math.Min(originLevel + image.TmpImage.Height, Constants.MaxMapHeightLevel);
                     }
                 }
             });

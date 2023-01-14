@@ -50,6 +50,9 @@ namespace TSMapEditor.UI.CursorActions
 
             Point2D adjustedCellCoords = GetAdjustedCellCoords(cellCoords);
 
+            MapTile originTile = CursorActionTarget.Map.GetTile(adjustedCellCoords);
+            int originLevel = originTile == null ? -1 : originTile.Level;
+
             BrushSize brush = CursorActionTarget.BrushSize;
 
             brush.DoForBrushSize(offset =>
@@ -67,8 +70,11 @@ namespace TSMapEditor.UI.CursorActions
                     var mapTile = CursorActionTarget.Map.GetTile(cx, cy);
                     if (mapTile != null && (!CursorActionTarget.OnlyPaintOnClearGround || mapTile.IsClearGround()))
                     {
+                        if (originLevel < 0)
+                            originLevel = mapTile.Level;
+
                         mapTile.PreviewSubTileIndex = i;
-                        mapTile.PreviewLevel = Math.Min(mapTile.Level + image.TmpImage.Height, Constants.MaxMapHeightLevel);
+                        mapTile.PreviewLevel = Math.Min(originLevel + image.TmpImage.Height, Constants.MaxMapHeightLevel);
                         action(mapTile);
                     }
                 }
