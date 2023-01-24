@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.Input;
+using System;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 
@@ -17,10 +18,10 @@ namespace TSMapEditor.Rendering
             Map = map;
         }
 
+        public event EventHandler CameraUpdated;
+
         private readonly WindowManager WindowManager;
         private readonly Map Map;
-
-        
 
         private Point2D _topLeftPoint;
         public Point2D TopLeftPoint
@@ -31,6 +32,7 @@ namespace TSMapEditor.Rendering
                 _topLeftPoint = value;
                 _floatTopLeftPoint = new Vector2(_topLeftPoint.X, _topLeftPoint.Y);
                 ConstrainCamera();
+                CameraUpdated?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -43,6 +45,7 @@ namespace TSMapEditor.Rendering
                 _floatTopLeftPoint = value;
                 _topLeftPoint = new Point2D((int)_floatTopLeftPoint.X, (int)_floatTopLeftPoint.Y);
                 ConstrainCamera();
+                CameraUpdated?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -74,6 +77,8 @@ namespace TSMapEditor.Rendering
 
                     FloatTopLeftPoint += new Vector2((float)(differenceX / 2.0), (float)(differenceY / 2.0));
                 }
+
+                CameraUpdated?.Invoke(this, EventArgs.Empty);
             }
         }
 

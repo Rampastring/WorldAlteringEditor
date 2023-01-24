@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
@@ -92,6 +93,7 @@ namespace TSMapEditor.Rendering
             this.windowController = windowController;
 
             Camera = new Camera(WindowManager, Map);
+            Camera.CameraUpdated += (s, e) => InvalidateMap();
         }
 
         public EditorState EditorState { get; }
@@ -151,7 +153,7 @@ namespace TSMapEditor.Rendering
         /// </summary>
         //private List<RefreshPoint> refreshes = new List<RefreshPoint>();
 
-        private List<Refresh> newRefreshes = new List<Refresh>();
+        // private List<Refresh> newRefreshes = new List<Refresh>();
 
         private CopyTerrainCursorAction copyTerrainCursorAction;
         private PasteTerrainCursorAction pasteTerrainCursorAction;
@@ -161,25 +163,28 @@ namespace TSMapEditor.Rendering
 
         private Point lastClickedPoint;
 
+        private List<GameObject> gameObjectsToRender = new List<GameObject>();
+
         private Stopwatch refreshStopwatch;
 
         public void AddRefreshPoint(Point2D point, int size = 1)
         {
-            if (mapInvalidated)
-                return;
+            InvalidateMap();
 
-            if (newRefreshes.Exists(nr => point == nr.InitPoint))
-                return;
-
-            var newRefresh = new Refresh(Map, refreshSizeSetting);
-            newRefresh.Initiate(size, point);
-            newRefreshes.Add(newRefresh);
+            // if (mapInvalidated)
+            //     return;
+            //
+            // if (newRefreshes.Exists(nr => point == nr.InitPoint))
+            //     return;
+            //
+            // var newRefresh = new Refresh(Map, refreshSizeSetting);
+            // newRefresh.Initiate(size, point);
+            // newRefreshes.Add(newRefresh);
         }
 
         public void InvalidateMap()
         {
-            // refreshes.Clear();
-            newRefreshes.Clear();
+            // newRefreshes.Clear();
             mapInvalidated = true;
         }
 
@@ -308,28 +313,14 @@ namespace TSMapEditor.Rendering
                DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.PreserveContents);
         }
 
-        Stopwatch sw = new Stopwatch();
         public void DrawWholeMap()
         {
-            sw.Restart();
+            refreshStopwatch.Restart();
 
             Renderer.PushRenderTarget(mapRenderTarget);
             GraphicsDevice.Clear(Color.Black);
 
-            for (int i = 0; i < Map.Tiles.Length; i++)
-            {
-                var row = Map.Tiles[i];
-
-                for (int j = 0; j < row.Length; j++)
-                {
-                    if (row[j] == null)
-                    {
-                        continue;
-                    }
-
-                    DrawTerrainTile(row[j]);
-                }
-            }
+            DoForVisibleCells(DrawTerrainTile);
 
             DrawSmudges();
             DrawOverlays();
@@ -342,23 +333,72 @@ namespace TSMapEditor.Rendering
 
             if (EditorState.HighlightImpassableCells)
             {
-                Map.DoForAllValidTiles(cell => DrawImpassableHighlight(cell));
+                Map.DoForAllValidTiles(DrawImpassableHighlight);
             }
 
             if (EditorState.HighlightIceGrowth)
             {
-                Map.DoForAllValidTiles(cell => DrawIceGrowthHighlight(cell));
+                Map.DoForAllValidTiles(DrawIceGrowthHighlight);
             }
 
             Renderer.PopRenderTarget();
 
-            sw.Stop();
-            Console.WriteLine("Map render time: " + sw.Elapsed.TotalMilliseconds);
+            refreshStopwatch.Stop();
+            Console.WriteLine("Map render time: " + refreshStopwatch.Elapsed.TotalMilliseconds);
+        }
+
+        private void DoForVisibleCells(Action<MapTile> action)
+        {
+            int tlX = Camera.TopLeftPoint.X >= 0 ? Camera.TopLeftPoint.X : 0;
+            int tlY = Camera.TopLeftPoint.Y >= 0 ? Camera.TopLeftPoint.Y : 0;
+            Point2D firstVisibleCellCoords = CellMath.CellCoordsFromPixelCoords_2D(new Point2D(tlX, tlY), Map);
+
+            int camRight = GetCameraRightXCoord();
+            int camBottom = GetCameraBottomYCoord();
+
+            int xCellCount = (camRight - tlX) / Constants.CellSizeX;
+            xCellCount += 2; // Add some padding for edge cases
+
+            int yCellCount = (camBottom - tlY) / Constants.CellSizeY;
+
+            // Add some padding to take height levels into account
+            const int yPadding = 10;
+            yCellCount += yPadding * 2;
+
+            for (int offset = 0; offset < yCellCount; offset++)
+            {
+                int x = firstVisibleCellCoords.X + offset;
+                int y = firstVisibleCellCoords.Y + offset;
+
+                // Draw two horizontal rows of the map
+
+                for (int sx = 0; sx < xCellCount; sx++)
+                {
+                    int coordX = x + sx;
+                    int coordY = y - sx;
+
+                    var cell = Map.GetTile(coordX, coordY);
+
+                    if (cell != null)
+                        action(cell);
+                }
+
+                for (int sx = 0; sx < xCellCount; sx++)
+                {
+                    int coordX = x + 1 + sx;
+                    int coordY = y - sx;
+
+                    var cell = Map.GetTile(coordX, coordY);
+
+                    if (cell != null)
+                        action(cell);
+                }
+            }
         }
 
         private void DrawSmudges()
         {
-            Map.DoForAllValidTiles(t =>
+            DoForVisibleCells(t =>
             {
                 if (t.Smudge != null)
                     DrawObject(t.Smudge);
@@ -367,7 +407,7 @@ namespace TSMapEditor.Rendering
 
         private void DrawOverlays()
         {
-            Map.DoForAllValidTiles(t =>
+            DoForVisibleCells(t =>
             {
                 if (t.Overlay != null)
                     DrawObject(t.Overlay);
@@ -376,7 +416,7 @@ namespace TSMapEditor.Rendering
 
         private void DrawWaypoints()
         {
-            Map.DoForAllValidTiles(t =>
+            DoForVisibleCells(t =>
             {
                 if (t.Waypoint != null)
                     DrawWaypoint(t.Waypoint);
@@ -385,23 +425,36 @@ namespace TSMapEditor.Rendering
 
         private void DrawCellTags()
         {
-            Map.DoForAllValidTiles(t =>
+            DoForVisibleCells(t =>
             {
                 if (t.CellTag != null)
                     DrawCellTag(t.CellTag);
             });
         }
 
+        private int CompareGameObjectsForRendering(GameObject obj1, GameObject obj2)
+        {
+            int val1 = obj1.GetYPositionForDrawOrder();
+            int val2 = obj2.GetYPositionForDrawOrder();
+
+            if (val1 > val2)
+                return 1;
+            else if (val1 < val2)
+                return -1;
+
+            return obj1.GetXPositionForDrawOrder().CompareTo(obj2.GetXPositionForDrawOrder());
+        }
+
         private void DrawObjects()
         {
-            List<GameObject> gameObjects = new List<GameObject>(Map.TerrainObjects);
-            gameObjects.AddRange(Map.Structures);
-            gameObjects.AddRange(Map.Aircraft);
-            gameObjects.AddRange(Map.Units);
-            gameObjects.AddRange(Map.Infantry);
-            gameObjects = gameObjects.OrderBy(s => s.GetYPositionForDrawOrder())
-                .ThenBy(s => s.GetXPositionForDrawOrder()).ToList();
-            gameObjects.ForEach(go => DrawObject(go));
+            gameObjectsToRender.Clear();
+            gameObjectsToRender.AddRange(Map.TerrainObjects);
+            gameObjectsToRender.AddRange(Map.Structures);
+            gameObjectsToRender.AddRange(Map.Aircraft);
+            gameObjectsToRender.AddRange(Map.Units);
+            gameObjectsToRender.AddRange(Map.Infantry);
+            gameObjectsToRender.Sort(CompareGameObjectsForRendering);
+            gameObjectsToRender.ForEach(DrawObject);
         }
 
         private void DrawObject(GameObject gameObject)
@@ -495,6 +548,40 @@ namespace TSMapEditor.Rendering
                     break;
             }
 
+            int frameIndex = -1;
+
+            if (graphics != null && graphics.Frames != null && graphics.Frames.Length > 0)
+                frameIndex = gameObject.GetFrameIndex(graphics.Frames.Length);
+
+            PositionedTexture frame = null;
+
+            int yDrawOffset = gameObject.GetYDrawOffset();
+            int finalDrawPointX = drawPoint.X;
+            int finalDrawPointRight = finalDrawPointX;
+            int finalDrawPointY = drawPoint.Y;
+            int finalDrawPointBottom = finalDrawPointY;
+
+            if (frameIndex > -1 && frameIndex < graphics.Frames.Length)
+            {
+                frame = graphics.Frames[frameIndex];
+
+                if (frame != null)
+                {
+                    finalDrawPointX = drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2;
+                    finalDrawPointY = drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset;
+
+                    finalDrawPointRight = finalDrawPointX + frame.Texture.Width;
+                    finalDrawPointBottom = finalDrawPointY + frame.Texture.Height;
+                }
+            }
+
+            // If the object is not in view, skip
+            if (finalDrawPointRight < Camera.TopLeftPoint.X || finalDrawPointX > GetCameraRightXCoord())
+                return;
+
+            if (finalDrawPointBottom < Camera.TopLeftPoint.Y || finalDrawPointY > GetCameraBottomYCoord())
+                return;
+
             if (gameObject.WhatAmI() == RTTIType.Building)
             {
                 var structure = (Structure)gameObject;
@@ -525,8 +612,6 @@ namespace TSMapEditor.Rendering
                 return;
             }
 
-            int yDrawOffset = gameObject.GetYDrawOffset();
-
             if (Constants.DrawShadows)
             {
                 int shadowFrameIndex = gameObject.GetShadowFrameIndex(graphics.Frames.Length);
@@ -542,25 +627,20 @@ namespace TSMapEditor.Rendering
                     }
                 }
             }
-            
-            int frameIndex = gameObject.GetFrameIndex(graphics.Frames.Length);
-            if (frameIndex >= graphics.Frames.Length)
-                return;
 
-            var frame = graphics.Frames[frameIndex];
             if (frame == null)
                 return;
 
             var texture = frame.Texture;
-            DrawTexture(texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
-                drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
+            DrawTexture(texture, new Rectangle(
+                finalDrawPointX, finalDrawPointY,
                 texture.Width, texture.Height), Constants.HQRemap ? Color.White : remapColor);
 
             if (Constants.HQRemap && graphics.RemapFrames != null)
             {
-                DrawTexture(graphics.RemapFrames[frameIndex].Texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
-                    drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
-                    texture.Width, texture.Height), remapColor);
+                DrawTexture(graphics.RemapFrames[frameIndex].Texture,
+                    new Rectangle(finalDrawPointX, finalDrawPointY, texture.Width, texture.Height),
+                    remapColor);
             }
 
             if (gameObject.WhatAmI() == RTTIType.Unit)
@@ -631,10 +711,31 @@ namespace TSMapEditor.Rendering
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int GetCameraWidth() => (int)(Width / (float)Camera.ZoomLevel);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int GetCameraHeight() => (int)(Height / (float)Camera.ZoomLevel);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int GetCameraRightXCoord() => Math.Min(Camera.TopLeftPoint.X + GetCameraWidth(), Map.Size.X * Constants.CellSizeX);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int GetCameraBottomYCoord() => Math.Min(Camera.TopLeftPoint.Y + GetCameraHeight(), Map.Size.Y * Constants.CellSizeY);
+
         public void DrawTerrainTile(MapTile tile)
         {
             Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(new Point2D(tile.X, tile.Y), Map);
+
+            if (drawPoint.X + Constants.CellSizeX < Camera.TopLeftPoint.X || drawPoint.X > GetCameraRightXCoord())
+                return;
             
+            if (drawPoint.Y + Constants.CellSizeY < Camera.TopLeftPoint.Y)
+                return;
+
+            if (drawPoint.Y - (tile.Level * Constants.CellHeight) > GetCameraBottomYCoord())
+                return;
+
             if (tile.TileIndex >= TheaterGraphics.TileCount)
                 return;
 
@@ -1186,15 +1287,15 @@ namespace TSMapEditor.Rendering
                 CursorAction.PreMapDraw(tileUnderCursor.CoordsToPoint());
             }
 
-            if (mapInvalidated || (!Constants.IsFlatWorld && newRefreshes.Count > 0))
+            if (mapInvalidated)
             {
                 DrawWholeMap();
                 mapInvalidated = false;
-                newRefreshes.Clear();
+                // newRefreshes.Clear();
                 DrawTubes();
             }
 
-            if (newRefreshes.Count > 0)
+            /*if (newRefreshes.Count > 0)
             {
                 Renderer.PushRenderTarget(mapRenderTarget);
 
@@ -1269,14 +1370,7 @@ namespace TSMapEditor.Rendering
 
                 DrawTubes();
                 Renderer.PopRenderTarget();
-            }
-
-
-            // foreach (var refresh in refreshes)
-            // {
-            //     RefreshOverArea(refresh);
-            // }
-            // refreshes.Clear();
+            }*/
 
             DrawWorld();
 

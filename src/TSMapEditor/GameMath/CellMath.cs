@@ -34,7 +34,7 @@ namespace TSMapEditor.GameMath
             return preHeightCoords - new Point2D(0, cell.Level * Constants.CellHeight);
         }
 
-        public static Point2D CellCoordsFromPixelCoords(Point2D pixelCoords, Map map)
+        public static Point2D CellCoordsFromPixelCoords_2D(Point2D pixelCoords, Map map)
         {
             // It's likely possible to find a more efficient algorithm for this
 
@@ -62,8 +62,15 @@ namespace TSMapEditor.GameMath
             else if (rx < (ry - Constants.CellSizeY / 2) * 2)
                 cy++;
 
+            return new Point2D(cx, cy);
+        }
+
+        public static Point2D CellCoordsFromPixelCoords(Point2D pixelCoords, Map map)
+        {
+            Point2D coords2D = CellCoordsFromPixelCoords_2D(pixelCoords, map);
+
             if (Constants.IsFlatWorld)
-                return new Point2D(cx, cy);
+                return coords2D;
 
             Point2D nearestCenterCoords = new Point2D(-1, -1);
             float nearestDistance = float.MaxValue;
@@ -77,7 +84,7 @@ namespace TSMapEditor.GameMath
                     // traverse height
                     for (int i = 0; i < 14; i++)
                     {
-                        var otherCellCoords = new Point2D(cx, cy) + new Point2D(x, y) + new Point2D(i, i);
+                        var otherCellCoords = coords2D + new Point2D(x, y) + new Point2D(i, i);
                         var otherCell = map.GetTile(otherCellCoords);
 
                         if (otherCell != null)
