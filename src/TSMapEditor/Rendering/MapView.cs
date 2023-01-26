@@ -5,9 +5,9 @@ using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations;
@@ -76,7 +76,6 @@ namespace TSMapEditor.Rendering
     public class OldMapView : XNAControl, ICursorActionTarget, IMutationTarget
 #endif
     {
-        private int MaxRefreshTimeInFrame = 24;
         private const float RightClickScrollRateDivisor = 64f;
 
 #if !ADVMAPVIEW
@@ -128,38 +127,27 @@ namespace TSMapEditor.Rendering
         private Texture2D iceGrowthHighlightTexture;
 
         private RenderTarget2D mapRenderTarget;
-        private RenderTarget2D objectsRenderTarget;
+        private RenderTarget2D depthRenderTarget;
         private RenderTarget2D transparencyRenderTarget;
+
+        private Effect colorDrawEffect;
+        private Effect depthApplyEffect;
 
         private MapTile tileUnderCursor;
         private MapTile lastTileUnderCursor;
 
         private bool mapInvalidated = true;
 
-        private int refreshSizeSetting;
         private int scrollRate;
 
         private bool isDraggingObject = false;
         private bool isRotatingObject = false;
         private IMovable draggedOrRotatedObject = null;
 
-        // For right-click scrolling
         private bool isRightClickScrolling = false;
         private Point rightClickScrollInitPos = new Point(-1, -1);
 
-        /// <summary>
-        /// A list of cells that have been invalidated.
-        /// Areas around these cells are to be redrawn.
-        /// </summary>
-        //private List<RefreshPoint> refreshes = new List<RefreshPoint>();
-
-        // private List<Refresh> newRefreshes = new List<Refresh>();
-
-        private CopyTerrainCursorAction copyTerrainCursorAction;
-        private PasteTerrainCursorAction pasteTerrainCursorAction;
-
-        private Texture2D mapWideOverlayTexture;
-        private float mapWideOverlayTextureOpacity;
+        private MapWideOverlay mapWideOverlay;
 
         private Point lastClickedPoint;
 
@@ -167,24 +155,15 @@ namespace TSMapEditor.Rendering
 
         private Stopwatch refreshStopwatch;
 
+        private bool isRenderingDepth;
+
         public void AddRefreshPoint(Point2D point, int size = 1)
         {
             InvalidateMap();
-
-            // if (mapInvalidated)
-            //     return;
-            //
-            // if (newRefreshes.Exists(nr => point == nr.InitPoint))
-            //     return;
-            //
-            // var newRefresh = new Refresh(Map, refreshSizeSetting);
-            // newRefresh.Initiate(size, point);
-            // newRefreshes.Add(newRefresh);
         }
 
         public void InvalidateMap()
         {
-            // newRefreshes.Clear();
             mapInvalidated = true;
         }
 
@@ -192,20 +171,16 @@ namespace TSMapEditor.Rendering
         {
             base.Initialize();
 
+            LoadShaders();
+
             impassableCellHighlightTexture = AssetLoader.LoadTexture("impassablehighlight.png");
             iceGrowthHighlightTexture = AssetLoader.LoadTexture("icehighlight.png");
 
-            const string MapWideOverlayTextureName = "mapwideoverlay.png";
-            if (AssetLoader.AssetExists(MapWideOverlayTextureName))
-                mapWideOverlayTexture = AssetLoader.LoadTexture(MapWideOverlayTextureName);
-            EditorState.MapWideOverlayExists = mapWideOverlayTexture != null;
-            mapWideOverlayTextureOpacity = UserSettings.Instance.MapWideOverlayOpacity / 255.0f;
+            mapWideOverlay = new MapWideOverlay();
+            EditorState.MapWideOverlayExists = mapWideOverlay.HasTexture;
 
-            mapRenderTarget = CreateFullMapRenderTarget();
-            objectsRenderTarget = CreateFullMapRenderTarget();
-            transparencyRenderTarget = CreateFullMapRenderTarget();
+            RefreshRenderTargets();
 
-            refreshSizeSetting = UserSettings.Instance.RefreshSize;
             scrollRate = UserSettings.Instance.ScrollRate;
 
             EditorState.CursorActionChanged += EditorState_CursorActionChanged;
@@ -220,36 +195,23 @@ namespace TSMapEditor.Rendering
                 WindowManager.AddAndInitializeControl(mmw);
             };
 
-            copyTerrainCursorAction = new CopyTerrainCursorAction(this);
-            pasteTerrainCursorAction = new PasteTerrainCursorAction(this);
-
-            KeyboardCommands.Instance.Copy.Triggered += (s, e) =>
-            {
-                copyTerrainCursorAction.StartCellCoords = null;
-                copyTerrainCursorAction.EntryTypes = windowController.CopiedEntryTypesWindow.GetEnabledEntryTypes();
-                CursorAction = copyTerrainCursorAction;
-            };
-
-            KeyboardCommands.Instance.Paste.Triggered += (s, e) =>
-            {
-                CursorAction = pasteTerrainCursorAction;
-            };
-
             windowController.Initialized += (s, e) => windowController.MinimapWindow.MegamapClicked += MinimapWindow_MegamapClicked;
             Map.LocalSizeChanged += (s, e) => InvalidateMap();
             Map.MapResized += Map_MapResized;
 
-            Map.HouseColorChanged += (s, e) =>
-            {
-                Map.DoForAllTechnos(obj => { if (obj.Owner == e.House) AddRefreshPoint(obj.Position, 0); });
-            };
-
+            Map.HouseColorChanged += (s, e) => InvalidateMap();
             EditorState.HighlightImpassableCellsChanged += (s, e) => InvalidateMap();
             EditorState.HighlightIceGrowthChanged += (s, e) => InvalidateMap();
 
             KeyboardCommands.Instance.RotateUnitOneStep.Triggered += RotateUnitOneStep_Triggered;
 
             refreshStopwatch = new Stopwatch();
+        }
+
+        private void LoadShaders()
+        {
+            colorDrawEffect = AssetLoader.LoadEffect("Shaders/ColorDraw");
+            depthApplyEffect = AssetLoader.LoadEffect("Shaders/DepthApply");
         }
 
         private void RotateUnitOneStep_Triggered(object sender, EventArgs e)
@@ -273,17 +235,24 @@ namespace TSMapEditor.Rendering
 
         private void Map_MapResized(object sender, EventArgs e)
         {
-            // We need to re-create our map texture
-            mapRenderTarget?.Dispose();
-            transparencyRenderTarget?.Dispose();
-
-            mapRenderTarget = CreateFullMapRenderTarget();
-            transparencyRenderTarget = CreateFullMapRenderTarget();
+            // We need to re-create our map textures
+            RefreshRenderTargets();
 
             windowController.MinimapWindow.MegamapTexture = mapRenderTarget;
 
             // And then re-draw the whole map
             InvalidateMap();
+        }
+
+        private void RefreshRenderTargets()
+        {
+            mapRenderTarget?.Dispose();
+            depthRenderTarget?.Dispose();
+            transparencyRenderTarget?.Dispose();
+
+            mapRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
+            depthRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Single);
+            transparencyRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
         }
 
         private void MinimapWindow_MegamapClicked(object sender, MegamapClickedEventArgs e)
@@ -294,7 +263,7 @@ namespace TSMapEditor.Rendering
         private void FrameworkMode_Triggered(object sender, EventArgs e)
         {
             EditorState.IsMarbleMadness = !EditorState.IsMarbleMadness;
-            mapInvalidated = true;
+            InvalidateMap();
         }
 
         private void EditorState_CursorActionChanged(object sender, EventArgs e)
@@ -305,27 +274,52 @@ namespace TSMapEditor.Rendering
             lastTileUnderCursor = null;
         }
 
-        private RenderTarget2D CreateFullMapRenderTarget()
+        private RenderTarget2D CreateFullMapRenderTarget(SurfaceFormat surfaceFormat)
         {
            return new RenderTarget2D(GraphicsDevice,
-               Map.Size.X * Constants.CellSizeX,
-               Map.Size.Y * Constants.CellSizeY + Constants.CellSizeY / 2, false, SurfaceFormat.Color,
-               DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.PreserveContents);
+               Map.WidthInPixels,
+               Map.HeightInPixels, false, surfaceFormat,
+               DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
         }
 
         public void DrawWholeMap()
         {
             refreshStopwatch.Restart();
 
+            // First render depth
+            Renderer.PushRenderTarget(depthRenderTarget);
+            GraphicsDevice.Clear(Color.Black);
+
+            isRenderingDepth = true;
+            Renderer.PushSettings(new SpriteBatchSettings(SpriteSortMode.Immediate, BlendState.Opaque, null, null, null, depthApplyEffect));
+            DoForVisibleCells(DrawTerrainTile);
+            Renderer.PopSettings();
+            isRenderingDepth = false;
+
+            Renderer.PopRenderTarget();
+
+            // Then render color
             Renderer.PushRenderTarget(mapRenderTarget);
             GraphicsDevice.Clear(Color.Black);
 
+            Renderer.PushSettings(new SpriteBatchSettings(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, colorDrawEffect));
             DoForVisibleCells(DrawTerrainTile);
-
             DrawSmudges();
             DrawOverlays();
-
             DrawObjects();
+            Renderer.PopSettings();
+
+            // Then draw on-map UI elements
+            DrawMapUIElements();
+
+            Renderer.PopRenderTarget();
+
+            refreshStopwatch.Stop();
+            Console.WriteLine("Map render time: " + refreshStopwatch.Elapsed.TotalMilliseconds);
+        }
+
+        private void DrawMapUIElements()
+        {
             DrawCellTags();
             DrawWaypoints();
 
@@ -340,11 +334,22 @@ namespace TSMapEditor.Rendering
             {
                 Map.DoForAllValidTiles(DrawIceGrowthHighlight);
             }
+        }
 
-            Renderer.PopRenderTarget();
+        private void SetEffectParams(Effect effect, float bottomDepth, float topDepth,
+            Vector2 worldTextureCoordinates, Vector2 spriteSizeToWorldSizeRatio, Texture2D depthTexture)
+        {
+            effect.Parameters["SpriteDepthBottom"].SetValue(bottomDepth);
+            effect.Parameters["SpriteDepthTop"].SetValue(topDepth);
+            effect.Parameters["WorldTextureCoordinates"].SetValue(worldTextureCoordinates);
+            effect.Parameters["SpriteSizeToWorldSizeRatio"].SetValue(spriteSizeToWorldSizeRatio);
+            GraphicsDevice.SamplerStates[1] = SamplerState.LinearClamp;
 
-            refreshStopwatch.Stop();
-            Console.WriteLine("Map render time: " + refreshStopwatch.Elapsed.TotalMilliseconds);
+            if (depthTexture != null)
+            {
+                effect.Parameters["DepthTexture"].SetValue(depthTexture);
+                GraphicsDevice.Textures[1] = depthTexture;
+            }
         }
 
         private void DoForVisibleCells(Action<MapTile> action)
@@ -362,8 +367,8 @@ namespace TSMapEditor.Rendering
             int yCellCount = (camBottom - tlY) / Constants.CellSizeY;
 
             // Add some padding to take height levels into account
-            const int yPadding = 10;
-            yCellCount += yPadding * 2;
+            const int yPadding = 8;
+            yCellCount += yPadding;
 
             for (int offset = 0; offset < yCellCount; offset++)
             {
@@ -393,6 +398,127 @@ namespace TSMapEditor.Rendering
                     if (cell != null)
                         action(cell);
                 }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int GetCameraWidth() => (int)(Width / (float)Camera.ZoomLevel);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int GetCameraHeight() => (int)(Height / (float)Camera.ZoomLevel);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int GetCameraRightXCoord() => Math.Min(Camera.TopLeftPoint.X + GetCameraWidth(), Map.Size.X * Constants.CellSizeX);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int GetCameraBottomYCoord() => Math.Min(Camera.TopLeftPoint.Y + GetCameraHeight(), Map.Size.Y * Constants.CellSizeY);
+
+        public void DrawTerrainTile(MapTile tile)
+        {
+            if (tile.TileIndex >= TheaterGraphics.TileCount)
+                return;
+
+            Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(new Point2D(tile.X, tile.Y), Map);
+
+            if (drawPoint.X + Constants.CellSizeX < Camera.TopLeftPoint.X || drawPoint.X > GetCameraRightXCoord())
+                return;
+
+            if (drawPoint.Y + Constants.CellSizeY < Camera.TopLeftPoint.Y)
+                return;
+
+            if (tile.TileImage == null)
+                tile.TileImage = TheaterGraphics.GetTileGraphics(tile.TileIndex);
+
+            TileImage tileImage;
+            int subTileIndex;
+            int level;
+            if (tile.PreviewTileImage != null)
+            {
+                tileImage = tile.PreviewTileImage;
+                subTileIndex = tile.PreviewSubTileIndex;
+                level = tile.PreviewLevel;
+            }
+            else
+            {
+                tileImage = tile.TileImage;
+                subTileIndex = tile.SubTileIndex;
+                level = tile.Level;
+            }
+
+            // Framework Mode / Marble Madness support
+            if (EditorState.IsMarbleMadness)
+                tileImage = TheaterGraphics.GetMarbleMadnessTileGraphics(tileImage.TileID);
+
+            MGTMPImage tmpImage = tileImage.TMPImages[subTileIndex];
+
+            int extraDrawY = drawPoint.Y + tmpImage.TmpImage.YExtra - tmpImage.TmpImage.Y;
+
+            if (drawPoint.Y - (tile.Level * Constants.CellHeight) > GetCameraBottomYCoord())
+            {
+                if (tmpImage.ExtraTexture == null)
+                    return;
+
+                // If we have extra graphics, need to check whether they are on screen
+                if (extraDrawY - (tile.Level * Constants.CellHeight) > GetCameraBottomYCoord())
+                    return;
+            }
+
+            int originalDrawPointY = drawPoint.Y;
+            drawPoint -= new Point2D(0, (Constants.CellSizeY / 2) * level);
+
+            if (subTileIndex >= tileImage.TMPImages.Length)
+            {
+                DrawString(subTileIndex.ToString(), 0, new Vector2(drawPoint.X, drawPoint.Y), Color.Red);
+                return;
+            }
+
+            if (tmpImage.Texture != null)
+            {
+                float depthTop = originalDrawPointY / (float)Map.HeightInPixels;
+                float depthBottom = (originalDrawPointY + tmpImage.Texture.Height) / (float)Map.HeightInPixels;
+                depthTop = 1.0f - depthTop;
+                depthBottom = 1.0f - depthBottom;
+
+                Vector2 worldTextureCoordinates = new Vector2(drawPoint.X / (float)Map.WidthInPixels, drawPoint.Y / (float)Map.HeightInPixels);
+                Vector2 spriteSizeToWorldSizeRatio = new Vector2(Constants.CellSizeX / (float)Map.WidthInPixels, Constants.CellSizeY / (float)Map.HeightInPixels);
+
+                if (isRenderingDepth)
+                    SetEffectParams(depthApplyEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, null);
+                else
+                    SetEffectParams(colorDrawEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTarget);
+
+                DrawTexture(tmpImage.Texture, new Rectangle(drawPoint.X, drawPoint.Y,
+                    Constants.CellSizeX, Constants.CellSizeY), null, Color.White, 0f, Vector2.Zero, SpriteEffects.None, 0f);
+            }
+
+            if (tmpImage.ExtraTexture != null)
+            {
+                int yDrawPointWithoutCellHeight = originalDrawPointY + tmpImage.TmpImage.YExtra - tmpImage.TmpImage.Y;
+                float depthTop = yDrawPointWithoutCellHeight / (float)Map.HeightInPixels;
+                float depthBottom = (yDrawPointWithoutCellHeight + tmpImage.ExtraTexture.Height) / (float)Map.HeightInPixels;
+                depthTop = 1.0f - depthTop;
+                depthBottom = 1.0f - depthBottom;
+
+                int exDrawPointX = drawPoint.X + tmpImage.TmpImage.XExtra - tmpImage.TmpImage.X;
+                int exDrawPointY = drawPoint.Y + tmpImage.TmpImage.YExtra - tmpImage.TmpImage.Y;
+
+                Vector2 worldTextureCoordinates = new Vector2(exDrawPointX / (float)Map.WidthInPixels, exDrawPointY / (float)Map.HeightInPixels);
+                Vector2 spriteSizeToWorldSizeRatio = new Vector2(tmpImage.ExtraTexture.Width / (float)Map.WidthInPixels, tmpImage.ExtraTexture.Height / (float)Map.HeightInPixels);
+
+                if (isRenderingDepth)
+                    SetEffectParams(depthApplyEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, null);
+                else
+                    SetEffectParams(colorDrawEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTarget);
+
+                DrawTexture(tmpImage.ExtraTexture,
+                    new Rectangle(exDrawPointX,
+                    exDrawPointY,
+                    tmpImage.ExtraTexture.Width,
+                    tmpImage.ExtraTexture.Height),
+                    null,
+                    Color.White,
+                    0f,
+                    Vector2.Zero, SpriteEffects.None, 0f);
             }
         }
 
@@ -432,8 +558,30 @@ namespace TSMapEditor.Rendering
             });
         }
 
+        private int BuildingAndNonBuildingComparison(Structure obj1, GameObject obj2) 
+        {
+            // Check whether the object is in front of the building
+
+            if (obj2.Position.Y >= obj1.Position.Y + obj1.ObjectType.ArtConfig.FoundationY ||
+                obj2.Position.X >= obj1.Position.X + obj1.ObjectType.ArtConfig.FoundationX)
+            {
+                return -1;
+            }
+
+            return 1;
+        }
+
         private int CompareGameObjectsForRendering(GameObject obj1, GameObject obj2)
         {
+            if (obj1.WhatAmI() == RTTIType.Building && obj2.WhatAmI() != RTTIType.Building)
+            {
+                return BuildingAndNonBuildingComparison(obj1 as Structure, obj2);
+            }
+            else if (obj2.WhatAmI() == RTTIType.Building && obj1.WhatAmI() != RTTIType.Building)
+            {
+                return BuildingAndNonBuildingComparison(obj2 as Structure, obj1) * -1;
+            }
+
             int val1 = obj1.GetYPositionForDrawOrder();
             int val2 = obj2.GetYPositionForDrawOrder();
 
@@ -466,6 +614,8 @@ namespace TSMapEditor.Rendering
             Color remapColor = Color.White;
             Color foundationLineColor = Color.White;
             string iniName = string.Empty;
+
+            int yDrawPointWithoutCellHeight = drawPoint.Y;
 
             var mapCell = Map.GetTile(gameObject.Position);
             int heightOffset = mapCell.Level * Constants.CellHeight;
@@ -548,6 +698,9 @@ namespace TSMapEditor.Rendering
                     break;
             }
 
+            // float depth = (originalDrawPoint + depthOffset) / (float)mapRenderTarget.Height;
+            // depth = 1.0f - depth;
+
             int frameIndex = -1;
 
             if (graphics != null && graphics.Frames != null && graphics.Frames.Length > 0)
@@ -569,6 +722,7 @@ namespace TSMapEditor.Rendering
                 {
                     finalDrawPointX = drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2;
                     finalDrawPointY = drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset;
+                    yDrawPointWithoutCellHeight = yDrawPointWithoutCellHeight - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset;
 
                     finalDrawPointRight = finalDrawPointX + frame.Texture.Width;
                     finalDrawPointBottom = finalDrawPointY + frame.Texture.Height;
@@ -623,7 +777,13 @@ namespace TSMapEditor.Rendering
                         var shadowTexture = shadowFrame.Texture;
                         DrawTexture(shadowTexture, new Rectangle(drawPoint.X - shadowFrame.ShapeWidth / 2 + shadowFrame.OffsetX + Constants.CellSizeX / 2,
                             drawPoint.Y - shadowFrame.ShapeHeight / 2 + shadowFrame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
-                            shadowTexture.Width, shadowTexture.Height), new Color(0, 0, 0, 128));
+                            shadowTexture.Width, shadowTexture.Height),
+                            null,
+                            new Color(0, 0, 0, 128),
+                            0f,
+                            Vector2.Zero,
+                            SpriteEffects.None,
+                            0f);
                     }
                 }
             }
@@ -632,15 +792,37 @@ namespace TSMapEditor.Rendering
                 return;
 
             var texture = frame.Texture;
+            int depthOffset = Constants.CellSizeY;
+
+            float depthTop = (yDrawPointWithoutCellHeight + depthOffset) / (float)Map.HeightInPixels;
+            float depthBottom = (yDrawPointWithoutCellHeight + texture.Height + depthOffset) / (float)Map.HeightInPixels;
+            depthTop = 1.0f - depthTop;
+            depthBottom = 1.0f - depthBottom;
+
+            Vector2 worldTextureCoordinates = new Vector2(finalDrawPointX / (float)Map.WidthInPixels, finalDrawPointY / (float)Map.HeightInPixels);
+            Vector2 spriteSizeToWorldSizeRatio = new Vector2(texture.Width / (float)Map.WidthInPixels, texture.Height / (float)Map.HeightInPixels);
+
+            if (isRenderingDepth)
+                SetEffectParams(depthApplyEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, null);
+            else
+                SetEffectParams(colorDrawEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTarget);
+
             DrawTexture(texture, new Rectangle(
                 finalDrawPointX, finalDrawPointY,
-                texture.Width, texture.Height), Constants.HQRemap ? Color.White : remapColor);
+                texture.Width, texture.Height),
+                null, Constants.HQRemap ? Color.White : remapColor,
+                0f, Vector2.Zero, SpriteEffects.None, 0f);
 
             if (Constants.HQRemap && graphics.RemapFrames != null)
             {
                 DrawTexture(graphics.RemapFrames[frameIndex].Texture,
                     new Rectangle(finalDrawPointX, finalDrawPointY, texture.Width, texture.Height),
-                    remapColor);
+                    null,
+                    remapColor,
+                    0f,
+                    Vector2.Zero,
+                    SpriteEffects.None,
+                    0f);
             }
 
             if (gameObject.WhatAmI() == RTTIType.Unit)
@@ -656,15 +838,28 @@ namespace TSMapEditor.Rendering
                         if (frame == null)
                             return;
                         texture = frame.Texture;
+
                         DrawTexture(texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
                             drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
-                            texture.Width, texture.Height), Constants.HQRemap ? Color.White : remapColor);
+                            texture.Width, texture.Height),
+                            null,
+                            Constants.HQRemap ? Color.White : remapColor,
+                            0f,
+                            Vector2.Zero,
+                            SpriteEffects.None,
+                            0f);
 
                         if (Constants.HQRemap && graphics.RemapFrames != null)
                         {
                             DrawTexture(graphics.RemapFrames[turretFrameIndex].Texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
                                 drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
-                                texture.Width, texture.Height), remapColor);
+                                texture.Width, texture.Height),
+                                null,
+                                remapColor,
+                                0f,
+                                Vector2.Zero,
+                                SpriteEffects.None,
+                                0f);
                         }
                     }
                 }
@@ -679,7 +874,6 @@ namespace TSMapEditor.Rendering
             Color replacementColor = Color.Yellow;
             string iniName = graphicalBaseNode.BuildingType.ININame;
             Color remapColor = graphicalBaseNode.BuildingType.ArtConfig.Remapable ? graphicalBaseNode.Owner.XNAColor : Color.White;
-            Color foundationLineColor = graphicalBaseNode.Owner.XNAColor;
 
             if (graphics == null || graphics.Frames.Length == 0)
             {
@@ -708,84 +902,6 @@ namespace TSMapEditor.Rendering
             if (Constants.HQRemap && graphics.RemapFrames != null)
             {
                 DrawTexture(graphics.RemapFrames[frameIndex].Texture, drawRectangle, remapColor);
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetCameraWidth() => (int)(Width / (float)Camera.ZoomLevel);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetCameraHeight() => (int)(Height / (float)Camera.ZoomLevel);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetCameraRightXCoord() => Math.Min(Camera.TopLeftPoint.X + GetCameraWidth(), Map.Size.X * Constants.CellSizeX);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetCameraBottomYCoord() => Math.Min(Camera.TopLeftPoint.Y + GetCameraHeight(), Map.Size.Y * Constants.CellSizeY);
-
-        public void DrawTerrainTile(MapTile tile)
-        {
-            Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(new Point2D(tile.X, tile.Y), Map);
-
-            if (drawPoint.X + Constants.CellSizeX < Camera.TopLeftPoint.X || drawPoint.X > GetCameraRightXCoord())
-                return;
-            
-            if (drawPoint.Y + Constants.CellSizeY < Camera.TopLeftPoint.Y)
-                return;
-
-            if (drawPoint.Y - (tile.Level * Constants.CellHeight) > GetCameraBottomYCoord())
-                return;
-
-            if (tile.TileIndex >= TheaterGraphics.TileCount)
-                return;
-
-            if (tile.TileImage == null)
-                tile.TileImage = TheaterGraphics.GetTileGraphics(tile.TileIndex);
-
-            TileImage tileImage;
-            int subTileIndex;
-            int level;
-            if (tile.PreviewTileImage != null)
-            {
-                tileImage = tile.PreviewTileImage;
-                subTileIndex = tile.PreviewSubTileIndex;
-                level = tile.PreviewLevel;
-            }
-            else
-            {
-                tileImage = tile.TileImage;
-                subTileIndex = tile.SubTileIndex;
-                level = tile.Level;
-            }
-
-            // MM support
-            if (EditorState.IsMarbleMadness)
-                tileImage = TheaterGraphics.GetMarbleMadnessTileGraphics(tileImage.TileID);
-
-            drawPoint -= new Point2D(0, (Constants.CellSizeY / 2) * level);
-
-            if (subTileIndex >= tileImage.TMPImages.Length)
-            {
-                DrawString(subTileIndex.ToString(), 0, new Vector2(drawPoint.X, drawPoint.Y), Color.Red);
-                return;
-            }
-
-            MGTMPImage tmpImage = tileImage.TMPImages[subTileIndex];
-
-            if (tmpImage.Texture != null)
-            {
-                DrawTexture(tmpImage.Texture, new Rectangle(drawPoint.X, drawPoint.Y,
-                    Constants.CellSizeX, Constants.CellSizeY), Color.White);
-            }
-
-            if (tmpImage.ExtraTexture != null)
-            {
-                DrawTexture(tmpImage.ExtraTexture,
-                    new Rectangle(drawPoint.X + tmpImage.TmpImage.XExtra - tmpImage.TmpImage.X,
-                    drawPoint.Y + tmpImage.TmpImage.YExtra - tmpImage.TmpImage.Y,
-                    tmpImage.ExtraTexture.Width,
-                    tmpImage.ExtraTexture.Height),
-                    Color.White);
             }
         }
 
@@ -1291,86 +1407,8 @@ namespace TSMapEditor.Rendering
             {
                 DrawWholeMap();
                 mapInvalidated = false;
-                // newRefreshes.Clear();
                 DrawTubes();
             }
-
-            /*if (newRefreshes.Count > 0)
-            {
-                Renderer.PushRenderTarget(mapRenderTarget);
-
-                refreshStopwatch.Reset();
-                refreshStopwatch.Start();
-                int i = 0;
-                while (i < newRefreshes.Count)
-                {
-                    if (refreshStopwatch.ElapsedMilliseconds > MaxRefreshTimeInFrame)
-                        break;
-
-                    var refresh = newRefreshes[i];
-
-                    if (!refresh.IsComplete)
-                    {
-                        refresh.Process();
-
-                        if (!refresh.IsComplete)
-                        {
-                            i++;
-                            continue;
-                        }
-                    }
-
-                    var overlaysToRedraw = new List<Overlay>();
-                    var smudgesToRedraw = new List<Smudge>();
-                    var waypointsToRedraw = new List<Waypoint>();
-                    var cellTagsToRedraw = new List<CellTag>();
-
-                    var sortedCells = refresh.tilesToRedraw.Select(kvp => kvp.Value).OrderBy(cell => cell.Y).ThenBy(cell => cell.X).ToArray();
-
-                    foreach (var cell in sortedCells)
-                    {
-                        DrawTerrainTile(cell);
-
-                        if (cell.Overlay != null)
-                            overlaysToRedraw.Add(cell.Overlay);
-                        if (cell.Smudge != null)
-                            smudgesToRedraw.Add(cell.Smudge);
-                        if (cell.Waypoint != null)
-                            waypointsToRedraw.Add(cell.Waypoint);
-                        if (cell.CellTag != null)
-                            cellTagsToRedraw.Add(cell.CellTag);
-                    }
-
-                    overlaysToRedraw.ForEach(o => DrawObject(o));
-                    smudgesToRedraw.ForEach(o => DrawObject(o));
-                    var sortedObjects = refresh.objectsToRedraw.Select(kvp => kvp.Value).OrderBy(go => go.GetYPositionForDrawOrder()).ThenBy(go => go.GetXPositionForDrawOrder()).ThenBy(go => go.WhatAmI()).ToArray();
-                    Array.ForEach(sortedObjects, obj => DrawObject(obj));
-                    waypointsToRedraw.ForEach(wp => DrawWaypoint(wp));
-                    cellTagsToRedraw.ForEach(ct => DrawCellTag(ct));
-
-                    if (EditorState.HighlightImpassableCells)
-                    {
-                        foreach (var cell in sortedCells)
-                        {
-                            DrawImpassableHighlight(cell);
-                        }
-                    }
-
-                    if (EditorState.HighlightIceGrowth)
-                    {
-                        foreach (var cell in sortedCells)
-                        {
-                            DrawIceGrowthHighlight(cell);
-                        }
-                    }
-
-                    newRefreshes.RemoveAt(i);
-                }
-                refreshStopwatch.Stop();
-
-                DrawTubes();
-                Renderer.PopRenderTarget();
-            }*/
 
             DrawWorld();
 
@@ -1382,15 +1420,13 @@ namespace TSMapEditor.Rendering
                 CursorAction.DrawPreview(tileUnderCursor.CoordsToPoint(), Camera.TopLeftPoint);
             }
 
-            if (mapWideOverlayTexture != null && EditorState.DrawMapWideOverlay)
+            if (EditorState.DrawMapWideOverlay)
             {
-                Renderer.DrawTexture(mapWideOverlayTexture,
-                    new Rectangle(
+                mapWideOverlay.Draw(new Rectangle(
                         (int)(-Camera.TopLeftPoint.X * Camera.ZoomLevel),
                         (int)(-Camera.TopLeftPoint.Y * Camera.ZoomLevel),
                         (int)(mapRenderTarget.Width * Camera.ZoomLevel),
-                        (int)(mapRenderTarget.Height * Camera.ZoomLevel)),
-                    Color.White * mapWideOverlayTextureOpacity);
+                        (int)(mapRenderTarget.Height * Camera.ZoomLevel)));
             }
 
             DrawOnTileUnderCursor();
@@ -1448,7 +1484,7 @@ namespace TSMapEditor.Rendering
 
             Renderer.PushRenderTarget(transparencyRenderTarget);
             GraphicsDevice.Clear(Color.Transparent);
-            Map.GraphicalBaseNodes.ForEach(bn => DrawBaseNode(bn));
+            Map.GraphicalBaseNodes.ForEach(DrawBaseNode);
             Renderer.PopRenderTarget();
 
             DrawTexture(transparencyRenderTarget,

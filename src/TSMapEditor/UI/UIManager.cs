@@ -49,6 +49,8 @@ namespace TSMapEditor.UI
         private ChangeTechnoOwnerAction changeTechnoOwnerAction;
         private PlaceWaypointCursorAction placeWaypointCursorAction;
         private OverlayPlacementAction overlayPlacementAction;
+        private CopyTerrainCursorAction copyTerrainCursorAction;
+        private PasteTerrainCursorAction pasteTerrainCursorAction;
 
         private WindowController windowController;
 
@@ -179,6 +181,21 @@ namespace TSMapEditor.UI
 
             editorState.CursorActionChanged += EditorState_CursorActionChanged;
             overlayPlacementAction.OverlayTypeChanged += OverlayPlacementAction_OverlayTypeChanged;
+
+            copyTerrainCursorAction = new CopyTerrainCursorAction(mapView);
+            pasteTerrainCursorAction = new PasteTerrainCursorAction(mapView);
+
+            KeyboardCommands.Instance.Copy.Triggered += (s, e) =>
+            {
+                copyTerrainCursorAction.StartCellCoords = null;
+                copyTerrainCursorAction.EntryTypes = windowController.CopiedEntryTypesWindow.GetEnabledEntryTypes();
+                mapView.CursorAction = copyTerrainCursorAction;
+            };
+
+            KeyboardCommands.Instance.Paste.Triggered += (s, e) =>
+            {
+                mapView.CursorAction = pasteTerrainCursorAction;
+            };
 
             windowController.OpenMapWindow.OnFileSelected += OpenMapWindow_OnFileSelected;
             windowController.CreateNewMapWindow.OnCreateNewMap += CreateNewMapWindow_OnCreateNewMap;

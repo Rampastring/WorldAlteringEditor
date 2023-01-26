@@ -106,6 +106,10 @@ namespace TSMapEditor.Models
             }
         }
 
+        public int WidthInPixels => Size.X * Constants.CellSizeX;
+
+        public int HeightInPixels => Size.Y * Constants.CellSizeY;
+
         public string TheaterName { get; set; }
         public ITheater TheaterInstance { get; set; }
 

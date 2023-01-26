@@ -62,7 +62,7 @@
 
         public override int GetYPositionForDrawOrder()
         {
-            return Position.Y + ObjectType.ArtConfig.FoundationY - 1;
+            return Position.Y + ObjectType.ArtConfig.FoundationY / 2;
         }
     }
 }
