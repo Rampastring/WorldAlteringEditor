@@ -17,6 +17,8 @@ namespace TSMapEditor.Models
     {
         public Point2D Position { get; set; }
 
+        public ulong LastRefreshIndex;
+
         public virtual int GetYDrawOffset()
         {
             return 0;
@@ -40,6 +42,11 @@ namespace TSMapEditor.Models
         public virtual int GetYPositionForDrawOrder()
         {
             return Position.Y;
+        }
+
+        public override int GetHashCode()
+        {
+            return (int)WhatAmI() * 10000000 + Position.Y * 512 + Position.X;
         }
     }
 }

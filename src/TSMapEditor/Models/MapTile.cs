@@ -45,6 +45,13 @@ namespace TSMapEditor.Models
         /// </summary>
         public List<AbstractObject> OverlapList { get; set; }
 
+        /// <summary>
+        /// The number of the screen refresh iteration when
+        /// this map tile was last rendered. If this value matches the current
+        /// rendering iteration, there is no need to draw this tile.
+        /// </summary>
+        public ulong LastRefreshIndex;
+
 
         public void ShiftPosition(int x, int y)
         {
