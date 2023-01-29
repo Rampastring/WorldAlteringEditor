@@ -43,7 +43,7 @@ namespace TSMapEditor.Rendering
             graphics.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
             Content.RootDirectory = "Content";
             graphics.SynchronizeWithVerticalRetrace = false;
-            Window.Title = "DTA Scenario Editor";
+            Window.Title = "C&C World-Altering Editor (WAE)";
 
             //IsFixedTimeStep = false;
             TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / UserSettings.Instance.TargetFPS);
