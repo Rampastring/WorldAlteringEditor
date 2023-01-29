@@ -641,7 +641,11 @@ namespace TSMapEditor.Rendering
             else if (val1 < val2)
                 return -1;
 
-            return obj1.GetXPositionForDrawOrder().CompareTo(obj2.GetXPositionForDrawOrder());
+            int xResult = obj1.GetXPositionForDrawOrder().CompareTo(obj2.GetXPositionForDrawOrder());
+            if (xResult != 0)
+                return xResult;
+
+            return ((int)obj1.WhatAmI()).CompareTo((int)obj2.WhatAmI());
         }
 
         private void DrawSmudges()
