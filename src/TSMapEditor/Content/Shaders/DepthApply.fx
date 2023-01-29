@@ -26,8 +26,17 @@ struct VertexShaderOutput
     float2 TextureCoordinates : TEXCOORD0;
 };
 
+sampler DepthTextureSampler : register(s1)
+{
+    Texture = <DepthTexture>; // passed in
+    AddressU = clamp;
+    AddressV = clamp;
+};
+
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
+    // We need to read from the main texture first,
+    // otherwise the output will be black!
     float4 tex = tex2D(SpriteTextureSampler, input.TextureCoordinates);
 
     if (tex.a <= 0)
@@ -42,6 +51,12 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 
     // Terrain increases in depth as we go up the screen
     float spriteDepth = SpriteDepthBottom + ((SpriteDepthTop - SpriteDepthBottom) * (1.0 - input.TextureCoordinates.y));
+
+    float4 worldDepth = tex2D(DepthTextureSampler, finalPosition);
+    if (worldDepth.r < spriteDepth)
+    {
+        discard;
+    }
 
     return float4(spriteDepth, 0, 0, 0);
 }

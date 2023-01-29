@@ -128,13 +128,13 @@ namespace TSMapEditor.Rendering
 
         private RenderTarget2D mapRenderTarget;
         private RenderTarget2D depthRenderTarget;
+        private RenderTarget2D depthRenderTargetCopy;
         private RenderTarget2D objectRenderTarget;
         private RenderTarget2D shadowRenderTarget;
         private RenderTarget2D transparencyRenderTarget;
 
         private Effect colorDrawEffect;
         private Effect depthApplyEffect;
-        private Effect drawOnTransparency;
 
         private MapTile tileUnderCursor;
         private MapTile lastTileUnderCursor;
@@ -165,6 +165,7 @@ namespace TSMapEditor.Rendering
 
         private bool isRenderingDepth;
 
+        private bool debugRenderDepthBuffer = false;
 
 
         public void AddRefreshPoint(Point2D point, int size = 1)
@@ -220,6 +221,12 @@ namespace TSMapEditor.Rendering
 
             refreshStopwatch = new Stopwatch();
 
+            Keyboard.OnKeyPressed += (s, e) =>
+            {
+                if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.F11)
+                    debugRenderDepthBuffer = !debugRenderDepthBuffer;
+            };
+
             InvalidateMap();
         }
 
@@ -263,12 +270,14 @@ namespace TSMapEditor.Rendering
         {
             mapRenderTarget?.Dispose();
             depthRenderTarget?.Dispose();
+            depthRenderTargetCopy?.Dispose();
             objectRenderTarget?.Dispose();
             shadowRenderTarget?.Dispose();
             transparencyRenderTarget?.Dispose();
 
             mapRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color, DepthFormat.Depth16);
             depthRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Single);
+            depthRenderTargetCopy = CreateFullMapRenderTarget(SurfaceFormat.Single);
             objectRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
             shadowRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Alpha8);
             transparencyRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
@@ -309,16 +318,27 @@ namespace TSMapEditor.Rendering
             overlaysToRender.Clear();
             gameObjectsToRender.Clear();
 
+            if (mapInvalidated)
+            {
+                GraphicsDevice.SetRenderTarget(depthRenderTarget);
+                GraphicsDevice.Clear(Color.White);
+                GraphicsDevice.SetRenderTarget(depthRenderTargetCopy);
+                GraphicsDevice.Clear(Color.White);
+            }
+
             // First render depth
             Renderer.PushRenderTarget(depthRenderTarget);
-            GraphicsDevice.Clear(Color.White);
-
             isRenderingDepth = true;
             Renderer.PushSettings(new SpriteBatchSettings(SpriteSortMode.Immediate, BlendState.Opaque, null, null, null, depthApplyEffect));
             DoForVisibleCells(DrawTerrainTile);
             Renderer.PopSettings();
             isRenderingDepth = false;
 
+            Renderer.PopRenderTarget();
+
+            // Copy rendered depth so we are able to sample the depth buffer when rendering depth on later frames
+            Renderer.PushRenderTarget(depthRenderTargetCopy, new SpriteBatchSettings(SpriteSortMode.Immediate, BlendState.Opaque, null, null, null, null));
+            Renderer.DrawTexture(depthRenderTarget, new Rectangle(0, 0, depthRenderTargetCopy.Width, depthRenderTargetCopy.Height), Color.White);
             Renderer.PopRenderTarget();
 
             // Then render color
@@ -552,7 +572,7 @@ namespace TSMapEditor.Rendering
                 Vector2 spriteSizeToWorldSizeRatio = new Vector2(Constants.CellSizeX / (float)Map.WidthInPixels, Constants.CellSizeY / (float)Map.HeightInPixels);
 
                 if (isRenderingDepth)
-                    SetEffectParams(depthApplyEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, null);
+                    SetEffectParams(depthApplyEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTargetCopy);
                 else
                     SetEffectParams(colorDrawEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTarget);
 
@@ -565,6 +585,7 @@ namespace TSMapEditor.Rendering
                 int yDrawPointWithoutCellHeight = originalDrawPointY + tmpImage.TmpImage.YExtra - tmpImage.TmpImage.Y;
                 float depthTop = yDrawPointWithoutCellHeight / (float)Map.HeightInPixels;
                 float depthBottom = (yDrawPointWithoutCellHeight + tmpImage.ExtraTexture.Height) / (float)Map.HeightInPixels;
+                depthTop = depthTop - ((depthTop - depthBottom) / 4.0f);
                 depthTop = 1.0f - depthTop;
                 depthBottom = 1.0f - depthBottom;
 
@@ -575,7 +596,7 @@ namespace TSMapEditor.Rendering
                 Vector2 spriteSizeToWorldSizeRatio = new Vector2(tmpImage.ExtraTexture.Width / (float)Map.WidthInPixels, tmpImage.ExtraTexture.Height / (float)Map.HeightInPixels);
 
                 if (isRenderingDepth)
-                    SetEffectParams(depthApplyEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, null);
+                    SetEffectParams(depthApplyEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTargetCopy);
                 else
                     SetEffectParams(colorDrawEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTarget);
 
@@ -1535,6 +1556,13 @@ namespace TSMapEditor.Rendering
                 sourceRectangle,
                 destinationRectangle,
                 Color.White);
+
+            if (debugRenderDepthBuffer)
+            {
+                DrawTexture(depthRenderTarget,
+                    sourceRectangle, destinationRectangle,
+                    Color.White);
+            }
 
             Renderer.PushRenderTarget(transparencyRenderTarget);
             GraphicsDevice.Clear(Color.Transparent);

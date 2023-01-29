@@ -35,12 +35,9 @@ struct VertexShaderOutput
 
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
+    // We need to read from the main texture first,
+    // otherwise the output will be black!
     float4 tex = tex2D(SpriteTextureSampler, input.TextureCoordinates);
-
-    if (tex.a <= 0)
-    {
-        discard;
-    }
 
     float xRatio = SpriteSizeToWorldSizeRatio.x;
     float yRatio = SpriteSizeToWorldSizeRatio.y;
@@ -50,9 +47,11 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float spriteDepth = SpriteDepthBottom + ((SpriteDepthTop - SpriteDepthBottom) * (1.0 - input.TextureCoordinates.y));
 
     float4 worldDepth = tex2D(DepthTextureSampler, finalPosition);
-    if (worldDepth.r < spriteDepth)
+
+    // Skip if worldDepth is smaller than spriteDepth, but leave some room
+    // due to float imprecision (z-fighting)
+    if (worldDepth.r - spriteDepth < -0.004)
     {
-        // return float4(1, 0, 0, 0);
         discard;
     }
 
