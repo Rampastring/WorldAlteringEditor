@@ -938,7 +938,7 @@ namespace TSMapEditor.Rendering
 
         private void DrawBaseNode(GraphicalBaseNode graphicalBaseNode)
         {
-            Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(graphicalBaseNode.BaseNode.Location, Map);
+            Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(graphicalBaseNode.BaseNode.Position, Map);
 
             ObjectImage graphics = TheaterGraphics.BuildingTextures[graphicalBaseNode.BuildingType.Index];
             Color replacementColor = Color.Yellow;

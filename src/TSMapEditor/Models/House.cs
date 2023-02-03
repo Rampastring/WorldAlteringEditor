@@ -6,7 +6,7 @@ using TSMapEditor.GameMath;
 
 namespace TSMapEditor.Models
 {
-    public class BaseNode
+    public class BaseNode : IPositioned
     {
         public BaseNode()
         {
@@ -15,11 +15,11 @@ namespace TSMapEditor.Models
         public BaseNode(string structureTypeName, Point2D location)
         {
             StructureTypeName = structureTypeName;
-            Location = location;
+            Position = location;
         }
 
         public string StructureTypeName { get; set; }
-        public Point2D Location { get; set; }
+        public Point2D Position { get; set; }
 
         public static BaseNode FromIniString(string iniString)
         {
@@ -110,7 +110,7 @@ namespace TSMapEditor.Models
             {
                 var node = BaseNodes[i];
 
-                iniSection.SetStringValue(i.ToString("D3"), $"{node.StructureTypeName},{node.Location.X},{node.Location.Y}");
+                iniSection.SetStringValue(i.ToString("D3"), $"{node.StructureTypeName},{node.Position.X},{node.Position.Y}");
             }
 
             // Erase potential removed nodes

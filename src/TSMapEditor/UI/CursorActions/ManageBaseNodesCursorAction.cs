@@ -96,7 +96,7 @@ namespace TSMapEditor.UI.CursorActions
                     if (nodeStructureType == null)
                         continue;
 
-                    if (baseNode.Location == cellCoords)
+                    if (baseNode.Position == cellCoords)
                     {
                         overlappingNodes = true;
                         break;
@@ -105,7 +105,7 @@ namespace TSMapEditor.UI.CursorActions
                     bool baseNodeExistsOnFoundation = false;
                     nodeStructureType.ArtConfig.DoForFoundationCoords(foundationOffset =>
                     {
-                        Point2D foundationCellCoords = baseNode.Location + foundationOffset;
+                        Point2D foundationCellCoords = baseNode.Position + foundationOffset;
                         if (foundationCellCoords == structureFoundationPoint)
                             baseNodeExistsOnFoundation = true;
                     });
@@ -149,12 +149,12 @@ namespace TSMapEditor.UI.CursorActions
                         return false;
 
                     if (structureType.ArtConfig.FoundationX == 0 || structureType.ArtConfig.FoundationY == 0)
-                        return baseNode.Location == cellCoords;
+                        return baseNode.Position == cellCoords;
 
                     bool clickedOnFoundation = false;
                     structureType.ArtConfig.DoForFoundationCoords(foundationOffset =>
                     {
-                        if (foundationOffset + baseNode.Location == cellCoords)
+                        if (foundationOffset + baseNode.Position == cellCoords)
                             clickedOnFoundation = true;
                     });
 

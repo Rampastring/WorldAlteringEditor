@@ -197,10 +197,10 @@ namespace TSMapEditor.Models
                             remove = true;
                         }
                         
-                        var cell = GetTile(baseNode.Location);
+                        var cell = GetTile(baseNode.Position);
                         if (cell == null)
                         {
-                            Logger.Log($"Base node for building type {baseNode.StructureTypeName} for house {house.ININame} is outside of the map! Coords: {baseNode.Location}. Removing the node.");
+                            Logger.Log($"Base node for building type {baseNode.StructureTypeName} for house {house.ININame} is outside of the map! Coords: {baseNode.Position}. Removing the node.");
                             remove = true;
                         }
 
@@ -429,6 +429,12 @@ namespace TSMapEditor.Models
             ShiftObjectsInList(Waypoints, eastShift, southShift);
             ShiftObjectsInList(CellTags, eastShift, southShift);
 
+            // Iterate all houses to shift base nodes
+            foreach (House house in GetHouses())
+            {
+                ShiftObjectsInList(house.BaseNodes, eastShift, southShift);
+            }
+
             // Tubes are slightly more complicated...
             Tubes.ForEach(tube =>
             {
@@ -457,16 +463,27 @@ namespace TSMapEditor.Models
             CellTags = CellTags.Where(ct => IsCoordWithinMap(ct.Position)).ToList();
             Tubes = Tubes.Where(tube => IsCoordWithinMap(tube.EntryPoint) && IsCoordWithinMap(tube.ExitPoint)).ToList();
 
+            // Refresh base nodes
+            GraphicalBaseNodes.Clear();
+
+            foreach (House house in GetHouses())
+            {
+                var nodesWithinMap = house.BaseNodes.Where(bn => IsCoordWithinMap(bn.Position)).ToList();
+                house.BaseNodes.Clear();
+                house.BaseNodes.AddRange(nodesWithinMap);
+                house.BaseNodes.ForEach(bn => RegisterBaseNode(house, bn));
+            }
+
             // We're done!
             MapResized?.Invoke(this, EventArgs.Empty);
         }
 
-        private void ShiftObjectsInList<T>(List<T> list, int eastShift, int southShift) where T : IMovable
+        private void ShiftObjectsInList<T>(List<T> list, int eastShift, int southShift) where T : IPositioned
         {
             list.ForEach(element => ShiftObject(element, eastShift, southShift));
         }
 
-        private void ShiftObject(IMovable movableObject, int eastShift, int southShift)
+        private void ShiftObject(IPositioned movableObject, int eastShift, int southShift)
         {
             int x = movableObject.Position.X;
             int y = movableObject.Position.Y;
