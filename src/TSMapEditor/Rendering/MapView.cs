@@ -216,6 +216,7 @@ namespace TSMapEditor.Rendering
             Map.HouseColorChanged += (s, e) => InvalidateMap();
             EditorState.HighlightImpassableCellsChanged += (s, e) => InvalidateMap();
             EditorState.HighlightIceGrowthChanged += (s, e) => InvalidateMap();
+            EditorState.DrawMapWideOverlayChanged += (s, e) => mapWideOverlay.Enabled = EditorState.DrawMapWideOverlay;
 
             KeyboardCommands.Instance.RotateUnitOneStep.Triggered += RotateUnitOneStep_Triggered;
 
@@ -1483,14 +1484,6 @@ namespace TSMapEditor.Rendering
 
             DrawWorld();
 
-            DrawMapBorder();
-
-            if (IsActive && tileUnderCursor != null && CursorAction != null)
-            {
-                CursorAction.PostMapDraw(tileUnderCursor.CoordsToPoint());
-                CursorAction.DrawPreview(tileUnderCursor.CoordsToPoint(), Camera.TopLeftPoint);
-            }
-
             if (EditorState.DrawMapWideOverlay)
             {
                 mapWideOverlay.Draw(new Rectangle(
@@ -1498,6 +1491,14 @@ namespace TSMapEditor.Rendering
                         (int)(-Camera.TopLeftPoint.Y * Camera.ZoomLevel),
                         (int)(mapRenderTarget.Width * Camera.ZoomLevel),
                         (int)(mapRenderTarget.Height * Camera.ZoomLevel)));
+            }
+
+            DrawMapBorder();
+
+            if (IsActive && tileUnderCursor != null && CursorAction != null)
+            {
+                CursorAction.PostMapDraw(tileUnderCursor.CoordsToPoint());
+                CursorAction.DrawPreview(tileUnderCursor.CoordsToPoint(), Camera.TopLeftPoint);
             }
 
             DrawOnTileUnderCursor();

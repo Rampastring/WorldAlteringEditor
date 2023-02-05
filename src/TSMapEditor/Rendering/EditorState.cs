@@ -113,7 +113,7 @@ namespace TSMapEditor.Rendering
         
         public bool MapWideOverlayExists { get; set; }
 
-        private bool _drawMapWideOverlay = true;
+        private bool _drawMapWideOverlay;
         public bool DrawMapWideOverlay 
         {
             get => _drawMapWideOverlay; 
