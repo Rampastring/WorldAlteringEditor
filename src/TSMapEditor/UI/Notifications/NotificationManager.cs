@@ -20,14 +20,6 @@ namespace TSMapEditor.UI.Notifications
 
         private List<Notification> notifications = new List<Notification>();
 
-        public override void AddChild(XNAControl child)
-        {
-            base.AddChild(child);
-
-            if (child is Notification notification)
-                notifications.Add(notification);
-        }
-
         public void AddNotification(string text)
         {
             Notification notification = new Notification(WindowManager);

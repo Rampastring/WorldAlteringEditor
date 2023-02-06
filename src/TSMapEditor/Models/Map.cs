@@ -3,6 +3,7 @@ using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
@@ -32,8 +33,37 @@ namespace TSMapEditor.Models
         public event EventHandler MapResized;
         public event EventHandler MapManuallySaved;
         public event EventHandler MapAutoSaved;
+        public event EventHandler PreSave;
+        public event EventHandler PostSave;
 
-        public IniFile LoadedINI { get; set; }
+
+        public IniFile LoadedINI { get; private set; }
+
+        public bool ReloadINI()
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(LoadedINI.FileName))
+                    throw new InvalidOperationException("Cannot reload INI of a map file that has no INI file path specified!");
+
+                if (!File.Exists(LoadedINI.FileName))
+                {
+                    Logger.Log("Map.ReloadINI: Skipping re-loading map INI because the map INI does not exist!");
+                    return true;
+                }
+
+                LoadedINI = new IniFile(LoadedINI.FileName);
+
+                return true;
+            }
+            catch (IOException ex)
+            {
+                // Sometimes the file might be used by some external software, making us unable
+                // to access it
+                Logger.Log("IOException when attempting to reload the map INI: " + ex.Message);
+                return false;
+            }
+        }
 
         public Rules Rules { get; private set; }
         public EditorConfig EditorConfig { get; private set; }
@@ -235,6 +265,8 @@ namespace TSMapEditor.Models
 
         private void Write(string filePath = null)
         {
+            PreSave?.Invoke(this, EventArgs.Empty);
+
             LoadedINI.Comment = "Written by DTA Scenario Editor\r\n; all comments have been truncated\r\n; www.moddb.com/members/Rampastring\r\n; github.com/Rampastring";
 
             MapWriter.WriteMapSection(this, LoadedINI);
@@ -267,6 +299,8 @@ namespace TSMapEditor.Models
             string savePath = filePath ?? LoadedINI.FileName;
 
             LoadedINI.WriteIniFile(savePath);
+
+            PostSave?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>

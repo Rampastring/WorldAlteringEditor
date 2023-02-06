@@ -66,6 +66,7 @@ namespace TSMapEditor.UI
         private DarkeningPanel mapLoadDarkeningPanel;
 
         private AutosaveTimer autosaveTimer;
+        private MapFileWatcher mapFileWatcher;
 
         public void SetAutoUpdateChildOrder(bool value) => AutoUpdateChildOrder = value;
 
@@ -161,6 +162,8 @@ namespace TSMapEditor.UI
 
             InitAutoSaveAndSaveNotifications();
 
+            mapFileWatcher = new MapFileWatcher(map);
+
             windowController.OpenMapWindow.OnFileSelected += OpenMapWindow_OnFileSelected;
             windowController.CreateNewMapWindow.OnCreateNewMap += CreateNewMapWindow_OnCreateNewMap;
 
@@ -174,7 +177,8 @@ namespace TSMapEditor.UI
 
             // This makes the exit process technically faster, but the editor stays longer on the
             // screen so practically increases exit time from the user's perspective
-            // WindowManager.GameClosing += WindowManager_GameClosing;
+            // WindowManager.GameClosing += (s, e) => ClearResources();
+            WindowManager.GameClosing += (s, e) => mapFileWatcher.StopWatching();
         }
 
         private void InitTheme()
@@ -270,11 +274,6 @@ namespace TSMapEditor.UI
             Game.Window.Title = string.Format(baseTitle, mapPath);
         }
 
-        private void WindowManager_GameClosing(object sender, EventArgs e)
-        {
-            ClearResources();
-        }
-
         private void CheckForIssuesAfterManualSave(object sender, EventArgs e)
         {
             var issues = map.CheckForIssues();
@@ -328,6 +327,8 @@ namespace TSMapEditor.UI
 
         private void LoadMap()
         {
+            mapFileWatcher.StopWatching();
+
             bool createNew = loadMapFilePath == null;
 
             string error = MapSetup.InitializeMap(UserSettings.Instance.GameDirectory, createNew,
@@ -497,6 +498,25 @@ namespace TSMapEditor.UI
             mutationManager.Redo();
         }
 
+        private void UpdateMapFileWatcher()
+        {
+            // We update the map file watcher here so we're not checking its status
+            // "too often"; the file system watcher might give out multiple events
+            // in case some application writes the file in multiple passes.
+
+            // By checking the map file watcher here, we only check it once per frame.
+
+            if (mapFileWatcher.ModifyEventDetected)
+            {
+                if (mapFileWatcher.HandleModifyEvent())
+                {
+                    notificationManager.AddNotification("The map file has been modified outside of the editor. The map's INI data has been reloaded." + Environment.NewLine + Environment.NewLine +
+                        "If you made edits to visible map data (terrain, objects, overlay etc.) outside of the editor, you can" + Environment.NewLine +
+                        "re-load the map to apply the effects. If you only made changes to other INI data, you can ignore this message.");
+                }
+            }
+        }
+
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
@@ -511,6 +531,7 @@ namespace TSMapEditor.UI
             else
             {
                 autosaveTimer.Update(gameTime.ElapsedGameTime);
+                UpdateMapFileWatcher();
             }
 
             if (Alpha < 1.0f)

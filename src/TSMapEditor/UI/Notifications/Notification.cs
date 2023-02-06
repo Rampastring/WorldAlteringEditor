@@ -7,7 +7,7 @@ namespace TSMapEditor.UI.Notifications
     public class Notification : EditorPanel
     {
         private const float AppearAlphaRate = 0.75f;
-        private const float DisappearAlphaRate = 0.25f;
+        private const float DisappearAlphaRate = 0.20f;
 
         public Notification(WindowManager windowManager) : base(windowManager) 
         {
