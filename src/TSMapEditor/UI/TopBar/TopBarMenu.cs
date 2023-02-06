@@ -142,7 +142,6 @@ namespace TSMapEditor.UI.TopBar
             base.Initialize();
 
             Height = fileButton.Height;
-            Width = aboutButton.Right;
 
             menuButtons = new MenuButton[] { fileButton, editButton, toolsButton, aboutButton };
             Array.ForEach(menuButtons, b => b.MouseEnter += MenuButton_MouseEnter);

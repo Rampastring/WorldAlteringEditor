@@ -17,7 +17,7 @@ namespace TSMapEditor.UI.TopBar
             EditorConfig editorConfig, EditorState editorState,
             PlaceTerrainCursorAction terrainPlacementAction,
             PlaceWaypointCursorAction placeWaypointCursorAction,
-            DeletionModeAction deletionModeAction) : base(windowManager)
+            ICursorActionTarget cursorActionTarget) : base(windowManager)
         {
             this.map = map;
             this.theaterGraphics = theaterGraphics;
@@ -25,7 +25,8 @@ namespace TSMapEditor.UI.TopBar
             this.editorState = editorState;
             this.terrainPlacementAction = terrainPlacementAction;
             this.placeWaypointCursorAction = placeWaypointCursorAction;
-            this.deletionModeAction = deletionModeAction;
+
+            deletionModeCursorAction = new DeletionModeCursorAction(cursorActionTarget);
         }
 
         private readonly Map map;
@@ -34,7 +35,7 @@ namespace TSMapEditor.UI.TopBar
         private readonly EditorState editorState;
         private readonly PlaceTerrainCursorAction terrainPlacementAction;
         private readonly PlaceWaypointCursorAction placeWaypointCursorAction;
-        private readonly DeletionModeAction deletionModeAction;
+        private readonly DeletionModeCursorAction deletionModeCursorAction;
 
         private XNADropDown ddBrushSize;
         private XNACheckBox chkAutoLat;
@@ -211,7 +212,7 @@ namespace TSMapEditor.UI.TopBar
 
         private void BtnDeletionMode_LeftClick(object sender, EventArgs e)
         {
-            editorState.CursorAction = deletionModeAction;
+            editorState.CursorAction = deletionModeCursorAction;
         }
 
         private void BtnPlaceWaypoint_LeftClick(object sender, EventArgs e)

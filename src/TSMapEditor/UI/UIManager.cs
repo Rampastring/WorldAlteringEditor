@@ -74,67 +74,21 @@ namespace TSMapEditor.UI
         {
             Name = nameof(UIManager);
 
-            UISettings.ActiveSettings.PanelBackgroundColor = new Color(0, 0, 0, 128);
-            UISettings.ActiveSettings.PanelBorderColor = new Color(128, 128, 128, 255);
-
-            bool boldFont = UserSettings.Instance.UseBoldFont;
-            if (boldFont)
-            {
-                Renderer.GetFontList()[0] = Renderer.GetFontList()[1];
-            }
-
-            bool lightTheme = false;
-            if (lightTheme)
-            {
-                UISettings.ActiveSettings.TextShadowColor = Color.Gray;
-                UISettings.ActiveSettings.TextShadowDistance = 0;
-                ((CustomUISettings)UISettings.ActiveSettings).ListBoxBackgroundColor = Color.White * 0.77f;
-                ((CustomUISettings)UISettings.ActiveSettings).ButtonMainBackgroundColor = Color.White * 0.77f;
-                ((CustomUISettings)UISettings.ActiveSettings).ButtonSecondaryBackgroundColor = Color.Gray;
-                ((CustomUISettings)UISettings.ActiveSettings).ButtonTertiaryBackgroundColor = Color.Black;
-                UISettings.ActiveSettings.BackgroundColor = Color.White;
-                UISettings.ActiveSettings.PanelBackgroundColor = Color.White;
-                UISettings.ActiveSettings.TextColor = Color.Black;
-                UISettings.ActiveSettings.FocusColor = Color.Gray;
-                UISettings.ActiveSettings.AltColor = Color.Black;
-                UISettings.ActiveSettings.ButtonTextColor = Color.Black;
-            }
-
-            bool greenTheme = UserSettings.Instance.Theme == "Tiberium";
-            if (greenTheme)
-            {
-                // ((CustomUISettings)UISettings.ActiveSettings).ButtonSecondaryBackgroundColor = new Color(0, 164, 0);
-                // ((CustomUISettings)UISettings.ActiveSettings).ButtonTertiaryBackgroundColor = Color.LimeGreen;
-                UISettings.ActiveSettings.TextColor = new Color(0,222,0);
-                UISettings.ActiveSettings.AltColor = Color.LimeGreen;
-                UISettings.ActiveSettings.FocusColor = new Color(0, 96, 0);
-                UISettings.ActiveSettings.ButtonTextColor = Color.LimeGreen;
-                UISettings.ActiveSettings.PanelBorderColor = new Color(0, 164, 0);
-            }
-
-            Width = WindowManager.RenderResolutionX;
-            Height = WindowManager.RenderResolutionY;
+            InitTheme();
 
             // Keyboard must be initialized before any other controls so it's properly usable
-            KeyboardCommands.Instance = new KeyboardCommands();
-            KeyboardCommands.Instance.Undo.Action = UndoAction;
-            KeyboardCommands.Instance.Redo.Action = RedoAction;
-            KeyboardCommands.Instance.ReadFromSettings();
+            InitKeyboard();
 
             windowController = new WindowController();
             editorState = new EditorState();
             editorState.BrushSize = map.EditorConfig.BrushSizes[0];
             mutationManager = new MutationManager();
 
-            mapView = new MapView(WindowManager, map, theaterGraphics, editorState, mutationManager, windowController);
-            mapView.Width = WindowManager.RenderResolutionX;
-            mapView.Height = WindowManager.RenderResolutionY;
-            AddChild(mapView);
+            InitMapView();
 
             placeTerrainCursorAction = new PlaceTerrainCursorAction(mapView);
             placeWaypointCursorAction = new PlaceWaypointCursorAction(mapView);
             changeTechnoOwnerAction = new ChangeTechnoOwnerAction(mapView);
-            var deletionModeCursorAction = new DeletionModeAction(mapView);
             editorState.ObjectOwnerChanged += (s, e) => editorState.CursorAction = changeTechnoOwnerAction;
 
             overlayPlacementAction = new OverlayPlacementAction(mapView);
@@ -165,24 +119,20 @@ namespace TSMapEditor.UI
             overlayFrameSelector.Disable();
 
             tileInfoDisplay = new TileInfoDisplay(WindowManager, map, theaterGraphics);
-            AddChild(tileInfoDisplay);
             tileInfoDisplay.X = Width - tileInfoDisplay.Width;
+            AddChild(tileInfoDisplay);
             mapView.TileInfoDisplay = tileInfoDisplay;
 
             var topBarMenu = new TopBarMenu(WindowManager, mutationManager, mapView, map, windowController);
-            AddChild(topBarMenu);
             topBarMenu.Width = editorSidebar.Width;
+            AddChild(topBarMenu);
 
             var topBarControlMenu = new TopBarControlMenu(WindowManager, map, theaterGraphics,
-                map.EditorConfig, editorState, placeTerrainCursorAction, placeWaypointCursorAction, deletionModeCursorAction);
+                map.EditorConfig, editorState, placeTerrainCursorAction, placeWaypointCursorAction, mapView);
             topBarControlMenu.X = topBarMenu.Right;
             AddChild(topBarControlMenu);
 
-            notificationManager = new NotificationManager(WindowManager);
-            notificationManager.X = editorSidebar.X + Constants.UIEmptySideSpace;
-            notificationManager.Width = WindowManager.RenderResolutionX - (notificationManager.X * 2);
-            notificationManager.Y = 100;
-            AddChild(notificationManager);
+            InitNotificationManager();
 
             base.Initialize();
 
@@ -227,6 +177,75 @@ namespace TSMapEditor.UI
             // This makes the exit process technically faster, but the editor stays longer on the
             // screen so practically increases exit time from the user's perspective
             // WindowManager.GameClosing += WindowManager_GameClosing;
+        }
+
+        private void InitTheme()
+        {
+            UISettings.ActiveSettings.PanelBackgroundColor = new Color(0, 0, 0, 128);
+            UISettings.ActiveSettings.PanelBorderColor = new Color(128, 128, 128, 255);
+
+            bool boldFont = UserSettings.Instance.UseBoldFont;
+            if (boldFont)
+            {
+                Renderer.GetFontList()[0] = Renderer.GetFontList()[1];
+            }
+
+            bool lightTheme = false;
+            if (lightTheme)
+            {
+                UISettings.ActiveSettings.TextShadowColor = Color.Gray;
+                UISettings.ActiveSettings.TextShadowDistance = 0;
+                ((CustomUISettings)UISettings.ActiveSettings).ListBoxBackgroundColor = Color.White * 0.77f;
+                ((CustomUISettings)UISettings.ActiveSettings).ButtonMainBackgroundColor = Color.White * 0.77f;
+                ((CustomUISettings)UISettings.ActiveSettings).ButtonSecondaryBackgroundColor = Color.Gray;
+                ((CustomUISettings)UISettings.ActiveSettings).ButtonTertiaryBackgroundColor = Color.Black;
+                UISettings.ActiveSettings.BackgroundColor = Color.White;
+                UISettings.ActiveSettings.PanelBackgroundColor = Color.White;
+                UISettings.ActiveSettings.TextColor = Color.Black;
+                UISettings.ActiveSettings.FocusColor = Color.Gray;
+                UISettings.ActiveSettings.AltColor = Color.Black;
+                UISettings.ActiveSettings.ButtonTextColor = Color.Black;
+            }
+
+            bool greenTheme = UserSettings.Instance.Theme == "Tiberium";
+            if (greenTheme)
+            {
+                // ((CustomUISettings)UISettings.ActiveSettings).ButtonSecondaryBackgroundColor = new Color(0, 164, 0);
+                // ((CustomUISettings)UISettings.ActiveSettings).ButtonTertiaryBackgroundColor = Color.LimeGreen;
+                UISettings.ActiveSettings.TextColor = new Color(0, 222, 0);
+                UISettings.ActiveSettings.AltColor = Color.LimeGreen;
+                UISettings.ActiveSettings.FocusColor = new Color(0, 96, 0);
+                UISettings.ActiveSettings.ButtonTextColor = Color.LimeGreen;
+                UISettings.ActiveSettings.PanelBorderColor = new Color(0, 164, 0);
+            }
+
+            Width = WindowManager.RenderResolutionX;
+            Height = WindowManager.RenderResolutionY;
+        }
+
+        private void InitKeyboard()
+        {
+            KeyboardCommands.Instance = new KeyboardCommands();
+            KeyboardCommands.Instance.Undo.Action = UndoAction;
+            KeyboardCommands.Instance.Redo.Action = RedoAction;
+            KeyboardCommands.Instance.ReadFromSettings();
+        }
+
+        private void InitMapView()
+        {
+            mapView = new MapView(WindowManager, map, theaterGraphics, editorState, mutationManager, windowController);
+            mapView.Width = WindowManager.RenderResolutionX;
+            mapView.Height = WindowManager.RenderResolutionY;
+            AddChild(mapView);
+        }
+
+        private void InitNotificationManager()
+        {
+            notificationManager = new NotificationManager(WindowManager);
+            notificationManager.X = editorSidebar.X + Constants.UIEmptySideSpace;
+            notificationManager.Width = WindowManager.RenderResolutionX - (notificationManager.X * 2);
+            notificationManager.Y = 100;
+            AddChild(notificationManager);
         }
 
         private void WindowManager_GameClosing(object sender, EventArgs e)
