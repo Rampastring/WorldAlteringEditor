@@ -159,9 +159,7 @@ namespace TSMapEditor.UI
                 mapView.CursorAction = pasteTerrainCursorAction;
             };
 
-            autosaveTimer = new AutosaveTimer(map);
-            map.MapManuallySaved += (s, e) => notificationManager.AddNotification("Map saved.");
-            map.MapAutoSaved += (s, e) => notificationManager.AddNotification("Map auto-saved.");
+            InitAutoSaveAndSaveNotifications();
 
             windowController.OpenMapWindow.OnFileSelected += OpenMapWindow_OnFileSelected;
             windowController.CreateNewMapWindow.OnCreateNewMap += CreateNewMapWindow_OnCreateNewMap;
@@ -172,7 +170,7 @@ namespace TSMapEditor.UI
 
             Alpha = 0f;
 
-            map.MapManuallySaved += CheckForIssuesAfterManualSave;
+            RefreshWindowTitle();
 
             // This makes the exit process technically faster, but the editor stays longer on the
             // screen so practically increases exit time from the user's perspective
@@ -246,6 +244,30 @@ namespace TSMapEditor.UI
             notificationManager.Width = WindowManager.RenderResolutionX - (notificationManager.X * 2);
             notificationManager.Y = 100;
             AddChild(notificationManager);
+        }
+
+        private void InitAutoSaveAndSaveNotifications()
+        {
+            autosaveTimer = new AutosaveTimer(map);
+
+            map.MapManuallySaved += (s, e) =>
+            {
+                notificationManager.AddNotification("Map saved.");
+                RefreshWindowTitle();
+                CheckForIssuesAfterManualSave(s, e);
+            };
+
+            map.MapAutoSaved += (s, e) => notificationManager.AddNotification("Map auto-saved.");
+        }
+
+        private void RefreshWindowTitle()
+        {
+            string baseTitle = "C&C World-Altering Editor (WAE) - {0}";
+            string mapPath;
+
+            mapPath = string.IsNullOrWhiteSpace(map.LoadedINI.FileName) ? "New map" : map.LoadedINI.FileName;
+
+            Game.Window.Title = string.Format(baseTitle, mapPath);
         }
 
         private void WindowManager_GameClosing(object sender, EventArgs e)
