@@ -4,12 +4,14 @@ using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Linq;
 using TSMapEditor.GameMath;
+using TSMapEditor.Misc;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations;
 using TSMapEditor.Rendering;
 using TSMapEditor.Settings;
 using TSMapEditor.UI.Controls;
 using TSMapEditor.UI.CursorActions;
+using TSMapEditor.UI.Notifications;
 using TSMapEditor.UI.Sidebar;
 using TSMapEditor.UI.TopBar;
 using TSMapEditor.UI.Windows;
@@ -56,10 +58,14 @@ namespace TSMapEditor.UI
 
         private MutationManager mutationManager;
 
+        private NotificationManager notificationManager;
+
         private int loadMapStage;
         private string loadMapFilePath;
         private CreateNewMapEventArgs newMapInfo;
         private DarkeningPanel mapLoadDarkeningPanel;
+
+        private AutosaveTimer autosaveTimer;
 
         public void SetAutoUpdateChildOrder(bool value) => AutoUpdateChildOrder = value;
 
@@ -172,6 +178,12 @@ namespace TSMapEditor.UI
             topBarControlMenu.X = topBarMenu.Right;
             AddChild(topBarControlMenu);
 
+            notificationManager = new NotificationManager(WindowManager);
+            notificationManager.X = editorSidebar.X + Constants.UIEmptySideSpace;
+            notificationManager.Width = WindowManager.RenderResolutionX - (notificationManager.X * 2);
+            notificationManager.Y = 100;
+            AddChild(notificationManager);
+
             base.Initialize();
 
             windowController.Initialize(this, map, editorState, mapView);
@@ -197,6 +209,10 @@ namespace TSMapEditor.UI
                 mapView.CursorAction = pasteTerrainCursorAction;
             };
 
+            autosaveTimer = new AutosaveTimer(map);
+            map.MapManuallySaved += (s, e) => notificationManager.AddNotification("Map saved.");
+            map.MapAutoSaved += (s, e) => notificationManager.AddNotification("Map auto-saved.");
+
             windowController.OpenMapWindow.OnFileSelected += OpenMapWindow_OnFileSelected;
             windowController.CreateNewMapWindow.OnCreateNewMap += CreateNewMapWindow_OnCreateNewMap;
 
@@ -206,7 +222,7 @@ namespace TSMapEditor.UI
 
             Alpha = 0f;
 
-            map.MapWritten += Map_MapWritten;
+            map.MapManuallySaved += CheckForIssuesAfterManualSave;
 
             // This makes the exit process technically faster, but the editor stays longer on the
             // screen so practically increases exit time from the user's perspective
@@ -218,7 +234,7 @@ namespace TSMapEditor.UI
             ClearResources();
         }
 
-        private void Map_MapWritten(object sender, EventArgs e)
+        private void CheckForIssuesAfterManualSave(object sender, EventArgs e)
         {
             var issues = map.CheckForIssues();
 
@@ -450,6 +466,10 @@ namespace TSMapEditor.UI
 
                 if (loadMapStage > 3)
                     LoadMap();
+            }
+            else
+            {
+                autosaveTimer.Update(gameTime.ElapsedGameTime);
             }
 
             if (Alpha < 1.0f)

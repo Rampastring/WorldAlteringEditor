@@ -104,7 +104,7 @@ namespace TSMapEditor.UI.Windows
             }
 
             map.LoadedINI.FileName = Path.Combine(lbFileList.DirectoryPath, filename);
-            map.Write();
+            map.Save();
 
             Hide();
         }

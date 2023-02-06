@@ -59,7 +59,7 @@ namespace TSMapEditor.UI.TopBar
                     return;
                 }
 
-                map.Write();
+                map.Save();
             });
             fileContextMenu.AddItem("Save As", () => SaveAs(), null, null, null);
             fileContextMenu.AddItem("Exit", () => WindowManager.CloseGame());

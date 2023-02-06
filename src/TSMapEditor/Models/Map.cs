@@ -30,7 +30,8 @@ namespace TSMapEditor.Models
         public event EventHandler<HouseEventArgs> HouseColorChanged;
         public event EventHandler LocalSizeChanged;
         public event EventHandler MapResized;
-        public event EventHandler MapWritten;
+        public event EventHandler MapManuallySaved;
+        public event EventHandler MapAutoSaved;
 
         public IniFile LoadedINI { get; set; }
 
@@ -220,7 +221,19 @@ namespace TSMapEditor.Models
             Lighting.ReadFromIniFile(mapIni);
         }
 
-        public void Write()
+        public void Save()
+        {
+            Write(null);
+            MapManuallySaved?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void AutoSave(string filePath)
+        {
+            Write(filePath);
+            MapAutoSaved?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void Write(string filePath = null)
         {
             LoadedINI.Comment = "Written by DTA Scenario Editor\r\n; all comments have been truncated\r\n; www.moddb.com/members/Rampastring\r\n; github.com/Rampastring";
 
@@ -251,10 +264,9 @@ namespace TSMapEditor.Models
             MapWriter.WriteInfantry(this, LoadedINI);
             MapWriter.WriteBuildings(this, LoadedINI);
 
-            //LoadedINI.WriteIniFile(LoadedINI.FileName.Substring(0, LoadedINI.FileName.Length - 4) + "_test.map");
-            LoadedINI.WriteIniFile(LoadedINI.FileName);
+            string savePath = filePath ?? LoadedINI.FileName;
 
-            MapWritten?.Invoke(this, EventArgs.Empty);
+            LoadedINI.WriteIniFile(savePath);
         }
 
         /// <summary>

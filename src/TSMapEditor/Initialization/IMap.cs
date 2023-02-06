@@ -60,6 +60,7 @@ namespace TSMapEditor.Initialization
 
         void SortWaypoints();
 
-        void Write();
+        void Save();
+        void AutoSave(string filePath);
     }
 }
