@@ -120,8 +120,8 @@ namespace TSMapEditor.UI
             overlayFrameSelector.Disable();
 
             tileInfoDisplay = new TileInfoDisplay(WindowManager, map, theaterGraphics);
-            tileInfoDisplay.X = Width - tileInfoDisplay.Width;
             AddChild(tileInfoDisplay);
+            tileInfoDisplay.X = Width - tileInfoDisplay.Width;
             mapView.TileInfoDisplay = tileInfoDisplay;
 
             var topBarMenu = new TopBarMenu(WindowManager, mutationManager, mapView, map, windowController);
