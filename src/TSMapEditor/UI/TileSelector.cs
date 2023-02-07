@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Rendering;
+using TSMapEditor.UI.Controls;
 using TSMapEditor.UI.CursorActions;
 
 namespace TSMapEditor.UI
@@ -24,7 +25,7 @@ namespace TSMapEditor.UI
         {
             if (Initialized)
             {
-                lbTileSetList.Height = Height;
+                lbTileSetList.Height = Height - tbSearch.Bottom;
                 lbTileSetList.Width = TileSetListWidth;
                 TileDisplay.Height = Height;
                 TileDisplay.Width = Width - TileSetListWidth;
@@ -37,7 +38,8 @@ namespace TSMapEditor.UI
         private readonly PlaceTerrainCursorAction placeTerrainCursorAction;
 
         public TileDisplay TileDisplay { get; private set; }
-        
+
+        private EditorSuggestionTextBox tbSearch;
         private XNAListBox lbTileSetList;
 
         private bool isBeingDragged = false;
@@ -47,9 +49,19 @@ namespace TSMapEditor.UI
         {
             Name = nameof(TileSelector);
 
+            tbSearch = new EditorSuggestionTextBox(WindowManager);
+            tbSearch.Name = nameof(tbSearch);
+            tbSearch.Width = TileSetListWidth;
+            tbSearch.Suggestion = "Search TileSet...";
+            AddChild(tbSearch);
+            UIHelpers.AddSearchTipsBoxToControl(tbSearch);
+            tbSearch.TextChanged += TbSearch_TextChanged;
+            tbSearch.EnterPressed += (s, e) => FindNext();
+
             lbTileSetList = new XNAListBox(WindowManager);
             lbTileSetList.Name = nameof(lbTileSetList);
-            lbTileSetList.Height = Height;
+            lbTileSetList.Y = tbSearch.Bottom;
+            lbTileSetList.Height = Height - tbSearch.Bottom;
             lbTileSetList.Width = TileSetListWidth;
             lbTileSetList.SelectedIndexChanged += LbTileSetList_SelectedIndexChanged;
             AddChild(lbTileSetList);
@@ -70,6 +82,28 @@ namespace TSMapEditor.UI
 
             KeyboardCommands.Instance.NextTileSet.Action = NextTileSet;
             KeyboardCommands.Instance.PreviousTileSet.Action = PreviousTileSet;
+        }
+
+        private void TbSearch_TextChanged(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(tbSearch.Text) || tbSearch.Text == tbSearch.Suggestion)
+                return;
+
+            lbTileSetList.SelectedIndex = -1;
+            FindNext();
+        }
+
+        private void FindNext()
+        {
+            for (int i = lbTileSetList.SelectedIndex + 1; i < lbTileSetList.Items.Count; i++)
+            {
+                if (lbTileSetList.Items[i].Text.ToUpperInvariant().Contains(tbSearch.Text.ToUpperInvariant()))
+                {
+                    lbTileSetList.SelectedIndex = i;
+                    lbTileSetList.ViewTop = lbTileSetList.SelectedIndex * lbTileSetList.LineHeight;
+                    break;
+                }
+            }
         }
 
         private void NextTileSet()
@@ -165,7 +199,8 @@ namespace TSMapEditor.UI
             TileDisplay.SetTileSet(tileSet);
 
             // Unselect the listbox
-            WindowManager.SelectedControl = null;
+            if (WindowManager.SelectedControl == lbTileSetList)
+                WindowManager.SelectedControl = null;
         }
 
         private void RefreshTileSets()
