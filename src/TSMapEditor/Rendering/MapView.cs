@@ -112,7 +112,7 @@ namespace TSMapEditor.Rendering
             get => EditorState.CopiedMapData;
             set => EditorState.CopiedMapData = value;
         }
-        public Texture2D MegamapTexture => mapRenderTarget;
+        public Texture2D MegamapTexture => compositeRenderTarget;
         public Camera Camera { get; private set; }
 
         public TileInfoDisplay TileInfoDisplay { get; set; }
@@ -132,6 +132,7 @@ namespace TSMapEditor.Rendering
         private RenderTarget2D objectRenderTarget;
         private RenderTarget2D shadowRenderTarget;
         private RenderTarget2D transparencyRenderTarget;
+        private RenderTarget2D compositeRenderTarget;
 
         private Effect colorDrawEffect;
         private Effect depthApplyEffect;
@@ -275,6 +276,7 @@ namespace TSMapEditor.Rendering
             objectRenderTarget?.Dispose();
             shadowRenderTarget?.Dispose();
             transparencyRenderTarget?.Dispose();
+            compositeRenderTarget?.Dispose();
 
             mapRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color, DepthFormat.Depth16);
             depthRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Single);
@@ -282,6 +284,7 @@ namespace TSMapEditor.Rendering
             objectRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
             shadowRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Alpha8);
             transparencyRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
+            compositeRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
         }
 
         private void MinimapWindow_MegamapClicked(object sender, MegamapClickedEventArgs e)
@@ -682,6 +685,7 @@ namespace TSMapEditor.Rendering
             Color remapColor = Color.White;
             Color foundationLineColor = Color.White;
             string iniName = string.Empty;
+            ObjectImage bibGraphics = null;
 
             int yDrawPointWithoutCellHeight = drawPoint.Y;
 
@@ -708,6 +712,7 @@ namespace TSMapEditor.Rendering
                 case RTTIType.Building:
                     var structure = (Structure)gameObject;
                     graphics = TheaterGraphics.BuildingTextures[structure.ObjectType.Index];
+                    bibGraphics = TheaterGraphics.BuildingBibTextures[structure.ObjectType.Index];
                     replacementColor = Color.Yellow;
                     iniName = structure.ObjectType.ININame;
                     remapColor = structure.ObjectType.ArtConfig.Remapable ? structure.Owner.XNAColor : remapColor;
@@ -780,6 +785,7 @@ namespace TSMapEditor.Rendering
             int finalDrawPointRight = finalDrawPointX;
             int finalDrawPointY = drawPoint.Y;
             int finalDrawPointBottom = finalDrawPointY;
+            int objectYDrawPointWithoutCellHeight = yDrawPointWithoutCellHeight;
 
             if (frameIndex > -1 && frameIndex < graphics.Frames.Length)
             {
@@ -789,7 +795,7 @@ namespace TSMapEditor.Rendering
                 {
                     finalDrawPointX = drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2;
                     finalDrawPointY = drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset;
-                    yDrawPointWithoutCellHeight = yDrawPointWithoutCellHeight - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset;
+                    objectYDrawPointWithoutCellHeight = yDrawPointWithoutCellHeight - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset;
 
                     finalDrawPointRight = finalDrawPointX + frame.Texture.Width;
                     finalDrawPointBottom = finalDrawPointY + frame.Texture.Height;
@@ -833,6 +839,56 @@ namespace TSMapEditor.Rendering
                 return;
             }
 
+            float depthTop = 0f;
+            float depthBottom = 0f;
+            int depthOffset = Constants.CellSizeY;
+            Texture2D texture = null;
+            Vector2 worldTextureCoordinates;
+            Vector2 spriteSizeToWorldSizeRatio;
+
+            // Draw building bib
+            if (bibGraphics != null)
+            {
+                PositionedTexture bibFrame = bibGraphics.Frames[0];
+                texture = bibFrame.Texture;
+
+                int bibFinalDrawPointX = drawPoint.X - bibFrame.ShapeWidth / 2 + bibFrame.OffsetX + Constants.CellSizeX / 2;
+                int bibFinalDrawPointY = drawPoint.Y - bibFrame.ShapeHeight / 2 + bibFrame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset;
+                int bibYDrawPointWithoutCellHeight = yDrawPointWithoutCellHeight - bibFrame.ShapeHeight / 2 + bibFrame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset;
+
+                depthTop = (bibYDrawPointWithoutCellHeight + depthOffset) / (float)Map.HeightInPixels;
+                depthBottom = (bibYDrawPointWithoutCellHeight + texture.Height + depthOffset) / (float)Map.HeightInPixels;
+                depthTop = 1.0f - depthTop;
+                depthBottom = 1.0f - depthBottom;
+
+                worldTextureCoordinates = new Vector2(bibFinalDrawPointX / (float)Map.WidthInPixels, bibFinalDrawPointY / (float)Map.HeightInPixels);
+                spriteSizeToWorldSizeRatio = new Vector2(texture.Width / (float)Map.WidthInPixels, texture.Height / (float)Map.HeightInPixels);
+
+                if (isRenderingDepth)
+                    SetEffectParams(depthApplyEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, null);
+                else
+                    SetEffectParams(colorDrawEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTarget);
+
+                DrawTexture(texture, new Rectangle(
+                    bibFinalDrawPointX, bibFinalDrawPointY,
+                    texture.Width, texture.Height),
+                    null, Constants.HQRemap ? Color.White : remapColor,
+                    0f, Vector2.Zero, SpriteEffects.None, 0f);
+
+                if (Constants.HQRemap && bibGraphics.RemapFrames != null)
+                {
+                    DrawTexture(bibGraphics.RemapFrames[0].Texture,
+                        new Rectangle(bibFinalDrawPointX, bibFinalDrawPointY, texture.Width, texture.Height),
+                        null,
+                        remapColor,
+                        0f,
+                        Vector2.Zero,
+                        SpriteEffects.None,
+                        0f);
+                }
+            }
+
+            // Draw shadow
             if (Constants.DrawShadows)
             {
                 int shadowFrameIndex = gameObject.GetShadowFrameIndex(graphics.Frames.Length);
@@ -862,16 +918,15 @@ namespace TSMapEditor.Rendering
             if (frame == null)
                 return;
 
-            var texture = frame.Texture;
-            int depthOffset = Constants.CellSizeY;
+            texture = frame.Texture;
 
-            float depthTop = (yDrawPointWithoutCellHeight + depthOffset) / (float)Map.HeightInPixels;
-            float depthBottom = (yDrawPointWithoutCellHeight + texture.Height + depthOffset) / (float)Map.HeightInPixels;
+            depthTop = (objectYDrawPointWithoutCellHeight + depthOffset) / (float)Map.HeightInPixels;
+            depthBottom = (objectYDrawPointWithoutCellHeight + texture.Height + depthOffset) / (float)Map.HeightInPixels;
             depthTop = 1.0f - depthTop;
             depthBottom = 1.0f - depthBottom;
 
-            Vector2 worldTextureCoordinates = new Vector2(finalDrawPointX / (float)Map.WidthInPixels, finalDrawPointY / (float)Map.HeightInPixels);
-            Vector2 spriteSizeToWorldSizeRatio = new Vector2(texture.Width / (float)Map.WidthInPixels, texture.Height / (float)Map.HeightInPixels);
+            worldTextureCoordinates = new Vector2(finalDrawPointX / (float)Map.WidthInPixels, finalDrawPointY / (float)Map.HeightInPixels);
+            spriteSizeToWorldSizeRatio = new Vector2(texture.Width / (float)Map.WidthInPixels, texture.Height / (float)Map.HeightInPixels);
 
             if (isRenderingDepth)
                 SetEffectParams(depthApplyEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, null);
@@ -1547,10 +1602,14 @@ namespace TSMapEditor.Rendering
                 destinationHeight = (int)(zoomedHeight * Camera.ZoomLevel);
             }
 
-            Renderer.PushSettings(new SpriteBatchSettings(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null));
+            Renderer.PushRenderTarget(compositeRenderTarget, new SpriteBatchSettings(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null));
 
-            Rectangle sourceRectangle = new Rectangle(sourceX, sourceY, zoomedWidth, zoomedHeight);
-            Rectangle destinationRectangle = new Rectangle(destinationX, destinationY, destinationWidth, destinationHeight);
+            GraphicsDevice.Clear(Color.Black);
+
+            // Rectangle sourceRectangle = new Rectangle(sourceX, sourceY, zoomedWidth, zoomedHeight);
+            // Rectangle destinationRectangle = new Rectangle(destinationX, destinationY, destinationWidth, destinationHeight);
+            Rectangle sourceRectangle = new Rectangle(0, 0, mapRenderTarget.Width, mapRenderTarget.Height);
+            Rectangle destinationRectangle = sourceRectangle;
 
             DrawTexture(mapRenderTarget,
                 sourceRectangle,
@@ -1578,6 +1637,19 @@ namespace TSMapEditor.Rendering
                 sourceRectangle,
                 destinationRectangle,
                 new Color(128, 128, 255) * 0.5f);
+
+            Renderer.PopRenderTarget();
+
+            // Draw directly to the screen
+            sourceRectangle = new Rectangle(sourceX, sourceY, zoomedWidth, zoomedHeight);
+            destinationRectangle = new Rectangle(destinationX, destinationY, destinationWidth, destinationHeight);
+
+            Renderer.PushSettings(new SpriteBatchSettings(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null));
+
+            DrawTexture(compositeRenderTarget,
+                sourceRectangle,
+                destinationRectangle,
+                Color.White);
 
             Renderer.PopSettings();
         }

@@ -523,6 +523,7 @@ namespace TSMapEditor.Rendering
         public void ReadBuildingTextures(List<BuildingType> buildingTypes)
         {
             BuildingTextures = new ObjectImage[buildingTypes.Count];
+            BuildingBibTextures = new ObjectImage[buildingTypes.Count];
             for (int i = 0; i < buildingTypes.Count; i++)
             {
                 var buildingType = buildingTypes[i];
@@ -560,6 +561,38 @@ namespace TSMapEditor.Rendering
                 shpFile.ParseFromBuffer(shpData);
                 BuildingTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData,
                     buildingType.ArtConfig.TerrainPalette ? theaterPalette : unitPalette, null, buildingType.ArtConfig.Remapable);
+
+                // If this building has a bib, attempt to load it
+                if (!string.IsNullOrWhiteSpace(buildingType.ArtConfig.BibShape))
+                {
+                    string bibShpFileName = buildingType.ArtConfig.BibShape;
+
+                    if (buildingType.ArtConfig.Theater)
+                        bibShpFileName += Theater.FileExtension;
+                    else
+                        bibShpFileName += SHP_FILE_EXTENSION;
+
+                    shpData = null;
+                    if (buildingType.ArtConfig.NewTheater)
+                    {
+                        string newTheaterBibShpName = bibShpFileName.Substring(0, 1) + Theater.NewTheaterBuildingLetter + bibShpFileName.Substring(2);
+
+                        shpData = fileManager.LoadFile(newTheaterBibShpName);
+                    }
+
+                    if (shpData == null)
+                        shpData = fileManager.LoadFile(bibShpFileName);
+
+                    if (shpData == null)
+                    {
+                        continue;
+                    }
+
+                    var bibShpFile = new ShpFile();
+                    bibShpFile.ParseFromBuffer(shpData);
+                    BuildingBibTextures[i] = new ObjectImage(graphicsDevice, bibShpFile, shpData,
+                        buildingType.ArtConfig.TerrainPalette ? theaterPalette : unitPalette, null, buildingType.ArtConfig.Remapable);
+                }
             }
         }
 
@@ -766,6 +799,7 @@ namespace TSMapEditor.Rendering
 
         public ObjectImage[] TerrainObjectTextures { get; set; }
         public ObjectImage[] BuildingTextures { get; set; }
+        public ObjectImage[] BuildingBibTextures { get; set; }
         public ObjectImage[] UnitTextures { get; set; }
         public ObjectImage[] InfantryTextures { get; set; }
         public ObjectImage[] OverlayTextures { get; set; }

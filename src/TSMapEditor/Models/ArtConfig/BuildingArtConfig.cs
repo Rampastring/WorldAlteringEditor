@@ -16,6 +16,7 @@ namespace TSMapEditor.Models.ArtConfig
         public bool TerrainPalette { get; set; }
         public bool Theater { get; set; }
         public string Image { get; set; }
+        public string BibShape { get; set; }
 
         public void ReadFromIniSection(IniSection iniSection)
         {
@@ -41,6 +42,7 @@ namespace TSMapEditor.Models.ArtConfig
             TerrainPalette = iniSection.GetBooleanValue(nameof(TerrainPalette), TerrainPalette);
             Theater = iniSection.GetBooleanValue(nameof(Theater), Theater);
             Image = iniSection.GetStringValue(nameof(Image), Image);
+            BibShape = iniSection.GetStringValue(nameof(BibShape), BibShape);
         }
 
         public void DoForFoundationCoords(Action<Point2D> action)
