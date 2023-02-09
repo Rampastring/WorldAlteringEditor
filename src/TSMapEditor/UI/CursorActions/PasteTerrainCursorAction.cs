@@ -80,6 +80,7 @@ namespace TSMapEditor.UI.CursorActions
                     var terrainEntry = entry as CopiedTerrainEntry;
                     cell.PreviewTileImage = CursorActionTarget.TheaterGraphics.GetTileGraphics(terrainEntry.TileIndex, 0);
                     cell.PreviewSubTileIndex = terrainEntry.SubTileIndex;
+                    cell.PreviewLevel = cell.Level;
                 }
                 /*else if (entry.EntryType == CopiedEntryType.Overlay)
                 {
