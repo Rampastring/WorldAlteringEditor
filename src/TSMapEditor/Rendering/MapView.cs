@@ -996,6 +996,7 @@ namespace TSMapEditor.Rendering
         {
             Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(graphicalBaseNode.BaseNode.Position, Map);
 
+            ObjectImage bibGraphics = TheaterGraphics.BuildingBibTextures[graphicalBaseNode.BuildingType.Index];
             ObjectImage graphics = TheaterGraphics.BuildingTextures[graphicalBaseNode.BuildingType.Index];
             Color replacementColor = Color.Yellow;
             string iniName = graphicalBaseNode.BuildingType.ININame;
@@ -1009,13 +1010,40 @@ namespace TSMapEditor.Rendering
 
             int yDrawOffset = Constants.CellSizeY / -2;
             int frameIndex = 0;
+            Texture2D texture;
 
+            if (bibGraphics != null)
+            {
+                PositionedTexture bibFrame = bibGraphics.Frames[0];
+                texture = bibFrame.Texture;
+
+                int bibFinalDrawPointX = drawPoint.X - bibFrame.ShapeWidth / 2 + bibFrame.OffsetX + Constants.CellSizeX / 2;
+                int bibFinalDrawPointY = drawPoint.Y - bibFrame.ShapeHeight / 2 + bibFrame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset;
+
+                DrawTexture(texture, new Rectangle(
+                    bibFinalDrawPointX, bibFinalDrawPointY,
+                    texture.Width, texture.Height),
+                    null, Constants.HQRemap ? Color.White : remapColor,
+                    0f, Vector2.Zero, SpriteEffects.None, 0f);
+
+                if (Constants.HQRemap && bibGraphics.RemapFrames != null)
+                {
+                    DrawTexture(bibGraphics.RemapFrames[0].Texture,
+                        new Rectangle(bibFinalDrawPointX, bibFinalDrawPointY, texture.Width, texture.Height),
+                        null,
+                        remapColor,
+                        0f,
+                        Vector2.Zero,
+                        SpriteEffects.None,
+                        0f);
+                }
+            }
 
             var frame = graphics.Frames[frameIndex];
             if (frame == null)
                 return;
 
-            var texture = frame.Texture;
+            texture = frame.Texture;
 
             int x = drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2;
             int y = drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset;
