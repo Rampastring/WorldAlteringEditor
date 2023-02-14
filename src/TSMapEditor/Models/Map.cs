@@ -54,6 +54,8 @@ namespace TSMapEditor.Models
 
                 LoadedINI = new IniFile(LoadedINI.FileName);
 
+                ReloadSections();
+
                 return true;
             }
             catch (IOException ex)
@@ -211,6 +213,13 @@ namespace TSMapEditor.Models
             MapLoader.ReadUnits(this, mapIni);
             MapLoader.ReadInfantry(this, mapIni);
 
+            CreateGraphicalNodesFromBaseNodes();
+
+            Lighting.ReadFromIniFile(mapIni);
+        }
+
+        private void CreateGraphicalNodesFromBaseNodes()
+        {
             // Check base nodes and create graphical base node instances from them
             if (Houses.Count > 0)
             {
@@ -227,7 +236,7 @@ namespace TSMapEditor.Models
                             Logger.Log($"Building type {baseNode.StructureTypeName} not found for base node for house {house.ININame}! Removing the node.");
                             remove = true;
                         }
-                        
+
                         var cell = GetTile(baseNode.Position);
                         if (cell == null)
                         {
@@ -247,8 +256,11 @@ namespace TSMapEditor.Models
                     }
                 }
             }
+        }
 
-            Lighting.ReadFromIniFile(mapIni);
+        private void ReloadSections()
+        {
+            MapLoader.ReadBasicSection(this, LoadedINI);
         }
 
         public void Save()
