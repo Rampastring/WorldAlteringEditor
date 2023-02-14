@@ -85,15 +85,15 @@ namespace TSMapEditor.UI.CursorActions
             if (tile.Structure != null)
                 return;
 
-            bool foundationAreaHasStructure = false;
+            bool foundationInvalid = false;
             structure.ObjectType.ArtConfig.DoForFoundationCoords(offset =>
             {
                 var cell = CursorActionTarget.Map.GetTile(cellCoords + offset);
-                if (cell.Structure != null)
-                    foundationAreaHasStructure = true;
+                if (cell == null || cell.Structure != null)
+                    foundationInvalid = true;
             });
 
-            if (foundationAreaHasStructure)
+            if (foundationInvalid)
                 return;
 
             var mutation = new PlaceBuildingMutation(CursorActionTarget.MutationTarget, BuildingType, cellCoords);
