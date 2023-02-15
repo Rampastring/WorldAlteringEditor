@@ -26,6 +26,8 @@ namespace TSMapEditor.UI.Controls
 
         protected EditorButton btnClose { get; private set; }
 
+        protected string SubDirectory { get; set; } = "Windows";
+
         public T FindChild<T>(string childName, bool optional = false) where T : XNAControl
         {
             T child = FindChild<T>(Children, childName);
@@ -56,7 +58,7 @@ namespace TSMapEditor.UI.Controls
                 throw new InvalidOperationException("INItializableWindow cannot be initialized twice.");
 
             var dsc = Path.DirectorySeparatorChar;
-            string configIniPath = Environment.CurrentDirectory + dsc + "Config" + dsc + "UI" + dsc + Name + ".ini";
+            string configIniPath = Path.Combine(Environment.CurrentDirectory, "Config", "UI", SubDirectory, Name + ".ini");
             
             if (!File.Exists(configIniPath))
                 throw new FileNotFoundException("Config INI not found: " + configIniPath);
