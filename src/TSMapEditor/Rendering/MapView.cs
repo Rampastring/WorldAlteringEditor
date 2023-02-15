@@ -204,7 +204,7 @@ namespace TSMapEditor.Rendering
             KeyboardCommands.Instance.FrameworkMode.Triggered += FrameworkMode_Triggered;
             KeyboardCommands.Instance.ViewMegamap.Triggered += (s, e) =>
             {
-                var mmw = new MegamapWindow(WindowManager, mapRenderTarget, false);
+                var mmw = new MegamapWindow(WindowManager, compositeRenderTarget, false);
                 mmw.Width = WindowManager.RenderResolutionX;
                 mmw.Height = WindowManager.RenderResolutionY;
                 WindowManager.AddAndInitializeControl(mmw);
@@ -314,7 +314,7 @@ namespace TSMapEditor.Rendering
                depthFormat, 0, RenderTargetUsage.PreserveContents);
         }
 
-        public void DrawWholeMap()
+        public void DrawVisibleMapPortion()
         {
             refreshStopwatch.Restart();
 
@@ -373,6 +373,11 @@ namespace TSMapEditor.Rendering
 
         private void DrawMapUIElements()
         {
+            Renderer.PushRenderTarget(transparencyRenderTarget, new SpriteBatchSettings(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null));
+            GraphicsDevice.Clear(Color.Transparent);
+
+            Map.GraphicalBaseNodes.ForEach(DrawBaseNode);
+
             DrawCellTags();
             DrawWaypoints();
 
@@ -387,6 +392,8 @@ namespace TSMapEditor.Rendering
             {
                 Map.DoForAllValidTiles(DrawIceGrowthHighlight);
             }
+
+            Renderer.PopRenderTarget();
         }
 
         private void SetEffectParams(Effect effect, float bottomDepth, float topDepth,
@@ -1002,6 +1009,12 @@ namespace TSMapEditor.Rendering
             string iniName = graphicalBaseNode.BuildingType.ININame;
             Color remapColor = graphicalBaseNode.BuildingType.ArtConfig.Remapable ? graphicalBaseNode.Owner.XNAColor : Color.White;
 
+            const float opacity = 0.25f;
+
+            remapColor *= opacity;
+
+            Color nonRemapBaseNodeShade = new Color(opacity, opacity, opacity * 2.0f, opacity * 2.0f);
+
             if (graphics == null || graphics.Frames.Length == 0)
             {
                 DrawStringWithShadow(iniName, 1, drawPoint.ToXNAVector(), replacementColor, 1.0f);
@@ -1023,7 +1036,7 @@ namespace TSMapEditor.Rendering
                 DrawTexture(texture, new Rectangle(
                     bibFinalDrawPointX, bibFinalDrawPointY,
                     texture.Width, texture.Height),
-                    null, Constants.HQRemap ? Color.White : remapColor,
+                    null, Constants.HQRemap ? nonRemapBaseNodeShade : remapColor,
                     0f, Vector2.Zero, SpriteEffects.None, 0f);
 
                 if (Constants.HQRemap && bibGraphics.RemapFrames != null)
@@ -1051,7 +1064,7 @@ namespace TSMapEditor.Rendering
             int height = texture.Height;
             Rectangle drawRectangle = new Rectangle(x, y, width, height);
 
-            DrawTexture(texture, drawRectangle, Constants.HQRemap ? Color.White : remapColor);
+            DrawTexture(texture, drawRectangle, Constants.HQRemap ? nonRemapBaseNodeShade : remapColor);
 
             if (Constants.HQRemap && graphics.RemapFrames != null)
             {
@@ -1559,7 +1572,7 @@ namespace TSMapEditor.Rendering
 
             if (mapInvalidated || cameraMoved)
             {
-                DrawWholeMap();
+                DrawVisibleMapPortion();
                 mapInvalidated = false;
                 cameraMoved = false;
                 DrawTubes();
@@ -1656,15 +1669,10 @@ namespace TSMapEditor.Rendering
                     Color.White);
             }
 
-            Renderer.PushRenderTarget(transparencyRenderTarget);
-            GraphicsDevice.Clear(Color.Transparent);
-            Map.GraphicalBaseNodes.ForEach(DrawBaseNode);
-            Renderer.PopRenderTarget();
-
             DrawTexture(transparencyRenderTarget,
                 sourceRectangle,
                 destinationRectangle,
-                new Color(128, 128, 255) * 0.5f);
+                Color.White);
 
             Renderer.PopRenderTarget();
 
