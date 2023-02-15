@@ -2,6 +2,7 @@
 using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace TSMapEditor.UI
 {
@@ -85,6 +86,23 @@ namespace TSMapEditor.UI
             return GetExprValue();
         }
 
+        /// <summary>
+        /// Parsing a sub-expression while parsing an expression eradicates the original parsing context
+        /// (information about the input and token place).
+        ///
+        /// This function automatically saves and restores the original context while parsing a sub-expression.
+        /// </summary>
+        private int GetExprValueWithContextSave(string input, XNAControl parsingControl)
+        {
+            string originalInput = Input;
+            int originalTokenPlace = tokenPlace;
+            int value = GetExprValue(input, parsingControl);
+            Input = originalInput;
+            tokenPlace = originalTokenPlace;
+
+            return value;
+        }
+
         private int GetExprValue()
         {
             int value = 0;
@@ -96,7 +114,7 @@ namespace TSMapEditor.UI
                 if (IsEndOfInput())
                     return value;
 
-                char c = Input[tokenPlace];
+                char c = PeekChar();
 
                 if (char.IsDigit(c))
                 {
@@ -150,7 +168,7 @@ namespace TSMapEditor.UI
             if (IsEndOfInput())
                 return 0;
 
-            char c = Input[tokenPlace];
+            char c = PeekChar();
 
             if (char.IsDigit(c))
             {
@@ -180,7 +198,7 @@ namespace TSMapEditor.UI
                 if (IsEndOfInput())
                     return;
 
-                char c = Input[tokenPlace];
+                char c = PeekChar();
                 if (c == ' ' || c == '\r' || c == '\n')
                     tokenPlace++;
                 else
@@ -197,7 +215,7 @@ namespace TSMapEditor.UI
                 if (IsEndOfInput())
                     break;
 
-                char c = Input[tokenPlace];
+                char c = PeekChar();
                 if (char.IsWhiteSpace(c))
                     break;
 
@@ -222,24 +240,80 @@ namespace TSMapEditor.UI
             string functionName = GetIdentifier();
             SkipWhitespace();
             ConsumeChar('(');
-            string paramName = GetIdentifier();
+
+            var parameters = new List<string>();
+
+            var sb = new StringBuilder();
+
+            // Read all parameters
+            while (true)
+            {
+                SkipWhitespace();
+
+                sb.Clear();
+                int openParenCount = 0;
+
+                // Fetch single parameter, read until ',' or ')'
+                while (true)
+                {
+                    char c = PeekChar();
+
+                    if (c == ',')
+                    {
+                        break;
+                    }
+
+                    if (c == '(')
+                    {
+                        openParenCount++;
+                    }
+                    else if (c == ')')
+                    {
+                        openParenCount--;
+                        if (openParenCount < 0)
+                            break;
+                    }
+
+                    sb.Append(c);
+                    ConsumeChar(c);
+                }
+
+                string paramName = sb.ToString();
+                parameters.Add(paramName);
+
+                if (PeekChar() != ',')
+                    break;
+
+                ConsumeChar(',');
+            }
+
             SkipWhitespace();
             ConsumeChar(')');
 
+            // Evaluate function
             switch (functionName)
             {
                 case "getX":
-                    return GetControl(paramName).X;
+                    return GetControl(parameters[0]).X;
                 case "getY":
-                    return GetControl(paramName).Y;
+                    return GetControl(parameters[0]).Y;
                 case "getWidth":
-                    return GetControl(paramName).Width;
+                    return GetControl(parameters[0]).Width;
                 case "getHeight":
-                    return GetControl(paramName).Height;
+                    return GetControl(parameters[0]).Height;
                 case "getBottom":
-                    return GetControl(paramName).Bottom;
+                    return GetControl(parameters[0]).Bottom;
                 case "getRight":
-                    return GetControl(paramName).Right;
+                    return GetControl(parameters[0]).Right;
+                case "max":
+                    int largest = GetExprValueWithContextSave(parameters[0], parsingControl);
+                    for (int i = 1; i < parameters.Count; i++)
+                    {
+                        int val = GetExprValueWithContextSave(parameters[i], parsingControl);
+                        if (val > largest)
+                            largest = val;
+                    }
+                    return largest;
                 case "horizontalCenterOnParent":
                     parsingControl.CenterOnParentHorizontally();
                     return parsingControl.X;
@@ -253,6 +327,14 @@ namespace TSMapEditor.UI
             if (Input[tokenPlace] != token)
                 throw new INIConfigException("Parse error: expected '" + token + "' in expression " + Input);
             tokenPlace++;
+        }
+
+        private char PeekChar()
+        {
+            if (IsEndOfInput())
+                throw new INIConfigException("Parse error: unexpected end of input in expression " + Input);
+
+            return Input[tokenPlace];
         }
 
         private int GetInt()
