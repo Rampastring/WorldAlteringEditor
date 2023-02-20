@@ -20,6 +20,17 @@ namespace TSMapEditor.GameMath
             return new Point2D(cx, cy);
         }
 
+        public static Point2D CellTopLeftPointFromCellCoords_3D(Point2D cellCoords, Map map)
+        {
+            var cell = map.GetTile(cellCoords);
+
+            if (cell == null)
+                return CellTopLeftPointFromCellCoords(cellCoords, map);
+
+            Point2D preHeightCoords = CellTopLeftPointFromCellCoords(cellCoords, map);
+            return preHeightCoords - new Point2D(0, cell.Level * Constants.CellHeight);
+        }
+
         public static Point2D CellCenterPointFromCellCoords(Point2D cellCoords, Map map)
             => CellTopLeftPointFromCellCoords(cellCoords, map) + new Point2D(Constants.CellSizeX / 2, Constants.CellSizeY / 2);
 
