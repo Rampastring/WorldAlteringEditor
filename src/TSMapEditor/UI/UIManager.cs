@@ -349,7 +349,10 @@ namespace TSMapEditor.UI
             }
 
             if (!createNew)
+            {
                 UserSettings.Instance.LastScenarioPath.UserDefinedValue = loadMapFilePath;
+                var _ = UserSettings.Instance.SaveSettingsAsync();
+            }
 
             ClearResources();
             WindowManager.RemoveControl(this);

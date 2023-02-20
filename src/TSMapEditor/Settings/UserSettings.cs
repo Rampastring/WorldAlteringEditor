@@ -1,5 +1,6 @@
 ﻿using Rampastring.Tools;
 using System;
+using System.Threading.Tasks;
 
 namespace TSMapEditor.Settings
 {
@@ -55,6 +56,11 @@ namespace TSMapEditor.Settings
             }
 
             UserSettingsIni.WriteIniFile();
+        }
+
+        public async Task SaveSettingsAsync()
+        {
+            await Task.Factory.StartNew(SaveSettings);
         }
 
         public static UserSettings Instance { get; private set; }
