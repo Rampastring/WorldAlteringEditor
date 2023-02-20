@@ -10,8 +10,8 @@
         EnemyHasCredits = 4,
 
         // The following are RA2/YR only
-        // OwnerHasIronCurtainReady = 5
-        // OwnerHasChronosphereReady = 6
-        // NeutralHouseOwns = 7
+        OwnerHasIronCurtainReady = 5,
+        OwnerHasChronosphereReady = 6,
+        NeutralHouseOwns = 7
     }
 }

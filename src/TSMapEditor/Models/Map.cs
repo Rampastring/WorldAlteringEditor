@@ -119,6 +119,7 @@ namespace TSMapEditor.Models
         public List<CellTag> CellTags { get; private set; } = new List<CellTag>();
         public List<Script> Scripts { get; } = new List<Script>();
         public List<TeamType> TeamTypes { get; } = new List<TeamType>();
+        public List<AITriggerType> AITriggerTypes { get; } = new List<AITriggerType>();
         public List<LocalVariable> LocalVariables { get; } = new List<LocalVariable>();
         public List<Tube> Tubes { get; private set; } = new List<Tube>();
 
@@ -206,6 +207,7 @@ namespace TSMapEditor.Models
             MapLoader.ReadCellTags(this, mapIni);
             MapLoader.ReadScripts(this, mapIni);
             MapLoader.ReadTeamTypes(this, mapIni);
+            MapLoader.ReadAITriggerTypes(this, mapIni);
             MapLoader.ReadLocalVariables(this, mapIni);
 
             MapLoader.ReadBuildings(this, mapIni);
@@ -1134,7 +1136,9 @@ namespace TSMapEditor.Models
                 if (TaskForces.Exists(tf => tf.ININame == idString) || 
                     Scripts.Exists(s => s.ININame == idString) || 
                     TeamTypes.Exists(tt => tt.ININame == idString) ||
-                    Triggers.Exists(t => t.ID == idString) || Tags.Exists(t => t.ID == idString) ||
+                    Triggers.Exists(t => t.ID == idString) ||
+                    Tags.Exists(t => t.ID == idString) ||
+                    AITriggerTypes.Exists(t => t.ININame == idString) ||
                     LoadedINI.SectionExists(idString))
                 {
                     id++;

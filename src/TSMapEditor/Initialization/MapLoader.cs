@@ -1,8 +1,10 @@
 ﻿using CNCMaps.FileFormats.Encodings;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
@@ -20,6 +22,7 @@ namespace TSMapEditor.Initialization
         private const int UNIT_PROPERTY_FIELD_COUNT = 14;
         private const int INFANTRY_PROPERTY_FIELD_COUNT = 14;
         private const int AIRCRAFT_PROPERTY_FIELD_COUNT = 12;
+        private const int AI_TRIGGER_PROPERTY_FIELD_COUNT = 18;
 
         public static List<string> MapLoadErrors = new List<string>();
 
@@ -760,6 +763,85 @@ namespace TSMapEditor.Initialization
                 }
 
                 map.AddTeamType(teamType);
+            }
+        }
+
+        public static void ReadAITriggerTypes(IMap map, IniFile mapIni)
+        {
+            var section = mapIni.GetSection("AITriggerTypes");
+            if (section == null)
+                return;
+
+            foreach (var kvp in section.Keys)
+            {
+                if (string.IsNullOrWhiteSpace(kvp.Key) || string.IsNullOrWhiteSpace(kvp.Value))
+                    continue;
+
+                string[] parts = kvp.Value.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length != AI_TRIGGER_PROPERTY_FIELD_COUNT)
+                {
+                    AddMapLoadError($"AITriggerType {kvp.Key} is invalid, skipping reading it.");
+                    continue;
+                }
+
+                var aiTriggerType = new AITriggerType(kvp.Key);
+
+                aiTriggerType.Name = parts[0];
+                aiTriggerType.PrimaryTeam = map.TeamTypes.Find(tt => tt.ININame == parts[1]);
+                aiTriggerType.OwnerName = parts[2];
+                aiTriggerType.Owner = map.FindHouse(aiTriggerType.OwnerName);
+
+                if (!int.TryParse(parts[3], CultureInfo.InvariantCulture, out int techLevel))
+                {
+                    AddMapLoadError($"AITriggerType {kvp.Key} has an invalid tech level, skipping reading it.");
+                    continue;
+                }
+                aiTriggerType.TechLevel = techLevel;
+
+                if (!int.TryParse(parts[4], CultureInfo.InvariantCulture, out int conditionType))
+                {
+                    AddMapLoadError($"AITriggerType {kvp.Key} has an invalid tech level, skipping reading it.");
+                    continue;
+                }
+
+                aiTriggerType.ConditionType = (AITriggerConditionType)conditionType;
+
+                if (!Helpers.IsStringNoneValue(parts[5]))
+                {
+                    TechnoType conditionObject = map.Rules.FindTechnoType(parts[5]);
+
+                    if (conditionObject == null)
+                    {
+                        AddMapLoadError($"AITriggerType {kvp.Key} has a non-existent condition object \"{parts[5]}\"");
+                    }
+
+                    aiTriggerType.ConditionObject = conditionObject;
+                }
+
+                aiTriggerType.Comparator = parts[6];
+                aiTriggerType.InitialWeight = Conversions.DoubleFromString(parts[7], 0.0);
+                aiTriggerType.MinimumWeight = Conversions.DoubleFromString(parts[8], 0.0);
+                aiTriggerType.MaximumWeight = Conversions.DoubleFromString(parts[9], 0.0);
+                aiTriggerType.ForMultiplayer = parts[10] != "0";
+                aiTriggerType.Unused = parts[11] != "0";
+                aiTriggerType.Side = Conversions.IntFromString(parts[12], 0);
+                aiTriggerType.IsBaseDefense = parts[13] != "0";
+
+                if (!Helpers.IsStringNoneValue(parts[14]) )
+                {
+                    aiTriggerType.SecondaryTeam = map.TeamTypes.Find(tt => tt.ININame == parts[14]);
+
+                    if (aiTriggerType.SecondaryTeam == null)
+                    {
+                        AddMapLoadError($"AITriggerType {kvp.Key} has a non-existent secondary team type \"{parts[14]}\"");
+                    }
+                }
+
+                aiTriggerType.Easy = parts[15] != "0";
+                aiTriggerType.Medium = parts[16] != "0";
+                aiTriggerType.Hard = parts[17] != "0";
+
+                map.AITriggerTypes.Add(aiTriggerType);
             }
         }
 

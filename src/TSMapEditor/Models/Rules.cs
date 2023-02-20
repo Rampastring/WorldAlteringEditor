@@ -215,5 +215,25 @@ namespace TSMapEditor.Models
 
             return existing;
         }
+
+        public TechnoType FindTechnoType(string technoTypeININame)
+        {
+            TechnoType returnValue = AircraftTypes.Find(at => at.ININame == technoTypeININame);
+
+            if (returnValue != null)
+                return returnValue;
+
+            returnValue = BuildingTypes.Find(bt => bt.ININame == technoTypeININame);
+
+            if (returnValue != null)
+                return returnValue;
+
+            returnValue = InfantryTypes.Find(it => it.ININame == technoTypeININame);
+
+            if (returnValue != null)
+                return returnValue;
+
+            return UnitTypes.Find(ut => ut.ININame == technoTypeININame);
+        }
     }
 }
