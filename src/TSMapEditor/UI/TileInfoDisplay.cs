@@ -3,6 +3,7 @@ using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Models;
 using TSMapEditor.Models.Enums;
@@ -145,11 +146,14 @@ namespace TSMapEditor.UI
 
             foreach (Trigger trigger in map.Triggers)
             {
+                bool usageFound = false;
+
                 foreach (var action in trigger.Actions)
                 {
-                    bool usageFound = false;
+                    if (usageFound)
+                        break;
 
-                    if (action.ActionIndex < 0 && action.ActionIndex >= map.EditorConfig.TriggerActionTypes.Count)
+                    if (action.ActionIndex < 0 || action.ActionIndex >= map.EditorConfig.TriggerActionTypes.Count)
                         continue;
 
                     var triggerActionType = map.EditorConfig.TriggerActionTypes[action.ActionIndex];
@@ -163,20 +167,44 @@ namespace TSMapEditor.UI
 
                         if (param.TriggerParamType == TriggerParamType.Waypoint && action.Parameters[i] == waypoint.Identifier.ToString())
                         {
-                            usages.Add("trigger '" + trigger.Name + "', ");
                             usageFound = true;
                         }
                         else if (param.TriggerParamType == TriggerParamType.WaypointZZ && action.Parameters[i] == Helpers.WaypointNumberToAlphabeticalString(waypoint.Identifier))
                         {
-                            usages.Add("trigger '" + trigger.Name + "', ");
                             usageFound = true;
                         }
                     }
+                }
 
-                    // Don't list the trigger multiple times if it has multiple actions that refer to the waypoint
+                foreach (var condition in trigger.Conditions)
+                {
                     if (usageFound)
                         break;
+
+                    if (condition.ConditionIndex < 0 || condition.ConditionIndex >= map.EditorConfig.TriggerEventTypes.Count)
+                        continue;
+
+                    var triggerEventType = map.EditorConfig.TriggerEventTypes[condition.ConditionIndex];
+
+                    if ((triggerEventType.P1Type == TriggerParamType.Waypoint && condition.Parameter1 == waypoint.Identifier) ||
+                        (triggerEventType.P2Type == TriggerParamType.Waypoint && condition.Parameter2 == waypoint.Identifier))
+                    {
+                        usageFound = true;
+                    }
+                    else
+                    {
+                        string waypointZZString = Helpers.WaypointNumberToAlphabeticalString(waypoint.Identifier);
+
+                        if ((triggerEventType.P1Type == TriggerParamType.WaypointZZ && condition.Parameter1.ToString(CultureInfo.InvariantCulture) == waypointZZString) ||
+                            (triggerEventType.P2Type == TriggerParamType.WaypointZZ && condition.Parameter2.ToString(CultureInfo.InvariantCulture) == waypointZZString))
+                        {
+                            usageFound = true;
+                        }
+                    }
                 }
+
+                if (usageFound)
+                    usages.Add("trigger '" + trigger.Name + "', ");
             }
 
             foreach (Script script in map.Scripts)
