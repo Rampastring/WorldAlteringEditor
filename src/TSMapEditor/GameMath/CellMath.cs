@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using SharpDX.Direct2D1.Effects;
 using TSMapEditor.Models;
 
 namespace TSMapEditor.GameMath
