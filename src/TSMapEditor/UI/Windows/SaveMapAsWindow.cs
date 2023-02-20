@@ -103,8 +103,15 @@ namespace TSMapEditor.UI.Windows
                 filename += ".map";
             }
 
-            map.LoadedINI.FileName = Path.Combine(lbFileList.DirectoryPath, filename);
+            string path = Path.Combine(lbFileList.DirectoryPath, filename);
+            map.LoadedINI.FileName = path;
             map.Save();
+
+            if (UserSettings.Instance.LastScenarioPath != path)
+            {
+                UserSettings.Instance.LastScenarioPath.UserDefinedValue = path;
+                _ = UserSettings.Instance.SaveSettingsAsync();
+            }
 
             Hide();
         }

@@ -251,7 +251,7 @@ namespace TSMapEditor.UI
 
             WindowManager.CenterControlOnScreen(this);
 
-            var _ = UserSettings.Instance.SaveSettingsAsync();
+            _ = UserSettings.Instance.SaveSettingsAsync();
         }
 
         private void BtnLoad_LeftClick(object sender, EventArgs e)
