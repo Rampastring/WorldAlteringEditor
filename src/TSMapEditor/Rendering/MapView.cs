@@ -1586,7 +1586,6 @@ namespace TSMapEditor.Rendering
                 DrawVisibleMapPortion();
                 mapInvalidated = false;
                 cameraMoved = false;
-                DrawTubes();
             }
 
             DrawWorld();
