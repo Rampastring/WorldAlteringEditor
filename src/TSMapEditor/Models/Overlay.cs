@@ -20,7 +20,10 @@
 
         public override int GetYDrawOffset()
         {
-            if (OverlayType.Tiberium || OverlayType.Wall)
+            if (OverlayType.IsVeinholeMonster)
+                return Constants.CellSizeY * -2;
+
+            if (OverlayType.Tiberium || OverlayType.Wall || OverlayType.IsVeins)
                 return Constants.CellSizeY / -2;
 
             return 0;

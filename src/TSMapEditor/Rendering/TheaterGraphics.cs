@@ -728,7 +728,7 @@ namespace TSMapEditor.Rendering
                     shpFile.ParseFromBuffer(shpData);
                     Palette palette = theaterPalette;
 
-                    if (overlayType.Wall || (overlayType.Tiberium && !Constants.TheaterPaletteForTiberium))
+                    if (overlayType.Wall || overlayType.IsVeins || (overlayType.Tiberium && !Constants.TheaterPaletteForTiberium))
                         palette = unitPalette;
 
                     bool isRemapable = overlayType.Tiberium && !Constants.TheaterPaletteForTiberium;
