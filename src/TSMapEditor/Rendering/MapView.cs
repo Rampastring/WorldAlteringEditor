@@ -545,7 +545,16 @@ namespace TSMapEditor.Rendering
             if (EditorState.IsMarbleMadness)
                 tileImage = TheaterGraphics.GetMarbleMadnessTileGraphics(tileImage.TileID);
 
+            if (subTileIndex >= tileImage.TMPImages.Length)
+                subTileIndex = 0;
+
+            if (tileImage.TMPImages.Length == 0)
+                return;
+
             MGTMPImage tmpImage = tileImage.TMPImages[subTileIndex];
+
+            if (tmpImage.TmpImage == null)
+                return;
 
             int extraDrawY = drawPoint.Y + tmpImage.TmpImage.YExtra - tmpImage.TmpImage.Y;
 
@@ -599,6 +608,8 @@ namespace TSMapEditor.Rendering
                 depthTop = depthTop - ((depthTop - depthBottom) / 4.0f);
                 depthTop = 1.0f - depthTop;
                 depthBottom = 1.0f - depthBottom;
+                // depthTop = depthBottom; // depthTop - ((depthTop - depthBottom) / 2.0f);
+                // depthBottom = Math.Max(0f, depthTop * 0.9f);
 
                 int exDrawPointX = drawPoint.X + tmpImage.TmpImage.XExtra - tmpImage.TmpImage.X;
                 int exDrawPointY = drawPoint.Y + tmpImage.TmpImage.YExtra - tmpImage.TmpImage.Y;
