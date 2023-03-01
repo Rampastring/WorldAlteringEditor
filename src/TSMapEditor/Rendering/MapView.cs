@@ -158,7 +158,6 @@ namespace TSMapEditor.Rendering
 
         private List<GameObject> gameObjectsToRender = new List<GameObject>();
         private List<Smudge> smudgesToRender = new List<Smudge>();
-        private List<Overlay> overlaysToRender = new List<Overlay>();
 
         private Stopwatch refreshStopwatch;
 
@@ -319,7 +318,6 @@ namespace TSMapEditor.Rendering
             refreshStopwatch.Restart();
 
             smudgesToRender.Clear();
-            overlaysToRender.Clear();
             gameObjectsToRender.Clear();
 
             if (mapInvalidated)
@@ -328,6 +326,8 @@ namespace TSMapEditor.Rendering
                 GraphicsDevice.Clear(Color.White);
                 GraphicsDevice.SetRenderTarget(depthRenderTargetCopy);
                 GraphicsDevice.Clear(Color.White);
+                GraphicsDevice.SetRenderTarget(mapRenderTarget);
+                GraphicsDevice.Clear(Color.Black);
             }
 
             // First render depth
@@ -356,7 +356,6 @@ namespace TSMapEditor.Rendering
             Renderer.PushRenderTarget(objectRenderTarget, colorDrawSettings);
             GraphicsDevice.Clear(Color.Transparent);
             DrawSmudges();
-            DrawOverlays();
             DrawObjects();
             Renderer.PopRenderTarget();
 
@@ -489,7 +488,7 @@ namespace TSMapEditor.Rendering
                 smudgesToRender.Add(tile.Smudge);
 
             if (tile.Overlay != null && tile.Overlay.OverlayType != null)
-                overlaysToRender.Add(tile.Overlay);
+                gameObjectsToRender.Add(tile.Overlay);
 
             if (tile.Structure != null && tile.Structure.Position == tile.CoordsToPoint())
                 gameObjectsToRender.Add(tile.Structure);
@@ -581,10 +580,13 @@ namespace TSMapEditor.Rendering
                 return;
             }
 
+            float depthTop = 0f;
+            float depthBottom = 0f;
+
             if (tmpImage.Texture != null)
             {
-                float depthTop = originalDrawPointY / (float)Map.HeightInPixels;
-                float depthBottom = (originalDrawPointY + tmpImage.Texture.Height) / (float)Map.HeightInPixels;
+                depthTop = originalDrawPointY / (float)Map.HeightInPixels;
+                depthBottom = (originalDrawPointY + tmpImage.Texture.Height) / (float)Map.HeightInPixels;
                 depthTop = 1.0f - depthTop;
                 depthBottom = 1.0f - depthBottom;
 
@@ -602,14 +604,9 @@ namespace TSMapEditor.Rendering
 
             if (tmpImage.ExtraTexture != null)
             {
-                int yDrawPointWithoutCellHeight = originalDrawPointY + tmpImage.TmpImage.YExtra - tmpImage.TmpImage.Y;
-                float depthTop = yDrawPointWithoutCellHeight / (float)Map.HeightInPixels;
-                float depthBottom = (yDrawPointWithoutCellHeight + tmpImage.ExtraTexture.Height) / (float)Map.HeightInPixels;
-                depthTop = depthTop - ((depthTop - depthBottom) / 4.0f);
-                depthTop = 1.0f - depthTop;
-                depthBottom = 1.0f - depthBottom;
-                // depthTop = depthBottom; // depthTop - ((depthTop - depthBottom) / 2.0f);
-                // depthBottom = Math.Max(0f, depthTop * 0.9f);
+                // Most extra graphics are drawn above the regular terrain, this gives
+                // us a kind-of smooth depth transition for them
+                depthBottom = depthTop;
 
                 int exDrawPointX = drawPoint.X + tmpImage.TmpImage.XExtra - tmpImage.TmpImage.X;
                 int exDrawPointY = drawPoint.Y + tmpImage.TmpImage.YExtra - tmpImage.TmpImage.Y;
@@ -676,20 +673,8 @@ namespace TSMapEditor.Rendering
             smudgesToRender.ForEach(DrawObject);
         }
 
-        private void DrawOverlays()
-        {
-            overlaysToRender.Sort(CompareGameObjectsForRendering);
-            overlaysToRender.ForEach(DrawObject);
-        }
-
         private void DrawObjects()
         {
-            // gameObjectsToRender.Clear();
-            // gameObjectsToRender.AddRange(Map.TerrainObjects);
-            // gameObjectsToRender.AddRange(Map.Structures);
-            // gameObjectsToRender.AddRange(Map.Aircraft);
-            // gameObjectsToRender.AddRange(Map.Units);
-            // gameObjectsToRender.AddRange(Map.Infantry);
             gameObjectsToRender.Sort(CompareGameObjectsForRendering);
             gameObjectsToRender.ForEach(DrawObject);
         }
@@ -843,6 +828,8 @@ namespace TSMapEditor.Rendering
                     p2 -= new Point2D(0, heightOffset);
                     p3 -= new Point2D(0, heightOffset);
                     p4 -= new Point2D(0, heightOffset);
+
+                    SetEffectParams(colorDrawEffect, 1.0f, 1.0f, Vector2.Zero, Vector2.Zero, depthRenderTarget);
 
                     DrawLine(p1.ToXNAVector(), p2.ToXNAVector(), foundationLineColor, 1);
                     DrawLine(p1.ToXNAVector(), p3.ToXNAVector(), foundationLineColor, 1);
