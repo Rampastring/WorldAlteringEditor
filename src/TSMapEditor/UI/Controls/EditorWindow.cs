@@ -20,6 +20,14 @@ namespace TSMapEditor.UI.Controls
         public event EventHandler Closed;
         public event EventHandler InteractedWith;
 
+
+        /// <summary>
+        /// This is stored here for the purposes of being able
+        /// to clean up event handlers when the window controller
+        /// for a session is cleaned.
+        /// </summary>
+        public EventHandler FocusSwitchEventHandler { get; set; }
+
         protected bool CanBeMoved { get; set; } = true;
 
         protected bool IsDragged;

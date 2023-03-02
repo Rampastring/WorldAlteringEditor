@@ -12,6 +12,8 @@ namespace TSMapEditor.UI
         {
         }
 
+        private bool isStockBackgroundTexture;
+
         public override void Initialize()
         {
             base.Initialize();
@@ -20,7 +22,16 @@ namespace TSMapEditor.UI
             {
                 BackgroundTexture = AssetLoader.CreateTexture(UISettings.ActiveSettings.PanelBackgroundColor, 2, 2);
                 PanelBackgroundDrawMode = PanelBackgroundImageDrawMode.STRETCHED;
+                isStockBackgroundTexture = true;
             }
+        }
+
+        public override void Kill()
+        {
+            if (isStockBackgroundTexture)
+                BackgroundTexture?.Dispose();
+
+            base.Kill();
         }
     }
 }

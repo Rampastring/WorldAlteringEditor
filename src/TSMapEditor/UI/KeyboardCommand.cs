@@ -126,7 +126,7 @@ namespace TSMapEditor.UI
             get => action;
             set
             {
-                if (action != null)
+                if (action != null && value != null)
                     throw new InvalidOperationException("KeyboardCommand.Action can only be set once.");
 
                 action = value;

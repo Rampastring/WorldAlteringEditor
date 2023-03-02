@@ -21,10 +21,10 @@ namespace TSMapEditor.UI.Sidebar
             this.overlayPlacementAction = overlayPlacementAction;
         }
 
-        private readonly EditorState editorState;
-        private readonly Map map;
-        private readonly TheaterGraphics theaterGraphics;
-        private readonly OverlayPlacementAction overlayPlacementAction;
+        private EditorState editorState;
+        private Map map;
+        private TheaterGraphics theaterGraphics;
+        private OverlayPlacementAction overlayPlacementAction;
 
         private XNAListBox lbSelection;
 
@@ -102,14 +102,17 @@ namespace TSMapEditor.UI.Sidebar
 
             base.Initialize();
 
-            KeyboardCommands.Instance.AircraftMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 0;
-            KeyboardCommands.Instance.BuildingMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 1;
-            KeyboardCommands.Instance.VehicleMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 2;
-            KeyboardCommands.Instance.NavalMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 3;
-            KeyboardCommands.Instance.InfantryMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 4;
-            KeyboardCommands.Instance.TerrainObjectMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 5;
-            KeyboardCommands.Instance.OverlayMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 6;
-            KeyboardCommands.Instance.SmudgeMenu.Triggered += (s, e) => lbSelection.SelectedIndex = 7;
+            // This is less extensible than using events, but with events we'd have to store
+            // the delegates to be able to unsubscribe from them later on.
+            // Thus, this results in neater code.
+            KeyboardCommands.Instance.AircraftMenu.Action = () => lbSelection.SelectedIndex = 0;
+            KeyboardCommands.Instance.BuildingMenu.Action = () => lbSelection.SelectedIndex = 1;
+            KeyboardCommands.Instance.VehicleMenu.Action = () => lbSelection.SelectedIndex = 2;
+            KeyboardCommands.Instance.NavalMenu.Action = () => lbSelection.SelectedIndex = 3;
+            KeyboardCommands.Instance.InfantryMenu.Action = () => lbSelection.SelectedIndex = 4;
+            KeyboardCommands.Instance.TerrainObjectMenu.Action = () => lbSelection.SelectedIndex = 5;
+            KeyboardCommands.Instance.OverlayMenu.Action = () => lbSelection.SelectedIndex = 6;
+            KeyboardCommands.Instance.SmudgeMenu.Action = () => lbSelection.SelectedIndex = 7;
 
             Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
         }
@@ -155,6 +158,37 @@ namespace TSMapEditor.UI.Sidebar
             panel.Height = Height - panel.Y;
             panel.Width = Width;
             AddChild(panel);
+        }
+
+        public override void Kill()
+        {
+            KeyboardCommands.Instance.AircraftMenu.Action = null;
+            KeyboardCommands.Instance.BuildingMenu.Action = null;
+            KeyboardCommands.Instance.VehicleMenu.Action = null;
+            KeyboardCommands.Instance.NavalMenu.Action = null;
+            KeyboardCommands.Instance.InfantryMenu.Action = null;
+            KeyboardCommands.Instance.TerrainObjectMenu.Action = null;
+            KeyboardCommands.Instance.OverlayMenu.Action = null;
+            KeyboardCommands.Instance.SmudgeMenu.Action = null;
+
+            Keyboard.OnKeyPressed -= Keyboard_OnKeyPressed;
+
+            lbSelection.SelectedIndexChanged -= LbSelection_SelectedIndexChanged;
+            lbSelection.Kill();
+            lbSelection = null;
+
+            editorState = null;
+            map = null;
+            theaterGraphics = null;
+            overlayPlacementAction = null;
+
+            Array.ForEach(modePanels, panel => panel.Kill());
+            modePanels = null;
+            activePanel = null;
+
+            cursorActionTarget = null;
+
+            base.Kill();
         }
     }
 }

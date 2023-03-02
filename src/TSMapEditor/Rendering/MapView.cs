@@ -95,11 +95,11 @@ namespace TSMapEditor.Rendering
             Camera.CameraUpdated += (s, e) => cameraMoved = true;
         }
 
-        public EditorState EditorState { get; }
-        public Map Map { get; }
-        public TheaterGraphics TheaterGraphics { get; }
-        public MutationManager MutationManager { get; }
-        private readonly WindowController windowController;
+        public EditorState EditorState { get; private set; }
+        public Map Map { get; private set; }
+        public TheaterGraphics TheaterGraphics { get; private set; }
+        public MutationManager MutationManager { get; private set; }
+        private WindowController windowController;
 
         public IMutationTarget MutationTarget => this;
         public House ObjectOwner => EditorState.ObjectOwner;
@@ -201,15 +201,9 @@ namespace TSMapEditor.Rendering
 
             Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
             KeyboardCommands.Instance.FrameworkMode.Triggered += FrameworkMode_Triggered;
-            KeyboardCommands.Instance.ViewMegamap.Triggered += (s, e) =>
-            {
-                var mmw = new MegamapWindow(WindowManager, compositeRenderTarget, false);
-                mmw.Width = WindowManager.RenderResolutionX;
-                mmw.Height = WindowManager.RenderResolutionY;
-                WindowManager.AddAndInitializeControl(mmw);
-            };
+            KeyboardCommands.Instance.ViewMegamap.Triggered += ViewMegamap_Triggered;
 
-            windowController.Initialized += (s, e) => windowController.MinimapWindow.MegamapClicked += MinimapWindow_MegamapClicked;
+            windowController.Initialized += PostWindowControllerInit;
             Map.LocalSizeChanged += (s, e) => InvalidateMap();
             Map.MapResized += Map_MapResized;
 
@@ -222,13 +216,41 @@ namespace TSMapEditor.Rendering
 
             refreshStopwatch = new Stopwatch();
 
-            Keyboard.OnKeyPressed += (s, e) =>
-            {
-                if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.F11)
-                    debugRenderDepthBuffer = !debugRenderDepthBuffer;
-            };
-
             InvalidateMap();
+        }
+
+        private void PostWindowControllerInit(object sender, EventArgs e)
+        {
+            windowController.MinimapWindow.MegamapClicked += MinimapWindow_MegamapClicked;
+            windowController.Initialized -= PostWindowControllerInit;
+        }
+
+        public void Clear()
+        {
+            EditorState.CursorActionChanged -= EditorState_CursorActionChanged;
+            EditorState = null;
+            TheaterGraphics = null;
+            MutationManager = null;
+
+            windowController = null;
+
+            Map.MapResized -= Map_MapResized;
+            Map = null;
+
+            Keyboard.OnKeyPressed -= Keyboard_OnKeyPressed;
+            KeyboardCommands.Instance.FrameworkMode.Triggered -= FrameworkMode_Triggered;
+            KeyboardCommands.Instance.ViewMegamap.Triggered -= ViewMegamap_Triggered;
+            KeyboardCommands.Instance.RotateUnitOneStep.Triggered -= RotateUnitOneStep_Triggered;
+
+            ClearRenderTargets();
+        }
+
+        private void ViewMegamap_Triggered(object sender, EventArgs e)
+        {
+            var mmw = new MegamapWindow(WindowManager, compositeRenderTarget, false);
+            mmw.Width = WindowManager.RenderResolutionX;
+            mmw.Height = WindowManager.RenderResolutionY;
+            WindowManager.AddAndInitializeControl(mmw);
         }
 
         private void LoadShaders()
@@ -267,7 +289,7 @@ namespace TSMapEditor.Rendering
             InvalidateMap();
         }
 
-        private void RefreshRenderTargets()
+        private void ClearRenderTargets()
         {
             mapRenderTarget?.Dispose();
             depthRenderTarget?.Dispose();
@@ -276,6 +298,11 @@ namespace TSMapEditor.Rendering
             shadowRenderTarget?.Dispose();
             transparencyRenderTarget?.Dispose();
             compositeRenderTarget?.Dispose();
+        }
+
+        private void RefreshRenderTargets()
+        {
+            ClearRenderTargets();
 
             mapRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color, DepthFormat.Depth16);
             depthRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Single);
@@ -1344,6 +1371,10 @@ namespace TSMapEditor.Rendering
                 }
 
                 EditorMessageBox.Show(WindowManager, "Hotkey Help", text.ToString(), MessageBoxButtons.OK);
+            }
+            else if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.F11)
+            {
+                debugRenderDepthBuffer = !debugRenderDepthBuffer;
             }
 
             if (!e.Handled && CursorAction != null && CursorAction.HandlesKeyboardInput)

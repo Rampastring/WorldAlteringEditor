@@ -55,6 +55,14 @@ namespace TSMapEditor.UI.Windows
             Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
         }
 
+        public override void Kill()
+        {
+            lbKeyboardCommands.SelectedIndexChanged -= LbKeyboardCommands_SelectedIndexChanged;
+            Keyboard.OnKeyPressed -= Keyboard_OnKeyPressed;
+
+            base.Kill();
+        }
+
         public void Open()
         {
             Show();

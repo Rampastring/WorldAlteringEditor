@@ -2,6 +2,7 @@
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using TSMapEditor.GameMath;
 using TSMapEditor.Misc;
@@ -36,8 +37,8 @@ namespace TSMapEditor.UI
             this.theaterGraphics = theaterGraphics;
         }
 
-        private readonly Map map;
-        private readonly TheaterGraphics theaterGraphics;
+        private Map map;
+        private TheaterGraphics theaterGraphics;
 
         private MapView mapView;
         private TileSelector tileSelector;
@@ -140,25 +141,11 @@ namespace TSMapEditor.UI
             windowController.Initialize(this, map, editorState, mapView);
             placeWaypointCursorAction.PlaceWaypointWindow = windowController.PlaceWaypointWindow;
 
-            Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
-
             editorState.CursorActionChanged += EditorState_CursorActionChanged;
             overlayPlacementAction.OverlayTypeChanged += OverlayPlacementAction_OverlayTypeChanged;
 
             copyTerrainCursorAction = new CopyTerrainCursorAction(mapView);
             pasteTerrainCursorAction = new PasteTerrainCursorAction(mapView);
-
-            KeyboardCommands.Instance.Copy.Triggered += (s, e) =>
-            {
-                copyTerrainCursorAction.StartCellCoords = null;
-                copyTerrainCursorAction.EntryTypes = windowController.CopiedEntryTypesWindow.GetEnabledEntryTypes();
-                mapView.CursorAction = copyTerrainCursorAction;
-            };
-
-            KeyboardCommands.Instance.Paste.Triggered += (s, e) =>
-            {
-                mapView.CursorAction = pasteTerrainCursorAction;
-            };
 
             InitAutoSaveAndSaveNotifications();
 
@@ -178,8 +165,10 @@ namespace TSMapEditor.UI
             // This makes the exit process technically faster, but the editor stays longer on the
             // screen so practically increases exit time from the user's perspective
             // WindowManager.GameClosing += (s, e) => ClearResources();
-            WindowManager.GameClosing += (s, e) => mapFileWatcher.StopWatching();
+            WindowManager.GameClosing += WindowManager_GameClosing;
         }
+
+        private void WindowManager_GameClosing(object sender, EventArgs e) => mapFileWatcher.StopWatching();
 
         private void InitTheme()
         {
@@ -227,10 +216,25 @@ namespace TSMapEditor.UI
 
         private void InitKeyboard()
         {
+            Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
+
             KeyboardCommands.Instance = new KeyboardCommands();
-            KeyboardCommands.Instance.Undo.Action = UndoAction;
-            KeyboardCommands.Instance.Redo.Action = RedoAction;
+            KeyboardCommands.Instance.Undo.Triggered += UndoAction;
+            KeyboardCommands.Instance.Redo.Triggered += RedoAction;
+            KeyboardCommands.Instance.Copy.Triggered += CopyAction;
+            KeyboardCommands.Instance.Paste.Triggered += PasteAction;
+
             KeyboardCommands.Instance.ReadFromSettings();
+        }
+
+        private void ClearKeyboard()
+        {
+            Keyboard.OnKeyPressed -= Keyboard_OnKeyPressed;
+
+            KeyboardCommands.Instance.Undo.Triggered -= UndoAction;
+            KeyboardCommands.Instance.Redo.Triggered -= RedoAction;
+            KeyboardCommands.Instance.Copy.Triggered -= CopyAction;
+            KeyboardCommands.Instance.Paste.Triggered -= PasteAction;
         }
 
         private void InitMapView()
@@ -263,6 +267,7 @@ namespace TSMapEditor.UI
 
             map.MapAutoSaved += (s, e) => notificationManager.AddNotification("Map auto-saved.");
         }
+
 
         private void RefreshWindowTitle()
         {
@@ -318,13 +323,6 @@ namespace TSMapEditor.UI
             loadMapStage = 1;
         }
 
-        private void Clear()
-        {
-            map.Rules.TutorialLines.ShutdownFSW();
-            windowController.OpenMapWindow.OnFileSelected -= OpenMapWindow_OnFileSelected;
-            windowController.CreateNewMapWindow.OnCreateNewMap -= CreateNewMapWindow_OnCreateNewMap;
-        }
-
         private void LoadMap()
         {
             mapFileWatcher.StopWatching();
@@ -362,16 +360,45 @@ namespace TSMapEditor.UI
 
         private void ClearResources()
         {
-            // We need to free memory of everything that we've ever created and then load the map's theater graphics
-            Clear();
+            // We need to free memory of everything that we've ever created
+
+            map.Rules.TutorialLines.ShutdownFSW();
+            windowController.OpenMapWindow.OnFileSelected -= OpenMapWindow_OnFileSelected;
+            windowController.CreateNewMapWindow.OnCreateNewMap -= CreateNewMapWindow_OnCreateNewMap;
+
+            editorState.CursorActionChanged -= EditorState_CursorActionChanged;
+            overlayPlacementAction.OverlayTypeChanged -= OverlayPlacementAction_OverlayTypeChanged;
+
+            windowController.OpenMapWindow.OnFileSelected -= OpenMapWindow_OnFileSelected;
+            windowController.CreateNewMapWindow.OnCreateNewMap -= CreateNewMapWindow_OnCreateNewMap;
+
+            WindowManager.GameClosing -= WindowManager_GameClosing;
+
             Disable();
-            foreach (var child in Children)
-                child.Disable();
+
+            Kill();
+
+            ClearKeyboard();
 
             // TODO free up memory of textures created for controls - they should be mostly 
             // insignificant compared to the map textures though, so it shouldn't be too bad like this
 
+            tileSelector = null;
+            overlayFrameSelector = null;
+            editorSidebar = null;
+
+            map.Clear();
+            map = null;
+
+            windowController.Clear();
+            windowController = null;
+
             theaterGraphics.DisposeAll();
+            theaterGraphics = null;
+
+            mapView.Clear();
+
+            GC.Collect();
         }
 
         private void OverlayPlacementAction_OverlayTypeChanged(object sender, EventArgs e)
@@ -491,15 +518,18 @@ namespace TSMapEditor.UI
                 overlayPlacementAction.FrameIndex = overlayFrameSelector.SelectedFrameIndex;
         }
 
-        private void UndoAction()
+        private void UndoAction(object sender, EventArgs e) => mutationManager.Undo();
+
+        private void RedoAction(object sender, EventArgs e) => mutationManager.Redo();
+
+        private void CopyAction(object sender, EventArgs e)
         {
-            mutationManager.Undo();
+            copyTerrainCursorAction.StartCellCoords = null;
+            copyTerrainCursorAction.EntryTypes = windowController.CopiedEntryTypesWindow.GetEnabledEntryTypes();
+            mapView.CursorAction = copyTerrainCursorAction;
         }
 
-        private void RedoAction()
-        {
-            mutationManager.Redo();
-        }
+        private void PasteAction(object sender, EventArgs e) => mapView.CursorAction = pasteTerrainCursorAction;
 
         private void UpdateMapFileWatcher()
         {

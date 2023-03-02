@@ -2,6 +2,7 @@
 using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI.Controls;
@@ -13,6 +14,7 @@ namespace TSMapEditor.UI.Windows
     public interface IWindowParentControl
     {
         void AddChild(XNAControl child);
+        void RemoveChild(XNAControl child);
 
         WindowManager WindowManager { get; }
 
@@ -152,16 +154,16 @@ namespace TSMapEditor.UI.Windows
 
             MapSizeWindow = new MapSizeWindow(windowParentControl.WindowManager, map);
             Windows.Add(MapSizeWindow);
+            MapSizeWindow.OnResizeMapButtonClicked += MapSizeWindow_OnResizeMapButtonClicked;
 
             ExpandMapWindow = new ExpandMapWindow(windowParentControl.WindowManager, map);
             Windows.Add(ExpandMapWindow);
-            MapSizeWindow.OnResizeMapButtonClicked += (s, e) => ExpandMapWindow.Open();
 
             AboutWindow = new AboutWindow(windowParentControl.WindowManager);
             Windows.Add(AboutWindow);
 
-            TeamTypesWindow.TaskForceOpened += (s, e) => { TaskForcesWindow.Open(); TaskForcesWindow.SelectTaskForce(e.TaskForce); };
-            TeamTypesWindow.ScriptOpened += (s, e) => { ScriptsWindow.Open(); ScriptsWindow.SelectScript(e.Script); };
+            TeamTypesWindow.TaskForceOpened += TeamTypesWindow_TaskForceOpened;
+            TeamTypesWindow.ScriptOpened += TeamTypesWindow_ScriptOpened;
 
             foreach (var window in Windows)
             {
@@ -182,14 +184,79 @@ namespace TSMapEditor.UI.Windows
             Initialized?.Invoke(this, EventArgs.Empty);
         }
 
+        private void MapSizeWindow_OnResizeMapButtonClicked(object sender, EventArgs e)
+        {
+            ExpandMapWindow.Open();
+        }
+
         private void AddFocusSwitchHandlerToChildrenRecursive(EditorWindow window, XNAControl control)
+        {
+            EventHandler eventHandler = (s, e) => Window_HandleFocusSwitch(window, EventArgs.Empty);
+            window.FocusSwitchEventHandler = eventHandler;
+
+            foreach (var child in control.Children)
+            {
+                child.MouseLeftDown += eventHandler;
+                child.LeftClick += eventHandler;
+                AddFocusSwitchHandlerToChildrenRecursive(window, child);
+            }
+        }
+
+        private void TeamTypesWindow_TaskForceOpened(object sender, TaskForceEventArgs e)
+        {
+            TaskForcesWindow.Open();
+            TaskForcesWindow.SelectTaskForce(e.TaskForce);
+        }
+
+        private void TeamTypesWindow_ScriptOpened(object sender, ScriptEventArgs e)
+        {
+            ScriptsWindow.Open();
+            ScriptsWindow.SelectScript(e.Script);
+        }
+
+        private void ClearFocusSwitchHandlerFromChildrenRecursive(EditorWindow window, XNAControl control)
         {
             foreach (var child in control.Children)
             {
-                child.MouseLeftDown += (s, e) => Window_HandleFocusSwitch(window, EventArgs.Empty);
-                child.LeftClick += (s, e) => Window_HandleFocusSwitch(window, EventArgs.Empty);
-                AddFocusSwitchHandlerToChildrenRecursive(window, child);
+                child.MouseLeftDown -= window.FocusSwitchEventHandler;
+                child.LeftClick -= window.FocusSwitchEventHandler;
+                ClearFocusSwitchHandlerFromChildrenRecursive(window, child);
             }
+
+            window.FocusSwitchEventHandler = null;
+        }
+
+        public void Clear()
+        {
+            TeamTypesWindow.TaskForceOpened -= TeamTypesWindow_TaskForceOpened;
+            TeamTypesWindow.ScriptOpened -= TeamTypesWindow_ScriptOpened;
+            MapSizeWindow.OnResizeMapButtonClicked -= MapSizeWindow_OnResizeMapButtonClicked;
+
+            foreach (var window in Windows)
+            {
+                window.LeftClick -= Window_HandleFocusSwitch;
+                window.InteractedWith -= Window_HandleFocusSwitch;
+                windowParentControl.RemoveChild(window);
+
+                ClearFocusSwitchHandlerFromChildrenRecursive(window, window);
+
+                window.Kill();
+            }
+
+            Windows.Clear();
+
+            var properties = GetType().GetProperties();
+            foreach (var property in properties)
+            {
+                if (property.PropertyType.IsAssignableTo(typeof(EditorWindow)))
+                {
+                    property.SetValue(this, null, BindingFlags.SetProperty | BindingFlags.NonPublic, null, null, null);
+                }
+            }
+
+            foregroundWindow = null;
+
+            windowParentControl = null;
         }
     }
 }

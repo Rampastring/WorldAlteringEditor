@@ -107,25 +107,25 @@ namespace TSMapEditor.Models
         /// or in the Rules.ini standard house list.
         /// </summary>
         public List<House> StandardHouses { get; set; }
-        public List<House> Houses { get; } = new List<House>();
+        public List<House> Houses { get; protected set; } = new List<House>();
         public List<House> GetHouses() => Houses.Count > 0 ? Houses : StandardHouses;
 
         public List<TerrainObject> TerrainObjects { get; private set; } = new List<TerrainObject>();
         public List<Waypoint> Waypoints { get; private set; } = new List<Waypoint>();
 
-        public List<TaskForce> TaskForces { get; } = new List<TaskForce>();
-        public List<Trigger> Triggers { get; } = new List<Trigger>();
-        public List<Tag> Tags { get; } = new List<Tag>();
+        public List<TaskForce> TaskForces { get; protected set; } = new List<TaskForce>();
+        public List<Trigger> Triggers { get; protected set; } = new List<Trigger>();
+        public List<Tag> Tags { get; protected set; } = new List<Tag>();
         public List<CellTag> CellTags { get; private set; } = new List<CellTag>();
-        public List<Script> Scripts { get; } = new List<Script>();
-        public List<TeamType> TeamTypes { get; } = new List<TeamType>();
-        public List<AITriggerType> AITriggerTypes { get; } = new List<AITriggerType>();
-        public List<LocalVariable> LocalVariables { get; } = new List<LocalVariable>();
+        public List<Script> Scripts { get; protected set; } = new List<Script>();
+        public List<TeamType> TeamTypes { get; protected set; } = new List<TeamType>();
+        public List<AITriggerType> AITriggerTypes { get; protected set; } = new List<AITriggerType>();
+        public List<LocalVariable> LocalVariables { get; protected set; } = new List<LocalVariable>();
         public List<Tube> Tubes { get; private set; } = new List<Tube>();
 
         public Lighting Lighting { get; } = new Lighting();
 
-        public List<GraphicalBaseNode> GraphicalBaseNodes { get; } = new List<GraphicalBaseNode>();
+        public List<GraphicalBaseNode> GraphicalBaseNodes { get; protected set; } = new List<GraphicalBaseNode>();
 
         public Point2D Size { get; set; }
 
@@ -1352,6 +1352,65 @@ namespace TSMapEditor.Models
             }
 
             return issueList;
+        }
+
+        public void Clear()
+        {
+            LoadedINI = null;
+
+            TheaterInstance = null;
+
+            for (int y = 0; y < Tiles.Length; y++)
+            {
+                for (int x = 0; x < Tiles[y].Length; x++)
+                {
+                    Tiles[y][x] = null;
+                }
+            }
+
+            Tiles = null;
+
+            Rules = null;
+            EditorConfig = null;
+            Basic = null;
+
+            Aircraft.Clear();
+            Infantry.Clear();
+            Units.Clear();
+            Structures.Clear();
+            StandardHouses.Clear();
+            Houses.Clear();
+            TerrainObjects.Clear();
+            Waypoints.Clear();
+            TaskForces.Clear();
+            Triggers.Clear();
+            Tags.Clear();
+            CellTags.Clear();
+            Scripts.Clear();
+            TeamTypes.Clear();
+            AITriggerTypes.Clear();
+            LocalVariables.Clear();
+            Tubes.Clear();
+            GraphicalBaseNodes.Clear();
+
+            Aircraft = null;
+            Infantry = null;
+            Units = null;
+            Structures = null;
+            StandardHouses = null;
+            Houses = null;
+            TerrainObjects = null;
+            Waypoints = null;
+            TaskForces = null;
+            Triggers = null;
+            Tags = null;
+            CellTags = null;
+            Scripts = null;
+            TeamTypes = null;
+            AITriggerTypes = null;
+            LocalVariables = null;
+            Tubes = null;
+            GraphicalBaseNodes = null;
         }
     }
 }
