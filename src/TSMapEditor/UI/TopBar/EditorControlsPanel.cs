@@ -26,6 +26,8 @@ namespace TSMapEditor.UI.TopBar
             this.placeWaypointCursorAction = placeWaypointCursorAction;
 
             deletionModeCursorAction = new DeletionModeCursorAction(cursorActionTarget);
+            raiseCellsCursorAction = new RaiseCellsCursorAction(cursorActionTarget);
+            lowerCellsCursorAction = new LowerCellsCursorAction(cursorActionTarget);
         }
 
         private readonly Map map;
@@ -35,6 +37,8 @@ namespace TSMapEditor.UI.TopBar
         private readonly PlaceTerrainCursorAction terrainPlacementAction;
         private readonly PlaceWaypointCursorAction placeWaypointCursorAction;
         private readonly DeletionModeCursorAction deletionModeCursorAction;
+        private readonly RaiseCellsCursorAction raiseCellsCursorAction;
+        private readonly LowerCellsCursorAction lowerCellsCursorAction;
 
         private XNADropDown ddBrushSize;
         private XNACheckBox chkAutoLAT;
@@ -68,6 +72,14 @@ namespace TSMapEditor.UI.TopBar
 
             FindChild<EditorButton>("btnPlaceWaypoint").LeftClick += (s, e) => editorState.CursorAction = placeWaypointCursorAction;
             FindChild<EditorButton>("btnDeletionMode").LeftClick += (s, e) => editorState.CursorAction = deletionModeCursorAction;
+
+            var btnRaiseCells = FindChild<EditorButton>("btnRaiseCells", true);
+            if (btnRaiseCells != null)
+                btnRaiseCells.LeftClick += (s, e) => editorState.CursorAction = raiseCellsCursorAction;
+
+            var btnLowerCells = FindChild<EditorButton>("btnLowerCells", true);
+            if (btnLowerCells != null)
+                btnLowerCells.LeftClick += (s, e) => editorState.CursorAction = lowerCellsCursorAction;
 
             KeyboardCommands.Instance.NextBrushSize.Triggered += NextBrushSize_Triggered;
             KeyboardCommands.Instance.PreviousBrushSize.Triggered += PreviousBrushSize_Triggered;
