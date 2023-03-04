@@ -1253,15 +1253,21 @@ namespace TSMapEditor.Models
 
             DoForAllValidTiles(cell =>
             {
-                // Check whether the cell has tiberium on an impassable terrain type
                 if (cell.HasTiberium())
                 {
                     ITileImage tile = TheaterInstance.GetTile(cell.TileIndex);
                     ISubTileImage subTile = tile.GetSubTile(cell.SubTileIndex);
 
+                    // Check whether the cell has tiberium on an impassable terrain type
                     if (Helpers.IsLandTypeImpassable(subTile.TmpImage.TerrainType, true))
                     {
                         issueList.Add($"Cell at {cell.CoordsToPoint()} has tiberium on an otherwise impassable cell. This can cause harvesters to get stuck.");
+                    }
+
+                    // Check for tiberium on ramps that don't support tiberium on them
+                    if (subTile.TmpImage.RampType > (int)RampType.South)
+                    {
+                        issueList.Add($"Cell at {cell.CoordsToPoint()} has tiberium on a ramp that does not allow tiberium on it. This can crash the game!");
                     }
                 }
             });
