@@ -1,4 +1,5 @@
-﻿using TSMapEditor.GameMath;
+﻿using Microsoft.Xna.Framework;
+using TSMapEditor.GameMath;
 
 namespace TSMapEditor.Models
 {
@@ -48,5 +49,9 @@ namespace TSMapEditor.Models
         {
             return (int)WhatAmI() * 10000000 + Position.Y * 512 + Position.X;
         }
+
+        public virtual bool Remapable() => false;
+
+        public virtual Color GetRemapColor() => Color.White;
     }
 }

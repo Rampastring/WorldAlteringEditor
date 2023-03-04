@@ -524,6 +524,7 @@ namespace TSMapEditor.Rendering
         {
             BuildingTextures = new ObjectImage[buildingTypes.Count];
             BuildingBibTextures = new ObjectImage[buildingTypes.Count];
+
             for (int i = 0; i < buildingTypes.Count; i++)
             {
                 var buildingType = buildingTypes[i];

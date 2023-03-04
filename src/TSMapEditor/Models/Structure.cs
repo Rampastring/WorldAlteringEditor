@@ -64,5 +64,7 @@
         {
             return Position.Y + ObjectType.ArtConfig.FoundationY / 2;
         }
+
+        public override bool Remapable() => ObjectType.ArtConfig.Remapable;
     }
 }

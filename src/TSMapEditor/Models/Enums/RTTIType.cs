@@ -11,6 +11,8 @@
         // In addition, I took the liberty of making
         // the names of the values more fitting for C# conventions.
         None,
+        OverlayType,
+        Overlay,
         Unit,
         Aircraft,
         AircraftType,
@@ -33,8 +35,6 @@
         TaskForce,
         ScriptType,
         TeamType,
-        OverlayType,
-        Overlay,
         Waypoint,
         CellTag
     }

@@ -1,0 +1,38 @@
+﻿using Microsoft.Xna.Framework.Graphics;
+using System;
+using TSMapEditor.Models;
+
+namespace TSMapEditor.Rendering.ObjectRenderers
+{
+    public struct RenderDependencies
+    {
+        public Map Map;
+        public TheaterGraphics TheaterGraphics;
+        public GraphicsDevice GraphicsDevice;
+        public Effect ColorDrawEffect;
+        public Camera Camera;
+        public Func<int> GetCameraRightXCoord;
+        public Func<int> GetCameraBottomYCoord;
+        public RenderTarget2D DepthRenderTarget;
+
+
+        public RenderDependencies(Map map, 
+            TheaterGraphics theaterGraphics, 
+            GraphicsDevice graphicsDevice, 
+            Effect colorDrawEffect, 
+            Camera camera, 
+            Func<int> getCameraRightXCoord, 
+            Func<int> getCameraBottomYCoord, 
+            RenderTarget2D depthRenderTarget)
+        {
+            Map = map;
+            TheaterGraphics = theaterGraphics;
+            GraphicsDevice = graphicsDevice;
+            ColorDrawEffect = colorDrawEffect;
+            Camera = camera;
+            GetCameraRightXCoord = getCameraRightXCoord;
+            GetCameraBottomYCoord = getCameraBottomYCoord;
+            DepthRenderTarget = depthRenderTarget;
+        }
+    }
+}

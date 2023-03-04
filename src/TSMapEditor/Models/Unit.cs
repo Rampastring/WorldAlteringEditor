@@ -89,6 +89,8 @@
             return UnitType.ArtConfig.StartStandFrame + (facingIndex * UnitType.ArtConfig.StandingFrames);
         }
 
+        public override bool Remapable() => ObjectType.ArtConfig.Remapable;
+
         public override int GetShadowFrameIndex(int frameCount)
         {
             return GetFrameIndex(frameCount) + frameCount / 2;

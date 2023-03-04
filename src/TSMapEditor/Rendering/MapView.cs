@@ -7,19 +7,17 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
-using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations;
 using TSMapEditor.Mutations.Classes;
+using TSMapEditor.Rendering.ObjectRenderers;
 using TSMapEditor.Settings;
 using TSMapEditor.UI;
-using TSMapEditor.UI.CursorActions;
 using TSMapEditor.UI.Windows;
 
 namespace TSMapEditor.Rendering
 {
-#if !ADVMAPVIEW
     /// <summary>
     /// An interface for an object that mutations use to interact with the map.
     /// </summary>
@@ -57,33 +55,13 @@ namespace TSMapEditor.Rendering
         Camera Camera { get; }
     }
 
-    struct RefreshPoint
-    {
-        public Point2D CellCoords;
-        public int Size;
 
-        public RefreshPoint(Point2D cellCoords, int size)
-        {
-            CellCoords = cellCoords;
-            Size = size;
-        }
-    }
-#endif
-
-#if !ADVMAPVIEW
     public class MapView : XNAControl, ICursorActionTarget, IMutationTarget
-#else
-    public class OldMapView : XNAControl, ICursorActionTarget, IMutationTarget
-#endif
     {
         private const float RightClickScrollRateDivisor = 64f;
 
-#if !ADVMAPVIEW
-        public MapView(
-#else
-        public OldMapView(
-#endif
-        WindowManager windowManager, Map map, TheaterGraphics theaterGraphics, EditorState editorState, MutationManager mutationManager, WindowController windowController) : base(windowManager)
+        public MapView(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics, EditorState editorState,
+            MutationManager mutationManager, WindowController windowController) : base(windowManager)
         {
             EditorState = editorState;
             Map = map;
@@ -167,6 +145,14 @@ namespace TSMapEditor.Rendering
 
         private bool debugRenderDepthBuffer = false;
 
+        private AircraftRenderer aircraftRenderer;
+        private BuildingRenderer buildingRenderer;
+        private InfantryRenderer infantryRenderer;
+        private OverlayRenderer overlayRenderer;
+        private SmudgeRenderer smudgeRenderer;
+        private TerrainRenderer terrainRenderer;
+        private UnitRenderer unitRenderer;
+
 
         public void AddRefreshPoint(Point2D point, int size = 1)
         {
@@ -215,6 +201,8 @@ namespace TSMapEditor.Rendering
             KeyboardCommands.Instance.RotateUnitOneStep.Triggered += RotateUnitOneStep_Triggered;
 
             refreshStopwatch = new Stopwatch();
+
+            InitRenderers();
 
             InvalidateMap();
         }
@@ -311,6 +299,30 @@ namespace TSMapEditor.Rendering
             shadowRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Alpha8);
             transparencyRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
             compositeRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
+
+            aircraftRenderer?.UpdateDepthRenderTarget(depthRenderTarget);
+            buildingRenderer?.UpdateDepthRenderTarget(depthRenderTarget);
+            infantryRenderer?.UpdateDepthRenderTarget(depthRenderTarget);
+            overlayRenderer?.UpdateDepthRenderTarget(depthRenderTarget);
+            smudgeRenderer?.UpdateDepthRenderTarget(depthRenderTarget);
+            terrainRenderer?.UpdateDepthRenderTarget(depthRenderTarget);
+            unitRenderer?.UpdateDepthRenderTarget(depthRenderTarget);
+        }
+
+        private RenderDependencies CreateRenderDependencies()
+        {
+            return new RenderDependencies(Map, TheaterGraphics, GraphicsDevice, colorDrawEffect, Camera, GetCameraRightXCoord, GetCameraBottomYCoord, depthRenderTarget);
+        }
+
+        private void InitRenderers()
+        {
+            aircraftRenderer = new AircraftRenderer(CreateRenderDependencies());
+            buildingRenderer = new BuildingRenderer(CreateRenderDependencies());
+            infantryRenderer = new InfantryRenderer(CreateRenderDependencies());
+            overlayRenderer = new OverlayRenderer(CreateRenderDependencies());
+            smudgeRenderer = new SmudgeRenderer(CreateRenderDependencies());
+            terrainRenderer = new TerrainRenderer(CreateRenderDependencies());
+            unitRenderer = new UnitRenderer(CreateRenderDependencies());
         }
 
         private void MinimapWindow_MegamapClicked(object sender, MegamapClickedEventArgs e)
@@ -708,340 +720,31 @@ namespace TSMapEditor.Rendering
 
         private void DrawObject(GameObject gameObject)
         {
-            Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(gameObject.Position, Map);
-
-            ObjectImage graphics = null;
-            Color replacementColor = Color.Red;
-            Color remapColor = Color.White;
-            Color foundationLineColor = Color.White;
-            string iniName = string.Empty;
-            ObjectImage bibGraphics = null;
-
-            int yDrawPointWithoutCellHeight = drawPoint.Y;
-
-            var mapCell = Map.GetTile(gameObject.Position);
-            int heightOffset = mapCell.Level * Constants.CellHeight;
-            if (mapCell != null)
-                drawPoint -= new Point2D(0, heightOffset);
-
-            // TODO refactor this to be more object-oriented
-
             switch (gameObject.WhatAmI())
             {
                 case RTTIType.Aircraft:
-                    var aircraft = (Aircraft)gameObject;
-                    replacementColor = Color.HotPink;
-                    iniName = aircraft.ObjectType.ININame;
-                    break;
-                case RTTIType.Terrain:
-                    var terrainObject = (TerrainObject)gameObject;
-                    graphics = TheaterGraphics.TerrainObjectTextures[terrainObject.TerrainType.Index];
-                    replacementColor = Color.Green;
-                    iniName = terrainObject.TerrainType.ININame;
-                    break;
+                    aircraftRenderer.Draw(gameObject as Aircraft);
+                    return;
                 case RTTIType.Building:
-                    var structure = (Structure)gameObject;
-                    graphics = TheaterGraphics.BuildingTextures[structure.ObjectType.Index];
-                    bibGraphics = TheaterGraphics.BuildingBibTextures[structure.ObjectType.Index];
-                    replacementColor = Color.Yellow;
-                    iniName = structure.ObjectType.ININame;
-                    remapColor = structure.ObjectType.ArtConfig.Remapable ? structure.Owner.XNAColor : remapColor;
-                    foundationLineColor = structure.Owner.XNAColor;
-                    break;
-                case RTTIType.Unit:
-                    var unit = (Unit)gameObject;
-                    graphics = TheaterGraphics.UnitTextures[unit.ObjectType.Index];
-                    replacementColor = Color.Red;
-                    iniName = unit.ObjectType.ININame;
-                    remapColor = unit.ObjectType.ArtConfig.Remapable ? unit.Owner.XNAColor : remapColor;
-                    break;
+                    buildingRenderer.Draw(gameObject as Structure);
+                    return;
                 case RTTIType.Infantry:
-                    var infantry = (Infantry)gameObject;
-                    graphics = TheaterGraphics.InfantryTextures[infantry.ObjectType.Index];
-                    replacementColor = Color.Teal;
-                    iniName = infantry.ObjectType.ININame;
-                    remapColor = infantry.ObjectType.ArtConfig.Remapable ? infantry.Owner.XNAColor : remapColor;
-                    switch (infantry.SubCell)
-                    {
-                        case SubCell.Top:
-                            drawPoint += new Point2D(0, Constants.CellSizeY / -4);
-                            break;
-                        case SubCell.Bottom:
-                            drawPoint += new Point2D(0, Constants.CellSizeY / 4);
-                            break;
-                        case SubCell.Left:
-                            drawPoint += new Point2D(Constants.CellSizeX / -4, 0);
-                            break;
-                        case SubCell.Right:
-                            drawPoint += new Point2D(Constants.CellSizeX / 4, 0);
-                            break;
-                        case SubCell.Center:
-                        default:
-                            break;
-                    }
-                    break;
+                    infantryRenderer.Draw(gameObject as Infantry);
+                    return;
                 case RTTIType.Overlay:
-                    var overlay = (Overlay)gameObject;
-                    if (overlay.OverlayType == null)
-                        return;
-                    graphics = TheaterGraphics.OverlayTextures[overlay.OverlayType.Index];
-                    int tiberiumIndex = overlay.OverlayType.GetTiberiumIndex();
-                    if (tiberiumIndex > -1 && tiberiumIndex < Map.Rules.TiberiumTypes.Count)
-                        remapColor = Map.Rules.TiberiumTypes[tiberiumIndex].XNAColor;
-                    replacementColor = Color.LimeGreen;
-                    iniName = overlay.OverlayType.ININame;
-                    break;
+                    overlayRenderer.Draw(gameObject as Overlay);
+                    return;
                 case RTTIType.Smudge:
-                    var smudge = (Smudge)gameObject;
-                    if (smudge.SmudgeType == null)
-                        return;
-                    graphics = TheaterGraphics.SmudgeTextures[smudge.SmudgeType.Index];
-                    replacementColor = Color.Cyan;
-                    iniName = smudge.SmudgeType.ININame;
-                    break;
-            }
-
-            int frameIndex = -1;
-
-            if (graphics != null && graphics.Frames != null && graphics.Frames.Length > 0)
-            {
-                frameIndex = gameObject.GetFrameIndex(graphics.Frames.Length);
-            }
-
-            PositionedTexture frame = null;
-
-            int yDrawOffset = gameObject.GetYDrawOffset();
-            int finalDrawPointX = drawPoint.X;
-            int finalDrawPointRight = finalDrawPointX;
-            int finalDrawPointY = drawPoint.Y;
-            int finalDrawPointBottom = finalDrawPointY;
-            int objectYDrawPointWithoutCellHeight = yDrawPointWithoutCellHeight;
-
-            if (frameIndex > -1 && frameIndex < graphics.Frames.Length)
-            {
-                frame = graphics.Frames[frameIndex];
-
-                if (frame != null)
-                {
-                    finalDrawPointX = drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2;
-                    finalDrawPointY = drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset;
-                    objectYDrawPointWithoutCellHeight = yDrawPointWithoutCellHeight - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset;
-
-                    finalDrawPointRight = finalDrawPointX + frame.Texture.Width;
-                    finalDrawPointBottom = finalDrawPointY + frame.Texture.Height;
-                }
-            }
-
-            // If the object is not in view, skip
-            if (finalDrawPointRight < Camera.TopLeftPoint.X || finalDrawPointX > GetCameraRightXCoord())
-                return;
-
-            if (finalDrawPointBottom < Camera.TopLeftPoint.Y || finalDrawPointY > GetCameraBottomYCoord())
-                return;
-
-            if (gameObject.WhatAmI() == RTTIType.Building)
-            {
-                var structure = (Structure)gameObject;
-                int foundationX = structure.ObjectType.ArtConfig.FoundationX;
-                int foundationY = structure.ObjectType.ArtConfig.FoundationY;
-                if (foundationX > 0 && foundationY > 0)
-                {
-                    Point2D p1 = CellMath.CellTopLeftPointFromCellCoords(gameObject.Position, Map) + new Point2D(Constants.CellSizeX / 2, 0);
-                    Point2D p2 = CellMath.CellTopLeftPointFromCellCoords(new Point2D(gameObject.Position.X + foundationX, gameObject.Position.Y), Map) + new Point2D(Constants.CellSizeX / 2, 0);
-                    Point2D p3 = CellMath.CellTopLeftPointFromCellCoords(new Point2D(gameObject.Position.X, gameObject.Position.Y + foundationY), Map) + new Point2D(Constants.CellSizeX / 2, 0);
-                    Point2D p4 = CellMath.CellTopLeftPointFromCellCoords(new Point2D(gameObject.Position.X + foundationX, gameObject.Position.Y + foundationY), Map) + new Point2D(Constants.CellSizeX / 2, 0);
-
-                    p1 -= new Point2D(0, heightOffset);
-                    p2 -= new Point2D(0, heightOffset);
-                    p3 -= new Point2D(0, heightOffset);
-                    p4 -= new Point2D(0, heightOffset);
-
-                    SetEffectParams(colorDrawEffect, 1.0f, 1.0f, Vector2.Zero, Vector2.Zero, depthRenderTarget);
-
-                    DrawLine(p1.ToXNAVector(), p2.ToXNAVector(), foundationLineColor, 1);
-                    DrawLine(p1.ToXNAVector(), p3.ToXNAVector(), foundationLineColor, 1);
-                    DrawLine(p2.ToXNAVector(), p4.ToXNAVector(), foundationLineColor, 1);
-                    DrawLine(p3.ToXNAVector(), p4.ToXNAVector(), foundationLineColor, 1);
-                }
-            }
-
-            if (graphics == null || graphics.Frames.Length == 0)
-            {
-                SetEffectParams(colorDrawEffect, 1.0f, 1.0f, Vector2.Zero, Vector2.Zero, depthRenderTarget);
-
-                if (gameObject.IsTechno())
-                {
-                    var techno = gameObject as TechnoBase;
-                    var cellCenterPoint = (drawPoint + new Point2D(Constants.CellSizeX / 2, Constants.CellSizeY / 2)).ToXNAVector();
-
-                    float rad = (techno.Facing / 255.0f) * (float)Math.PI * 2.0f;
-
-                    // The in-game compass is slightly rotated compared to the usual math compass
-                    // and the compass used by MonoGame.
-                    // In the usual compass, 0 rad points directly towards the right / east, in the in-game
-                    // compass it points to top-right / northeast
-                    rad -= (float)Math.PI / 4.0f;
-
-                    var arrowEndPoint = Helpers.VectorFromLengthAndAngle(Constants.CellSizeX / 4, rad);
-                    arrowEndPoint += new Vector2(arrowEndPoint.X, 0f);
-                    DrawArrow(cellCenterPoint, cellCenterPoint + arrowEndPoint, Color.Yellow, 1f, 10f, 1);
-                }
-
-                DrawString(iniName, 1, drawPoint.ToXNAVector(), replacementColor, 1.0f);
-
-                return;
-            }
-
-            float depthTop = 0f;
-            float depthBottom = 0f;
-            int depthOffset = Constants.CellSizeY;
-            Texture2D texture = null;
-            Vector2 worldTextureCoordinates;
-            Vector2 spriteSizeToWorldSizeRatio;
-
-            // Draw building bib
-            if (bibGraphics != null)
-            {
-                PositionedTexture bibFrame = bibGraphics.Frames[0];
-                texture = bibFrame.Texture;
-
-                int bibFinalDrawPointX = drawPoint.X - bibFrame.ShapeWidth / 2 + bibFrame.OffsetX + Constants.CellSizeX / 2;
-                int bibFinalDrawPointY = drawPoint.Y - bibFrame.ShapeHeight / 2 + bibFrame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset;
-                int bibYDrawPointWithoutCellHeight = yDrawPointWithoutCellHeight - bibFrame.ShapeHeight / 2 + bibFrame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset;
-
-                depthTop = (bibYDrawPointWithoutCellHeight + depthOffset) / (float)Map.HeightInPixels;
-                depthBottom = (bibYDrawPointWithoutCellHeight + texture.Height + depthOffset) / (float)Map.HeightInPixels;
-                depthTop = 1.0f - depthTop;
-                depthBottom = 1.0f - depthBottom;
-
-                worldTextureCoordinates = new Vector2(bibFinalDrawPointX / (float)Map.WidthInPixels, bibFinalDrawPointY / (float)Map.HeightInPixels);
-                spriteSizeToWorldSizeRatio = new Vector2(texture.Width / (float)Map.WidthInPixels, texture.Height / (float)Map.HeightInPixels);
-
-                if (isRenderingDepth)
-                    SetEffectParams(depthApplyEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, null);
-                else
-                    SetEffectParams(colorDrawEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTarget);
-
-                DrawTexture(texture, new Rectangle(
-                    bibFinalDrawPointX, bibFinalDrawPointY,
-                    texture.Width, texture.Height),
-                    null, Constants.HQRemap ? Color.White : remapColor,
-                    0f, Vector2.Zero, SpriteEffects.None, 0f);
-
-                if (Constants.HQRemap && bibGraphics.RemapFrames != null)
-                {
-                    DrawTexture(bibGraphics.RemapFrames[0].Texture,
-                        new Rectangle(bibFinalDrawPointX, bibFinalDrawPointY, texture.Width, texture.Height),
-                        null,
-                        remapColor,
-                        0f,
-                        Vector2.Zero,
-                        SpriteEffects.None,
-                        0f);
-                }
-            }
-
-            // Draw shadow
-            if (Constants.DrawShadows)
-            {
-                int shadowFrameIndex = gameObject.GetShadowFrameIndex(graphics.Frames.Length);
-                if (shadowFrameIndex > 0 && shadowFrameIndex < graphics.Frames.Length)
-                {
-                    var shadowFrame = graphics.Frames[shadowFrameIndex];
-                    if (shadowFrame != null)
-                    {
-                        var shadowTexture = shadowFrame.Texture;
-
-                        DrawTexture(shadowTexture, new Rectangle(drawPoint.X - shadowFrame.ShapeWidth / 2 + shadowFrame.OffsetX + Constants.CellSizeX / 2,
-                            drawPoint.Y - shadowFrame.ShapeHeight / 2 + shadowFrame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
-                            shadowTexture.Width, shadowTexture.Height),
-                            null,
-                            new Color(0, 0, 0, 128),
-                            0f,
-                            Vector2.Zero,
-                            SpriteEffects.None,
-                            0f);
-                    }
-                }
-            }
-
-            // We're going to render this object, update its last refresh frame
-            // gameObject.LastRefreshIndex = refreshIndex;
-
-            if (frame == null)
-                return;
-
-            texture = frame.Texture;
-
-            depthTop = (objectYDrawPointWithoutCellHeight + depthOffset) / (float)Map.HeightInPixels;
-            depthBottom = (objectYDrawPointWithoutCellHeight + texture.Height + depthOffset) / (float)Map.HeightInPixels;
-            depthTop = 1.0f - depthTop;
-            depthBottom = 1.0f - depthBottom;
-
-            worldTextureCoordinates = new Vector2(finalDrawPointX / (float)Map.WidthInPixels, finalDrawPointY / (float)Map.HeightInPixels);
-            spriteSizeToWorldSizeRatio = new Vector2(texture.Width / (float)Map.WidthInPixels, texture.Height / (float)Map.HeightInPixels);
-
-            if (isRenderingDepth)
-                SetEffectParams(depthApplyEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, null);
-            else
-                SetEffectParams(colorDrawEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTarget);
-
-            DrawTexture(texture, new Rectangle(
-                finalDrawPointX, finalDrawPointY,
-                texture.Width, texture.Height),
-                null, Constants.HQRemap ? Color.White : remapColor,
-                0f, Vector2.Zero, SpriteEffects.None, 0f);
-
-            if (Constants.HQRemap && graphics.RemapFrames != null)
-            {
-                DrawTexture(graphics.RemapFrames[frameIndex].Texture,
-                    new Rectangle(finalDrawPointX, finalDrawPointY, texture.Width, texture.Height),
-                    null,
-                    remapColor,
-                    0f,
-                    Vector2.Zero,
-                    SpriteEffects.None,
-                    0f);
-            }
-
-            if (gameObject.WhatAmI() == RTTIType.Unit)
-            {
-                var unit = (Unit)gameObject;
-
-                if (unit.UnitType.Turret)
-                {
-                    int turretFrameIndex = unit.GetTurretFrameIndex();
-                    if (turretFrameIndex > -1 && turretFrameIndex < graphics.Frames.Length)
-                    {
-                        frame = graphics.Frames[turretFrameIndex];
-                        if (frame == null)
-                            return;
-                        texture = frame.Texture;
-
-                        DrawTexture(texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
-                            drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
-                            texture.Width, texture.Height),
-                            null,
-                            Constants.HQRemap ? Color.White : remapColor,
-                            0f,
-                            Vector2.Zero,
-                            SpriteEffects.None,
-                            0f);
-
-                        if (Constants.HQRemap && graphics.RemapFrames != null)
-                        {
-                            DrawTexture(graphics.RemapFrames[turretFrameIndex].Texture, new Rectangle(drawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2,
-                                drawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset,
-                                texture.Width, texture.Height),
-                                null,
-                                remapColor,
-                                0f,
-                                Vector2.Zero,
-                                SpriteEffects.None,
-                                0f);
-                        }
-                    }
-                }
+                    smudgeRenderer.Draw(gameObject as Smudge);
+                    return;
+                case RTTIType.Terrain:
+                    terrainRenderer.Draw(gameObject as TerrainObject);
+                    return;
+                case RTTIType.Unit:
+                    unitRenderer.Draw(gameObject as Unit);
+                    return;
+                default:
+                    throw new NotImplementedException("No renderer implemented for type " + gameObject.WhatAmI());
             }
         }
 
@@ -1602,16 +1305,7 @@ namespace TSMapEditor.Rendering
 
         private static void DrawArrow(Vector2 start, Vector2 end,
             Color color, float angleDiff, float sideLineLength, int thickness = 1)
-        {
-            Vector2 line = end - start;
-            float angle = Helpers.AngleFromVector(line) - (float)Math.PI;
-            Renderer.DrawLine(start,
-                end, color, thickness);
-            Renderer.DrawLine(end, end + Helpers.VectorFromLengthAndAngle(sideLineLength, angle + angleDiff),
-                color, thickness);
-            Renderer.DrawLine(end, end + Helpers.VectorFromLengthAndAngle(sideLineLength, angle - angleDiff),
-                color, thickness);
-        }
+            => RendererExtensions.DrawArrow(start, end, color, angleDiff, sideLineLength, thickness);
 
         public override void Draw(GameTime gameTime)
         {

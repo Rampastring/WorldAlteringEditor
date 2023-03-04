@@ -29,6 +29,8 @@
             return GetFrameIndex(frameCount) + (frameCount / 2);
         }
 
+        public override bool Remapable() => ObjectType.ArtConfig.Remapable;
+
         public override int GetHashCode()
         {
             return ((int)WhatAmI() * 10000000) + (Position.Y * 512) + (Position.X * 10) + (int)SubCell;
