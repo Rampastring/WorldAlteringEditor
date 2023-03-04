@@ -8,17 +8,7 @@ namespace TSMapEditor.Models
     /// </summary>
     public class UnitType : TechnoType, IArtConfigContainer
     {
-        /// <summary>
-        /// Horrible hack, but I can't be bothered to link the whole object
-        /// hierarchy to a editor configuration container at least for now.
-        /// 
-        /// Controls whether the graphical frames for the unit's standing frames
-        /// start towards the north, or to the north-east.
-        /// 
-        /// Enables the editor to support both DTA's ancient 32-facing hack as well
-        /// as newer implementations in Ares and Vinifera.
-        /// </summary>
-        public bool AdvancedFacingsHack => Constants.AdvancedFacingsHack;
+        public static bool AdvancedFacingsHack => Constants.AdvancedFacingsHack;
 
         public const int STANDARD_STANDING_FRAME_COUNT = 8;
 
