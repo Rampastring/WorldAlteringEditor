@@ -5,12 +5,12 @@ using System.Runtime.Versioning;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Dawn of the Tiberium Age Scenario Editor")]
-[assembly: AssemblyDescription("Dawn of the Tiberium Age Scenario Editor")]
+[assembly: AssemblyTitle("World-Altering Editor (WAE)")]
+[assembly: AssemblyDescription("Map editor for Tiberian Sun and Red Alert 2")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Rampastring")]
-[assembly: AssemblyProduct("Dawn of the Tiberium Age")]
-[assembly: AssemblyCopyright("Copyright © Rami 'Rampastring' Pasanen 2022")]
+[assembly: AssemblyProduct("World-Altering Editor (WAE)")]
+[assembly: AssemblyCopyright("Copyright © Rami 'Rampastring' Pasanen 2023")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -34,4 +34,4 @@ using System.Runtime.Versioning;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.8.*")]
+[assembly: AssemblyVersion("0.9.*")]
