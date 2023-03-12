@@ -473,6 +473,10 @@ namespace TSMapEditor.UI
                     return;
             }
 
+            // First, check for commands that match when all modifiers are fully considered
+            // - for example, if there's two commands, one that is activated by pressing A,
+            // and another that is activated by pressing Alt + A, DON'T match on the first
+            // one if Alt is down
             foreach (var keyboardCommand in KeyboardCommands.Instance.Commands)
             {
                 if (e.PressedKey == keyboardCommand.Key.Key)
@@ -494,6 +498,35 @@ namespace TSMapEditor.UI
                     keyboardCommand.Action?.Invoke();
                     keyboardCommand.DoTrigger();
                     break;
+                }
+            }
+
+            // If the key wasn't handled, check for modifierless keys and allow pressing
+            // them even if a modifier key is down
+            if (!e.Handled)
+            {
+                foreach (var keyboardCommand in KeyboardCommands.Instance.Commands)
+                {
+                    if (e.PressedKey == keyboardCommand.Key.Key)
+                    {
+                        // Key matches, check modifiers
+
+                        if (((keyboardCommand.Key.Modifiers & KeyboardModifiers.Alt) == KeyboardModifiers.Alt) && !Keyboard.IsAltHeldDown())
+                            continue;
+
+                        if (((keyboardCommand.Key.Modifiers & KeyboardModifiers.Ctrl) == KeyboardModifiers.Ctrl) && !Keyboard.IsCtrlHeldDown())
+                            continue;
+
+                        if (((keyboardCommand.Key.Modifiers & KeyboardModifiers.Shift)) == KeyboardModifiers.Shift && !Keyboard.IsShiftHeldDown())
+                            continue;
+
+                        // All keys match, perform the command!
+                        e.Handled = true;
+
+                        keyboardCommand.Action?.Invoke();
+                        keyboardCommand.DoTrigger();
+                        break;
+                    }
                 }
             }
         }
