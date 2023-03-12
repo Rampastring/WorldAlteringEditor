@@ -127,6 +127,9 @@ namespace TSMapEditor.UI.TopBar
                 if (autoLATGround.GroundTileSet.NonMarbleMadness > -1)
                     continue;
 
+                if (!autoLATGround.GroundTileSet.AllowToPlace)
+                    continue;
+
                 // If we already have a button for this ground type, then skip it
                 // The editor can automatically place the correct LAT variations
                 // of a tile based on its surroundings
