@@ -60,12 +60,15 @@ namespace TSMapEditor.UI.TopBar
             ddBrushSize.SelectedIndex = 0;
 
             chkAutoLAT = FindChild<XNACheckBox>(nameof(chkAutoLAT));
+            chkAutoLAT.Checked = editorState.AutoLATEnabled;
             chkAutoLAT.CheckedChanged += ChkAutoLat_CheckedChanged;
 
             chkOnlyPaintOnClearGround = FindChild<XNACheckBox>(nameof(chkOnlyPaintOnClearGround));
+            chkOnlyPaintOnClearGround.Checked = editorState.OnlyPaintOnClearGround;
             chkOnlyPaintOnClearGround.CheckedChanged += ChkOnlyPaintOnClearGround_CheckedChanged;
 
             chkDrawMapWideOverlay = FindChild<XNACheckBox>(nameof(chkDrawMapWideOverlay));
+            chkDrawMapWideOverlay.Checked = editorState.DrawMapWideOverlay;
             chkDrawMapWideOverlay.CheckedChanged += ChkDrawMapWideOverlay_CheckedChanged;
             if (!editorState.MapWideOverlayExists)
                 chkDrawMapWideOverlay.Disable();
@@ -117,6 +120,12 @@ namespace TSMapEditor.UI.TopBar
             for (int i = 0; i < map.TheaterInstance.Theater.LATGrounds.Count; i++)
             {
                 LATGround autoLATGround = map.TheaterInstance.Theater.LATGrounds[i];
+
+                // If this LAT is for Marble Madness mode only, skip
+                // (some modders might do this if they don't use all the
+                // TS LAT slots)
+                if (autoLATGround.GroundTileSet.NonMarbleMadness > -1)
+                    continue;
 
                 // If we already have a button for this ground type, then skip it
                 // The editor can automatically place the correct LAT variations
@@ -184,16 +193,12 @@ namespace TSMapEditor.UI.TopBar
 
         private void ChkAutoLat_CheckedChanged(object sender, EventArgs e)
         {
-            chkAutoLAT.CheckedChanged -= ChkAutoLat_CheckedChanged;
-            editorState.AutoLATEnabled = !editorState.AutoLATEnabled;
-            chkAutoLAT.CheckedChanged += ChkAutoLat_CheckedChanged;
+            editorState.AutoLATEnabled = chkAutoLAT.Checked;
         }
 
         private void ChkOnlyPaintOnClearGround_CheckedChanged(object sender, EventArgs e)
         {
-            chkOnlyPaintOnClearGround.CheckedChanged -= ChkOnlyPaintOnClearGround_CheckedChanged;
-            editorState.OnlyPaintOnClearGround = !editorState.OnlyPaintOnClearGround;
-            chkOnlyPaintOnClearGround.CheckedChanged += ChkOnlyPaintOnClearGround_CheckedChanged;
+            editorState.OnlyPaintOnClearGround = chkOnlyPaintOnClearGround.Checked;
         }
 
         private void ChkDrawMapWideOverlay_CheckedChanged(object sender, EventArgs e)
