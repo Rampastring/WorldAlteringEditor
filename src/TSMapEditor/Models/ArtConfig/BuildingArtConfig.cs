@@ -55,5 +55,13 @@ namespace TSMapEditor.Models.ArtConfig
                 }
             }
         }
+
+        public void DoForFoundationCoordsOrOrigin(Action<Point2D> action)
+        {
+            if (FoundationY == 0 || FoundationX == 0)
+                action(new Point2D(0, 0));
+            else
+                DoForFoundationCoords(action);
+        }
     }
 }

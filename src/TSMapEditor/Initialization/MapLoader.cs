@@ -10,6 +10,7 @@ using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Models.MapFormat;
 using TSMapEditor.Rendering;
+using TSMapEditor.UI;
 
 namespace TSMapEditor.Initialization
 {
@@ -285,7 +286,7 @@ namespace TSMapEditor.Initialization
                 var building = new Structure(buildingType)
                 {
                     HP = health,
-                    Position = new GameMath.Point2D(x, y),
+                    Position = new Point2D(x, y),
                     Facing = (byte)facing,
                     AISellable = aiSellable,
                     Powered = powered,
@@ -303,23 +304,39 @@ namespace TSMapEditor.Initialization
 
                 FindAttachedTag(map, building, attachedTag);
 
-                map.Structures.Add(building);
-                for (int foundationY = 0; foundationY < buildingType.ArtConfig.FoundationY; foundationY++)
+                bool isClear = true;
+
+                void CheckFoundationCell(Point2D cellCoords)
                 {
-                    for (int foundationX = 0; foundationX < buildingType.ArtConfig.FoundationX; foundationX++)
+                    if (!isClear)
+                        return;
+
+                    var tile = map.GetTile(cellCoords);
+                    if (tile == null)
                     {
-                        var tile = map.GetTile(x + foundationX, y + foundationY);
-                        if (tile != null)
-                            tile.Structure = building;
+                        isClear = false;
+                        AddMapLoadError($"Building {buildingType.ININame} has been placed outside of the map at {cellCoords}. Skipping adding it to map.");
+                        return;
+                    }
+
+                    if (tile.Structure != null)
+                    {
+                        isClear = false;
+                        AddMapLoadError($"Building {buildingType.ININame} exists on a cell ({cellCoords}) that already has another building ({tile.Structure.ObjectType.ININame}). Skipping adding it to map.");
                     }
                 }
 
-                if (buildingType.ArtConfig.FoundationX == 0 || buildingType.ArtConfig.FoundationY == 0)
+                buildingType.ArtConfig.DoForFoundationCoordsOrOrigin(offset => CheckFoundationCell(building.Position + offset));
+
+                if (!isClear)
+                    continue;
+
+                map.Structures.Add(building);
+                buildingType.ArtConfig.DoForFoundationCoordsOrOrigin(offset =>
                 {
-                    var tile = map.GetTile(x, y);
-                    if (tile != null)
-                        tile.Structure = building;
-                }
+                    var tile = map.GetTile(building.Position + offset);
+                    tile.Structure = building;
+                });
             }
         }
 

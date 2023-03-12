@@ -14,6 +14,7 @@ namespace TSMapEditor.Initialization
 
         MapTile[][] Tiles { get; }
         MapTile GetTile(int x, int y);
+        MapTile GetTile(Point2D cellCoords);
         List<House> StandardHouses { get; }
         List<Aircraft> Aircraft { get; }
         List<House> Houses { get; }
