@@ -207,7 +207,7 @@ namespace TSMapEditor.UI.Sidebar
                             if (firstNotNullIndex > -1)
                             {
                                 texture = frames[firstNotNullIndex].Texture;
-                                if (Constants.HQRemap && objectType.GetArtConfig().Remapable)
+                                if (Constants.HQRemap && objectType.GetArtConfig().Remapable && textures[i].RemapFrames != null)
                                     remapTexture = textures[i].RemapFrames[firstNotNullIndex].Texture;
                             }
                         }
