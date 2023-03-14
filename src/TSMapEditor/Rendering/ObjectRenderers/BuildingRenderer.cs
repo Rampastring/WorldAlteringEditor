@@ -56,6 +56,16 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             return new CommonDrawParams(graphics, iniName);
         }
 
+        protected override bool ShouldRenderReplacementText(Structure gameObject)
+        {
+            var bibGraphics = RenderDependencies.TheaterGraphics.BuildingBibTextures[gameObject.ObjectType.Index];
+
+            if (bibGraphics != null)
+                return false;
+
+            return base.ShouldRenderReplacementText(gameObject);
+        }
+
         private void DrawBibGraphics(Structure gameObject, ObjectImage bibGraphics, int yDrawPointWithoutCellHeight, Point2D drawPoint, CommonDrawParams commonDrawParams)
         {
             DrawObjectImage(gameObject, commonDrawParams, bibGraphics, 0, Color.White, true, gameObject.GetRemapColor(), drawPoint, yDrawPointWithoutCellHeight);

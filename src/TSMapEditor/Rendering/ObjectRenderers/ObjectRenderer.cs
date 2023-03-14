@@ -60,7 +60,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             if (!IsObjectInCamera(finalDrawPointX, finalDrawPointRight, finalDrawPointY, finalDrawPointBottom))
                 return;
 
-            if (frame == null)
+            if (frame == null && ShouldRenderReplacementText(gameObject))
             {
                 DrawObjectReplacementText(gameObject, drawParams, drawPoint);
             }
@@ -68,6 +68,17 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             {
                 Render(gameObject, drawPointWithoutCellHeight.Y, drawPoint, drawParams);
             }
+        }
+
+        /// <summary>
+        /// Returns a bool that determines whether a game object
+        /// should be rendered as text in case it does not have
+        /// regular graphics loaded.
+        /// </summary>
+        /// <param name="gameObject">The game object.</param>
+        protected virtual bool ShouldRenderReplacementText(T gameObject)
+        {
+            return true;
         }
 
         /// <summary>
