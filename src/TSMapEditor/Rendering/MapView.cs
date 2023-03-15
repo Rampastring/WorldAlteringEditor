@@ -867,8 +867,8 @@ namespace TSMapEditor.Rendering
         private void DrawMapBorder()
         {
             const int BorderThickness = 4;
-            const double InitialHeight = 2.5; // TS engine assumes that the first cell is at a height of 2.5
-            const int HeightAddition = 4; // TS engine adds 4 to specified map height <3
+            const int InitialHeight = 3; // TS engine assumes that the first cell is at a height of 2
+            const double HeightAddition = 4.5; // TS engine adds 4.5 to specified map height <3
             const int TopImpassableCellCount = 3; // The northernmost 3 cells are impassable in the TS engine, we'll also display this border
 
             int x = (int)((Map.LocalSize.X * Constants.CellSizeX - Camera.TopLeftPoint.X) * Camera.ZoomLevel);
