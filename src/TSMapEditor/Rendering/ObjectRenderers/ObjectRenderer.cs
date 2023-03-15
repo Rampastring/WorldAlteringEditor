@@ -148,7 +148,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             {
                 int frameIndex = gameObject.GetFrameIndex(drawParams.Graphics.Frames.Length);
 
-                if (frameIndex < drawParams.Graphics.Frames.Length)
+                if (frameIndex > -1 && frameIndex < drawParams.Graphics.Frames.Length)
                     return drawParams.Graphics.Frames[frameIndex];
             }
 
