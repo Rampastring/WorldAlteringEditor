@@ -8,8 +8,6 @@ namespace TSMapEditor.Models
     /// </summary>
     public class UnitType : TechnoType, IArtConfigContainer
     {
-        public static bool AdvancedFacingsHack => Constants.AdvancedFacingsHack;
-
         public const int STANDARD_STANDING_FRAME_COUNT = 8;
 
         public UnitType(string iniName) : base(iniName)
@@ -27,17 +25,14 @@ namespace TSMapEditor.Models
 
         public int GetTurretStartFrame()
         {
-            if (!AdvancedFacingsHack)
-                return STANDARD_STANDING_FRAME_COUNT * ArtConfig.WalkFrames;
-
             if (ArtConfig.StartTurretFrame > -1)
                 return ArtConfig.StartTurretFrame;
 
-            if (ArtConfig.StartStandFrame == -1)
+            if (ArtConfig.StartStandFrame < 0)
             {
-                if (ArtConfig.StartWalkFrame == -1)
+                if (ArtConfig.StartWalkFrame < 0)
                 {
-                    return ArtConfig.Facings;
+                    return ArtConfig.Facings * ArtConfig.StandingFrames;
                 }
 
                 // Turret frames come after walk frames
@@ -52,28 +47,41 @@ namespace TSMapEditor.Models
         {
             var returnValue = new List<int>();
 
-            if (ArtConfig.StartStandFrame == -1)
+            if (ArtConfig.FiringFrames > 0)
             {
-                if (ArtConfig.StartWalkFrame == -1)
-                {
-                    for (int i = 0; i < ArtConfig.Facings; i++)
-                        returnValue.Add(i);
-                }
+                int startStandFrame;
+
+                if (ArtConfig.StartStandFrame > -1)
+                    startStandFrame = ArtConfig.StartStandFrame;
                 else
-                {
-                    // Use walk frames
-                    for (int i = 0; i < ArtConfig.Facings; i++)
-                    {
-                        returnValue.Add(ArtConfig.StartWalkFrame + i * ArtConfig.WalkFrames);
-                    }
-                }
+                    startStandFrame = ArtConfig.WalkFrames * ArtConfig.Facings;
+
+                for (int i = 0; i < ArtConfig.Facings; i++)
+                    returnValue.Add(startStandFrame + (i * ArtConfig.StandingFrames));
             }
             else
             {
-                // Use StartStandFrame
-                for (int i = 0; i < ArtConfig.Facings; i++)
+                if (ArtConfig.StartStandFrame < 0)
                 {
-                    returnValue.Add(ArtConfig.StartStandFrame + i * ArtConfig.StandingFrames);
+                    if (ArtConfig.StartWalkFrame < 0)
+                    {
+                        for (int i = 0; i < ArtConfig.Facings; i++)
+                            returnValue.Add(i * ArtConfig.StandingFrames);
+                    }
+                    else
+                    {
+                        // Use walk frames
+                        for (int i = 0; i < ArtConfig.Facings; i++)
+                            returnValue.Add(ArtConfig.StartWalkFrame + (i * ArtConfig.WalkFrames));
+                    }
+                }
+                else
+                {
+                    // Use StartStandFrame
+                    for (int i = 0; i < ArtConfig.Facings; i++)
+                    {
+                        returnValue.Add(ArtConfig.StartStandFrame + (i * ArtConfig.StandingFrames));
+                    }
                 }
             }
 

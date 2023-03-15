@@ -9,8 +9,8 @@ namespace TSMapEditor.Models.ArtConfig
         public int StartStandFrame { get; set; } = -1;
         public int StandingFrames { get; set; }
         public int StartWalkFrame { get; set; } = -1;
-        public int WalkFrames { get; set; } = 1;
-        public int Facings { get; set; } = 1;
+        public int WalkFrames { get; set; } = 15;
+        public int Facings { get; set; } = 8;
 
         public int FiringFrames { get; set; } = -1;
 
@@ -29,6 +29,12 @@ namespace TSMapEditor.Models.ArtConfig
             Remapable = iniSection.GetBooleanValue(nameof(Remapable), Remapable);
             StartStandFrame = iniSection.GetIntValue(nameof(StartStandFrame), StartStandFrame);
             StartWalkFrame = iniSection.GetIntValue(nameof(StartWalkFrame), StartWalkFrame);
+
+            // Hackity hackity hack hack
+            // In DTA WalkFrames defaults to 1 instead of 15
+            if (Constants.ExpectedClientExecutableName == "DTA.exe")
+                WalkFrames = 1;
+
             WalkFrames = iniSection.GetIntValue(nameof(WalkFrames), WalkFrames);
             StandingFrames = iniSection.GetIntValue(nameof(StandingFrames), WalkFrames); // intentionally defaults to walkframes, the game does that too
             Facings = iniSection.GetIntValue(nameof(Facings), Facings);

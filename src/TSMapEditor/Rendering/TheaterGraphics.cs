@@ -625,8 +625,7 @@ namespace TSMapEditor.Rendering
                 if (unitType.Turret)
                 {
                     int turretStartFrame = unitType.GetTurretStartFrame();
-                    const int TURRET_FRAME_COUNT = 32;
-                    for (int t = turretStartFrame; t < turretStartFrame + TURRET_FRAME_COUNT; t++)
+                    for (int t = turretStartFrame; t < turretStartFrame + Constants.TurretFrameCount; t++)
                         framesToLoad.Add(t);
                 }
 
