@@ -680,7 +680,7 @@ namespace TSMapEditor.Mutations.Classes
                         };
                     }
 
-                    var autoLatGround = latGrounds.Find(g => g.GroundTileSet.Index == tileSetIndex &&
+                    var autoLatGround = latGrounds.Find(g => (g.GroundTileSet.Index == tileSetIndex || g.TransitionTileSet.Index == tileSetIndex) &&
                         g.TransitionTileSet.Index != baseTileSetId && g.BaseTileSet.Index == baseTileSetId);
 
                     if (autoLatGround != null)
