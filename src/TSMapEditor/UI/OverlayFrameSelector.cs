@@ -148,8 +148,12 @@ namespace TSMapEditor.UI
         public void SetOverlayType(OverlayType overlayType)
         {
             viewY = 0;
-            this.overlayType = overlayType;
-            RefreshGraphics();
+            if (this.overlayType != overlayType)
+            {
+                this.overlayType = overlayType;
+                RefreshGraphics();
+                SelectedFrameIndex = 0;
+            }
         }
 
         private void RefreshGraphics()
