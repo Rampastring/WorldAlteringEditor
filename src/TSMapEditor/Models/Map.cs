@@ -281,7 +281,7 @@ namespace TSMapEditor.Models
         {
             PreSave?.Invoke(this, EventArgs.Empty);
 
-            LoadedINI.Comment = "Written by DTA Scenario Editor\r\n; all comments have been truncated\r\n; www.moddb.com/members/Rampastring\r\n; github.com/Rampastring";
+            LoadedINI.Comment = "Written by the World-Altering Editor (WAE)\r\n; all comments have been truncated\r\n; github.com/Rampastring/TSMapEditor\r\n; if you wish to support the editor, subscribe at patreon.com/rampastring";
 
             MapWriter.WriteMapSection(this, LoadedINI);
             MapWriter.WriteBasicSection(this, LoadedINI);
@@ -1265,7 +1265,7 @@ namespace TSMapEditor.Models
                     }
 
                     // Check for tiberium on ramps that don't support tiberium on them
-                    if (subTile.TmpImage.RampType > (int)RampType.South)
+                    if (subTile.TmpImage.RampType > RampType.South)
                     {
                         issueList.Add($"Cell at {cell.CoordsToPoint()} has Tiberium on a ramp that does not allow Tiberium on it. This can crash the game!");
                     }

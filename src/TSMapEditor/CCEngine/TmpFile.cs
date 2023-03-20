@@ -125,7 +125,7 @@ namespace TSMapEditor.CCEngine
             stream.Read(buffer, 0, 3);
             Height = buffer[0];
             TerrainType = buffer[1];
-            RampType = buffer[2];
+            RampType = (RampType)buffer[2];
             RadarLeftColor = ReadRGBColorFromStream(stream);
             RadarRightColor = ReadRGBColorFromStream(stream);
             stream.Read(buffer, 0, 3); // Discard 3 more bytes of WW trash data / uninitialized memory
@@ -182,7 +182,8 @@ namespace TSMapEditor.CCEngine
         public TmpImageFlags ImageFlags { get; private set; }
         public byte Height { get; private set; }
         public byte TerrainType { get; private set; }
-        public byte RampType { get; private set; }
+        public RampType RampType { get; private set; }
+
         public RGBColor RadarLeftColor { get; set; }
         public RGBColor RadarRightColor { get; set; }
 
