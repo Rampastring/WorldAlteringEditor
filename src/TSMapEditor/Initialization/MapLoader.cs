@@ -539,18 +539,35 @@ namespace TSMapEditor.Initialization
                 string[] values = kvp.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
                 if (values.Length < 3)
+                {
+                    AddMapLoadError($"Invalid syntax in smudge defined in map: {kvp.Value}");
                     continue;
+                }
 
                 string smudgeTypeId = values[0];
                 int x = Conversions.IntFromString(values[1], -1);
                 int y = Conversions.IntFromString(values[2], -1);
                 if (values.Length > 3 && values[3] != "0")
+                {
+                    AddMapLoadError($"Invalid syntax in smudge at {x},{y}: {kvp.Value}");
                     continue;
+                }
 
                 var smudgeType = map.Rules.SmudgeTypes.Find(st => st.ININame == smudgeTypeId);
+                if (smudgeType == null)
+                {
+                    AddMapLoadError($"Cell at {x},{y} contains a smudge '{smudgeTypeId}' that does not exist in Rules.ini. Ignoring it.");
+                    continue;
+                }
+
                 var cell = map.GetTile(x, y);
-                if (cell != null)
-                    cell.Smudge = new Smudge() { SmudgeType = smudgeType, Position = new Point2D(x, y) };
+                if (cell == null)
+                {
+                    AddMapLoadError($"Smudge at {x},{y} is placed outside of the map. Ignoring it.");
+                    continue;
+                }
+
+                cell.Smudge = new Smudge() { SmudgeType = smudgeType, Position = new Point2D(x, y) };
             }
         }
 
