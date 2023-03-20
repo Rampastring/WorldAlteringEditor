@@ -1,4 +1,5 @@
-﻿using TSMapEditor.Rendering;
+﻿using TSMapEditor.Models;
+using TSMapEditor.Rendering;
 
 namespace TSMapEditor.Mutations
 {
@@ -15,6 +16,8 @@ namespace TSMapEditor.Mutations
         }
 
         protected IMutationTarget MutationTarget { get; }
+
+        protected Map Map => MutationTarget.Map;
 
         public abstract void Perform();
 
