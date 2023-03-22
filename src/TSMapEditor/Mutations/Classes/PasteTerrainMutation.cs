@@ -777,6 +777,11 @@ namespace TSMapEditor.Mutations.Classes
                 MutationTarget.Map.RemoveBuilding(cellCoords);
             }
 
+            foreach (var infantryInfo in infantryLocations)
+            {
+                MutationTarget.Map.RemoveInfantry(infantryInfo.Coords, infantryInfo.SubCell);
+            }
+
             AddRefresh();
         }
     }

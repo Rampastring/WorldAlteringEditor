@@ -835,6 +835,14 @@ namespace TSMapEditor.Models
             Infantry.Remove(infantry);
         }
 
+        public void RemoveInfantry(Point2D cellCoords, SubCell subCell)
+        {
+            var cell = GetTile(cellCoords);
+            var infantry = cell.Infantry[(int)subCell];
+            Infantry.Remove(infantry);
+            cell.Infantry[(int)subCell] = null;
+        }
+
         public void MoveInfantry(Infantry infantry, Point2D newCoords)
         {
             var newCell = GetTile(newCoords);
