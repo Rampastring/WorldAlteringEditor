@@ -177,6 +177,7 @@ namespace TSMapEditor.UI
 
                 int width = tileImage.GetWidth(out int minX);
                 int height = tileImage.GetHeight();
+                int yOffset = tileImage.GetYOffset();
 
                 if (x + width > usableWidth)
                 {
@@ -192,7 +193,7 @@ namespace TSMapEditor.UI
                 if (minX > 0)
                     minX = 0;
 
-                var tileDisplayTile = new TileDisplayTile(new Point(x, y), new Point(-minX, 0), new Point(width, height), tileImage);
+                var tileDisplayTile = new TileDisplayTile(new Point(x, y), new Point(-minX, yOffset), new Point(width, height), tileImage);
                 tilesInView.Add(tileDisplayTile);
 
                 if (height > currentLineHeight)
@@ -256,19 +257,6 @@ namespace TSMapEditor.UI
                 if (tile.TileImage.TMPImages.Length == 0)
                     continue;
 
-                int totalHeightOffset = tile.TileImage.TMPImages.Max(tmp => 
-                    {
-                        if (tmp.TmpImage == null)
-                            return 0;
-
-                        int regularHeight = tmp.TmpImage.Height * Constants.CellHeight;
-
-                        if (tmp.ExtraTexture == null)
-                            return regularHeight;
-
-                        return Math.Max(regularHeight, (int)tmp.TmpImage.ExtraHeight);
-                    });
-
                 foreach (MGTMPImage image in tile.TileImage.TMPImages)
                 {
                     if (image == null || image.TmpImage == null)
@@ -277,13 +265,13 @@ namespace TSMapEditor.UI
                     int subTileHeightOffset = image.TmpImage.Height * Constants.CellHeight;
 
                     DrawTexture(image.Texture, new Rectangle(tile.Location.X + image.TmpImage.X + tile.Offset.X,
-                        viewY + tile.Location.Y + image.TmpImage.Y + tile.Offset.Y + totalHeightOffset - subTileHeightOffset,
+                        viewY + tile.Location.Y + image.TmpImage.Y + tile.Offset.Y - subTileHeightOffset,
                         Constants.CellSizeX, Constants.CellSizeY), Color.White);
 
                     if (image.ExtraTexture != null)
                     {
                         DrawTexture(image.ExtraTexture, new Rectangle(tile.Location.X + image.TmpImage.XExtra + tile.Offset.X,
-                            viewY + tile.Location.Y + image.TmpImage.YExtra + tile.Offset.Y + totalHeightOffset - subTileHeightOffset,
+                            viewY + tile.Location.Y + image.TmpImage.YExtra + tile.Offset.Y - subTileHeightOffset,
                             image.ExtraTexture.Width, image.ExtraTexture.Height), Color.White);
                     }
                 }

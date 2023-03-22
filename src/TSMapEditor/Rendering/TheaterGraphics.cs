@@ -130,6 +130,7 @@ namespace TSMapEditor.Rendering
 
             int maxX = int.MinValue;
             int minX = int.MaxValue;
+
             for (int i = 0; i < TMPImages.Length; i++)
             {
                 if (TMPImages[i] == null)
@@ -155,7 +156,7 @@ namespace TSMapEditor.Rendering
             }
 
             outMinX = minX;
-            return Math.Abs(minX) + maxX;
+            return maxX - minX;
         }
 
         /// <summary>
@@ -166,7 +167,9 @@ namespace TSMapEditor.Rendering
             if (TMPImages == null)
                 return 0;
 
-            int height = 0;
+            int top = int.MaxValue;
+            int bottom = int.MinValue;
+
             for (int i = 0; i < TMPImages.Length; i++)
             {
                 if (TMPImages[i] == null)
@@ -177,22 +180,93 @@ namespace TSMapEditor.Rendering
                     continue;
 
                 int heightOffset = Constants.CellHeight * tmpData.Height;
-                int cellBottomCoordinate = tmpData.Y + Constants.CellSizeY + heightOffset;
-                if (cellBottomCoordinate > height)
-                    height = cellBottomCoordinate;
+
+                int cellTop = tmpData.Y - heightOffset;
+                int cellBottom = cellTop + Constants.CellSizeY;
+
+                if (cellTop < top)
+                    top = cellTop;
+
+                if (cellBottom > bottom)
+                    bottom = cellBottom;
 
                 if (TMPImages[i].ExtraTexture != null)
                 {
-                    int extraCellBottomCoordinate = TMPImages[i].TmpImage.YExtra + TMPImages[i].ExtraTexture.Height;
-                    if (extraCellBottomCoordinate > height)
-                        height = extraCellBottomCoordinate;
+                    int extraCellTop = tmpData.YExtra - heightOffset;
+                    int extraCellBottom = extraCellTop + TMPImages[i].ExtraTexture.Height;
 
-                    if (TMPImages[i].TmpImage.YExtra < 0)
-                        height -= TMPImages[i].TmpImage.YExtra;
+                    if (extraCellTop < top)
+                        top = extraCellTop;
+
+                    if (extraCellBottom > bottom)
+                        bottom = extraCellBottom;
                 }
             }
 
-            return height;
+            return bottom - top;
+        }
+
+        public int GetYOffset()
+        {
+            int height = GetHeight();
+
+            // return 0;
+
+            int yOffset = 0;
+
+            int maxTopCoord = int.MaxValue;
+            int maxBottomCoord = int.MinValue;
+
+            for (int i = 0; i < TMPImages.Length; i++)
+            {
+                if (TMPImages[i] == null)
+                    continue;
+
+                var tmpData = TMPImages[i].TmpImage;
+                if (tmpData == null)
+                    continue;
+
+                int heightOffset = Constants.CellHeight * tmpData.Height;
+                int cellTopCoord = tmpData.Y - heightOffset;
+                int cellBottomCoord = tmpData.Y + Constants.CellSizeY - heightOffset;
+
+                if (cellTopCoord < maxTopCoord)
+                    maxTopCoord = cellTopCoord;
+
+                if (cellBottomCoord > maxBottomCoord)
+                    maxBottomCoord = cellBottomCoord;
+            }
+
+            for (int i = 0; i < TMPImages.Length; i++)
+            {
+                if (TMPImages[i] == null)
+                    continue;
+
+                var tmpData = TMPImages[i].TmpImage;
+                if (tmpData == null)
+                    continue;
+
+                if (TMPImages[i].ExtraTexture != null)
+                {
+                    int heightOffset = Constants.CellHeight * tmpData.Height;
+
+                    int extraTopCoord = TMPImages[i].TmpImage.YExtra - heightOffset;
+                    int extraBottomCoord = TMPImages[i].TmpImage.YExtra + TMPImages[i].ExtraTexture.Height - heightOffset;
+
+                    if (extraTopCoord < maxTopCoord)
+                        maxTopCoord = extraTopCoord;
+
+                    if (extraBottomCoord > maxBottomCoord)
+                        maxBottomCoord = extraBottomCoord;
+                }
+            }
+
+            if (maxTopCoord < 0)
+                yOffset = -maxTopCoord;
+            else if (maxBottomCoord > height)
+                yOffset = -(maxBottomCoord - height);
+
+            return yOffset;
         }
 
         public void Dispose()
