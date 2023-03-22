@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework.Input;
 using System;
 using TSMapEditor.GameMath;
+using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 
 namespace TSMapEditor.UI
@@ -40,6 +41,7 @@ namespace TSMapEditor.UI
         /// </summary>
         public virtual bool DrawCellCursor => false;
 
+        protected Map Map => CursorActionTarget.Map;
 
         protected ICursorActionTarget CursorActionTarget { get; }
 
