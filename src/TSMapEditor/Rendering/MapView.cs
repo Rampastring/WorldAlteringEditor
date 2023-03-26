@@ -853,7 +853,7 @@ namespace TSMapEditor.Rendering
             const int cellTagBorderOffsetX = 12;
             const int cellTagBorderOffsetY = 4;
 
-            Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(cellTag.Position, Map);
+            Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords_3D(cellTag.Position, Map);
 
             var rect = new Rectangle(drawPoint.X + cellTagBorderOffsetX,
                 drawPoint.Y + cellTagBorderOffsetY,
