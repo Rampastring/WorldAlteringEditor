@@ -758,7 +758,7 @@ namespace TSMapEditor.Mutations.Classes
 
             ITileImage tile = MutationTarget.Map.TheaterInstance.GetTile(cell.TileIndex);
             ISubTileImage subTile = tile.GetSubTile(cell.SubTileIndex);
-            if (subTile.TmpImage.TerrainType != 0x0)
+            if (Helpers.IsLandTypeImpassable(subTile.TmpImage.TerrainType, true))
                 return false;
 
             if (treeGroup.ImpassableCells == null)

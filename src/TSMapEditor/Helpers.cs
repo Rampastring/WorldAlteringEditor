@@ -58,6 +58,7 @@ namespace TSMapEditor
             switch (landType)
             {
                 case 0x0:
+                case 0xD:
                     return "Clear";
                 case 0x1:
                 case 0x2:
@@ -78,8 +79,6 @@ namespace TSMapEditor
                 case 0xB:
                 case 0xC:
                     return "Road";
-                case 0xD:
-                    return "Clear";
                 case 0xE:
                     return "Rough";
                 case 0xF:
@@ -150,6 +149,15 @@ namespace TSMapEditor
 
             return ((char)('A' + (firstLetterValue - 1))).ToString() + ((char)('A' + secondLetterValue)).ToString();
         }
+
+        private static Point2D[] visualDirectionToPointTable = new Point2D[]
+        {
+            new Point2D(0, -1), new Point2D(1, -1), new Point2D(1, 0),
+            new Point2D(1, 1), new Point2D(0, 1), new Point2D(-1, 1),
+            new Point2D(-1, 0), new Point2D(-1, -1)
+        };
+
+        public static Point2D VisualDirectionToPoint(Direction direction) => visualDirectionToPointTable[(int)direction];
 
         /// <summary>
         /// Creates and returns a new UI texture.

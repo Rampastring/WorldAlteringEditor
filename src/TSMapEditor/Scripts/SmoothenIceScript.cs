@@ -14,27 +14,6 @@ namespace TSMapEditor.Scripts
     /// </summary>
     public class SmoothenIceScript
     {
-        private enum Direction
-        {
-            NE = 0,
-            E = 1,
-            SE = 2,
-            S = 3,
-            SW = 4,
-            W = 5,
-            NW = 6,
-            N = 7,
-
-            Count = 8
-        }
-
-        private Point2D[] DirectionToPointTable = new Point2D[]
-        {
-            new Point2D(0, -1), new Point2D(1, -1), new Point2D(1, 0),
-            new Point2D(1, 1), new Point2D(0, 1), new Point2D(-1, 1),
-            new Point2D(-1, 0), new Point2D(-1, -1)
-        };
-        
         private class IceTransitionDirectionAndTileIndex
         {
             public List<Direction> DirectionsWithIce;
@@ -244,7 +223,7 @@ namespace TSMapEditor.Scripts
 
                     for (int d = 0; d < (int)Direction.Count; d++)
                     {
-                        Point2D otherCellCoords = mapCell.CoordsToPoint() + DirectionToPointTable[d];
+                        Point2D otherCellCoords = mapCell.CoordsToPoint() + Helpers.VisualDirectionToPoint((Direction)d);
 
                         MapTile otherCell = map.GetTile(otherCellCoords);
                         if (otherCell == null)
