@@ -287,25 +287,31 @@ namespace TSMapEditor.Initialization
                     Owner = map.FindOrMakeHouse(ownerName)
                 };
 
-                for (int i = 0; i < upgradeCount && i < buildingType.Upgrades && i < Structure.MaxUpgradeCount; i++)
+                if (upgradeCount > 0)
                 {
-                    if (!Helpers.IsStringNoneValue(upgradeIds[i]))
+                    int appliedUpgrades = 0;
+
+                    for (int i = 0; i < Structure.MaxUpgradeCount; i++)
                     {
-                        var upgradeBuildingType = map.Rules.BuildingTypes.Find(b => b.ININame == upgradeIds[i]);
-                        if (upgradeBuildingType == null)
+                        if (!Helpers.IsStringNoneValue(upgradeIds[i]))
                         {
-                            AddMapLoadError($"Invalid building upgrade specified for building {buildingTypeId}: " + upgradeIds[i]);
-                            continue;
-                        }
+                            var upgradeBuildingType = map.Rules.BuildingTypes.Find(b => b.ININame == upgradeIds[i]);
+                            if (upgradeBuildingType == null)
+                            {
+                                AddMapLoadError($"Invalid building upgrade specified for building {buildingTypeId}: " + upgradeIds[i]);
+                                continue;
+                            }
 
-                        if (string.IsNullOrWhiteSpace(upgradeBuildingType.PowersUpBuilding) || !upgradeBuildingType.PowersUpBuilding.Equals(buildingType.ININame, StringComparison.OrdinalIgnoreCase))
-                        {
-                            AddMapLoadError($"Building {buildingTypeId} has an upgrade {upgradeBuildingType.ININame}, but \r\n{upgradeBuildingType.ININame} " +
-                                $"does not specify {buildingTypeId} in its PowersUpBuilding= key. Skipping adding upgrade to map.");
-                            continue;
-                        }
+                            if (string.IsNullOrWhiteSpace(upgradeBuildingType.PowersUpBuilding) || !upgradeBuildingType.PowersUpBuilding.Equals(buildingType.ININame, StringComparison.OrdinalIgnoreCase))
+                            {
+                                AddMapLoadError($"Building {buildingTypeId} has an upgrade {upgradeBuildingType.ININame}, but \r\n{upgradeBuildingType.ININame} " +
+                                    $"does not specify {buildingTypeId} in its PowersUpBuilding= key. Skipping adding upgrade to map.");
+                                continue;
+                            }
 
-                        building.Upgrades[i] = upgradeBuildingType;
+                            building.Upgrades[appliedUpgrades] = upgradeBuildingType;
+                            appliedUpgrades++;
+                        }
                     }
                 }
 
