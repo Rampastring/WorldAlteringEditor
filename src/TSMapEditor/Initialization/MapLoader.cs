@@ -235,15 +235,6 @@ namespace TSMapEditor.Initialization
             }
         }
 
-        private static BuildingType FindUpgrade(string upgradeBuildingId, IMap map)
-        {
-            if (upgradeBuildingId.Equals(Constants.NoneValue1, StringComparison.InvariantCultureIgnoreCase) ||
-                upgradeBuildingId.Equals(Constants.NoneValue2, StringComparison.InvariantCultureIgnoreCase))
-                return null;
-
-            return map.Rules.BuildingTypes.Find(b => b.ININame == upgradeBuildingId);
-        }
-
         public static void ReadBuildings(IMap map, IniFile mapIni)
         {
             IniSection section = mapIni.GetSection("Structures");
@@ -290,7 +281,6 @@ namespace TSMapEditor.Initialization
                     Facing = (byte)facing,
                     AISellable = aiSellable,
                     Powered = powered,
-                    // TODO handle upgrades
                     Spotlight = (SpotlightType)spotlight,
                     AIRepairable = aiRepairable,
                     Nominal = nominal,
@@ -299,7 +289,24 @@ namespace TSMapEditor.Initialization
 
                 for (int i = 0; i < upgradeCount && i < buildingType.Upgrades && i < Structure.MaxUpgradeCount; i++)
                 {
-                    building.Upgrades[i] = FindUpgrade(upgradeIds[i], map);
+                    if (!Helpers.IsStringNoneValue(upgradeIds[i]))
+                    {
+                        var upgradeBuildingType = map.Rules.BuildingTypes.Find(b => b.ININame == upgradeIds[i]);
+                        if (upgradeBuildingType == null)
+                        {
+                            AddMapLoadError($"Invalid building upgrade specified for building {buildingTypeId}: " + upgradeIds[i]);
+                            continue;
+                        }
+
+                        if (string.IsNullOrWhiteSpace(upgradeBuildingType.PowersUpBuilding) || !upgradeBuildingType.PowersUpBuilding.Equals(buildingType.ININame, StringComparison.OrdinalIgnoreCase))
+                        {
+                            AddMapLoadError($"Building {buildingTypeId} has an upgrade {upgradeBuildingType.ININame}, but \r\n{upgradeBuildingType.ININame} " +
+                                $"does not specify {buildingTypeId} in its PowersUpBuilding= key. Skipping adding upgrade to map.");
+                            continue;
+                        }
+
+                        building.Upgrades[i] = upgradeBuildingType;
+                    }
                 }
 
                 FindAttachedTag(map, building, attachedTag);

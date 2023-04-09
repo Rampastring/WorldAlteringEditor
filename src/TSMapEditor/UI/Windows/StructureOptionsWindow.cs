@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using TSMapEditor.Models;
@@ -25,9 +26,9 @@ namespace TSMapEditor.UI.Windows
         private XNACheckBox chkAIRepairable;
         private XNACheckBox chkNominal;
         private XNADropDown ddSpotlight;
-        private EditorPopUpSelector upgrade1Selector;
-        private EditorPopUpSelector upgrade2Selector;
-        private EditorPopUpSelector upgrade3Selector;
+        private XNADropDown ddUpgrade1;
+        private XNADropDown ddUpgrade2;
+        private XNADropDown ddUpgrade3;
         private EditorPopUpSelector attachedTagSelector;
 
         private Structure structure;
@@ -46,9 +47,9 @@ namespace TSMapEditor.UI.Windows
             chkAIRepairable = FindChild<XNACheckBox>(nameof(chkAIRepairable));
             chkNominal = FindChild<XNACheckBox>(nameof(chkNominal));
             ddSpotlight = FindChild<XNADropDown>(nameof(ddSpotlight));
-            upgrade1Selector = FindChild<EditorPopUpSelector>(nameof(upgrade1Selector));
-            upgrade2Selector = FindChild<EditorPopUpSelector>(nameof(upgrade2Selector));
-            upgrade3Selector = FindChild<EditorPopUpSelector>(nameof(upgrade3Selector));
+            ddUpgrade1 = FindChild<XNADropDown>(nameof(ddUpgrade1));
+            ddUpgrade2 = FindChild<XNADropDown>(nameof(ddUpgrade2));
+            ddUpgrade3 = FindChild<XNADropDown>(nameof(ddUpgrade3));
             attachedTagSelector = FindChild<EditorPopUpSelector>(nameof(attachedTagSelector));
 
             attachedTagSelector.LeftClick += AttachedTagSelector_LeftClick;
@@ -78,8 +79,45 @@ namespace TSMapEditor.UI.Windows
             Show();
         }
 
+        private void FillUpgradesForDropDown(XNADropDown dropDown, int index, List<BuildingType> upgrades)
+        {
+            dropDown.Items.Clear();
+            dropDown.AddItem("None");
+            dropDown.AllowDropDown = false;
+
+            if (structure.ObjectType.Upgrades > index)
+            {
+                dropDown.AllowDropDown = upgrades.Count > 0;
+                upgrades.ForEach(ubt => dropDown.AddItem(new XNADropDownItem() { Text = ubt.Name, Tag = ubt }));
+            }
+        }
+
+        private void FetchUpgrade(XNADropDown dropDown, int upgradeIndex, List<BuildingType> upgrades)
+        {
+            var upgrade = structure.Upgrades[upgradeIndex];
+
+            if (upgrade == null || upgradeIndex >= structure.ObjectType.Upgrades)
+            {
+                dropDown.SelectedIndex = 0;
+                return;
+            }
+
+            int index = upgrades.FindIndex(ubt => upgrade == ubt);
+            // "None" takes one slot, so we need to add one.
+            // In case the upgrade was invalid, -1 + 1 is conveniently 0,
+            // which makes "None" get selected.
+            dropDown.SelectedIndex = index + 1;
+        }
+
         private void RefreshValues()
         {
+            var possibleUpgrades = map.Rules.BuildingTypes.FindAll(bt => !string.IsNullOrWhiteSpace(bt.PowersUpBuilding) &&
+                bt.PowersUpBuilding.Equals(structure.ObjectType.ININame, StringComparison.OrdinalIgnoreCase));
+
+            FillUpgradesForDropDown(ddUpgrade1, 0, possibleUpgrades);
+            FillUpgradesForDropDown(ddUpgrade2, 1, possibleUpgrades);
+            FillUpgradesForDropDown(ddUpgrade3, 2, possibleUpgrades);
+
             tbStrength.Value = structure.HP;
             chkSellable.Checked = structure.AISellable;
             chkRebuild.Checked = structure.AIRebuildable;
@@ -87,22 +125,11 @@ namespace TSMapEditor.UI.Windows
             chkAIRepairable.Checked = structure.AIRepairable;
             chkNominal.Checked = structure.Nominal;
             ddSpotlight.SelectedIndex = (int)structure.Spotlight;
-            FetchUpgrade(upgrade1Selector, 0);
-            FetchUpgrade(upgrade2Selector, 1);
-            FetchUpgrade(upgrade3Selector, 2);
+            FetchUpgrade(ddUpgrade1, 0, possibleUpgrades);
+            FetchUpgrade(ddUpgrade2, 1, possibleUpgrades);
+            FetchUpgrade(ddUpgrade3, 2, possibleUpgrades);
             attachedTagSelector.Text = structure.AttachedTag == null ? string.Empty : structure.AttachedTag.GetDisplayString();
             attachedTagSelector.Tag = structure.AttachedTag;
-        }
-
-        private void FetchUpgrade(EditorPopUpSelector upgradeSelector, int upgradeIndex)
-        {
-            var upgrade = structure.Upgrades[upgradeIndex];
-            upgradeSelector.Tag = upgrade;
-
-            if (upgrade == null)
-                upgradeSelector.Text = string.Empty;
-            else
-                upgradeSelector.Text = upgrade.Name + " (" + upgrade.ININame + ")";
         }
 
         private void BtnOK_LeftClick(object sender, EventArgs e)
@@ -114,9 +141,9 @@ namespace TSMapEditor.UI.Windows
             structure.AIRepairable = chkAIRepairable.Checked;
             structure.Nominal = chkNominal.Checked;
             structure.Spotlight = (SpotlightType)ddSpotlight.SelectedIndex;
-            structure.Upgrades[0] = (BuildingType)upgrade1Selector.Tag;
-            structure.Upgrades[1] = (BuildingType)upgrade2Selector.Tag;
-            structure.Upgrades[2] = (BuildingType)upgrade3Selector.Tag;
+            structure.Upgrades[0] = (BuildingType)ddUpgrade1.SelectedItem.Tag;
+            structure.Upgrades[1] = (BuildingType)ddUpgrade2.SelectedItem.Tag;
+            structure.Upgrades[2] = (BuildingType)ddUpgrade3.SelectedItem.Tag;
             structure.AttachedTag = (Tag)attachedTagSelector.Tag;
 
             Hide();

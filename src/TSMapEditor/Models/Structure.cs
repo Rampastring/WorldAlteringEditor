@@ -29,7 +29,7 @@
             {
                 int upgradeCount = 0;
 
-                for (int i = 0; i < MaxUpgradeCount; i++)
+                for (int i = 0; i < MaxUpgradeCount && i < ObjectType.Upgrades; i++)
                 {
                     if (Upgrades[i] != null)
                         upgradeCount++;

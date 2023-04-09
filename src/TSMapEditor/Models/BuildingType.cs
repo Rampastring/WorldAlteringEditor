@@ -8,7 +8,7 @@ namespace TSMapEditor.Models
         {
         }
 
-        public int Upgrades { get; set; }
+        public int Upgrades { get; set; } = 1;
         public string PowersUpBuilding { get; set; }
 
         public BuildingArtConfig ArtConfig { get; set; } = new BuildingArtConfig();
