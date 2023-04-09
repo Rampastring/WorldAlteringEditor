@@ -71,7 +71,10 @@ namespace TSMapEditor.Models
         {
             string directoryPath = Path.GetDirectoryName(iniPath);
             if (!Directory.Exists(directoryPath))
+            {
+                Logger.Log($"Directory in path specified for Tutorial.ini ({directoryPath}) does not exist! Skipping file system watcher setup.");
                 return;
+            }
 
             fsw = new FileSystemWatcher(Path.GetDirectoryName(iniPath));
             fsw.Filter = Path.GetFileName(iniPath);
@@ -111,7 +114,10 @@ namespace TSMapEditor.Models
             const string TutorialSectionName = "Tutorial";
 
             if (!File.Exists(iniPath))
+            {
+                Logger.Log("File for tutorial lines does not exist! Tried to read from: " + iniPath);
                 return;
+            }
 
             Logger.Log("Reading tutorial lines from " + iniPath);
 

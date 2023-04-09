@@ -37,7 +37,7 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
             IniFile artOverridesIni = new IniFile(Path.Combine(Environment.CurrentDirectory, "Config/ArtOverrides.ini"));
             IniFile.ConsolidateIniFiles(artFSIni, artOverridesIni);
 
-            var tutorialLines = new TutorialLines(Path.Combine(gameDirectory, "INI/Tutorial.ini"), a => windowManager.AddCallback(a, null));
+            var tutorialLines = new TutorialLines(Path.Combine(gameDirectory, Constants.TutorialIniPath), a => windowManager.AddCallback(a, null));
             var themes = new Themes(gameDirectory);
 
             Map map = new Map();
