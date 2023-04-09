@@ -69,6 +69,10 @@ namespace TSMapEditor.Models
 
         private void SetUpFSW()
         {
+            string directoryPath = Path.GetDirectoryName(iniPath);
+            if (!Directory.Exists(directoryPath))
+                return;
+
             fsw = new FileSystemWatcher(Path.GetDirectoryName(iniPath));
             fsw.Filter = Path.GetFileName(iniPath);
             fsw.EnableRaisingEvents = true;
@@ -77,6 +81,9 @@ namespace TSMapEditor.Models
 
         public void ShutdownFSW()
         {
+            if (fsw == null)
+                return;
+
             fsw.EnableRaisingEvents = false;
             fsw.Changed -= Fsw_Changed;
             fsw.Dispose();
@@ -84,8 +91,6 @@ namespace TSMapEditor.Models
         }
 
         private Dictionary<int, string> tutorialLines = new Dictionary<int, string>();
-
-
 
         public List<TutorialLine> GetLines() => tutorialLines.Select(tl => new TutorialLine(tl.Key, tl.Value)).OrderBy(tl => tl.ID).ToList();
 
