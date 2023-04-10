@@ -263,6 +263,7 @@ namespace TSMapEditor.Models
         private void ReloadSections()
         {
             MapLoader.ReadBasicSection(this, LoadedINI);
+            Lighting.ReadFromIniFile(LoadedINI);
         }
 
         public void Save()
