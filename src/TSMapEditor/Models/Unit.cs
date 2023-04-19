@@ -15,8 +15,18 @@ namespace TSMapEditor.Models
         public override RTTIType WhatAmI() => RTTIType.Unit;
 
         public UnitType UnitType => ObjectType;
-        public int FollowsID { get; set; } = -1;
-        public Unit FollowedUnit { get; set; }
+
+        /// <summary>
+        /// The index of a unit (in the internal unit list) that is set up to
+        /// follow this unit. -1 means none. Only fetched and used on map load,
+        /// otherwise <see cref="FollowerUnit"/> is used.
+        /// </summary>
+        public int FollowerID { get; set; } = -1;
+
+        /// <summary>
+        /// The unit, if any, that is set up to follow this unit.
+        /// </summary>
+        public Unit FollowerUnit { get; set; }
 
         public override int GetFrameIndex(int frameCount)
         {

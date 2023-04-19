@@ -456,7 +456,7 @@ namespace TSMapEditor.Initialization
                     Veterancy = veterancy,
                     Group = group,
                     High = high,
-                    FollowsID = followsIndex,
+                    FollowerID = followsIndex,
                     AutocreateNoRecruitable = autocreateNoRecruitable,
                     AutocreateYesRecruitable = autocreateYesRecruitable,
                     Owner = map.FindOrMakeHouse(ownerName)
@@ -473,10 +473,10 @@ namespace TSMapEditor.Initialization
             // Process follow IDs
             foreach (var unit in map.Units)
             {
-                if (unit.FollowsID < 0 || unit.FollowsID >= map.Units.Count)
+                if (unit.FollowerID < 0 || unit.FollowerID >= map.Units.Count)
                     continue;
 
-                unit.FollowedUnit = map.Units[unit.FollowsID];
+                unit.FollowerUnit = map.Units[unit.FollowerID];
             }
         }
 

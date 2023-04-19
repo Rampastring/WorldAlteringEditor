@@ -23,7 +23,7 @@ namespace TSMapEditor.UI.Windows
         private XNADropDown ddMission;
         private XNADropDown ddVeterancy;
         private EditorNumberTextBox tbGroup;
-        private EditorNumberTextBox tbFollowsID;
+        private EditorNumberTextBox tbFollowerID;
         private XNACheckBox chkOnBridge;
         private XNACheckBox chkAutocreateNoRecruitable;
         private XNACheckBox chkAutocreateYesRecruitable;
@@ -42,7 +42,7 @@ namespace TSMapEditor.UI.Windows
             ddMission = FindChild<XNADropDown>(nameof(ddMission));
             ddVeterancy = FindChild<XNADropDown>(nameof(ddVeterancy));
             tbGroup = FindChild<EditorNumberTextBox>(nameof(tbGroup));
-            tbFollowsID = FindChild<EditorNumberTextBox>(nameof(tbFollowsID));
+            tbFollowerID = FindChild<EditorNumberTextBox>(nameof(tbFollowerID));
             chkOnBridge = FindChild<XNACheckBox>(nameof(chkOnBridge));
             chkAutocreateNoRecruitable = FindChild<XNACheckBox>(nameof(chkAutocreateNoRecruitable));
             chkAutocreateYesRecruitable = FindChild<XNACheckBox>(nameof(chkAutocreateYesRecruitable));
@@ -91,7 +91,7 @@ namespace TSMapEditor.UI.Windows
             int veterancyIndex = ddVeterancy.Items.FindIndex(i => (int)i.Tag == unit.Veterancy);
             ddVeterancy.SelectedIndex = Math.Max(0, veterancyIndex);
             tbGroup.Value = unit.Group;
-            tbFollowsID.Value = unit.FollowsID;
+            tbFollowerID.Value = map.Units.IndexOf(unit.FollowerUnit);
             chkOnBridge.Checked = unit.High;
             chkAutocreateNoRecruitable.Checked = unit.AutocreateNoRecruitable;
             chkAutocreateYesRecruitable.Checked = unit.AutocreateYesRecruitable;
@@ -105,12 +105,12 @@ namespace TSMapEditor.UI.Windows
             unit.Mission = ddMission.SelectedItem == null ? unit.Mission : ddMission.SelectedItem.Text;
             unit.Veterancy = (int)ddVeterancy.SelectedItem.Tag;
             unit.Group = tbGroup.Value;
-            unit.FollowsID = tbFollowsID.Value;
+            unit.FollowerID = tbFollowerID.Value;
 
-            if (unit.FollowsID > -1 && unit.FollowsID < map.Units.Count)
-                unit.FollowedUnit = map.Units[unit.FollowsID];
+            if (unit.FollowerID > -1 && unit.FollowerID < map.Units.Count)
+                unit.FollowerUnit = map.Units[unit.FollowerID];
             else
-                unit.FollowedUnit = null;
+                unit.FollowerUnit = null;
 
             unit.High = chkOnBridge.Checked;
             unit.AutocreateNoRecruitable = chkAutocreateNoRecruitable.Checked;

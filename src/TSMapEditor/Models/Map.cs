@@ -1255,6 +1255,7 @@ namespace TSMapEditor.Models
         /// <summary>
         /// Checks the map for issues.
         /// Returns a list of issues found.
+        /// TODO split up into multiple functions, preferably within a separate file/class
         /// </summary>
         public List<string> CheckForIssues()
         {
@@ -1364,6 +1365,31 @@ namespace TSMapEditor.Models
             if (Tubes.Count > MaxTubes)
             {
                 issueList.Add($"The map has more than {MaxTubes} tunnel tubes. This might cause issues when units cross the tunnels.");
+            }
+
+            // Check for vehicles sharing the same follows index and for vehicles following themselves
+            List<Unit> followedUnits = new List<Unit>();
+            for (int i = 0; i < Units.Count; i++)
+            {
+                var unit = Units[i];
+                int followsId = unit.FollowerUnit == null ? -1 : Units.IndexOf(unit.FollowerUnit);
+                if (followsId == -1)
+                    continue;
+
+                if (followedUnits.Contains(unit.FollowerUnit))
+                {
+                    issueList.Add($"Multiple units are configured to make unit {unit.FollowerUnit.UnitType.ININame} at {unit.FollowerUnit.Position} to follow them! " + Environment.NewLine +
+                        $"This can cause strange behaviour in the game. {unit.UnitType.ININame} at {unit.Position} is one of the followed units.");
+                }
+                else
+                {
+                    followedUnits.Add(unit.FollowerUnit);
+                }
+
+                if (followsId < -1)
+                    issueList.Add($"Unit {unit.UnitType.ININame} at {unit.Position} has a follower ID below -1. It is unknown how the game reacts to this.");
+                else if (followsId == i)
+                    issueList.Add($"Unit {unit.UnitType.ININame} at {unit.Position} follows itself! This can cause the game to crash or freeze!");
             }
 
             return issueList;
