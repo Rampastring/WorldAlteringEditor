@@ -83,7 +83,7 @@ namespace TSMapEditor.UI.Windows
         private SelectTutorialLineWindow selectTutorialLineWindow;
         private SelectThemeWindow selectThemeWindow;
 
-        private XNAContextMenu actionParameterContextMenu;
+        private XNAContextMenu actionContextMenu;
         private XNAContextMenu triggerListContextMenu;
 
         private Trigger editedTrigger;
@@ -215,10 +215,14 @@ namespace TSMapEditor.UI.Windows
             var themeDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectThemeWindow);
             themeDarkeningPanel.Hidden += ThemeDarkeningPanel_Hidden;
 
-            actionParameterContextMenu = new XNAContextMenu(WindowManager);
-            actionParameterContextMenu.Name = nameof(actionParameterContextMenu);
-            actionParameterContextMenu.Width = tbActionParameterValue.Width;
-            AddChild(actionParameterContextMenu);
+            actionContextMenu = new XNAContextMenu(WindowManager);
+            actionContextMenu.Name = nameof(actionContextMenu);
+            actionContextMenu.Width = lbActions.Width;
+            actionContextMenu.AddItem("Move Up", ActionContextMenu_MoveUp, () => editedTrigger != null && lbActions.SelectedItem != null && lbActions.SelectedIndex > 0);
+            actionContextMenu.AddItem("Move Down", ActionContextMenu_MoveDown, () => editedTrigger != null && lbActions.SelectedItem != null && lbActions.SelectedIndex < lbActions.Items.Count - 1);
+            actionContextMenu.AddItem("Clone Action", ActionContextMenu_CloneAction, () => editedTrigger != null && lbActions.SelectedItem != null);
+            actionContextMenu.AddItem("Delete Action", () => BtnDeleteAction_LeftClick(this, EventArgs.Empty), () => editedTrigger != null);
+            AddChild(actionContextMenu);
 
             triggerListContextMenu = new XNAContextMenu(WindowManager);
             triggerListContextMenu.Name = nameof(triggerListContextMenu);
@@ -231,6 +235,46 @@ namespace TSMapEditor.UI.Windows
             lbTriggers.AllowRightClickUnselect = false;
             lbTriggers.RightClick += (s, e) => triggerListContextMenu.Open(GetCursorPoint());
             lbTriggers.SelectedIndexChanged += LbTriggers_SelectedIndexChanged;
+
+            lbActions.AllowRightClickUnselect = false;
+            lbActions.RightClick += (s, e) => { if (editedTrigger != null) { lbActions.OnMouseLeftDown(); actionContextMenu.Open(GetCursorPoint()); } };
+        }
+
+        private void ActionContextMenu_MoveUp()
+        {
+            if (editedTrigger == null || lbActions.SelectedItem == null || lbActions.SelectedIndex < 1)
+                return;
+
+            var tmp = editedTrigger.Actions[lbActions.SelectedIndex - 1];
+            editedTrigger.Actions[lbActions.SelectedIndex - 1] = editedTrigger.Actions[lbActions.SelectedIndex];
+            editedTrigger.Actions[lbActions.SelectedIndex] = tmp;
+
+            EditTrigger(editedTrigger);
+            lbActions.SelectedIndex--;
+        }
+
+        private void ActionContextMenu_MoveDown()
+        {
+            if (editedTrigger == null || lbActions.SelectedItem == null || lbActions.SelectedIndex >= lbActions.Items.Count - 1)
+                return;
+
+            var tmp = editedTrigger.Actions[lbActions.SelectedIndex + 1];
+            editedTrigger.Actions[lbActions.SelectedIndex + 1] = editedTrigger.Actions[lbActions.SelectedIndex];
+            editedTrigger.Actions[lbActions.SelectedIndex] = tmp;
+
+            EditTrigger(editedTrigger);
+            lbActions.SelectedIndex++;
+        }
+
+        private void ActionContextMenu_CloneAction()
+        {
+            if (editedTrigger == null || lbActions.SelectedItem == null)
+                return;
+
+            var clone = ((TriggerAction)lbActions.SelectedItem.Tag).Clone();
+            editedTrigger.Actions.Insert(lbActions.SelectedIndex + 1, clone);
+            EditTrigger(editedTrigger);
+            lbActions.SelectedIndex++;
         }
 
         private void DdActions_SelectedIndexChanged(object sender, EventArgs e)
