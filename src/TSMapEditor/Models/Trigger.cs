@@ -111,13 +111,13 @@ namespace TSMapEditor.Models
             clone.Conditions = new List<TriggerCondition>(Conditions.Capacity);
             foreach (var condition in Conditions)
             {
-                clone.Conditions.Add(condition.Clone());
+                clone.Conditions.Add(condition.DoClone());
             }
 
             clone.Actions = new List<TriggerAction>(Actions.Capacity);
             foreach (var action in Actions)
             {
-                clone.Actions.Add(action.Clone());
+                clone.Actions.Add(action.DoClone());
             }
 
             return clone;

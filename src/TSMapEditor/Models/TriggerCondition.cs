@@ -1,11 +1,12 @@
 ﻿using Rampastring.Tools;
+using System;
 
 namespace TSMapEditor.Models
 {
     /// <summary>
     /// A trigger condition ("Event").
     /// </summary>
-    public class TriggerCondition
+    public class TriggerCondition : ICloneable
     {
         public const int INI_VALUE_COUNT = 3;
 
@@ -13,7 +14,9 @@ namespace TSMapEditor.Models
         public int Parameter1 { get; set; }
         public int Parameter2 { get; set; }
 
-        public TriggerCondition Clone()
+        public object Clone() => DoClone();
+
+        public TriggerCondition DoClone()
         {
             return (TriggerCondition)MemberwiseClone();
         }

@@ -84,6 +84,7 @@ namespace TSMapEditor.UI.Windows
         private SelectThemeWindow selectThemeWindow;
 
         private XNAContextMenu actionContextMenu;
+        private XNAContextMenu eventContextMenu;
         private XNAContextMenu triggerListContextMenu;
 
         private Trigger editedTrigger;
@@ -215,14 +216,29 @@ namespace TSMapEditor.UI.Windows
             var themeDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectThemeWindow);
             themeDarkeningPanel.Hidden += ThemeDarkeningPanel_Hidden;
 
+            eventContextMenu = new XNAContextMenu(WindowManager);
+            eventContextMenu.Name = nameof(eventContextMenu);
+            eventContextMenu.Width = lbEvents.Width;
+            eventContextMenu.AddItem("Move Up", EventContextMenu_MoveUp, () => editedTrigger != null && lbEvents.SelectedItem != null && lbEvents.SelectedIndex > 0);
+            eventContextMenu.AddItem("Move Down", EventContextMenu_MoveDown, () => editedTrigger != null && lbEvents.SelectedItem != null && lbEvents.SelectedIndex < lbEvents.Items.Count - 1);
+            eventContextMenu.AddItem("Clone Event", EventContextMenu_CloneEvent, () => editedTrigger != null && lbEvents.SelectedItem != null);
+            eventContextMenu.AddItem("Delete Event", () => BtnDeleteEvent_LeftClick(this, EventArgs.Empty), () => editedTrigger != null && lbEvents.SelectedItem != null);
+            AddChild(eventContextMenu);
+
+            lbEvents.AllowRightClickUnselect = false;
+            lbEvents.RightClick += (s, e) => { if (editedTrigger != null) { lbEvents.OnMouseLeftDown(); eventContextMenu.Open(GetCursorPoint()); } };
+
             actionContextMenu = new XNAContextMenu(WindowManager);
             actionContextMenu.Name = nameof(actionContextMenu);
             actionContextMenu.Width = lbActions.Width;
             actionContextMenu.AddItem("Move Up", ActionContextMenu_MoveUp, () => editedTrigger != null && lbActions.SelectedItem != null && lbActions.SelectedIndex > 0);
             actionContextMenu.AddItem("Move Down", ActionContextMenu_MoveDown, () => editedTrigger != null && lbActions.SelectedItem != null && lbActions.SelectedIndex < lbActions.Items.Count - 1);
             actionContextMenu.AddItem("Clone Action", ActionContextMenu_CloneAction, () => editedTrigger != null && lbActions.SelectedItem != null);
-            actionContextMenu.AddItem("Delete Action", () => BtnDeleteAction_LeftClick(this, EventArgs.Empty), () => editedTrigger != null);
+            actionContextMenu.AddItem("Delete Action", () => BtnDeleteAction_LeftClick(this, EventArgs.Empty), () => editedTrigger != null && lbActions.SelectedItem != null);
             AddChild(actionContextMenu);
+
+            lbActions.AllowRightClickUnselect = false;
+            lbActions.RightClick += (s, e) => { if (editedTrigger != null) { lbActions.OnMouseLeftDown(); actionContextMenu.Open(GetCursorPoint()); } };
 
             triggerListContextMenu = new XNAContextMenu(WindowManager);
             triggerListContextMenu.Name = nameof(triggerListContextMenu);
@@ -235,46 +251,6 @@ namespace TSMapEditor.UI.Windows
             lbTriggers.AllowRightClickUnselect = false;
             lbTriggers.RightClick += (s, e) => triggerListContextMenu.Open(GetCursorPoint());
             lbTriggers.SelectedIndexChanged += LbTriggers_SelectedIndexChanged;
-
-            lbActions.AllowRightClickUnselect = false;
-            lbActions.RightClick += (s, e) => { if (editedTrigger != null) { lbActions.OnMouseLeftDown(); actionContextMenu.Open(GetCursorPoint()); } };
-        }
-
-        private void ActionContextMenu_MoveUp()
-        {
-            if (editedTrigger == null || lbActions.SelectedItem == null || lbActions.SelectedIndex < 1)
-                return;
-
-            var tmp = editedTrigger.Actions[lbActions.SelectedIndex - 1];
-            editedTrigger.Actions[lbActions.SelectedIndex - 1] = editedTrigger.Actions[lbActions.SelectedIndex];
-            editedTrigger.Actions[lbActions.SelectedIndex] = tmp;
-
-            EditTrigger(editedTrigger);
-            lbActions.SelectedIndex--;
-        }
-
-        private void ActionContextMenu_MoveDown()
-        {
-            if (editedTrigger == null || lbActions.SelectedItem == null || lbActions.SelectedIndex >= lbActions.Items.Count - 1)
-                return;
-
-            var tmp = editedTrigger.Actions[lbActions.SelectedIndex + 1];
-            editedTrigger.Actions[lbActions.SelectedIndex + 1] = editedTrigger.Actions[lbActions.SelectedIndex];
-            editedTrigger.Actions[lbActions.SelectedIndex] = tmp;
-
-            EditTrigger(editedTrigger);
-            lbActions.SelectedIndex++;
-        }
-
-        private void ActionContextMenu_CloneAction()
-        {
-            if (editedTrigger == null || lbActions.SelectedItem == null)
-                return;
-
-            var clone = ((TriggerAction)lbActions.SelectedItem.Tag).Clone();
-            editedTrigger.Actions.Insert(lbActions.SelectedIndex + 1, clone);
-            EditTrigger(editedTrigger);
-            lbActions.SelectedIndex++;
         }
 
         private void DdActions_SelectedIndexChanged(object sender, EventArgs e)
@@ -613,6 +589,60 @@ namespace TSMapEditor.UI.Windows
 
             ListTriggers();
         }
+
+        #region Event and action context menus
+
+        private void ActionContextMenu_MoveUp() => MoveUpEventOrAction(lbActions, editedTrigger?.Actions);
+
+        private void EventContextMenu_MoveUp() => MoveUpEventOrAction(lbEvents, editedTrigger?.Conditions);
+
+        private void MoveUpEventOrAction<T>(XNAListBox listBox, List<T> objectList)
+        {
+            if (editedTrigger == null || objectList == null || listBox.SelectedItem == null || listBox.SelectedIndex < 1)
+                return;
+
+            var tmp = objectList[listBox.SelectedIndex - 1];
+            objectList[listBox.SelectedIndex - 1] = objectList[listBox.SelectedIndex];
+            objectList[listBox.SelectedIndex] = tmp;
+
+            EditTrigger(editedTrigger);
+            listBox.SelectedIndex--;
+        }
+
+        private void ActionContextMenu_MoveDown() => MoveDownEventOrAction(lbActions, editedTrigger?.Actions);
+
+        private void EventContextMenu_MoveDown() => MoveDownEventOrAction(lbEvents, editedTrigger?.Conditions);
+
+        private void MoveDownEventOrAction<T>(XNAListBox listBox, List<T> objectList)
+        {
+            if (editedTrigger == null || listBox.SelectedItem == null || listBox.SelectedIndex >= listBox.Items.Count - 1)
+                return;
+
+            var tmp = objectList[listBox.SelectedIndex + 1];
+            objectList[listBox.SelectedIndex + 1] = objectList[listBox.SelectedIndex];
+            objectList[listBox.SelectedIndex] = tmp;
+
+            EditTrigger(editedTrigger);
+            listBox.SelectedIndex++;
+        }
+
+        private void EventContextMenu_CloneEvent() => CloneEventOrAction(lbEvents, editedTrigger?.Conditions);
+
+        private void ActionContextMenu_CloneAction() => CloneEventOrAction(lbActions, editedTrigger?.Actions);
+
+        private void CloneEventOrAction<T>(XNAListBox listBox, List<T> objectList) where T : ICloneable
+        {
+            if (editedTrigger == null || listBox.SelectedItem == null)
+                return;
+
+            var tag = (T)listBox.SelectedItem.Tag;
+            var clone = (T)tag.Clone();
+            objectList.Insert(listBox.SelectedIndex + 1, clone);
+            EditTrigger(editedTrigger);
+            listBox.SelectedIndex++;
+        }
+
+        #endregion
 
         private void BtnEventParameterValuePreset_LeftClick(object sender, EventArgs e)
         {

@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace TSMapEditor.Models
 {
-    public class TriggerAction
+    public class TriggerAction : ICloneable
     {
         public const int PARAM_COUNT = 7;
         public const int INI_VALUE_COUNT = PARAM_COUNT + 1;
@@ -27,7 +27,9 @@ namespace TSMapEditor.Models
             return Parameters[index];
         }
 
-        public TriggerAction Clone()
+        public object Clone() => DoClone();
+
+        public TriggerAction DoClone()
         {
             TriggerAction clone = (TriggerAction)MemberwiseClone();
             clone.Parameters = new string[Parameters.Length];
