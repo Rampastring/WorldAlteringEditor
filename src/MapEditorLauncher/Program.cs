@@ -1,14 +1,37 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace MapEditorLauncher
 {
     class Program
     {
+        // We have to do this because of .NET 7 limitations.
+        // If the user does not have .NET 7 installed, the program tells
+        // the user to install it.
+
+        // However, if your application is a console application, the
+        // error message is written to the standard output instead
+        // of showing a graphical form. For the average user,
+        // this is a no-go.
+
+        // That can be fixed by making your application a Windows application,
+        // and the user gets a nice graphical error for missing .NET 7.
+        // However, Windows applications don't have a platform-agnostic way to
+        // open the console.
+
+        // So the best thing we can do is make our application a Windows
+        // application, and call AllocConsole to show the console window.
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool AllocConsole();
+
         static void Main(string[] args)
         {
+            AllocConsole();
+
             Environment.CurrentDirectory = AppContext.BaseDirectory;
 
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
