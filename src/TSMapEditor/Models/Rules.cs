@@ -21,7 +21,7 @@ namespace TSMapEditor.Models
         public List<InfantrySequence> InfantrySequences = new List<InfantrySequence>();
         public List<RulesColor> Colors = new List<RulesColor>();
         public List<TiberiumType> TiberiumTypes = new List<TiberiumType>();
-
+        public List<AnimType> AnimTypes = new List<AnimType>();
         public List<GlobalVariable> GlobalVariables = new List<GlobalVariable>();
 
         public TutorialLines TutorialLines { get; set; }
@@ -39,6 +39,7 @@ namespace TSMapEditor.Models
             InitFromTypeSection(iniFile, "TerrainTypes", TerrainTypes);
             InitFromTypeSection(iniFile, "OverlayTypes", OverlayTypes);
             InitFromTypeSection(iniFile, "SmudgeTypes", SmudgeTypes);
+            InitFromTypeSection(iniFile, "Animations", AnimTypes);
 
             // Go through all the lists and get object properties
             UnitTypes.ForEach(ot => initializer.ReadObjectTypePropertiesFromINI(ot, iniFile));

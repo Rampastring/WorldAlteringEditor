@@ -74,6 +74,7 @@ namespace TSMapEditor.UI.Windows
 
         private SelectEventWindow selectEventWindow;
         private SelectActionWindow selectActionWindow;
+        private SelectAnimationWindow selectAnimationWindow;
         private SelectBuildingTypeWindow selectBuildingTypeWindow;
         private SelectTeamTypeWindow selectTeamTypeWindow;
         private SelectTriggerWindow selectTriggerWindow;
@@ -183,6 +184,10 @@ namespace TSMapEditor.UI.Windows
             selectActionWindow = new SelectActionWindow(WindowManager, map);
             var actionWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectActionWindow);
             actionWindowDarkeningPanel.Hidden += ActionWindowDarkeningPanel_Hidden;
+
+            selectAnimationWindow = new SelectAnimationWindow(WindowManager, map);
+            var animationWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectAnimationWindow);
+            animationWindowDarkeningPanel.Hidden += AnimationWindowDarkeningPanel_Hidden;
 
             selectBuildingTypeWindow = new SelectBuildingTypeWindow(WindowManager, map);
             var buildingTypeWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectBuildingTypeWindow);
@@ -702,6 +707,11 @@ namespace TSMapEditor.UI.Windows
 
             switch (triggerActionType.Parameters[paramIndex].TriggerParamType)
             {
+                case TriggerParamType.Animation:
+                    AnimType existingAnimType = map.Rules.AnimTypes.Find(at => at.Index == Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1));
+                    selectAnimationWindow.IsForEvent = false;
+                    selectAnimationWindow.Open(existingAnimType);
+                    break;
                 case TriggerParamType.TeamType:
                     TeamType existingTeamType = map.TeamTypes.Find(tt => tt.ININame == triggerAction.Parameters[paramIndex]);
                     selectTeamTypeWindow.IsForEvent = false;
@@ -739,6 +749,14 @@ namespace TSMapEditor.UI.Windows
                 default:
                     break;
             }
+        }
+
+        private void AnimationWindowDarkeningPanel_Hidden(object sender, EventArgs e)
+        {
+            if (selectAnimationWindow.SelectedObject == null)
+                return;
+
+            AssignParamValue(selectAnimationWindow.IsForEvent, selectAnimationWindow.SelectedObject.Index);
         }
 
         private void BuildingTypeWindowDarkeningPanel_Hidden(object sender, EventArgs e)
@@ -1459,6 +1477,14 @@ namespace TSMapEditor.UI.Windows
 
             switch (paramType)
             {
+                case TriggerParamType.Animation:
+                    if (!intParseSuccess)
+                        return paramValue;
+
+                    if (intValue >= map.Rules.AnimTypes.Count)
+                        return intValue + " - nonexistent animation";
+
+                    return intValue + " " + map.Rules.AnimTypes[intValue].ININame;
                 case TriggerParamType.House:
                     if (intParseSuccess)
                     {

@@ -17,6 +17,7 @@
         Aircraft,
         AircraftType,
         Anim,
+        AnimType,
         Building,
         BuildingType,
         Bullet,
