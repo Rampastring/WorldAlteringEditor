@@ -145,12 +145,16 @@ namespace TSMapEditor.UI.Sidebar
                         continue;
 
                     Texture2D texture = null;
-                    var frames = TheaterGraphics.OverlayTextures[collection.OverlayTypes[0].Index].Frames;
-                    if (frames.Length > 0)
+                    var textures = TheaterGraphics.OverlayTextures[collection.OverlayTypes[0].Index];
+                    if (textures != null)
                     {
-                        var frame = frames[(frames.Length / 2) - 1];
-                        if (frame != null)
-                            texture = frame.Texture;
+                        var frames = textures.Frames;
+                        if (frames != null && frames.Length > 0)
+                        {
+                            var frame = frames[(frames.Length / 2) - 1];
+                            if (frame != null)
+                                texture = frame.Texture;
+                        }
                     }
 
                     collectionsCategory.Nodes.Add(new TreeViewNode()
