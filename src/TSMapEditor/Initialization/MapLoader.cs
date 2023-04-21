@@ -73,10 +73,14 @@ namespace TSMapEditor.Initialization
                     t.SubTileIndex = 0;
                 }
 
-                int maxSubTileIndex = theaterGraphics.GetTile(t.TileIndex).SubTileCount - 1;
+                var tile = theaterGraphics.GetTile(t.TileIndex);
+                var tileSet = theaterGraphics.Theater.TileSets[tile.TileSetId];
+                int maxSubTileIndex = tile.SubTileCount - 1;
                 if (t.SubTileIndex > maxSubTileIndex)
                 {
-                    AddMapLoadError($"Invalid sub-tile index {t.SubTileIndex} for cell at {t.CoordsToPoint()} (max: {maxSubTileIndex}) - setting it to 0");
+                    AddMapLoadError($"Invalid sub-tile index {t.SubTileIndex} for cell at {t.CoordsToPoint()} (max: {maxSubTileIndex}) - setting it to 0. " +
+                        $"TileSet: {tileSet.SetName} ({tileSet.FileName}), index of tile within its set: {tile.TileIndexInTileSet}");
+
                     t.SubTileIndex = 0;
 
                     if (maxSubTileIndex < 0)
