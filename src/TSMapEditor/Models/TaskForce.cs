@@ -1,4 +1,6 @@
 ﻿using Rampastring.Tools;
+using System;
+using System.Text;
 
 namespace TSMapEditor.Models
 {
@@ -44,7 +46,7 @@ namespace TSMapEditor.Models
     /// <summary>
     /// A taskforce. A group of unit types that can be used in team types.
     /// </summary>
-    public class TaskForce : IIDContainer
+    public class TaskForce : IIDContainer, IHintable
     {
         public const int MaxTechnoCount = 6;
 
@@ -88,6 +90,28 @@ namespace TSMapEditor.Models
             // techno entries works properly for TaskForces with MaxTechnoCount techno entries
 
             TechnoTypes[MaxTechnoCount - 1] = null;
+        }
+
+        public string GetHeaderText() => Name;
+
+        public string GetHintText()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("Contains:");
+
+            foreach (var entry in TechnoTypes)
+            {
+                if (entry == null)
+                    break;
+
+                sb.Append(Environment.NewLine);
+                sb.Append("    ");
+                sb.Append(entry.Count);
+                sb.Append("x ");
+                sb.Append(entry.TechnoType.GetEditorDisplayName());
+            }
+
+            return sb.ToString();
         }
 
         /// <summary>

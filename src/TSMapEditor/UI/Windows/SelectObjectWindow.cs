@@ -1,5 +1,7 @@
 ﻿using System;
 using Rampastring.XNAUI;
+using TSMapEditor.GameMath;
+using TSMapEditor.Models;
 using TSMapEditor.UI.Controls;
 
 namespace TSMapEditor.UI.Windows
@@ -25,6 +27,8 @@ namespace TSMapEditor.UI.Windows
 
         private T initialSelection;
 
+        private SelectObjectWindowInfoPanel infoPanel;
+
         public override void Initialize()
         {
             base.Initialize();
@@ -46,6 +50,7 @@ namespace TSMapEditor.UI.Windows
             lbObjectList.AllowRightClickUnselect = false;
             lbObjectList.DoubleLeftClick += (s, e) => Hide();
             lbObjectList.SelectedIndexChanged += LbObjectList_SelectedIndexChanged;
+            lbObjectList.HoveredIndexChanged += LbObjectList_HoveredIndexChanged;
 
             FindChild<EditorButton>("btnSelect").LeftClick += (s, e) => Hide();
 
@@ -55,6 +60,11 @@ namespace TSMapEditor.UI.Windows
             // Make pressing X not save changes
             if (btnClose != null)
                 btnClose.LeftClick += (s, e) => SelectedObject = initialSelection;
+
+            infoPanel = new SelectObjectWindowInfoPanel(WindowManager);
+            AddChild(infoPanel);
+
+            EnabledChanged += SelectObjectWindow_EnabledChanged;
         }
 
         private void TbSearch_TextChanged(object sender, EventArgs e)
@@ -64,6 +74,14 @@ namespace TSMapEditor.UI.Windows
 
             lbObjectList.SelectedIndex = -1;
             FindNext();
+        }
+
+        private void SelectObjectWindow_EnabledChanged(object sender, EventArgs e)
+        {
+            if (!Enabled)
+            {
+                HideInfoPanel();
+            }
         }
 
         private void FindNext()
@@ -79,8 +97,18 @@ namespace TSMapEditor.UI.Windows
             }
         }
 
+        private void HideInfoPanel()
+        {
+            if (infoPanel.Detached)
+            {
+                infoPanel.Attach();
+                infoPanel.Disable();
+            }
+        }
+
         public void Open(T initialSelection)
         {
+            HideInfoPanel();
             SelectedObject = initialSelection;
             this.initialSelection = SelectedObject;
             ListObjects();
@@ -106,6 +134,28 @@ namespace TSMapEditor.UI.Windows
         }
 
         protected abstract void LbObjectList_SelectedIndexChanged(object sender, EventArgs e);
+
+        private void LbObjectList_HoveredIndexChanged(object sender, EventArgs e)
+        {
+            if (lbObjectList.HoveredItem == null)
+            {
+                 infoPanel.Hide();
+                 return;
+            }
+
+            var item = (T)lbObjectList.HoveredItem.Tag;
+            if (item == null)
+                return;
+
+            if (item is not IHintable)
+                return;
+
+            var itemAsHintable = item as IHintable;
+
+            infoPanel.Open(itemAsHintable.GetHeaderText(),
+                itemAsHintable.GetHintText(),
+                new Point2D(Width, GetCursorPoint().Y));
+        }
 
         protected abstract void ListObjects();
     }
