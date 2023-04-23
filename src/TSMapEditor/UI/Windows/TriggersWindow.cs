@@ -430,7 +430,7 @@ namespace TSMapEditor.UI.Windows
             return;
         }
 
-        private void AppendToStringBuilder<T>(Techno<T> techno, StringBuilder stringBuilder) where T : GameObjectType
+        private void AppendToStringBuilder<T>(Techno<T> techno, StringBuilder stringBuilder) where T : TechnoType
         {
             string rtti = techno.WhatAmI().ToString();
             string name = techno.ObjectType.Name;

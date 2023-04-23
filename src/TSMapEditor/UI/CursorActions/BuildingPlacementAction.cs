@@ -61,6 +61,7 @@ namespace TSMapEditor.UI.CursorActions
             if (!foundationAreaHasStructure)
             {
                 tile.Structure = structure;
+                CursorActionTarget.TechnoUnderCursor = structure;
                 CursorActionTarget.AddRefreshPoint(cellCoords, 10);
             }
         }
@@ -72,6 +73,7 @@ namespace TSMapEditor.UI.CursorActions
             if (tile.Structure == structure)
             {
                 tile.Structure = null;
+                CursorActionTarget.TechnoUnderCursor = null;
                 CursorActionTarget.AddRefreshPoint(cellCoords, 10);
             }
         }

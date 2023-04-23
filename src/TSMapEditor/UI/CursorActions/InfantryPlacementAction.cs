@@ -53,6 +53,7 @@ namespace TSMapEditor.UI.CursorActions
             {
                 infantry.SubCell = freeSubCell;
                 tile.AddInfantry(infantry);
+                CursorActionTarget.TechnoUnderCursor = infantry;
                 CursorActionTarget.AddRefreshPoint(cellCoords);
             }
         }
@@ -65,6 +66,7 @@ namespace TSMapEditor.UI.CursorActions
             {
                 // If SubCell != none, then the infantry was placed on the tile
                 tile.Infantry[(int)infantry.SubCell] = null;
+                CursorActionTarget.TechnoUnderCursor = tile.GetTechno();
                 CursorActionTarget.AddRefreshPoint(cellCoords);
             }
         }

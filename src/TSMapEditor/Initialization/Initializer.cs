@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using TSMapEditor.Models;
 using TSMapEditor.Models.ArtConfig;
 using TSMapEditor.Models.Enums;
+using TSMapEditor.UI;
+using static System.Collections.Specialized.BitVector32;
 
 namespace TSMapEditor.Initialization
 {
@@ -22,12 +24,8 @@ namespace TSMapEditor.Initialization
         public Initializer(IMap map)
         {
             this.map = map;
-        }
 
-        private readonly IMap map;
-
-        private Dictionary<Type, Action<AbstractObject, IniFile, IniSection>> objectTypeInitializers
-            = new Dictionary<Type, Action<AbstractObject, IniFile, IniSection>>()
+            objectTypeInitializers = new Dictionary<Type, Action<INIDefineable, IniFile, IniSection>>()
             {
                 { typeof(BuildingType), InitBuildingType },
                 { typeof(InfantryType), InitInfantryType },
@@ -37,6 +35,11 @@ namespace TSMapEditor.Initialization
                 { typeof(TerrainType), InitTerrainType },
                 { typeof(SmudgeType), InitSmudgeType }
             };
+        }
+
+        private readonly IMap map;
+
+        private Dictionary<Type, Action<INIDefineable, IniFile, IniSection>> objectTypeInitializers;
 
         private Dictionary<Type, Action<IMap, AbstractObject, IniFile, IniSection>> objectTypeArtInitializers
             = new Dictionary<Type, Action<IMap, AbstractObject, IniFile, IniSection>>()
@@ -49,7 +52,7 @@ namespace TSMapEditor.Initialization
                 { typeof(InfantryType), InitInfantryArtConfig }
             };
 
-        public void ReadObjectTypePropertiesFromINI<T>(T obj, IniFile iniFile) where T : AbstractObject, INIDefined
+        public void ReadObjectTypePropertiesFromINI<T>(T obj, IniFile iniFile) where T : INIDefineable, INIDefined
         {
             IniSection objectSection = iniFile.GetSection(obj.ININame);
             if (objectSection == null)
@@ -86,9 +89,67 @@ namespace TSMapEditor.Initialization
 
         }
 
-        private static void InitBuildingType(AbstractObject obj, IniFile rulesIni, IniSection section)
+        private Weapon FindOrCreateWeapon(string weaponName, IniFile rulesIni)
+        {
+            Weapon weapon = map.Rules.Weapons.Find(weapon => weapon.ININame == weaponName);
+
+            if (weapon == null)
+            {
+                weapon = new Weapon(weaponName);
+                var section = rulesIni.GetSection(weaponName);
+                if (section == null)
+                    throw new INIConfigException($"No section found for weapon {weaponName} while parsing Rules!");
+
+                weapon.ReadPropertiesFromIniSection(section);
+                map.Rules.Weapons.Add(weapon);
+            }
+
+            return weapon;
+        }
+
+        private Weapon FetchWeapon(IniFile rulesIni, IniSection objectSection, string keyName)
+        {
+            if (objectSection.KeyExists(keyName))
+            {
+                string weaponName = objectSection.GetStringValue(keyName, string.Empty);
+
+                if (!string.IsNullOrWhiteSpace(weaponName) && !Helpers.IsStringNoneValue(weaponName))
+                {
+                    return FindOrCreateWeapon(weaponName, rulesIni);
+                }
+            }
+
+            return null;
+        }
+
+        private void CommonTechnoInit(TechnoType technoType, IniFile rulesIni, IniSection section)
+        {
+            if (technoType.Primary == null)
+                technoType.Primary = FetchWeapon(rulesIni, section, "Primary");
+
+            if (technoType.Secondary == null)
+                technoType.Secondary = FetchWeapon(rulesIni, section, "Secondary");
+        }
+
+        private void InitBuildingType(INIDefineable obj, IniFile rulesIni, IniSection section)
         {
             var buildingType = (BuildingType)obj;
+            CommonTechnoInit(buildingType, rulesIni, section);
+        }
+
+        private void InitInfantryType(INIDefineable obj, IniFile rulesIni, IniSection section)
+        {
+            CommonTechnoInit((TechnoType)obj, rulesIni, section);
+        }
+
+        public void InitUnitType(INIDefineable obj, IniFile rulesIni, IniSection section)
+        {
+            CommonTechnoInit((TechnoType)obj, rulesIni, section);
+        }
+
+        private void InitAircraftType(INIDefineable obj, IniFile rulesIni, IniSection section)
+        {
+            CommonTechnoInit((TechnoType)obj, rulesIni, section);
         }
 
         private static void InitArtConfigGeneric(IMap map, AbstractObject obj, IniFile artIni, IniSection artSection)
@@ -107,25 +168,13 @@ namespace TSMapEditor.Initialization
             }
         }
 
-        private static void InitInfantryType(AbstractObject obj, IniFile rulesIni, IniSection section)
-        {
-        }
-
-        private static void InitUnitType(AbstractObject obj, IniFile rulesIni, IniSection section)
-        {
-        }
-
-        private static void InitAircraftType(AbstractObject obj, IniFile rulesIni, IniSection section)
-        {
-        }
-
-        private static void InitOverlayType(AbstractObject obj, IniFile rulesIni, IniSection section)
+        private static void InitOverlayType(INIDefineable obj, IniFile rulesIni, IniSection section)
         {
             var overlayType = (OverlayType)obj;
             overlayType.Land = (LandType)Enum.Parse(typeof(LandType), section.GetStringValue("Land", LandType.Clear.ToString()));
         }
 
-        private static void InitTerrainType(AbstractObject obj, IniFile rulesIni, IniSection section)
+        private static void InitTerrainType(INIDefineable obj, IniFile rulesIni, IniSection section)
         {
             var terrainType = (TerrainType)obj;
             terrainType.SnowOccupationBits = (TerrainOccupation)section.GetIntValue("SnowOccupationBits", 0);
@@ -139,7 +188,7 @@ namespace TSMapEditor.Initialization
             terrainType.Image = artSection.GetStringValue("Image", terrainType.Image);
         }
 
-        private static void InitSmudgeType(AbstractObject obj, IniFile rulesIni, IniSection section)
+        private static void InitSmudgeType(INIDefineable obj, IniFile rulesIni, IniSection section)
         {
         }
 

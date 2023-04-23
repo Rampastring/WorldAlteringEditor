@@ -3,7 +3,7 @@
     /// <summary>
     /// A base class for mobile objects.
     /// </summary>
-    public abstract class Foot<T> : Techno<T> where T : GameObjectType
+    public abstract class Foot<T> : Techno<T> where T : TechnoType
     {
         public const int VeterancyNone = 0;
         public const int VeterancyVeteran = 100;

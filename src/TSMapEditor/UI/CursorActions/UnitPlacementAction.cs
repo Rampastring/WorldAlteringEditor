@@ -49,6 +49,7 @@ namespace TSMapEditor.UI.CursorActions
             if (tile.Vehicle == null)
             {
                 tile.Vehicle = unit;
+                CursorActionTarget.TechnoUnderCursor = unit;
                 CursorActionTarget.AddRefreshPoint(cellCoords);
             }
         }
@@ -60,6 +61,7 @@ namespace TSMapEditor.UI.CursorActions
             if (tile.Vehicle == unit)
             {
                 tile.Vehicle = null;
+                CursorActionTarget.TechnoUnderCursor = null;
                 CursorActionTarget.AddRefreshPoint(cellCoords);
             }
         }

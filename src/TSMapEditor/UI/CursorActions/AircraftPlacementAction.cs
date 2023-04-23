@@ -46,6 +46,7 @@ namespace TSMapEditor.UI.CursorActions
             if (tile.Aircraft == null)
             {
                 tile.Aircraft = aircraft;
+                CursorActionTarget.TechnoUnderCursor = aircraft;
                 CursorActionTarget.AddRefreshPoint(cellCoords);
             }
         }
@@ -57,6 +58,7 @@ namespace TSMapEditor.UI.CursorActions
             if (tile.Aircraft == aircraft)
             {
                 tile.Aircraft = null;
+                CursorActionTarget.TechnoUnderCursor = null;
                 CursorActionTarget.AddRefreshPoint(cellCoords);
             }
         }

@@ -53,6 +53,7 @@ namespace TSMapEditor.Rendering
         CopiedMapData CopiedMapData { get; set; }
         Texture2D MegamapTexture { get; }
         Camera Camera { get; }
+        TechnoBase TechnoUnderCursor { get; set; }
     }
 
 
@@ -92,6 +93,7 @@ namespace TSMapEditor.Rendering
         }
         public Texture2D MegamapTexture => compositeRenderTarget;
         public Camera Camera { get; private set; }
+        public TechnoBase TechnoUnderCursor { get; set; }
 
         public TileInfoDisplay TileInfoDisplay { get; set; }
         
@@ -103,6 +105,7 @@ namespace TSMapEditor.Rendering
 
         private Texture2D impassableCellHighlightTexture;
         private Texture2D iceGrowthHighlightTexture;
+        private Texture2D rangeIndicatorTexture;
 
         private RenderTarget2D mapRenderTarget;
         private RenderTarget2D depthRenderTarget;
@@ -153,7 +156,6 @@ namespace TSMapEditor.Rendering
         private TerrainRenderer terrainRenderer;
         private UnitRenderer unitRenderer;
 
-
         public void AddRefreshPoint(Point2D point, int size = 1)
         {
             InvalidateMap();
@@ -175,6 +177,7 @@ namespace TSMapEditor.Rendering
 
             impassableCellHighlightTexture = AssetLoader.LoadTexture("impassablehighlight.png");
             iceGrowthHighlightTexture = AssetLoader.LoadTexture("icehighlight.png");
+            rangeIndicatorTexture = AssetLoader.LoadTexture("rangeindicator.png");
 
             mapWideOverlay = new MapWideOverlay();
             EditorState.MapWideOverlayExists = mapWideOverlay.HasTexture;
@@ -882,6 +885,36 @@ namespace TSMapEditor.Rendering
             FillRectangle(new Rectangle(x, impassableY - (BorderThickness / 2), width, BorderThickness), Color.Teal * 0.25f);
         }
 
+        private void DrawTechnoRangeIndicator()
+        {
+            if (TechnoUnderCursor == null)
+                return;
+
+            double range = TechnoUnderCursor.GetWeaponRange();
+            if (range <= 0.0)
+                return;
+
+            Point2D center = CellMath.CellCenterPointFromCellCoords_3D(TechnoUnderCursor.Position, Map);
+
+            // Range is specified in "tile edge lengths",
+            // so we need a bit of trigonometry
+            double horizontalPixelRange = Constants.CellSizeX / Math.Sqrt(2.0);
+            double verticalPixelRange = Constants.CellSizeY / Math.Sqrt(2.0);
+
+            int startX = center.X - (int)(range * horizontalPixelRange);
+            int startY = center.Y - (int)(range * verticalPixelRange);
+            int endX = center.X + (int)(range * horizontalPixelRange);
+            int endY = center.Y + (int)(range * verticalPixelRange);
+
+            startX = Camera.ScaleIntWithZoom(startX - Camera.TopLeftPoint.X);
+            startY = Camera.ScaleIntWithZoom(startY - Camera.TopLeftPoint.Y);
+            endX = Camera.ScaleIntWithZoom(endX - Camera.TopLeftPoint.X);
+            endY = Camera.ScaleIntWithZoom(endY - Camera.TopLeftPoint.Y);
+
+            DrawTexture(rangeIndicatorTexture,
+                new Rectangle(startX, startY, endX - startX, endY - startY), TechnoUnderCursor.Owner.XNAColor);
+        }
+
         public override void OnMouseScrolled()
         {
             if (Cursor.ScrollWheelValue > 0)
@@ -1063,6 +1096,8 @@ namespace TSMapEditor.Rendering
 
             if (IsActive && tileUnderCursor != null)
             {
+                TechnoUnderCursor = tileUnderCursor.GetTechno();
+
                 if (KeyboardCommands.Instance.DeleteObject.AreKeysDown(Keyboard))
                     DeleteObjectFromCell(tileUnderCursor.CoordsToPoint());
             }
@@ -1331,6 +1366,8 @@ namespace TSMapEditor.Rendering
                         (int)(mapRenderTarget.Width * Camera.ZoomLevel),
                         (int)(mapRenderTarget.Height * Camera.ZoomLevel)));
             }
+
+            DrawTechnoRangeIndicator();
 
             DrawMapBorder();
 
