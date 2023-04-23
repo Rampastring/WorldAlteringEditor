@@ -21,6 +21,9 @@ namespace TSMapEditor.UI.Controls
         public Color TextIdleColor { get; set; }
         public Color TextHoverColor { get; set; }
 
+        private string oldText;
+        private string cachedText;
+
         private Color textColor;
 
         public override void OnMouseEnter()
@@ -38,9 +41,16 @@ namespace TSMapEditor.UI.Controls
         public override void Draw(GameTime gameTime)
         {
             DrawPanel();
+
             if (!string.IsNullOrWhiteSpace(Text))
             {
-                DrawStringWithShadow(Text, FontIndex,
+                if (!ReferenceEquals(oldText, Text))
+                {
+                    oldText = Text;
+                    cachedText = Renderer.GetStringWithLimitedWidth(Text, FontIndex, Width - TEXT_HORIZONTAL_MARGIN);
+                }
+
+                DrawStringWithShadow(cachedText, FontIndex,
                     new Vector2(TEXT_HORIZONTAL_MARGIN, TEXT_VERTICAL_MARGIN),
                     textColor);
             }

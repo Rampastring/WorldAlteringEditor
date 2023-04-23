@@ -111,11 +111,7 @@ namespace TSMapEditor.UI.Windows
 
                 if (Keyboard.IsCtrlHeldDown() && editedTeamType.TaskForce != null)
                 {
-                    TaskForceOpened?.Invoke(this, new TaskForceEventArgs(editedTeamType.TaskForce));
-
-                    // hack time! allow the other window to show on top of this one,
-                    // we can't cancel the "left click" event on the child with current XNAUI
-                    WindowManager.AddCallback(new Action(() => { DrawOrder -= 500; UpdateOrder -= 500; }));
+                    OpenTaskForce();
                 }
                 else
                 {
@@ -130,11 +126,7 @@ namespace TSMapEditor.UI.Windows
 
                 if (Keyboard.IsCtrlHeldDown() && editedTeamType.Script != null)
                 {
-                    ScriptOpened?.Invoke(this, new ScriptEventArgs(editedTeamType.Script));
-
-                    // hack time! allow the other window to show on top of this one,
-                    // we can't cancel the "left click" event on the child with current XNAUI
-                    WindowManager.AddCallback(new Action(() => { DrawOrder -= 500; UpdateOrder -= 500; }));
+                    OpenScript();
                 }
                 else
                 {
@@ -142,7 +134,34 @@ namespace TSMapEditor.UI.Windows
                 }
             };
 
+            FindChild<EditorButton>("btnOpenTaskForce").LeftClick += (s, e) => OpenTaskForce();
+            FindChild<EditorButton>("btnOpenScript").LeftClick += (s, e) => OpenScript();
+
             selTag.LeftClick += (s, e) => { if (editedTeamType != null) selectTagWindow.Open(editedTeamType.Tag); };
+        }
+
+        private void OpenTaskForce()
+        {
+            if (editedTeamType == null || editedTeamType.TaskForce == null)
+                return;
+
+            TaskForceOpened?.Invoke(this, new TaskForceEventArgs(editedTeamType.TaskForce));
+
+            // hack time! allow the other window to show on top of this one,
+            // we can't cancel the "left click" event on the child with current XNAUI
+            WindowManager.AddCallback(new Action(() => { DrawOrder -= 500; UpdateOrder -= 500; }));
+        }
+
+        private void OpenScript()
+        {
+            if (editedTeamType == null || editedTeamType.Script == null)
+                return;
+
+            ScriptOpened?.Invoke(this, new ScriptEventArgs(editedTeamType.Script));
+
+            // hack time! allow the other window to show on top of this one,
+            // we can't cancel the "left click" event on the child with current XNAUI
+            WindowManager.AddCallback(new Action(() => { DrawOrder -= 500; UpdateOrder -= 500; }));
         }
 
         private void SelectionWindow_ApplyEffect<T>(Action<T> action, T window)
