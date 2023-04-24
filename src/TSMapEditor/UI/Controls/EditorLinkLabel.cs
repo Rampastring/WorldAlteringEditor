@@ -32,7 +32,7 @@ namespace TSMapEditor.UI.Controls
             {
                 try
                 {
-                    Process.Start(URL);
+                    Process.Start(new ProcessStartInfo(URL) { UseShellExecute = true });
                 }
                 catch (Win32Exception ex)
                 {
