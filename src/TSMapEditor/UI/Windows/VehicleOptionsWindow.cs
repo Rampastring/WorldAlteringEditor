@@ -3,7 +3,9 @@ using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Globalization;
 using TSMapEditor.Models;
+using TSMapEditor.Rendering;
 using TSMapEditor.UI.Controls;
+using TSMapEditor.UI.CursorActions;
 
 namespace TSMapEditor.UI.Windows
 {
@@ -12,18 +14,22 @@ namespace TSMapEditor.UI.Windows
     /// </summary>
     public class VehicleOptionsWindow : INItializableWindow
     {
-        public VehicleOptionsWindow(WindowManager windowManager, Map map) : base(windowManager)
+        public VehicleOptionsWindow(WindowManager windowManager, Map map, EditorState editorState, ICursorActionTarget cursorActionTarget) : base(windowManager)
         {
             this.map = map;
+            this.editorState = editorState;
+            this.setFollowerCursorAction = new SetFollowerCursorAction(cursorActionTarget);
         }
 
         private readonly Map map;
+        private readonly EditorState editorState;
+        private readonly SetFollowerCursorAction setFollowerCursorAction;
 
         private EditorNumberTextBox tbStrength;
         private XNADropDown ddMission;
         private XNADropDown ddVeterancy;
         private EditorNumberTextBox tbGroup;
-        private EditorNumberTextBox tbFollowerID;
+        private EditorPopUpSelector followerSelector;
         private XNACheckBox chkOnBridge;
         private XNACheckBox chkAutocreateNoRecruitable;
         private XNACheckBox chkAutocreateYesRecruitable;
@@ -42,7 +48,7 @@ namespace TSMapEditor.UI.Windows
             ddMission = FindChild<XNADropDown>(nameof(ddMission));
             ddVeterancy = FindChild<XNADropDown>(nameof(ddVeterancy));
             tbGroup = FindChild<EditorNumberTextBox>(nameof(tbGroup));
-            tbFollowerID = FindChild<EditorNumberTextBox>(nameof(tbFollowerID));
+            followerSelector = FindChild<EditorPopUpSelector>(nameof(followerSelector));
             chkOnBridge = FindChild<XNACheckBox>(nameof(chkOnBridge));
             chkAutocreateNoRecruitable = FindChild<XNACheckBox>(nameof(chkAutocreateNoRecruitable));
             chkAutocreateYesRecruitable = FindChild<XNACheckBox>(nameof(chkAutocreateYesRecruitable));
@@ -64,6 +70,20 @@ namespace TSMapEditor.UI.Windows
             }
 
             FindChild<EditorButton>("btnOK").LeftClick += BtnOK_LeftClick;
+            followerSelector.LeftClick += FollowerSelector_LeftClick;
+            setFollowerCursorAction.ActionExited += SetFollowerCursorAction_ActionExited;
+        }
+
+        private void SetFollowerCursorAction_ActionExited(object sender, EventArgs e)
+        {
+            Open(unit);
+        }
+
+        private void FollowerSelector_LeftClick(object sender, EventArgs e)
+        {
+            Hide();
+            setFollowerCursorAction.UnitToFollow = unit;
+            editorState.CursorAction = setFollowerCursorAction;
         }
 
         private void SelectionWindow_ApplyEffect<T>(Action<T> action, T window)
@@ -91,7 +111,8 @@ namespace TSMapEditor.UI.Windows
             int veterancyIndex = ddVeterancy.Items.FindIndex(i => (int)i.Tag == unit.Veterancy);
             ddVeterancy.SelectedIndex = Math.Max(0, veterancyIndex);
             tbGroup.Value = unit.Group;
-            tbFollowerID.Value = map.Units.IndexOf(unit.FollowerUnit);
+            followerSelector.Tag = unit.FollowerUnit;
+            followerSelector.Text = unit.FollowerUnit == null ? "none" : unit.FollowerUnit.UnitType.GetEditorDisplayName() + " at " + unit.FollowerUnit.Position;
             chkOnBridge.Checked = unit.High;
             chkAutocreateNoRecruitable.Checked = unit.AutocreateNoRecruitable;
             chkAutocreateYesRecruitable.Checked = unit.AutocreateYesRecruitable;
@@ -105,13 +126,7 @@ namespace TSMapEditor.UI.Windows
             unit.Mission = ddMission.SelectedItem == null ? unit.Mission : ddMission.SelectedItem.Text;
             unit.Veterancy = (int)ddVeterancy.SelectedItem.Tag;
             unit.Group = tbGroup.Value;
-            unit.FollowerID = tbFollowerID.Value;
-
-            if (unit.FollowerID > -1 && unit.FollowerID < map.Units.Count)
-                unit.FollowerUnit = map.Units[unit.FollowerID];
-            else
-                unit.FollowerUnit = null;
-
+            unit.FollowerUnit = followerSelector.Tag as Unit;
             unit.High = chkOnBridge.Checked;
             unit.AutocreateNoRecruitable = chkAutocreateNoRecruitable.Checked;
             unit.AutocreateYesRecruitable = chkAutocreateYesRecruitable.Checked;

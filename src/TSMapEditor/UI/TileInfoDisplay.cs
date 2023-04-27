@@ -255,9 +255,20 @@ namespace TSMapEditor.UI
 
             if (techno.WhatAmI() == RTTIType.Unit)
             {
-                int id = map.Units.IndexOf(techno as Unit);
+                var unit = techno as Unit;
+                int id = map.Units.IndexOf(unit);
                 textRenderer.AddTextPart(new XNATextPart("ID: " + id, Constants.UIDefaultFont, Color.White));
                 textRenderer.AddTextPart(new XNATextPart("Facing: " + techno.Facing, Constants.UIDefaultFont, Color.White));
+
+                if (unit.FollowerUnit != null)
+                {
+                    int followerId = map.Units.IndexOf(unit.FollowerUnit);
+                    if (followerId > -1)
+                    {
+                        string followerName = unit.FollowerUnit.UnitType.GetEditorDisplayName();
+                        textRenderer.AddTextPart(new XNATextPart("Follower: " + followerName + " at " + unit.FollowerUnit.Position, Constants.UIDefaultFont, Color.White));
+                    }
+                }
             }
             
             if (techno.AttachedTag != null)

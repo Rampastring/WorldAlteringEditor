@@ -113,7 +113,7 @@ namespace TSMapEditor.UI.Windows
             StructureOptionsWindow = new StructureOptionsWindow(windowParentControl.WindowManager, map);
             Windows.Add(StructureOptionsWindow);
 
-            VehicleOptionsWindow = new VehicleOptionsWindow(windowParentControl.WindowManager, map);
+            VehicleOptionsWindow = new VehicleOptionsWindow(windowParentControl.WindowManager, map, editorState, cursorActionTarget);
             Windows.Add(VehicleOptionsWindow);
 
             InfantryOptionsWindow = new InfantryOptionsWindow(windowParentControl.WindowManager, map);

@@ -2,6 +2,7 @@
 using System;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
+using TSMapEditor.Mutations;
 using TSMapEditor.Rendering;
 
 namespace TSMapEditor.UI
@@ -44,6 +45,10 @@ namespace TSMapEditor.UI
         protected Map Map => CursorActionTarget.Map;
 
         protected ICursorActionTarget CursorActionTarget { get; }
+
+        protected IMutationTarget MutationTarget => CursorActionTarget.MutationTarget;
+
+        protected void PerformMutation(Mutation mutation) => CursorActionTarget.MutationManager.PerformMutation(mutation);
 
         /// <summary>
         /// Called when the action is activated (when it becomes the cursor action that the user is using).
