@@ -13,7 +13,7 @@ namespace TSMapEditor.UI.Windows.TerrainGenerator
     /// A panel that allows the user to customize how the terrain 
     /// generator places smudges on the map.
     /// </summary>
-    public class TerrainGeneratorSmudgeGroupsPanel : XNAPanel
+    public class TerrainGeneratorSmudgeGroupsPanel : EditorPanel
     {
         public TerrainGeneratorSmudgeGroupsPanel(WindowManager windowManager, Map map) : base(windowManager)
         {

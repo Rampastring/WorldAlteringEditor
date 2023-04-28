@@ -15,7 +15,7 @@ namespace TSMapEditor.UI.Windows.TerrainGenerator
     /// A panel that allows the user to customize how the terrain 
     /// generator places overlay on the map.
     /// </summary>
-    public class TerrainGeneratorOverlayGroupsPanel : XNAPanel
+    public class TerrainGeneratorOverlayGroupsPanel : EditorPanel
     {
         public TerrainGeneratorOverlayGroupsPanel(WindowManager windowManager, Map map) : base(windowManager)
         {

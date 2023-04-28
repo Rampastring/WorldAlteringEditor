@@ -13,7 +13,7 @@ namespace TSMapEditor.UI.Windows.TerrainGenerator
     /// A panel that allows the user to customize how the terrain 
     /// generator places terrain types on the map.
     /// </summary>
-    public class TerrainGeneratorTerrainTypeGroupsPanel : XNAPanel
+    public class TerrainGeneratorTerrainTypeGroupsPanel : EditorPanel
     {
         public TerrainGeneratorTerrainTypeGroupsPanel(WindowManager windowManager, Map map) : base(windowManager)
         {

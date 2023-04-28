@@ -16,7 +16,7 @@ namespace TSMapEditor.UI.Windows.TerrainGenerator
     /// A panel that allows the user to customize how the terrain 
     /// generator places terrain tiles on the map.
     /// </summary>
-    public class TerrainGeneratorTileGroupsPanel : XNAPanel
+    public class TerrainGeneratorTileGroupsPanel : EditorPanel
     {
         public TerrainGeneratorTileGroupsPanel(WindowManager windowManager, Map map) : base(windowManager)
         {
@@ -36,8 +36,6 @@ namespace TSMapEditor.UI.Windows.TerrainGenerator
 
         public override void Initialize()
         {
-            base.Initialize();
-
             const int MaxTileGroupCount = 8;
 
             tileSetSelectors = new EditorPopUpSelector[MaxTileGroupCount];
@@ -119,6 +117,8 @@ namespace TSMapEditor.UI.Windows.TerrainGenerator
 
                 y = tbOccupiedChance.Bottom + Constants.UIEmptyTopSpace;
             }
+
+            base.Initialize();
         }
 
         private void TileSetDarkeningPanel_Hidden(object sender, EventArgs e)
