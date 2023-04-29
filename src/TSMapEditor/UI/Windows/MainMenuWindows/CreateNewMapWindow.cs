@@ -62,18 +62,33 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
 
         private void BtnCreate_LeftClick(object sender, EventArgs e)
         {
-            if (tbWidth.Value < MinMapSize || tbHeight.Value < MinMapSize || tbWidth.Value + tbHeight.Value >= MaxMapSize)
+            if (tbWidth.Value < MinMapSize)
+            {
+                EditorMessageBox.Show(WindowManager, "Map too narrow", "Map width must be at least " + MinMapSize + " cells.", MessageBoxButtons.OK);
                 return;
+            }
+
+            if (tbHeight.Value < MinMapSize)
+            {
+                EditorMessageBox.Show(WindowManager, "Map too small", "Map height must be at least " + MinMapSize + " cells.", MessageBoxButtons.OK);
+                return;
+            }
 
             if (tbWidth.Value > Constants.MaxMapWidth)
             {
-                EditorMessageBox.Show(WindowManager, "Map too wide", "Map width cannot exceed " + Constants.MaxMapWidth + " cells!", MessageBoxButtons.OK);
+                EditorMessageBox.Show(WindowManager, "Map too wide", "Map width cannot exceed " + Constants.MaxMapWidth + " cells.", MessageBoxButtons.OK);
                 return;
             }
 
             if (tbHeight.Value > Constants.MaxMapHeight)
             {
-                EditorMessageBox.Show(WindowManager, "Map too long", "Map height cannot exceed " + Constants.MaxMapHeight + " cells!", MessageBoxButtons.OK);
+                EditorMessageBox.Show(WindowManager, "Map too long", "Map height cannot exceed " + Constants.MaxMapHeight + " cells.", MessageBoxButtons.OK);
+                return;
+            }
+
+            if (tbWidth.Value + tbHeight.Value > MaxMapSize)
+            {
+                EditorMessageBox.Show(WindowManager, "Map too large", "Map width + height cannot exceed " + MaxMapSize + " cells.", MessageBoxButtons.OK);
                 return;
             }
 

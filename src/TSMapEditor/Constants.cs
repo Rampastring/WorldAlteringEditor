@@ -27,8 +27,8 @@ namespace TSMapEditor
 
         public const int TextureSizeLimit = 16384;
 
-        public static int MaxMapWidth = TextureSizeLimit / CellSizeX;
-        public static int MaxMapHeight = TextureSizeLimit / CellSizeY;
+        public static int MaxMapWidth;
+        public static int MaxMapHeight;
 
         public const int MaxMapHeightLevel = 14;
 
@@ -80,7 +80,10 @@ namespace TSMapEditor
             IniFile constantsIni = new IniFile(Environment.CurrentDirectory + "/Config/Constants.ini");
 
             CellSizeX = constantsIni.GetIntValue(ConstantsSectionName, nameof(CellSizeX), CellSizeX);
+            MaxMapWidth = TextureSizeLimit / CellSizeX;
             CellSizeY = constantsIni.GetIntValue(ConstantsSectionName, nameof(CellSizeY), CellSizeY);
+            MaxMapHeight = TextureSizeLimit / CellSizeY;
+
             TileColorBufferSize = constantsIni.GetIntValue(ConstantsSectionName, nameof(TileColorBufferSize), TileColorBufferSize);
 
             RenderPixelPadding = constantsIni.GetIntValue(ConstantsSectionName, nameof(RenderPixelPadding), RenderPixelPadding);
