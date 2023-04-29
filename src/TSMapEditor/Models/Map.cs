@@ -146,6 +146,7 @@ namespace TSMapEditor.Models
 
         public string TheaterName { get; set; }
         public ITheater TheaterInstance { get; set; }
+        public string LoadedTheaterName => TheaterInstance.Theater.UIName;
 
         private readonly Initializer initializer;
 

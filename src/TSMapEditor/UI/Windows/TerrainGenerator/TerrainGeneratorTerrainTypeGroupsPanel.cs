@@ -89,6 +89,8 @@ namespace TSMapEditor.UI.Windows.TerrainGenerator
                 y = tbOccupiedChance.Bottom + Constants.UIEmptyTopSpace;
             }
 
+            Height = y + Constants.UIEmptyBottomSpace;
+
             base.Initialize();
         }
 

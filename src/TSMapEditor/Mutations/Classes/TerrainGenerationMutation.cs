@@ -17,12 +17,16 @@ namespace TSMapEditor.Mutations.Classes
         private const string SmudgeGroupString = "SmudgeGroup";
 
         public TerrainGeneratorConfiguration(string name,
+            string theater,
+            bool isUserConfiguration,
             List<TerrainGeneratorTerrainTypeGroup> terrainTypeGroups,
             List<TerrainGeneratorTileGroup> tileGroups,
             List<TerrainGeneratorOverlayGroup> overlayGroups,
             List<TerrainGeneratorSmudgeGroup> smudgeGroups)
         {
             Name = name;
+            Theater = theater;
+            IsUserConfiguration = isUserConfiguration;
             TerrainTypeGroups = terrainTypeGroups;
             TileGroups = tileGroups;
             OverlayGroups = overlayGroups;
@@ -30,6 +34,8 @@ namespace TSMapEditor.Mutations.Classes
         }
 
         public string Name { get; }
+        public string Theater { get; }
+        public bool IsUserConfiguration { get; }
         public List<TerrainGeneratorTerrainTypeGroup> TerrainTypeGroups { get; }
         public List<TerrainGeneratorTileGroup> TileGroups { get; }
         public List<TerrainGeneratorOverlayGroup> OverlayGroups { get; }
@@ -38,6 +44,9 @@ namespace TSMapEditor.Mutations.Classes
         public IniSection GetIniConfigSection(string sectionName)
         {
             var iniSection = new IniSection(sectionName);
+
+            iniSection.SetStringValue("Name", Name);
+            iniSection.SetStringValue("Theater", Theater);
 
             for (int i = 0; i < TerrainTypeGroups.Count; i++)
             {
@@ -62,7 +71,11 @@ namespace TSMapEditor.Mutations.Classes
             return iniSection;
         }
 
-        public static TerrainGeneratorConfiguration FromConfigSection(IniSection section, List<TerrainType> terrainTypes, List<TileSet> tilesets, List<OverlayType> overlayTypes, List<SmudgeType> smudgeTypes)
+        public static TerrainGeneratorConfiguration FromConfigSection(IniSection section, Rules rules, Theater theater, bool isUserConfiguration)
+            => FromConfigSection(section, isUserConfiguration, rules.TerrainTypes, theater.TileSets, rules.OverlayTypes, rules.SmudgeTypes);
+
+        public static TerrainGeneratorConfiguration FromConfigSection(IniSection section, bool isUserConfiguration, 
+            List<TerrainType> terrainTypes, List<TileSet> tilesets, List<OverlayType> overlayTypes, List<SmudgeType> smudgeTypes)
         {
             var terrainTypeGroups = new List<TerrainGeneratorTerrainTypeGroup>();
             var tileGroups = new List<TerrainGeneratorTileGroup>();
@@ -70,6 +83,7 @@ namespace TSMapEditor.Mutations.Classes
             var smudgeGroups = new List<TerrainGeneratorSmudgeGroup>();
 
             string configName = section.GetStringValue("Name", "Unnamed Configuration");
+            string theater = section.GetStringValue("Theater", string.Empty);
 
             int i = 0;
             while (true)
@@ -135,8 +149,8 @@ namespace TSMapEditor.Mutations.Classes
                 i++;
             }
 
-            if (terrainTypeGroups.Count > 0 || tileGroups.Count > 0 || overlayGroups.Count > 0)
-                return new TerrainGeneratorConfiguration(configName, terrainTypeGroups, tileGroups, overlayGroups, smudgeGroups);
+            if (terrainTypeGroups.Count > 0 || tileGroups.Count > 0 || overlayGroups.Count > 0 || smudgeGroups.Count > 0)
+                return new TerrainGeneratorConfiguration(configName, theater, isUserConfiguration, terrainTypeGroups, tileGroups, overlayGroups, smudgeGroups);
 
             return null;
         }
@@ -157,7 +171,7 @@ namespace TSMapEditor.Mutations.Classes
 
         public string GetConfigString()
         {
-            return $",{OpenChance},{OverlapChance}," + string.Join(",", TerrainTypes.Select(tt => tt.ININame));
+            return $"{OpenChance},{OverlapChance}," + string.Join(",", TerrainTypes.Select(tt => tt.ININame));
         }
 
         public static TerrainGeneratorTerrainTypeGroup FromConfigString(List<TerrainType> allTerrainTypes, string config)

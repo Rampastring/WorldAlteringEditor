@@ -104,6 +104,9 @@
     <None Update="Config\UI\Windows\CreateNewMapWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Config\UI\Windows\DeleteTerrainGeneratorPresetWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Config\UI\Windows\GenerateStandardHousesWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -114,6 +117,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Config\UI\Windows\InfantryOptionsWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\Windows\InputTerrainGeneratorPresetNameWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Config\UI\Windows\LightingSettingsWindow.ini">

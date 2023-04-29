@@ -95,18 +95,20 @@ namespace TSMapEditor.UI.Controls
             base.ParseControlINIAttribute(iniFile, key, value);
         }
 
-        private void ReadINIForControl(XNAControl control)
+        private bool ReadINIForControl(XNAControl control)
         {
             var section = ConfigIni.GetSection(control.Name);
             if (section == null)
-                return;
+                return false;
 
             foreach (var kvp in section.Keys)
             {
                 if (kvp.Key.StartsWith("$CC"))
                 {
                     var child = CreateChildControl(control, kvp.Value);
-                    ReadINIForControl(child);
+                    if (!ReadINIForControl(child))
+                        throw new INIConfigException("No section exists for child control " + kvp.Value);
+
                     child.Initialize();
                 }
                 else if (kvp.Key == "$X")
@@ -149,6 +151,8 @@ namespace TSMapEditor.UI.Controls
                     control.ParseINIAttribute(ConfigIni, kvp.Key, kvp.Value);
                 }
             }
+
+            return true;
         }
 
         /// <summary>

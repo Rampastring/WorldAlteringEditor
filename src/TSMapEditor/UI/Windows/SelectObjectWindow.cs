@@ -116,7 +116,7 @@ namespace TSMapEditor.UI.Windows
             if (lbObjectList.SelectedItem == null)
             {
                 // If the initially selected object wasn't found for some reason, then clear selection
-                SelectedObject = default(T);
+                SelectedObject = default;
             }
 
             if (SelectedObject == null)

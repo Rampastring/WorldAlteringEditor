@@ -70,6 +70,7 @@ namespace TSMapEditor
         public const bool DrawShadows = true;
 
         public const string ClipboardMapDataFormatValue = "ScenarioEditorCopiedMapData";
+        public const string UserDataFolder = "UserData";
 
         public static void Init()
         {
