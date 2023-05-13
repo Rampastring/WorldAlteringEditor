@@ -2,6 +2,7 @@
 using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Text;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -1393,7 +1394,31 @@ namespace TSMapEditor.Models
                     issueList.Add($"Unit {unit.UnitType.ININame} at {unit.Position} follows itself! This can cause the game to crash or freeze!");
             }
 
+            var reportedTeams = new List<TeamType>();
+
+            // Check for AI Trigger linked TeamTypes having Max=0
+            foreach (var aiTrigger in AITriggerTypes)
+            {
+                CheckForAITriggerTeamWithMaxZeroIssue(aiTrigger, aiTrigger.PrimaryTeam, reportedTeams, issueList);
+                CheckForAITriggerTeamWithMaxZeroIssue(aiTrigger, aiTrigger.SecondaryTeam, reportedTeams, issueList);
+            }
+
             return issueList;
+        }
+
+        private void CheckForAITriggerTeamWithMaxZeroIssue(AITriggerType aiTrigger, TeamType team, List<TeamType> reportedTeams, List<string> issueList)
+        {
+            if (reportedTeams.Contains(team))
+                return;
+
+            if (team == null)
+                return;
+
+            if (TeamTypes.Contains(team) && team.Max == 0)
+            {
+                issueList.Add($"Team '{team.Name}', linked to AITrigger '{aiTrigger.Name}', has Max=0. This prevents the AI from building the team.");
+                reportedTeams.Add(team);
+            }
         }
 
         public void Clear()
