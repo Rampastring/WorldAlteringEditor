@@ -97,7 +97,7 @@ namespace TSMapEditor.UI.TopBar
             editContextMenu.AddItem("Toggle IceGrowth", () => { mapView.EditorState.CursorAction = toggleIceGrowthCursorAction; toggleIceGrowthCursorAction.ToggleIceGrowth = true; mapView.EditorState.HighlightIceGrowth = true; }, null, null, null);
             editContextMenu.AddItem("Clear IceGrowth", () => { mapView.EditorState.CursorAction = toggleIceGrowthCursorAction; toggleIceGrowthCursorAction.ToggleIceGrowth = false; mapView.EditorState.HighlightIceGrowth = true; }, null, null, null);
             editContextMenu.AddItem(" ", null, () => false, null, null);
-            editContextMenu.AddItem("Manage Base Nodes", () => mapView.EditorState.CursorAction = manageBaseNodesCursorAction, null, null, null);
+            editContextMenu.AddItem("Manage Base Nodes", ManageBaseNodes_Selected, null, null, null);
 
             var editButton = new MenuButton(WindowManager, editContextMenu);
             editButton.Name = nameof(editButton);
@@ -150,6 +150,19 @@ namespace TSMapEditor.UI.TopBar
             KeyboardCommands.Instance.GenerateTerrain.Triggered += (s, e) => EnterTerrainGenerator();
             KeyboardCommands.Instance.ConfigureTerrainGenerator.Triggered += (s, e) => windowController.TerrainGeneratorConfigWindow.Open();
             KeyboardCommands.Instance.PlaceTunnel.Triggered += (s, e) => mapView.EditorState.CursorAction = placeTubeCursorAction;
+        }
+
+        private void ManageBaseNodes_Selected()
+        {
+            if (map.Houses.Count == 0)
+            {
+                EditorMessageBox.Show(WindowManager, "Houses Required",
+                    "The map has no houses set up. Houses need to be configured before base nodes can be added." + Environment.NewLine + Environment.NewLine +
+                    "You can configure Houses from Edit -> Houses.", MessageBoxButtons.OK);
+                return;
+            }
+
+            mapView.EditorState.CursorAction = manageBaseNodesCursorAction;
         }
 
         private void GenerateAnimatedWater()
