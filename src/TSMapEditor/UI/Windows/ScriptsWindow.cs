@@ -1,10 +1,14 @@
 ﻿using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
+using System.Globalization;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Models;
 using TSMapEditor.Models.Enums;
+using TSMapEditor.Rendering;
 using TSMapEditor.UI.Controls;
+using TSMapEditor.UI.CursorActions;
+using TSMapEditor.UI.Notifications;
 
 namespace TSMapEditor.UI.Windows
 {
@@ -13,12 +17,19 @@ namespace TSMapEditor.UI.Windows
     /// </summary>
     public class ScriptsWindow : INItializableWindow
     {
-        public ScriptsWindow(WindowManager windowManager, Map map) : base(windowManager)
+        public ScriptsWindow(WindowManager windowManager, Map map, EditorState editorState,
+            INotificationManager notificationManager, ICursorActionTarget cursorActionTarget) : base(windowManager)
         {
             this.map = map;
+            this.editorState = editorState;
+            this.notificationManager = notificationManager;
+            selectCellCursorAction = new SelectCellCursorAction(cursorActionTarget);
         }
 
         private readonly Map map;
+        private readonly EditorState editorState;
+        private readonly INotificationManager notificationManager;
+        private SelectCellCursorAction selectCellCursorAction;
 
         private EditorListBox lbScriptTypes;
         private EditorTextBox tbName;
@@ -51,6 +62,7 @@ namespace TSMapEditor.UI.Windows
             presetValuesContextMenu.Width = 250;
             btnEditorPresetValues.ContextMenu = presetValuesContextMenu;
             btnEditorPresetValues.ContextMenu.OptionSelected += ContextMenu_OptionSelected;
+            btnEditorPresetValues.LeftClick += BtnEditorPresetValues_LeftClick;
 
             tbName.TextChanged += TbName_TextChanged;
             tbParameterValue.TextChanged += TbParameterValue_TextChanged;
@@ -68,6 +80,34 @@ namespace TSMapEditor.UI.Windows
             FindChild<EditorButton>("btnCloneScript").LeftClick += BtnCloneScript_LeftClick;
             FindChild<EditorButton>("btnAddAction").LeftClick += BtnAddAction_LeftClick;
             FindChild<EditorButton>("btnDeleteAction").LeftClick += BtnDeleteAction_LeftClick;
+
+            selectCellCursorAction.CellSelected += SelectCellCursorAction_CellSelected;
+        }
+
+        private void SelectCellCursorAction_CellSelected(object sender, GameMath.Point2D e)
+        {
+            tbParameterValue.Text = ((e.Y * 1000) + e.X).ToString(CultureInfo.InvariantCulture);
+        }
+
+        private void BtnEditorPresetValues_LeftClick(object sender, EventArgs e)
+        {
+            if (editedScript == null)
+                return;
+
+            if (lbActions.SelectedItem == null)
+                return;
+
+            ScriptActionEntry entry = editedScript.Actions[lbActions.SelectedIndex];
+            ScriptAction action = entry.Action >= map.EditorConfig.ScriptActions.Count ? null : map.EditorConfig.ScriptActions[entry.Action];
+
+            if (action == null)
+                return;
+
+            if (action.ParamType == TriggerParamType.Cell)
+            {
+                editorState.CursorAction = selectCellCursorAction;
+                notificationManager.AddNotification("Select a cell from the map.");
+            }
         }
 
         private void BtnAddScript_LeftClick(object sender, EventArgs e)

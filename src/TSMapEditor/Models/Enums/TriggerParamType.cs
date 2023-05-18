@@ -5,6 +5,7 @@
         Unused,
         Unknown,
         Number,
+        Cell,
         LocalVariable,
         TeamType,
         Building,

@@ -6,6 +6,7 @@ using System.Reflection;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI.Controls;
+using TSMapEditor.UI.Notifications;
 using TSMapEditor.UI.Windows.MainMenuWindows;
 using TSMapEditor.UI.Windows.TerrainGenerator;
 
@@ -17,6 +18,8 @@ namespace TSMapEditor.UI.Windows
         void RemoveChild(XNAControl child);
 
         WindowManager WindowManager { get; }
+
+        INotificationManager NotificationManager { get; }
 
         void SetAutoUpdateChildOrder(bool value);
     }
@@ -95,7 +98,7 @@ namespace TSMapEditor.UI.Windows
             TaskForcesWindow = new TaskforcesWindow(windowParentControl.WindowManager, map);
             Windows.Add(TaskForcesWindow);
 
-            ScriptsWindow = new ScriptsWindow(windowParentControl.WindowManager, map);
+            ScriptsWindow = new ScriptsWindow(windowParentControl.WindowManager, map, editorState, windowParentControl.NotificationManager, cursorActionTarget);
             Windows.Add(ScriptsWindow);
 
             TeamTypesWindow = new TeamTypesWindow(windowParentControl.WindowManager, map);

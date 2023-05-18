@@ -71,6 +71,7 @@ namespace TSMapEditor.UI
 
         public void SetAutoUpdateChildOrder(bool value) => AutoUpdateChildOrder = value;
 
+        public INotificationManager NotificationManager => notificationManager;
 
         public override void Initialize()
         {
