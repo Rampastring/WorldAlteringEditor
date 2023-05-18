@@ -12,6 +12,7 @@ using TSMapEditor.Models;
 using TSMapEditor.Mutations;
 using TSMapEditor.Mutations.Classes;
 using TSMapEditor.Rendering.ObjectRenderers;
+using TSMapEditor.Scripts;
 using TSMapEditor.Settings;
 using TSMapEditor.UI;
 using TSMapEditor.UI.Windows;
@@ -885,16 +886,27 @@ namespace TSMapEditor.Rendering
             FillRectangle(new Rectangle(x, impassableY - (BorderThickness / 2), width, BorderThickness), Color.Teal * 0.25f);
         }
 
-        private void DrawTechnoRangeIndicator()
+        private void DrawTechnoRangeIndicators()
         {
             if (TechnoUnderCursor == null)
                 return;
 
             double range = TechnoUnderCursor.GetWeaponRange();
-            if (range <= 0.0)
-                return;
+            if (range > 0.0)
+            {
+                DrawRangeIndicator(TechnoUnderCursor.Position, range, TechnoUnderCursor.Owner.XNAColor);
+            }
 
-            Point2D center = CellMath.CellCenterPointFromCellCoords_3D(TechnoUnderCursor.Position, Map);
+            range = TechnoUnderCursor.GetGuardRange();
+            if (range > 0.0)
+            {
+                DrawRangeIndicator(TechnoUnderCursor.Position, range, TechnoUnderCursor.Owner.XNAColor * 0.25f);
+            }
+        }
+
+        private void DrawRangeIndicator(Point2D cellCoords, double range, Color color)
+        {
+            Point2D center = CellMath.CellCenterPointFromCellCoords_3D(cellCoords, Map);
 
             // Range is specified in "tile edge lengths",
             // so we need a bit of trigonometry
@@ -912,7 +924,7 @@ namespace TSMapEditor.Rendering
             endY = Camera.ScaleIntWithZoom(endY - Camera.TopLeftPoint.Y);
 
             DrawTexture(rangeIndicatorTexture,
-                new Rectangle(startX, startY, endX - startX, endY - startY), TechnoUnderCursor.Owner.XNAColor);
+                new Rectangle(startX, startY, endX - startX, endY - startY), color);
         }
 
         public override void OnMouseScrolled()
@@ -1367,7 +1379,7 @@ namespace TSMapEditor.Rendering
                         (int)(mapRenderTarget.Height * Camera.ZoomLevel)));
             }
 
-            DrawTechnoRangeIndicator();
+            DrawTechnoRangeIndicators();
 
             DrawMapBorder();
 

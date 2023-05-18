@@ -12,6 +12,14 @@ namespace TSMapEditor.Models
 
         public override double GetWeaponRange() => ObjectType.GetWeaponRange();
 
+        public override double GetGuardRange()
+        {
+            if (ObjectType.GuardRange == 0.0)
+                return GetWeaponRange();
+
+            return ObjectType.GuardRange > 0.0 ? ObjectType.GuardRange : GetWeaponRange();
+        }
+
         public T ObjectType { get; }
     }
 
@@ -28,6 +36,7 @@ namespace TSMapEditor.Models
         public Tag AttachedTag { get; set; }
 
         public abstract double GetWeaponRange();
+        public abstract double GetGuardRange();
 
         public override Color GetRemapColor() => Remapable() ? Owner.XNAColor : Color.White;
     }

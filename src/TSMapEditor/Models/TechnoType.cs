@@ -14,6 +14,8 @@ namespace TSMapEditor.Models
         public Weapon Primary { get; set; }
         public Weapon Secondary { get; set; }
 
+        public double GuardRange { get; set; }
+
         public double GetWeaponRange()
         {
             double primaryRange = Primary != null ? Primary.Range : 0.0;
