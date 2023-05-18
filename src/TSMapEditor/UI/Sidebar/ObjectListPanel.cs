@@ -214,6 +214,7 @@ namespace TSMapEditor.UI.Sidebar
                     }
                 }
 
+                categories = categories.OrderBy(c => Map.EditorConfig.EditorRulesIni.GetIntValue("ObjectCategoryPriorities", c, 0)).ToList();
 
                 for (int categoryIndex = 0; categoryIndex < categories.Count; categoryIndex++)
                 {
@@ -233,6 +234,7 @@ namespace TSMapEditor.UI.Sidebar
             for (int i = 0; i < sideCategories.Count; i++)
                 sideCategories[i].Nodes = sideCategories[i].Nodes.OrderBy(n => n.Text).ToList();
 
+            sideCategories = sideCategories.OrderBy(c => Map.EditorConfig.EditorRulesIni.GetIntValue("ObjectCategoryPriorities", c.Text, int.MaxValue)).ToList();
             sideCategories.ForEach(c => ObjectTreeView.AddCategory(c));
         }
 
