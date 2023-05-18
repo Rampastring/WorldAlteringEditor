@@ -17,15 +17,17 @@ namespace TSMapEditor.UI.CursorActions
             var tube = CursorActionTarget.Map.Tubes.Find(tb => tb.EntryPoint == cellCoords || tb.ExitPoint == cellCoords);
             Color color = tube == null ? Color.Gray : Color.Red;
 
-            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cellCoords, CursorActionTarget.Map) - cameraTopLeftPoint;
+            Point2D cellPixelCoords = CellMath.CellTopLeftPointFromCellCoords_3D(cellCoords, CursorActionTarget.Map) - cameraTopLeftPoint;
+            cellPixelCoords = new Point2D(cellPixelCoords.X + Constants.CellSizeX / 2, cellPixelCoords.Y);
+            cellPixelCoords = cellPixelCoords.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
 
             const string text = "Delete Tunnel";
             var textDimensions = Renderer.GetTextDimensions(text, Constants.UIBoldFont);
-            int x = cellTopLeftPoint.X - (int)(textDimensions.X - Constants.CellSizeX) / 2;
+            int x = cellPixelCoords.X - (int)(textDimensions.X / 2);
 
             Renderer.DrawStringWithShadow(text,
                 Constants.UIBoldFont,
-                new Vector2(x, cellTopLeftPoint.Y),
+                new Vector2(x, cellPixelCoords.Y),
                 color);
         }
 
