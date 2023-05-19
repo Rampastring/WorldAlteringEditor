@@ -3,6 +3,7 @@ using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Globalization;
 using TSMapEditor.CCEngine;
+using TSMapEditor.Misc;
 using TSMapEditor.Models;
 using TSMapEditor.Models.Enums;
 using TSMapEditor.Rendering;
@@ -43,6 +44,7 @@ namespace TSMapEditor.UI.Windows
         private Script editedScript;
 
         private SelectScriptActionWindow selectScriptActionWindow;
+        private XNAContextMenu actionListContextMenu;
 
         public override void Initialize()
         {
@@ -82,6 +84,59 @@ namespace TSMapEditor.UI.Windows
             FindChild<EditorButton>("btnDeleteAction").LeftClick += BtnDeleteAction_LeftClick;
 
             selectCellCursorAction.CellSelected += SelectCellCursorAction_CellSelected;
+
+            actionListContextMenu = new XNAContextMenu(WindowManager);
+            actionListContextMenu.Name = nameof(actionListContextMenu);
+            actionListContextMenu.Width = 150;
+            actionListContextMenu.AddItem("Move Up", ActionListContextMenu_MoveUp, () => editedScript != null && lbActions.SelectedItem != null && lbActions.SelectedIndex > 0);
+            actionListContextMenu.AddItem("Move Down", ActionListContextMenu_MoveDown, () => editedScript != null && lbActions.SelectedItem != null && lbActions.SelectedIndex < lbActions.Items.Count - 1);
+            actionListContextMenu.AddItem("Insert New Action Here", ActionListContextMenu_Insert, () => editedScript != null && lbActions.SelectedItem != null);
+            actionListContextMenu.AddItem("Delete Action", ActionListContextMenu_Delete, () => editedScript != null && lbActions.SelectedItem != null);
+            AddChild(actionListContextMenu);
+            lbActions.AllowRightClickUnselect = false;
+            lbActions.RightClick += (s, e) => { if (editedScript != null) { lbActions.SelectedIndex = lbActions.HoveredIndex; actionListContextMenu.Open(GetCursorPoint()); } };
+        }
+
+        private void ActionListContextMenu_MoveUp()
+        {
+            if (editedScript == null || lbActions.SelectedItem == null || lbActions.SelectedIndex <= 0)
+                return;
+
+            editedScript.Actions.Swap(lbActions.SelectedIndex - 1, lbActions.SelectedIndex);
+            EditScript(editedScript);
+
+            // var tmp = editedScript.Actions[lbActions.SelectedIndex - 1];
+            // editedScript.Actions[lbActions.SelectedIndex - 1] = editedScript.Actions[lbActions.SelectedIndex];
+            // editedScript.Actions[lbActions.SelectedIndex] = tmp;
+        }
+
+        private void ActionListContextMenu_MoveDown()
+        {
+            if (editedScript == null || lbActions.SelectedItem == null || lbActions.SelectedIndex >= editedScript.Actions.Count - 1)
+                return;
+
+            editedScript.Actions.Swap(lbActions.SelectedIndex, lbActions.SelectedIndex + 1);
+            EditScript(editedScript);
+        }
+
+        private void ActionListContextMenu_Insert()
+        {
+            if (editedScript == null || lbActions.SelectedItem == null)
+                return;
+
+            int index = lbActions.SelectedIndex;
+            editedScript.Actions.Insert(index, new ScriptActionEntry());
+            EditScript(editedScript);
+            lbActions.SelectedIndex = index;
+        }
+
+        private void ActionListContextMenu_Delete()
+        {
+            if (editedScript == null || lbActions.SelectedItem == null)
+                return;
+
+            editedScript.Actions.RemoveAt(lbActions.SelectedIndex);
+            EditScript(editedScript);
         }
 
         private void SelectCellCursorAction_CellSelected(object sender, GameMath.Point2D e)
