@@ -102,8 +102,11 @@ namespace TSMapEditor.UI.Windows
             if (editedScript == null || lbActions.SelectedItem == null || lbActions.SelectedIndex <= 0)
                 return;
 
+            int viewTop = lbActions.ViewTop;
             editedScript.Actions.Swap(lbActions.SelectedIndex - 1, lbActions.SelectedIndex);
             EditScript(editedScript);
+            lbActions.SelectedIndex--;
+            lbActions.ViewTop = viewTop;
 
             // var tmp = editedScript.Actions[lbActions.SelectedIndex - 1];
             // editedScript.Actions[lbActions.SelectedIndex - 1] = editedScript.Actions[lbActions.SelectedIndex];
@@ -115,8 +118,11 @@ namespace TSMapEditor.UI.Windows
             if (editedScript == null || lbActions.SelectedItem == null || lbActions.SelectedIndex >= editedScript.Actions.Count - 1)
                 return;
 
+            int viewTop = lbActions.ViewTop;
             editedScript.Actions.Swap(lbActions.SelectedIndex, lbActions.SelectedIndex + 1);
             EditScript(editedScript);
+            lbActions.SelectedIndex++;
+            lbActions.ViewTop = viewTop;
         }
 
         private void ActionListContextMenu_Insert()
@@ -124,10 +130,14 @@ namespace TSMapEditor.UI.Windows
             if (editedScript == null || lbActions.SelectedItem == null)
                 return;
 
+            int viewTop = lbActions.ViewTop;
+
             int index = lbActions.SelectedIndex;
             editedScript.Actions.Insert(index, new ScriptActionEntry());
             EditScript(editedScript);
             lbActions.SelectedIndex = index;
+
+            lbActions.ViewTop = viewTop;
         }
 
         private void ActionListContextMenu_Delete()
@@ -135,8 +145,10 @@ namespace TSMapEditor.UI.Windows
             if (editedScript == null || lbActions.SelectedItem == null)
                 return;
 
+            int viewTop = lbActions.ViewTop;
             editedScript.Actions.RemoveAt(lbActions.SelectedIndex);
             EditScript(editedScript);
+            lbActions.ViewTop = viewTop;
         }
 
         private void SelectCellCursorAction_CellSelected(object sender, GameMath.Point2D e)
@@ -234,6 +246,7 @@ namespace TSMapEditor.UI.Windows
 
             ScriptActionEntry entry = editedScript.Actions[lbActions.SelectedIndex];
             entry.Argument = tbParameterValue.Value;
+            lbActions.SelectedItem.Text = GetActionEntryText(lbActions.SelectedIndex, entry);
         }
 
         private void ContextMenu_OptionSelected(object sender, ContextMenuItemSelectedEventArgs e)
@@ -405,9 +418,9 @@ namespace TSMapEditor.UI.Windows
         {
             ScriptAction action = GetScriptAction(entry.Action);
             if (action == null)
-                return "#" + index + " - Unknown";
+                return "#" + index + " - Unknown (" +  entry.Argument.ToString(CultureInfo.InvariantCulture) + ")";
 
-            return "#" + index + " - " + action.Name;
+            return "#" + index + " - " + action.Name + " (" + entry.Argument.ToString(CultureInfo.InvariantCulture) + ")";
         }
 
         private string GetActionNameFromIndex(int index)
