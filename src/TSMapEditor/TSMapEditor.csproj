@@ -278,10 +278,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Rampastring.Tools" Version="2.0.4" />
-    <PackageReference Include="Rampastring.XNAUI.WindowsDX" Version="2.3.8" />
     <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.1.303" />
+    <PackageReference Include="Rampastring.Tools" Version="2.0.4" />
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.1.303" />
+    <PackageReference Include="Rampastring.XNAUI.WindowsDX" Version="2.3.9" />
     <PackageReference Include="Westwind.Scripting" Version="1.2.7" />
   </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
