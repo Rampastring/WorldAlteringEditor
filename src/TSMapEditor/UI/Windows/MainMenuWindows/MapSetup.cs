@@ -103,8 +103,11 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
             var uiManager = new UIManager(windowManager, LoadedMap, theaterGraphics);
             windowManager.AddAndInitializeControl(uiManager);
 
-            const int MaxErrors = 100;
-            if (MapLoader.MapLoadErrors.Count > MaxErrors)
+            const int margin = 60;
+            string errorList = string.Join("\r\n\r\n", MapLoader.MapLoadErrors);
+            int errorListHeight = (int)Renderer.GetTextDimensions(errorList, Constants.UIDefaultFont).Y;
+
+            if (errorListHeight > windowManager.RenderResolutionY - margin)
             {
                 EditorMessageBox.Show(windowManager, "Errors while loading map",
                     "A massive number of errors was encountered while loading the map. See MapEditorLog.log for details.", MessageBoxButtons.OK);
@@ -112,7 +115,7 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
             else if (MapLoader.MapLoadErrors.Count > 0)
             {
                 EditorMessageBox.Show(windowManager, "Errors while loading map",
-                    "One of more errors were encountered while loading the map:\r\n\r\n" + string.Join("\r\n\r\n", MapLoader.MapLoadErrors), MessageBoxButtons.OK);
+                    "One of more errors were encountered while loading the map:\r\n\r\n" + errorList, MessageBoxButtons.OK);
             }
         }
     }
