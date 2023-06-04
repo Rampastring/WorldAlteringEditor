@@ -1417,6 +1417,29 @@ namespace TSMapEditor.Models
                 }
             }
 
+            // Check for triggers using the "Entered by" event without being attached to anything
+            const int EnteredByConditionIndex = 1;
+            foreach (var trigger in Triggers)
+            {
+                if (!trigger.Conditions.Exists(c => c.ConditionIndex == EnteredByConditionIndex))
+                    continue;
+
+                var tag = Tags.Find(t => t.Trigger == trigger);
+                if (tag == null)
+                    continue;
+
+                if (!Structures.Exists(s => s.AttachedTag == tag) &&
+                    !Infantry.Exists(i => i.AttachedTag == tag) &&
+                    !Units.Exists(u => u.AttachedTag == tag) &&
+                    !Aircraft.Exists(a => a.AttachedTag == tag) &&
+                    !TeamTypes.Exists(tt => tt.Tag == tag) &&
+                    !CellTags.Exists(ct => ct.Tag == tag) &&
+                    !Triggers.Exists(otherTrigger => otherTrigger.LinkedTrigger == trigger))
+                {
+                    issueList.Add($"Trigger '{trigger.Name}' is using the \"Entered by...\" event without being attached to any object, cell, or team. Did you forget to attach it?");
+                }
+            }
+
             return issueList;
         }
 
