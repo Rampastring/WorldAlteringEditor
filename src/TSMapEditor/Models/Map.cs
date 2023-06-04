@@ -1403,6 +1403,20 @@ namespace TSMapEditor.Models
                 CheckForAITriggerTeamWithMaxZeroIssue(aiTrigger, aiTrigger.SecondaryTeam, reportedTeams, issueList);
             }
 
+            // Check for triggers having 0 events or actions
+            foreach (var trigger in Triggers)
+            {
+                if (trigger.Conditions.Count == 0)
+                {
+                    issueList.Add($"Trigger '{trigger.Name}' has 0 events specified. It will never be fired. Did you forget to give it events?");
+                }
+
+                if (trigger.Actions.Count == 0)
+                {
+                    issueList.Add($"Trigger '{trigger.Name}' has 0 actions specified. It will not do anything. Did you forget to give it actions?");
+                }
+            }
+
             return issueList;
         }
 
