@@ -89,6 +89,14 @@ namespace TSMapEditor.Initialization
                         t.TileIndex = 0;
                     }
                 }
+
+                if (tile.GetSubTile(t.SubTileIndex).TmpImage == null)
+                {
+                    AddMapLoadError($"Null sub-tile {t.SubTileIndex} for cell at {t.CoordsToPoint()} - clearing the tile. " +
+                        $"TileSet: {tileSet.SetName} ({tileSet.FileName}), index of tile within its set: {tile.TileIndexInTileSet}");
+
+                    t.ChangeTileIndex(0, 0);
+                }
             });
         }
 
