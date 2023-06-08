@@ -2,7 +2,6 @@
 using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
-using System.Drawing.Text;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -1437,6 +1436,64 @@ namespace TSMapEditor.Models
                     !Triggers.Exists(otherTrigger => otherTrigger.LinkedTrigger == trigger))
                 {
                     issueList.Add($"Trigger '{trigger.Name}' is using the \"Entered by...\" event without being attached to any object, cell, or team. Did you forget to attach it?");
+                }
+            }
+
+            // Check for triggers using the "Bridge destroyed" event without being linked to any cell
+            const int BridgeDestroyedConditionIndex = 31;
+            foreach (var trigger in Triggers)
+            {
+                if (!trigger.Conditions.Exists(c => c.ConditionIndex == BridgeDestroyedConditionIndex))
+                    continue;
+
+                var tag = Tags.Find(t => t.Trigger == trigger);
+                if (tag == null)
+                    continue;
+
+                if (!CellTags.Exists(ct => ct.Tag == tag))
+                {
+                    issueList.Add($"Trigger '{trigger.Name}' is using the \"Bridge destroyed\" event, but it is not attached to any CellTag. Did you forget to place a celltag for it?");
+                }
+            }
+
+            // Check for triggers using an object-specific event (like "destroyed" or "damaged") without
+            // being linked to any object
+            var objectSpecificEventIndexes = new List<int>() {
+                6,  // Attacked by any house
+                7,  // Destroyed by any house
+                33, // Selected by player
+                34, // Comes near waypoint
+                38, // First damaged (combat only)
+                39, // Half health (combat only)
+                40, // Quarter health (combat only)
+                41, // First damaged (any source)
+                42, // Half health (any source)
+                43, // Quarter health (any source)
+                44, // Attacked by (house)
+                48  // Destroyed by anything
+                /*55 Limpet Attached - need to think how to handle YR*/
+            };
+
+            foreach (var trigger in Triggers)
+            {
+                int usedEventIndex = objectSpecificEventIndexes.Find(eventIndex => trigger.Conditions.Exists(c => c.ConditionIndex == eventIndex));
+                if (usedEventIndex < 0 || usedEventIndex >= EditorConfig.TriggerEventTypes.Count)
+                    continue;
+
+                var tag = Tags.Find(t => t.Trigger == trigger);
+                if (tag == null)
+                    continue;
+
+                if (!Structures.Exists(s => s.AttachedTag == tag) &&
+                    !Infantry.Exists(i => i.AttachedTag == tag) &&
+                    !Units.Exists(u => u.AttachedTag == tag) &&
+                    !Aircraft.Exists(a => a.AttachedTag == tag) &&
+                    !TeamTypes.Exists(tt => tt.Tag == tag) &&
+                    !Triggers.Exists(otherTrigger => otherTrigger.LinkedTrigger == trigger))
+                {
+                    string eventName = EditorConfig.TriggerEventTypes[usedEventIndex].Name;
+
+                    issueList.Add($"Trigger '{trigger.Name}' is using the {eventName} event without being attached to any object or team. Did you forget to attach it?");
                 }
             }
 
