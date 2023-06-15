@@ -12,6 +12,8 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public override string GetName() => "Place Aircraft";
+
         private Aircraft aircraft;
 
         private AircraftType _aircraftType;

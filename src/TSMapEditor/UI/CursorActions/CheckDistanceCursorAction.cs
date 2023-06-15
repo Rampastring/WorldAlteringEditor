@@ -16,6 +16,8 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public override string GetName() => "Check Distance";
+
         private Point2D? source;
         private Point2D? destination;
         private List<Point2D> pathCellCoords = new List<Point2D>();

@@ -11,6 +11,7 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public override string GetName() => "Place CellTag";
 
         private Tag _tag;
         public Tag Tag

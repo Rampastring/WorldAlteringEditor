@@ -86,7 +86,7 @@ namespace TSMapEditor.Models
                     }
                     else
                     {
-                        // Only allow assigning coors that actually exist in the color table
+                        // Only allow assigning colors that actually exist in the color table
                         _editorColor = null;
                     }
                 }

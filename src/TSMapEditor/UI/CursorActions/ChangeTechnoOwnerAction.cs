@@ -16,6 +16,8 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public override string GetName() => "Change Object Owner";
+
         public override void DrawPreview(Point2D cellCoords, Point2D cameraTopLeftPoint)
         {
             House newOwner = CursorActionTarget.MutationTarget.ObjectOwner;

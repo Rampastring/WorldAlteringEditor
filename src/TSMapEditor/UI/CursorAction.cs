@@ -42,6 +42,8 @@ namespace TSMapEditor.UI
         /// </summary>
         public virtual bool DrawCellCursor => false;
 
+        public abstract string GetName();
+
         protected Map Map => CursorActionTarget.Map;
 
         protected ICursorActionTarget CursorActionTarget { get; }

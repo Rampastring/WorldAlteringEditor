@@ -15,6 +15,8 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public override string GetName() => "Place Building";
+
         private Structure structure;
 
         private BuildingType _buildingType;

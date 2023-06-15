@@ -17,6 +17,8 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public override string GetName() => "Manage Base Nodes";
+
         public override bool DrawCellCursor => true;
 
         public override void DrawPreview(Point2D cellCoords, Point2D cameraTopLeftPoint)

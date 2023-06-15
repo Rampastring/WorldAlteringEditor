@@ -14,6 +14,8 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public override string GetName() => "Delete Object";
+
         public override void DrawPreview(Point2D cellCoords, Point2D cameraTopLeftPoint)
         {
             Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cellCoords, CursorActionTarget.Map) - cameraTopLeftPoint;

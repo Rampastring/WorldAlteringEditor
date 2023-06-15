@@ -15,6 +15,8 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public override string GetName() => "Place Terrain Object";
+
         private TerrainObject terrainObject;
 
         private TerrainType _terrainType;

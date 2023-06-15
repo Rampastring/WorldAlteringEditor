@@ -12,6 +12,8 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public override string GetName() => "Place Waypoint";
+
         public PlaceWaypointWindow PlaceWaypointWindow { get; set; }
 
         public override void LeftClick(Point2D cellCoords)

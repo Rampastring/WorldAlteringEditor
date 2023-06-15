@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.Input;
-using SharpDX.Direct3D9;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations.Classes;
@@ -17,6 +16,8 @@ namespace TSMapEditor.UI.CursorActions
         public SetFollowerCursorAction(ICursorActionTarget cursorActionTarget) : base(cursorActionTarget)
         {
         }
+
+        public override string GetName() => "Select Follower";
 
         public sealed override bool DrawCellCursor => true;
 

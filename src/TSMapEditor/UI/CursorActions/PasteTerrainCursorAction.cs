@@ -17,6 +17,8 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public override string GetName() => "Paste Copied Terrain";
+
         struct OriginalOverlayInfo
         {
             public Point2D CellCoords;

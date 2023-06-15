@@ -121,7 +121,7 @@ namespace TSMapEditor.UI
             overlayFrameSelector.ClientRectangleUpdated += UpdateTileAndOverlaySelectorArea;
             overlayFrameSelector.Disable();
 
-            tileInfoDisplay = new TileInfoDisplay(WindowManager, map, theaterGraphics);
+            tileInfoDisplay = new TileInfoDisplay(WindowManager, map, theaterGraphics, editorState);
             AddChild(tileInfoDisplay);
             tileInfoDisplay.X = Width - tileInfoDisplay.Width;
             mapView.TileInfoDisplay = tileInfoDisplay;

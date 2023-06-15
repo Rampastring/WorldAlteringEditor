@@ -13,6 +13,8 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public override string GetName() => "Select Cell";
+
         public override bool DrawCellCursor => true;
 
         public event EventHandler<Point2D> CellSelected;

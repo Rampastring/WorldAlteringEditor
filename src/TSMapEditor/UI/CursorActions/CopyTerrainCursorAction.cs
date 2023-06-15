@@ -17,6 +17,8 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public override string GetName() => "Copy Terrain";
+
         public CopiedEntryType EntryTypes { get; set; }
 
         public Point2D? StartCellCoords { get; set; } = null;

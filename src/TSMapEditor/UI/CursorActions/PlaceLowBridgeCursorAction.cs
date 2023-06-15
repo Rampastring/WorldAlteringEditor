@@ -18,6 +18,8 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public override string GetName() => "Place Low Bridge";
+
         public override bool HandlesKeyboardInput => true;
 
         public override bool DrawCellCursor => true;

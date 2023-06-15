@@ -13,6 +13,8 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public override string GetName() => "Place Overlay Collection";
+
         public OverlayCollection OverlayCollection { get; set; }
 
         struct OriginalOverlayInfo

@@ -13,6 +13,8 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public override string GetName() => "Change Attached Tag";
+
         public Tag TagToAttach { get; set; }
 
         public override void DrawPreview(Point2D cellCoords, Point2D cameraTopLeftPoint)

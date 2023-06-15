@@ -10,6 +10,8 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public override string GetName() => "Lower Cells";
+
         public override bool DrawCellCursor => true;
 
         public override void LeftClick(Point2D cellCoords)

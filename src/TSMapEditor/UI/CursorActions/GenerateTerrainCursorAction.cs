@@ -17,6 +17,8 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public override string GetName() => "Generate Terrain";
+
         public TerrainGeneratorConfiguration TerrainGeneratorConfiguration { get; set; }
 
         public Point2D? StartCellCoords { get; set; } = null;

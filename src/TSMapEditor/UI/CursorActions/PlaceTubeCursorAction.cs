@@ -14,6 +14,8 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public override string GetName() => "Place Tube";
+
         public override bool HandlesKeyboardInput => true;
 
         public override bool DrawCellCursor => true;

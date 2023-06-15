@@ -16,14 +16,16 @@ namespace TSMapEditor.UI
     /// </summary>
     public class TileInfoDisplay : EditorPanel
     {
-        public TileInfoDisplay(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics) : base(windowManager)
+        public TileInfoDisplay(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics, EditorState editorState) : base(windowManager)
         {
             this.map = map;
             this.theaterGraphics = theaterGraphics;
+            this.editorState = editorState;
         }
 
         private readonly Map map;
         private readonly TheaterGraphics theaterGraphics;
+        private readonly EditorState editorState;
 
         private MapTile _mapTile;
         public MapTile MapTile
@@ -64,9 +66,18 @@ namespace TSMapEditor.UI
 
             Color subtleTextColor = Color.Gray;
             Color baseTextColor = Color.White;
-            Color cellTagTextColor = Color.Red;
 
             Visible = true;
+
+            if (editorState.CursorAction != null)
+            {
+                textRenderer.AddTextLine(new XNATextPart("Selected tool: ", Constants.UIDefaultFont, subtleTextColor));
+                textRenderer.AddTextPart(new XNATextPart(editorState.CursorAction.GetName(), Constants.UIDefaultFont, baseTextColor));
+            }
+            else
+            {
+                textRenderer.AddTextLine(new XNATextPart("No tool selected", Constants.UIDefaultFont, subtleTextColor));
+            }
 
             textRenderer.AddTextLine(new XNATextPart(MapTile.X + ", " + MapTile.Y, Constants.UIDefaultFont, baseTextColor));
 
@@ -93,7 +104,7 @@ namespace TSMapEditor.UI
                 textRenderer.AddTextLine(new XNATextPart("CellTag: ",
                     Constants.UIDefaultFont, subtleTextColor));
                 textRenderer.AddTextPart(new XNATextPart(cellTag.Tag.Name + " (" + cellTag.Tag.ID + ")",
-                    Constants.UIDefaultFont, cellTagTextColor));
+                    Constants.UIDefaultFont, cellTag.Tag.Trigger.EditorColor == null ? baseTextColor : cellTag.Tag.Trigger.XNAColor));
             }
 
             Overlay overlay = MapTile.Overlay;

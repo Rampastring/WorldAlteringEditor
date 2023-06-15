@@ -13,6 +13,8 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public override string GetName() => "Place Terrain Tiles";
+
         public TileImage Tile { get; set; }
 
         private Point2D GetAdjustedCellCoords(Point2D cellCoords)

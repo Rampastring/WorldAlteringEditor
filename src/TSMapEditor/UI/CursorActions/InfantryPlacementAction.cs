@@ -15,6 +15,8 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public override string GetName() => "Place Infantry";
+
         private Infantry infantry;
 
         private InfantryType _infantryType;

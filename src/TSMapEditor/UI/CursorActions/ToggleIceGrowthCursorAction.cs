@@ -12,6 +12,8 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public override string GetName() => ToggleIceGrowth ? "Enable Ice Growth" : "Disable Ice Growth";
+
         public bool ToggleIceGrowth { get; set; } = true;
 
         public override void DrawPreview(Point2D cellCoords, Point2D cameraTopLeftPoint)

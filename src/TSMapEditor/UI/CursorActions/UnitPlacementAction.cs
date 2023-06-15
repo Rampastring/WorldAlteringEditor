@@ -15,6 +15,8 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
+        public override string GetName() => "Place Vehicle";
+
         private Unit unit;
 
         private UnitType _unitType;
