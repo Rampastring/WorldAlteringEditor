@@ -664,7 +664,7 @@ namespace TSMapEditor.Initialization
                 var mapCell = map.GetTile(waypoint.Position.X, waypoint.Position.Y);
                 if (mapCell == null)
                 {
-                    AddMapLoadError($"Waypoint at {waypoint.Position} is not within the valid map area");
+                    AddMapLoadError($"Waypoint {waypoint.Identifier} at {waypoint.Position} is not within the valid map area.");
                     continue;
                 }
                 
