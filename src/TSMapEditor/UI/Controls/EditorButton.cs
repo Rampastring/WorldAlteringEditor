@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Rampastring.Tools;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 
@@ -14,6 +15,16 @@ namespace TSMapEditor.UI.Controls
         }
 
         public Texture2D ExtraTexture { get; set; }
+
+        protected override void ParseControlINIAttribute(IniFile iniFile, string key, string value)
+        {
+            base.ParseControlINIAttribute(iniFile, key, value);
+
+            if (key == "ExtraTexture")
+            {
+                ExtraTexture = AssetLoader.LoadTextureUncached(value);
+            }
+        }
 
         public override void Initialize()
         {
