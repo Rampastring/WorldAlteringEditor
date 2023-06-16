@@ -169,7 +169,7 @@ namespace TSMapEditor.Mutations.Classes
         {
             this.OriginCell = originCell;
             this.BrushSize = brushSize;
-            RampTileSet = Map.TheaterInstance.Theater.TileSets.Find(ts => ts.SetName == "Ramps");
+            RampTileSet = Map.TheaterInstance.Theater.RampTileSet;
         }
 
         protected readonly Point2D OriginCell;

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TSMapEditor.Models;
+using TSMapEditor.UI;
 
 namespace TSMapEditor.CCEngine
 {
@@ -75,6 +76,7 @@ namespace TSMapEditor.CCEngine
 
         public List<TileSet> TileSets = new List<TileSet>();
         public List<LATGround> LATGrounds = new List<LATGround>();
+        public TileSet RampTileSet { get; set; }
 
         public void ReadConfigINI(string baseDirectoryPath)
         {
@@ -121,6 +123,14 @@ namespace TSMapEditor.CCEngine
             InitLATGround(theaterIni, "SandTile", "ClearToSandLat", null, null, "Sand");
             InitLATGround(theaterIni, "PaveTile", "ClearToPaveLat", null, null, "Pavement");
             InitLATGround(theaterIni, "GreenTile", "ClearToGreenLat", null, null, "Green");
+
+            int rampTileSetIndex = theaterIni.GetIntValue("General", "RampBase", -1);
+            if (rampTileSetIndex < 0 || rampTileSetIndex >= TileSets.Count)
+            {
+                throw new INIConfigException("Invalid value specified for RampBase= in the theater configuration file!");
+            }
+
+            RampTileSet = TileSets[rampTileSetIndex];
         }
 
         public TileSet TryGetTileSetById(int id)
