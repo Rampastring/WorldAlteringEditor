@@ -26,6 +26,8 @@ namespace TSMapEditor.UI.TopBar
             this.placeWaypointCursorAction = placeWaypointCursorAction;
 
             deletionModeCursorAction = new DeletionModeCursorAction(cursorActionTarget);
+            raiseGroundCursorAction = new RaiseGroundCursorAction(cursorActionTarget);
+            lowerGroundCursorAction = new LowerGroundCursorAction(cursorActionTarget);
             raiseCellsCursorAction = new RaiseCellsCursorAction(cursorActionTarget);
             lowerCellsCursorAction = new LowerCellsCursorAction(cursorActionTarget);
         }
@@ -37,6 +39,8 @@ namespace TSMapEditor.UI.TopBar
         private readonly PlaceTerrainCursorAction terrainPlacementAction;
         private readonly PlaceWaypointCursorAction placeWaypointCursorAction;
         private readonly DeletionModeCursorAction deletionModeCursorAction;
+        private readonly RaiseGroundCursorAction raiseGroundCursorAction;
+        private readonly LowerGroundCursorAction lowerGroundCursorAction;
         private readonly RaiseCellsCursorAction raiseCellsCursorAction;
         private readonly LowerCellsCursorAction lowerCellsCursorAction;
 
@@ -75,6 +79,14 @@ namespace TSMapEditor.UI.TopBar
 
             FindChild<EditorButton>("btnPlaceWaypoint").LeftClick += (s, e) => editorState.CursorAction = placeWaypointCursorAction;
             FindChild<EditorButton>("btnDeletionMode").LeftClick += (s, e) => editorState.CursorAction = deletionModeCursorAction;
+
+            var btnRaiseGround = FindChild<EditorButton>("btnRaiseGround", true);
+            if (btnRaiseGround != null)
+                btnRaiseGround.LeftClick += (s, e) => editorState.CursorAction = raiseGroundCursorAction;
+
+            var btnLowerGround = FindChild<EditorButton>("btnLowerGround", true);
+            if (btnLowerGround != null)
+                btnLowerGround.LeftClick += (s, e) => editorState.CursorAction = lowerGroundCursorAction;
 
             var btnRaiseCells = FindChild<EditorButton>("btnRaiseCells", true);
             if (btnRaiseCells != null)
