@@ -82,11 +82,11 @@ namespace TSMapEditor.UI.TopBar
 
             var btnRaiseGround = FindChild<EditorButton>("btnRaiseGround", true);
             if (btnRaiseGround != null)
-                btnRaiseGround.LeftClick += (s, e) => editorState.CursorAction = raiseGroundCursorAction;
+                btnRaiseGround.LeftClick += (s, e) => { editorState.CursorAction = raiseGroundCursorAction; editorState.BrushSize = map.EditorConfig.BrushSizes.Find(bs => bs.Width == 3 && bs.Height == 3); };
 
             var btnLowerGround = FindChild<EditorButton>("btnLowerGround", true);
             if (btnLowerGround != null)
-                btnLowerGround.LeftClick += (s, e) => editorState.CursorAction = lowerGroundCursorAction;
+                btnLowerGround.LeftClick += (s, e) => { editorState.CursorAction = lowerGroundCursorAction; editorState.BrushSize = map.EditorConfig.BrushSizes.Find(bs => bs.Width == 2 && bs.Height == 2); };
 
             var btnRaiseCells = FindChild<EditorButton>("btnRaiseCells", true);
             if (btnRaiseCells != null)
