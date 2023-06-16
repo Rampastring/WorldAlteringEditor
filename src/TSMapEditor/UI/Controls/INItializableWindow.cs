@@ -201,6 +201,14 @@ namespace TSMapEditor.UI.Controls
                                 ((XNATextBox)child).PreviousControl = otherChild;
                         }
                     }
+
+                    string toolTipText = childSection.GetStringValue("ToolTip", null);
+                    if (!string.IsNullOrWhiteSpace(toolTipText))
+                    {
+                        var toolTipControl = new ToolTip(WindowManager, child);
+                        toolTipControl.Text = toolTipText;
+                        toolTipControl.ToolTipDelay = 0;
+                    }
                 }
                     
                 ReadLateAttributesForControl(child);
