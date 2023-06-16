@@ -82,11 +82,6 @@ namespace TSMapEditor.UI.TopBar
             editContextMenu.AddItem("Map Size", () => windowController.MapSizeWindow.Open(), null, null, null, null);
             editContextMenu.AddItem(" ", null, () => false, null, null);
             editContextMenu.AddItem("Houses", () => windowController.HousesWindow.Open(), null, null, null);
-            editContextMenu.AddItem("Triggers", () => windowController.TriggersWindow.Open(), null, null, null);
-            editContextMenu.AddItem("TaskForces", () => windowController.TaskForcesWindow.Open(), null, null, null);
-            editContextMenu.AddItem("Scripts", () => windowController.ScriptsWindow.Open(), null, null, null);
-            editContextMenu.AddItem("TeamTypes", () => windowController.TeamTypesWindow.Open(), null, null, null);
-            editContextMenu.AddItem("Local Variables", () => windowController.LocalVariablesWindow.Open(), null, null, null);
             editContextMenu.AddItem(" ", null, () => false, null, null);
             editContextMenu.AddItem("Lighting", () => windowController.LightingSettingsWindow.Open(), null, null, null);
             editContextMenu.AddItem(" ", null, () => false, null, null);
@@ -122,6 +117,7 @@ namespace TSMapEditor.UI.TopBar
             toolsContextMenu.AddItem("Check Distance...", () => mapView.EditorState.CursorAction = checkDistanceCursorAction, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("Configure Hotkeys...", () => windowController.HotkeyConfigurationWindow.Open(), null, null, null);
+            toolsContextMenu.AddItem("About", () => windowController.AboutWindow.Open(), null, null, null, null);
 
             var toolsButton = new MenuButton(WindowManager, toolsContextMenu);
             toolsButton.Name = nameof(toolsButton);
@@ -129,21 +125,25 @@ namespace TSMapEditor.UI.TopBar
             toolsButton.Text = "Tools";
             AddChild(toolsButton);
 
-            var aboutContextMenu = new EditorContextMenu(WindowManager);
-            aboutContextMenu.Name = nameof(aboutContextMenu);
-            aboutContextMenu.AddItem("About", () => windowController.AboutWindow.Open(), null, null, null, null);
+            var scriptingContextMenu = new EditorContextMenu(WindowManager);
+            scriptingContextMenu.Name = nameof(scriptingContextMenu);
+            scriptingContextMenu.AddItem("Triggers", () => windowController.TriggersWindow.Open(), null, null, null);
+            scriptingContextMenu.AddItem("TaskForces", () => windowController.TaskForcesWindow.Open(), null, null, null);
+            scriptingContextMenu.AddItem("Scripts", () => windowController.ScriptsWindow.Open(), null, null, null);
+            scriptingContextMenu.AddItem("TeamTypes", () => windowController.TeamTypesWindow.Open(), null, null, null);
+            scriptingContextMenu.AddItem("Local Variables", () => windowController.LocalVariablesWindow.Open(), null, null, null);
 
-            var aboutButton = new MenuButton(WindowManager, aboutContextMenu);
-            aboutButton.Name = nameof(aboutButton);
-            aboutButton.X = toolsButton.Right + 1;
-            aboutButton.Text = "About";
-            AddChild(aboutButton);
+            var scriptingButton = new MenuButton(WindowManager, scriptingContextMenu);
+            scriptingButton.Name = nameof(scriptingButton);
+            scriptingButton.X = toolsButton.Right + 1;
+            scriptingButton.Text = "Scripting";
+            AddChild(scriptingButton);
 
             base.Initialize();
 
             Height = fileButton.Height;
 
-            menuButtons = new MenuButton[] { fileButton, editButton, toolsButton, aboutButton };
+            menuButtons = new MenuButton[] { fileButton, editButton, toolsButton, scriptingButton };
             Array.ForEach(menuButtons, b => b.MouseEnter += MenuButton_MouseEnter);
 
             KeyboardCommands.Instance.ConfigureCopiedObjects.Triggered += (s, e) => windowController.CopiedEntryTypesWindow.Open();
