@@ -18,6 +18,11 @@ namespace TSMapEditor.Models.ArtConfig
         public string Image { get; set; }
         public string BibShape { get; set; }
 
+        /// <summary>
+        /// Palette override introduced in Red Alert 2.
+        /// </summary>
+        public string Palette { get; set; }
+
         public void ReadFromIniSection(IniSection iniSection)
         {
             if (iniSection == null)
@@ -43,6 +48,7 @@ namespace TSMapEditor.Models.ArtConfig
             Theater = iniSection.GetBooleanValue(nameof(Theater), Theater);
             Image = iniSection.GetStringValue(nameof(Image), Image);
             BibShape = iniSection.GetStringValue(nameof(BibShape), BibShape);
+            Palette = iniSection.GetStringValue(nameof(Palette), Palette);
         }
 
         public void DoForFoundationCoords(Action<Point2D> action)

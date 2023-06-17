@@ -632,10 +632,14 @@ namespace TSMapEditor.Rendering
                     }
                 }
 
+                // Palette override in RA2/YR
+                Palette palette = buildingType.ArtConfig.TerrainPalette ? theaterPalette : unitPalette;
+                if (!string.IsNullOrWhiteSpace(buildingType.ArtConfig.Palette))
+                    palette = GetPaletteOrFail(buildingType.ArtConfig.Palette + Theater.FileExtension + ".pal");
+
                 var shpFile = new ShpFile();
                 shpFile.ParseFromBuffer(shpData);
-                BuildingTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData,
-                    buildingType.ArtConfig.TerrainPalette ? theaterPalette : unitPalette, null, buildingType.ArtConfig.Remapable);
+                BuildingTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, palette, null, buildingType.ArtConfig.Remapable);
 
                 // If this building has a bib, attempt to load it
                 if (!string.IsNullOrWhiteSpace(buildingType.ArtConfig.BibShape))
@@ -665,8 +669,7 @@ namespace TSMapEditor.Rendering
 
                     var bibShpFile = new ShpFile();
                     bibShpFile.ParseFromBuffer(shpData);
-                    BuildingBibTextures[i] = new ObjectImage(graphicsDevice, bibShpFile, shpData,
-                        buildingType.ArtConfig.TerrainPalette ? theaterPalette : unitPalette, null, buildingType.ArtConfig.Remapable);
+                    BuildingBibTextures[i] = new ObjectImage(graphicsDevice, bibShpFile, shpData, palette, null, buildingType.ArtConfig.Remapable);
                 }
             }
         }
