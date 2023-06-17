@@ -141,17 +141,22 @@ namespace TSMapEditor.UI.Sidebar
 
                 foreach (var collection in Map.EditorConfig.OverlayCollections)
                 {
-                    if (collection.OverlayTypes.Length == 0)
+                    if (collection.Entries.Length == 0)
                         continue;
 
                     Texture2D texture = null;
-                    var textures = TheaterGraphics.OverlayTextures[collection.OverlayTypes[0].Index];
+                    var firstEntry = collection.Entries[0];
+                    var textures = TheaterGraphics.OverlayTextures[firstEntry.OverlayType.Index];
                     if (textures != null)
                     {
                         var frames = textures.Frames;
-                        if (frames != null && frames.Length > 0)
+                        int frameNumber = firstEntry.Frame;
+                        if (firstEntry.OverlayType.Tiberium)
+                            frameNumber = (frames.Length / 2) - 1;
+
+                        if (frames != null && frames.Length > frameNumber)
                         {
-                            var frame = frames[(frames.Length / 2) - 1];
+                            var frame = frames[frameNumber];
                             if (frame != null)
                                 texture = frame.Texture;
                         }

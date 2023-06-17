@@ -15,7 +15,20 @@ namespace TSMapEditor.UI.CursorActions
 
         public override string GetName() => "Place Overlay Collection";
 
-        public OverlayCollection OverlayCollection { get; set; }
+        private OverlayCollection _overlayCollection;
+        public OverlayCollection OverlayCollection
+        {
+            get => _overlayCollection;
+            set
+            {
+                if (value.Entries.Length == 0)
+                {
+                    throw new InvalidOperationException($"Overlay collection {value.Name} has no overlay entries!");
+                }
+
+                _overlayCollection = value;
+            }
+        }
 
         struct OriginalOverlayInfo
         {
@@ -30,7 +43,7 @@ namespace TSMapEditor.UI.CursorActions
         }
 
         private List<OriginalOverlayInfo> originalOverlay = new List<OriginalOverlayInfo>();
-        private int[] randomizedOverlayTypeIndexes;
+        private int[] randomizedOverlayCollectionEntryIndexes;
         private OverlayCollection lastRandomizedCollection = null;
 
         public override void PreMapDraw(Point2D cellCoords)
@@ -39,11 +52,11 @@ namespace TSMapEditor.UI.CursorActions
 
             int brushSize = CursorActionTarget.BrushSize.Width * CursorActionTarget.BrushSize.Height;
             if (lastRandomizedCollection != OverlayCollection || 
-                randomizedOverlayTypeIndexes.Length < brushSize)
+                randomizedOverlayCollectionEntryIndexes.Length < brushSize)
             {
-                randomizedOverlayTypeIndexes = new int[brushSize];
-                for (int i = 0; i < randomizedOverlayTypeIndexes.Length; i++)
-                    randomizedOverlayTypeIndexes[i] = CursorActionTarget.Randomizer.GetRandomNumber(0, OverlayCollection.OverlayTypes.Length - 1);
+                randomizedOverlayCollectionEntryIndexes = new int[brushSize];
+                for (int i = 0; i < randomizedOverlayCollectionEntryIndexes.Length; i++)
+                    randomizedOverlayCollectionEntryIndexes[i] = CursorActionTarget.Randomizer.GetRandomNumber(0, OverlayCollection.Entries.Length - 1);
 
                 lastRandomizedCollection = OverlayCollection;
             }
@@ -61,10 +74,10 @@ namespace TSMapEditor.UI.CursorActions
                 else
                     originalOverlay.Add(new OriginalOverlayInfo(null, Constants.NO_OVERLAY));
 
-                OverlayType overlayType = OverlayCollection.OverlayTypes[randomizedOverlayTypeIndexes[tileIndex]];
+                var entry = OverlayCollection.Entries[randomizedOverlayCollectionEntryIndexes[tileIndex]];
 
                 // Do not place tiberium on impassable tiles
-                if (overlayType.Tiberium)
+                if (entry.OverlayType.Tiberium)
                 {
                     ITileImage tileImage = CursorActionTarget.Map.TheaterInstance.GetTile(tile.TileIndex);
                     ISubTileImage subCellImage = tileImage.GetSubTile(tile.SubTileIndex);
@@ -78,18 +91,20 @@ namespace TSMapEditor.UI.CursorActions
                 // Apply new overlay info
                 if (tile.Overlay == null)
                 {
-                    // Creating new object instances each frame is not very performance-friendly, we might want to revise this later...
                     tile.Overlay = new Overlay()
                     {
                         Position = tile.CoordsToPoint(),
-                        OverlayType = overlayType
+                        OverlayType = entry.OverlayType,
+                        FrameIndex = entry.Frame
                     };
                 }
                 else
                 {
-                    tile.Overlay.OverlayType = overlayType;
+                    tile.Overlay.OverlayType = entry.OverlayType;
+                    tile.Overlay.FrameIndex = entry.Frame;
                 }
 
+                // Smooth out tiberium
                 tile.Overlay.FrameIndex = CursorActionTarget.Map.GetOverlayFrameIndex(tile.CoordsToPoint());
 
                 tileIndex++;
@@ -108,7 +123,7 @@ namespace TSMapEditor.UI.CursorActions
                 if (tile == null)
                     return;
 
-                if (OverlayCollection.OverlayTypes[0].Tiberium)
+                if (OverlayCollection.Entries[0].OverlayType.Tiberium)
                 {
                     ITileImage tileImage = CursorActionTarget.Map.TheaterInstance.GetTile(tile.TileIndex);
                     ISubTileImage subCellImage = tileImage.GetSubTile(tile.SubTileIndex);

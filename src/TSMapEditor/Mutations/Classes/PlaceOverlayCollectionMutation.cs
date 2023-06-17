@@ -35,9 +35,9 @@ namespace TSMapEditor.Mutations.Classes
                 if (tile == null)
                     return;
 
-                OverlayType newOverlayType = overlayCollection.OverlayTypes[MutationTarget.Randomizer.GetRandomNumber(0, overlayCollection.OverlayTypes.Length - 1)];
+                var collectionEntry = overlayCollection.Entries[MutationTarget.Randomizer.GetRandomNumber(0, overlayCollection.Entries.Length - 1)];
                 
-                if (newOverlayType.Tiberium)
+                if (collectionEntry.OverlayType.Tiberium)
                 {
                     // Don't allow placing tiberium on impassable tiles, it's a common mapping error
                     // that leads to harvesters getting stuck
@@ -58,8 +58,8 @@ namespace TSMapEditor.Mutations.Classes
                 tile.Overlay = new Overlay()
                 {
                      Position = tile.CoordsToPoint(),
-                     OverlayType = newOverlayType,
-                     FrameIndex = 0
+                     OverlayType = collectionEntry.OverlayType,
+                     FrameIndex = collectionEntry.Frame
                 };
             });
 
