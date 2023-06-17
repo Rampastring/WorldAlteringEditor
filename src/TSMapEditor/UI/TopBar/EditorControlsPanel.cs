@@ -30,6 +30,7 @@ namespace TSMapEditor.UI.TopBar
             lowerGroundCursorAction = new LowerGroundCursorAction(cursorActionTarget);
             raiseCellsCursorAction = new RaiseCellsCursorAction(cursorActionTarget);
             lowerCellsCursorAction = new LowerCellsCursorAction(cursorActionTarget);
+            flattenGroundCursorAction = new FlattenGroundCursorAction(cursorActionTarget);
         }
 
         private readonly Map map;
@@ -43,6 +44,7 @@ namespace TSMapEditor.UI.TopBar
         private readonly LowerGroundCursorAction lowerGroundCursorAction;
         private readonly RaiseCellsCursorAction raiseCellsCursorAction;
         private readonly LowerCellsCursorAction lowerCellsCursorAction;
+        private readonly FlattenGroundCursorAction flattenGroundCursorAction;
 
         private XNADropDown ddBrushSize;
         private XNACheckBox chkAutoLAT;
@@ -95,6 +97,10 @@ namespace TSMapEditor.UI.TopBar
             var btnLowerCells = FindChild<EditorButton>("btnLowerCells", true);
             if (btnLowerCells != null)
                 btnLowerCells.LeftClick += (s, e) => editorState.CursorAction = lowerCellsCursorAction;
+
+            var btnFlattenGround = FindChild<EditorButton>("btnFlattenGround", true);
+            if (btnFlattenGround != null)
+                btnFlattenGround.LeftClick += (s, e) => editorState.CursorAction = flattenGroundCursorAction;
 
             KeyboardCommands.Instance.NextBrushSize.Triggered += NextBrushSize_Triggered;
             KeyboardCommands.Instance.PreviousBrushSize.Triggered += PreviousBrushSize_Triggered;

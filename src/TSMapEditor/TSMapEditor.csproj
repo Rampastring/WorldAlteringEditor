@@ -272,6 +272,9 @@
     <None Update="Content\SpriteFont1.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Content\ToolIcons\flattenground.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Content\ToolIcons\lowercells.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

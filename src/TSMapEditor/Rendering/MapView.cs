@@ -991,12 +991,19 @@ namespace TSMapEditor.Rendering
         {
             base.OnMouseMove();
 
-            if (tileUnderCursor != null && CursorAction != null)
+            if (CursorAction != null)
             {
-                if (Cursor.LeftDown && lastTileUnderCursor != tileUnderCursor)
+                if (Cursor.LeftDown)
                 {
-                    CursorAction.LeftDown(tileUnderCursor.CoordsToPoint());
-                    lastTileUnderCursor = tileUnderCursor;
+                    if (tileUnderCursor != null && lastTileUnderCursor != tileUnderCursor)
+                    {
+                        CursorAction.LeftDown(tileUnderCursor.CoordsToPoint());
+                        lastTileUnderCursor = tileUnderCursor;
+                    }
+                }
+                else
+                {
+                    CursorAction.LeftUpOnMouseMove(tileUnderCursor == null ? new Point2D(-1, -1) : tileUnderCursor.CoordsToPoint());
                 }
             }
 
