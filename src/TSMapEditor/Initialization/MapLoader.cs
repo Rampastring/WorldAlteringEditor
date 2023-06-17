@@ -226,7 +226,7 @@ namespace TSMapEditor.Initialization
 
                 var terrainObject = new TerrainObject(terrainType, new Point2D(x, y));
                 var tile = map.GetTile(x, y);
-                if (tile != null)
+                if (tile == null)
                 {
                     AddMapLoadError($"Terrain object {terrainType} has been placed outside of the valid map area, at {tile.CoordsToPoint()}. Skipping placing it on the map.");
                     continue;
