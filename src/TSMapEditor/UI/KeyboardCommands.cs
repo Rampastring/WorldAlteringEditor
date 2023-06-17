@@ -40,6 +40,7 @@ namespace TSMapEditor.UI
                 AircraftMenu,
                 BuildingMenu,
                 VehicleMenu,
+                NavalMenu,
                 InfantryMenu,
                 TerrainObjectMenu,
                 OverlayMenu
