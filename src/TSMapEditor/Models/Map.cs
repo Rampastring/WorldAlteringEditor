@@ -1333,8 +1333,8 @@ namespace TSMapEditor.Models
                 if (!Triggers.Exists(otherTrigger => otherTrigger != trigger && otherTrigger.Actions.Exists(a => a.ActionIndex == EnableTriggerActionIndex && a.Parameters[TriggerParamIndex] == trigger.ID)))
                     return;
 
-                // If this trigger is disabled by some other trigger, skip
-                if (Triggers.Exists(otherTrigger => otherTrigger != trigger && otherTrigger.Actions.Exists(a => a.ActionIndex == DisableTriggerActionIndex && a.Parameters[TriggerParamIndex] == trigger.ID)))
+                // If this trigger is disabled by itself or some other trigger, skip
+                if (Triggers.Exists(otherTrigger => otherTrigger.Actions.Exists(a => a.ActionIndex == DisableTriggerActionIndex && a.Parameters[TriggerParamIndex] == trigger.ID)))
                     return;
 
                 // This trigger is never disabled, but it is enabled by at least 1 other trigger - add an issue
