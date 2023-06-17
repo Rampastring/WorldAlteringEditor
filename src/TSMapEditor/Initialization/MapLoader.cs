@@ -220,15 +220,20 @@ namespace TSMapEditor.Initialization
                 TerrainType terrainType = map.Rules.TerrainTypes.Find(tt => tt.ININame == kvp.Value);
                 if (terrainType == null)
                 {
-                    AddMapLoadError($"Skipping loading of terrain type {kvp.Value} because it does not exist in Rules");
+                    AddMapLoadError($"Skipping loading of terrain type {kvp.Value}, placed at {x}, {y}, because it does not exist in Rules.");
                     continue;
                 }
 
                 var terrainObject = new TerrainObject(terrainType, new Point2D(x, y));
-                map.TerrainObjects.Add(terrainObject);
                 var tile = map.GetTile(x, y);
                 if (tile != null)
-                    tile.TerrainObject = terrainObject;
+                {
+                    AddMapLoadError($"Terrain object {terrainType} has been placed outside of the valid map area, at {tile.CoordsToPoint()}. Skipping placing it on the map.");
+                    continue;
+                }
+
+                map.TerrainObjects.Add(terrainObject);
+                tile.TerrainObject = terrainObject;
             }
         }
 
