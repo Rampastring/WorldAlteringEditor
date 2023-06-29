@@ -189,13 +189,23 @@ namespace TSMapEditor.CCEngine
         /// <returns>A byte array.</returns>
         public byte[] GetSingleFileData(int offset, int count)
         {
-            lock (locker)
+            var lockObject = GetLockObject();
+
+            lock (lockObject)
             {
                 OpenFile();
                 byte[] buffer = GetFileData(offset, count);
                 CloseFile();
                 return buffer;
             }
+        }
+
+        private object GetLockObject()
+        {
+            if (masterMix != null)
+                return masterMix.GetLockObject();
+
+            return locker;
         }
 
         /// <summary>
