@@ -9,7 +9,14 @@ namespace TSMapEditor.CCEngine
     {
         public string GameDirectory { get; set; }
 
+        /// <summary>
+        /// Contains information on which MIX file each found game file can be loaded from.
+        /// </summary>
         private Dictionary<uint, FileLocationInfo> fileLocationInfos = new Dictionary<uint, FileLocationInfo>();
+
+        /// <summary>
+        /// List of all MIX files that have been registered to the file manager.
+        /// </summary>
         private List<MixFile> mixFiles = new List<MixFile>();
 
         private List<string> searchDirectories = new List<string>();
@@ -39,11 +46,39 @@ namespace TSMapEditor.CCEngine
         }
 
         /// <summary>
+        /// Loads a MIX file.
+        /// Searches for it from both the search directories
+        /// as well as already loaded MIX files.
+        /// </summary>
+        /// <param name="name">The name of the MIX file.</param>
+        /// <returns>True if the MIX file was successfully loaded, otherwise false.</returns>
+        private bool LoadMIXFile(string name)
+        {
+            uint identifier = MixFile.GetFileID(name);
+
+            // First check from game directory, if not found then check from already loaded MIX files
+            if (!LoadMixFromDirectories(name))
+            {
+                if (fileLocationInfos.TryGetValue(identifier, out FileLocationInfo value))
+                {
+                    var mixFile = new MixFile(value.MixFile, value.Offset);
+                    mixFile.Parse();
+                    AddMix(mixFile);
+                    return true;
+                }
+
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Attempts to search for and load a MIX file from the search directories.
         /// Returns true if loading the MIX file succeeds, otherwise false.
         /// </summary>
         /// <param name="name">The name of the MIX file.</param>
-        /// <returns></returns>
+        /// <returns>True if the MIX file was successfully loaded, otherwise false.</returns>
         private bool LoadMixFromDirectories(string name)
         {
             string searchDir = null;
@@ -68,42 +103,10 @@ namespace TSMapEditor.CCEngine
         }
 
         /// <summary>
-        /// Loads a MIX file.
-        /// Does not search for it in already loaded MIX files.
-        /// Throws a FileNotFoundException if the MIX file isn't found.
+        /// Registers a MIX file to the file system.
+        /// Adds all file entries from the MIX file to the file location tracking system.
         /// </summary>
-        /// <param name="path">The name of the MIX file.</param>
-        public void LoadPrimaryMixFile(string name)
-        {
-            if (!LoadMixFromDirectories(name))
-                throw new FileNotFoundException("Primary MIX file not found: " + name);
-        }
-
-
-        /// <summary>
-        /// Loads a MIX file.
-        /// Searches for it in already loaded MIX files.
-        /// Does not throw an exception if the MIX file is not found.
-        /// </summary>
-        /// <param name="name">The name of the MIX file.</param>
-        public void LoadSecondaryMixFile(string name)
-        {
-            uint identifier = MixFile.GetFileID(name);
-
-            MixFile mixFile = null;
-
-            if (fileLocationInfos.TryGetValue(identifier, out FileLocationInfo value))
-            {
-                mixFile = new MixFile(value.MixFile, value.Offset);
-                mixFile.Parse();
-                AddMix(mixFile);
-            }
-            else
-            {
-                LoadMixFromDirectories(name);
-            }
-        }
-
+        /// <param name="mixFile">The MIX file to register.</param>
         private void AddMix(MixFile mixFile)
         {
             mixFiles.Add(mixFile);
@@ -111,6 +114,32 @@ namespace TSMapEditor.CCEngine
             foreach (MixFileEntry fileEntry in mixFile.GetEntries())
             {
                 fileLocationInfos[fileEntry.Identifier] = new FileLocationInfo(mixFile, fileEntry.Offset, fileEntry.Size);
+            }
+        }
+
+        /// <summary>
+        /// Loads a required MIX file.
+        /// Throws a FileNotFoundException if the MIX file isn't found.
+        /// </summary>
+        /// <param name="path">The name of the MIX file.</param>
+        public void LoadPrimaryMixFile(string name)
+        {
+            if (!LoadMIXFile(name))
+            {
+                throw new FileNotFoundException("Primary MIX file not found: " + name);
+            }
+        }
+
+        /// <summary>
+        /// Loads an optional MIX file.
+        /// Does not throw an exception if the MIX file is not found.
+        /// </summary>
+        /// <param name="name">The name of the MIX file.</param>
+        public void LoadSecondaryMixFile(string name)
+        {
+            if (!LoadMIXFile(name))
+            {
+                Logger.Log("Secondary MIX file not found: " + name);
             }
         }
 
@@ -130,6 +159,10 @@ namespace TSMapEditor.CCEngine
         }
     }
 
+    /// <summary>
+    /// Struct for holding data on which MIX file a file exists in,
+    /// and where the file exists within the MIX file.
+    /// </summary>
     internal struct FileLocationInfo
     {
         public FileLocationInfo(MixFile mixFile, int offset, int size)
