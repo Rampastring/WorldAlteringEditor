@@ -84,15 +84,28 @@ namespace TSMapEditor.CCEngine
             byte[] buffer = new byte[256];
             stream.Read(buffer, 0, 4);
             MixType mixType = (MixType)BitConverter.ToInt32(buffer, 0);
+            
+            bool isEncrypted = (mixType & MixType.ENCRYPTED) != 0;
 
-            if (mixType != MixType.DEFAULT)
-                throw new NotImplementedException("Reading of checksummed or Blowfish-encrypted MIX files is not implemented.");
+            if (isEncrypted)
+            {
+                // Read and decrypt the Blowfish associated with this MIX.
+                stream.Read(buffer, 0, KeyDecryptor.SIZE_OF_ENCRYPTED_KEY);
+                stream = new BlowfishStream(stream, KeyDecryptor.DecryptBlowfishKey(buffer));
+            }
 
             stream.Read(buffer, 0, MixFileHeader.SIZE_OF_HEADER);
 
             MixFileHeader header = new MixFileHeader(buffer);
 
             bodyOffset = INDEX_POSITION + MixFileEntry.SIZE_OF_FILE_ENTRY * header.FileCount;
+
+            if (isEncrypted)
+            {
+                // Account for Blowfish key and padding.
+                bodyOffset += KeyDecryptor.SIZE_OF_ENCRYPTED_KEY;
+                bodyOffset += (header.FileCount % 2) == 0 ? 2 : 6;
+            }
 
             for (int i = 0; i < header.FileCount; i++)
             {
