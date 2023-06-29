@@ -77,8 +77,8 @@ namespace TSMapEditor.UI
         private XNACheckBox chkBorderless;
         private XNACheckBox chkUpscaleUI;
         private XNADropDown ddTheme;
+        private XNADropDown ddScrollRate;
         private XNACheckBox chkUseBoldFont;
-        private XNACheckBox chkMoreAccurateRendering;
 
         public override void Initialize()
         {
@@ -136,10 +136,30 @@ namespace TSMapEditor.UI
             ddTheme.AddItem("Default");
             ddTheme.AddItem("Tiberium");
 
+            var lblScrollRate = new XNALabel(WindowManager);
+            lblScrollRate.Name = nameof(lblScrollRate);
+            lblScrollRate.Text = "Scroll Rate:";
+            lblScrollRate.X = lblDisplayResolution.X;
+            lblScrollRate.Y = ddTheme.Bottom + Constants.UIEmptyTopSpace;
+            AddChild(lblScrollRate);
+
+            ddScrollRate = new XNADropDown(WindowManager);
+            ddScrollRate.Name = nameof(ddScrollRate);
+            ddScrollRate.X = ddDisplayResolution.X;
+            ddScrollRate.Y = lblScrollRate.Y - 1;
+            ddScrollRate.Width = ddDisplayResolution.Width;
+            AddChild(ddScrollRate);
+            var scrollRateNames = new string[] { "Fastest", "Faster", "Fast", "Normal", "Slow", "Slower", "Slowest" };
+            var scrollRateValues = new int[] { 21, 18, 15, 12, 9, 6, 3 };
+            for (int i = 0; i < scrollRateNames.Length; i++)
+            {
+                ddScrollRate.AddItem(new XNADropDownItem() { Text = scrollRateNames[i], Tag = scrollRateValues[i] });
+            }
+
             chkBorderless = new XNACheckBox(WindowManager);
             chkBorderless.Name = nameof(chkBorderless);
             chkBorderless.X = Constants.UIEmptySideSpace;
-            chkBorderless.Y = ddTheme.Bottom + Constants.UIVerticalSpacing;
+            chkBorderless.Y = ddScrollRate.Bottom + Constants.UIVerticalSpacing;
             chkBorderless.Text = "Borderless Mode";
             AddChild(chkBorderless);
 
@@ -156,13 +176,6 @@ namespace TSMapEditor.UI
             chkUseBoldFont.Y = chkUpscaleUI.Bottom + Constants.UIVerticalSpacing;
             chkUseBoldFont.Text = "Use Bold Font";
             AddChild(chkUseBoldFont);
-
-            chkMoreAccurateRendering = new XNACheckBox(WindowManager);
-            chkMoreAccurateRendering.Name = nameof(chkMoreAccurateRendering);
-            chkMoreAccurateRendering.X = Constants.UIEmptySideSpace;
-            chkMoreAccurateRendering.Y = chkUseBoldFont.Bottom + Constants.UIEmptyTopSpace;
-            chkMoreAccurateRendering.Text = "More aggressive view refreshing\r\n(more accurate rendering at\r\nthe expense of performance)";
-            AddChild(chkMoreAccurateRendering);
 
             const int MinWidth = 1024;
             const int MinHeight = 600;
@@ -202,11 +215,11 @@ namespace TSMapEditor.UI
 
 
             ddTheme.SelectedIndex = userSettings.Theme == "Tiberium" ? 1 : 0;
+            ddScrollRate.SelectedIndex = ddScrollRate.Items.FindIndex(item => (int)item.Tag == userSettings.ScrollRate.GetValue());
 
             chkBorderless.Checked = userSettings.Borderless;
             chkUpscaleUI.Checked = userSettings.UpscaleUI;
             chkUseBoldFont.Checked = userSettings.UseBoldFont;
-            chkMoreAccurateRendering.Checked = userSettings.RefreshSize > 1;
         }
 
         public void ApplySettings()
@@ -219,9 +232,10 @@ namespace TSMapEditor.UI
             userSettings.Borderless.UserDefinedValue = chkBorderless.Checked;
             userSettings.UpscaleUI.UserDefinedValue = chkUpscaleUI.Checked;
             userSettings.UseBoldFont.UserDefinedValue = chkUseBoldFont.Checked;
-            userSettings.RefreshSize.UserDefinedValue = chkMoreAccurateRendering.Checked ? 2 : 1;
 
             userSettings.Theme.UserDefinedValue = ddTheme.SelectedItem.Text;
+            if (ddScrollRate.SelectedItem != null)
+                userSettings.ScrollRate.UserDefinedValue = (int)ddScrollRate.SelectedItem.Tag;
 
             if (ddDisplayResolution.SelectedItem != null)
             {

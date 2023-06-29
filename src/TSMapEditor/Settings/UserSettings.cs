@@ -31,7 +31,6 @@ namespace TSMapEditor.Settings
 
                 ScrollRate,
                 MapWideOverlayOpacity,
-                RefreshSize,
 
                 UpscaleUI,
                 Theme,
@@ -77,7 +76,6 @@ namespace TSMapEditor.Settings
 
         public IntSetting ScrollRate = new IntSetting(MapView, nameof(ScrollRate), 15);
         public IntSetting MapWideOverlayOpacity = new IntSetting(MapView, "MapWideOverlayOpacity", 50);
-        public IntSetting RefreshSize = new IntSetting(MapView, nameof(RefreshSize), 1);
 
         public BoolSetting UpscaleUI = new BoolSetting(General, "UpscaleUI", false);
         public StringSetting Theme = new StringSetting(General, "Theme", "Default");
