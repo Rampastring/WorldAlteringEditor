@@ -71,7 +71,7 @@ namespace TSMapEditor.Rendering
             Logger.Log("Exiting.");
 
             windowManager?.HideWindow();
-            System.Windows.Forms.MessageBox.Show("The map editor has crashed. Go bash Rampastring." + Environment.NewLine + Environment.NewLine +
+            System.Windows.Forms.MessageBox.Show("The map editor has crashed." + Environment.NewLine + Environment.NewLine +
                 "Exception information logged into except.txt:" + Environment.NewLine + Environment.NewLine +
                 sb.ToString());
 
