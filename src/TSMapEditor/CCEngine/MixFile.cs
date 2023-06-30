@@ -19,7 +19,12 @@ namespace TSMapEditor.CCEngine
         public MixFile(MixFile masterMix, int startOffset)
         {
             this.masterMix = masterMix;
-            this.mixStartOffset = startOffset;
+            mixStartOffset = startOffset;
+
+            if (masterMix != null)
+            {
+                mixStartOffset += masterMix.bodyOffset;
+            }
         }
 
 
