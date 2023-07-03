@@ -71,6 +71,7 @@ namespace TSMapEditor.Initialization
                     AddMapLoadError($"Invalid tile index {t.TileIndex} for cell at {t.CoordsToPoint()} - setting it to 0");
                     t.TileIndex = 0;
                     t.SubTileIndex = 0;
+                    return;
                 }
 
                 var tile = theaterGraphics.GetTile(t.TileIndex);
@@ -88,6 +89,8 @@ namespace TSMapEditor.Initialization
                         AddMapLoadError($"    Maximum sub-tile count of 0 detected for tile at {t.CoordsToPoint()}, also setting the cell's tile index to 0.");
                         t.TileIndex = 0;
                     }
+
+                    return;
                 }
 
                 if (tile.GetSubTile(t.SubTileIndex).TmpImage == null)
