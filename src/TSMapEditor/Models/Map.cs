@@ -1490,7 +1490,7 @@ namespace TSMapEditor.Models
             foreach (var trigger in Triggers)
             {
                 int usedEventIndex = objectSpecificEventIndexes.Find(eventIndex => trigger.Conditions.Exists(c => c.ConditionIndex == eventIndex));
-                if (usedEventIndex < 0 || usedEventIndex >= EditorConfig.TriggerEventTypes.Count)
+                if (usedEventIndex <= 0 || usedEventIndex >= EditorConfig.TriggerEventTypes.Count)
                     continue;
 
                 var tag = Tags.Find(t => t.Trigger == trigger);
