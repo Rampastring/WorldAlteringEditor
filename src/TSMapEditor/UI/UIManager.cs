@@ -47,6 +47,7 @@ namespace TSMapEditor.UI
         private TileSelector tileSelector;
         private OverlayFrameSelector overlayFrameSelector;
         private EditorSidebar editorSidebar;
+        private TopBarMenu topBarMenu;
 
         private EditorState editorState;
         private TileInfoDisplay tileInfoDisplay;
@@ -129,7 +130,7 @@ namespace TSMapEditor.UI
             tileInfoDisplay.X = Width - tileInfoDisplay.Width;
             mapView.TileInfoDisplay = tileInfoDisplay;
 
-            var topBarMenu = new TopBarMenu(WindowManager, mutationManager, mapView, map, windowController);
+            topBarMenu = new TopBarMenu(WindowManager, mutationManager, mapView, map, windowController);
             topBarMenu.Width = editorSidebar.Width;
             AddChild(topBarMenu);
 
@@ -157,6 +158,7 @@ namespace TSMapEditor.UI
 
             windowController.OpenMapWindow.OnFileSelected += OpenMapWindow_OnFileSelected;
             windowController.CreateNewMapWindow.OnCreateNewMap += CreateNewMapWindow_OnCreateNewMap;
+            topBarMenu.InputFileReloadRequested += TopBarMenu_InputFileReloadRequested;
 
             // Try to select "Neutral" as default house
             editorState.ObjectOwner = map.GetHouses().Find(h => h.ININame == "Neutral");
@@ -315,6 +317,15 @@ namespace TSMapEditor.UI
             StartLoadingMap();
         }
 
+        private void TopBarMenu_InputFileReloadRequested(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(map.LoadedINI.FileName))
+                return;
+
+            loadMapFilePath = map.LoadedINI.FileName;
+            StartLoadingMap();
+        }
+
         private void StartLoadingMap()
         {
             var messageBox = new EditorMessageBox(WindowManager, "Loading", "Please wait, loading map...", MessageBoxButtons.None);
@@ -369,12 +380,10 @@ namespace TSMapEditor.UI
             map.Rules.TutorialLines.ShutdownFSW();
             windowController.OpenMapWindow.OnFileSelected -= OpenMapWindow_OnFileSelected;
             windowController.CreateNewMapWindow.OnCreateNewMap -= CreateNewMapWindow_OnCreateNewMap;
+            topBarMenu.InputFileReloadRequested -= TopBarMenu_InputFileReloadRequested;
 
             editorState.CursorActionChanged -= EditorState_CursorActionChanged;
             overlayPlacementAction.OverlayTypeChanged -= OverlayPlacementAction_OverlayTypeChanged;
-
-            windowController.OpenMapWindow.OnFileSelected -= OpenMapWindow_OnFileSelected;
-            windowController.CreateNewMapWindow.OnCreateNewMap -= CreateNewMapWindow_OnCreateNewMap;
 
             WindowManager.GameClosing -= WindowManager_GameClosing;
 

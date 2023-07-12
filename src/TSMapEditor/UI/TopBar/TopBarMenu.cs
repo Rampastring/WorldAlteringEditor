@@ -20,6 +20,8 @@ namespace TSMapEditor.UI.TopBar
             this.windowController = windowController;
         }
 
+        public event EventHandler InputFileReloadRequested;
+
         private readonly MutationManager mutationManager;
         private readonly MapView mapView;
         private readonly Map map;
@@ -62,7 +64,13 @@ namespace TSMapEditor.UI.TopBar
                 map.Save();
             });
             fileContextMenu.AddItem("Save As", () => SaveAs(), null, null, null);
-            fileContextMenu.AddItem("Exit", () => WindowManager.CloseGame());
+            fileContextMenu.AddItem(" ", null, () => false, null, null);
+            fileContextMenu.AddItem("Reload Input File",
+                () => InputFileReloadRequested?.Invoke(this, EventArgs.Empty),
+                () => !string.IsNullOrWhiteSpace(map.LoadedINI.FileName),
+                null, null);
+            fileContextMenu.AddItem(" ", null, () => false, null, null);
+            fileContextMenu.AddItem("Exit", WindowManager.CloseGame);
 
             var fileButton = new MenuButton(WindowManager, fileContextMenu);
             fileButton.Name = nameof(fileButton);
