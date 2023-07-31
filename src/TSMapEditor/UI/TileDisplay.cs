@@ -31,11 +31,13 @@ namespace TSMapEditor.UI
         private const int TILE_PADDING = 3;
         private const int SCROLL_RATE = 10;
 
-        public TileDisplay(WindowManager windowManager, TheaterGraphics theaterGraphics, PlaceTerrainCursorAction placeTerrainCursorAction) : base(windowManager)
+        public TileDisplay(WindowManager windowManager, TheaterGraphics theaterGraphics,
+            PlaceTerrainCursorAction placeTerrainCursorAction, EditorState editorState) : base(windowManager)
         {
             this.theaterGraphics = theaterGraphics;
             DrawMode = ControlDrawMode.UNIQUE_RENDER_TARGET;
             placeTerrainCursorAction.ActionExited += (s, e) => _selectedTile = null;
+            this.editorState = editorState;
         }
 
         public event EventHandler SelectedTileChanged;
@@ -62,6 +64,8 @@ namespace TSMapEditor.UI
 
         private int viewY = 0;
 
+        private readonly EditorState editorState;
+
         public override void Initialize()
         {
             base.Initialize();
@@ -71,6 +75,7 @@ namespace TSMapEditor.UI
 
             KeyboardCommands.Instance.NextTile.Action = NextTile;
             KeyboardCommands.Instance.PreviousTile.Action = PreviousTile;
+            editorState.MarbleMadnessChanged += OnMarbleMadnessChanged;
         }
 
         /// <summary>
@@ -171,7 +176,8 @@ namespace TSMapEditor.UI
                 if (tileIndex > theaterGraphics.TileCount)
                     break;
 
-                TileImage tileImage = theaterGraphics.GetTileGraphics(tileIndex);
+                TileImage tileImage = editorState.IsMarbleMadness ? theaterGraphics.GetMarbleMadnessTileGraphics(tileIndex) : theaterGraphics.GetTileGraphics(tileIndex);
+
                 if (tileImage == null)
                     break;
 
@@ -282,6 +288,15 @@ namespace TSMapEditor.UI
 
             DrawChildren(gameTime);
             DrawPanelBorders();
+        }
+
+        public void OnMarbleMadnessChanged(object sender, EventArgs e) => RefreshGraphics();
+
+        public override void Kill()
+        {
+            editorState.MarbleMadnessChanged -= OnMarbleMadnessChanged;
+
+            base.Kill();
         }
     }
 }
