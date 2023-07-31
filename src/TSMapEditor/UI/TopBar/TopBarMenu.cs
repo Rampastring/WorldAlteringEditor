@@ -114,6 +114,9 @@ namespace TSMapEditor.UI.TopBar
             if (windowController.AutoApplyImpassableOverlayWindow.IsAvailable)
                 toolsContextMenu.AddItem("Apply Impassable Overlay", () => windowController.AutoApplyImpassableOverlayWindow.Open(), null, null, null);
 
+            if (ApplyAnimatedWaterScript.IsAvailable(map))
+                toolsContextMenu.AddItem("Generate Animated Water", GenerateAnimatedWater, null, null, null, null);
+
             toolsContextMenu.AddItem("Terrain Generator Options", () => windowController.TerrainGeneratorConfigWindow.Open(), null, null, null, KeyboardCommands.Instance.ConfigureTerrainGenerator.GetKeyDisplayString());
             toolsContextMenu.AddItem("Generate Terrain", () => EnterTerrainGenerator(), null, null, null, KeyboardCommands.Instance.GenerateTerrain.GetKeyDisplayString());
             toolsContextMenu.AddItem("Apply INI Code...", () => windowController.ApplyINICodeWindow.Open(), null, null, null);
@@ -121,7 +124,6 @@ namespace TSMapEditor.UI.TopBar
             toolsContextMenu.AddItem("Toggle Impassable Cells", () => mapView.EditorState.HighlightImpassableCells = !mapView.EditorState.HighlightImpassableCells, null, null, null);
             toolsContextMenu.AddItem("Toggle IceGrowth Preview", () => mapView.EditorState.HighlightIceGrowth = !mapView.EditorState.HighlightIceGrowth, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
-            toolsContextMenu.AddItem("Generate Animated Water", GenerateAnimatedWater, null, null, null, null);
             toolsContextMenu.AddItem("Smoothen Ice", SmoothenIce, null, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("Check Distance...", () => mapView.EditorState.CursorAction = checkDistanceCursorAction, null, null, null);
@@ -179,7 +181,7 @@ namespace TSMapEditor.UI.TopBar
         {
             var messageBox = EditorMessageBox.Show(WindowManager, "Are you sure?",
                 "This will automatically replace water tiles on the map with animated water.\r\n\r\n" +
-                "Make sure to save your map first, as NO UN-DO IS AVAILABLE!\r\n\r\n" +
+                "No un-do is available!\r\n\r\n" +
                 "Do you wish to continue?", MessageBoxButtons.YesNo);
 
             messageBox.YesClickedAction = (_) => { new ApplyAnimatedWaterScript().Perform(map); mapView.InvalidateMap(); };

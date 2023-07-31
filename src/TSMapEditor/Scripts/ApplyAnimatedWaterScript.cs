@@ -11,16 +11,36 @@ namespace TSMapEditor.Scripts
     {
         private TileSet waterTileSet;
 
+        private const string AnimatedWaterTileSetName = "Animated Water";
+        private const string WaterTileSetName = "Water";
+
+        public static bool IsAvailable(Map map)
+        {
+            if (map.TheaterInstance.Theater.TileSets.Find(ts => ts.SetName == AnimatedWaterTileSetName) == null)
+            {
+                Logger.Log("TileSet for animated water not found!");
+                return false;
+            }
+
+            if (map.TheaterInstance.Theater.TileSets.Find(ts => ts.SetName == WaterTileSetName) == null)
+            {
+                Logger.Log("TileSet for regular (non-animated) water not found!");
+                return false;
+            }
+
+            return true;
+        }
+
         public void Perform(Map map)
         {
-            var animatedWaterTileSet = map.TheaterInstance.Theater.TileSets.Find(ts => ts.SetName == "Animated Water");
+            var animatedWaterTileSet = map.TheaterInstance.Theater.TileSets.Find(ts => ts.SetName == AnimatedWaterTileSetName);
             if (animatedWaterTileSet == null)
             {
                 Logger.Log("TileSet for animated water not found!");
                 return;
             }
 
-            waterTileSet = map.TheaterInstance.Theater.TileSets.Find(ts => ts.SetName == "Water");
+            waterTileSet = map.TheaterInstance.Theater.TileSets.Find(ts => ts.SetName == WaterTileSetName);
             if (waterTileSet == null)
             {
                 Logger.Log("TileSet for regular (non-animated) water not found!");
