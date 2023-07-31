@@ -89,6 +89,12 @@ namespace TSMapEditor.UI.Sidebar
                 smudgePlacementAction.SmudgeType = smudgeType;
                 EditorState.CursorAction = smudgePlacementAction;
             }
+            else
+            {
+                // Assume this to be the smudge removal entry
+                smudgePlacementAction.SmudgeType = null;
+                EditorState.CursorAction = smudgePlacementAction;
+            }
         }
 
         private void NextSidebarNode_Triggered(object sender, EventArgs e)
