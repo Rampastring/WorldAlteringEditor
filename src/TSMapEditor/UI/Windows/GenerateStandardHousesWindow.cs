@@ -73,7 +73,19 @@ namespace TSMapEditor.UI.Windows
             }
 
             map.AddHouses(houses);
+            ReassignObjectHouses();
             Hide();
+        }
+
+        private void ReassignObjectHouses()
+        {
+            map.DoForAllTechnos(t =>
+            {
+                string ownerName = t.Owner.ININame;
+                var house = map.Houses.Find(h => h.ININame == ownerName);
+                if (house != null)
+                    t.Owner = house;
+            });
         }
 
         public void Open()
