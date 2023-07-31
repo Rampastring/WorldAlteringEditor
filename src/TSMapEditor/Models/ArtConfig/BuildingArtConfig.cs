@@ -233,6 +233,9 @@ namespace TSMapEditor.Models.ArtConfig
 
         public void DoForFoundationCoords(Action<Point2D> action)
         {
+            if (Foundation.FoundationCells == null)
+                return;
+
             foreach (var cell in Foundation.FoundationCells)
                 action(cell);
         }
