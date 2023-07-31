@@ -130,6 +130,8 @@ namespace TSMapEditor.UI
             tileInfoDisplay.X = Width - tileInfoDisplay.Width;
             mapView.TileInfoDisplay = tileInfoDisplay;
 
+            windowController.Initialize(this, map, editorState, mapView);
+
             topBarMenu = new TopBarMenu(WindowManager, mutationManager, mapView, map, windowController);
             topBarMenu.Width = editorSidebar.Width;
             AddChild(topBarMenu);
@@ -143,7 +145,6 @@ namespace TSMapEditor.UI
 
             base.Initialize();
 
-            windowController.Initialize(this, map, editorState, mapView);
             placeWaypointCursorAction.PlaceWaypointWindow = windowController.PlaceWaypointWindow;
 
             editorState.CursorActionChanged += EditorState_CursorActionChanged;

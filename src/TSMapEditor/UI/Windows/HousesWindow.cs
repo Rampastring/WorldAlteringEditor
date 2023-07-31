@@ -35,6 +35,8 @@ namespace TSMapEditor.UI.Windows
         private EditorNumberTextBox tbMoney;
         private XNACheckBox chkPlayerControl;
 
+        private XNALabel lblStatsValue;
+
         private House editedHouse;
 
         private GenerateStandardHousesWindow generateStandardHousesWindow;
@@ -57,6 +59,9 @@ namespace TSMapEditor.UI.Windows
             tbAllies = FindChild<EditorTextBox>(nameof(tbAllies));
             tbMoney = FindChild<EditorNumberTextBox>(nameof(tbMoney));
             chkPlayerControl = FindChild<XNACheckBox>(nameof(chkPlayerControl));
+
+            lblStatsValue = FindChild<XNALabel>(nameof(lblStatsValue));
+            lblStatsValue.Text = "";
 
             for (int i = 0; i < map.Rules.Sides.Count; i++)
             {
@@ -196,6 +201,8 @@ namespace TSMapEditor.UI.Windows
 
         private void RefreshHouseInfo()
         {
+            RefreshHouseStats();
+
             tbName.TextChanged -= TbName_TextChanged;
             ddIQ.SelectedIndexChanged -= DdIQ_SelectedIndexChanged;
             ddMapEdge.SelectedIndexChanged -= DdMapEdge_SelectedIndexChanged;
@@ -221,8 +228,7 @@ namespace TSMapEditor.UI.Windows
                 tbAllies.Text = string.Empty;
                 tbMoney.Text = string.Empty;
                 chkPlayerControl.Checked = false;
-
-                return;
+                lblStatsValue.Text = string.Empty;
             }
 
             tbName.Text = editedHouse.ININame;
@@ -341,6 +347,25 @@ namespace TSMapEditor.UI.Windows
             }
 
             ddHouseOfHumanPlayer.SelectedIndex = map.Houses.FindIndex(h => h.ININame == map.Basic.Player) + 1;
+        }
+
+        private void RefreshHouseStats()
+        {
+            if (editedHouse == null)
+            {
+                lblStatsValue.Text = "";
+                return;
+            }
+
+            string stats = "Power: " + map.Structures.Aggregate<Structure, int>(0, (value, structure) => 
+            {
+                if (structure.Owner == editedHouse)
+                    return value + structure.ObjectType.Power;
+
+                return value;
+            });
+
+            lblStatsValue.Text = stats;
         }
     }
 }
