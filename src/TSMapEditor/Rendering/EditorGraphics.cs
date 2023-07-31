@@ -15,10 +15,10 @@ namespace TSMapEditor.Rendering
 
         public EditorGraphics()
         {
-            GenericTileTexture = AssetLoader.LoadTexture("generictile.png");
-            ImpassableCellHighlightTexture = AssetLoader.LoadTexture("impassablehighlight.png");
-            IceGrowthHighlightTexture = AssetLoader.LoadTexture("icehighlight.png");
-            RangeIndicatorTexture = AssetLoader.LoadTexture("rangeindicator.png");
+            GenericTileTexture = AssetLoader.LoadTextureUncached("generictile.png");
+            ImpassableCellHighlightTexture = AssetLoader.LoadTextureUncached("impassablehighlight.png");
+            IceGrowthHighlightTexture = AssetLoader.LoadTextureUncached("icehighlight.png");
+            RangeIndicatorTexture = AssetLoader.LoadTextureUncached("rangeindicator.png");
         }
 
         public void DisposeAll()
