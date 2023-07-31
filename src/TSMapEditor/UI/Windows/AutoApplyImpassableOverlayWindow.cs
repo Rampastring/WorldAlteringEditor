@@ -26,6 +26,8 @@ namespace TSMapEditor.UI.Windows
         private string overlayTypeName = "";
         private OverlayType impassableOverlayType;
 
+        public bool IsAvailable => impassableOverlayType != null;
+
         protected override void ParseControlINIAttribute(IniFile iniFile, string key, string value)
         {
             if (key == "ImpassableOverlayTypeName")

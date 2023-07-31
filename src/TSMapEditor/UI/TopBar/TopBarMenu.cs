@@ -111,7 +111,9 @@ namespace TSMapEditor.UI.TopBar
             var toolsContextMenu = new EditorContextMenu(WindowManager);
             toolsContextMenu.Name = nameof(toolsContextMenu);
             // toolsContextMenu.AddItem("Options");
-            toolsContextMenu.AddItem("Apply Impassable Overlay", () => windowController.AutoApplyImpassableOverlayWindow.Open(), null, null, null);
+            if (windowController.AutoApplyImpassableOverlayWindow.IsAvailable)
+                toolsContextMenu.AddItem("Apply Impassable Overlay", () => windowController.AutoApplyImpassableOverlayWindow.Open(), null, null, null);
+
             toolsContextMenu.AddItem("Terrain Generator Options", () => windowController.TerrainGeneratorConfigWindow.Open(), null, null, null, KeyboardCommands.Instance.ConfigureTerrainGenerator.GetKeyDisplayString());
             toolsContextMenu.AddItem("Generate Terrain", () => EnterTerrainGenerator(), null, null, null, KeyboardCommands.Instance.GenerateTerrain.GetKeyDisplayString());
             toolsContextMenu.AddItem("Apply INI Code...", () => windowController.ApplyINICodeWindow.Open(), null, null, null);
