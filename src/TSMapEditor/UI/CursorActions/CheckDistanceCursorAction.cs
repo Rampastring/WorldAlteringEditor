@@ -83,22 +83,7 @@ namespace TSMapEditor.UI.CursorActions
 
         private void DrawText(Point2D cellCoords, Point2D cameraTopLeftPoint, string text, Color textColor)
         {
-            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cellCoords, CursorActionTarget.Map) - cameraTopLeftPoint;
-            cellTopLeftPoint = cellTopLeftPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
-
-            var textDimensions = Renderer.GetTextDimensions(text, Constants.UIBoldFont);
-            int x = cellTopLeftPoint.X - (int)(textDimensions.X - Constants.CellSizeX) / 2;
-
-            Vector2 textPosition = new Vector2(x + 60, cellTopLeftPoint.Y - 150);
-            Rectangle textBackgroundRectangle = new Rectangle((int)textPosition.X - Constants.UIEmptySideSpace,
-                (int)textPosition.Y - Constants.UIEmptyTopSpace,
-                (int)textDimensions.X + Constants.UIEmptySideSpace * 2,
-                (int)textDimensions.Y + Constants.UIEmptyBottomSpace + Constants.UIEmptyTopSpace);
-
-            Renderer.FillRectangle(textBackgroundRectangle, UISettings.ActiveSettings.PanelBackgroundColor);
-            Renderer.DrawRectangle(textBackgroundRectangle, UISettings.ActiveSettings.PanelBorderColor);
-
-            Renderer.DrawStringWithShadow(text, Constants.UIBoldFont, textPosition, textColor);
+            DrawText(cellCoords, cameraTopLeftPoint, 60, -150, text, textColor);
         }
 
         private Rectangle GetDrawRectangleForMarker(Point2D cellCenterPoint)

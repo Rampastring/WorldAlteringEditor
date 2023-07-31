@@ -34,6 +34,7 @@ namespace TSMapEditor.UI.TopBar
         private PlaceLowBridgeCursorAction placeLowBridgeCursorAction;
         private ToggleIceGrowthCursorAction toggleIceGrowthCursorAction;
         private CheckDistanceCursorAction checkDistanceCursorAction;
+        private CalculateTiberiumValueCursorAction calculateTiberiumValueCursorAction;
         private ManageBaseNodesCursorAction manageBaseNodesCursorAction;
         
 
@@ -46,6 +47,7 @@ namespace TSMapEditor.UI.TopBar
             placeLowBridgeCursorAction = new PlaceLowBridgeCursorAction(mapView);
             toggleIceGrowthCursorAction = new ToggleIceGrowthCursorAction(mapView);
             checkDistanceCursorAction = new CheckDistanceCursorAction(mapView);
+            calculateTiberiumValueCursorAction = new CalculateTiberiumValueCursorAction(mapView);
             manageBaseNodesCursorAction = new ManageBaseNodesCursorAction(mapView);
 
             var fileContextMenu = new EditorContextMenu(WindowManager);
@@ -127,6 +129,8 @@ namespace TSMapEditor.UI.TopBar
             toolsContextMenu.AddItem("Smoothen Ice", SmoothenIce, null, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("Check Distance...", () => mapView.EditorState.CursorAction = checkDistanceCursorAction, null, null, null);
+            toolsContextMenu.AddItem(" ", null, () => false, null, null);
+            toolsContextMenu.AddItem("Calculate Credits...", () => mapView.EditorState.CursorAction = calculateTiberiumValueCursorAction, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("Configure Hotkeys...", () => windowController.HotkeyConfigurationWindow.Open(), null, null, null);
             toolsContextMenu.AddItem("About", () => windowController.AboutWindow.Open(), null, null, null, null);

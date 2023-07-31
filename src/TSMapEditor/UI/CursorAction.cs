@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Input;
+﻿using Microsoft.Xna.Framework;
+using Rampastring.XNAUI;
 using System;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
@@ -101,5 +102,25 @@ namespace TSMapEditor.UI
         /// <param name="cellCoords">The coords of the cell under the cursor.</param>
         /// <param name="cameraTopLeftPoint">The top-left point of the user's screen.</param>
         public virtual void DrawPreview(Point2D cellCoords, Point2D cameraTopLeftPoint) { }
+
+        protected void DrawText(Point2D cellCoords, Point2D cameraTopLeftPoint, int xOffset, int yOffset, string text, Color textColor)
+        {
+            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cellCoords, CursorActionTarget.Map) - cameraTopLeftPoint;
+            cellTopLeftPoint = cellTopLeftPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
+
+            var textDimensions = Renderer.GetTextDimensions(text, Constants.UIBoldFont);
+            int x = cellTopLeftPoint.X - (int)(textDimensions.X - Constants.CellSizeX) / 2;
+
+            Vector2 textPosition = new Vector2(x + xOffset, cellTopLeftPoint.Y + yOffset);
+            Rectangle textBackgroundRectangle = new Rectangle((int)textPosition.X - Constants.UIEmptySideSpace,
+                (int)textPosition.Y - Constants.UIEmptyTopSpace,
+                (int)textDimensions.X + Constants.UIEmptySideSpace * 2,
+                (int)textDimensions.Y + Constants.UIEmptyBottomSpace + Constants.UIEmptyTopSpace);
+
+            Renderer.FillRectangle(textBackgroundRectangle, UISettings.ActiveSettings.PanelBackgroundColor);
+            Renderer.DrawRectangle(textBackgroundRectangle, UISettings.ActiveSettings.PanelBorderColor);
+
+            Renderer.DrawStringWithShadow(text, Constants.UIBoldFont, textPosition, textColor);
+        }
     }
 }
