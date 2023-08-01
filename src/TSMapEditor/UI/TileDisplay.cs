@@ -11,18 +11,20 @@ namespace TSMapEditor.UI
 {
     class TileDisplayTile
     {
-        public TileDisplayTile(Point location, Point offset, Point size, TileImage tileImage)
+        public TileDisplayTile(Point location, Point offset, Point size, TileImage tileImageToDisplay, TileImage tileImageToPlace)
         {
             Location = location;
             Offset = offset;
             Size = size;
-            TileImage = tileImage;
+            TileImageToDisplay = tileImageToDisplay;
+            TileImageToPlace = tileImageToPlace;
         }
 
         public Point Location { get; set; }
         public Point Offset { get; set; }
         public Point Size { get; set; }
-        public TileImage TileImage { get; set; }
+        public TileImage TileImageToDisplay { get; set; }
+        public TileImage TileImageToPlace { get; set; }
     }
 
     public class TileDisplay : XNAPanel
@@ -85,14 +87,14 @@ namespace TSMapEditor.UI
             if (!AppliesToSelfAndAllParents(c => c.Enabled))
                 return;
 
-            int selectedTileIndex = tilesInView.FindIndex(t => t.TileImage == SelectedTile);
+            int selectedTileIndex = tilesInView.FindIndex(t => t.TileImageToPlace == SelectedTile);
 
             if (SelectedTile == null || selectedTileIndex < 0)
             {
                 // If no tile from the current tileset is selected, then select the first tile
 
                 if (tilesInView.Count > 0)
-                    SelectedTile = tilesInView[0].TileImage;
+                    SelectedTile = tilesInView[0].TileImageToPlace;
 
                 return;
             }
@@ -106,7 +108,7 @@ namespace TSMapEditor.UI
             if (selectedTileIndex >= tilesInView.Count)
                 selectedTileIndex = tilesInView.Count - 1;
 
-            SelectedTile = tilesInView[selectedTileIndex].TileImage;
+            SelectedTile = tilesInView[selectedTileIndex].TileImageToPlace;
         }
 
         /// <summary>
@@ -117,14 +119,14 @@ namespace TSMapEditor.UI
             if (!AppliesToSelfAndAllParents(c => c.Enabled))
                 return;
 
-            int selectedTileIndex = tilesInView.FindIndex(t => t.TileImage == SelectedTile);
+            int selectedTileIndex = tilesInView.FindIndex(t => t.TileImageToPlace == SelectedTile);
 
             if (SelectedTile == null || selectedTileIndex < 0)
             {
                 // If no tile from the current tileset is selected, then select the last tile
 
                 if (tilesInView.Count > 0)
-                    SelectedTile = tilesInView[tilesInView.Count - 1].TileImage;
+                    SelectedTile = tilesInView[tilesInView.Count - 1].TileImageToPlace;
 
                 return;
             }
@@ -138,7 +140,7 @@ namespace TSMapEditor.UI
             if (selectedTileIndex < 0)
                 selectedTileIndex = 0;
 
-            SelectedTile = tilesInView[selectedTileIndex].TileImage;
+            SelectedTile = tilesInView[selectedTileIndex].TileImageToPlace;
         }
 
         protected override void OnClientRectangleUpdated()
@@ -175,14 +177,15 @@ namespace TSMapEditor.UI
                 if (tileIndex > theaterGraphics.TileCount)
                     break;
 
-                TileImage tileImage = editorState.IsMarbleMadness ? theaterGraphics.GetMarbleMadnessTileGraphics(tileIndex) : theaterGraphics.GetTileGraphics(tileIndex);
+                TileImage tileImageToPlace = theaterGraphics.GetTileGraphics(tileIndex);
+                TileImage tileImageToDisplay = editorState.IsMarbleMadness ? theaterGraphics.GetMarbleMadnessTileGraphics(tileIndex) : tileImageToPlace;
 
-                if (tileImage == null)
+                if (tileImageToDisplay == null)
                     break;
 
-                int width = tileImage.GetWidth(out int minX);
-                int height = tileImage.GetHeight();
-                int yOffset = tileImage.GetYOffset();
+                int width = tileImageToDisplay.GetWidth(out int minX);
+                int height = tileImageToDisplay.GetHeight();
+                int yOffset = tileImageToDisplay.GetYOffset();
 
                 if (x + width > usableWidth)
                 {
@@ -198,7 +201,7 @@ namespace TSMapEditor.UI
                 if (minX > 0)
                     minX = 0;
 
-                var tileDisplayTile = new TileDisplayTile(new Point(x, y), new Point(-minX, yOffset), new Point(width, height), tileImage);
+                var tileDisplayTile = new TileDisplayTile(new Point(x, y), new Point(-minX, yOffset), new Point(width, height), tileImageToDisplay, tileImageToPlace);
                 tilesInView.Add(tileDisplayTile);
 
                 if (height > currentLineHeight)
@@ -217,7 +220,7 @@ namespace TSMapEditor.UI
         {
             foreach (var tile in line)
             {
-                tile.Location = new Point(tile.Location.X, tile.Location.Y + (lineHeight - tile.TileImage.GetHeight()) / 2);
+                tile.Location = new Point(tile.Location.X, tile.Location.Y + (lineHeight - tile.TileImageToDisplay.GetHeight()) / 2);
             }
         }
 
@@ -230,7 +233,7 @@ namespace TSMapEditor.UI
         public override void OnMouseLeftDown()
         {
             base.OnMouseLeftDown();
-            SelectedTile = GetTileUnderCursor()?.TileImage;
+            SelectedTile = GetTileUnderCursor()?.TileImageToPlace;
         }
 
         private TileDisplayTile GetTileUnderCursor()
@@ -259,10 +262,10 @@ namespace TSMapEditor.UI
                 var rectangle = new Rectangle(tile.Location.X, tile.Location.Y + viewY, tile.Size.X, tile.Size.Y);
                 FillRectangle(rectangle, Color.Black);
 
-                if (tile.TileImage.TMPImages.Length == 0)
+                if (tile.TileImageToDisplay.TMPImages.Length == 0)
                     continue;
 
-                foreach (MGTMPImage image in tile.TileImage.TMPImages)
+                foreach (MGTMPImage image in tile.TileImageToDisplay.TMPImages)
                 {
                     if (image == null || image.TmpImage == null)
                         continue;
@@ -281,7 +284,7 @@ namespace TSMapEditor.UI
                     }
                 }
 
-                if (tile.TileImage == SelectedTile)
+                if (tile.TileImageToDisplay == SelectedTile)
                     DrawRectangle(rectangle, Color.Red, 2);
             }
 
