@@ -3,12 +3,12 @@ using TSMapEditor.GameMath;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI;
 
-namespace TSMapEditor.Mutations.Classes
+namespace TSMapEditor.Mutations.Classes.HeightMutations
 {
     /// <summary>
     /// A mutation for "smartly" raising ground, with automatic application of ramps.
     /// </summary>
-    internal class RaiseGroundMutation : AlterGroundElevationMutation
+    public class RaiseGroundMutation : AlterGroundElevationMutation
     {
         public RaiseGroundMutation(IMutationTarget mutationTarget, Point2D originCell, BrushSize brushSize) : base(mutationTarget, originCell, brushSize)
         {
@@ -21,7 +21,7 @@ namespace TSMapEditor.Mutations.Classes
         {
             var targetCell = Map.GetTile(OriginCell);
 
-            if (targetCell == null || targetCell.Level >= Constants.MaxMapHeightLevel || (!targetCell.IsClearGround() && !RampTileSet.ContainsTile(targetCell.TileIndex)))
+            if (targetCell == null || targetCell.Level >= Constants.MaxMapHeightLevel || !targetCell.IsClearGround() && !RampTileSet.ContainsTile(targetCell.TileIndex))
                 return;
 
             int targetCellHeight = targetCell.Level;
@@ -61,10 +61,10 @@ namespace TSMapEditor.Mutations.Classes
                     return;
             }
 
-            int beginY = OriginCell.Y - (ySize / 2);
-            int endY = OriginCell.Y + (ySize / 2);
-            int beginX = OriginCell.X - (xSize / 2);
-            int endX = OriginCell.X + (xSize / 2);
+            int beginY = OriginCell.Y - ySize / 2;
+            int endY = OriginCell.Y + ySize / 2;
+            int beginX = OriginCell.X - xSize / 2;
+            int endX = OriginCell.X + xSize / 2;
 
             // For all other brush sizes we can have a generic implementation
             for (int y = beginY; y <= endY; y++)

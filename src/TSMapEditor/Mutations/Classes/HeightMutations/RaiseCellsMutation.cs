@@ -3,14 +3,14 @@ using TSMapEditor.GameMath;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI;
 
-namespace TSMapEditor.Mutations.Classes
+namespace TSMapEditor.Mutations.Classes.HeightMutations
 {
     /// <summary>
-    /// A mutation for lowering cell height levels.
+    /// A mutation for increasing cell height levels.
     /// </summary>
-    public class LowerCellsMutation : Mutation
+    public class RaiseCellsMutation : Mutation
     {
-        public LowerCellsMutation(IMutationTarget mutationTarget, Point2D targetCellCoords, BrushSize brushSize) : base(mutationTarget)
+        public RaiseCellsMutation(IMutationTarget mutationTarget, Point2D targetCellCoords, BrushSize brushSize) : base(mutationTarget)
         {
             this.targetCellCoords = targetCellCoords;
             this.brushSize = brushSize;
@@ -31,9 +31,9 @@ namespace TSMapEditor.Mutations.Classes
                 if (cell == null)
                     return;
 
-                if (cell.Level > 0)
+                if (cell.Level < Constants.MaxMapHeightLevel)
                 {
-                    cell.Level--;
+                    cell.Level++;
                     affectedCells.Add(cellCoords);
                 }
             });
@@ -49,8 +49,8 @@ namespace TSMapEditor.Mutations.Classes
                 if (cell == null)
                     return;
 
-                if (cell.Level < Constants.MaxMapHeight)
-                    cell.Level++;
+                if (cell.Level > 0)
+                    cell.Level--;
             }
 
             MutationTarget.AddRefreshPoint(targetCellCoords);

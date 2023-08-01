@@ -1,8 +1,8 @@
 ﻿using TSMapEditor.GameMath;
-using TSMapEditor.Mutations.Classes;
+using TSMapEditor.Mutations.Classes.HeightMutations;
 using TSMapEditor.Rendering;
 
-namespace TSMapEditor.UI.CursorActions
+namespace TSMapEditor.UI.CursorActions.HeightActions
 {
     /// <summary>
     /// A cursor action that allows the user to "flatten" ground by holding

@@ -1,8 +1,8 @@
 ﻿using TSMapEditor.GameMath;
-using TSMapEditor.Mutations.Classes;
+using TSMapEditor.Mutations.Classes.HeightMutations;
 using TSMapEditor.Rendering;
 
-namespace TSMapEditor.UI.CursorActions
+namespace TSMapEditor.UI.CursorActions.HeightActions
 {
     public class RaiseGroundCursorAction : CursorAction
     {
@@ -10,7 +10,7 @@ namespace TSMapEditor.UI.CursorActions
         {
         }
 
-        public override string GetName() => "Raise Ground";
+        public override string GetName() => "Raise Ground (Steep Ramps)";
 
         public override bool DrawCellCursor => true;
 

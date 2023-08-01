@@ -7,6 +7,7 @@ using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI.Controls;
 using TSMapEditor.UI.CursorActions;
+using TSMapEditor.UI.CursorActions.HeightActions;
 
 namespace TSMapEditor.UI.TopBar
 {
@@ -26,6 +27,8 @@ namespace TSMapEditor.UI.TopBar
             this.placeWaypointCursorAction = placeWaypointCursorAction;
 
             deletionModeCursorAction = new DeletionModeCursorAction(cursorActionTarget);
+            fsRaiseGroundCursorAction = new FSRaiseGroundCursorAction(cursorActionTarget);
+            fsLowerGroundCursorAction = new FSLowerGroundCursorAction(cursorActionTarget);
             raiseGroundCursorAction = new RaiseGroundCursorAction(cursorActionTarget);
             lowerGroundCursorAction = new LowerGroundCursorAction(cursorActionTarget);
             raiseCellsCursorAction = new RaiseCellsCursorAction(cursorActionTarget);
@@ -40,6 +43,8 @@ namespace TSMapEditor.UI.TopBar
         private readonly PlaceTerrainCursorAction terrainPlacementAction;
         private readonly PlaceWaypointCursorAction placeWaypointCursorAction;
         private readonly DeletionModeCursorAction deletionModeCursorAction;
+        private readonly FSRaiseGroundCursorAction fsRaiseGroundCursorAction;
+        private readonly FSLowerGroundCursorAction fsLowerGroundCursorAction;
         private readonly RaiseGroundCursorAction raiseGroundCursorAction;
         private readonly LowerGroundCursorAction lowerGroundCursorAction;
         private readonly RaiseCellsCursorAction raiseCellsCursorAction;
@@ -84,11 +89,19 @@ namespace TSMapEditor.UI.TopBar
 
             var btnRaiseGround = FindChild<EditorButton>("btnRaiseGround", true);
             if (btnRaiseGround != null)
-                btnRaiseGround.LeftClick += (s, e) => { editorState.CursorAction = raiseGroundCursorAction; editorState.BrushSize = map.EditorConfig.BrushSizes.Find(bs => bs.Width == 3 && bs.Height == 3); };
+                btnRaiseGround.LeftClick += (s, e) => { editorState.CursorAction = fsRaiseGroundCursorAction; editorState.BrushSize = map.EditorConfig.BrushSizes.Find(bs => bs.Width == 3 && bs.Height == 3); };
 
             var btnLowerGround = FindChild<EditorButton>("btnLowerGround", true);
             if (btnLowerGround != null)
-                btnLowerGround.LeftClick += (s, e) => { editorState.CursorAction = lowerGroundCursorAction; editorState.BrushSize = map.EditorConfig.BrushSizes.Find(bs => bs.Width == 2 && bs.Height == 2); };
+                btnLowerGround.LeftClick += (s, e) => { editorState.CursorAction = fsLowerGroundCursorAction; editorState.BrushSize = map.EditorConfig.BrushSizes.Find(bs => bs.Width == 2 && bs.Height == 2); };
+
+            var btnRaiseGroundSteep = FindChild<EditorButton>("btnRaiseGroundSteep", true);
+            if (btnRaiseGroundSteep != null)
+                btnRaiseGroundSteep.LeftClick += (s, e) => { editorState.CursorAction = raiseGroundCursorAction; editorState.BrushSize = map.EditorConfig.BrushSizes.Find(bs => bs.Width == 3 && bs.Height == 3); };
+
+            var btnLowerGroundSteep = FindChild<EditorButton>("btnLowerGroundSteep", true);
+            if (btnLowerGroundSteep != null)
+                btnLowerGroundSteep.LeftClick += (s, e) => { editorState.CursorAction = lowerGroundCursorAction; editorState.BrushSize = map.EditorConfig.BrushSizes.Find(bs => bs.Width == 2 && bs.Height == 2); };
 
             var btnRaiseCells = FindChild<EditorButton>("btnRaiseCells", true);
             if (btnRaiseCells != null)

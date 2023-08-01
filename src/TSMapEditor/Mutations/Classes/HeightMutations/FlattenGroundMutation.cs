@@ -3,80 +3,47 @@ using System;
 using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models.Enums;
-using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI;
 using System.Linq;
+using HCT = TSMapEditor.Mutations.Classes.HeightMutations.HeightComparisonType;
 
-namespace TSMapEditor.Mutations.Classes
+namespace TSMapEditor.Mutations.Classes.HeightMutations
 {
-    using HCT = HeightComparisonType;
-
-    internal class LowerGroundMutation : Mutation
+    /// <summary>
+    /// A mutation for flattening ground. Especially useful when used with cliffs.
+    /// Adjusts a target cell's height to a desired level and then processes all surrounding
+    /// tiles for the height level to match.
+    /// </summary>
+    public class FlattenGroundMutation : Mutation
     {
-        public LowerGroundMutation(IMutationTarget mutationTarget, Point2D originCell, BrushSize brushSize) : base(mutationTarget)
+        public FlattenGroundMutation(IMutationTarget mutationTarget, Point2D originCell, BrushSize brushSize, int desiredHeightLevel) : base(mutationTarget)
         {
-            this.OriginCell = originCell;
-            this.BrushSize = brushSize;
+            this.desiredHeightLevel = desiredHeightLevel;
+            OriginCell = originCell;
+            BrushSize = brushSize;
             RampTileSet = Map.TheaterInstance.Theater.RampTileSet;
         }
 
-        public override void Perform() => LowerGround();
+        private readonly int desiredHeightLevel;
 
-        private void LowerGround()
+        public override void Perform() => FlattenGround();
+
+        private void FlattenGround()
         {
-            var targetCell = Map.GetTile(OriginCell);
-
-            if (targetCell == null || targetCell.Level < 1 || (!targetCell.IsClearGround() && !RampTileSet.ContainsTile(targetCell.TileIndex)))
+            var cell = Map.GetTile(OriginCell);
+            if (cell == null || cell.Level == desiredHeightLevel)
                 return;
 
-            int targetCellHeight = targetCell.Level;
-
-            // If the brush size is 1, only process it if the target cell is a ramp.
-            // If it is not a ramp, then we'd need to lower the cell's height,
-            // which would always result in it affecting more than 1 cell,
-            // which wouldn't be logical with the brush size.
-            if (BrushSize.Width == 1 || BrushSize.Height == 1)
+            AddCellToUndoData(OriginCell);
+            cell.Level = (byte)desiredHeightLevel;
+            cell.ChangeTileIndex(0, 0);
+            foreach (Point2D surroundingCellOffset in SurroundingTiles)
             {
-                if (!RampTileSet.ContainsTile(targetCell.TileIndex))
-                    return;
+                RegisterCell(OriginCell + surroundingCellOffset);
             }
 
-            int xSize = BrushSize.Width;
-            int ySize = BrushSize.Height;
-
-            int beginY = OriginCell.Y - ((ySize - 1) / 2);
-            int endY = OriginCell.Y + (ySize / 2);
-            int beginX = OriginCell.X - ((xSize - 1) / 2);
-            int endX = OriginCell.X + (xSize / 2);
-
-            // For all other brush sizes we can have a generic implementation
-            for (int y = beginY; y <= endY; y++)
-            {
-                for (int x = beginX; x <= endX; x++)
-                {
-                    var cellCoords = new Point2D(x, y);
-                    targetCell = Map.GetTile(cellCoords);
-                    if (targetCell == null || targetCell.Level < 1)
-                        continue;
-
-                    // Only lower ground that was on the same level with our original target cell,
-                    // otherwise things get illogical
-                    if (targetCell.Level != targetCellHeight)
-                        continue;
-
-                    // Lower this cell and check surrounding cells whether they need ramps
-                    AddCellToUndoData(cellCoords);
-                    targetCell.Level--;
-                    targetCell.ChangeTileIndex(0, 0);
-                    foreach (Point2D surroundingCellOffset in SurroundingTiles)
-                    {
-                        RegisterCell(cellCoords + surroundingCellOffset);
-                    }
-
-                    MarkCellAsProcessed(cellCoords);
-                }
-            }
+            MarkCellAsProcessed(OriginCell);
 
             Process();
         }
@@ -109,11 +76,6 @@ namespace TSMapEditor.Mutations.Classes
             new TransitionRampInfo(RampType.MidSE, new() { HCT.HigherOrEqual, HCT.HigherOrEqual, HCT.Equal, HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.HigherOrEqual, HCT.HigherOrEqual, HCT.Higher }),
             new TransitionRampInfo(RampType.MidSW, new() { HCT.HigherOrEqual, HCT.Higher, HCT.HigherOrEqual, HCT.HigherOrEqual, HCT.Equal, HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.HigherOrEqual }),
 
-            new TransitionRampInfo(RampType.SteepSE, new() { HCT.LowerOrEqual, HCT.HigherOrEqual, HCT.Higher, HCT.MuchHigher, HCT.Higher, HCT.HigherOrEqual, HCT.LowerOrEqual, HCT.LowerOrEqual }),
-            new TransitionRampInfo(RampType.SteepSW, new() { HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.HigherOrEqual, HCT.Higher, HCT.MuchHigher, HCT.Higher, HCT.HigherOrEqual }),
-            new TransitionRampInfo(RampType.SteepNW, new() { HCT.Higher, HCT.HigherOrEqual, HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.HigherOrEqual, HCT.Higher, HCT.MuchHigher }),
-            new TransitionRampInfo(RampType.SteepNE, new() { HCT.Higher, HCT.MuchHigher, HCT.Higher, HCT.HigherOrEqual, HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.HigherOrEqual }),
-
             new TransitionRampInfo(RampType.DoubleUpSWNE, new() { HCT.Equal, HCT.Higher, HCT.Equal, HCT.Irrelevant, HCT.Equal, HCT.Higher, HCT.Equal, HCT.Irrelevant }),
             new TransitionRampInfo(RampType.DoubleDownSWNE, new() { HCT.Equal, HCT.Irrelevant, HCT.Equal, HCT.Higher, HCT.Equal, HCT.Irrelevant, HCT.Equal, HCT.Higher }),
 
@@ -142,19 +104,25 @@ namespace TSMapEditor.Mutations.Classes
             new TransitionRampInfo(RampType.MidSW, new() { HCT.Higher, HCT.HigherOrEqual, HCT.HigherOrEqual, HCT.HigherOrEqual, HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.HigherOrEqual }),
 
             // Special on-ramp-placement height fix checks
-            // new TransitionRampInfo(RampType.None, new() { HCT.Equal, HCT.Equal, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher }, 1),
-            // new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher, HCT.Equal, HCT.Equal }, 1),
-            // new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher, HCT.Higher }, 1),
-            // new TransitionRampInfo(RampType.None, new() { HCT.Equal, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal }, 1),
-            // new TransitionRampInfo(RampType.None, new() { HCT.Equal, HCT.Equal, HCT.Higher, HCT.Equal, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher }, 1),
-            // new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal, HCT.Equal }, 1),
-            // new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher }, 1),
-            // new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher, HCT.Higher }, 1),
-            // new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher, HCT.Higher, HCT.Higher }, 1),
-            // new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher }, 1),
-            // new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher }, 1),
-            // new TransitionRampInfo(RampType.None, new() { HCT.Equal, HCT.Equal, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher }, 1),
-            // new TransitionRampInfo(RampType.None, new() { HCT.Equal, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal }, 1),
+            new TransitionRampInfo(RampType.None, new() { HCT.Equal, HCT.Equal, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher }, 1),
+            new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher, HCT.Equal, HCT.Equal }, 1),
+            new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher, HCT.Higher }, 1),
+            new TransitionRampInfo(RampType.None, new() { HCT.Equal, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal }, 1),
+            new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal, HCT.Equal }, 1),
+            new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher }, 1),
+            new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher, HCT.Higher }, 1),
+            new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher, HCT.Higher, HCT.Higher }, 1),
+            new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher }, 1),
+            new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher }, 1),
+            new TransitionRampInfo(RampType.None, new() { HCT.Equal, HCT.Equal, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher }, 1),
+            new TransitionRampInfo(RampType.None, new() { HCT.Equal, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal }, 1),
+            new TransitionRampInfo(RampType.None, new() { HCT.Equal, HCT.HigherOrEqual, HCT.Higher, HCT.Equal, HCT.Higher, HCT.Equal, HCT.HigherOrEqual, HCT.Higher }, 1),
+            new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Equal, HCT.Higher, HCT.Equal, HCT.HigherOrEqual, HCT.Higher, HCT.Equal, HCT.HigherOrEqual }, 1),
+            new TransitionRampInfo(RampType.None, new() { HCT.HigherOrEqual, HCT.Higher, HCT.Equal, HCT.HigherOrEqual, HCT.Higher, HCT.Equal, HCT.Higher, HCT.Equal }, 1),
+            new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Equal, HCT.HigherOrEqual, HCT.Higher, HCT.Equal, HCT.HigherOrEqual, HCT.Higher, HCT.Equal }, 1),
+
+            new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Irrelevant, HCT.Irrelevant, HCT.Irrelevant, HCT.Higher, HCT.Irrelevant, HCT.Irrelevant, HCT.Irrelevant }, 1),
+            new TransitionRampInfo(RampType.None, new() { HCT.Irrelevant, HCT.Irrelevant, HCT.Higher, HCT.Irrelevant, HCT.Higher, HCT.Irrelevant, HCT.Higher, HCT.Irrelevant }, 1),
 
             // In case it's anything else, we probably need to flatten it
             new TransitionRampInfo(RampType.None, new() { HCT.Irrelevant, HCT.Irrelevant, HCT.Irrelevant, HCT.Irrelevant, HCT.Irrelevant, HCT.Irrelevant, HCT.Irrelevant, HCT.Irrelevant }, 0),
@@ -261,42 +229,21 @@ namespace TSMapEditor.Mutations.Classes
 
             int biggestHeightDiff = 0;
 
-            var northernCell = Map.GetTile(cellCoords + new Point2D(0, -1));
-            if (northernCell != null && northernCell.Level < thisCell.Level)
+            for (int direction = 0; direction < (int)Direction.Count; direction++)
             {
-                biggestHeightDiff = Math.Max(biggestHeightDiff, thisCell.Level - northernCell.Level);
+                var cell = Map.GetTile(cellCoords + Helpers.VisualDirectionToPoint((Direction)direction));
+                if (cell == null)
+                    continue;
+
+                if (cell.Level > thisCell.Level)
+                    biggestHeightDiff = Math.Max(biggestHeightDiff, cell.Level - thisCell.Level);
             }
 
-            var southernCell = Map.GetTile(cellCoords + new Point2D(0, 1));
-            if (southernCell != null && southernCell.Level < thisCell.Level)
-            {
-                biggestHeightDiff = Math.Max(biggestHeightDiff, thisCell.Level - southernCell.Level);
-            }
-
-            var westernCell = Map.GetTile(cellCoords + new Point2D(-1, 0));
-            if (westernCell != null && westernCell.Level < thisCell.Level)
-            {
-                biggestHeightDiff = Math.Max(biggestHeightDiff, thisCell.Level - westernCell.Level);
-            }
-
-            var easternCell = Map.GetTile(cellCoords + new Point2D(1, 0));
-            if (easternCell != null && easternCell.Level < thisCell.Level)
-            {
-                biggestHeightDiff = Math.Max(biggestHeightDiff, thisCell.Level - easternCell.Level);
-            }
-
-            // If nearby cells are lower by more than 1 cell, it's necessary to also lower this cell
+            // If nearby cells are raised by more than 1 cell, it's necessary to also raise this cell
             if (biggestHeightDiff > 1)
             {
                 AddCellToUndoData(thisCell.CoordsToPoint());
-
-                if (thisCell.Level > 0)
-                {
-                    if (thisCell.Level >= (biggestHeightDiff - 1))
-                        thisCell.Level = (byte)(thisCell.Level - (biggestHeightDiff - 1));
-                    else
-                        thisCell.Level--;
-                }
+                thisCell.Level += (byte)(biggestHeightDiff - 1);
 
                 foreach (Point2D offset in SurroundingTiles)
                 {
@@ -387,14 +334,14 @@ namespace TSMapEditor.Mutations.Classes
                 // If a cell has higher cells on both of its sides in a straight diagonal line,
                 // we need to normalize its height to be on the same level with the diagonal sides,
                 // because no "one cell" depression exists
-                // cellsToCheck.ForEach(cc => CellHeightFix_CheckStraightDiagonalLine(cc, newCells, true));
-                // cellsToCheck.ForEach(cc => CellHeightFix_CheckStraightDiagonalLine(cc, newCells, false));
+                cellsToCheck.ForEach(cc => CellHeightFix_CheckStraightDiagonalLine(cc, newCells, true));
+                cellsToCheck.ForEach(cc => CellHeightFix_CheckStraightDiagonalLine(cc, newCells, false));
 
                 // If a cell has a two-levels-higher cell next to it on a horizontal or vertical line,
                 // and a one-level-higher cell next to it on the opposite side,
                 // we need to increase its level by 1
-                // totalProcessedCells.ForEach(cc => CellHeightFix_DifferentHeightDiffsOnStraightLine(cc, new Point2D(1, -1), new Point2D(-1, 1)));
-                // totalProcessedCells.ForEach(cc => CellHeightFix_DifferentHeightDiffsOnStraightLine(cc, new Point2D(-1, -1), new Point2D(1, 1)));
+                totalProcessedCells.ForEach(cc => CellHeightFix_DifferentHeightDiffsOnStraightLine(cc, new Point2D(1, -1), new Point2D(-1, 1)));
+                totalProcessedCells.ForEach(cc => CellHeightFix_DifferentHeightDiffsOnStraightLine(cc, new Point2D(-1, -1), new Point2D(1, 1)));
 
                 // Special height fixes
                 totalProcessedCells.ForEach(cc =>
@@ -411,7 +358,7 @@ namespace TSMapEditor.Mutations.Classes
                     {
                         AddCellToUndoData(cell.CoordsToPoint());
                         cell.ChangeTileIndex(0, 0);
-                        cell.Level = (byte)(cell.Level + applyingTransition.HeightChange);
+                        cell.Level += (byte)applyingTransition.HeightChange;
 
                         // If we fixed this flaw from one cell, also check the surrounding ones
                         foreach (var surroundingCell in SurroundingTiles)
@@ -422,7 +369,7 @@ namespace TSMapEditor.Mutations.Classes
                     }
                 });
 
-                var cellsForNextRound = newCells.Where(c => !cellsToCheck.Contains(c));
+                var cellsForNextRound = newCells; //.Where(c => !cellsToCheck.Contains(c));
                 cellsToCheck.Clear();
                 cellsToCheck.AddRange(cellsForNextRound);
                 totalProcessedCells.AddRange(cellsForNextRound.Where(c => !totalProcessedCells.Contains(c)));
@@ -476,7 +423,7 @@ namespace TSMapEditor.Mutations.Classes
 
                         if (transitionRampInfo.HeightChange != 0)
                         {
-                            cell.Level = (byte)(cell.Level + transitionRampInfo.HeightChange);
+                            cell.Level += (byte)transitionRampInfo.HeightChange;
                         }
 
                         break;

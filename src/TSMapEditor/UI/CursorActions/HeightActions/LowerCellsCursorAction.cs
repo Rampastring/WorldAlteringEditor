@@ -1,16 +1,16 @@
 ﻿using TSMapEditor.GameMath;
-using TSMapEditor.Mutations.Classes;
+using TSMapEditor.Mutations.Classes.HeightMutations;
 using TSMapEditor.Rendering;
 
-namespace TSMapEditor.UI.CursorActions
+namespace TSMapEditor.UI.CursorActions.HeightActions
 {
-    internal class RaiseCellsCursorAction : CursorAction
+    internal class LowerCellsCursorAction : CursorAction
     {
-        public RaiseCellsCursorAction(ICursorActionTarget cursorActionTarget) : base(cursorActionTarget)
+        public LowerCellsCursorAction(ICursorActionTarget cursorActionTarget) : base(cursorActionTarget)
         {
         }
 
-        public override string GetName() => "Raise Cells";
+        public override string GetName() => "Lower Cells";
 
         public override bool DrawCellCursor => true;
 
@@ -20,7 +20,7 @@ namespace TSMapEditor.UI.CursorActions
 
             Point2D targetCellCoords = cellCoords - new Point2D(CursorActionTarget.BrushSize.Width / 2, CursorActionTarget.BrushSize.Height / 2);
 
-            var mutation = new RaiseCellsMutation(CursorActionTarget.MutationTarget, targetCellCoords, CursorActionTarget.BrushSize);
+            var mutation = new LowerCellsMutation(CursorActionTarget.MutationTarget, targetCellCoords, CursorActionTarget.BrushSize);
             CursorActionTarget.MutationManager.PerformMutation(mutation);
         }
     }

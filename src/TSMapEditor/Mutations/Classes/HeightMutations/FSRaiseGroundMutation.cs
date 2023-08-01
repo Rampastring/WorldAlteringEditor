@@ -3,171 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
-using TSMapEditor.Models;
 using TSMapEditor.Models.Enums;
+using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI;
+using HCT = TSMapEditor.Mutations.Classes.HeightMutations.HeightComparisonType;
 
-namespace TSMapEditor.Mutations.Classes
+namespace TSMapEditor.Mutations.Classes.HeightMutations
 {
-    using HCT = HeightComparisonType;
-
-    /// <summary>
-    /// Defines what kind of comparison to use when comparing the height of a cell
-    /// to the height of another cell.
-    /// </summary>
-    enum HeightComparisonType
+    public class FSRaiseGroundMutation : Mutation
     {
-        /// <summary>
-        /// The height of the other cell is irrelevant for the resulting ramp type.
-        /// </summary>
-        Irrelevant,
-
-        /// <summary>
-        /// The other cell must be higher by 1 level.
-        /// </summary>
-        Higher,
-
-        /// <summary>
-        /// The other cell must be higher by 2 or more levels.
-        /// </summary>
-        MuchHigher,
-
-        /// <summary>
-        /// The other cell must be higher (by 1 level) or equal.
-        /// </summary>
-        HigherOrEqual,
-
-        /// <summary>
-        /// The other cell must be lower by 1 level.
-        /// </summary>
-        Lower,
-
-        /// <summary>
-        /// The other cell must be lower by 2 or more levels.
-        /// </summary>
-        MuchLower,
-
-        /// <summary>
-        /// The other cell must be lower or equal.
-        /// </summary>
-        LowerOrEqual,
-
-        /// <summary>
-        /// The other cell must be equal.
-        /// </summary>
-        Equal
-    }
-
-    /// <summary>
-    /// Defines a condition for applying a ramp on a cell based on the 
-    /// height level difference between it and its neighbouring cells.
-    /// </summary>
-    class TransitionRampInfo
-    {
-        public TransitionRampInfo(RampType rampType, List<HCT> comparisonTypesForDirections, int heightChange = 0)
+        public FSRaiseGroundMutation(IMutationTarget mutationTarget, Point2D originCell, BrushSize brushSize) : base(mutationTarget)
         {
-            RampType = rampType;
-            ComparisonTypesForDirections = comparisonTypesForDirections;
-            HeightChange = heightChange;
-
-            if (comparisonTypesForDirections.Count != (int)Direction.Count)
-            {
-                throw new ArgumentException($"The length of {nameof(comparisonTypesForDirections)} must match " +
-                    $"the number of primary directions in the game ({Direction.Count})");
-            }
-        }
-
-        public readonly RampType RampType;
-
-        public readonly List<HCT> ComparisonTypesForDirections;
-
-        public int HeightChange { get; }
-
-        public bool Matches(Map map, Point2D cellCoords, int cellHeight)
-        {
-            for (int i = 0; i < (int)Direction.Count; i++)
-            {
-                var offset = Helpers.VisualDirectionToPoint((Direction)i);
-
-                var otherCellCoords = cellCoords + offset;
-                var otherCell = map.GetTile(otherCellCoords);
-                if (otherCell == null)
-                    continue;
-
-                HCT expected = ComparisonTypesForDirections[i];
-
-                switch (expected)
-                {
-                    case HCT.Irrelevant:
-                        continue;
-
-                    case HCT.Higher:
-                        if (otherCell.Level != cellHeight + 1)
-                            return false;
-                        break;
-
-                    case HCT.MuchHigher:
-                        if (otherCell.Level - cellHeight < 2)
-                            return false;
-                        break;
-
-                    case HCT.HigherOrEqual:
-                        if (otherCell.Level < cellHeight /*|| otherCell.Level - cellHeight > 1*/)
-                            return false;
-                        break;
-
-                    case HCT.Lower:
-                        if (otherCell.Level != cellHeight - 1)
-                            return false;
-                        break;
-
-                    case HCT.MuchLower:
-                        if (cellHeight - otherCell.Level < 2)
-                            return false;
-                        break;
-
-                    case HCT.LowerOrEqual:
-                        if (otherCell.Level > cellHeight /*|| cellHeight - otherCell.Level > 1*/)
-                            return false;
-                        break;
-
-                    case HCT.Equal:
-                        if (otherCell.Level != cellHeight)
-                            return false;
-                        break;
-                }
-            }
-
-            return true;
-        }
-    }
-
-    /// <summary>
-    /// Struct for the undo data of mutations based on this class.
-    /// </summary>
-    struct AlterGroundElevationUndoData
-    {
-        public Point2D CellCoords;
-        public int TileIndex;
-        public int SubTileIndex;
-        public int HeightLevel;
-
-        public AlterGroundElevationUndoData(Point2D cellCoords, int tileIndex, int subTileIndex, int heightLevel)
-        {
-            CellCoords = cellCoords;
-            TileIndex = tileIndex;
-            SubTileIndex = subTileIndex;
-            HeightLevel = heightLevel;
-        }
-    }
-
-    public abstract class AlterGroundElevationMutation : Mutation
-    {
-        public AlterGroundElevationMutation(IMutationTarget mutationTarget, Point2D originCell, BrushSize brushSize) : base(mutationTarget)
-        {
-            this.OriginCell = originCell;
-            this.BrushSize = brushSize;
+            OriginCell = originCell;
+            BrushSize = brushSize;
             RampTileSet = Map.TheaterInstance.Theater.RampTileSet;
         }
 
@@ -198,11 +47,6 @@ namespace TSMapEditor.Mutations.Classes
             new TransitionRampInfo(RampType.MidNE, new() { HCT.Equal, HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.HigherOrEqual, HCT.HigherOrEqual, HCT.Higher, HCT.HigherOrEqual, HCT.HigherOrEqual }),
             new TransitionRampInfo(RampType.MidSE, new() { HCT.HigherOrEqual, HCT.HigherOrEqual, HCT.Equal, HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.HigherOrEqual, HCT.HigherOrEqual, HCT.Higher }),
             new TransitionRampInfo(RampType.MidSW, new() { HCT.HigherOrEqual, HCT.Higher, HCT.HigherOrEqual, HCT.HigherOrEqual, HCT.Equal, HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.HigherOrEqual }),
-
-            new TransitionRampInfo(RampType.SteepSE, new() { HCT.LowerOrEqual, HCT.HigherOrEqual, HCT.Higher, HCT.MuchHigher, HCT.Higher, HCT.HigherOrEqual, HCT.LowerOrEqual, HCT.LowerOrEqual }),
-            new TransitionRampInfo(RampType.SteepSW, new() { HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.HigherOrEqual, HCT.Higher, HCT.MuchHigher, HCT.Higher, HCT.HigherOrEqual }),
-            new TransitionRampInfo(RampType.SteepNW, new() { HCT.Higher, HCT.HigherOrEqual, HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.HigherOrEqual, HCT.Higher, HCT.MuchHigher }),
-            new TransitionRampInfo(RampType.SteepNE, new() { HCT.Higher, HCT.MuchHigher, HCT.Higher, HCT.HigherOrEqual, HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.HigherOrEqual }),
 
             new TransitionRampInfo(RampType.DoubleUpSWNE, new() { HCT.Equal, HCT.Higher, HCT.Equal, HCT.Irrelevant, HCT.Equal, HCT.Higher, HCT.Equal, HCT.Irrelevant }),
             new TransitionRampInfo(RampType.DoubleDownSWNE, new() { HCT.Equal, HCT.Irrelevant, HCT.Equal, HCT.Higher, HCT.Equal, HCT.Irrelevant, HCT.Equal, HCT.Higher }),
@@ -262,8 +106,107 @@ namespace TSMapEditor.Mutations.Classes
             new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Equal, HCT.Equal }, 1),
         };
 
-        protected static readonly Point2D[] SurroundingTiles = new Point2D[] { new Point2D(-1, 0), new Point2D(1, 0), new Point2D(0, -1), new Point2D(0, 1), 
+        protected static readonly Point2D[] SurroundingTiles = new Point2D[] { new Point2D(-1, 0), new Point2D(1, 0), new Point2D(0, -1), new Point2D(0, 1),
                                                                              new Point2D(-1, -1), new Point2D(-1, 1), new Point2D(1, -1), new Point2D(1, 1) };
+
+
+        public override void Perform() => RaiseGround();
+
+
+        private void RaiseGround()
+        {
+            var targetCell = Map.GetTile(OriginCell);
+
+            if (targetCell == null || targetCell.Level >= Constants.MaxMapHeightLevel || !targetCell.IsClearGround() && !RampTileSet.ContainsTile(targetCell.TileIndex))
+                return;
+
+            int targetCellHeight = targetCell.Level;
+
+            int xSize = BrushSize.Width - 2;
+            int ySize = BrushSize.Height - 2;
+
+            // Special case for 2x2 brush.
+            // Check if we can create a 2x2 "hill". If yes, then do so.
+            // Otherwise, process it as 1x1.
+            if (BrushSize.Width == 2 && BrushSize.Height == 2)
+            {
+                bool canCreateSmallHill = true;
+                int height = targetCell.Level;
+                BrushSize.DoForBrushSize(offset =>
+                {
+                    var otherCellCoords = OriginCell + offset;
+                    var otherCell = Map.GetTile(otherCellCoords);
+                    if (otherCell == null || !otherCell.IsClearGround() || otherCell.Level != height)
+                        canCreateSmallHill = false;
+                });
+
+                if (canCreateSmallHill)
+                {
+                    CreateSmallHill(OriginCell);
+                    return;
+                }
+            }
+
+            // If the brush size is 1, only process it if the target cell is a ramp.
+            // If it is not a ramp, then we'd need to raise the cell's height,
+            // which would always result in it affecting more than 1 cell,
+            // which wouldn't be logical with the brush size.
+            if (BrushSize.Width == 1 || BrushSize.Height == 1)
+            {
+                if (!RampTileSet.ContainsTile(targetCell.TileIndex))
+                    return;
+            }
+
+            int beginY = OriginCell.Y - ySize / 2;
+            int endY = OriginCell.Y + ySize / 2;
+            int beginX = OriginCell.X - xSize / 2;
+            int endX = OriginCell.X + xSize / 2;
+
+            // For all other brush sizes we can have a generic implementation
+            for (int y = beginY; y <= endY; y++)
+            {
+                for (int x = beginX; x <= endX; x++)
+                {
+                    var cellCoords = new Point2D(x, y);
+                    targetCell = Map.GetTile(cellCoords);
+                    if (targetCell == null || targetCell.Level >= Constants.MaxMapHeightLevel)
+                        continue;
+
+                    // Only raise ground that was on the same level with our original target cell,
+                    // otherwise things get illogical
+                    if (targetCell.Level != targetCellHeight)
+                        continue;
+
+                    // Raise this cell and check surrounding cells whether they need ramps
+                    AddCellToUndoData(cellCoords);
+                    targetCell.Level++;
+                    targetCell.ChangeTileIndex(0, 0);
+                    foreach (Point2D surroundingCellOffset in SurroundingTiles)
+                    {
+                        RegisterCell(cellCoords + surroundingCellOffset);
+                    }
+
+                    MarkCellAsProcessed(cellCoords);
+                }
+            }
+
+            Process();
+        }
+
+        private void CreateSmallHill(Point2D cellCoords)
+        {
+            AddCellToUndoData(cellCoords);
+            AddCellToUndoData(cellCoords + new Point2D(1, 0));
+            AddCellToUndoData(cellCoords + new Point2D(0, 1));
+            AddCellToUndoData(cellCoords + new Point2D(1, 1));
+
+            Map.GetTile(cellCoords).ChangeTileIndex(RampTileSet.StartTileIndex + ((int)RampType.CornerNW - 1), 0);
+            Map.GetTile(cellCoords + new Point2D(1, 0)).ChangeTileIndex(RampTileSet.StartTileIndex + ((int)RampType.CornerNE - 1), 0);
+            Map.GetTile(cellCoords + new Point2D(0, 1)).ChangeTileIndex(RampTileSet.StartTileIndex + ((int)RampType.CornerSW - 1), 0);
+            Map.GetTile(cellCoords + new Point2D(1, 1)).ChangeTileIndex(RampTileSet.StartTileIndex + ((int)RampType.CornerSE - 1), 0);
+
+            MutationTarget.InvalidateMap();
+        }
 
 
         /// <summary>
@@ -357,28 +300,14 @@ namespace TSMapEditor.Mutations.Classes
 
             int biggestHeightDiff = 0;
 
-            var northernCell = Map.GetTile(cellCoords + new Point2D(0, -1));
-            if (northernCell != null && northernCell.Level > thisCell.Level)
+            for (int direction = 0; direction < (int)Direction.Count; direction++)
             {
-                biggestHeightDiff = Math.Max(biggestHeightDiff, northernCell.Level - thisCell.Level);
-            }
+                var cell = Map.GetTile(cellCoords + Helpers.VisualDirectionToPoint((Direction)direction));
+                if (cell == null)
+                    continue;
 
-            var southernCell = Map.GetTile(cellCoords + new Point2D(0, 1));
-            if (southernCell != null && southernCell.Level > thisCell.Level)
-            {
-                biggestHeightDiff = Math.Max(biggestHeightDiff, southernCell.Level - thisCell.Level);
-            }
-
-            var westernCell = Map.GetTile(cellCoords + new Point2D(-1, 0));
-            if (westernCell != null && westernCell.Level > thisCell.Level)
-            {
-                biggestHeightDiff = Math.Max(biggestHeightDiff, westernCell.Level - thisCell.Level);
-            }
-            
-            var easternCell = Map.GetTile(cellCoords + new Point2D(1, 0));
-            if (easternCell != null && easternCell.Level > thisCell.Level)
-            {
-                biggestHeightDiff = Math.Max(biggestHeightDiff, easternCell.Level - thisCell.Level);
+                if (cell.Level > thisCell.Level)
+                    biggestHeightDiff = Math.Max(biggestHeightDiff, cell.Level - thisCell.Level);
             }
 
             // If nearby cells are raised by more than 1 cell, it's necessary to also raise this cell
@@ -562,7 +491,7 @@ namespace TSMapEditor.Mutations.Classes
                         {
                             cell.ChangeTileIndex(RampTileSet.StartTileIndex + ((int)transitionRampInfo.RampType - 1), 0);
                         }
-                        
+
                         if (transitionRampInfo.HeightChange != 0)
                         {
                             cell.Level += (byte)transitionRampInfo.HeightChange;
