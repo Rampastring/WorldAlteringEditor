@@ -878,9 +878,14 @@ namespace TSMapEditor.Models
 
         public void RemoveAircraft(Aircraft aircraft)
         {
-            var cell = GetTile(aircraft.Position);
+            RemoveAircraft(aircraft.Position);
+        }
+
+        public void RemoveAircraft(Point2D cellCoords)
+        {
+            var cell = GetTile(cellCoords);
+            Aircraft.Remove(cell.Aircraft);
             cell.Aircraft = null;
-            Aircraft.Remove(aircraft);
         }
 
         public void MoveAircraft(Aircraft aircraft, Point2D newCoords)
@@ -929,10 +934,11 @@ namespace TSMapEditor.Models
         /// <summary>
         /// Determines whether an object can be moved to a specific location.
         /// </summary>
-        /// <param name="gameObject">The object to move.</param>
+        /// <param name="movable">The object to move.</param>
         /// <param name="newCoords">The new coordinates of the object.</param>
+        /// <param name="considerSelf">Determines whether the object itself can be considered as blocking placement of the object.</param>
         /// <returns>True if the object can be moved, otherwise false.</returns>
-        public bool CanMoveObject(IMovable movable, Point2D newCoords)
+        public bool CanPlaceObjectAt(IMovable movable, Point2D newCoords, bool considerSelf)
         {
             if (movable.WhatAmI() == RTTIType.Building)
             {
@@ -944,7 +950,7 @@ namespace TSMapEditor.Models
                     if (foundationCell == null)
                         return;
 
-                    if (foundationCell.Structure != null && foundationCell.Structure != movable)
+                    if (foundationCell.Structure != null && (!considerSelf || foundationCell.Structure != movable))
                         canPlace = false;
                 });
 

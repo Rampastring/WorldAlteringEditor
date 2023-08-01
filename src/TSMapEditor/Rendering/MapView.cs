@@ -946,7 +946,9 @@ namespace TSMapEditor.Rendering
 
         private void DrawRangeIndicator(Point2D cellCoords, double range, Color color)
         {
-            Point2D center = CellMath.CellCenterPointFromCellCoords_3D(cellCoords, Map);
+            Point2D center = EditorState.Is2DMode ? 
+                CellMath.CellCenterPointFromCellCoords(cellCoords, Map) : 
+                CellMath.CellCenterPointFromCellCoords_3D(cellCoords, Map);
 
             // Range is specified in "tile edge lengths",
             // so we need a bit of trigonometry
@@ -989,7 +991,17 @@ namespace TSMapEditor.Rendering
 
                         if (tileUnderCursor != null && tileUnderCursor.CoordsToPoint() != draggedOrRotatedObject.Position)
                         {
-                            if (Map.CanMoveObject(draggedOrRotatedObject, tileUnderCursor.CoordsToPoint()))
+                            // If the clone modifier is held down, attempt cloning the object.
+                            // Otherwise, move the dragged object.
+                            if (KeyboardCommands.Instance.CloneObject.AreKeysOrModifiersDown(Keyboard))
+                            {
+                                if (Map.CanPlaceObjectAt(draggedOrRotatedObject, tileUnderCursor.CoordsToPoint(), true))
+                                {
+                                    var mutation = new CloneObjectMutation(MutationTarget, draggedOrRotatedObject, tileUnderCursor.CoordsToPoint());
+                                    MutationManager.PerformMutation(mutation);
+                                }
+                            }
+                            else if (Map.CanPlaceObjectAt(draggedOrRotatedObject, tileUnderCursor.CoordsToPoint(), false))
                             {
                                 var mutation = new MoveObjectMutation(MutationTarget, draggedOrRotatedObject, tileUnderCursor.CoordsToPoint());
                                 MutationManager.PerformMutation(mutation);
@@ -1226,8 +1238,10 @@ namespace TSMapEditor.Rendering
 
             if (isDraggingObject)
             {
-                Color lineColor = Color.White;
-                if (!Map.CanMoveObject(draggedOrRotatedObject, tileUnderCursor.CoordsToPoint()))
+                bool isCloning = KeyboardCommands.Instance.CloneObject.AreKeysOrModifiersDown(Keyboard);
+
+                Color lineColor = isCloning ? new Color(0, 255, 255) : Color.White;
+                if (!Map.CanPlaceObjectAt(draggedOrRotatedObject, tileUnderCursor.CoordsToPoint(), isCloning))
                     lineColor = Color.Red;
 
                 Point2D cameraAndCellCenterOffset = new Point2D(-Camera.TopLeftPoint.X + Constants.CellSizeX / 2,

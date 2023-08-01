@@ -33,6 +33,7 @@ namespace TSMapEditor.UI
                 RotateUnitOneStep,
                 PlaceTerrainBelow,
                 FillTerrain,
+                CloneObject,
                 ViewMegamap,
                 GenerateTerrain,
                 ConfigureTerrainGenerator,
@@ -105,6 +106,7 @@ namespace TSMapEditor.UI
         public KeyboardCommand RotateUnitOneStep { get; } = new KeyboardCommand("RotateUnitOneStep", "Rotate Object One Step", new KeyboardCommandInput(Keys.A, KeyboardModifiers.Shift));
         public KeyboardCommand PlaceTerrainBelow { get; } = new KeyboardCommand("PlaceTerrainBelow", "Place Terrain Below Cursor", new KeyboardCommandInput(Keys.None, KeyboardModifiers.Alt), true);
         public KeyboardCommand FillTerrain { get; } = new KeyboardCommand("FillTerrain", "Fill Terrain (1x1 tiles only)", new KeyboardCommandInput(Keys.None, KeyboardModifiers.Ctrl), true);
+        public KeyboardCommand CloneObject { get; } = new KeyboardCommand("CloneObject", "Clone Object (Modifier)", new KeyboardCommandInput(Keys.None, KeyboardModifiers.Shift), true);
         public KeyboardCommand ViewMegamap { get; } = new KeyboardCommand("ViewMegamap", "View Megamap", new KeyboardCommandInput(Keys.F12, KeyboardModifiers.None));
         public KeyboardCommand GenerateTerrain { get; } = new KeyboardCommand("GenerateTerrain", "Generate Terrain", new KeyboardCommandInput(Keys.G, KeyboardModifiers.Ctrl));
         public KeyboardCommand ConfigureTerrainGenerator { get; } = new KeyboardCommand("ConfigureTerrainGenerator", "Configure Terrain Generator", new KeyboardCommandInput(Keys.G, KeyboardModifiers.Alt));

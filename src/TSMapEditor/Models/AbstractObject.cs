@@ -13,5 +13,10 @@
                    rtti == RTTIType.Unit || 
                    rtti == RTTIType.Building;
         }
+
+        public virtual AbstractObject Clone()
+        {
+            return (AbstractObject)MemberwiseClone();
+        }
     }
 }
