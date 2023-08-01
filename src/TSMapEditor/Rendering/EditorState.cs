@@ -20,6 +20,7 @@ namespace TSMapEditor.Rendering
         public event EventHandler HighlightIceGrowthChanged;
         public event EventHandler BrushSizeChanged;
         public event EventHandler MarbleMadnessChanged;
+        public event EventHandler Is2DModeChanged;
 
         private CursorAction _cursorAction;
         public CursorAction CursorAction
@@ -164,6 +165,20 @@ namespace TSMapEditor.Rendering
                 {
                     _isMarbleMadness = value;
                     MarbleMadnessChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+
+        private bool _is2DMode = false;
+        public bool Is2DMode
+        {
+            get => _is2DMode;
+            set
+            {
+                if (value != _is2DMode)
+                {
+                    _is2DMode = value;
+                    Is2DModeChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }

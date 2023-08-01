@@ -43,7 +43,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             Point2D drawPointWithoutCellHeight = CellMath.CellTopLeftPointFromCellCoords(gameObject.Position, RenderDependencies.Map);
 
             var mapCell = RenderDependencies.Map.GetTile(gameObject.Position);
-            int heightOffset = mapCell.Level * Constants.CellHeight;
+            int heightOffset = RenderDependencies.EditorState.Is2DMode ? 0 : mapCell.Level * Constants.CellHeight;
             Point2D drawPoint = new Point2D(drawPointWithoutCellHeight.X, drawPointWithoutCellHeight.Y - heightOffset);
 
             CommonDrawParams drawParams = GetDrawParams(gameObject);

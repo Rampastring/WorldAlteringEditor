@@ -8,6 +8,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
     {
         public Map Map;
         public TheaterGraphics TheaterGraphics;
+        public EditorState EditorState;
         public GraphicsDevice GraphicsDevice;
         public Effect ColorDrawEffect;
         public Camera Camera;
@@ -17,16 +18,18 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
 
         public RenderDependencies(Map map, 
-            TheaterGraphics theaterGraphics, 
-            GraphicsDevice graphicsDevice, 
-            Effect colorDrawEffect, 
-            Camera camera, 
-            Func<int> getCameraRightXCoord, 
-            Func<int> getCameraBottomYCoord, 
+            TheaterGraphics theaterGraphics,
+            EditorState editorState,
+            GraphicsDevice graphicsDevice,
+            Effect colorDrawEffect,
+            Camera camera,
+            Func<int> getCameraRightXCoord,
+            Func<int> getCameraBottomYCoord,
             RenderTarget2D depthRenderTarget)
         {
             Map = map;
             TheaterGraphics = theaterGraphics;
+            EditorState = editorState;
             GraphicsDevice = graphicsDevice;
             ColorDrawEffect = colorDrawEffect;
             Camera = camera;

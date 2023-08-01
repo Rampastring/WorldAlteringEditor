@@ -28,6 +28,7 @@ namespace TSMapEditor.UI
                 DeleteObject,
                 ToggleAutoLAT,
                 ToggleMapWideOverlay,
+                Toggle2DMode,
                 RotateUnit,
                 RotateUnitOneStep,
                 PlaceTerrainBelow,
@@ -46,6 +47,11 @@ namespace TSMapEditor.UI
                 OverlayMenu,
                 SmudgeMenu
             };
+
+            // Theoretically not optimal for performance, but
+            // cleaner this way
+            if (Constants.IsFlatWorld)
+                Commands.Remove(Toggle2DMode);
         }
 
         public void ReadFromSettings()
@@ -94,6 +100,7 @@ namespace TSMapEditor.UI
         public KeyboardCommand DeleteObject { get; } = new KeyboardCommand("DeleteObject", "Delete Object", new KeyboardCommandInput(Keys.Delete, KeyboardModifiers.None));
         public KeyboardCommand ToggleAutoLAT { get; } = new KeyboardCommand("ToggleAutoLAT", "Toggle AutoLAT", new KeyboardCommandInput(Keys.L, KeyboardModifiers.Ctrl));
         public KeyboardCommand ToggleMapWideOverlay { get; } = new KeyboardCommand("ToggleMapWideOverlay", "Toggle Map-Wide Overlay", new KeyboardCommandInput(Keys.F2, KeyboardModifiers.None));
+        public KeyboardCommand Toggle2DMode { get; } = new KeyboardCommand("Toggle2DMode", "Toggle 2D Mode", new KeyboardCommandInput(Keys.D, KeyboardModifiers.Shift));
         public KeyboardCommand RotateUnit { get; } = new KeyboardCommand("RotateUnit", "Rotate Unit", new KeyboardCommandInput(Keys.A, KeyboardModifiers.None));
         public KeyboardCommand RotateUnitOneStep { get; } = new KeyboardCommand("RotateUnitOneStep", "Rotate Object One Step", new KeyboardCommandInput(Keys.A, KeyboardModifiers.Shift));
         public KeyboardCommand PlaceTerrainBelow { get; } = new KeyboardCommand("PlaceTerrainBelow", "Place Terrain Below Cursor", new KeyboardCommandInput(Keys.None, KeyboardModifiers.Alt), true);

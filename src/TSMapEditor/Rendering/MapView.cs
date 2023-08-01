@@ -186,6 +186,7 @@ namespace TSMapEditor.Rendering
             Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
             KeyboardCommands.Instance.FrameworkMode.Triggered += FrameworkMode_Triggered;
             KeyboardCommands.Instance.ViewMegamap.Triggered += ViewMegamap_Triggered;
+            KeyboardCommands.Instance.Toggle2DMode.Triggered += Toggle2DMode_Triggered;
 
             windowController.Initialized += PostWindowControllerInit;
             Map.LocalSizeChanged += (s, e) => InvalidateMap();
@@ -226,6 +227,7 @@ namespace TSMapEditor.Rendering
             Keyboard.OnKeyPressed -= Keyboard_OnKeyPressed;
             KeyboardCommands.Instance.FrameworkMode.Triggered -= FrameworkMode_Triggered;
             KeyboardCommands.Instance.ViewMegamap.Triggered -= ViewMegamap_Triggered;
+            KeyboardCommands.Instance.Toggle2DMode.Triggered -= Toggle2DMode_Triggered;
             KeyboardCommands.Instance.RotateUnitOneStep.Triggered -= RotateUnitOneStep_Triggered;
 
             ClearRenderTargets();
@@ -309,7 +311,7 @@ namespace TSMapEditor.Rendering
 
         private RenderDependencies CreateRenderDependencies()
         {
-            return new RenderDependencies(Map, TheaterGraphics, GraphicsDevice, colorDrawEffect, Camera, GetCameraRightXCoord, GetCameraBottomYCoord, depthRenderTarget);
+            return new RenderDependencies(Map, TheaterGraphics, EditorState, GraphicsDevice, colorDrawEffect, Camera, GetCameraRightXCoord, GetCameraBottomYCoord, depthRenderTarget);
         }
 
         private void InitRenderers()
@@ -331,6 +333,15 @@ namespace TSMapEditor.Rendering
         private void FrameworkMode_Triggered(object sender, EventArgs e)
         {
             EditorState.IsMarbleMadness = !EditorState.IsMarbleMadness;
+            InvalidateMap();
+        }
+
+        private void Toggle2DMode_Triggered(object sender, EventArgs e)
+        {
+            if (Constants.IsFlatWorld)
+                return;
+
+            EditorState.Is2DMode = !EditorState.Is2DMode;
             InvalidateMap();
         }
 
@@ -609,7 +620,9 @@ namespace TSMapEditor.Rendering
                 tile.LastRefreshIndex = refreshIndex;
 
             int originalDrawPointY = drawPoint.Y;
-            drawPoint -= new Point2D(0, (Constants.CellSizeY / 2) * level);
+
+            if (!EditorState.Is2DMode)
+                drawPoint -= new Point2D(0, (Constants.CellSizeY / 2) * level);
 
             if (subTileIndex >= tileImage.TMPImages.Length)
             {
@@ -639,7 +652,7 @@ namespace TSMapEditor.Rendering
                     Constants.CellSizeX, Constants.CellSizeY), null, Color.White, 0f, Vector2.Zero, SpriteEffects.None, 0f);
             }
 
-            if (tmpImage.ExtraTexture != null)
+            if (tmpImage.ExtraTexture != null && !EditorState.Is2DMode)
             {
                 // Most extra graphics are drawn above the regular terrain, this gives
                 // us a kind-of smooth depth transition for them
@@ -828,7 +841,7 @@ namespace TSMapEditor.Rendering
             Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(waypoint.Position, Map);
 
             var cell = Map.GetTile(waypoint.Position);
-            if (cell != null)
+            if (cell != null && !EditorState.Is2DMode)
                 drawPoint -= new Point2D(0, cell.Level * Constants.CellHeight);
 
             var rect = new Rectangle(drawPoint.X + waypointBorderOffsetX,
@@ -851,7 +864,9 @@ namespace TSMapEditor.Rendering
             const int cellTagBorderOffsetX = 12;
             const int cellTagBorderOffsetY = 4;
 
-            Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords_3D(cellTag.Position, Map);
+            Point2D drawPoint = EditorState.Is2DMode ? 
+                CellMath.CellTopLeftPointFromCellCoords(cellTag.Position, Map) : 
+                CellMath.CellTopLeftPointFromCellCoords_3D(cellTag.Position, Map);
 
             var rect = new Rectangle(drawPoint.X + cellTagBorderOffsetX,
                 drawPoint.Y + cellTagBorderOffsetY,
@@ -1101,7 +1116,10 @@ namespace TSMapEditor.Rendering
             windowController.MinimapWindow.CameraRectangle = new Rectangle(Camera.TopLeftPoint.ToXNAPoint(), new Point2D(Width, Height).ScaleBy(1.0 / Camera.ZoomLevel).ToXNAPoint());
 
             Point2D cursorMapPoint = GetCursorMapPoint();
-            Point2D tileCoords = CellMath.CellCoordsFromPixelCoords(cursorMapPoint, Map);
+            Point2D tileCoords = EditorState.Is2DMode ? 
+                CellMath.CellCoordsFromPixelCoords_2D(cursorMapPoint, Map) : 
+                CellMath.CellCoordsFromPixelCoords(cursorMapPoint, Map);
+
             var tile = Map.GetTile(tileCoords.X, tileCoords.Y);
 
             tileUnderCursor = tile;
@@ -1254,7 +1272,7 @@ namespace TSMapEditor.Rendering
             Color lineColor = new Color(96, 168, 96, 128);
             Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(new Point2D(tileUnderCursor.X, tileUnderCursor.Y), Map) - Camera.TopLeftPoint;
 
-            int height = tileUnderCursor.Level * Constants.CellHeight;
+            int height = EditorState.Is2DMode ? 0 : tileUnderCursor.Level * Constants.CellHeight;
 
             cellTopLeftPoint = new Point2D((int)(cellTopLeftPoint.X * Camera.ZoomLevel), (int)((cellTopLeftPoint.Y - height) * Camera.ZoomLevel));
 

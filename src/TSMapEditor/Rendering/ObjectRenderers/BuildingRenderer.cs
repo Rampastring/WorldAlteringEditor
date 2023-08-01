@@ -27,7 +27,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             int heightOffset = 0;
 
             var cell = map.GetTile(gameObject.Position);
-            if (cell != null)
+            if (cell != null && !RenderDependencies.EditorState.Is2DMode)
                 heightOffset = cell.Level * Constants.CellHeight;
 
             SetEffectParams(0.0f, 0.0f, Vector2.Zero, Vector2.Zero);
