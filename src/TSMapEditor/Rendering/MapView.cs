@@ -62,6 +62,25 @@ namespace TSMapEditor.Rendering
     {
         private const float RightClickScrollRateDivisor = 64f;
 
+        private static Color[] MarbleMadnessTileHeightLevelColors = new Color[]
+        {
+            new Color(165, 28, 68),
+            new Color(202, 149, 101),
+            new Color(170, 125, 76),
+            new Color(149, 109, 64),
+            new Color(133, 97, 56),
+            new Color(226, 101, 182),
+            new Color(194, 198, 255),
+            new Color(20, 153, 20),
+            new Color(4, 129, 16),
+            new Color(40, 165, 28),
+            new Color(230, 198, 109),
+            new Color(153, 20, 48),
+            new Color(80, 190, 56),
+            new Color(56, 89, 133),
+            new Color(194, 198, 255)
+        };
+
         public MapView(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics, EditorGraphics editorGraphics,
             EditorState editorState, MutationManager mutationManager, WindowController windowController) : base(windowManager)
         {
@@ -648,8 +667,20 @@ namespace TSMapEditor.Rendering
                 else
                     SetEffectParams(colorDrawEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTarget);
 
-                DrawTexture(tmpImage.Texture, new Rectangle(drawPoint.X, drawPoint.Y,
-                    Constants.CellSizeX, Constants.CellSizeY), null, Color.White, 0f, Vector2.Zero, SpriteEffects.None, 0f);
+                var textureToDraw = tmpImage.Texture;
+                Color color = Color.White;
+
+                // Replace terrain lacking MM graphics with colored cells to denote height if we are in marble madness mode
+                if (!Constants.IsFlatWorld &&
+                    EditorState.IsMarbleMadness &&
+                    !TheaterGraphics.HasSeparateMarbleMadnessTileGraphics(tileImage.TileID))
+                {
+                    textureToDraw = EditorGraphics.GenericTileWithBorderTexture;
+                    color = MarbleMadnessTileHeightLevelColors[tile.Level];
+                }
+
+                DrawTexture(textureToDraw, new Rectangle(drawPoint.X, drawPoint.Y,
+                    Constants.CellSizeX, Constants.CellSizeY), null, color, 0f, Vector2.Zero, SpriteEffects.None, 0f);
             }
 
             if (tmpImage.ExtraTexture != null && !EditorState.Is2DMode)

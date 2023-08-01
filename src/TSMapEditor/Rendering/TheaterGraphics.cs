@@ -540,6 +540,7 @@ namespace TSMapEditor.Rendering
                     for (int i = 0; i < tileSet.LoadedTileCount; i++)
                     {
                         mmTerrainGraphicsList.Add(terrainGraphicsList[tileIndex + i]);
+                        hasMMGraphics.Add(tileSet.NonMarbleMadness > -1);
                     }
 
                     tileIndex += tileSet.LoadedTileCount;
@@ -551,6 +552,7 @@ namespace TSMapEditor.Rendering
                 for (int i = 0; i < tileSet.LoadedTileCount; i++)
                 {
                     mmTerrainGraphicsList.Add(terrainGraphicsList[mmTileSet.StartTileIndex + i]);
+                    hasMMGraphics.Add(true);
                 }
                 tileIndex += tileSet.LoadedTileCount;
             }
@@ -883,12 +885,14 @@ namespace TSMapEditor.Rendering
 
         private List<TileImage[]> terrainGraphicsList = new List<TileImage[]>();
         private List<TileImage[]> mmTerrainGraphicsList = new List<TileImage[]>();
+        private List<bool> hasMMGraphics = new List<bool>();
 
         public int TileCount => terrainGraphicsList.Count;
 
         public TileImage GetTileGraphics(int id) => terrainGraphicsList[id][random.Next(terrainGraphicsList[id].Length)];
         public TileImage GetTileGraphics(int id, int randomId) => terrainGraphicsList[id][randomId];
         public TileImage GetMarbleMadnessTileGraphics(int id) => mmTerrainGraphicsList[id][0];
+        public bool HasSeparateMarbleMadnessTileGraphics(int id) => hasMMGraphics[id];
 
         public ITileImage GetTile(int id) => GetTileGraphics(id);
 
