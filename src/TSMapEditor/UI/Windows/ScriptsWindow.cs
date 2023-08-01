@@ -22,8 +22,8 @@ namespace TSMapEditor.UI.Windows
             INotificationManager notificationManager, ICursorActionTarget cursorActionTarget) : base(windowManager)
         {
             this.map = map;
-            this.editorState = editorState;
-            this.notificationManager = notificationManager;
+            this.editorState = editorState ?? throw new ArgumentNullException(nameof(editorState));
+            this.notificationManager = notificationManager ?? throw new ArgumentNullException(nameof(notificationManager));
             selectCellCursorAction = new SelectCellCursorAction(cursorActionTarget);
         }
 

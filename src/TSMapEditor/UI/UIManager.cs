@@ -130,6 +130,7 @@ namespace TSMapEditor.UI
             tileInfoDisplay.X = Width - tileInfoDisplay.Width;
             mapView.TileInfoDisplay = tileInfoDisplay;
 
+            InitNotificationManager();
             windowController.Initialize(this, map, editorState, mapView);
 
             topBarMenu = new TopBarMenu(WindowManager, mutationManager, mapView, map, windowController);
@@ -141,7 +142,7 @@ namespace TSMapEditor.UI
             editorControlsPanel.X = topBarMenu.Right;
             AddChild(editorControlsPanel);
 
-            InitNotificationManager();
+            AddChild(notificationManager);
 
             base.Initialize();
 
@@ -258,7 +259,6 @@ namespace TSMapEditor.UI
             notificationManager.X = editorSidebar.X + Constants.UIEmptySideSpace;
             notificationManager.Width = WindowManager.RenderResolutionX - (notificationManager.X * 2);
             notificationManager.Y = 100;
-            AddChild(notificationManager);
         }
 
         private void InitAutoSaveAndSaveNotifications()
