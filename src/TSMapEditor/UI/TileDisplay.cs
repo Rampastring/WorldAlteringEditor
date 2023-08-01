@@ -3,7 +3,6 @@ using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI.CursorActions;

@@ -1,5 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using TSMapEditor.Models.ArtConfig;
+﻿using TSMapEditor.Models.ArtConfig;
 using TSMapEditor.Models.Enums;
 
 namespace TSMapEditor.Models

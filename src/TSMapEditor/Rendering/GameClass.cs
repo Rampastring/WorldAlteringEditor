@@ -5,7 +5,6 @@ using Rampastring.XNAUI;
 using System;
 using System.Globalization;
 using System.IO;
-using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;

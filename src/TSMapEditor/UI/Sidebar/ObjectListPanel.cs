@@ -8,7 +8,6 @@ using System.Linq;
 using TSMapEditor.Models;
 using TSMapEditor.Models.ArtConfig;
 using TSMapEditor.Rendering;
-using TSMapEditor.UI.Controls;
 
 namespace TSMapEditor.UI.Sidebar
 {

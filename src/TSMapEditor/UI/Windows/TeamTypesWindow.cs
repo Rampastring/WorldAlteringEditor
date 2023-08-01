@@ -1,5 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using Rampastring.XNAUI;
+﻿using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;

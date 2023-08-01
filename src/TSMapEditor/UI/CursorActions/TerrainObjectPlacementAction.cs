@@ -3,7 +3,6 @@ using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations.Classes;
 using TSMapEditor.Rendering;
-using TSMapEditor.UI;
 
 namespace TSMapEditor.UI.CursorActions
 {

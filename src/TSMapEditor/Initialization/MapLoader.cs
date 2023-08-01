@@ -1,6 +1,5 @@
 ﻿using CNCMaps.FileFormats.Encodings;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
@@ -10,7 +9,6 @@ using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Models.MapFormat;
 using TSMapEditor.Rendering;
-using TSMapEditor.UI;
 
 namespace TSMapEditor.Initialization
 {

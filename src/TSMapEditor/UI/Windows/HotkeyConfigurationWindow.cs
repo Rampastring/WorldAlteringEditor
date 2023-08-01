@@ -4,7 +4,6 @@ using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;
 using TSMapEditor.Settings;
-using TSMapEditor.UI;
 using TSMapEditor.UI.Controls;
 
 namespace TSMapEditor.UI.Windows

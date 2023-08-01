@@ -5,7 +5,6 @@ using TSMapEditor.Models;
 using TSMapEditor.Models.ArtConfig;
 using TSMapEditor.Models.Enums;
 using TSMapEditor.UI;
-using static System.Collections.Specialized.BitVector32;
 
 namespace TSMapEditor.Initialization
 {

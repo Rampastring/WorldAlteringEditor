@@ -12,7 +12,6 @@ using TSMapEditor.Models;
 using TSMapEditor.Mutations;
 using TSMapEditor.Mutations.Classes;
 using TSMapEditor.Rendering.ObjectRenderers;
-using TSMapEditor.Scripts;
 using TSMapEditor.Settings;
 using TSMapEditor.UI;
 using TSMapEditor.UI.Windows;
