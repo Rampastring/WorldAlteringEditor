@@ -14,6 +14,8 @@ namespace TSMapEditor.UI.Windows
 
         private readonly Map map;
 
+        public bool IsForSecondaryTeam { get; set; }
+
         public override void Initialize()
         {
             Name = nameof(SelectTeamTypeWindow);

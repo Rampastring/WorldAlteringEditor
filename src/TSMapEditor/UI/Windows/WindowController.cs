@@ -37,6 +37,7 @@ namespace TSMapEditor.UI.Windows
         public ScriptsWindow ScriptsWindow { get; private set; }
         public TeamTypesWindow TeamTypesWindow { get; private set; }
         public TriggersWindow TriggersWindow { get; private set; }
+        public AITriggersWindow AITriggersWindow { get; private set; }
         public PlaceWaypointWindow PlaceWaypointWindow { get; private set; }
         public LocalVariablesWindow LocalVariablesWindow { get; private set; }
         public StructureOptionsWindow StructureOptionsWindow { get; private set; }
@@ -106,6 +107,9 @@ namespace TSMapEditor.UI.Windows
 
             TriggersWindow = new TriggersWindow(windowParentControl.WindowManager, map, editorState, cursorActionTarget);
             Windows.Add(TriggersWindow);
+
+            AITriggersWindow = new AITriggersWindow(windowParentControl.WindowManager, map);
+            Windows.Add(AITriggersWindow);
 
             PlaceWaypointWindow = new PlaceWaypointWindow(windowParentControl.WindowManager, map, cursorActionTarget.MutationManager, cursorActionTarget.MutationTarget);
             Windows.Add(PlaceWaypointWindow);

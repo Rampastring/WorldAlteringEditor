@@ -366,6 +366,39 @@ namespace TSMapEditor.Initialization
             }
         }
 
+        public static void WriteAITriggerTypes(IMap map, IniFile mapIni)
+        {
+            const string sectionName = "AITriggerTypes";
+            mapIni.RemoveSection(sectionName);
+
+            if (map.AITriggerTypes.Count == 0)
+                return;
+
+            var aiTriggerTypesSection = new IniSection(sectionName);
+            mapIni.AddSection(aiTriggerTypesSection);
+            for (int i = 0; i < map.AITriggerTypes.Count; i++)
+            {
+                AITriggerType aiTriggerType = map.AITriggerTypes[i];
+                aiTriggerType.WriteToIniSection(aiTriggerTypesSection);
+            }
+
+            const string enablesSectionName = "AITriggerTypesEnable";
+            var enablesSection = mapIni.GetSection(enablesSectionName);
+            if (enablesSection == null)
+            {
+                enablesSection = new IniSection(enablesSectionName);
+                mapIni.AddSection(enablesSection);
+            }
+
+            // Enable local AI triggers that haven't been enabled or disabled
+            // by the user yet
+            for (int i = 0; i < map.AITriggerTypes.Count; i++)
+            {
+                if (!enablesSection.KeyExists(map.AITriggerTypes[i].ININame))
+                    enablesSection.SetStringValue(map.AITriggerTypes[i].ININame, "yes");
+            }
+        }
+
         public static void WriteHouses(IMap map, IniFile mapIni)
         {
             const string sectionName = "Houses";

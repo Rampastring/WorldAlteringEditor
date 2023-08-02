@@ -298,6 +298,7 @@ namespace TSMapEditor.Models
 
             MapWriter.WriteMapSection(this, LoadedINI);
             MapWriter.WriteBasicSection(this, LoadedINI);
+            MapWriter.WriteAITriggerTypes(this, LoadedINI);
             MapWriter.WriteIsoMapPack5(this, LoadedINI);
 
             Lighting.WriteToIniFile(LoadedINI);
@@ -316,6 +317,7 @@ namespace TSMapEditor.Models
             MapWriter.WriteCellTags(this, LoadedINI);
             MapWriter.WriteScripts(this, LoadedINI);
             MapWriter.WriteTeamTypes(this, LoadedINI);
+
             MapWriter.WriteLocalVariables(this, LoadedINI);
 
             MapWriter.WriteAircraft(this, LoadedINI);

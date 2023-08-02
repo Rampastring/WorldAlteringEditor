@@ -48,6 +48,12 @@ namespace TSMapEditor
             return new Point2D(x, y);
         }
 
+        public static int ReverseEndianness(int value)
+        {
+            return (int)((value & 0x000000FFU) << 24 | (value & 0x0000FF00U) << 8 |
+                (value & 0x00FF0000U) >> 8 | (value & 0xFF000000U) >> 24);
+        }
+
         public static string LandTypeToString(int landType)
         {
             return GetLandTypeName(landType) + " (0x" + landType.ToString("X") + ")";

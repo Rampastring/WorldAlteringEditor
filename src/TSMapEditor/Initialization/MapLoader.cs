@@ -858,14 +858,14 @@ namespace TSMapEditor.Initialization
 
                 if (!int.TryParse(parts[3], CultureInfo.InvariantCulture, out int techLevel))
                 {
-                    AddMapLoadError($"AITriggerType {kvp.Key} has an invalid tech level, skipping reading it.");
+                    AddMapLoadError($"AITriggerType {kvp.Key} has an invalid tech level, skipping parsing of the AI trigger.");
                     continue;
                 }
                 aiTriggerType.TechLevel = techLevel;
 
                 if (!int.TryParse(parts[4], CultureInfo.InvariantCulture, out int conditionType))
                 {
-                    AddMapLoadError($"AITriggerType {kvp.Key} has an invalid tech level, skipping reading it.");
+                    AddMapLoadError($"AITriggerType {kvp.Key} has an invalid tech level, skipping parsing of the AI trigger.");
                     continue;
                 }
 
@@ -880,14 +880,22 @@ namespace TSMapEditor.Initialization
                         AddMapLoadError($"AITriggerType {kvp.Key} has a non-existent condition object \"{parts[5]}\"");
                     }
 
-                    aiTriggerType.ConditionObject = conditionObject;
+                    aiTriggerType.ConditionObjectString = parts[5];
                 }
 
-                aiTriggerType.Comparator = parts[6];
+                aiTriggerType.LoadedComparatorString = parts[6];
+                AITriggerComparator? comparator = AITriggerComparator.Parse(aiTriggerType.LoadedComparatorString);
+                if (comparator == null)
+                {
+                    AddMapLoadError($"Failed to parse comparator of AITriggerType {kvp.Key} ({aiTriggerType.Name})! Skipping loading of the AI trigger.");
+                    continue;
+                }
+                aiTriggerType.Comparator = comparator.Value;
+
                 aiTriggerType.InitialWeight = Conversions.DoubleFromString(parts[7], 0.0);
                 aiTriggerType.MinimumWeight = Conversions.DoubleFromString(parts[8], 0.0);
                 aiTriggerType.MaximumWeight = Conversions.DoubleFromString(parts[9], 0.0);
-                aiTriggerType.ForMultiplayer = parts[10] != "0";
+                aiTriggerType.EnabledInMultiplayer = parts[10] != "0";
                 aiTriggerType.Unused = parts[11] != "0";
                 aiTriggerType.Side = Conversions.IntFromString(parts[12], 0);
                 aiTriggerType.IsBaseDefense = parts[13] != "0";
