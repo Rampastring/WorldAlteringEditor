@@ -1518,6 +1518,16 @@ namespace TSMapEditor.Models
                 }
             }
 
+            // Check for AITriggerTypes that have a non-existing condition object
+            foreach (var aiTrigger in AITriggerTypes)
+            {
+                if (!string.IsNullOrWhiteSpace(aiTrigger.ConditionObjectString) &&
+                    Rules.FindTechnoType(aiTrigger.ConditionObjectString) == null)
+                {
+                    issueList.Add($"AITrigger '{aiTrigger.Name}' has a condition object '{aiTrigger.ConditionObjectString}' that does not exist in Rules!");
+                }
+            }
+
             return issueList;
         }
 
