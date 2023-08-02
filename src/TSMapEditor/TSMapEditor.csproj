@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net7.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
-    <AssemblyName>DTAScenarioEditor</AssemblyName>
+    <AssemblyName>WorldAlteringEditor</AssemblyName>
     <Deterministic>false</Deterministic>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <UseWindowsForms>true</UseWindowsForms>
