@@ -1,10 +1,13 @@
 ﻿using Microsoft.Xna.Framework;
 using Rampastring.Tools;
 using Rampastring.XNAUI;
+using System;
+using System.Globalization;
+using System.Text;
 
 namespace TSMapEditor.Models
 {
-    public class TeamType : AbstractObject, IIDContainer
+    public class TeamType : AbstractObject, IIDContainer, IHintable
     {
         public TeamType(string iniName)
         {
@@ -16,14 +19,14 @@ namespace TSMapEditor.Models
 
         public string ININame { get; private set; }
 
-        public int Max { get; set; }
-        public bool Full { get; set; }
         public string Name { get; set; }
         public int Group { get; set; } = -1;
         public House House { get; set; }
         public Script Script { get; set; }
         public TaskForce TaskForce { get; set; }
         public Tag Tag { get; set; }
+        public int Max { get; set; }
+        public bool Full { get; set; }
         public bool Whiner { get; set; }
         public bool Droppod { get; set; }
         public bool Suicide { get; set; }
@@ -47,6 +50,85 @@ namespace TSMapEditor.Models
         public bool OnlyTargetHouseEnemy { get; set; }
         public bool TransportsReturnOnUnload { get; set; }
         public bool AreTeamMembersRecruitable { get; set; }
+
+        public string GetHeaderText() => Name;
+
+        public string GetHintText()
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.Append("Owner: " + (House == null ? Constants.NoneValue2 : House.ININame));
+            stringBuilder.Append(Environment.NewLine + Environment.NewLine);
+            stringBuilder.Append("Script: " + (Script == null ? Constants.NoneValue2 : Script.Name));
+            stringBuilder.Append(Environment.NewLine + Environment.NewLine);
+
+            if (Tag != null)
+            {
+                stringBuilder.Append("Tag: " + Tag.Name);
+                stringBuilder.Append(Environment.NewLine + Environment.NewLine);
+            }
+
+            stringBuilder.Append("Waypoint: " + (string.IsNullOrWhiteSpace(Waypoint) ? Constants.NoneValue2 : Helpers.GetWaypointNumberFromAlphabeticalString(Waypoint)));
+            stringBuilder.Append(Environment.NewLine + Environment.NewLine);
+
+            if (VeteranLevel > 1)
+            {
+                stringBuilder.Append("Veteran Level: " + (VeteranLevel > 2 ? "Elite" : "Veteran"));
+                stringBuilder.Append(Environment.NewLine + Environment.NewLine);
+            }
+
+            if (TaskForce == null)
+            {
+                stringBuilder.Append("No TaskForce set");
+            }
+            else
+            {
+                stringBuilder.Append(TaskForce.GetHintText());
+            }
+
+            stringBuilder.Append(Environment.NewLine + Environment.NewLine);
+            AppendFlag(stringBuilder, nameof(Max), Max);
+            AppendFlag(stringBuilder, nameof(Full), Full);
+            AppendFlag(stringBuilder, nameof(Whiner), Whiner);
+            AppendFlag(stringBuilder, nameof(Droppod), Droppod);
+            AppendFlag(stringBuilder, nameof(Suicide), Suicide);
+            AppendFlag(stringBuilder, nameof(Loadable), Loadable);
+            AppendFlag(stringBuilder, nameof(Prebuild), Prebuild);
+            AppendFlag(stringBuilder, nameof(Priority), Priority);
+            AppendFlag(stringBuilder, nameof(Annoyance), Annoyance);
+            AppendFlag(stringBuilder, nameof(IonImmune), IonImmune);
+            AppendFlag(stringBuilder, nameof(Recruiter), Recruiter);
+            AppendFlag(stringBuilder, nameof(Reinforce), Reinforce);
+            AppendFlag(stringBuilder, nameof(Aggressive), Aggressive);
+            AppendFlag(stringBuilder, nameof(Autocreate), Autocreate);
+            AppendFlag(stringBuilder, nameof(GuardSlower), GuardSlower);
+            AppendFlag(stringBuilder, nameof(OnTransOnly), OnTransOnly);
+            AppendFlag(stringBuilder, nameof(AvoidThreats), AvoidThreats);
+            AppendFlag(stringBuilder, nameof(LooseRecruit), LooseRecruit);
+            AppendFlag(stringBuilder, nameof(IsBaseDefense), IsBaseDefense);
+            AppendFlag(stringBuilder, nameof(OnlyTargetHouseEnemy), OnlyTargetHouseEnemy);
+            AppendFlag(stringBuilder, nameof(TransportsReturnOnUnload), TransportsReturnOnUnload);
+            AppendFlag(stringBuilder, nameof(AreTeamMembersRecruitable), AreTeamMembersRecruitable);
+
+            return stringBuilder.ToString();
+        }
+
+        private void AppendFlag<T>(StringBuilder stringBuilder, string name, T flagValue, T defValue = default) where T : struct
+        {
+            if (!flagValue.Equals(defValue))
+            {
+                if (flagValue.GetType() == typeof(bool))
+                {
+                    // Bool fields are only listed if their value is 'true', so just telling their name is enough
+                    stringBuilder.Append(name);
+                    stringBuilder.Append(Environment.NewLine);
+                }
+                else
+                {
+                    stringBuilder.Append(name + ": " + flagValue.ToString());
+                    stringBuilder.Append(Environment.NewLine);
+                }
+            }
+        }
 
         /// <summary>
         /// Creates and returns a clone of this TeamType.

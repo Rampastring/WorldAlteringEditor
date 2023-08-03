@@ -2,8 +2,7 @@
 {
     public interface IHintable
     {
-        string GetHintText();
-
         string GetHeaderText();
+        string GetHintText();
     }
 }
