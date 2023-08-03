@@ -247,7 +247,10 @@ namespace TSMapEditor.UI.Windows
 
         private void TbComparisonObjectType_TextChanged(object sender, System.EventArgs e)
         {
-            editedAITrigger.ConditionObjectString = tbComparisonObjectType.Text;
+            if (string.IsNullOrWhiteSpace(tbComparisonObjectType.Text))
+                editedAITrigger.ConditionObjectString = Constants.NoneValue1;
+            else
+                editedAITrigger.ConditionObjectString = tbComparisonObjectType.Text;
         }
 
         private void SelPrimaryTeam_LeftClick(object sender, EventArgs e)

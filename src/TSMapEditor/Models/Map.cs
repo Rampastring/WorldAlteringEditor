@@ -1522,6 +1522,7 @@ namespace TSMapEditor.Models
             foreach (var aiTrigger in AITriggerTypes)
             {
                 if (!string.IsNullOrWhiteSpace(aiTrigger.ConditionObjectString) &&
+                    !Helpers.IsStringNoneValue(aiTrigger.ConditionObjectString) &&
                     Rules.FindTechnoType(aiTrigger.ConditionObjectString) == null)
                 {
                     issueList.Add($"AITrigger '{aiTrigger.Name}' has a condition object '{aiTrigger.ConditionObjectString}' that does not exist in Rules!");
