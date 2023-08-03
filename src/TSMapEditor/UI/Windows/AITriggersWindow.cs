@@ -217,7 +217,7 @@ namespace TSMapEditor.UI.Windows
         private void TbName_TextChanged(object sender, System.EventArgs e)
         {
             editedAITrigger.Name = tbName.Text;
-            ListAITriggers();
+            lbAITriggers.SelectedItem.Text = tbName.Text;
         }
 
         private void DdSide_SelectedIndexChanged(object sender, System.EventArgs e)
