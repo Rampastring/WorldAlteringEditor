@@ -6,6 +6,16 @@ using TSMapEditor.UI.Controls;
 
 namespace TSMapEditor.UI.Windows
 {
+    public class TeamTypeEventArgs : EventArgs
+    {
+        public TeamTypeEventArgs(TeamType teamType)
+        {
+            TeamType = teamType;
+        }
+
+        public TeamType TeamType { get; }
+    }
+
     public class AITriggersWindow : INItializableWindow
     {
         public AITriggersWindow(WindowManager windowManager, Map map) : base(windowManager)
@@ -14,6 +24,8 @@ namespace TSMapEditor.UI.Windows
         }
 
         private readonly Map map;
+
+        public event EventHandler<TeamTypeEventArgs> TeamTypeOpened;
 
         private EditorListBox lbAITriggers;
         private EditorTextBox tbName;
@@ -62,11 +74,39 @@ namespace TSMapEditor.UI.Windows
             FindChild<EditorButton>("btnDelete").LeftClick += BtnDelete_LeftClick;
             FindChild<EditorButton>("btnClone").LeftClick += BtnClone_LeftClick;
 
+            FindChild<EditorButton>("btnOpenPrimaryTeam").LeftClick += BtnOpenPrimaryTeam_LeftClick;
+            FindChild<EditorButton>("btnOpenSecondaryTeam").LeftClick += BtnOpenSecondaryTeam_LeftClick;
+
             selectTeamTypeWindow = new SelectTeamTypeWindow(WindowManager, map);
             var teamTypeWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTeamTypeWindow);
             teamTypeWindowDarkeningPanel.Hidden += TeamTypeWindowDarkeningPanel_Hidden;
 
             lbAITriggers.SelectedIndexChanged += LbAITriggers_SelectedIndexChanged;
+        }
+
+        private void BtnOpenPrimaryTeam_LeftClick(object sender, EventArgs e)
+        {
+            if (editedAITrigger == null || editedAITrigger.PrimaryTeam == null)
+                return;
+
+            OpenTeamType(editedAITrigger.PrimaryTeam);
+        }
+
+        private void BtnOpenSecondaryTeam_LeftClick(object sender, EventArgs e)
+        {
+            if (editedAITrigger == null || editedAITrigger.SecondaryTeam == null)
+                return;
+
+            OpenTeamType(editedAITrigger.SecondaryTeam);
+        }
+
+        private void OpenTeamType(TeamType teamType)
+        {
+            TeamTypeOpened?.Invoke(this, new TeamTypeEventArgs(teamType));
+
+            // hack time! allow the other window to show on top of this one,
+            // we can't cancel the "left click" event on the child with current XNAUI
+            WindowManager.AddCallback(new Action(() => { DrawOrder -= 500; UpdateOrder -= 500; }));
         }
 
         private void BtnNew_LeftClick(object sender, EventArgs e)
@@ -319,7 +359,7 @@ namespace TSMapEditor.UI.Windows
             }
 
             ddHouse.AddItem("<all>");
-            map.GetHouses().ForEach(house => ddHouse.AddItem(house.ININame));
+            map.GetHouses().ForEach(house => ddHouse.AddItem(house.ININame, house.HasDarkHouseColor() ? UISettings.ActiveSettings.AltColor : house.XNAColor));
 
             LbAITriggers_SelectedIndexChanged(this, EventArgs.Empty);
         }

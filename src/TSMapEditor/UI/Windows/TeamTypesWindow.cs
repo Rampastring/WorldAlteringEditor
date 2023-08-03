@@ -291,6 +291,14 @@ namespace TSMapEditor.UI.Windows
             }
         }
 
+        public void SelectTeamType(TeamType teamType)
+        {
+            int index = lbTeamTypes.Items.FindIndex(lbi => lbi.Tag == teamType);
+
+            if (index > -1)
+                lbTeamTypes.SelectedIndex = index;
+        }
+
         private void EditTeamType(TeamType teamType)
         {
             tbName.TextChanged -= TbName_TextChanged;

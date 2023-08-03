@@ -171,6 +171,7 @@ namespace TSMapEditor.UI.Windows
 
             TeamTypesWindow.TaskForceOpened += TeamTypesWindow_TaskForceOpened;
             TeamTypesWindow.ScriptOpened += TeamTypesWindow_ScriptOpened;
+            AITriggersWindow.TeamTypeOpened += AITriggersWindow_TeamTypeOpened;
 
             foreach (var window in Windows)
             {
@@ -219,6 +220,12 @@ namespace TSMapEditor.UI.Windows
         {
             ScriptsWindow.Open();
             ScriptsWindow.SelectScript(e.Script);
+        }
+
+        private void AITriggersWindow_TeamTypeOpened(object sender, TeamTypeEventArgs e)
+        {
+            TeamTypesWindow.Open();
+            TeamTypesWindow.SelectTeamType(e.TeamType);
         }
 
         private void ClearFocusSwitchHandlerFromChildrenRecursive(EditorWindow window, XNAControl control)
