@@ -952,7 +952,7 @@ namespace TSMapEditor.Models
                     if (foundationCell == null)
                         return;
 
-                    if (foundationCell.Structure != null && (!considerSelf || foundationCell.Structure != movable))
+                    if (foundationCell.Structure != null && (considerSelf || foundationCell.Structure != movable))
                         canPlace = false;
                 });
 
