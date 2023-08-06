@@ -53,6 +53,7 @@ namespace TSMapEditor.UI.Windows
         public CopiedEntryTypesWindow CopiedEntryTypesWindow { get; private set; }
         public LightingSettingsWindow LightingSettingsWindow { get; private set; }
         public ApplyINICodeWindow ApplyINICodeWindow { get; private set; }
+        public RunScriptWindow RunScriptWindow { get; private set; }
         public HotkeyConfigurationWindow HotkeyConfigurationWindow { get; private set; }
         public MapSizeWindow MapSizeWindow { get; private set; }
         public ExpandMapWindow ExpandMapWindow { get; private set; }
@@ -155,6 +156,9 @@ namespace TSMapEditor.UI.Windows
 
             ApplyINICodeWindow = new ApplyINICodeWindow(windowParentControl.WindowManager, map);
             Windows.Add(ApplyINICodeWindow);
+
+            RunScriptWindow = new RunScriptWindow(windowParentControl.WindowManager, map);
+            Windows.Add(RunScriptWindow);
 
             HotkeyConfigurationWindow = new HotkeyConfigurationWindow(windowParentControl.WindowManager);
             Windows.Add(HotkeyConfigurationWindow);

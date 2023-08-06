@@ -92,14 +92,6 @@ namespace TSMapEditor.Models
         public List<Unit> Units { get; private set; } = new List<Unit>();
         public List<Structure> Structures { get; private set; } = new List<Structure>();
 
-        public void DoForAllTechnos(Action<TechnoBase> action)
-        {
-            Aircraft.ForEach(a => action(a));
-            Infantry.ForEach(i => action(i));
-            Units.ForEach(u => action(u));
-            Structures.ForEach(s => action(s));
-        }
-
         /// <summary>
         /// The list of standard houses loaded from Rules.ini.
         /// Relevant when the map itself has no houses specified.
@@ -1066,6 +1058,25 @@ namespace TSMapEditor.Models
                     action(tile);
                 }
             }
+        }
+
+        public void DoForAllTechnos(Action<TechnoBase> action)
+        {
+            var aircraftCopy = new List<Aircraft>(Aircraft);
+            var infantryCopy = new List<Infantry>(Infantry);
+            var unitsCopy = new List<Unit>(Units);
+            var structuresCopy = new List<Structure>(Structures);
+
+            aircraftCopy.ForEach(a => action(a));
+            infantryCopy.ForEach(i => action(i));
+            unitsCopy.ForEach(u => action(u));
+            structuresCopy.ForEach(s => action(s));
+        }
+
+        public void DoForAllTerrainObjects(Action<TerrainObject> action)
+        {
+            var terrainObjectsCopy = new List<TerrainObject>(TerrainObjects);
+            terrainObjectsCopy.ForEach(t => action(t));
         }
 
         public void SortWaypoints() => Waypoints = Waypoints.OrderBy(wp => wp.Identifier).ToList();

@@ -112,7 +112,10 @@ namespace TSMapEditor.UI.TopBar
 
             toolsContextMenu.AddItem("Terrain Generator Options", () => windowController.TerrainGeneratorConfigWindow.Open(), null, null, null, KeyboardCommands.Instance.ConfigureTerrainGenerator.GetKeyDisplayString());
             toolsContextMenu.AddItem("Generate Terrain", () => EnterTerrainGenerator(), null, null, null, KeyboardCommands.Instance.GenerateTerrain.GetKeyDisplayString());
+            toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("Apply INI Code...", () => windowController.ApplyINICodeWindow.Open(), null, null, null);
+            toolsContextMenu.AddItem("Run Script...", () => windowController.RunScriptWindow.Open(), null, null, null, null);
+            toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("View Minimap", () => windowController.MinimapWindow.Open(), null, null, null);
             toolsContextMenu.AddItem("Toggle Impassable Cells", () => mapView.EditorState.HighlightImpassableCells = !mapView.EditorState.HighlightImpassableCells, null, null, null);
             toolsContextMenu.AddItem("Toggle IceGrowth Preview", () => mapView.EditorState.HighlightIceGrowth = !mapView.EditorState.HighlightIceGrowth, null, null, null);
@@ -124,6 +127,7 @@ namespace TSMapEditor.UI.TopBar
             toolsContextMenu.AddItem("Calculate Credits...", () => mapView.EditorState.CursorAction = calculateTiberiumValueCursorAction, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("Configure Hotkeys...", () => windowController.HotkeyConfigurationWindow.Open(), null, null, null);
+            toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("About", () => windowController.AboutWindow.Open(), null, null, null, null);
 
             var toolsButton = new MenuButton(WindowManager, toolsContextMenu);

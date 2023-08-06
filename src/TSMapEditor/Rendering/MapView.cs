@@ -229,6 +229,7 @@ namespace TSMapEditor.Rendering
         {
             windowController.MinimapWindow.MegamapClicked += MinimapWindow_MegamapClicked;
             windowController.Initialized -= PostWindowControllerInit;
+            windowController.RunScriptWindow.ScriptRun += (s, e) => InvalidateMap();
         }
 
         public void Clear()

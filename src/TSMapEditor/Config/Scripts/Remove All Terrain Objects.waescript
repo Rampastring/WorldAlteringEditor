@@ -1,0 +1,21 @@
+[$Editor]
+Confirmation=This script remove all terrain objects (trees etc.) from the map. Continue?
+Success=Successfully removed all terrain objects from the map.
+
+[$Code]
+Value=$$$TextBlockBegin$$$
+// Accept map parameter so we can access map data.
+Map map = (Map)@0; 
+
+// Query all terrain objects on the map and run an action on them.
+map.DoForAllTerrainObjects(terrainObject => 
+{
+    // Delete the terrain object from the map.
+    map.RemoveTerrainObject(terrainObject);
+});
+
+// All scripts need to return something, at least null.
+return null;
+$$$TextBlockEnd$$$
+
+
