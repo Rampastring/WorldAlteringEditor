@@ -284,7 +284,7 @@ namespace TSMapEditor.UI
                     }
                 }
 
-                if (tile.TileImageToDisplay == SelectedTile)
+                if (tile.TileImageToPlace == SelectedTile)
                     DrawRectangle(rectangle, Color.Red, 2);
             }
 
