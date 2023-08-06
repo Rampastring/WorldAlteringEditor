@@ -29,7 +29,9 @@ namespace TSMapEditor.UI.CursorActions
 
             Renderer.DrawTexture(
                 CursorActionTarget.EditorGraphics.GenericTileTexture,
-                new Rectangle(cellTopLeftPoint.X, cellTopLeftPoint.Y, Constants.CellSizeX, Constants.CellSizeY),
+                new Rectangle(cellTopLeftPoint.X, cellTopLeftPoint.Y,
+                CursorActionTarget.Camera.ScaleIntWithZoom(Constants.CellSizeX),
+                CursorActionTarget.Camera.ScaleIntWithZoom(Constants.CellSizeY)),
                 newOwner.XNAColor * 0.5f);
 
             if (tile.HasTechnoThatPassesCheck(techno => techno.Owner != newOwner))
