@@ -172,7 +172,7 @@ namespace TSMapEditor.Models
             const int marginY = 6;
             const int marginX = 4;
 
-            Initialize(rulesIni, firestormIni, artIni, artFirestormIni);
+            InitializeRules(rulesIni, firestormIni);
             LoadedINI = new IniFileEx();
             var baseMap = new IniFileEx(Environment.CurrentDirectory + "/Config/BaseMap.ini", ccFileManager);
             baseMap.FileName = string.Empty;
@@ -185,11 +185,13 @@ namespace TSMapEditor.Models
 
         public void LoadExisting(IniFile rulesIni, IniFile firestormIni, IniFile artIni, IniFile artFirestormIni, IniFile mapIni)
         {
-            Initialize(rulesIni, firestormIni, artIni, artFirestormIni);
+            InitializeRules(rulesIni, firestormIni);
 
             LoadedINI = mapIni ?? throw new ArgumentNullException(nameof(mapIni));
             Rules.InitFromINI(mapIni, initializer, true);
             InitEditorConfig();
+
+            InitializeArt(artIni, artFirestormIni);
 
             MapLoader.MapLoadErrors.Clear();
 
@@ -1236,7 +1238,7 @@ namespace TSMapEditor.Models
         //     LoadedINI = new IniFileEx();
         // }
 
-        public void Initialize(IniFile rulesIni, IniFile firestormIni, IniFile artIni, IniFile artFirestormIni)
+        public void InitializeRules(IniFile rulesIni, IniFile firestormIni)
         {
             if (rulesIni == null)
                 throw new ArgumentNullException(nameof(rulesIni));
@@ -1257,13 +1259,6 @@ namespace TSMapEditor.Models
             if (StandardHouses.Count == 0 && firestormIni != null)
                 StandardHouses = Rules.GetStandardHouses(firestormIni);
 
-            Rules.InitArt(artIni, initializer);
-
-            if (artFirestormIni != null)
-            {
-                Rules.InitArt(artFirestormIni, initializer);
-            }
-
             // Load impassable cell information for terrain types
             var impassableTerrainObjectsIni = new IniFile(Environment.CurrentDirectory + "/Config/TerrainTypeImpassability.ini");
 
@@ -1283,6 +1278,17 @@ namespace TSMapEditor.Models
                     tt.ImpassableCells.Add(point);
                 }
             });
+        }
+
+
+        public void InitializeArt(IniFile artIni, IniFile artFirestormIni)
+        {
+            Rules.InitArt(artIni, initializer);
+
+            if (artFirestormIni != null)
+            {
+                Rules.InitArt(artFirestormIni, initializer);
+            }
         }
 
         /// <summary>

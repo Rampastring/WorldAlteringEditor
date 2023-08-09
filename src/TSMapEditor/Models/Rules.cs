@@ -178,7 +178,7 @@ namespace TSMapEditor.Models
             if (sectionKeys == null || sectionKeys.Count == 0)
                 return;
 
-            int i = 0;
+            int i = targetList.Count;
 
             foreach (string key in sectionKeys)
             {
