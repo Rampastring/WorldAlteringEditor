@@ -151,7 +151,7 @@ namespace TSMapEditor.UI
             overlayPlacementAction.OverlayTypeChanged += OverlayPlacementAction_OverlayTypeChanged;
 
             copyTerrainCursorAction = new CopyTerrainCursorAction(mapView);
-            pasteTerrainCursorAction = new PasteTerrainCursorAction(mapView);
+            pasteTerrainCursorAction = new PasteTerrainCursorAction(mapView, Keyboard);
 
             InitAutoSaveAndSaveNotifications();
 

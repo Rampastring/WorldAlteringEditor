@@ -119,31 +119,11 @@ namespace TSMapEditor.UI
                     Constants.UIDefaultFont, baseTextColor));
             }
 
-            if (MapTile.Aircraft != null)
-            {
-                AddObjectInformation("Aircraft: ", MapTile.Aircraft);
-            }
-
-            if (MapTile.Vehicle != null)
-            {
-                AddObjectInformation("Vehicle: ", MapTile.Vehicle);
-            }
-
-            if (MapTile.Structure != null)
-            {
-                AddObjectInformation("Structure: ", MapTile.Structure);
-            }
-
-            for (int i = 0; i < MapTile.Infantry.Length; i++)
-            {
-                if (MapTile.Infantry[i] != null)
-                    AddObjectInformation("Infantry: ", MapTile.Infantry[i]);
-            }
-
-            if (MapTile.Waypoint != null)
-            {
-                AddWaypointInfo(MapTile.Waypoint);
-            }
+            MapTile.DoForAllAircraft(aircraft => AddObjectInformation("Aircraft: ", aircraft));
+            MapTile.DoForAllVehicles(unit => AddObjectInformation("Vehicle: ", unit));
+            MapTile.DoForAllBuildings(structure => AddObjectInformation("Structure: ", structure));
+            MapTile.DoForAllInfantry(inf => AddObjectInformation("Infantry: ", inf));
+            MapTile.DoForAllWaypoints(waypoint => AddWaypointInfo(waypoint));
 
             textRenderer.PrepareTextParts();
 

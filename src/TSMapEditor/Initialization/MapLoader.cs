@@ -4,6 +4,7 @@ using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
@@ -350,10 +351,9 @@ namespace TSMapEditor.Initialization
                         return;
                     }
 
-                    if (tile.Structure != null)
+                    if (tile.Structures.Count > 0)
                     {
-                        isClear = false;
-                        AddMapLoadError($"Building {buildingType.ININame} exists on a cell ({cellCoords}) that already has another building ({tile.Structure.ObjectType.ININame}). Skipping adding it to map.");
+                        Logger.Log($"NOTE: Building {buildingType.ININame} exists in the cell at {cellCoords} that already contains other buildings: {string.Join(", ", tile.Structures.Select(s => s.ObjectType.ININame))}");
                     }
                 }
 
@@ -366,7 +366,7 @@ namespace TSMapEditor.Initialization
                 buildingType.ArtConfig.DoForFoundationCoordsOrOrigin(offset =>
                 {
                     var tile = map.GetTile(building.Position + offset);
-                    tile.Structure = building;
+                    tile.Structures.Add(building);
                 });
             }
         }
@@ -424,7 +424,7 @@ namespace TSMapEditor.Initialization
                 map.Aircraft.Add(aircraft);
                 var tile = map.GetTile(x, y);
                 if (tile != null)
-                    tile.Aircraft = aircraft;
+                    tile.Aircraft.Add(aircraft);
             }
         }
 
@@ -485,7 +485,7 @@ namespace TSMapEditor.Initialization
                 map.Units.Add(unit);
                 var tile = map.GetTile(x, y);
                 if (tile != null)
-                    tile.Vehicle = unit;
+                    tile.Vehicles.Add(unit);
             }
 
             // Process follow IDs
@@ -667,16 +667,16 @@ namespace TSMapEditor.Initialization
                     continue;
                 }
 
-                var mapCell = map.GetTile(waypoint.Position.X, waypoint.Position.Y);
-                if (mapCell == null)
+                var tile = map.GetTile(waypoint.Position.X, waypoint.Position.Y);
+                if (tile == null)
                 {
                     AddMapLoadError($"Waypoint {waypoint.Identifier} at {waypoint.Position} is not within the valid map area.");
                     continue;
                 }
-                
-                if (mapCell.Waypoint != null)
+
+                if (tile.Waypoints.Count > 0)
                 {
-                    AddMapLoadError($"Cell at {waypoint.Position} has multiple waypoints placed on it. Skipping adding waypoint #{waypoint.Identifier} there.");
+                    Logger.Log($"NOTE: Waypoint {waypoint.Identifier} exists in the cell at {waypoint.Position} that already contains other waypoints: {string.Join(", ", tile.Waypoints.Select(s => s.Identifier))}");
                     continue;
                 }
 

@@ -67,13 +67,13 @@ namespace TSMapEditor.Mutations.Classes
             switch (objectToClone.WhatAmI())
             {
                 case RTTIType.Aircraft:
-                    Map.RemoveAircraft(clonePosition);
+                    Map.RemoveAircraft((Aircraft)placedClone);
                     break;
                 case RTTIType.Building:
-                    Map.RemoveBuilding(clonePosition);
+                    Map.RemoveBuilding((Structure)placedClone);
                     break;
                 case RTTIType.Unit:
-                    Map.RemoveUnit(clonePosition);
+                    Map.RemoveUnit((Unit)placedClone);
                     break;
                 case RTTIType.Infantry:
                     Map.RemoveInfantry((Infantry)placedClone);

@@ -68,10 +68,10 @@ namespace TSMapEditor.UI.CursorActions
         {
             var mapCell = CursorActionTarget.Map.GetTile(cellCoords);
 
-            if (mapCell.Structure == null)
+            if (mapCell.Structures.Count == 0)
                 return;
 
-            var structureType = mapCell.Structure.ObjectType;
+            var structureType = mapCell.Structures[0].ObjectType;
             var cellCoordsToCheck = new List<Point2D>();
             if (structureType.ArtConfig.Foundation.Width == 0 || structureType.ArtConfig.Foundation.Height == 0)
                 cellCoordsToCheck.Add(cellCoords);
@@ -80,11 +80,11 @@ namespace TSMapEditor.UI.CursorActions
             {
                 for (int x = 0; x < structureType.ArtConfig.Foundation.Width; x++)
                 {
-                    cellCoordsToCheck.Add(mapCell.Structure.Position + new Point2D(x, y));
+                    cellCoordsToCheck.Add(mapCell.Structures[0].Position + new Point2D(x, y));
                 }
             }
 
-            House owner = mapCell.Structure.Owner;
+            House owner = mapCell.Structures[0].Owner;
 
             bool overlappingNodes = false;
 
@@ -126,7 +126,7 @@ namespace TSMapEditor.UI.CursorActions
             if (!overlappingNodes)
             {
                 // All OK, create the base node
-                var baseNode = new BaseNode(structureType.ININame, mapCell.Structure.Position);
+                var baseNode = new BaseNode(structureType.ININame, mapCell.Structures[0].Position);
                 owner.BaseNodes.Add(baseNode);
                 CursorActionTarget.Map.RegisterBaseNode(owner, baseNode);
             }
@@ -134,7 +134,7 @@ namespace TSMapEditor.UI.CursorActions
             // If the user is holding Shift, then also delete the building
             if (CursorActionTarget.WindowManager.Keyboard.IsShiftHeldDown())
             {
-                CursorActionTarget.Map.RemoveBuilding(cellCoords);
+                CursorActionTarget.Map.RemoveBuildingsFrom(cellCoords);
             }
 
             CursorActionTarget.AddRefreshPoint(cellCoords);

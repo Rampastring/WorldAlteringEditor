@@ -6,10 +6,10 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using TSMapEditor.CCEngine;
+using TSMapEditor.Extensions;
 using TSMapEditor.GameMath;
 using TSMapEditor.Initialization;
 using TSMapEditor.Rendering;
-using TSMapEditor.Extensions;
 
 namespace TSMapEditor.Models
 {
@@ -598,32 +598,35 @@ namespace TSMapEditor.Models
         public void AddWaypoint(Waypoint waypoint)
         {
             Waypoints.Add(waypoint);
-            var cell = GetTile(waypoint.Position.X, waypoint.Position.Y);
-            if (cell.Waypoint != null)
+            var tile = GetTile(waypoint.Position.X, waypoint.Position.Y);
+            if (tile.Waypoints.Count > 0)
             {
-                throw new InvalidOperationException($"Cell at {cell.CoordsToPoint()} already has a waypoint, skipping adding waypoint {waypoint.Identifier}");
+                Logger.Log($"NOTE: Waypoint {waypoint.Identifier} exists in the cell at {waypoint.Position} that already contains other waypoints: {string.Join(", ", tile.Waypoints.Select(s => s.Identifier))}");
             }
 
-            cell.Waypoint = waypoint;
+            tile.Waypoints.Add(waypoint);
         }
 
         public void RemoveWaypoint(Waypoint waypoint)
         {
             var tile = GetTile(waypoint.Position);
-            if (tile.Waypoint == waypoint)
+            if (tile.Waypoints.Contains(waypoint))
             {
                 Waypoints.Remove(waypoint);
-                tile.Waypoint = null;
+                tile.Waypoints.Remove(waypoint);
             }
         }
 
-        public void RemoveWaypointFrom(Point2D cellCoords)
+        public void RemoveWaypointsFrom(Point2D cellCoords)
         {
             var tile = GetTile(cellCoords);
-            if (tile.Waypoint != null)
+            if (tile.Waypoints.Count > 0)
             {
-                Waypoints.Remove(tile.Waypoint);
-                tile.Waypoint = null;
+                foreach (var waypoint in tile.Waypoints)
+                {
+                    Waypoints.Remove(waypoint);
+                }
+                tile.Waypoints.Clear();
             }
         }
 
@@ -749,26 +752,23 @@ namespace TSMapEditor.Models
                 if (cell == null)
                     return;
 
-                if (cell.Structure != null)
-                    throw new InvalidOperationException("Cannot place a structure on a cell that already has a structure!");
-
-                cell.Structure = structure;
+                cell.Structures.Add(structure);
             });
 
             if (structure.ObjectType.ArtConfig.Foundation.Width == 0 && structure.ObjectType.ArtConfig.Foundation.Height == 0)
             {
-                GetTile(structure.Position).Structure = structure;
+                GetTile(structure.Position).Structures.Add(structure);
             }
             
             Structures.Add(structure);
         }
 
-        public void RemoveBuilding(Point2D cellCoords)
+        public void RemoveBuildingsFrom(Point2D cellCoords)
         {
             var cell = GetTile(cellCoords);
 
-            if (cell.Structure != null)
-                RemoveBuilding(cell.Structure);
+            if (cell.Structures.Count > 0)
+                cell.DoForAllBuildings(structure => RemoveBuilding(structure));
         }
 
         public void RemoveBuilding(Structure structure)
@@ -779,13 +779,13 @@ namespace TSMapEditor.Models
                 if (cell == null)
                     return;
 
-                if (cell.Structure == structure)
-                    cell.Structure = null;
+                if (cell.Structures.Contains(structure))
+                    cell.Structures.Remove(structure);
             });
 
             if (structure.ObjectType.ArtConfig.Foundation.Width == 0 && structure.ObjectType.ArtConfig.Foundation.Height == 0)
             {
-                GetTile(structure.Position).Structure = null;
+                GetTile(structure.Position).Structures.Remove(structure);
             }
 
             Structures.Remove(structure);
@@ -801,23 +801,24 @@ namespace TSMapEditor.Models
         public void PlaceUnit(Unit unit)
         {
             var cell = GetTile(unit.Position);
-            if (cell.Vehicle != null)
-                throw new InvalidOperationException("Cannot place a vehicle on a cell that already has a vehicle!");
 
-            cell.Vehicle = unit;
+            cell.Vehicles.Add(unit);
             Units.Add(unit);
         }
 
         public void RemoveUnit(Unit unit)
         {
-            RemoveUnit(unit.Position);
+            var cell = GetTile(unit.Position);
+            Units.Remove(unit);
+            cell.Vehicles.Remove(unit);
         }
 
-        public void RemoveUnit(Point2D cellCoords)
+        public void RemoveUnitsFrom(Point2D cellCoords)
         {
             var cell = GetTile(cellCoords);
-            Units.Remove(cell.Vehicle);
-            cell.Vehicle = null;
+            cell.DoForAllVehicles(unit => Units.Remove(unit));
+
+            cell.Vehicles.Clear();
         }
 
         public void MoveUnit(Unit unit, Point2D newCoords)
@@ -865,23 +866,24 @@ namespace TSMapEditor.Models
         public void PlaceAircraft(Aircraft aircraft)
         {
             var cell = GetTile(aircraft.Position);
-            if (cell.Aircraft != null)
-                throw new InvalidOperationException("Cannot place an aircraft on a cell that already has an aircraft!");
 
-            cell.Aircraft = aircraft;
+            cell.Aircraft.Add(aircraft);
             Aircraft.Add(aircraft);
         }
 
         public void RemoveAircraft(Aircraft aircraft)
         {
-            RemoveAircraft(aircraft.Position);
+            var cell = GetTile(aircraft.Position);
+            cell.Aircraft.Remove(aircraft);
+            Aircraft.Remove(aircraft);
         }
 
-        public void RemoveAircraft(Point2D cellCoords)
+        public void RemoveAircraftFrom(Point2D cellCoords)
         {
             var cell = GetTile(cellCoords);
-            Aircraft.Remove(cell.Aircraft);
-            cell.Aircraft = null;
+            cell.DoForAllAircraft(aircraft => Aircraft.Remove(aircraft));
+
+            cell.Aircraft.Clear();
         }
 
         public void MoveAircraft(Aircraft aircraft, Point2D newCoords)
@@ -932,9 +934,10 @@ namespace TSMapEditor.Models
         /// </summary>
         /// <param name="movable">The object to move.</param>
         /// <param name="newCoords">The new coordinates of the object.</param>
-        /// <param name="considerSelf">Determines whether the object itself can be considered as blocking placement of the object.</param>
+        /// <param name="blocksSelf">Determines whether the object itself can be considered as blocking placement of the object.</param>
+        /// <param name="overlapObjects">Determines whether multiple objects of the same type should be allowed to exist in the same cell.</param>
         /// <returns>True if the object can be moved, otherwise false.</returns>
-        public bool CanPlaceObjectAt(IMovable movable, Point2D newCoords, bool considerSelf)
+        public bool CanPlaceObjectAt(IMovable movable, Point2D newCoords, bool blocksSelf, bool overlapObjects)
         {
             if (movable.WhatAmI() == RTTIType.Building)
             {
@@ -946,19 +949,15 @@ namespace TSMapEditor.Models
                     if (foundationCell == null)
                         return;
 
-                    if (foundationCell.Structure != null && (considerSelf || foundationCell.Structure != movable))
+                    if (!foundationCell.CanAddObject((GameObject)movable, blocksSelf, overlapObjects))
                         canPlace = false;
                 });
 
-                if (!canPlace)
-                    return false;
+                return canPlace;
             }
 
             MapTile cell = GetTile(newCoords);
-            if (movable.WhatAmI() == RTTIType.Waypoint)
-                return cell.Waypoint == null;
-
-            return cell.CanAddObject((GameObject)movable);
+            return cell.CanAddObject((GameObject)movable, blocksSelf, overlapObjects);
         }
 
         public void DeleteObjectFromCell(Point2D cellCoords)
@@ -976,21 +975,21 @@ namespace TSMapEditor.Models
                 }
             }
 
-            if (tile.Aircraft != null)
+            if (tile.Aircraft.Count > 0)
             {
-                RemoveAircraft(tile.Aircraft);
+                RemoveAircraftFrom(tile.CoordsToPoint());
                 return;
             }
 
-            if (tile.Vehicle != null)
+            if (tile.Vehicles.Count > 0)
             {
-                RemoveUnit(tile.Vehicle);
+                RemoveUnitsFrom(tile.CoordsToPoint());
                 return;
             }
 
-            if (tile.Structure != null)
+            if (tile.Structures.Count > 0)
             {
-                RemoveBuilding(tile.Structure);
+                RemoveBuildingsFrom(tile.CoordsToPoint());
                 return;
             }
 
@@ -1006,9 +1005,9 @@ namespace TSMapEditor.Models
                 return;
             }
 
-            if (tile.Waypoint != null)
+            if (tile.Waypoints.Count > 0)
             {
-                RemoveWaypoint(tile.Waypoint);
+                RemoveWaypointsFrom(tile.CoordsToPoint());
                 return;
             }
         }

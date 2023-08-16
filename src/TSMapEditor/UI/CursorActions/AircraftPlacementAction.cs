@@ -1,4 +1,5 @@
 ﻿using System;
+using Rampastring.XNAUI.Input;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations.Classes;
@@ -8,8 +9,9 @@ namespace TSMapEditor.UI.CursorActions
 {
     public class AircraftPlacementAction : CursorAction
     {
-        public AircraftPlacementAction(ICursorActionTarget cursorActionTarget) : base(cursorActionTarget)
+        public AircraftPlacementAction(ICursorActionTarget cursorActionTarget, RKeyboard keyboard) : base(cursorActionTarget)
         {
+            this.keyboard = keyboard;
         }
 
         public override string GetName() => "Place Aircraft";
@@ -17,6 +19,8 @@ namespace TSMapEditor.UI.CursorActions
         private Aircraft aircraft;
 
         private AircraftType _aircraftType;
+
+        private readonly RKeyboard keyboard;
 
         public AircraftType AircraftType
         {
@@ -44,43 +48,51 @@ namespace TSMapEditor.UI.CursorActions
             // Assign preview data
             aircraft.Position = cellCoords;
 
+            bool overlapObjects = KeyboardCommands.Instance.OverlapObjects.AreKeysOrModifiersDown(keyboard);
+
+            bool canPlace = Map.CanPlaceObjectAt(aircraft, cellCoords, false, overlapObjects);
+
+            if (!canPlace)
+                return;
+
             var tile = CursorActionTarget.Map.GetTile(cellCoords);
-            if (tile.Aircraft == null)
-            {
-                tile.Aircraft = aircraft;
-                CursorActionTarget.TechnoUnderCursor = aircraft;
-                CursorActionTarget.AddRefreshPoint(cellCoords);
-            }
+            tile.Aircraft.Add(aircraft);
+            CursorActionTarget.TechnoUnderCursor = aircraft;
+            CursorActionTarget.AddRefreshPoint(cellCoords);
         }
 
         public override void PostMapDraw(Point2D cellCoords)
         {
             // Clear preview data
             var tile = CursorActionTarget.Map.GetTile(cellCoords);
-            if (tile.Aircraft == aircraft)
+            if (tile.Aircraft.Contains(aircraft))
             {
-                tile.Aircraft = null;
+                tile.Aircraft.Remove(aircraft);
                 CursorActionTarget.TechnoUnderCursor = null;
                 CursorActionTarget.AddRefreshPoint(cellCoords);
             }
         }
 
-        public override void LeftDown(Point2D cellPoint)
+        public override void LeftDown(Point2D cellCoords)
         {
             if (AircraftType == null)
                 throw new InvalidOperationException(nameof(AircraftType) + " cannot be null");
 
-            var tile = CursorActionTarget.Map.GetTile(cellPoint);
-            if (tile.Aircraft != null)
+            bool overlapObjects = KeyboardCommands.Instance.OverlapObjects.AreKeysOrModifiersDown(keyboard);
+
+            bool canPlace = Map.CanPlaceObjectAt(aircraft, cellCoords, false,
+                overlapObjects);
+
+            if (!canPlace)
                 return;
 
-            var mutation = new PlaceAircraftMutation(CursorActionTarget.MutationTarget, AircraftType, cellPoint);
+            var mutation = new PlaceAircraftMutation(CursorActionTarget.MutationTarget, AircraftType, cellCoords);
             CursorActionTarget.MutationManager.PerformMutation(mutation);
         }
 
-        public override void LeftClick(Point2D cellPoint)
+        public override void LeftClick(Point2D cellCoords)
         {
-            LeftDown(cellPoint);
+            LeftDown(cellCoords);
         }
     }
 }

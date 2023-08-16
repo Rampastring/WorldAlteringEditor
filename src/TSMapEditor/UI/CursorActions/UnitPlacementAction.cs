@@ -1,4 +1,5 @@
 ﻿using System;
+using Rampastring.XNAUI.Input;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations.Classes;
@@ -11,8 +12,9 @@ namespace TSMapEditor.UI.CursorActions
     /// </summary>
     class UnitPlacementAction : CursorAction
     {
-        public UnitPlacementAction(ICursorActionTarget cursorActionTarget) : base(cursorActionTarget)
+        public UnitPlacementAction(ICursorActionTarget cursorActionTarget, RKeyboard keyboard) : base(cursorActionTarget)
         {
+            this.keyboard = keyboard;
         }
 
         public override string GetName() => "Place Vehicle";
@@ -20,6 +22,8 @@ namespace TSMapEditor.UI.CursorActions
         private Unit unit;
 
         private UnitType _unitType;
+
+        private readonly RKeyboard keyboard;
 
         public UnitType UnitType
         {
@@ -47,43 +51,52 @@ namespace TSMapEditor.UI.CursorActions
             // Assign preview data
             unit.Position = cellCoords;
 
+            bool overlapObjects = KeyboardCommands.Instance.OverlapObjects.AreKeysOrModifiersDown(keyboard);
+
+            bool canPlace = Map.CanPlaceObjectAt(unit, cellCoords, false,
+                overlapObjects);
+
+            if (!canPlace)
+                return;
+
             var tile = CursorActionTarget.Map.GetTile(cellCoords);
-            if (tile.Vehicle == null)
-            {
-                tile.Vehicle = unit;
-                CursorActionTarget.TechnoUnderCursor = unit;
-                CursorActionTarget.AddRefreshPoint(cellCoords);
-            }
+            tile.Vehicles.Add(unit);
+            CursorActionTarget.TechnoUnderCursor = unit;
+            CursorActionTarget.AddRefreshPoint(cellCoords);
         }
 
         public override void PostMapDraw(Point2D cellCoords)
         {
             // Clear preview data
             var tile = CursorActionTarget.Map.GetTile(cellCoords);
-            if (tile.Vehicle == unit)
+            if (tile.Vehicles.Contains(unit))
             {
-                tile.Vehicle = null;
+                tile.Vehicles.Remove(unit);
                 CursorActionTarget.TechnoUnderCursor = null;
                 CursorActionTarget.AddRefreshPoint(cellCoords);
             }
         }
 
-        public override void LeftDown(Point2D cellPoint)
+        public override void LeftDown(Point2D cellCoords)
         {
             if (UnitType == null)
                 throw new InvalidOperationException(nameof(UnitType) + " cannot be null");
 
-            var tile = CursorActionTarget.Map.GetTile(cellPoint);
-            if (tile.Vehicle != null)
+            bool overlapObjects = KeyboardCommands.Instance.OverlapObjects.AreKeysOrModifiersDown(keyboard);
+
+            bool canPlace = Map.CanPlaceObjectAt(unit, cellCoords, false,
+                overlapObjects);
+
+            if (!canPlace)
                 return;
 
-            var mutation = new PlaceVehicleMutation(CursorActionTarget.MutationTarget, UnitType, cellPoint);
+            var mutation = new PlaceVehicleMutation(CursorActionTarget.MutationTarget, UnitType, cellCoords);
             CursorActionTarget.MutationManager.PerformMutation(mutation);
         }
 
-        public override void LeftClick(Point2D cellPoint)
+        public override void LeftClick(Point2D cellCoords)
         {
-            LeftDown(cellPoint);
+            LeftDown(cellCoords);
         }
     }
 }

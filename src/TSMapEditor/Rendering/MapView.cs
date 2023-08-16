@@ -558,16 +558,15 @@ namespace TSMapEditor.Rendering
             if (tile.Overlay != null && tile.Overlay.OverlayType != null)
                 gameObjectsToRender.Add(tile.Overlay);
 
-            if (tile.Structure != null && tile.Structure.Position == tile.CoordsToPoint())
-                gameObjectsToRender.Add(tile.Structure);
+            tile.DoForAllBuildings(structure =>
+            {
+                if (structure.Position == tile.CoordsToPoint())
+                    gameObjectsToRender.Add(structure);
+            });
 
-            tile.DoForAllInfantry(i => gameObjectsToRender.Add(i));
-
-            if (tile.Aircraft != null)
-                gameObjectsToRender.Add(tile.Aircraft);
-
-            if (tile.Vehicle != null)
-                gameObjectsToRender.Add(tile.Vehicle);
+            tile.DoForAllInfantry(inf => gameObjectsToRender.Add(inf));
+            tile.DoForAllAircraft(aircraft => gameObjectsToRender.Add(aircraft));
+            tile.DoForAllVehicles(unit => gameObjectsToRender.Add(unit));
 
             if (tile.TerrainObject != null)
                 gameObjectsToRender.Add(tile.TerrainObject);
@@ -994,15 +993,16 @@ namespace TSMapEditor.Rendering
                         {
                             // If the clone modifier is held down, attempt cloning the object.
                             // Otherwise, move the dragged object.
+                            bool overlapObjects = KeyboardCommands.Instance.OverlapObjects.AreKeysOrModifiersDown(Keyboard);
                             if (KeyboardCommands.Instance.CloneObject.AreKeysOrModifiersDown(Keyboard))
                             {
-                                if (Map.CanPlaceObjectAt(draggedOrRotatedObject, tileUnderCursor.CoordsToPoint(), true))
+                                if (Map.CanPlaceObjectAt(draggedOrRotatedObject, tileUnderCursor.CoordsToPoint(), true, overlapObjects))
                                 {
                                     var mutation = new CloneObjectMutation(MutationTarget, draggedOrRotatedObject, tileUnderCursor.CoordsToPoint());
                                     MutationManager.PerformMutation(mutation);
                                 }
                             }
-                            else if (Map.CanPlaceObjectAt(draggedOrRotatedObject, tileUnderCursor.CoordsToPoint(), false))
+                            else if (Map.CanPlaceObjectAt(draggedOrRotatedObject, tileUnderCursor.CoordsToPoint(), false, overlapObjects))
                             {
                                 var mutation = new MoveObjectMutation(MutationTarget, draggedOrRotatedObject, tileUnderCursor.CoordsToPoint());
                                 MutationManager.PerformMutation(mutation);
@@ -1076,9 +1076,9 @@ namespace TSMapEditor.Rendering
                             isDraggingObject = true;
                     }
                 }
-                else if (tileUnderCursor.Waypoint != null)
+                else if (tileUnderCursor.Waypoints.Count > 0)
                 {
-                    draggedOrRotatedObject = tileUnderCursor.Waypoint;
+                    draggedOrRotatedObject = tileUnderCursor.Waypoints[0];
                     isDraggingObject = true;
                 }
             }
@@ -1121,11 +1121,11 @@ namespace TSMapEditor.Rendering
         {
             if (tileUnderCursor != null && CursorAction == null)
             {
-                if (tileUnderCursor.Structure != null)
-                    windowController.StructureOptionsWindow.Open(tileUnderCursor.Structure);
+                if (tileUnderCursor.Structures.Count > 0)
+                    windowController.StructureOptionsWindow.Open(tileUnderCursor.Structures[0]);
 
-                if (tileUnderCursor.Vehicle != null)
-                    windowController.VehicleOptionsWindow.Open(tileUnderCursor.Vehicle);
+                if (tileUnderCursor.Vehicles.Count > 0)
+                    windowController.VehicleOptionsWindow.Open(tileUnderCursor.Vehicles[0]);
 
                 Infantry infantry = tileUnderCursor.GetFirstInfantry();
                 if (infantry != null)
@@ -1240,9 +1240,10 @@ namespace TSMapEditor.Rendering
             if (isDraggingObject)
             {
                 bool isCloning = KeyboardCommands.Instance.CloneObject.AreKeysOrModifiersDown(Keyboard);
+                bool overlapObjects = KeyboardCommands.Instance.OverlapObjects.AreKeysOrModifiersDown(Keyboard);
 
                 Color lineColor = isCloning ? new Color(0, 255, 255) : Color.White;
-                if (!Map.CanPlaceObjectAt(draggedOrRotatedObject, tileUnderCursor.CoordsToPoint(), isCloning))
+                if (!Map.CanPlaceObjectAt(draggedOrRotatedObject, tileUnderCursor.CoordsToPoint(), isCloning, overlapObjects))
                     lineColor = Color.Red;
 
                 Point2D cameraAndCellCenterOffset = new Point2D(-Camera.TopLeftPoint.X + Constants.CellSizeX / 2,

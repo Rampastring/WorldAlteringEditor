@@ -18,9 +18,6 @@ namespace TSMapEditor.UI.CursorActions
 
         public override void LeftClick(Point2D cellCoords)
         {
-            if (CursorActionTarget.Map.GetTile(cellCoords).Waypoint != null)
-                return;
-
             PlaceWaypointWindow.Open(cellCoords);
         }
 

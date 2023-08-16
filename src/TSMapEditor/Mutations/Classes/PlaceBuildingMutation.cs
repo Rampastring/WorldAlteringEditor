@@ -1,5 +1,4 @@
-﻿using System;
-using TSMapEditor.GameMath;
+﻿using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 
@@ -25,9 +24,6 @@ namespace TSMapEditor.Mutations.Classes
         public override void Perform()
         {
             var cell = MutationTarget.Map.GetTileOrFail(cellCoords);
-
-            if (cell.Structure != null)
-                throw new InvalidOperationException(nameof(PlaceBuildingMutation) + ": the cell already has a building!");
 
             var structure = new Structure(buildingType);
             structure.Owner = MutationTarget.ObjectOwner;

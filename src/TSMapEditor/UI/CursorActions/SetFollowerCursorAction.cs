@@ -40,7 +40,7 @@ namespace TSMapEditor.UI.CursorActions
             Color color = Color.Gray;
             var cell = Map.GetTile(cellCoords);
 
-            if (cell != null && cell.Vehicle != null && cell.Vehicle != UnitToFollow)
+            if (cell != null && cell.Vehicles.Count > 0 && cell.Vehicles[0] != UnitToFollow)
                 color = Color.Yellow;
 
             var rect = new Rectangle(x - Constants.UIEmptySideSpace, 
@@ -73,13 +73,13 @@ namespace TSMapEditor.UI.CursorActions
             if (cell == null)
                 return;
 
-            if (cell.Vehicle == null)
+            if (cell.Vehicles.Count == 0)
                 return;
 
-            if (cell.Vehicle == UnitToFollow)
+            if (cell.Vehicles[0] == UnitToFollow)
                 return;
 
-            PerformMutation(new SetFollowerMutation(MutationTarget, UnitToFollow, cell.Vehicle));
+            PerformMutation(new SetFollowerMutation(MutationTarget, UnitToFollow, cell.Vehicles[0]));
             ExitAction();
         }
 

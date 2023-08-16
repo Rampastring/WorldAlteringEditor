@@ -15,7 +15,7 @@ namespace TSMapEditor.UI.Sidebar
             Map map, TheaterGraphics theaterGraphics, ICursorActionTarget cursorActionTarget)
             : base(windowManager, editorState, map, theaterGraphics)
         {
-            aircraftPlacementAction = new AircraftPlacementAction(cursorActionTarget);
+            aircraftPlacementAction = new AircraftPlacementAction(cursorActionTarget, Keyboard);
             aircraftPlacementAction.ActionExited += AircraftPlacementAction_ActionExited;
         }
 

@@ -1,5 +1,4 @@
-﻿using System;
-using TSMapEditor.GameMath;
+﻿using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 
@@ -18,6 +17,7 @@ namespace TSMapEditor.Mutations.Classes
 
         private readonly AircraftType aircraftType;
         private readonly Point2D cellCoords;
+        private Aircraft aircraft;
 
         public override void Perform()
         {
@@ -25,10 +25,7 @@ namespace TSMapEditor.Mutations.Classes
             if (cell == null)
                 return;
 
-            if (cell.Aircraft != null)
-                throw new InvalidOperationException(nameof(PlaceAircraftMutation) + ": the cell already has an aircraft!");
-
-            var aircraft = new Aircraft(aircraftType);
+            aircraft = new Aircraft(aircraftType);
             aircraft.Owner = MutationTarget.ObjectOwner;
             aircraft.Position = cellCoords;
             MutationTarget.Map.PlaceAircraft(aircraft);
@@ -38,7 +35,7 @@ namespace TSMapEditor.Mutations.Classes
         public override void Undo()
         {
             var cell = MutationTarget.Map.GetTile(cellCoords);
-            MutationTarget.Map.RemoveAircraft(cell.Aircraft);
+            MutationTarget.Map.RemoveAircraft(aircraft);
             MutationTarget.AddRefreshPoint(cellCoords);
         }
     }

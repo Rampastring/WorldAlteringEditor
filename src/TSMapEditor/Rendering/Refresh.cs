@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.Win32;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 
@@ -112,10 +113,8 @@ namespace TSMapEditor.Rendering
                 // }
 
                 mapTile.DoForAllInfantry(inf => RedrawFromObject(inf));
-                if (mapTile.Vehicle != null)
-                    RedrawFromObject(mapTile.Vehicle);
-                if (mapTile.Aircraft != null)
-                    RedrawFromObject(mapTile.Aircraft);
+                mapTile.DoForAllVehicles(unit => RedrawFromObject(unit));
+                mapTile.DoForAllAircraft(aircraft => RedrawFromObject(aircraft));
                 if (mapTile.TerrainObject != null)
                     RedrawFromObject(mapTile.TerrainObject);
 

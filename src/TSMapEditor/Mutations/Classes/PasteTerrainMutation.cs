@@ -448,10 +448,11 @@ namespace TSMapEditor.Mutations.Classes
     /// </summary>
     public class PasteTerrainMutation : Mutation
     {
-        public PasteTerrainMutation(IMutationTarget mutationTarget, CopiedMapData copiedMapData, Point2D origin) : base(mutationTarget)
+        public PasteTerrainMutation(IMutationTarget mutationTarget, CopiedMapData copiedMapData, Point2D origin, bool allowOverlap) : base(mutationTarget)
         {
             this.copiedMapData = copiedMapData;
             this.origin = origin;
+            this.allowOverlap = allowOverlap;
         }
 
         private struct PlacedInfantryInfo
@@ -468,6 +469,7 @@ namespace TSMapEditor.Mutations.Classes
 
         private readonly CopiedMapData copiedMapData;
         private readonly Point2D origin;
+        private readonly bool allowOverlap;
 
         private OriginalCellTerrainData[] terrainUndoData;
         private OriginalOverlayInfo[] overlayUndoData;
@@ -476,6 +478,8 @@ namespace TSMapEditor.Mutations.Classes
         private Point2D[] vehicleCells;
         private Point2D[] structureCells;
         private PlacedInfantryInfo[] infantryLocations;
+
+        private List<TechnoBase> placedObjects = new List<TechnoBase>();
 
         private void AddRefresh()
         {
@@ -616,8 +620,21 @@ namespace TSMapEditor.Mutations.Classes
                 if (cell == null)
                     continue;
 
-                if (cell.Vehicle != null)
-                    continue;
+                if (cell.Vehicles.Count > 0 && !allowOverlap)
+                {
+                    bool foreignUnitExists = false;
+                    foreach (var vehicle in cell.Vehicles)
+                    {
+                        if (!placedObjects.Contains(vehicle))
+                        {
+                            foreignUnitExists = true;
+                            break;
+                        }
+                    }
+
+                    if (foreignUnitExists)
+                        continue;
+                }
 
                 var unitType = MutationTarget.Map.Rules.UnitTypes.Find(tt => tt.ININame == copiedVehicleEntry.ObjectTypeName);
                 if (unitType == null)
@@ -627,15 +644,18 @@ namespace TSMapEditor.Mutations.Classes
                 if (owner == null)
                     continue;
 
-                MutationTarget.Map.PlaceUnit(new Unit(unitType) 
-                { 
-                    Position = cellCoords, 
-                    Owner = owner, 
-                    HP = copiedVehicleEntry.HP, 
+                var unit = new Unit(unitType)
+                {
+                    Position = cellCoords,
+                    Owner = owner,
+                    HP = copiedVehicleEntry.HP,
                     Veterancy = copiedVehicleEntry.Veterancy,
-                    Facing = copiedVehicleEntry.Facing, 
-                    Mission = copiedVehicleEntry.Mission 
-                });
+                    Facing = copiedVehicleEntry.Facing,
+                    Mission = copiedVehicleEntry.Mission
+                };
+
+                MutationTarget.Map.PlaceUnit(unit);
+                placedObjects.Add(unit);
 
                 vehicleCells.Add(cellCoords);
             }
@@ -657,31 +677,45 @@ namespace TSMapEditor.Mutations.Classes
                 if (cell == null)
                     continue;
 
-                if (cell.Structure != null)
-                    continue;
-
                 var buildingType = MutationTarget.Map.Rules.BuildingTypes.Find(tt => tt.ININame == copiedStructureEntry.ObjectTypeName);
                 if (buildingType == null)
                     continue;
 
-                bool isFoundationClear = true;
-                buildingType.ArtConfig.DoForFoundationCoords(foundationPoint =>
+                if (cell.Structures.Count > 0 && !allowOverlap)
                 {
-                    Point2D foundationCellCoords = foundationPoint + cellCoords;
-                    MapTile foundationCell = MutationTarget.Map.GetTile(foundationCellCoords);
+                    bool isFoundationClear = true;
+                    buildingType.ArtConfig.DoForFoundationCoords(offset =>
+                    {
+                        Point2D foundationCellCoords = offset + cellCoords;
+                        MapTile foundationCell = MutationTarget.Map.GetTile(foundationCellCoords);
 
-                    if (foundationCell == null || foundationCell.Structure != null)
-                        isFoundationClear = false;
-                });
+                        foreach (var building in foundationCell.Structures)
+                        {
+                            if (!placedObjects.Contains(building))
+                            {
+                                isFoundationClear = false;
+                                break;
+                            }
+                        }
+                    });
 
-                if (!isFoundationClear)
-                    continue;
+                    if (!isFoundationClear)
+                        continue;
+                }
                 
                 House owner = MutationTarget.Map.GetHouses().Find(h => h.ININame == copiedStructureEntry.OwnerHouseName);
                 if (owner == null)
                     continue;
 
-                MutationTarget.Map.PlaceBuilding(new Structure(buildingType) { Position = cellCoords, Owner = owner, HP = copiedStructureEntry.HP, Facing = copiedStructureEntry.Facing });
+                var building = new Structure(buildingType)
+                {
+                    Position = cellCoords, Owner = owner, HP = copiedStructureEntry.HP,
+                    Facing = copiedStructureEntry.Facing
+                };
+
+                MutationTarget.Map.PlaceBuilding(building);
+                placedObjects.Add(building);
+
                 structureCells.Add(cellCoords);
             }
 
@@ -769,12 +803,12 @@ namespace TSMapEditor.Mutations.Classes
 
             foreach (Point2D cellCoords in vehicleCells)
             {
-                MutationTarget.Map.RemoveUnit(cellCoords);
+                MutationTarget.Map.RemoveUnitsFrom(cellCoords);
             }
 
             foreach (Point2D cellCoords in structureCells)
             {
-                MutationTarget.Map.RemoveBuilding(cellCoords);
+                MutationTarget.Map.RemoveBuildingsFrom(cellCoords);
             }
 
             foreach (var infantryInfo in infantryLocations)

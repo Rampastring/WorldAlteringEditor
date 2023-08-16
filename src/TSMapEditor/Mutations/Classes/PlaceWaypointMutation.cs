@@ -17,16 +17,18 @@ namespace TSMapEditor.Mutations.Classes
 
         private readonly Point2D cellCoords;
         private readonly int waypointNumber;
+        private Waypoint waypoint;
 
         public override void Perform()
         {
-            MutationTarget.Map.AddWaypoint(new Waypoint() { Identifier = waypointNumber, Position = cellCoords });
+            waypoint = new Waypoint() { Identifier = waypointNumber, Position = cellCoords };
+            MutationTarget.Map.AddWaypoint(waypoint);
             MutationTarget.AddRefreshPoint(cellCoords, 1);
         }
 
         public override void Undo()
         {
-            MutationTarget.Map.RemoveWaypointFrom(cellCoords);
+            MutationTarget.Map.RemoveWaypoint(waypoint);
             MutationTarget.AddRefreshPoint(cellCoords, 1);
         }
     }

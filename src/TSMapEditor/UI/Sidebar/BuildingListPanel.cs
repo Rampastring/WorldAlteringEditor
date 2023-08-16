@@ -11,7 +11,7 @@ namespace TSMapEditor.UI.Sidebar
             Map map, TheaterGraphics theaterGraphics, ICursorActionTarget cursorActionTarget) : 
             base(windowManager, editorState, map, theaterGraphics)
         {
-            buildingPlacementAction = new BuildingPlacementAction(cursorActionTarget);
+            buildingPlacementAction = new BuildingPlacementAction(cursorActionTarget, Keyboard);
             buildingPlacementAction.ActionExited += BuildingPlacementAction_ActionExited;
         }
 

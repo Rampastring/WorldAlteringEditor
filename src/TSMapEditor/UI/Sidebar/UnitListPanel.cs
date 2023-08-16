@@ -13,7 +13,7 @@ namespace TSMapEditor.UI.Sidebar
     {
         public UnitListPanel(WindowManager windowManager, EditorState editorState, Map map, TheaterGraphics theaterGraphics, ICursorActionTarget cursorActionTarget, bool isNaval) : base(windowManager, editorState, map, theaterGraphics)
         {
-            unitPlacementAction = new UnitPlacementAction(cursorActionTarget);
+            unitPlacementAction = new UnitPlacementAction(cursorActionTarget, Keyboard);
             unitPlacementAction.ActionExited += UnitPlacementAction_ActionExited;
 
             this.isNaval = isNaval;

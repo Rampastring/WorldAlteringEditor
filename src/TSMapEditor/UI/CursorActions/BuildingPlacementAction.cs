@@ -1,4 +1,6 @@
 ﻿using System;
+using Rampastring.XNAUI.Input;
+using Rampastring.XNAUI.XNAControls;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations.Classes;
@@ -11,8 +13,9 @@ namespace TSMapEditor.UI.CursorActions
     /// </summary>
     public class BuildingPlacementAction : CursorAction
     {
-        public BuildingPlacementAction(ICursorActionTarget cursorActionTarget) : base(cursorActionTarget)
+        public BuildingPlacementAction(ICursorActionTarget cursorActionTarget, RKeyboard keyboard) : base(cursorActionTarget)
         {
+            this.keyboard = keyboard;
         }
 
         public override string GetName() => "Place Building";
@@ -20,6 +23,8 @@ namespace TSMapEditor.UI.CursorActions
         private Structure structure;
 
         private BuildingType _buildingType;
+
+        private readonly RKeyboard keyboard;
 
         public BuildingType BuildingType
         {
@@ -47,34 +52,27 @@ namespace TSMapEditor.UI.CursorActions
             // Assign preview data
             structure.Position = cellCoords;
 
-            var tile = CursorActionTarget.Map.GetTile(cellCoords);
-            if (tile.Structure != null)
+            bool overlapObjects = KeyboardCommands.Instance.OverlapObjects.AreKeysOrModifiersDown(keyboard);
+
+            bool canPlace = Map.CanPlaceObjectAt(structure, cellCoords, false,
+                overlapObjects);
+
+            if (!canPlace)
                 return;
 
-            bool foundationAreaHasStructure = false;
-            structure.ObjectType.ArtConfig.DoForFoundationCoordsOrOrigin(offset =>
-            {
-                var cell = CursorActionTarget.Map.GetTile(cellCoords + offset);
-
-                if (cell != null && cell.Structure != null)
-                    foundationAreaHasStructure = true;
-            });
-
-            if (!foundationAreaHasStructure)
-            {
-                tile.Structure = structure;
-                CursorActionTarget.TechnoUnderCursor = structure;
-                CursorActionTarget.AddRefreshPoint(cellCoords, 10);
-            }
+            var tile = CursorActionTarget.Map.GetTile(cellCoords);
+            tile.Structures.Add(structure);
+            CursorActionTarget.TechnoUnderCursor = structure;
+            CursorActionTarget.AddRefreshPoint(cellCoords, 10);
         }
 
         public override void PostMapDraw(Point2D cellCoords)
         {
             // Clear preview data
             var tile = CursorActionTarget.Map.GetTile(cellCoords);
-            if (tile.Structure == structure)
+            if (tile.Structures.Contains(structure))
             {
-                tile.Structure = null;
+                tile.Structures.Remove(structure);
                 CursorActionTarget.TechnoUnderCursor = null;
                 CursorActionTarget.AddRefreshPoint(cellCoords, 10);
             }
@@ -85,19 +83,12 @@ namespace TSMapEditor.UI.CursorActions
             if (BuildingType == null)
                 throw new InvalidOperationException(nameof(BuildingType) + " cannot be null");
 
-            var tile = CursorActionTarget.Map.GetTile(cellCoords);
-            if (tile.Structure != null)
-                return;
+            bool overlapObjects = KeyboardCommands.Instance.OverlapObjects.AreKeysOrModifiersDown(keyboard);
 
-            bool foundationInvalid = false;
-            structure.ObjectType.ArtConfig.DoForFoundationCoords(offset =>
-            {
-                var cell = CursorActionTarget.Map.GetTile(cellCoords + offset);
-                if (cell == null || cell.Structure != null)
-                    foundationInvalid = true;
-            });
+            bool canPlace = Map.CanPlaceObjectAt(structure, cellCoords, false,
+                overlapObjects);
 
-            if (foundationInvalid)
+            if (!canPlace)
                 return;
 
             var mutation = new PlaceBuildingMutation(CursorActionTarget.MutationTarget, BuildingType, cellCoords);

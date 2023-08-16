@@ -1,6 +1,7 @@
 ﻿using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
+using Rampastring.XNAUI.Input;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations.Classes;
@@ -13,8 +14,9 @@ namespace TSMapEditor.UI.CursorActions
     /// </summary>
     public class PasteTerrainCursorAction : CursorAction
     {
-        public PasteTerrainCursorAction(ICursorActionTarget cursorActionTarget) : base(cursorActionTarget)
+        public PasteTerrainCursorAction(ICursorActionTarget cursorActionTarget, RKeyboard keyboard) : base(cursorActionTarget)
         {
+            this.keyboard = keyboard;
         }
 
         public override string GetName() => "Paste Copied Terrain";
@@ -37,6 +39,8 @@ namespace TSMapEditor.UI.CursorActions
         private CopiedMapData copiedMapData;
 
         private List<OriginalOverlayInfo> originalOverlay = new List<OriginalOverlayInfo>();
+
+        private RKeyboard keyboard;
 
         public override void OnActionEnter()
         {
@@ -147,7 +151,9 @@ namespace TSMapEditor.UI.CursorActions
             if (CursorActionTarget.Map.GetTile(cellCoords) == null)
                 return;
 
-            var mutation = new PasteTerrainMutation(CursorActionTarget.MutationTarget, copiedMapData, cellCoords);
+            bool allowOverlap = KeyboardCommands.Instance.OverlapObjects.AreKeysOrModifiersDown(keyboard);
+            
+            var mutation = new PasteTerrainMutation(CursorActionTarget.MutationTarget, copiedMapData, cellCoords, allowOverlap);
             CursorActionTarget.MutationManager.PerformMutation(mutation);
         }
     }
