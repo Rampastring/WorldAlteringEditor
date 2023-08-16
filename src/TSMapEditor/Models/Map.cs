@@ -172,7 +172,7 @@ namespace TSMapEditor.Models
             const int marginY = 6;
             const int marginX = 4;
 
-            InitializeRules(rulesIni, firestormIni);
+            InitializeRules(rulesIni, artIni, firestormIni, artFirestormIni);
             LoadedINI = new IniFileEx();
             var baseMap = new IniFileEx(Environment.CurrentDirectory + "/Config/BaseMap.ini", ccFileManager);
             baseMap.FileName = string.Empty;
@@ -185,13 +185,13 @@ namespace TSMapEditor.Models
 
         public void LoadExisting(IniFile rulesIni, IniFile firestormIni, IniFile artIni, IniFile artFirestormIni, IniFile mapIni)
         {
-            InitializeRules(rulesIni, firestormIni);
+            InitializeRules(rulesIni, artIni, firestormIni, artFirestormIni);
 
             LoadedINI = mapIni ?? throw new ArgumentNullException(nameof(mapIni));
             Rules.InitFromINI(mapIni, initializer, true);
             InitEditorConfig();
 
-            InitializeArt(artIni, artFirestormIni);
+            PostInitializeRules_ReinitializeArt(artIni, artFirestormIni);
 
             MapLoader.MapLoadErrors.Clear();
 
@@ -1238,7 +1238,7 @@ namespace TSMapEditor.Models
         //     LoadedINI = new IniFileEx();
         // }
 
-        public void InitializeRules(IniFile rulesIni, IniFile firestormIni)
+        public void InitializeRules(IniFile rulesIni, IniFile artIni, IniFile firestormIni, IniFile artFirestormIni)
         {
             if (rulesIni == null)
                 throw new ArgumentNullException(nameof(rulesIni));
@@ -1246,9 +1246,14 @@ namespace TSMapEditor.Models
             Rules = new Rules();
             Rules.InitFromINI(rulesIni, initializer);
 
+            Rules.InitArt(artIni, initializer);
+
             if (firestormIni != null)
             {
                 Rules.InitFromINI(firestormIni, initializer);
+
+                if (artFirestormIni != null)
+                    Rules.InitArt(artFirestormIni, initializer);
             }
 
             var editorRulesIni = new IniFile(Environment.CurrentDirectory + "/Config/EditorRules.ini");
@@ -1281,7 +1286,16 @@ namespace TSMapEditor.Models
         }
 
 
-        public void InitializeArt(IniFile artIni, IniFile artFirestormIni)
+        /// <summary>
+        /// Re-initializes art.
+        /// Call after initializing rules overrides from map.
+        /// The game seems to initialize rules and art in multiple phases,
+        /// where it loads Art configurations each time after
+        /// it has loaded a Rules configuration.
+        /// Loading them in only one phase can cause objects using Image=
+        /// overrides in both rules and the map to bug out.
+        /// </summary>
+        public void PostInitializeRules_ReinitializeArt(IniFile artIni, IniFile artFirestormIni)
         {
             Rules.InitArt(artIni, initializer);
 
