@@ -26,6 +26,11 @@
     <ApplicationIcon>editoricon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Config\Scripts\Apply Animated Water.cs" />
+    <Compile Remove="Config\Scripts\Make Civilian Vehicles Sleep.cs" />
+    <Compile Remove="Config\Scripts\Remove All Terrain Objects.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <None Update="Config\Actions.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -75,12 +80,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Config\MapCode\Snowy Smudges.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Config\Scripts\Make Civilian Vehicles Sleep.waescript">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Config\Scripts\Remove All Terrain Objects.waescript">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Config\TerrainGeneratorPresets.ini">
@@ -331,6 +330,17 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\ToolIcons\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Config\Scripts\Apply Animated Water.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\Scripts\Make Civilian Vehicles Sleep.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Config\Scripts\Remove All Terrain Objects.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
     <Message Text="Restoring dotnet tools" Importance="High" />

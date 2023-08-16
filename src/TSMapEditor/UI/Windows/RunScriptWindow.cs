@@ -42,17 +42,18 @@ namespace TSMapEditor.UI.Windows
             if (!File.Exists(filePath))
             {
                 EditorMessageBox.Show(WindowManager, "Can't find file",
-                    "The selected INI file doesn't exist! Maybe it was deleted?", MessageBoxButtons.OK);
+                    "The selected file does not exist! Maybe it was deleted?", MessageBoxButtons.OK);
 
                 return;
             }
 
             scriptPath = filePath;
 
-            string confirmation = ScriptRunner.GetDescriptionFromScript(filePath);
+            string confirmation = ScriptRunner.GetDescriptionFromScript(map, filePath);
             if (confirmation == null)
             {
-                confirmation = "The script has no description. Are you sure you wish to run it?";
+                EditorMessageBox.Show(WindowManager, "Error", "Compiling the script failed! Check its syntax, or contact its author for support.", MessageBoxButtons.OK);
+                return;
             }
 
             confirmation = Renderer.FixText(confirmation, Constants.UIDefaultFont, Width).Text;
@@ -87,7 +88,7 @@ namespace TSMapEditor.UI.Windows
                 return;
             }
 
-            var iniFiles = Directory.GetFiles(directoryPath, "*.waescript");
+            var iniFiles = Directory.GetFiles(directoryPath, "*.cs");
 
             foreach (string filePath in iniFiles)
             {

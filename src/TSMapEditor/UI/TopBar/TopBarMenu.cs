@@ -107,9 +107,6 @@ namespace TSMapEditor.UI.TopBar
             if (windowController.AutoApplyImpassableOverlayWindow.IsAvailable)
                 toolsContextMenu.AddItem("Apply Impassable Overlay", () => windowController.AutoApplyImpassableOverlayWindow.Open(), null, null, null);
 
-            if (ApplyAnimatedWaterScript.IsAvailable(map))
-                toolsContextMenu.AddItem("Generate Animated Water", GenerateAnimatedWater, null, null, null, null);
-
             toolsContextMenu.AddItem("Terrain Generator Options", () => windowController.TerrainGeneratorConfigWindow.Open(), null, null, null, KeyboardCommands.Instance.ConfigureTerrainGenerator.GetKeyDisplayString());
             toolsContextMenu.AddItem("Generate Terrain", () => EnterTerrainGenerator(), null, null, null, KeyboardCommands.Instance.GenerateTerrain.GetKeyDisplayString());
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
@@ -187,16 +184,6 @@ namespace TSMapEditor.UI.TopBar
             }
 
             mapView.EditorState.CursorAction = manageBaseNodesCursorAction;
-        }
-
-        private void GenerateAnimatedWater()
-        {
-            var messageBox = EditorMessageBox.Show(WindowManager, "Are you sure?",
-                "This will automatically replace water tiles on the map with animated water.\r\n\r\n" +
-                "No un-do is available!\r\n\r\n" +
-                "Do you wish to continue?", MessageBoxButtons.YesNo);
-
-            messageBox.YesClickedAction = (_) => { new ApplyAnimatedWaterScript().Perform(map); mapView.InvalidateMap(); };
         }
 
         private void SmoothenIce()

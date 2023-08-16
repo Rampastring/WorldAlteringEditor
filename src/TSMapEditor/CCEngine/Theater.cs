@@ -83,6 +83,8 @@ namespace TSMapEditor.CCEngine
 
         private const string REQUIRED_SECTION = "General";
 
+        public TileSet FindTileSet(string tileSetName) => TileSets.Find(ts => ts.SetName == tileSetName);
+
         public void ReadConfigINI(string baseDirectoryPath, CCFileManager ccFileManager)
         {
             TileSets.Clear();

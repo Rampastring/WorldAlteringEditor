@@ -1,69 +1,100 @@
-﻿using Rampastring.Tools;
-using System;
+﻿using System;
 using System.IO;
+using System.Reflection;
+using TSMapEditor.CCEngine;
+using TSMapEditor.GameMath;
 using TSMapEditor.Models;
+using TSMapEditor.Rendering;
 using Westwind.Scripting;
 
 namespace TSMapEditor.Scripts
 {
     public static class ScriptRunner
     {
+        private static object scriptClassInstance;
+        private static MethodInfo getDescriptionMethod;
+        private static MethodInfo performMethod;
+        private static MethodInfo getSuccessMessageMethod;
+
         public static string RunScript(Map map, string scriptPath)
         {
-            var iniFile = FindIniFileForScript(scriptPath);
-            if (iniFile == null)
-                return "The script was not found! Maybe it was deleted?";
+            if (scriptClassInstance == null || performMethod == null || getSuccessMessageMethod == null)
+                throw new InvalidOperationException("Script not properly compiled!");
 
-            string source = iniFile.GetStringValue("$Code", "Value", null);
-            if (source == null)
-                return "An error occurred while running the script: the script file has no source code included!";
-
-            string error = RunSource(map, source);
-
-            if (error == null)
-                return iniFile.GetStringValue("$Editor", "Success", "Script executed successfully.");
-
-            return "An error occurred while running the script: " + Environment.NewLine + Environment.NewLine + error;
-
-            // string source = "TSMapEditor.Models.Map map = (TSMapEditor.Models.Map)@0; map.Units.ForEach(u => { if (u.Owner.ININame == \"Civilians\") u.Mission = \"Sleep\"; });";
-            // string source = "TSMapEditor.Models.Map map = (TSMapEditor.Models.Map)@0; int cc = map.GetCellCount(); System.Windows.Forms.MessageBox.Show(cc.ToString());";
-            // string source = "Map map = (Map)@0; map.DoForAllTechnos(techno => { if (techno.WhatAmI() == RTTIType.Unit && techno.Owner.ININame == \"Civilians\") { var unit = (Unit)techno; unit.Mission = \"Sleep\"; } }); return null;";
+            try
+            {
+                performMethod.Invoke(scriptClassInstance, new object[] { map });
+                return (string)getSuccessMessageMethod.Invoke(scriptClassInstance, null);
+            }
+            catch (Exception ex) // rare case where catching Exception is OK, we cannot know what the script can throw
+            {
+                return "An error occurred while running the script. Returned error message: " + Environment.NewLine + Environment.NewLine + ex.Message;
+            }
         }
 
-        public static string GetDescriptionFromScript(string scriptPath)
-        {
-            var iniFile = FindIniFileForScript(scriptPath);
-            if (iniFile == null)
-                return null;
-
-            return iniFile.GetStringValue("$Editor", "Confirmation", null);
-        }
-
-        private static IniFile FindIniFileForScript(string scriptPath)
+        public static string GetDescriptionFromScript(Map map, string scriptPath)
         {
             if (!File.Exists(scriptPath))
                 return null;
 
-            var iniFile = new IniFile(scriptPath);
-            return iniFile;
+            var sourceCode = File.ReadAllText(scriptPath);
+            bool compileSuccess = CompileSource(map, sourceCode);
+            if (!compileSuccess)
+                return null;
+
+            return (string)getDescriptionMethod.Invoke(scriptClassInstance, null);
         }
 
-        private static string RunSource(Map map, string source)
+        private static bool CompileSource(Map map, string source)
         {
             var script = new CSharpScriptExecution() { SaveGeneratedCode = true };
             script.AddDefaultReferencesAndNamespaces();
             script.AddAssembly(typeof(System.Windows.Forms.MessageBox));
             script.AddAssembly(map.Units.GetType());
             script.AddAssembly(typeof(Map));
+            script.AddAssembly(typeof(ITileImage));
+            script.AddAssembly(typeof(Theater));
+            script.AddAssembly(typeof(Point2D));
+            script.AddAssembly(typeof(Constants));
             script.AddNamespace("TSMapEditor");
             script.AddNamespace("TSMapEditor.Models");
+            script.AddNamespace("TSMapEditor.Rendering");
+            script.AddNamespace("TSMapEditor.GameMath");
 
-            script.ExecuteCode(source, map);
+            getDescriptionMethod = null;
+            performMethod = null;
+            getSuccessMessageMethod = null;
 
-            if (!script.Error)
-                return null;
+            object instance = script.CompileClass(source);
+            if (script.Error)
+                return false;
 
-            return script.ErrorMessage;
+            scriptClassInstance = instance;
+            Type classType = instance.GetType();
+            var methods = classType.GetMethods();
+            foreach (MethodInfo method in methods)
+            {
+                if (method.Name == "GetDescription")
+                {
+                    getDescriptionMethod = method;
+
+                    if (getDescriptionMethod.ReturnType != typeof(string))
+                        return false;
+                }
+                else if (method.Name == "Perform")
+                {
+                    performMethod = method;
+                }
+                else if (method.Name == "GetSuccessMessage")
+                {
+                    getSuccessMessageMethod = method;
+
+                    if (getSuccessMessageMethod.ReturnType != typeof(string))
+                        return false;
+                }
+            }
+
+            return getDescriptionMethod != null && performMethod != null && getSuccessMessageMethod != null;
         }
     }
 }
