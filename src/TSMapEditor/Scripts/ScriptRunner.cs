@@ -1,10 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
-using TSMapEditor.CCEngine;
-using TSMapEditor.GameMath;
 using TSMapEditor.Models;
-using TSMapEditor.Rendering;
 using Westwind.Scripting;
 
 namespace TSMapEditor.Scripts
@@ -48,14 +45,7 @@ namespace TSMapEditor.Scripts
         private static bool CompileSource(Map map, string source)
         {
             var script = new CSharpScriptExecution() { SaveGeneratedCode = true };
-            script.AddDefaultReferencesAndNamespaces();
-            script.AddAssembly(typeof(System.Windows.Forms.MessageBox));
-            script.AddAssembly(map.Units.GetType());
-            script.AddAssembly(typeof(Map));
-            script.AddAssembly(typeof(ITileImage));
-            script.AddAssembly(typeof(Theater));
-            script.AddAssembly(typeof(Point2D));
-            script.AddAssembly(typeof(Constants));
+            script.AddLoadedReferences();
             script.AddNamespace("TSMapEditor");
             script.AddNamespace("TSMapEditor.Models");
             script.AddNamespace("TSMapEditor.Rendering");
