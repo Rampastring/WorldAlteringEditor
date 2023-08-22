@@ -22,12 +22,20 @@
         {
             string name;
 
-            if (string.IsNullOrWhiteSpace(FSName))
-                name = Name ?? ININame;
-            else
+            if (!string.IsNullOrWhiteSpace(FSName))
+            {
                 name = FSName;
+            }
+            else if (!string.IsNullOrWhiteSpace(Name))
+            {
+                name = Name;
+            }
+            else
+            {
+                return ININame;
+            }
 
-            if (ININame.StartsWith("AI") && !Name.StartsWith("AI"))
+            if (ININame.StartsWith("AI") && !name.StartsWith("AI "))
                 return "AI " + name;
 
             return name;
