@@ -440,6 +440,8 @@ namespace TSMapEditor.Rendering
         private readonly GraphicsDevice graphicsDevice;
 
 
+        private static string[] NewTheaterHardcodedPrefixes = new string[] { "CA", "CT", "GA", "GT", "NA", "NT" };
+
         private void LoadBuildingZData()
         {
             return;
@@ -598,6 +600,8 @@ namespace TSMapEditor.Rendering
             }
         }
 
+
+
         public void ReadBuildingTextures(List<BuildingType> buildingTypes)
         {
             BuildingTextures = new ObjectImage[buildingTypes.Count];
@@ -617,8 +621,11 @@ namespace TSMapEditor.Rendering
                 else
                     shpFileName += SHP_FILE_EXTENSION;
 
+                // The game has hardcoded NewTheater=yes behaviour for buildings that start with a specific prefix
+                bool hardcodedNewTheater = Array.Exists(NewTheaterHardcodedPrefixes, prefix => buildingType.ININame.ToUpperInvariant().StartsWith(prefix));
+
                 byte[] shpData = null;
-                if (buildingType.ArtConfig.NewTheater)
+                if (buildingType.ArtConfig.NewTheater || hardcodedNewTheater)
                 {
                     string newTheaterShpName = shpFileName.Substring(0, 1) + Theater.NewTheaterBuildingLetter + shpFileName.Substring(2);
 
