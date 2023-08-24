@@ -61,6 +61,7 @@ namespace TSMapEditor.Rendering
     public class MapView : XNAControl, ICursorActionTarget, IMutationTarget
     {
         private const float RightClickScrollRateDivisor = 64f;
+        private const double ZoomStep = 0.1;
 
         private static Color[] MarbleMadnessTileHeightLevelColors = new Color[]
         {
@@ -206,6 +207,9 @@ namespace TSMapEditor.Rendering
             KeyboardCommands.Instance.FrameworkMode.Triggered += FrameworkMode_Triggered;
             KeyboardCommands.Instance.ViewMegamap.Triggered += ViewMegamap_Triggered;
             KeyboardCommands.Instance.Toggle2DMode.Triggered += Toggle2DMode_Triggered;
+            KeyboardCommands.Instance.ZoomIn.Triggered += ZoomIn_Triggered;
+            KeyboardCommands.Instance.ZoomOut.Triggered += ZoomOut_Triggered;
+            KeyboardCommands.Instance.ResetZoomLevel.Triggered += ResetZoomLevel_Triggered;
 
             windowController.Initialized += PostWindowControllerInit;
             Map.LocalSizeChanged += (s, e) => InvalidateMap();
@@ -248,6 +252,9 @@ namespace TSMapEditor.Rendering
             KeyboardCommands.Instance.FrameworkMode.Triggered -= FrameworkMode_Triggered;
             KeyboardCommands.Instance.ViewMegamap.Triggered -= ViewMegamap_Triggered;
             KeyboardCommands.Instance.Toggle2DMode.Triggered -= Toggle2DMode_Triggered;
+            KeyboardCommands.Instance.ZoomIn.Triggered -= ZoomIn_Triggered;
+            KeyboardCommands.Instance.ZoomOut.Triggered -= ZoomOut_Triggered;
+            KeyboardCommands.Instance.ResetZoomLevel.Triggered -= ResetZoomLevel_Triggered;
             KeyboardCommands.Instance.RotateUnitOneStep.Triggered -= RotateUnitOneStep_Triggered;
 
             ClearRenderTargets();
@@ -364,6 +371,12 @@ namespace TSMapEditor.Rendering
             EditorState.Is2DMode = !EditorState.Is2DMode;
             InvalidateMap();
         }
+
+        private void ZoomIn_Triggered(object sender, EventArgs e) => Camera.ZoomLevel += ZoomStep;
+
+        private void ZoomOut_Triggered(object sender, EventArgs e) => Camera.ZoomLevel -= ZoomStep;
+
+        private void ResetZoomLevel_Triggered(object sender, EventArgs e) => Camera.ZoomLevel = 1.0;
 
         private void EditorState_CursorActionChanged(object sender, EventArgs e)
         {
@@ -972,9 +985,9 @@ namespace TSMapEditor.Rendering
         public override void OnMouseScrolled()
         {
             if (Cursor.ScrollWheelValue > 0)
-                Camera.ZoomLevel += 0.1;
+                Camera.ZoomLevel += ZoomStep;
             else
-                Camera.ZoomLevel -= 0.1;
+                Camera.ZoomLevel -= ZoomStep;
 
             base.OnMouseScrolled();
         }

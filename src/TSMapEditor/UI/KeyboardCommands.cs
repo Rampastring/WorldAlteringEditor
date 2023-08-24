@@ -30,6 +30,9 @@ namespace TSMapEditor.UI
                 ToggleAutoLAT,
                 ToggleMapWideOverlay,
                 Toggle2DMode,
+                ZoomIn,
+                ZoomOut,
+                ResetZoomLevel,
                 RotateUnit,
                 RotateUnitOneStep,
                 PlaceTerrainBelow,
@@ -105,6 +108,9 @@ namespace TSMapEditor.UI
         public KeyboardCommand ToggleAutoLAT { get; } = new KeyboardCommand("ToggleAutoLAT", "Toggle AutoLAT", new KeyboardCommandInput(Keys.L, KeyboardModifiers.Ctrl));
         public KeyboardCommand ToggleMapWideOverlay { get; } = new KeyboardCommand("ToggleMapWideOverlay", "Toggle Map-Wide Overlay", new KeyboardCommandInput(Keys.F2, KeyboardModifiers.None));
         public KeyboardCommand Toggle2DMode { get; } = new KeyboardCommand("Toggle2DMode", "Toggle 2D Mode", new KeyboardCommandInput(Keys.D, KeyboardModifiers.Shift));
+        public KeyboardCommand ZoomIn { get; } = new KeyboardCommand("ZoomIn", "Zoom In", new KeyboardCommandInput(Keys.OemPlus, KeyboardModifiers.Ctrl));
+        public KeyboardCommand ZoomOut { get; } = new KeyboardCommand("ZoomOut", "Zoom Out", new KeyboardCommandInput(Keys.OemMinus, KeyboardModifiers.Ctrl));
+        public KeyboardCommand ResetZoomLevel { get; } = new KeyboardCommand("ResetZoomLevel", "Reset Zoom Level", new KeyboardCommandInput(Keys.D0, KeyboardModifiers.Ctrl));
         public KeyboardCommand RotateUnit { get; } = new KeyboardCommand("RotateUnit", "Rotate Unit", new KeyboardCommandInput(Keys.A, KeyboardModifiers.None));
         public KeyboardCommand RotateUnitOneStep { get; } = new KeyboardCommand("RotateUnitOneStep", "Rotate Object One Step", new KeyboardCommandInput(Keys.A, KeyboardModifiers.Shift));
         public KeyboardCommand PlaceTerrainBelow { get; } = new KeyboardCommand("PlaceTerrainBelow", "Place Terrain Below Cursor", new KeyboardCommandInput(Keys.None, KeyboardModifiers.Alt), true);
