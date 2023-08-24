@@ -592,7 +592,7 @@ namespace TSMapEditor.Rendering
                     if (data == null)
                         continue;
 
-                    var shpFile = new ShpFile();
+                    var shpFile = new ShpFile(shpFileName);
                     shpFile.ParseFromBuffer(data);
                     TerrainObjectTextures[i] = new ObjectImage(graphicsDevice, shpFile, data,
                         terrainTypes[i].SpawnsTiberium ? unitPalette : theaterPalette);
@@ -624,12 +624,15 @@ namespace TSMapEditor.Rendering
                 // The game has hardcoded NewTheater=yes behaviour for buildings that start with a specific prefix
                 bool hardcodedNewTheater = Array.Exists(NewTheaterHardcodedPrefixes, prefix => buildingType.ININame.ToUpperInvariant().StartsWith(prefix));
 
+                string loadedShpName = "";
+
                 byte[] shpData = null;
                 if (buildingType.ArtConfig.NewTheater || hardcodedNewTheater)
                 {
                     string newTheaterShpName = shpFileName.Substring(0, 1) + Theater.NewTheaterBuildingLetter + shpFileName.Substring(2);
 
                     shpData = fileManager.LoadFile(newTheaterShpName);
+                    loadedShpName = newTheaterShpName;
                 }
 
                 // Support generic building letter
@@ -638,6 +641,7 @@ namespace TSMapEditor.Rendering
                     string newTheaterShpName = shpFileName.Substring(0, 1) + Constants.NewTheaterGenericLetter + shpFileName.Substring(2);
 
                     shpData = fileManager.LoadFile(newTheaterShpName);
+                    loadedShpName = newTheaterShpName;
                 }
 
                 // The game can apparently fall back to the non-theater-specific SHP file name
@@ -645,6 +649,8 @@ namespace TSMapEditor.Rendering
                 if (shpData == null)
                 {
                     shpData = fileManager.LoadFile(shpFileName);
+                    loadedShpName = shpFileName;
+
                     if (shpData == null)
                     {
                         continue;
@@ -656,7 +662,7 @@ namespace TSMapEditor.Rendering
                 if (!string.IsNullOrWhiteSpace(buildingType.ArtConfig.Palette))
                     palette = GetPaletteOrFail(buildingType.ArtConfig.Palette + Theater.FileExtension[1..] + ".pal");
 
-                var shpFile = new ShpFile();
+                var shpFile = new ShpFile(loadedShpName);
                 shpFile.ParseFromBuffer(shpData);
                 BuildingTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, palette, null, buildingType.ArtConfig.Remapable);
 
@@ -676,17 +682,21 @@ namespace TSMapEditor.Rendering
                         string newTheaterBibShpName = bibShpFileName.Substring(0, 1) + Theater.NewTheaterBuildingLetter + bibShpFileName.Substring(2);
 
                         shpData = fileManager.LoadFile(newTheaterBibShpName);
+                        loadedShpName = newTheaterBibShpName;
                     }
 
                     if (shpData == null)
+                    {
                         shpData = fileManager.LoadFile(bibShpFileName);
-
+                        loadedShpName = bibShpFileName;
+                    }
+                        
                     if (shpData == null)
                     {
                         continue;
                     }
 
-                    var bibShpFile = new ShpFile();
+                    var bibShpFile = new ShpFile(loadedShpName);
                     bibShpFile.ParseFromBuffer(shpData);
                     BuildingBibTextures[i] = new ObjectImage(graphicsDevice, bibShpFile, shpData, palette, null, buildingType.ArtConfig.Remapable);
                 }
@@ -725,7 +735,7 @@ namespace TSMapEditor.Rendering
                         framesToLoad.Add(t);
                 }
 
-                var shpFile = new ShpFile();
+                var shpFile = new ShpFile(shpFileName);
                 shpFile.ParseFromBuffer(shpData);
 
                 // Load shadow frames
@@ -774,7 +784,7 @@ namespace TSMapEditor.Rendering
                     framesToLoad.Add(readySequence.StartFrame + (readySequence.FrameCount * readySequence.FacingMultiplier * j));
                 }
 
-                var shpFile = new ShpFile();
+                var shpFile = new ShpFile(shpFileName);
                 shpFile.ParseFromBuffer(shpData);
 
                 // Load shadow frames
@@ -814,30 +824,36 @@ namespace TSMapEditor.Rendering
                 {
                     // Load graphics as SHP
 
+                    string loadedShpName = "";
+
                     byte[] shpData;
 
                     if (overlayType.ArtConfig.NewTheater)
                     {
                         string shpFileName = imageName + SHP_FILE_EXTENSION;
                         string newTheaterImageName = shpFileName.Substring(0, 1) + Theater.NewTheaterBuildingLetter + shpFileName.Substring(2);
+                        
                         shpData = fileManager.LoadFile(newTheaterImageName);
+                        loadedShpName = newTheaterImageName;
 
                         if (shpData == null)
                         {
                             newTheaterImageName = shpFileName.Substring(0, 1) + Constants.NewTheaterGenericLetter + shpFileName.Substring(2);
                             shpData = fileManager.LoadFile(newTheaterImageName);
+                            loadedShpName = newTheaterImageName;
                         }
                     }
                     else
                     {
                         string fileExtension = overlayType.ArtConfig.Theater ? Theater.FileExtension : SHP_FILE_EXTENSION;
                         shpData = fileManager.LoadFile(imageName + fileExtension);
+                        loadedShpName = imageName + fileExtension;
                     }
 
                     if (shpData == null)
                         continue;
 
-                    var shpFile = new ShpFile();
+                    var shpFile = new ShpFile(loadedShpName);
                     shpFile.ParseFromBuffer(shpData);
                     Palette palette = theaterPalette;
 
@@ -868,12 +884,13 @@ namespace TSMapEditor.Rendering
 
                 string imageName = smudgeType.ININame;
                 string fileExtension = smudgeType.Theater ? Theater.FileExtension : SHP_FILE_EXTENSION;
-                byte[] shpData = fileManager.LoadFile(imageName + fileExtension);
+                string finalShpName = imageName + fileExtension;
+                byte[] shpData = fileManager.LoadFile(finalShpName);
 
                 if (shpData == null)
                     continue;
 
-                var shpFile = new ShpFile();
+                var shpFile = new ShpFile(finalShpName);
                 shpFile.ParseFromBuffer(shpData);
                 Palette palette = theaterPalette;
                 SmudgeTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, palette);

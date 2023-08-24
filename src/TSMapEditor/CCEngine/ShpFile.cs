@@ -4,6 +4,13 @@ using System.IO;
 
 namespace TSMapEditor.CCEngine
 {
+    public class ShpLoadException : Exception
+    {
+        public ShpLoadException(string message) : base(message)
+        {
+        }
+    }
+
     [Flags]
     public enum ShpCompression
     {
@@ -22,11 +29,11 @@ namespace TSMapEditor.CCEngine
         public ShpFileHeader(byte[] buffer)
         {
             if (buffer.Length < SizeOf)
-                throw new ArgumentException(nameof(ShpFileHeader) + ": buffer is not long enough");
+                throw new ShpLoadException(nameof(ShpFileHeader) + ": buffer is not long enough");
 
             Unknown = BitConverter.ToUInt16(buffer, 0);
             if (Unknown != 0)
-                throw new ArgumentException("Unexpected field value in SHP header");
+                throw new ShpLoadException("Unexpected field value in SHP header");
 
             SpriteWidth = BitConverter.ToUInt16(buffer, 2);
             SpriteHeight = BitConverter.ToUInt16(buffer, 4);
@@ -49,7 +56,7 @@ namespace TSMapEditor.CCEngine
         public ShpFrameInfo(Stream stream)
         {
             if (stream.Length < stream.Position + SizeOf)
-                throw new ArgumentException(nameof(ShpFrameInfo) + ": buffer is not long enough");
+                throw new ShpLoadException(nameof(ShpFrameInfo) + ": buffer is not long enough");
 
             XOffset = ReadUShortFromStream(stream);
             YOffset = ReadUShortFromStream(stream);
@@ -96,8 +103,19 @@ namespace TSMapEditor.CCEngine
     /// </summary>
     public class ShpFile
     {
+        public ShpFile() { }
+
+        public ShpFile(string fileName)
+        {
+            this.fileName = fileName;
+        }
+
+        private readonly string fileName;
+
         private ShpFileHeader shpFileHeader;
         private List<ShpFrameInfo> shpFrameInfos;
+
+        
 
         public int FrameCount => shpFrameInfos.Count;
 
@@ -122,18 +140,25 @@ namespace TSMapEditor.CCEngine
 
         public void ParseFromBuffer(byte[] buffer)
         {
-            shpFileHeader = new ShpFileHeader(buffer);
-            shpFrameInfos = new List<ShpFrameInfo>(shpFileHeader.FrameCount);
-
-            using (var memoryStream = new MemoryStream(buffer))
+            try
             {
-                memoryStream.Position = ShpFileHeader.SizeOf;
+                shpFileHeader = new ShpFileHeader(buffer);
+                shpFrameInfos = new List<ShpFrameInfo>(shpFileHeader.FrameCount);
 
-                for (int i = 0; i < shpFileHeader.FrameCount; i++)
+                using (var memoryStream = new MemoryStream(buffer))
                 {
-                    var shpFrameInfo = new ShpFrameInfo(memoryStream);
-                    shpFrameInfos.Add(shpFrameInfo);
+                    memoryStream.Position = ShpFileHeader.SizeOf;
+
+                    for (int i = 0; i < shpFileHeader.FrameCount; i++)
+                    {
+                        var shpFrameInfo = new ShpFrameInfo(memoryStream);
+                        shpFrameInfos.Add(shpFrameInfo);
+                    }
                 }
+            }
+            catch (ShpLoadException ex)
+            {
+                throw new ShpLoadException("Failed to load SHP file. Make sure that the file is not corrupted. Filename: " + fileName + ", original exception: " + ex.Message);
             }
         }
 
