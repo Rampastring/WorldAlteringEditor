@@ -301,6 +301,9 @@
     <None Update="Content\ToolIcons\flattenground.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Content\ToolIcons\frameworkmode.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Content\ToolIcons\lowercells.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

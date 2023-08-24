@@ -219,6 +219,7 @@ namespace TSMapEditor.Rendering
             EditorState.HighlightImpassableCellsChanged += (s, e) => InvalidateMap();
             EditorState.HighlightIceGrowthChanged += (s, e) => InvalidateMap();
             EditorState.DrawMapWideOverlayChanged += (s, e) => mapWideOverlay.Enabled = EditorState.DrawMapWideOverlay;
+            EditorState.MarbleMadnessChanged += (s, e) => InvalidateMap();
 
             KeyboardCommands.Instance.RotateUnitOneStep.Triggered += RotateUnitOneStep_Triggered;
 
@@ -360,7 +361,6 @@ namespace TSMapEditor.Rendering
         private void FrameworkMode_Triggered(object sender, EventArgs e)
         {
             EditorState.IsMarbleMadness = !EditorState.IsMarbleMadness;
-            InvalidateMap();
         }
 
         private void Toggle2DMode_Triggered(object sender, EventArgs e)

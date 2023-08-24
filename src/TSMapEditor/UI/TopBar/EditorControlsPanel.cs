@@ -115,6 +115,10 @@ namespace TSMapEditor.UI.TopBar
             if (btnFlattenGround != null)
                 btnFlattenGround.LeftClick += (s, e) => editorState.CursorAction = flattenGroundCursorAction;
 
+            var btnFrameworkMode = FindChild<EditorButton>("btnFrameworkMode", true);
+            if (btnFrameworkMode != null)
+                btnFrameworkMode.LeftClick += (s, e) => editorState.IsMarbleMadness = !editorState.IsMarbleMadness;
+
             KeyboardCommands.Instance.NextBrushSize.Triggered += NextBrushSize_Triggered;
             KeyboardCommands.Instance.PreviousBrushSize.Triggered += PreviousBrushSize_Triggered;
             KeyboardCommands.Instance.ToggleAutoLAT.Triggered += ToggleAutoLAT_Triggered;
