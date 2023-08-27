@@ -768,8 +768,8 @@ namespace TSMapEditor.Models
         {
             var cell = GetTile(cellCoords);
 
-            if (cell.Structures.Count > 0)
-                cell.DoForAllBuildings(structure => RemoveBuilding(structure));
+            while (cell.Structures.Count > 0)
+                RemoveBuilding(cell.Structures[0]);
         }
 
         public void RemoveBuilding(Structure structure)
