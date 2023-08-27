@@ -821,7 +821,7 @@ namespace TSMapEditor.Rendering
 
             ObjectImage bibGraphics = TheaterGraphics.BuildingBibTextures[graphicalBaseNode.BuildingType.Index];
             ObjectImage graphics = TheaterGraphics.BuildingTextures[graphicalBaseNode.BuildingType.Index];
-            Color replacementColor = Color.Yellow;
+            Color replacementColor = Color.DarkBlue;
             string iniName = graphicalBaseNode.BuildingType.ININame;
             Color remapColor = graphicalBaseNode.BuildingType.ArtConfig.Remapable ? graphicalBaseNode.Owner.XNAColor : Color.White;
 
@@ -831,14 +831,15 @@ namespace TSMapEditor.Rendering
 
             Color nonRemapBaseNodeShade = new Color(opacity, opacity, opacity * 2.0f, opacity * 2.0f);
 
-            if (graphics == null || graphics.Frames.Length == 0)
+            int yDrawOffset = Constants.CellSizeY / -2;
+            int frameIndex = 0;
+
+            if ((graphics == null || graphics.Frames.Length == 0 || graphics.Frames[frameIndex] == null) && bibGraphics == null)
             {
                 DrawStringWithShadow(iniName, 1, drawPoint.ToXNAVector(), replacementColor, 1.0f);
                 return;
             }
 
-            int yDrawOffset = Constants.CellSizeY / -2;
-            int frameIndex = 0;
             Texture2D texture;
 
             if (bibGraphics != null)
