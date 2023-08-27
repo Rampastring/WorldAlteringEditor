@@ -27,12 +27,12 @@ namespace TSMapEditor.Models
 
         public override int GetYDrawOffset()
         {
-            return Constants.CellSizeY / -2 + AnimType.ArtConfig.YDrawOffset + ExtraDrawOffset.X;
+            return Constants.CellSizeY / -2 + AnimType.ArtConfig.YDrawOffset + ExtraDrawOffset.Y;
         }
 
         public override int GetXDrawOffset()
         {
-            return AnimType.ArtConfig.XDrawOffset + ExtraDrawOffset.Y;
+            return AnimType.ArtConfig.XDrawOffset + ExtraDrawOffset.X;
         }
 
         public override int GetYPositionForDrawOrder()
