@@ -221,6 +221,7 @@ namespace TSMapEditor.Rendering
             EditorState.HighlightIceGrowthChanged += (s, e) => InvalidateMap();
             EditorState.DrawMapWideOverlayChanged += (s, e) => mapWideOverlay.Enabled = EditorState.DrawMapWideOverlay;
             EditorState.MarbleMadnessChanged += (s, e) => InvalidateMap();
+            EditorState.Is2DModeChanged += (s, e) => InvalidateMap();
 
             KeyboardCommands.Instance.RotateUnitOneStep.Triggered += RotateUnitOneStep_Triggered;
 
@@ -372,7 +373,6 @@ namespace TSMapEditor.Rendering
                 return;
 
             EditorState.Is2DMode = !EditorState.Is2DMode;
-            InvalidateMap();
         }
 
         private void ZoomIn_Triggered(object sender, EventArgs e) => Camera.ZoomLevel += ZoomStep;
