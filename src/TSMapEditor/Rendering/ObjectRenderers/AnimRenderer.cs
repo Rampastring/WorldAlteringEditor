@@ -37,6 +37,9 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
         protected override void DrawShadow(Animation gameObject, CommonDrawParams drawParams, Point2D drawPoint, int initialYDrawPointWithoutCellHeight)
         {
+            if (!Constants.DrawBuildingAnimationShadows && gameObject.IsBuildingAnim)
+                return;
+
             int shadowFrameIndex = gameObject.GetShadowFrameIndex(drawParams.Graphics.Frames.Length);
             if (gameObject.IsTurretAnim)
             {
