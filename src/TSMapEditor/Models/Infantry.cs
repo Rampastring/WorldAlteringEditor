@@ -19,10 +19,9 @@
                 return 0;
 
             var readySequence = ObjectType.ArtConfig.Sequence.Ready;
-            if (Constants.ReverseFacing)
-                return readySequence.StartFrame + (((255 - Facing) / 32) * readySequence.FacingMultiplier * readySequence.FrameCount);
-            else 
-                return readySequence.StartFrame + ((Facing / 32) * readySequence.FacingMultiplier * readySequence.FrameCount);
+
+            // Infantry have their facing frames reversed
+            return readySequence.StartFrame + (((255 - Facing) / 32) * readySequence.FacingMultiplier * readySequence.FrameCount);
         }
 
         public override int GetShadowFrameIndex(int frameCount)

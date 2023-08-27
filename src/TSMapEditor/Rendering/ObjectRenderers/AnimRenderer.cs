@@ -22,7 +22,8 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             int frameIndex = gameObject.AnimType.ArtConfig.Start;
             if (gameObject.IsTurretAnim)
             {
-                byte facing = Constants.ReverseFacing ? (byte)(255 - gameObject.Facing - 31) : (byte)(gameObject.Facing - 31);
+                // Turret anims have their facing frames reversed
+                byte facing = (byte)(255 - gameObject.Facing - 31);
                 frameIndex = facing / (512 / commonDrawParams.Graphics.Frames.Length);
             }
 
@@ -39,7 +40,8 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             int shadowFrameIndex = gameObject.GetShadowFrameIndex(drawParams.Graphics.Frames.Length);
             if (gameObject.IsTurretAnim)
             {
-                byte facing = Constants.ReverseFacing ? (byte)(255 - gameObject.Facing - 31) : (byte)(gameObject.Facing - 31);
+                // Turret anims have their facing frames reversed
+                byte facing = (byte)(255 - gameObject.Facing - 31);
                 shadowFrameIndex += facing / (512 / drawParams.Graphics.Frames.Length);
             }
 
