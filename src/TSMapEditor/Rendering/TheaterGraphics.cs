@@ -721,6 +721,7 @@ namespace TSMapEditor.Rendering
                 var animType = animTypes[i];
 
                 string shpFileName = string.IsNullOrWhiteSpace(animType.ArtConfig.Image) ? animType.ININame : animType.ArtConfig.Image;
+                string loadedShpName = "";
 
                 if (animType.ArtConfig.Theater)
                     shpFileName += Theater.FileExtension;
@@ -733,6 +734,7 @@ namespace TSMapEditor.Rendering
                     string newTheaterShpName = shpFileName.Substring(0, 1) + Theater.NewTheaterBuildingLetter + shpFileName.Substring(2);
 
                     shpData = fileManager.LoadFile(newTheaterShpName);
+                    loadedShpName = newTheaterShpName;
                 }
 
                 // Support generic theater letter
@@ -741,6 +743,7 @@ namespace TSMapEditor.Rendering
                     string newTheaterShpName = shpFileName.Substring(0, 1) + Constants.NewTheaterGenericLetter + shpFileName.Substring(2);
 
                     shpData = fileManager.LoadFile(newTheaterShpName);
+                    loadedShpName = newTheaterShpName;
                 }
 
                 // The game can apparently fall back to the non-theater-specific SHP file name
@@ -748,6 +751,8 @@ namespace TSMapEditor.Rendering
                 if (shpData == null)
                 {
                     shpData = fileManager.LoadFile(shpFileName);
+                    loadedShpName = shpFileName;
+
                     if (shpData == null)
                     {
                         continue;
@@ -765,7 +770,7 @@ namespace TSMapEditor.Rendering
                         palette);
                 }
 
-                var shpFile = new ShpFile();
+                var shpFile = new ShpFile(loadedShpName);
                 shpFile.ParseFromBuffer(shpData);
                 AnimTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, palette, null,
                     animType.ArtConfig.Remapable || animType.ArtConfig.IsBuildingAnim);
