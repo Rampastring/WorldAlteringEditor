@@ -61,6 +61,9 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             if (bibGraphics != null)
                 return false;
 
+            if (gameObject.ObjectType.ArtConfig.TurretAnim != null)
+                return false;
+
             return base.ShouldRenderReplacementText(gameObject);
         }
 
