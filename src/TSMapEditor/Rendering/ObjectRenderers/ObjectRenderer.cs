@@ -168,8 +168,9 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             if (frame != null)
             {
                 int yDrawOffset = gameObject.GetYDrawOffset();
+                int xDrawOffset = gameObject.GetXDrawOffset();
 
-                finalDrawPointX = initialDrawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2;
+                finalDrawPointX = initialDrawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2 + xDrawOffset;
                 finalDrawPointY = initialDrawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset;
                 objectYDrawPointWithoutCellHeight = initialYDrawPointWithoutCellHeight - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset;
 
@@ -207,7 +208,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             }
         }
 
-        protected void DrawShadow(T gameObject, CommonDrawParams drawParams, Point2D drawPoint, int initialYDrawPointWithoutCellHeight)
+        protected virtual void DrawShadow(T gameObject, CommonDrawParams drawParams, Point2D drawPoint, int initialYDrawPointWithoutCellHeight)
         {
             int shadowFrameIndex = gameObject.GetShadowFrameIndex(drawParams.Graphics.Frames.Length);
             if (shadowFrameIndex > 0 && shadowFrameIndex < drawParams.Graphics.Frames.Length)

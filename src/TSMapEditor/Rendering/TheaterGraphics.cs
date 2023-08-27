@@ -422,6 +422,7 @@ namespace TSMapEditor.Rendering
 
             theaterPalette = GetPaletteOrFail(theater.TerrainPaletteName);
             unitPalette = GetPaletteOrFail(Theater.UnitPaletteName);
+            animPalette = GetPaletteOrFail("anim.pal");
             if (!string.IsNullOrEmpty(Theater.TiberiumPaletteName))
                 tiberiumPalette = GetPaletteOrFail(Theater.TiberiumPaletteName);
 
@@ -432,7 +433,8 @@ namespace TSMapEditor.Rendering
             var task5 = Task.Factory.StartNew(() => ReadInfantryTextures(rules.InfantryTypes));
             var task6 = Task.Factory.StartNew(() => ReadOverlayTextures(rules.OverlayTypes));
             var task7 = Task.Factory.StartNew(() => ReadSmudgeTextures(rules.SmudgeTypes));
-            Task.WaitAll(task1, task2, task3, task4, task5, task6, task7);
+            var task8 = Task.Factory.StartNew(() => ReadAnimTextures(rules.AnimTypes));
+            Task.WaitAll(task1, task2, task3, task4, task5, task6, task7, task8);
 
             LoadBuildingZData();
         }
@@ -685,6 +687,13 @@ namespace TSMapEditor.Rendering
                         loadedShpName = newTheaterBibShpName;
                     }
 
+                    if (Constants.NewTheaterGenericBuilding && shpData == null)
+                    {
+                        string newTheaterBibShpName = bibShpFileName.Substring(0, 1) + Constants.NewTheaterGenericLetter + bibShpFileName.Substring(2);
+
+                        shpData = fileManager.LoadFile(newTheaterBibShpName);
+                    }
+
                     if (shpData == null)
                     {
                         shpData = fileManager.LoadFile(bibShpFileName);
@@ -700,6 +709,66 @@ namespace TSMapEditor.Rendering
                     bibShpFile.ParseFromBuffer(shpData);
                     BuildingBibTextures[i] = new ObjectImage(graphicsDevice, bibShpFile, shpData, palette, null, buildingType.ArtConfig.Remapable);
                 }
+            }
+        }
+
+        public void ReadAnimTextures(List<AnimType> animTypes)
+        {
+            AnimTextures = new ObjectImage[animTypes.Count];
+
+            for (int i = 0; i < animTypes.Count; i++)
+            {
+                var animType = animTypes[i];
+
+                string shpFileName = string.IsNullOrWhiteSpace(animType.ArtConfig.Image) ? animType.ININame : animType.ArtConfig.Image;
+
+                if (animType.ArtConfig.Theater)
+                    shpFileName += Theater.FileExtension;
+                else
+                    shpFileName += SHP_FILE_EXTENSION;
+
+                byte[] shpData = null;
+                if (animType.ArtConfig.NewTheater)
+                {
+                    string newTheaterShpName = shpFileName.Substring(0, 1) + Theater.NewTheaterBuildingLetter + shpFileName.Substring(2);
+
+                    shpData = fileManager.LoadFile(newTheaterShpName);
+                }
+
+                // Support generic theater letter
+                if (Constants.NewTheaterGenericBuilding && shpData == null)
+                {
+                    string newTheaterShpName = shpFileName.Substring(0, 1) + Constants.NewTheaterGenericLetter + shpFileName.Substring(2);
+
+                    shpData = fileManager.LoadFile(newTheaterShpName);
+                }
+
+                // The game can apparently fall back to the non-theater-specific SHP file name
+                // if the theater-specific SHP is not found
+                if (shpData == null)
+                {
+                    shpData = fileManager.LoadFile(shpFileName);
+                    if (shpData == null)
+                    {
+                        continue;
+                    }
+                }
+
+                // Palette override in RA2/YR
+                // NOTE: Until we use indexed color rendering, we have to assume that a building
+                // anim will only be used as a building anim (because it forces unit palette).
+                Palette palette = animType.ArtConfig.IsBuildingAnim || animType.ArtConfig.AltPalette ? unitPalette : animPalette;
+                if (!string.IsNullOrWhiteSpace(animType.ArtConfig.CustomPalette))
+                {
+                    palette = GetPaletteOrDefault(
+                        animType.ArtConfig.CustomPalette.Replace("~~~", Theater.FileExtension.Substring(1)),
+                        palette);
+                }
+
+                var shpFile = new ShpFile();
+                shpFile.ParseFromBuffer(shpData);
+                AnimTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, palette, null,
+                    animType.ArtConfig.Remapable || animType.ArtConfig.IsBuildingAnim);
             }
         }
 
@@ -906,6 +975,7 @@ namespace TSMapEditor.Rendering
         private readonly Palette theaterPalette;
         private readonly Palette unitPalette;
         private readonly Palette tiberiumPalette;
+        private readonly Palette animPalette;
 
         private List<TileImage[]> terrainGraphicsList = new List<TileImage[]>();
         private List<TileImage[]> mmTerrainGraphicsList = new List<TileImage[]>();
@@ -945,6 +1015,7 @@ namespace TSMapEditor.Rendering
         public ObjectImage[] InfantryTextures { get; set; }
         public ObjectImage[] OverlayTextures { get; set; }
         public ObjectImage[] SmudgeTextures { get; set; }
+        public ObjectImage[] AnimTextures { get; set; }
 
 
         public ObjectImage BuildingZ { get; set; }
@@ -964,7 +1035,8 @@ namespace TSMapEditor.Rendering
             var task6 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(SmudgeTextures));
             var task7 = Task.Factory.StartNew(() => { terrainGraphicsList.ForEach(tileImageArray => Array.ForEach(tileImageArray, tileImage => tileImage.Dispose())); terrainGraphicsList.Clear(); });
             var task8 = Task.Factory.StartNew(() => { mmTerrainGraphicsList.ForEach(tileImageArray => Array.ForEach(tileImageArray, tileImage => tileImage.Dispose())); mmTerrainGraphicsList.Clear(); });
-            Task.WaitAll(task1, task2, task3, task4, task5, task6, task7, task8);
+            var task9 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(AnimTextures));
+            Task.WaitAll(task1, task2, task3, task4, task5, task6, task7, task8, task9);
 
             TerrainObjectTextures = null;
             BuildingTextures = null;
@@ -972,6 +1044,7 @@ namespace TSMapEditor.Rendering
             InfantryTextures = null;
             OverlayTextures = null;
             SmudgeTextures = null;
+            AnimTextures = null;
         }
 
         private void DisposeObjectImagesFromArray(ObjectImage[] objImageArray)
@@ -985,6 +1058,14 @@ namespace TSMapEditor.Rendering
             byte[] paletteData = fileManager.LoadFile(paletteFileName);
             if (paletteData == null)
                 throw new KeyNotFoundException(paletteFileName + " not found from loaded MIX files!");
+            return new Palette(paletteData);
+        }
+
+        private Palette GetPaletteOrDefault(string paletteFileName, Palette palette)
+        {
+            byte[] paletteData = fileManager.LoadFile(paletteFileName);
+            if (paletteData == null)
+                return palette;
             return new Palette(paletteData);
         }
 

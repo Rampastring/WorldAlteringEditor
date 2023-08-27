@@ -2,6 +2,7 @@
 using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
+using TSMapEditor.GameMath;
 using TSMapEditor.Initialization;
 using TSMapEditor.Models.ArtConfig;
 
@@ -52,6 +53,7 @@ namespace TSMapEditor.Models
             OverlayTypes.ForEach(ot => initializer.ReadObjectTypePropertiesFromINI(ot, iniFile));
             SmudgeTypes.ForEach(ot => initializer.ReadObjectTypePropertiesFromINI(ot, iniFile));
             Weapons.ForEach(w => initializer.ReadObjectTypePropertiesFromINI(w, iniFile));
+            AnimTypes.ForEach(a => initializer.ReadObjectTypePropertiesFromINI(a, iniFile));
 
             var colorsSection = iniFile.GetSection("Colors");
             if (colorsSection != null)
@@ -125,6 +127,8 @@ namespace TSMapEditor.Models
 
             OverlayTypes.ForEach(ot => initializer.ReadObjectTypeArtPropertiesFromINI(ot, iniFile,
                 string.IsNullOrWhiteSpace(ot.Image) ? ot.ININame : ot.Image));
+
+            AnimTypes.ForEach(a => initializer.ReadObjectTypeArtPropertiesFromINI(a, iniFile, a.ININame));
         }
 
         public List<House> GetStandardHouses(IniFile iniFile)
@@ -242,6 +246,44 @@ namespace TSMapEditor.Models
                 return returnValue;
 
             return UnitTypes.Find(ut => ut.ININame == technoTypeININame);
+        }
+
+        public void SolveDependencies()
+        {
+            //UnitTypes.ForEach(ot => SolveUnitTypeDependencies(ot));
+            //InfantryTypes.ForEach(ot => SolveInfantryTypeDependencies(ot));
+            BuildingTypes.ForEach(ot => SolveBuildingTypeDependencies(ot));
+            //AircraftTypes.ForEach(ot => SolveAircraftTypeDependencies(ot));
+            //TerrainTypes.ForEach(ot => SolveTerrainTypeDependencies(ot));
+            //OverlayTypes.ForEach(ot => SolveOverlayTypeDependencies(ot));
+            //SmudgeTypes.ForEach(ot => SolveSmudgeTypeDependencies(ot));
+            //Weapons.ForEach(w => initializer.SolveWeaponDependencies(w))
+            //AnimTypes.ForEach(a => SolveAnimTypeDependencies(a));
+        }
+
+        private void SolveBuildingTypeDependencies(BuildingType type)
+        {
+            var anims = new List<AnimType>();
+            foreach (var animName in type.ArtConfig.AnimNames)
+            {
+                AnimType anim = AnimTypes.Find(at => at.ININame == animName);
+                if (anim != null)
+                {
+                    anim.ArtConfig.IsBuildingAnim = true;
+                    anims.Add(anim);
+                }
+            }
+            type.ArtConfig.Anims = anims.ToArray();
+
+            if (type.Turret && !type.TurretAnimIsVoxel)
+            {
+                var turretAnim = AnimTypes.Find(at => at.ININame == type.TurretAnim);
+                if (turretAnim != null)
+                {
+                    turretAnim.ArtConfig.IsBuildingAnim = true;
+                    type.ArtConfig.TurretAnim = turretAnim;
+                }
+            }
         }
     }
 }
