@@ -1261,6 +1261,8 @@ namespace TSMapEditor.Models
 
             var editorRulesIni = new IniFile(Environment.CurrentDirectory + "/Config/EditorRules.ini");
 
+            Rules.InitFromINI(editorRulesIni, initializer, false);
+
             StandardHouses = Rules.GetStandardHouses(editorRulesIni);
             if (StandardHouses.Count == 0)
                 StandardHouses = Rules.GetStandardHouses(rulesIni);
