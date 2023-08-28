@@ -143,19 +143,25 @@ namespace TSMapEditor.Models
             gameObjectTypes.AddRange(SmudgeTypes);
 
             var section = iniFile.GetSection("ObjectCategoryOverrides");
-            foreach (var keyValuePair in section.Keys)
+            if (section != null)
             {
-                var obj = gameObjectTypes.Find(o => o.ININame == keyValuePair.Key);
-                if (obj != null)
-                    obj.EditorCategory = keyValuePair.Value;
+                foreach (var keyValuePair in section.Keys)
+                {
+                    var obj = gameObjectTypes.Find(o => o.ININame == keyValuePair.Key);
+                    if (obj != null)
+                        obj.EditorCategory = keyValuePair.Value;
+                }
             }
 
             section = iniFile.GetSection("IgnoreTypes");
-            foreach (var keyValuePair in section.Keys)
+            if (section != null)
             {
-                var obj = gameObjectTypes.Find(o => o.ININame == keyValuePair.Key);
-                if (obj != null)
-                    obj.EditorVisible = !section.GetBooleanValue(keyValuePair.Key, !obj.EditorVisible);
+                foreach (var keyValuePair in section.Keys)
+                {
+                    var obj = gameObjectTypes.Find(o => o.ININame == keyValuePair.Key);
+                    if (obj != null)
+                        obj.EditorVisible = !section.GetBooleanValue(keyValuePair.Key, !obj.EditorVisible);
+                }
             }
         }
 
