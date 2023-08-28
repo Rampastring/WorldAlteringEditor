@@ -176,6 +176,9 @@ namespace TSMapEditor.UI.Sidebar
                 TreeViewCategory category = null;
                 OverlayType overlayType = Map.Rules.OverlayTypes[i];
 
+                if (!overlayType.EditorVisible)
+                    continue;
+
                 if (string.IsNullOrEmpty(overlayType.EditorCategory))
                 {
                     category = FindOrMakeCategory("Uncategorized", categories);
