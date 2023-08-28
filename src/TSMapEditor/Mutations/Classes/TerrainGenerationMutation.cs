@@ -94,9 +94,13 @@ namespace TSMapEditor.Mutations.Classes
 
                 var terrainTypeGroup = TerrainGeneratorTerrainTypeGroup.FromConfigString(terrainTypes, value);
                 if (terrainTypeGroup == null)
-                    continue;
-
-                terrainTypeGroups.Add(terrainTypeGroup);
+                {
+                    Logger.Log($"Failed to load terrain type group #{i} from terrain generator configuration section {section.SectionName}. User preset: {isUserConfiguration}");
+                }
+                else
+                {
+                    terrainTypeGroups.Add(terrainTypeGroup);
+                }
 
                 i++;
             }
@@ -110,9 +114,13 @@ namespace TSMapEditor.Mutations.Classes
 
                 var tileGroup = TerrainGeneratorTileGroup.FromConfigString(tilesets, value);
                 if (tileGroup == null)
-                    continue;
-
-                tileGroups.Add(tileGroup);
+                {
+                    Logger.Log($"Failed to load tile group #{i} from terrain generator configuration section {section.SectionName}. User preset: {isUserConfiguration}");
+                }
+                else
+                {
+                    tileGroups.Add(tileGroup);
+                }
 
                 i++;
             }
@@ -126,9 +134,13 @@ namespace TSMapEditor.Mutations.Classes
 
                 var overlayGroup = TerrainGeneratorOverlayGroup.FromConfigString(overlayTypes, value);
                 if (overlayGroup == null)
-                    continue;
-
-                overlayGroups.Add(overlayGroup);
+                {
+                    Logger.Log($"Failed to load overlay group #{i} from terrain generator configuration section {section.SectionName}. User preset: {isUserConfiguration}");
+                }
+                else
+                {
+                    overlayGroups.Add(overlayGroup);
+                }
 
                 i++;
             }
@@ -142,9 +154,13 @@ namespace TSMapEditor.Mutations.Classes
 
                 var smudgeGroup = TerrainGeneratorSmudgeGroup.FromConfigString(smudgeTypes, value);
                 if (smudgeGroup == null)
-                    continue;
-
-                smudgeGroups.Add(smudgeGroup);
+                {
+                    Logger.Log($"Failed to load smudge group #{i} from terrain generator configuration section {section.SectionName}. User preset: {isUserConfiguration}");
+                }
+                else
+                {
+                    smudgeGroups.Add(smudgeGroup);
+                }
 
                 i++;
             }
@@ -201,7 +217,7 @@ namespace TSMapEditor.Mutations.Classes
     {
         public TerrainGeneratorTileGroup(TileSet tileSet, List<int> tileIndicesInSet, double openChance, double overlapChance)
         {
-            TileSet = tileSet;
+            TileSet = tileSet ?? throw new ArgumentNullException(nameof(tileSet));
             TileIndicesInSet = tileIndicesInSet;
             OpenChance = openChance;
             OverlapChance = overlapChance;
@@ -233,6 +249,9 @@ namespace TSMapEditor.Mutations.Classes
             double openChance = Conversions.DoubleFromString(parts[0], 0.0);
             double overlapChance = Conversions.DoubleFromString(parts[1], 0.0);
             var tileSet = allTileSets.Find(ts => ts.AllowToPlace && ts.LoadedTileCount > 0 && ts.SetName == parts[2]);
+            if (tileSet == null)
+                return null;
+
             List<int> tileIndices = null;
             if (parts.Length > 3)
             {

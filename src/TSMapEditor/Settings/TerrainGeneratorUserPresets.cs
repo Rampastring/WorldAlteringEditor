@@ -42,6 +42,7 @@ namespace TSMapEditor.Settings
                     break;
 
                 var config = TerrainGeneratorConfiguration.FromConfigSection(iniSection, map.Rules, map.TheaterInstance.Theater, true);
+
                 if (config != null)
                     configurations.Add(config);
                 else
