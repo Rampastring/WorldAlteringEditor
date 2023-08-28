@@ -131,6 +131,34 @@ namespace TSMapEditor.Models
             AnimTypes.ForEach(a => initializer.ReadObjectTypeArtPropertiesFromINI(a, iniFile, a.ININame));
         }
 
+        public void InitEditorOverrides(IniFile iniFile)
+        {
+            List<GameObjectType> gameObjectTypes = new List<GameObjectType>();
+            gameObjectTypes.AddRange(UnitTypes);
+            gameObjectTypes.AddRange(InfantryTypes);
+            gameObjectTypes.AddRange(BuildingTypes);
+            gameObjectTypes.AddRange(AircraftTypes);
+            gameObjectTypes.AddRange(TerrainTypes);
+            gameObjectTypes.AddRange(OverlayTypes);
+            gameObjectTypes.AddRange(SmudgeTypes);
+
+            var section = iniFile.GetSection("ObjectCategoryOverrides");
+            foreach (var keyValuePair in section.Keys)
+            {
+                var obj = gameObjectTypes.Find(o => o.ININame == keyValuePair.Key);
+                if (obj != null)
+                    obj.EditorCategory = keyValuePair.Value;
+            }
+
+            section = iniFile.GetSection("IgnoreTypes");
+            foreach (var keyValuePair in section.Keys)
+            {
+                var obj = gameObjectTypes.Find(o => o.ININame == keyValuePair.Key);
+                if (obj != null)
+                    obj.EditorVisible = !section.GetBooleanValue(keyValuePair.Key, !obj.EditorVisible);
+            }
+        }
+
         public List<House> GetStandardHouses(IniFile iniFile)
         {
             var houses = GetHousesFrom(iniFile, "Houses");

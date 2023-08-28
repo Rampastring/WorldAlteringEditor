@@ -153,6 +153,7 @@ namespace TSMapEditor.UI.Sidebar
                 List<string> categories = new List<string>(1);
 
                 string categoriesString = objectType.EditorCategory;
+
                 if (categoriesString == null)
                     categoriesString = objectType.Owner;
 
@@ -170,7 +171,7 @@ namespace TSMapEditor.UI.Sidebar
                         Color remapColor = Color.White;
 
                         string ownerName = owners[ownerIndex];
-                        ownerName = Map.EditorConfig.EditorRulesIni.GetStringValue("ObjectCategoryOverrides", ownerName, ownerName);
+                        ownerName = Map.EditorConfig.EditorRulesIni.GetStringValue("ObjectOwnerOverrides", ownerName, ownerName);
 
                         House house = Map.StandardHouses.Find(h => h.ININame == ownerName);
                         if (house != null)

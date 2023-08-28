@@ -1260,6 +1260,7 @@ namespace TSMapEditor.Models
             }
 
             var editorRulesIni = new IniFile(Environment.CurrentDirectory + "/Config/EditorRules.ini");
+            Rules.InitEditorOverrides(editorRulesIni);
 
             Rules.InitFromINI(editorRulesIni, initializer, false);
 
