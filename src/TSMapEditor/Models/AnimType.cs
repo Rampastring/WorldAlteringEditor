@@ -12,8 +12,6 @@ namespace TSMapEditor.Models
         public AnimArtConfig ArtConfig { get; set; } = new AnimArtConfig();
         public IArtConfig GetArtConfig() => ArtConfig;
 
-        public void ReadFromIniSection(IniSection iniSection)
-        {
-        }
+        public bool RenderInEditor { get; set; } = true;
     }
 }

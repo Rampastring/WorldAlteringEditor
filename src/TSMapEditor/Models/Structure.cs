@@ -16,6 +16,9 @@ namespace TSMapEditor.Models
             var anims = new List<Animation>();
             foreach (var animType in objectType.ArtConfig.Anims)
             {
+                if (!animType.RenderInEditor)
+                    continue;
+
                 var anim = new Animation(animType);
                 anim.IsBuildingAnim = true;
                 anims.Add(anim);
