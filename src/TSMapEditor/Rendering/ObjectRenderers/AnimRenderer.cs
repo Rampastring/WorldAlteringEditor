@@ -17,6 +17,12 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             return new CommonDrawParams(TheaterGraphics.AnimTextures[gameObject.AnimType.Index], gameObject.AnimType.ININame);
         }
 
+        protected override bool ShouldRenderReplacementText(Animation gameObject)
+        {
+            // Never draw this for animations
+            return false;
+        }
+
         protected override void Render(Animation gameObject, int yDrawPointWithoutCellHeight, Point2D drawPoint, CommonDrawParams commonDrawParams)
         {
             int frameIndex = gameObject.AnimType.ArtConfig.Start;
@@ -27,11 +33,28 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 frameIndex = facing / (512 / commonDrawParams.Graphics.Frames.Length);
             }
 
+            float alpha = 1.0f;
+
+            // Translucency values don't seem to directly map into MonoGame alpha values,
+            // this will need some investigating into
+            switch (gameObject.AnimType.ArtConfig.Translucency)
+            {
+                case 75:
+                    alpha = 0.1f;
+                    break;
+                case 50:
+                    alpha = 0.2f;
+                    break;
+                case 25:
+                    alpha = 0.5f;
+                    break;
+            }
+
             DrawShadow(gameObject, commonDrawParams, drawPoint, yDrawPointWithoutCellHeight);
 
             DrawObjectImage(gameObject, commonDrawParams, commonDrawParams.Graphics,
-                frameIndex, Color.White,
-                gameObject.IsBuildingAnim, gameObject.GetRemapColor(),
+                frameIndex, Color.White * alpha,
+                gameObject.IsBuildingAnim, gameObject.GetRemapColor() * alpha,
                 drawPoint, yDrawPointWithoutCellHeight);
         }
 

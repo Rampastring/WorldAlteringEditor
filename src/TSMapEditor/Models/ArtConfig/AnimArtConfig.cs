@@ -16,6 +16,7 @@ namespace TSMapEditor.Models.ArtConfig
         public string CustomPalette { get; set; } // Ares
         public bool Shadow { get; set; }
         public int Start { get; set; } = 0;
+        public int Translucency { get; set; }
 
         /// <summary>
         /// Not an INI entry. Temporarily set per-type instead of per instance until
@@ -38,6 +39,7 @@ namespace TSMapEditor.Models.ArtConfig
             CustomPalette = iniSection.GetStringValue(nameof(CustomPalette), CustomPalette);
             Shadow = iniSection.GetBooleanValue(nameof(Shadow), Shadow);
             Start = iniSection.GetIntValue(nameof(Start), Start);
+            Translucency = iniSection.GetIntValue(nameof(Translucency), Translucency);
         }
     }
 }
