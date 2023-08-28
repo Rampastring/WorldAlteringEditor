@@ -1022,7 +1022,8 @@ namespace TSMapEditor.Rendering
                             bool overlapObjects = KeyboardCommands.Instance.OverlapObjects.AreKeysOrModifiersDown(Keyboard);
                             if (KeyboardCommands.Instance.CloneObject.AreKeysOrModifiersDown(Keyboard))
                             {
-                                if (Map.CanPlaceObjectAt(draggedOrRotatedObject, tileUnderCursor.CoordsToPoint(), true, overlapObjects))
+                                if ((draggedOrRotatedObject.IsTechno() || draggedOrRotatedObject.WhatAmI() == RTTIType.Terrain) && 
+                                    Map.CanPlaceObjectAt(draggedOrRotatedObject, tileUnderCursor.CoordsToPoint(), true, overlapObjects))
                                 {
                                     var mutation = new CloneObjectMutation(MutationTarget, draggedOrRotatedObject, tileUnderCursor.CoordsToPoint());
                                     MutationManager.PerformMutation(mutation);
@@ -1269,7 +1270,8 @@ namespace TSMapEditor.Rendering
                 bool overlapObjects = KeyboardCommands.Instance.OverlapObjects.AreKeysOrModifiersDown(Keyboard);
 
                 Color lineColor = isCloning ? new Color(0, 255, 255) : Color.White;
-                if (!Map.CanPlaceObjectAt(draggedOrRotatedObject, tileUnderCursor.CoordsToPoint(), isCloning, overlapObjects))
+                if (!Map.CanPlaceObjectAt(draggedOrRotatedObject, tileUnderCursor.CoordsToPoint(), isCloning, overlapObjects) ||
+                    (isCloning && !draggedOrRotatedObject.IsTechno() && draggedOrRotatedObject.WhatAmI() != RTTIType.Terrain))
                     lineColor = Color.Red;
 
                 Point2D cameraAndCellCenterOffset = new Point2D(-Camera.TopLeftPoint.X + Constants.CellSizeX / 2,

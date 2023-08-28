@@ -13,8 +13,8 @@ namespace TSMapEditor.Mutations.Classes
         public CloneObjectMutation(IMutationTarget mutationTarget, IMovable movable, Point2D clonePosition) : base(mutationTarget)
         {
             this.objectToClone = (AbstractObject)movable;
-            if (!objectToClone.IsTechno())
-                throw new NotSupportedException(nameof(CloneObjectMutation) + " only supports cloning Technos!");
+            if (!objectToClone.IsTechno() && objectToClone.WhatAmI() != RTTIType.Terrain)
+                throw new NotSupportedException(nameof(CloneObjectMutation) + " only supports cloning Technos and TerrainObjects!");
 
             this.clonePosition = clonePosition;
         }
@@ -50,6 +50,11 @@ namespace TSMapEditor.Mutations.Classes
                     infantry.SubCell = Map.GetTile(clonePosition).GetFreeSubCellSpot();
                     MutationTarget.Map.PlaceInfantry(infantry);
                     break;
+                case RTTIType.Terrain:
+                    var terrainObject = (TerrainObject)clone;
+                    terrainObject.Position = clonePosition;
+                    MutationTarget.Map.AddTerrainObject(terrainObject);
+                    break;
             }
 
             placedClone = clone;
@@ -77,6 +82,9 @@ namespace TSMapEditor.Mutations.Classes
                     break;
                 case RTTIType.Infantry:
                     Map.RemoveInfantry((Infantry)placedClone);
+                    break;
+                case RTTIType.Terrain:
+                    Map.RemoveTerrainObject((TerrainObject)placedClone);
                     break;
             }
         }
