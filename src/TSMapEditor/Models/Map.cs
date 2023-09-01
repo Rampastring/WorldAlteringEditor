@@ -643,6 +643,12 @@ namespace TSMapEditor.Models
             LoadedINI.RemoveSection(taskForce.ININame);
         }
 
+        public void ClearTaskForces()
+        {
+            var taskforcesCopy = new List<TaskForce>(TaskForces);
+            taskforcesCopy.ForEach(tf => RemoveTaskForce(tf));
+        }
+
         public void AddTrigger(Trigger trigger)
         {
             Triggers.Add(trigger);
