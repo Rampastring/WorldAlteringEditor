@@ -1,0 +1,68 @@
+name: Publish compiled binaries in release
+
+on: 
+  release:
+    types: [published]
+
+jobs:
+  release-tsclient:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3.1.0
+      with:
+        ref: tsclient
+
+    - name: Setup .NET Core SDK
+      uses: actions/setup-dotnet@v3.0.3
+      with:
+        dotnet-version: '7.x.x'
+
+    - name: Build Editor
+      run: ./build.ps1
+      shell: pwsh
+      
+    - name: Pack compiled binaries
+      run: 7z a -tzip WorldAlteringEditor_TSClient.zip "D:\a\TSMapEditor\TSMapEditor\Build\*.*"
+    
+    - name: Upload compiled binaries
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: 'WorldAlteringEditor_TSClient.zip'
+        asset_name: WorldAlteringEditor_TSClient.zip
+        asset_content_type: application/zip
+        
+        
+  release-yr:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3.1.0
+      with:
+        ref: yr
+
+    - name: Setup .NET Core SDK
+      uses: actions/setup-dotnet@v3.0.3
+      with:
+        dotnet-version: '7.x.x'
+
+    - name: Build Editor
+      run: ./build.ps1
+      shell: pwsh
+      
+    - name: Pack compiled binaries
+      run: 7z a -tzip WorldAlteringEditor_YurisRevenge.zip "D:\a\TSMapEditor\TSMapEditor\Build\*.*"
+      
+    - name: Upload compiled binaries
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: 'WorldAlteringEditor_YurisRevenge.zip'
+        asset_name: WorldAlteringEditor_YurisRevenge.zip
+        asset_content_type: application/zip
+
