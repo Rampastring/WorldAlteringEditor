@@ -2,9 +2,9 @@ name: Build Map Editor
 
 on:
   push:
-    branches: [ master, tsclient ]
+    branches: [ master, tsclient, yr ]
   pull_request:
-    branches: [ master, tsclient ]
+    branches: [ master, tsclient, yr ]
   workflow_dispatch:
 jobs:
   build-editor:
