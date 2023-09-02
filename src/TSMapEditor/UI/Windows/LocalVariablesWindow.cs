@@ -1,7 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Rampastring.Tools;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
+using TSMapEditor.Misc;
 using TSMapEditor.Models;
+using TSMapEditor.Models.Enums;
 using TSMapEditor.UI.Controls;
 
 namespace TSMapEditor.UI.Windows
@@ -31,6 +37,8 @@ namespace TSMapEditor.UI.Windows
             chkInitialState = FindChild<XNACheckBox>(nameof(chkInitialState));
 
             FindChild<EditorButton>("btnNewLocalVariable").LeftClick += BtnNewLocalVariable_LeftClick;
+            FindChild<EditorButton>("btnViewVariableUsages").LeftClick += BtnViewVariableUsages_LeftClick;
+
 
             lbLocalVariables.SelectedIndexChanged += LbLocalVariables_SelectedIndexChanged;
         }
@@ -41,6 +49,95 @@ namespace TSMapEditor.UI.Windows
             ListLocalVariables();
             lbLocalVariables.SelectedIndex = map.LocalVariables.Count - 1;
             lbLocalVariables.ScrollToBottom();
+        }
+
+        private void BtnViewVariableUsages_LeftClick(object sender, EventArgs e)
+        {
+            if (editedLocalVariable == null)
+            {
+                EditorMessageBox.Show(WindowManager, "Select a variable", "Please select a variable first.", MessageBoxButtons.OK);
+                return;
+            }
+
+            var list = new List<string>();
+
+            map.Triggers.ForEach(trigger =>
+            {
+                foreach (var action in trigger.Actions)
+                {
+                    var actionType = map.EditorConfig.TriggerActionTypes.GetElementIfInRange(action.ActionIndex);
+                    if (actionType == null)
+                        continue;
+
+                    for (int i = 0; i < actionType.Parameters.Length; i++)
+                    {
+                        var parameter = actionType.Parameters[i];
+                        if (parameter.TriggerParamType == TriggerParamType.LocalVariable)
+                        {
+                            if (Conversions.IntFromString(action.Parameters[i], -1) == editedLocalVariable.Index)
+                            {
+                                list.Add($"Trigger action of '{trigger.Name}' ({trigger.ID})");
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                foreach (var triggerEvent in trigger.Conditions)
+                {
+                    var eventType = map.EditorConfig.TriggerEventTypes.GetElementIfInRange(triggerEvent.ConditionIndex);
+                    if (eventType == null)
+                        continue;
+
+                    if (eventType.P1Type == TriggerParamType.LocalVariable)
+                    {
+                        if (triggerEvent.Parameter1 == editedLocalVariable.Index)
+                        {
+                            list.Add($"Trigger event of '{trigger.Name}' ({trigger.ID})");
+                        }
+                    }
+
+                    if (eventType.P2Type == TriggerParamType.LocalVariable)
+                    {
+                        if (triggerEvent.Parameter2 == editedLocalVariable.Index)
+                        {
+                            list.Add($"Trigger event of '{trigger.Name}' ({trigger.ID})");
+                        }
+                    }
+                }
+            });
+
+            map.Scripts.ForEach(script =>
+            {
+                foreach (var scriptAction in script.Actions)
+                {
+                    var scriptActionType = map.EditorConfig.ScriptActions.GetElementIfInRange(scriptAction.Action);
+
+                    if (scriptActionType == null)
+                        continue;
+
+                    if (scriptActionType.ParamType == TriggerParamType.LocalVariable &&
+                        scriptAction.Argument == editedLocalVariable.Index)
+                    {
+                        list.Add($"Script action of '{script.Name}' ({script.ININame})");
+                    }
+                }
+            });
+
+
+            if (list.Count == 0)
+            {
+                EditorMessageBox.Show(WindowManager, "No usages found",
+                    $"No triggers or scripts make use of the selected local variable '{editedLocalVariable.Name}'", MessageBoxButtons.OK);
+            }
+            else
+            {
+                EditorMessageBox.Show(WindowManager,
+                    "Local Variable Usages",
+                    $"The following usages were found for the selected local variable '{editedLocalVariable.Name}':" + Environment.NewLine + Environment.NewLine +
+                    string.Join(Environment.NewLine, list.Select(e => "- " + e)),
+                    MessageBoxButtons.OK);
+            }
         }
 
         private void LbLocalVariables_SelectedIndexChanged(object sender, EventArgs e)
