@@ -25,6 +25,9 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
         protected override void Render(Animation gameObject, int yDrawPointWithoutCellHeight, Point2D drawPoint, CommonDrawParams commonDrawParams)
         {
+            if (commonDrawParams.Graphics == null)
+                return;
+
             int frameIndex = gameObject.AnimType.ArtConfig.Start;
             if (gameObject.IsTurretAnim)
             {
