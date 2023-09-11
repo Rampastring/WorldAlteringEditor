@@ -81,11 +81,14 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             if (bibGraphics != null)
                 DrawBibGraphics(gameObject, bibGraphics, yDrawPointWithoutCellHeight, drawPoint, commonDrawParams);
 
-            DrawShadow(gameObject, commonDrawParams, drawPoint, yDrawPointWithoutCellHeight);
+            if (commonDrawParams.Graphics != null)
+            {
+                DrawShadow(gameObject, commonDrawParams, drawPoint, yDrawPointWithoutCellHeight);
 
-            DrawObjectImage(gameObject, commonDrawParams, commonDrawParams.Graphics,
-                gameObject.GetFrameIndex(commonDrawParams.Graphics.Frames.Length),
-                Color.White, true, gameObject.GetRemapColor(), drawPoint, yDrawPointWithoutCellHeight);
+                DrawObjectImage(gameObject, commonDrawParams, commonDrawParams.Graphics,
+                    gameObject.GetFrameIndex(commonDrawParams.Graphics.Frames.Length),
+                    Color.White, true, gameObject.GetRemapColor(), drawPoint, yDrawPointWithoutCellHeight);
+            }
         }
 
         protected override void DrawObjectReplacementText(Structure gameObject, CommonDrawParams drawParams, Point2D drawPoint)
