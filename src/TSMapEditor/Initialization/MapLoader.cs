@@ -246,7 +246,7 @@ namespace TSMapEditor.Initialization
                 Tag tag = map.Tags.Find(t => t.ID == attachedTagString);
                 if (tag == null)
                 {
-                    AddMapLoadError($"Unable to find tag {attachedTagString} attached to {techno.WhatAmI()}");
+                    AddMapLoadError($"Unable to find tag {attachedTagString} attached to {techno.WhatAmI()} at {techno.Position}");
                     return;
                 }
 
