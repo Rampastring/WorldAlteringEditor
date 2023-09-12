@@ -134,6 +134,7 @@ namespace TSMapEditor.UI.Windows
             {
                 if (map.DeleteHouse(editedHouse))
                 {
+                    editedHouse = null;
                     ListHouses();
                     lbHouseList.SelectedIndex = -1;
                 }
@@ -229,6 +230,7 @@ namespace TSMapEditor.UI.Windows
                 tbMoney.Text = string.Empty;
                 chkPlayerControl.Checked = false;
                 lblStatsValue.Text = string.Empty;
+                return;
             }
 
             tbName.Text = editedHouse.ININame;
