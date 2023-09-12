@@ -120,7 +120,7 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
             else if (MapLoader.MapLoadErrors.Count > 0)
             {
                 EditorMessageBox.Show(windowManager, "Errors while loading map",
-                    "One of more errors were encountered while loading the map:\r\n\r\n" + errorList, MessageBoxButtons.OK);
+                    "One or more errors were encountered while loading the map:\r\n\r\n" + errorList, MessageBoxButtons.OK);
             }
         }
     }
