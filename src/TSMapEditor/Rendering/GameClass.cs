@@ -123,11 +123,12 @@ namespace TSMapEditor.Rendering
 
             Components.Add(windowManager);
 
-            UISettings.ActiveSettings = new CustomUISettings();
-            UISettings.ActiveSettings.CheckBoxCheckedTexture = AssetLoader.LoadTextureUncached("checkBoxChecked.png");
-            UISettings.ActiveSettings.CheckBoxClearTexture = AssetLoader.LoadTextureUncached("checkBoxClear.png");
-            UISettings.ActiveSettings.CheckBoxDisabledCheckedTexture = AssetLoader.LoadTextureUncached("checkBoxCheckedD.png");
-            UISettings.ActiveSettings.CheckBoxDisabledClearTexture = AssetLoader.LoadTextureUncached("checkBoxClearD.png");
+            EditorThemes.Initialize();
+            UISettings.ActiveSettings = new CustomUISettings()
+            {
+                PanelBackgroundColor = new Color(32, 32, 32),
+                PanelBorderColor = new Color(196, 196, 196)
+            };
 
             InitMainMenu();
         }

@@ -21,6 +21,16 @@ namespace TSMapEditor.UI
 {
     public class CustomUISettings : UISettings
     {
+        public CustomUISettings()
+        {
+            CheckBoxCheckedTexture = AssetLoader.LoadTexture("checkBoxChecked.png");
+            CheckBoxClearTexture = AssetLoader.LoadTexture("checkBoxClear.png");
+            CheckBoxDisabledCheckedTexture = AssetLoader.LoadTexture("checkBoxCheckedD.png");
+            CheckBoxDisabledClearTexture = AssetLoader.LoadTexture("checkBoxClearD.png");
+            PanelBackgroundColor = new Color(0, 0, 0, 128);
+            PanelBorderColor = new Color(128, 128, 128, 255);
+        }
+
         public Color ListBoxBackgroundColor { get; set; } = Color.Black;
         public Color ButtonMainBackgroundColor { get; set; } = new Color(0, 0, 0, 196);
         public Color ButtonSecondaryBackgroundColor { get; set; } = new Color(0, 0, 0, 255);
@@ -179,43 +189,13 @@ namespace TSMapEditor.UI
 
         private void InitTheme()
         {
-            UISettings.ActiveSettings.PanelBackgroundColor = new Color(0, 0, 0, 128);
-            UISettings.ActiveSettings.PanelBorderColor = new Color(128, 128, 128, 255);
-
             bool boldFont = UserSettings.Instance.UseBoldFont;
             if (boldFont)
             {
                 Renderer.GetFontList()[0] = Renderer.GetFontList()[1];
             }
 
-            bool lightTheme = false;
-            if (lightTheme)
-            {
-                UISettings.ActiveSettings.TextShadowColor = Color.Gray;
-                UISettings.ActiveSettings.TextShadowDistance = 0;
-                ((CustomUISettings)UISettings.ActiveSettings).ListBoxBackgroundColor = Color.White * 0.77f;
-                ((CustomUISettings)UISettings.ActiveSettings).ButtonMainBackgroundColor = Color.White * 0.77f;
-                ((CustomUISettings)UISettings.ActiveSettings).ButtonSecondaryBackgroundColor = Color.Gray;
-                ((CustomUISettings)UISettings.ActiveSettings).ButtonTertiaryBackgroundColor = Color.Black;
-                UISettings.ActiveSettings.BackgroundColor = Color.White;
-                UISettings.ActiveSettings.PanelBackgroundColor = Color.White;
-                UISettings.ActiveSettings.TextColor = Color.Black;
-                UISettings.ActiveSettings.FocusColor = Color.Gray;
-                UISettings.ActiveSettings.AltColor = Color.Black;
-                UISettings.ActiveSettings.ButtonTextColor = Color.Black;
-            }
-
-            bool greenTheme = UserSettings.Instance.Theme == "Tiberium";
-            if (greenTheme)
-            {
-                // ((CustomUISettings)UISettings.ActiveSettings).ButtonSecondaryBackgroundColor = new Color(0, 164, 0);
-                // ((CustomUISettings)UISettings.ActiveSettings).ButtonTertiaryBackgroundColor = Color.LimeGreen;
-                UISettings.ActiveSettings.TextColor = new Color(0, 222, 0);
-                UISettings.ActiveSettings.AltColor = Color.LimeGreen;
-                UISettings.ActiveSettings.FocusColor = new Color(0, 96, 0);
-                UISettings.ActiveSettings.ButtonTextColor = Color.LimeGreen;
-                UISettings.ActiveSettings.PanelBorderColor = new Color(0, 164, 0);
-            }
+            UISettings.ActiveSettings = EditorThemes.Themes[UserSettings.Instance.Theme];
 
             Width = WindowManager.RenderResolutionX;
             Height = WindowManager.RenderResolutionY;

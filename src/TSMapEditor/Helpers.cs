@@ -245,5 +245,23 @@ namespace TSMapEditor
         {
             return new Vector2(length * (float)Math.Cos(angle), length * (float)Math.Sin(angle));
         }
+
+        public static Color ColorFromString(string str)
+        {
+            string[] parts = str.Split(',');
+
+            if (parts.Length < 3 || parts.Length > 4)
+                throw new ArgumentException("ColorFromString: parameter was not in a valid format: " + str);
+
+            int r = Conversions.IntFromString(parts[0], 0);
+            int g = Conversions.IntFromString(parts[1], 0);
+            int b = Conversions.IntFromString(parts[2], 0);
+            int a = 255;
+
+            if (parts.Length == 4)
+                a = Conversions.IntFromString(parts[3], a);
+
+            return new Color((byte)r, (byte)g, (byte)b, (byte)a);
+        }
     }
 }

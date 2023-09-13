@@ -133,8 +133,8 @@ namespace TSMapEditor.UI
             ddTheme.Y = lblTheme.Y - 1;
             ddTheme.Width = ddDisplayResolution.Width;
             AddChild(ddTheme);
-            ddTheme.AddItem("Default");
-            ddTheme.AddItem("Tiberium");
+            foreach (var theme in EditorThemes.Themes)
+                ddTheme.AddItem(theme.Key);
 
             var lblScrollRate = new XNALabel(WindowManager);
             lblScrollRate.Name = nameof(lblScrollRate);
@@ -213,8 +213,10 @@ namespace TSMapEditor.UI
                 ddRenderResolution.SelectedIndex = ddRenderResolution.Items.FindIndex(i => i.Text == renderResolution);
             }
 
-
-            ddTheme.SelectedIndex = userSettings.Theme == "Tiberium" ? 1 : 0;
+            int selectedTheme = ddTheme.Items.FindIndex(i => i.Text == userSettings.Theme);
+            if (selectedTheme == -1)
+                selectedTheme = ddTheme.Items.FindIndex(i => i.Text == "Default");
+            ddTheme.SelectedIndex = selectedTheme;
             ddScrollRate.SelectedIndex = ddScrollRate.Items.FindIndex(item => (int)item.Tag == userSettings.ScrollRate.GetValue());
 
             chkBorderless.Checked = userSettings.Borderless;
