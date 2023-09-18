@@ -45,8 +45,8 @@ namespace TSMapEditor.Initialization
             if (parts.Length != 4)
                 throw new MapLoadException("Invalid [Map] Size=");
 
-            int width = int.Parse(parts[2]);
-            int height = int.Parse(parts[3]);
+            int width = int.Parse(parts[2], CultureInfo.InvariantCulture);
+            int height = int.Parse(parts[3], CultureInfo.InvariantCulture);
 
             if (width > Constants.MaxMapWidth)
             {
@@ -111,8 +111,8 @@ namespace TSMapEditor.Initialization
             string size = section.GetStringValue("Size", null);
             string[] parts = size.Split(',');
 
-            int width = int.Parse(parts[2]);
-            int height = int.Parse(parts[3]);
+            int width = int.Parse(parts[2], CultureInfo.InvariantCulture);
+            int height = int.Parse(parts[3], CultureInfo.InvariantCulture);
             map.Size = new Point2D(width, height);
 
             string localSize = section.GetStringValue("LocalSize", null);
@@ -1000,7 +1000,7 @@ namespace TSMapEditor.Initialization
 
                 var localVariable = new LocalVariable(variableIndex);
                 localVariable.Name = parts[0];
-                localVariable.InitialState = int.Parse(parts[1]);
+                localVariable.InitialState = int.Parse(parts[1], CultureInfo.InvariantCulture);
 
                 map.LocalVariables.Add(localVariable);
             }

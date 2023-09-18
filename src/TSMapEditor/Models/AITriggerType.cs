@@ -35,7 +35,7 @@ namespace TSMapEditor.Models
 
             quantity = Helpers.ReverseEndianness(quantity);
 
-            int operatorPart = int.Parse(value[9].ToString());
+            int operatorPart = int.Parse(value[9].ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
             return new AITriggerComparator((AITriggerComparatorOperator)operatorPart, quantity);
         }
 

@@ -2,6 +2,7 @@
 using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using TSMapEditor.Initialization;
 using TSMapEditor.Models.ArtConfig;
 
@@ -103,7 +104,7 @@ namespace TSMapEditor.Models
                     for (int i = 0; i < variableNamesSection.Keys.Count; i++)
                     {
                         var kvp = variableNamesSection.Keys[i];
-                        GlobalVariables.Add(new GlobalVariable(int.Parse(kvp.Key), kvp.Value));
+                        GlobalVariables.Add(new GlobalVariable(int.Parse(kvp.Key, CultureInfo.InvariantCulture), kvp.Value));
                     }
                 }
             }
