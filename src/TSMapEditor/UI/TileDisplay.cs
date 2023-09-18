@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
@@ -31,6 +32,7 @@ namespace TSMapEditor.UI
     {
         private const int TILE_PADDING = 3;
         private const int SCROLL_RATE = 10;
+        private const int KEYBOARD_SCROLL_RATE = 400;
 
         public TileDisplay(WindowManager windowManager, TheaterGraphics theaterGraphics,
             PlaceTerrainCursorAction placeTerrainCursorAction, EditorState editorState) : base(windowManager)
@@ -63,7 +65,18 @@ namespace TSMapEditor.UI
 
         private List<TileDisplayTile> tilesInView = new List<TileDisplayTile>();
 
-        private int viewY = 0;
+        private double _viewY = 0;
+        private double ViewY
+        {
+            get => _viewY;
+            set
+            {
+                if (value > 0)
+                    _viewY = 0;
+                else
+                    _viewY = value;
+            }
+        }
 
         private readonly EditorState editorState;
 
@@ -152,14 +165,14 @@ namespace TSMapEditor.UI
 
         public void SetTileSet(TileSet tileSet)
         {
-            viewY = 0;
+            ViewY = 0;
             this.tileSet = tileSet;
             RefreshGraphics();
         }
 
         private void RefreshGraphics()
         {
-            viewY = 0;
+            ViewY = 0;
             tilesInView.Clear();
 
             if (tileSet == null)
@@ -227,7 +240,7 @@ namespace TSMapEditor.UI
         public override void OnMouseScrolled()
         {
             base.OnMouseScrolled();
-            viewY += Cursor.ScrollWheelValue * SCROLL_RATE;
+            ViewY += Cursor.ScrollWheelValue * SCROLL_RATE;
         }
 
         public override void OnMouseLeftDown()
@@ -245,12 +258,29 @@ namespace TSMapEditor.UI
 
             foreach (var tile in tilesInView)
             {
-                var rectangle = new Rectangle(tile.Location.X, tile.Location.Y + viewY, tile.Size.X, tile.Size.Y);
+                var rectangle = new Rectangle(tile.Location.X, tile.Location.Y + (int)ViewY, tile.Size.X, tile.Size.Y);
                 if (rectangle.Contains(cursorPoint))
                     return tile;
             }
 
             return null;
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+
+            if (IsActive)
+            {
+                if (Keyboard.IsKeyHeldDown(Keys.Up))
+                {
+                    ViewY += KEYBOARD_SCROLL_RATE * gameTime.ElapsedGameTime.TotalSeconds;
+                }
+                else if (Keyboard.IsKeyHeldDown(Keys.Down))
+                {
+                    ViewY -= KEYBOARD_SCROLL_RATE * gameTime.ElapsedGameTime.TotalSeconds;
+                }
+            }
         }
 
         public override void Draw(GameTime gameTime)
@@ -259,7 +289,7 @@ namespace TSMapEditor.UI
 
             foreach (var tile in tilesInView)
             {
-                var rectangle = new Rectangle(tile.Location.X, tile.Location.Y + viewY, tile.Size.X, tile.Size.Y);
+                var rectangle = new Rectangle(tile.Location.X, tile.Location.Y + (int)ViewY, tile.Size.X, tile.Size.Y);
                 FillRectangle(rectangle, Color.Black);
 
                 if (tile.TileImageToDisplay.TMPImages.Length == 0)
@@ -273,13 +303,13 @@ namespace TSMapEditor.UI
                     int subTileHeightOffset = image.TmpImage.Height * Constants.CellHeight;
 
                     DrawTexture(image.Texture, new Rectangle(tile.Location.X + image.TmpImage.X + tile.Offset.X,
-                        viewY + tile.Location.Y + image.TmpImage.Y + tile.Offset.Y - subTileHeightOffset,
+                        (int)ViewY + tile.Location.Y + image.TmpImage.Y + tile.Offset.Y - subTileHeightOffset,
                         Constants.CellSizeX, Constants.CellSizeY), Color.White);
 
                     if (image.ExtraTexture != null)
                     {
                         DrawTexture(image.ExtraTexture, new Rectangle(tile.Location.X + image.TmpImage.XExtra + tile.Offset.X,
-                            viewY + tile.Location.Y + image.TmpImage.YExtra + tile.Offset.Y - subTileHeightOffset,
+                            (int)ViewY + tile.Location.Y + image.TmpImage.YExtra + tile.Offset.Y - subTileHeightOffset,
                             image.ExtraTexture.Width, image.ExtraTexture.Height), Color.White);
                     }
                 }
