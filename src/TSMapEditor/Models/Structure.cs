@@ -124,16 +124,6 @@ namespace TSMapEditor.Models
             return 0;
         }
 
-        public override int GetXPositionForDrawOrder()
-        {
-            return Position.X + ObjectType.ArtConfig.Foundation.Width / 2;
-        }
-
-        public override int GetYPositionForDrawOrder()
-        {
-            return Position.Y + ObjectType.ArtConfig.Foundation.Height / 2;
-        }
-
         public override bool Remapable() => ObjectType.ArtConfig.Remapable;
 
         public override Structure Clone()

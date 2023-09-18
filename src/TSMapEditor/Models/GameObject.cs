@@ -40,16 +40,6 @@ namespace TSMapEditor.Models
             return (frameCount / 2);
         }
 
-        public virtual int GetXPositionForDrawOrder()
-        {
-            return Position.X;
-        }
-
-        public virtual int GetYPositionForDrawOrder()
-        {
-            return Position.Y;
-        }
-
         public override int GetHashCode()
         {
             return (int)WhatAmI() * 10000000 + Position.Y * 512 + Position.X;

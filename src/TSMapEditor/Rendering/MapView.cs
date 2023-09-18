@@ -748,24 +748,34 @@ namespace TSMapEditor.Rendering
             });
         }
 
-        private int CompareGameObjectsForRendering(GameObject obj1, GameObject obj2)
+        private Point2D GetBuildingCenterPoint(Structure structure)
         {
-            return GenericObjectRenderingComparison(obj1, obj2);
+            Point2D topPoint = CellMath.CellCenterPointFromCellCoords(structure.Position, Map);
+            var foundation = structure.ObjectType.ArtConfig.Foundation;
+            Point2D bottomPoint = CellMath.CellCenterPointFromCellCoords(structure.Position + new Point2D(foundation.Width - 1, foundation.Height - 1), Map);
+            return topPoint + new Point2D((bottomPoint.X - topPoint.X) / 2, (bottomPoint.Y - topPoint.Y) / 2);
         }
 
-        private int GenericObjectRenderingComparison(GameObject obj1, GameObject obj2)
+        private int CompareGameObjectsForRendering(GameObject obj1, GameObject obj2)
         {
-            int val1 = obj1.GetYPositionForDrawOrder();
-            int val2 = obj2.GetYPositionForDrawOrder();
+            // Use pixel coords for sorting. Objects closer to the top are rendered first.
+            // In case of identical Y coordinates, objects closer to the left take priority.
+            // For buildings, we take their foundation into account when calculating their center pixel coords.
 
-            if (val1 > val2)
-                return 1;
-            else if (val1 < val2)
-                return -1;
+            // In case the pixels coords are identical, sort by RTTI type.
+            Point2D obj1point = obj1.WhatAmI() == RTTIType.Building ? GetBuildingCenterPoint((Structure)obj1) :
+                CellMath.CellCenterPointFromCellCoords(obj1.Position, Map);
 
-            int xResult = obj1.GetXPositionForDrawOrder().CompareTo(obj2.GetXPositionForDrawOrder());
-            if (xResult != 0)
-                return xResult;
+            Point2D obj2point = obj2.WhatAmI() == RTTIType.Building ? GetBuildingCenterPoint((Structure)obj2) :
+                CellMath.CellCenterPointFromCellCoords(obj2.Position, Map);
+
+            int result = obj1point.Y.CompareTo(obj2point.Y);
+            if (result != 0)
+                return result;
+
+            result = obj1point.X.CompareTo(obj2point.X);
+            if (result != 0)
+                return result;
 
             return ((int)obj1.WhatAmI()).CompareTo((int)obj2.WhatAmI());
         }
