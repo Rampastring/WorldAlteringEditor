@@ -2,7 +2,6 @@
 using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
-using TSMapEditor.GameMath;
 using TSMapEditor.Initialization;
 using TSMapEditor.Models.ArtConfig;
 
@@ -104,7 +103,7 @@ namespace TSMapEditor.Models
                     for (int i = 0; i < variableNamesSection.Keys.Count; i++)
                     {
                         var kvp = variableNamesSection.Keys[i];
-                        GlobalVariables.Add(new GlobalVariable(i, kvp.Value));
+                        GlobalVariables.Add(new GlobalVariable(int.Parse(kvp.Key), kvp.Value));
                     }
                 }
             }

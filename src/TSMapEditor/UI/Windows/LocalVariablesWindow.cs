@@ -51,6 +51,7 @@ namespace TSMapEditor.UI.Windows
             }
 
             FindChild<EditorButton>("btnNewLocalVariable").LeftClick += BtnNewLocalVariable_LeftClick;
+            FindChild<EditorButton>("btnDeleteLocalVariable").LeftClick += BtnDeleteLocalVariable_LeftClick;
             FindChild<EditorButton>("btnViewVariableUsages").LeftClick += BtnViewVariableUsages_LeftClick;
 
 
@@ -59,10 +60,25 @@ namespace TSMapEditor.UI.Windows
 
         private void BtnNewLocalVariable_LeftClick(object sender, EventArgs e)
         {
-            map.LocalVariables.Add(new LocalVariable(map.LocalVariables.Count) { Name = "New Local Variable" });
+            int newIndex = 0;
+            while (map.LocalVariables.Exists(v => v.Index == newIndex))
+            {
+                newIndex++;
+            }
+
+            map.LocalVariables.Insert(newIndex, new LocalVariable(newIndex) { Name = "New Local Variable" });
             ListLocalVariables();
-            lbLocalVariables.SelectedIndex = map.LocalVariables.Count - 1;
-            lbLocalVariables.ScrollToBottom();
+            lbLocalVariables.SelectedIndex = newIndex;
+        }
+
+        private void BtnDeleteLocalVariable_LeftClick(object sender, EventArgs e)
+        {
+            if (lbLocalVariables.SelectedItem == null)
+                return;
+
+            map.LocalVariables.Remove(lbLocalVariables.SelectedItem.Tag as LocalVariable);
+            ListLocalVariables();
+            lbLocalVariables.SelectedIndex--;
         }
 
         private void BtnViewVariableUsages_LeftClick(object sender, EventArgs e)

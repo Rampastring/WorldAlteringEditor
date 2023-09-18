@@ -576,11 +576,9 @@ namespace TSMapEditor.Initialization
             var section = new IniSection(sectionName);
             mapIni.AddSection(section);
 
-            for (int i = 0; i < map.LocalVariables.Count; i++)
+            foreach (var localVariable in map.LocalVariables)
             {
-                var localVariable = map.LocalVariables[i];
-
-                section.SetStringValue(i.ToString(), localVariable.Name + "," + localVariable.InitialState.ToString(CultureInfo.InvariantCulture));
+                section.SetStringValue(localVariable.Index.ToString(CultureInfo.InvariantCulture), $"{localVariable.Name},{localVariable.InitialState.ToString(CultureInfo.InvariantCulture)}");
             }
         }
 
