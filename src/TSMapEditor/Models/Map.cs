@@ -1540,7 +1540,11 @@ namespace TSMapEditor.Models
 
             foreach (var trigger in Triggers)
             {
-                int usedEventIndex = objectSpecificEventIndexes.Find(eventIndex => trigger.Conditions.Exists(c => c.ConditionIndex == eventIndex));
+                int indexInList = objectSpecificEventIndexes.FindIndex(eventIndex => trigger.Conditions.Exists(c => c.ConditionIndex == eventIndex));
+                if (indexInList == -1)
+                    continue;
+
+                int usedEventIndex = objectSpecificEventIndexes[indexInList];
                 var triggerEventType = EditorConfig.TriggerEventTypes.GetValueOrDefault(usedEventIndex);
 
                 if (triggerEventType == null)
