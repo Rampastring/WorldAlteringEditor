@@ -322,8 +322,15 @@ namespace TSMapEditor.UI.Windows
             lblParameterDescription.Text = action == null ? "Parameter:" : action.ParamDescription + ":";
             lblActionDescriptionValue.Text = GetActionDescriptionFromIndex(entry.Action);
 
+            FillPresetContextMenu(entry, action);
+        }
+
+        private void FillPresetContextMenu(ScriptActionEntry entry, ScriptAction action)
+        {
             btnEditorPresetValues.ContextMenu.ClearItems();
+
             action.PresetOptions.ForEach(p => btnEditorPresetValues.ContextMenu.AddItem(new XNAContextMenuItem() { Text = p.GetOptionText() }));
+
             if (action.ParamType == TriggerParamType.LocalVariable)
             {
                 for (int i = 0; i < map.LocalVariables.Count; i++)
@@ -336,6 +343,13 @@ namespace TSMapEditor.UI.Windows
                 foreach (Waypoint waypoint in map.Waypoints)
                 {
                     btnEditorPresetValues.ContextMenu.AddItem(new XNAContextMenuItem() { Text = waypoint.Identifier.ToString() });
+                }
+            }
+            else if (action.ParamType == TriggerParamType.House)
+            {
+                foreach (var house in map.GetHouses())
+                {
+                    btnEditorPresetValues.ContextMenu.AddItem(new XNAContextMenuItem() { Text = house.ID + " " + house.ININame, TextColor = Helpers.GetHouseUITextColor(house) });
                 }
             }
 

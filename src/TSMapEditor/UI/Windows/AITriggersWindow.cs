@@ -359,7 +359,7 @@ namespace TSMapEditor.UI.Windows
             }
 
             ddHouse.AddItem("<all>");
-            map.GetHouses().ForEach(house => ddHouse.AddItem(house.ININame, house.HasDarkHouseColor() ? UISettings.ActiveSettings.AltColor : house.XNAColor));
+            map.GetHouses().ForEach(house => ddHouse.AddItem(house.ININame, Helpers.GetHouseUITextColor(house)));
 
             LbAITriggers_SelectedIndexChanged(this, EventArgs.Empty);
         }

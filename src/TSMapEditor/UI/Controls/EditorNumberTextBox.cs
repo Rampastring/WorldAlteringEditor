@@ -28,7 +28,7 @@ namespace TSMapEditor.UI.Controls
                 int i = 0;
                 while (i < Text.Length)
                 {
-                    if (!char.IsDigit(Text[i]) && Text[i] != '-')
+                    if (!char.IsDigit(Text[i]) && (i > 0 || Text[i] != '-'))
                     {
                         firstNonDigitIndex = i;
                         break;
@@ -53,7 +53,7 @@ namespace TSMapEditor.UI.Controls
                 int i = 0;
                 while (i < Text.Length)
                 {
-                    if (!char.IsDigit(Text[i]) && Text[i] != '-' && Text[i] != '.')
+                    if (!char.IsDigit(Text[i]) && (i > 0 || Text[i] != '-') && Text[i] != '.')
                     {
                         firstNonDigitIndex = i;
                         break;

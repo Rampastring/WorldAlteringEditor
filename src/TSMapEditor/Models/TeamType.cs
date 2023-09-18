@@ -164,12 +164,6 @@ namespace TSMapEditor.Models
             return RTTIType.TeamType;
         }
 
-        public Color GetXNAColor()
-        {
-            if (House == null || House.HasDarkHouseColor())
-                return UISettings.ActiveSettings.AltColor;
-
-            return House.XNAColor;
-        }
+        public Color GetXNAColor() => Helpers.GetHouseUITextColor(House);
     }
 }
