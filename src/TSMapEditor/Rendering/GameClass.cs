@@ -29,7 +29,7 @@ namespace TSMapEditor.Rendering
             Logger.Initialize(Environment.CurrentDirectory + "/", "MapEditorLog.log");
             File.Delete(Environment.CurrentDirectory + "/MapEditorLog.log");
 
-            Logger.Log("Dawn of the Tiberium Age Scenario Editor version " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString());
+            Logger.Log("C&C World-Altering Editor (WAE) version " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString());
 
             AutoLATType.InitArray();
 

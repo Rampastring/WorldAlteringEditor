@@ -6,7 +6,7 @@ using System.Runtime.Versioning;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("World-Altering Editor (WAE)")]
-[assembly: AssemblyDescription("Map editor for Tiberian Sun and Red Alert 2")]
+[assembly: AssemblyDescription("Map editor for DTA, Tiberian Sun and Red Alert 2")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Rampastring")]
 [assembly: AssemblyProduct("World-Altering Editor (WAE)")]
