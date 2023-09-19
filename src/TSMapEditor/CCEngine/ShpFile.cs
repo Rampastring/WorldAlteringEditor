@@ -172,6 +172,7 @@ namespace TSMapEditor.CCEngine
                 return null;
 
             byte[] frameData = new byte[frameInfo.Width * frameInfo.Height];
+
             if ((frameInfo.Flags & ShpCompression.UsesRle) == ShpCompression.None)
             {
                 for (int i = 0; i < frameData.Length; i++)
@@ -181,39 +182,91 @@ namespace TSMapEditor.CCEngine
             }
             else
             {
-                int dataOffset = 0;
-                for (int lineIndex = 0; lineIndex < frameInfo.Height; lineIndex++)
-                {
-                    int baseOffset = (int)frameInfo.DataOffset + dataOffset;
-                    int lineDataLength = fileData[baseOffset];
-                    int currentByteIndex = 2;
-                    int positionOnLine = 0;
-                    while (currentByteIndex < lineDataLength && positionOnLine < frameInfo.Width)
-                    {
-                        byte value = fileData[baseOffset + currentByteIndex];
-                        if (value == 0)
-                        {
-                            byte transparentPixelCount = fileData[baseOffset + currentByteIndex + 1];
-                            for (int j = 0; j < transparentPixelCount; j++)
-                            {
-                                frameData[lineIndex * frameInfo.Width + positionOnLine + j] = 0;
-                            }
-                            positionOnLine += transparentPixelCount;
-                            currentByteIndex += 2;
-                        }
-                        else
-                        {
-                            frameData[lineIndex * frameInfo.Width + positionOnLine] = value;
-                            positionOnLine++;
-                            currentByteIndex++;
-                        }
-                    }
-
-                    dataOffset += lineDataLength;
-                }
+                DecompressRLEZero(frameData, frameIndex, frameInfo, fileData);
             }
 
             return frameData;
+        }
+
+        private void DecompressRLEZero(byte[] frameData, int frameIndex, ShpFrameInfo frameInfo, byte[] fileData)
+        {
+            // https://moddingwiki.shikadi.net/wiki/Westwood_RLE-Zero
+
+            int dataOffset = 0;
+
+            // Read SHP line-by-line. RLE-zero only compresses the transparent parts (zero bytes) of each line, individually.
+            for (int lineIndex = 0; lineIndex < frameInfo.Height; lineIndex++)
+            {
+                int lineDataStartOffset = (int)frameInfo.DataOffset + dataOffset;
+
+                // Compose little-endian UInt16 from 2 bytes
+                int lineDataLength = fileData[lineDataStartOffset] | (fileData[lineDataStartOffset + 1] << 8);
+
+                if (lineDataStartOffset + lineDataLength > fileData.Length || lineDataLength < 2)
+                {
+                    throw new ShpLoadException($"Line data length out-of-bounds in SHP RLE-Zero frame. " +
+                        $"File name: {fileName}, frame index: {frameIndex}, line data length: {lineDataLength}");
+                }
+
+                // Line length includes the two-byte line data length value, skip it
+                int currentByteIndex = 2;
+
+                // Define variable for current pixel # on the current line
+                int pixelPositionOnLine = 0;
+
+                // Read image damage of current line
+                while (currentByteIndex < lineDataLength)
+                {
+                    byte value = fileData[lineDataStartOffset + currentByteIndex];
+
+                    if (value == 0)
+                    {
+                        // If we are at the end of a line when we encounter a zero, something is wrong.
+                        if (currentByteIndex == lineDataLength - 1)
+                        {
+                            throw new ShpLoadException($"Zero-byte encountered at end of line data in SHP RLE-Zero frame. " +
+                                $"File name: {fileName}, line index: {lineIndex}, file offset: {lineDataStartOffset + currentByteIndex}");
+                        }
+
+                        // A zero value means transparent pixels. The following byte
+                        // defines how many pixels are transparent.
+                        byte transparentPixelCount = fileData[lineDataStartOffset + currentByteIndex + 1];
+
+                        // -1 prevents us from counting the current pixel "twice"
+                        if (pixelPositionOnLine + transparentPixelCount - 1 > frameInfo.Width)
+                        {
+                            throw new ShpLoadException($"Out-of-bounds pixel position on transparent data in SHP RLE-Zero frame. " +
+                                $"File name: {fileName}, frame index: {frameIndex}, line index: {lineIndex}, file offset: {lineDataStartOffset + currentByteIndex}");
+                        }
+
+                        // Assign transparent pixel data
+                        while (transparentPixelCount > 0)
+                        {
+                            frameData[lineIndex * frameInfo.Width + pixelPositionOnLine] = 0;
+                            pixelPositionOnLine++;
+                            transparentPixelCount--;
+                        }
+
+                        // Advance buffer position
+                        currentByteIndex += 2;
+                    }
+                    else
+                    {
+                        if (pixelPositionOnLine >= frameInfo.Width)
+                        {
+                            throw new ShpLoadException($"Out-of-bounds pixel position on color data in SHP RLE-Zero frame. " +
+                                $"File name: {fileName}, frame index: {frameIndex}, line index: {lineIndex}, file offset: {lineDataStartOffset + currentByteIndex}");
+                        }
+
+                        // A non-zero value is color data that should be just applied directly.
+                        frameData[lineIndex * frameInfo.Width + pixelPositionOnLine] = value;
+                        pixelPositionOnLine++;
+                        currentByteIndex++;
+                    }
+                }
+
+                dataOffset += lineDataLength;
+            }
         }
     }
 
