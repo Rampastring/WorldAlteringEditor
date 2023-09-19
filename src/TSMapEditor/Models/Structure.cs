@@ -124,6 +124,14 @@ namespace TSMapEditor.Models
             return 0;
         }
 
+        public override int GetShadowFrameIndex(int frameCount)
+        {
+            if (HP < Constants.ConditionYellowHP)
+                return frameCount / 2 + 1;
+
+            return frameCount / 2;
+        }
+
         public override bool Remapable() => ObjectType.ArtConfig.Remapable;
 
         public override Structure Clone()
