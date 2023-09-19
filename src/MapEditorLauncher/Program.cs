@@ -44,7 +44,7 @@ namespace MapEditorLauncher
             new UpdaterLink().Run();
 
             Console.WriteLine("Launching scenario editor.");
-            Process.Start(new ProcessStartInfo(Path.Combine(Path.GetDirectoryName(Environment.ProcessPath), "Editor", "DTAScenarioEditor.exe"))
+            Process.Start(new ProcessStartInfo(Path.Combine(Path.GetDirectoryName(Environment.ProcessPath), "Editor", "WorldAlteringEditor.exe"))
                 {
                     UseShellExecute = false,
                     Arguments = "\"" + string.Join(" ", args) + "\""
