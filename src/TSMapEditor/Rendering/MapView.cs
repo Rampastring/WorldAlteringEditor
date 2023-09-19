@@ -119,7 +119,9 @@ namespace TSMapEditor.Rendering
         public TechnoBase TechnoUnderCursor { get; set; }
 
         public TileInfoDisplay TileInfoDisplay { get; set; }
-        
+
+        public MapWideOverlay MapWideOverlay { get; private set; }
+
         public CursorAction CursorAction
         {
             get => EditorState.CursorAction;
@@ -151,8 +153,6 @@ namespace TSMapEditor.Rendering
 
         private bool isRightClickScrolling = false;
         private Point rightClickScrollInitPos = new Point(-1, -1);
-
-        private MapWideOverlay mapWideOverlay;
 
         private Point lastClickedPoint;
 
@@ -195,8 +195,8 @@ namespace TSMapEditor.Rendering
 
             LoadShaders();
 
-            mapWideOverlay = new MapWideOverlay();
-            EditorState.MapWideOverlayExists = mapWideOverlay.HasTexture;
+            MapWideOverlay = new MapWideOverlay();
+            EditorState.MapWideOverlayExists = MapWideOverlay.HasTexture;
 
             RefreshRenderTargets();
 
@@ -211,6 +211,7 @@ namespace TSMapEditor.Rendering
             KeyboardCommands.Instance.ZoomIn.Triggered += ZoomIn_Triggered;
             KeyboardCommands.Instance.ZoomOut.Triggered += ZoomOut_Triggered;
             KeyboardCommands.Instance.ResetZoomLevel.Triggered += ResetZoomLevel_Triggered;
+            KeyboardCommands.Instance.RotateUnitOneStep.Triggered += RotateUnitOneStep_Triggered;
 
             windowController.Initialized += PostWindowControllerInit;
             Map.LocalSizeChanged += (s, e) => InvalidateMap();
@@ -219,11 +220,9 @@ namespace TSMapEditor.Rendering
             Map.HouseColorChanged += (s, e) => InvalidateMap();
             EditorState.HighlightImpassableCellsChanged += (s, e) => InvalidateMap();
             EditorState.HighlightIceGrowthChanged += (s, e) => InvalidateMap();
-            EditorState.DrawMapWideOverlayChanged += (s, e) => mapWideOverlay.Enabled = EditorState.DrawMapWideOverlay;
+            EditorState.DrawMapWideOverlayChanged += (s, e) => MapWideOverlay.Enabled = EditorState.DrawMapWideOverlay;
             EditorState.MarbleMadnessChanged += (s, e) => InvalidateMap();
             EditorState.Is2DModeChanged += (s, e) => InvalidateMap();
-
-            KeyboardCommands.Instance.RotateUnitOneStep.Triggered += RotateUnitOneStep_Triggered;
 
             refreshStopwatch = new Stopwatch();
 
@@ -246,6 +245,7 @@ namespace TSMapEditor.Rendering
             EditorState = null;
             TheaterGraphics = null;
             MutationManager = null;
+            MapWideOverlay.Clear();
 
             windowController = null;
 
@@ -1477,7 +1477,7 @@ namespace TSMapEditor.Rendering
 
             if (EditorState.DrawMapWideOverlay)
             {
-                mapWideOverlay.Draw(new Rectangle(
+                MapWideOverlay.Draw(new Rectangle(
                         (int)(-Camera.TopLeftPoint.X * Camera.ZoomLevel),
                         (int)(-Camera.TopLeftPoint.Y * Camera.ZoomLevel),
                         (int)(mapRenderTarget.Width * Camera.ZoomLevel),

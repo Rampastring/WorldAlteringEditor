@@ -15,6 +15,7 @@ namespace TSMapEditor.Rendering
         public event EventHandler ObjectOwnerChanged;
         public event EventHandler AutoLATEnabledChanged;
         public event EventHandler OnlyPaintOnClearGroundChanged;
+        public event EventHandler MapWideOverlayExistsChanged;
         public event EventHandler DrawMapWideOverlayChanged;
         public event EventHandler HighlightImpassableCellsChanged;
         public event EventHandler HighlightIceGrowthChanged;
@@ -110,8 +111,20 @@ namespace TSMapEditor.Rendering
                 }
             }
         }
-        
-        public bool MapWideOverlayExists { get; set; }
+
+        private bool _mapWideOverlayExists;
+        public bool MapWideOverlayExists 
+        {
+            get => _mapWideOverlayExists;
+            set
+            {
+                if (value != _mapWideOverlayExists)
+                {
+                    _mapWideOverlayExists = value;
+                    MapWideOverlayExistsChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
 
         private bool _drawMapWideOverlay;
         public bool DrawMapWideOverlay 

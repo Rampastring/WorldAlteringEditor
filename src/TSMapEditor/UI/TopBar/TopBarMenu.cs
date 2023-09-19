@@ -28,6 +28,7 @@ namespace TSMapEditor.UI.TopBar
 
         public event EventHandler<FileSelectedEventArgs> OnFileSelected;
         public event EventHandler InputFileReloadRequested;
+        public event EventHandler MapWideOverlayLoadRequested;
 
         private readonly MutationManager mutationManager;
         private readonly MapView mapView;
@@ -129,6 +130,8 @@ namespace TSMapEditor.UI.TopBar
             toolsContextMenu.AddItem("Check Distance...", () => mapView.EditorState.CursorAction = checkDistanceCursorAction, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("Calculate Credits...", () => mapView.EditorState.CursorAction = calculateTiberiumValueCursorAction, null, null, null);
+            toolsContextMenu.AddItem(" ", null, () => false, null, null);
+            toolsContextMenu.AddItem("Load Map-Wide Overlay...", () => MapWideOverlayLoadRequested?.Invoke(this, EventArgs.Empty), null, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("Configure Hotkeys...", () => windowController.HotkeyConfigurationWindow.Open(), null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);

@@ -81,8 +81,8 @@ namespace TSMapEditor.UI.TopBar
             chkDrawMapWideOverlay = FindChild<XNACheckBox>(nameof(chkDrawMapWideOverlay));
             chkDrawMapWideOverlay.Checked = editorState.DrawMapWideOverlay;
             chkDrawMapWideOverlay.CheckedChanged += ChkDrawMapWideOverlay_CheckedChanged;
-            if (!editorState.MapWideOverlayExists)
-                chkDrawMapWideOverlay.Disable();
+            CheckForMapWideOverlay();
+            editorState.MapWideOverlayExistsChanged += (s, e) => CheckForMapWideOverlay();
 
             FindChild<EditorButton>("btnPlaceWaypoint").LeftClick += (s, e) => editorState.CursorAction = placeWaypointCursorAction;
             FindChild<EditorButton>("btnDeletionMode").LeftClick += (s, e) => editorState.CursorAction = deletionModeCursorAction;
@@ -134,6 +134,11 @@ namespace TSMapEditor.UI.TopBar
             editorState.BrushSizeChanged += (s, e) => ddBrushSize.SelectedIndex = map.EditorConfig.BrushSizes.FindIndex(bs => bs == editorState.BrushSize);
 
             InitLATPanel();
+        }
+
+        private void CheckForMapWideOverlay()
+        {
+            chkDrawMapWideOverlay.AllowChecking = editorState.MapWideOverlayExists;
         }
 
         private void InitLATPanel()

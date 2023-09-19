@@ -145,6 +145,7 @@ namespace TSMapEditor.UI
             topBarMenu = new TopBarMenu(WindowManager, mutationManager, mapView, map, windowController);
             topBarMenu.Width = editorSidebar.Width;
             topBarMenu.OnFileSelected += OpenMapWindow_OnFileSelected;
+            topBarMenu.MapWideOverlayLoadRequested += TopBarMenu_MapWideOverlayLoadRequested;
             AddChild(topBarMenu);
 
             var editorControlsPanel = new EditorControlsPanel(WindowManager, map, theaterGraphics,
@@ -296,6 +297,12 @@ namespace TSMapEditor.UI
         {
             loadMapFilePath = e.FilePath;
             StartLoadingMap();
+        }
+
+        private void TopBarMenu_MapWideOverlayLoadRequested(object sender, EventArgs e)
+        {
+            mapView.MapWideOverlay.LoadMapWideOverlay(GraphicsDevice);
+            editorState.MapWideOverlayExists = mapView.MapWideOverlay.HasTexture;
         }
 
         private void TopBarMenu_InputFileReloadRequested(object sender, EventArgs e)
