@@ -6,7 +6,7 @@ namespace TSMapEditor.Models.ArtConfig
     {
         public AnimArtConfig() { }
 
-        public bool Remapable { get; set; }
+        public bool Remapable => IsBuildingAnim;
         public string Image { get; set; }
         public int YDrawOffset { get; set; }
         public int XDrawOffset { get; set; } // Phobos
@@ -29,7 +29,6 @@ namespace TSMapEditor.Models.ArtConfig
             if (iniSection == null)
                 return;
 
-            Remapable = iniSection.GetBooleanValue(nameof(Remapable), Remapable);
             Image = iniSection.GetStringValue(nameof(Image), Image);
             YDrawOffset = iniSection.GetIntValue(nameof(YDrawOffset), YDrawOffset);
             XDrawOffset = iniSection.GetIntValue(nameof(XDrawOffset), XDrawOffset);

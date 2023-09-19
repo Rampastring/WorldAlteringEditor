@@ -5,7 +5,7 @@ namespace TSMapEditor.Models.ArtConfig
     public class VehicleArtConfig : IArtConfig
     {
         public bool Voxel { get; set; }
-        public bool Remapable { get; set; }
+        public bool Remapable => true;
         public int StartStandFrame { get; set; } = -1;
         public int StandingFrames { get; set; }
         public int StartWalkFrame { get; set; } = -1;
@@ -26,7 +26,6 @@ namespace TSMapEditor.Models.ArtConfig
                 return;
 
             Voxel = iniSection.GetBooleanValue(nameof(Voxel), Voxel);
-            Remapable = iniSection.GetBooleanValue(nameof(Remapable), Remapable);
             StartStandFrame = iniSection.GetIntValue(nameof(StartStandFrame), StartStandFrame);
             StartWalkFrame = iniSection.GetIntValue(nameof(StartWalkFrame), StartWalkFrame);
 

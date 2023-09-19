@@ -7,13 +7,12 @@ namespace TSMapEditor.Models.ArtConfig
         public string SequenceName { get; private set; }
         public InfantrySequence Sequence { get; set; }
         public string Image { get; set; }
-        public bool Remapable { get; private set; }
+        public bool Remapable => true;
 
         public void ReadFromIniSection(IniSection iniSection)
         {
             SequenceName = iniSection.GetStringValue("Sequence", SequenceName);
             Image = iniSection.GetStringValue(nameof(Image), Image);
-            Remapable = iniSection.GetBooleanValue(nameof(Remapable), Remapable);
         }
     }
 }

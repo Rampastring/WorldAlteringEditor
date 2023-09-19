@@ -202,7 +202,7 @@ namespace TSMapEditor.Models.ArtConfig
 
         public Foundation Foundation { get; set; } = new();
         public int Height { get; set; }
-        public bool Remapable { get; set; }
+        public bool Remapable => true;
         public bool NewTheater { get; set; }
         public bool TerrainPalette { get; set; }
         public bool Theater { get; set; }
@@ -224,7 +224,6 @@ namespace TSMapEditor.Models.ArtConfig
 
             Foundation.ReadFromIniSection(iniSection);
             Height = iniSection.GetIntValue(nameof(Height), Height);
-            Remapable = iniSection.GetBooleanValue(nameof(Remapable), Remapable);
             NewTheater = iniSection.GetBooleanValue(nameof(NewTheater), NewTheater);
             TerrainPalette = iniSection.GetBooleanValue(nameof(TerrainPalette), TerrainPalette);
             Theater = iniSection.GetBooleanValue(nameof(Theater), Theater);
