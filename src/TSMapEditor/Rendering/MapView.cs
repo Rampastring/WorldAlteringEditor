@@ -237,6 +237,7 @@ namespace TSMapEditor.Rendering
             windowController.MinimapWindow.MegamapClicked += MinimapWindow_MegamapClicked;
             windowController.Initialized -= PostWindowControllerInit;
             windowController.RunScriptWindow.ScriptRun += (s, e) => InvalidateMap();
+            windowController.StructureOptionsWindow.EnabledChanged += (s, e) => { if (!((StructureOptionsWindow)s).Enabled) InvalidateMap(); };
         }
 
         public void Clear()
