@@ -33,7 +33,7 @@ namespace TSMapEditor.Models
         public bool Loadable { get; set; }
         public bool Prebuild { get; set; }
         public int Priority { get; set; }
-        public string Waypoint { get; set; } = "A";
+        public string Waypoint { get; set; }
         public bool Annoyance { get; set; }
         public bool IonImmune { get; set; }
         public bool Recruiter { get; set; }
