@@ -230,6 +230,7 @@ namespace TSMapEditor.UI.Sidebar
                 if (accumulatedHeight + Height > totalHeight)
                     accumulatedHeight = totalHeight - Height;
 
+                RefreshScrollbar();
                 ViewTop = accumulatedHeight;
             }
         }
