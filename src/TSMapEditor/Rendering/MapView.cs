@@ -52,7 +52,8 @@ namespace TSMapEditor.Rendering
         bool AutoLATEnabled { get; }
         bool OnlyPaintOnClearGround { get; }
         CopiedMapData CopiedMapData { get; set; }
-        Texture2D MegamapTexture { get; }
+        Texture2D MinimapTexture { get; }
+        HashSet<object> MinimapUsers { get; }
         Camera Camera { get; }
         TechnoBase TechnoUnderCursor { get; set; }
     }
@@ -114,7 +115,14 @@ namespace TSMapEditor.Rendering
             get => EditorState.CopiedMapData;
             set => EditorState.CopiedMapData = value;
         }
-        public Texture2D MegamapTexture => compositeRenderTarget;
+        public Texture2D MinimapTexture => minimapRenderTarget;
+
+        /// <summary>
+        /// Tracks users of the minimap.
+        /// If the minimap texture is not used by anyone, we can save
+        /// processing power and skip certain actions that would update it.
+        /// </summary>
+        public HashSet<object> MinimapUsers { get; } = new HashSet<object>();
         public Camera Camera { get; private set; }
         public TechnoBase TechnoUnderCursor { get; set; }
 
@@ -128,13 +136,15 @@ namespace TSMapEditor.Rendering
             set => EditorState.CursorAction = value;
         }
 
-        private RenderTarget2D mapRenderTarget;
-        private RenderTarget2D depthRenderTarget;
-        private RenderTarget2D depthRenderTargetCopy;
-        private RenderTarget2D objectRenderTarget;
-        private RenderTarget2D shadowRenderTarget;
-        private RenderTarget2D transparencyRenderTarget;
-        private RenderTarget2D compositeRenderTarget;
+        private RenderTarget2D mapRenderTarget;                      // Render target for terrain
+        private RenderTarget2D depthRenderTarget;                    // Depth buffer
+        private RenderTarget2D depthRenderTargetCopy;                // Copy of depth buffer so it can be sampled while rendering depth
+        private RenderTarget2D objectRenderTarget;                   // Object render target
+        private RenderTarget2D shadowRenderTarget;                   // Currently unused
+        private RenderTarget2D transparencyRenderTarget;             // Render target for map UI elements (celltags etc.) that are only refreshed if something in the map changes (due to performance reasons)
+        private RenderTarget2D transparencyPerFrameRenderTarget;     // Render target for map UI elements that are redrawn each frame
+        private RenderTarget2D compositeRenderTarget;                // Render target where all the above is combined
+        private RenderTarget2D minimapRenderTarget;                  // For minimap and megamap rendering
 
         private Effect colorDrawEffect;
         private Effect depthApplyEffect;
@@ -144,6 +154,7 @@ namespace TSMapEditor.Rendering
 
         private bool mapInvalidated;
         private bool cameraMoved;
+        private bool minimapNeedsRefresh;
 
         private int scrollRate;
 
@@ -176,6 +187,9 @@ namespace TSMapEditor.Rendering
         private TerrainRenderer terrainRenderer;
         private UnitRenderer unitRenderer;
 
+        private Rectangle mapRenderSourceRectangle;
+        private Rectangle mapRenderDestinationRectangle;
+
         public void AddRefreshPoint(Point2D point, int size = 1)
         {
             InvalidateMap();
@@ -187,6 +201,12 @@ namespace TSMapEditor.Rendering
                 refreshIndex++;
 
             mapInvalidated = true;
+        }
+
+        public void InvalidateMapForMinimap()
+        {
+            InvalidateMap();
+            minimapNeedsRefresh = true;
         }
 
         public override void Initialize()
@@ -234,6 +254,7 @@ namespace TSMapEditor.Rendering
         private void PostWindowControllerInit(object sender, EventArgs e)
         {
             windowController.MinimapWindow.MegamapClicked += MinimapWindow_MegamapClicked;
+            windowController.MinimapWindow.EnabledChanged += (s, e) => { if (((MegamapWindow)s).Enabled) InvalidateMapForMinimap(); };
             windowController.Initialized -= PostWindowControllerInit;
             windowController.RunScriptWindow.ScriptRun += (s, e) => InvalidateMap();
             windowController.StructureOptionsWindow.EnabledChanged += (s, e) => { if (!((StructureOptionsWindow)s).Enabled) InvalidateMap(); };
@@ -266,10 +287,11 @@ namespace TSMapEditor.Rendering
 
         private void ViewMegamap_Triggered(object sender, EventArgs e)
         {
-            var mmw = new MegamapWindow(WindowManager, compositeRenderTarget, false);
+            var mmw = new MegamapWindow(WindowManager, this, false);
             mmw.Width = WindowManager.RenderResolutionX;
             mmw.Height = WindowManager.RenderResolutionY;
             WindowManager.AddAndInitializeControl(mmw);
+            InvalidateMapForMinimap();
         }
 
         private void LoadShaders()
@@ -314,9 +336,11 @@ namespace TSMapEditor.Rendering
             depthRenderTarget?.Dispose();
             depthRenderTargetCopy?.Dispose();
             objectRenderTarget?.Dispose();
-            shadowRenderTarget?.Dispose();
+            // shadowRenderTarget?.Dispose();
             transparencyRenderTarget?.Dispose();
+            transparencyPerFrameRenderTarget?.Dispose();
             compositeRenderTarget?.Dispose();
+            minimapRenderTarget?.Dispose();
         }
 
         private void RefreshRenderTargets()
@@ -327,9 +351,11 @@ namespace TSMapEditor.Rendering
             depthRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Single);
             depthRenderTargetCopy = CreateFullMapRenderTarget(SurfaceFormat.Single);
             objectRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
-            shadowRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Alpha8);
+            // shadowRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Alpha8);
             transparencyRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
+            transparencyPerFrameRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
             compositeRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
+            minimapRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
 
             aircraftRenderer?.UpdateDepthRenderTarget(depthRenderTarget);
             animRenderer?.UpdateDepthRenderTarget(depthRenderTarget);
@@ -498,20 +524,37 @@ namespace TSMapEditor.Rendering
 
         private void DoForVisibleCells(Action<MapTile> action)
         {
-            // Add some padding to take objects just outside of the visible screen to account
-            int tlX = Camera.TopLeftPoint.X - Constants.RenderPixelPadding;
-            int tlY = Camera.TopLeftPoint.Y - Constants.RenderPixelPadding;
+            int tlX;
+            int tlY;
+            int camRight;
+            int camBottom;
 
-            if (tlX < 0)
+            if (minimapNeedsRefresh && MinimapUsers.Count > 0)
+            {
+                // If the minimap needs a full refresh, then we need to re-render the whole map
                 tlX = 0;
-
-            if (tlY < 0)
                 tlY = 0;
+                camRight = mapRenderTarget.Width;
+                camBottom = mapRenderTarget.Height;
+            }
+            else
+            {
+                // Otherwise, screen contents will do.
+                // Add some padding to take objects just outside of the visible screen to account
+                tlX = Camera.TopLeftPoint.X - Constants.RenderPixelPadding;
+                tlY = Camera.TopLeftPoint.Y - Constants.RenderPixelPadding;
+
+                if (tlX < 0)
+                    tlX = 0;
+
+                if (tlY < 0)
+                    tlY = 0;
+
+                camRight = GetCameraRightXCoord() + Constants.RenderPixelPadding;
+                camBottom = GetCameraBottomYCoord() + Constants.RenderPixelPadding;
+            }
 
             Point2D firstVisibleCellCoords = CellMath.CellCoordsFromPixelCoords_2D(new Point2D(tlX, tlY), Map);
-
-            int camRight = GetCameraRightXCoord() + Constants.RenderPixelPadding;
-            int camBottom = GetCameraBottomYCoord() + Constants.RenderPixelPadding;
 
             int xCellCount = (camRight - tlX) / Constants.CellSizeX;
             xCellCount += 2; // Add some padding for edge cases
@@ -605,11 +648,14 @@ namespace TSMapEditor.Rendering
 
             Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(new Point2D(tile.X, tile.Y), Map);
 
-            if (drawPoint.X + Constants.CellSizeX < Camera.TopLeftPoint.X || drawPoint.X > GetCameraRightXCoord())
-                return;
+            if (!minimapNeedsRefresh)
+            {
+                if (drawPoint.X + Constants.CellSizeX < Camera.TopLeftPoint.X || drawPoint.X > GetCameraRightXCoord())
+                    return;
 
-            if (drawPoint.Y + Constants.CellSizeY < Camera.TopLeftPoint.Y)
-                return;
+                if (drawPoint.Y + Constants.CellSizeY < Camera.TopLeftPoint.Y)
+                    return;
+            }
 
             if (tile.TileImage == null)
                 tile.TileImage = TheaterGraphics.GetTileGraphics(tile.TileIndex);
@@ -647,7 +693,7 @@ namespace TSMapEditor.Rendering
 
             int extraDrawY = drawPoint.Y + tmpImage.TmpImage.YExtra - tmpImage.TmpImage.Y;
 
-            if (drawPoint.Y - (tile.Level * Constants.CellHeight) > GetCameraBottomYCoord())
+            if (!minimapNeedsRefresh && drawPoint.Y - (tile.Level * Constants.CellHeight) > GetCameraBottomYCoord())
             {
                 if (tmpImage.ExtraTexture == null)
                     return;
@@ -798,28 +844,28 @@ namespace TSMapEditor.Rendering
             switch (gameObject.WhatAmI())
             {
                 case RTTIType.Aircraft:
-                    aircraftRenderer.Draw(gameObject as Aircraft);
+                    aircraftRenderer.Draw(gameObject as Aircraft, !minimapNeedsRefresh);
                     return;
                 case RTTIType.Anim:
-                    animRenderer.Draw(gameObject as Animation);
+                    animRenderer.Draw(gameObject as Animation, !minimapNeedsRefresh);
                     return;
                 case RTTIType.Building:
-                    buildingRenderer.Draw(gameObject as Structure);
+                    buildingRenderer.Draw(gameObject as Structure, !minimapNeedsRefresh);
                     return;
                 case RTTIType.Infantry:
-                    infantryRenderer.Draw(gameObject as Infantry);
+                    infantryRenderer.Draw(gameObject as Infantry, !minimapNeedsRefresh);
                     return;
                 case RTTIType.Overlay:
-                    overlayRenderer.Draw(gameObject as Overlay);
+                    overlayRenderer.Draw(gameObject as Overlay, !minimapNeedsRefresh);
                     return;
                 case RTTIType.Smudge:
-                    smudgeRenderer.Draw(gameObject as Smudge);
+                    smudgeRenderer.Draw(gameObject as Smudge, !minimapNeedsRefresh);
                     return;
                 case RTTIType.Terrain:
-                    terrainRenderer.Draw(gameObject as TerrainObject);
+                    terrainRenderer.Draw(gameObject as TerrainObject, !minimapNeedsRefresh);
                     return;
                 case RTTIType.Unit:
-                    unitRenderer.Draw(gameObject as Unit);
+                    unitRenderer.Draw(gameObject as Unit, !minimapNeedsRefresh);
                     return;
                 default:
                     throw new NotImplementedException("No renderer implemented for type " + gameObject.WhatAmI());
@@ -952,6 +998,23 @@ namespace TSMapEditor.Rendering
             const double HeightAddition = 4.5; // TS engine adds 4.5 to specified map height <3
             const int TopImpassableCellCount = 3; // The northernmost 3 cells are impassable in the TS engine, we'll also display this border
 
+            int x = (int)(Map.LocalSize.X * Constants.CellSizeX);
+            int y = (int)(Map.LocalSize.Y - InitialHeight) * Constants.CellSizeY;
+            int width = (int)(Map.LocalSize.Width * Constants.CellSizeX);
+            int height = (int)(Map.LocalSize.Height + HeightAddition) * Constants.CellSizeY;
+
+            DrawRectangle(new Rectangle(x, y, width, height), Color.Blue, BorderThickness);
+
+            int impassableY = (int)(y + (Constants.CellSizeY * TopImpassableCellCount));
+            FillRectangle(new Rectangle(x, impassableY - (BorderThickness / 2), width, BorderThickness), Color.Teal * 0.25f);
+
+            // old code for rendering directly to screen
+            /*
+            const int BorderThickness = 4;
+            const int InitialHeight = 3; // TS engine assumes that the first cell is at a height of 2
+            const double HeightAddition = 4.5; // TS engine adds 4.5 to specified map height <3
+            const int TopImpassableCellCount = 3; // The northernmost 3 cells are impassable in the TS engine, we'll also display this border
+
             int x = (int)((Map.LocalSize.X * Constants.CellSizeX - Camera.TopLeftPoint.X) * Camera.ZoomLevel);
             int y = (int)((((Map.LocalSize.Y - InitialHeight) * Constants.CellSizeY) - Camera.TopLeftPoint.Y) * Camera.ZoomLevel);
             int width = (int)((Map.LocalSize.Width * Constants.CellSizeX) * Camera.ZoomLevel);
@@ -961,6 +1024,7 @@ namespace TSMapEditor.Rendering
 
             int impassableY = (int)(y + (Constants.CellSizeY * TopImpassableCellCount * Camera.ZoomLevel));
             FillRectangle(new Rectangle(x, impassableY - (BorderThickness / 2), width, BorderThickness), Color.Teal * 0.25f);
+            */
         }
 
         private void DrawTechnoRangeIndicators()
@@ -997,10 +1061,10 @@ namespace TSMapEditor.Rendering
             int endX = center.X + (int)(range * horizontalPixelRange);
             int endY = center.Y + (int)(range * verticalPixelRange);
 
-            startX = Camera.ScaleIntWithZoom(startX - Camera.TopLeftPoint.X);
-            startY = Camera.ScaleIntWithZoom(startY - Camera.TopLeftPoint.Y);
-            endX = Camera.ScaleIntWithZoom(endX - Camera.TopLeftPoint.X);
-            endY = Camera.ScaleIntWithZoom(endY - Camera.TopLeftPoint.Y);
+            // startX = Camera.ScaleIntWithZoom(startX - Camera.TopLeftPoint.X);
+            // startY = Camera.ScaleIntWithZoom(startY - Camera.TopLeftPoint.Y);
+            // endX = Camera.ScaleIntWithZoom(endX - Camera.TopLeftPoint.X);
+            // endY = Camera.ScaleIntWithZoom(endY - Camera.TopLeftPoint.Y);
 
             DrawTexture(EditorGraphics.RangeIndicatorTexture,
                 new Rectangle(startX, startY, endX - startX, endY - startY), color);
@@ -1473,6 +1537,10 @@ namespace TSMapEditor.Rendering
                 cameraMoved = false;
             }
 
+            CalculateMapRenderRectangles();
+
+            DrawPerFrameTransparentElements();
+
             DrawWorld();
 
             if (EditorState.DrawMapWideOverlay)
@@ -1484,10 +1552,6 @@ namespace TSMapEditor.Rendering
                         (int)(mapRenderTarget.Height * Camera.ZoomLevel)));
             }
 
-            DrawTechnoRangeIndicators();
-
-            DrawMapBorder();
-
             if (IsActive && tileUnderCursor != null && CursorAction != null)
             {
                 CursorAction.PostMapDraw(tileUnderCursor.CoordsToPoint());
@@ -1496,10 +1560,54 @@ namespace TSMapEditor.Rendering
 
             DrawOnTileUnderCursor();
 
+            DrawOnMinimap();
+
             base.Draw(gameTime);
         }
 
-        private void DrawWorld()
+        private void DrawPerFrameTransparentElements()
+        {
+            Renderer.PushRenderTarget(transparencyPerFrameRenderTarget);
+
+            GraphicsDevice.Clear(Color.Transparent);
+
+            DrawMapBorder();
+            DrawTechnoRangeIndicators();
+
+            Renderer.PopRenderTarget();
+        }
+
+        /// <summary>
+        /// Draws the visible part of the map to the minimap.
+        /// </summary>
+        private void DrawOnMinimap()
+        {
+            if (MinimapUsers.Count > 0)
+            {
+                Renderer.PushRenderTarget(minimapRenderTarget);
+
+                if (minimapNeedsRefresh)
+                {
+                    DrawTexture(compositeRenderTarget,
+                        new Rectangle(0, 0, mapRenderTarget.Width, mapRenderTarget.Height),
+                        new Rectangle(0, 0, mapRenderTarget.Width, mapRenderTarget.Height),
+                        Color.White);
+                }
+                else
+                {
+                    DrawTexture(compositeRenderTarget,
+                        mapRenderSourceRectangle,
+                        mapRenderSourceRectangle,
+                        Color.White);
+                }
+
+                Renderer.PopRenderTarget();
+            }
+
+            minimapNeedsRefresh = false;
+        }
+
+        private void CalculateMapRenderRectangles()
         {
             int zoomedWidth = (int)(Width / Camera.ZoomLevel);
             int zoomedHeight = (int)(Height / Camera.ZoomLevel);
@@ -1540,12 +1648,16 @@ namespace TSMapEditor.Rendering
                 destinationHeight = (int)(zoomedHeight * Camera.ZoomLevel);
             }
 
+            mapRenderSourceRectangle = new Rectangle(sourceX, sourceY, zoomedWidth, zoomedHeight);
+            mapRenderDestinationRectangle = new Rectangle(destinationX, destinationY, destinationWidth, destinationHeight);
+        }
+
+        private void DrawWorld()
+        {
             Renderer.PushRenderTarget(compositeRenderTarget, new SpriteBatchSettings(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null));
 
             GraphicsDevice.Clear(Color.Black);
 
-            // Rectangle sourceRectangle = new Rectangle(sourceX, sourceY, zoomedWidth, zoomedHeight);
-            // Rectangle destinationRectangle = new Rectangle(destinationX, destinationY, destinationWidth, destinationHeight);
             Rectangle sourceRectangle = new Rectangle(0, 0, mapRenderTarget.Width, mapRenderTarget.Height);
             Rectangle destinationRectangle = sourceRectangle;
 
@@ -1571,17 +1683,20 @@ namespace TSMapEditor.Rendering
                 destinationRectangle,
                 Color.White);
 
+            DrawTexture(transparencyPerFrameRenderTarget,
+                sourceRectangle,
+                destinationRectangle,
+                Color.White);
+
             Renderer.PopRenderTarget();
 
-            // Draw directly to the screen
-            sourceRectangle = new Rectangle(sourceX, sourceY, zoomedWidth, zoomedHeight);
-            destinationRectangle = new Rectangle(destinationX, destinationY, destinationWidth, destinationHeight);
+            // Draw the composite render target directly to the screen
 
             Renderer.PushSettings(new SpriteBatchSettings(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null));
 
             DrawTexture(compositeRenderTarget,
-                sourceRectangle,
-                destinationRectangle,
+                mapRenderSourceRectangle,
+                mapRenderDestinationRectangle,
                 Color.White);
 
             Renderer.PopSettings();

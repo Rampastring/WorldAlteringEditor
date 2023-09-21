@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using Rampastring.XNAUI;
 using System;
 using TSMapEditor.GameMath;
+using TSMapEditor.Rendering;
 using TSMapEditor.UI.Controls;
 
 namespace TSMapEditor.UI.Windows
@@ -26,10 +27,11 @@ namespace TSMapEditor.UI.Windows
         private const int DefaultSizeChange = 20;
         private const int MinSize = 100;
 
-        public MegamapWindow(WindowManager windowManager, Texture2D megamapTexture, bool enableToolbar) : base(windowManager)
+        public MegamapWindow(WindowManager windowManager, ICursorActionTarget cursorActionTarget, bool enableToolbar) : base(windowManager)
         {
+            this.cursorActionTarget = cursorActionTarget;
             this.enableToolbar = enableToolbar;
-            MegamapTexture = megamapTexture;
+            MegamapTexture = cursorActionTarget.MinimapTexture;
 
             double ratio = MegamapTexture.Width / (double)MegamapTexture.Height;
             if (ratio > 2.0)
@@ -44,6 +46,21 @@ namespace TSMapEditor.UI.Windows
             }
 
             ClientRectangleUpdated += MegamapWindow_ClientRectangleUpdated;
+            EnabledChanged += MegamapWindow_EnabledChanged;
+            MegamapWindow_EnabledChanged(this, EventArgs.Empty);
+        }
+
+        private void MarkMinimapUsage()
+        {
+            if (Enabled)
+                cursorActionTarget.MinimapUsers.Add(this);
+            else
+                cursorActionTarget.MinimapUsers.Remove(this);
+        }
+
+        private void MegamapWindow_EnabledChanged(object sender, EventArgs e)
+        {
+            MarkMinimapUsage();
         }
 
         public event EventHandler<MegamapClickedEventArgs> MegamapClicked;
@@ -58,7 +75,8 @@ namespace TSMapEditor.UI.Windows
                 closeButton.X = Width - closeButton.Width;
         }
 
-        private bool enableToolbar;
+        private readonly ICursorActionTarget cursorActionTarget;
+        private readonly bool enableToolbar;
 
         private Texture2D _megamapTexture;
         public Texture2D MegamapTexture
@@ -209,8 +227,11 @@ namespace TSMapEditor.UI.Windows
 
         public override void Update(GameTime gameTime)
         {
-            if (Keyboard.IsKeyHeldDown(Keys.Escape))
+            if (!enableToolbar && Keyboard.IsKeyHeldDown(Keys.Escape))
+            {
+                Enabled = false;
                 WindowManager.RemoveControl(this);
+            }
 
             if (!IsChildActive)
             {
@@ -243,8 +264,10 @@ namespace TSMapEditor.UI.Windows
         {
             DrawPanel();
 
+            Renderer.PushSettings(new SpriteBatchSettings(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearWrap, null, null, null));
             DrawTexture(MegamapTexture, textureDrawRectangle, Color.White);
-            
+            Renderer.PopSettings();
+
             if (CameraRectangle.Width > 0 && CameraRectangle.Height > 0)
             {
                 double xPos = (CameraRectangle.X / (double)MegamapTexture.Width) * textureDrawRectangle.Width;

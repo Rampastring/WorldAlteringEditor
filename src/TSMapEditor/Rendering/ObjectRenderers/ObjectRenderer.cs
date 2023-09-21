@@ -38,7 +38,8 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         /// case it has no loaded graphics.
         /// </summary>
         /// <param name="gameObject">The game object to render.</param>
-        public void Draw(T gameObject)
+        /// <param name="checkInCamera">Whether the object's presence within the camera should be checked.</param>
+        public void Draw(T gameObject, bool checkInCamera)
         {
             Point2D drawPointWithoutCellHeight = CellMath.CellTopLeftPointFromCellCoords(gameObject.Position, RenderDependencies.Map);
 
@@ -57,7 +58,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 out int objectYDrawPointWithoutCellHeight);
 
             // If the object is not in view, skip
-            if (!IsObjectInCamera(finalDrawPointX, finalDrawPointRight, finalDrawPointY, finalDrawPointBottom))
+            if (checkInCamera && !IsObjectInCamera(finalDrawPointX, finalDrawPointRight, finalDrawPointY, finalDrawPointBottom))
                 return;
 
             if (frame == null && ShouldRenderReplacementText(gameObject))
