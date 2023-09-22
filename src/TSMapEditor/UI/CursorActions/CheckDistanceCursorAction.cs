@@ -1,8 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.Input;
+using System;
 using System.Collections.Generic;
 using TSMapEditor.GameMath;
+using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 
 namespace TSMapEditor.UI.CursorActions
@@ -19,7 +21,6 @@ namespace TSMapEditor.UI.CursorActions
         public override string GetName() => "Check Distance";
 
         private Point2D? source;
-        private Point2D? destination;
         private List<Point2D> pathCellCoords = new List<Point2D>();
         private int pathLength = 0;
 
@@ -38,7 +39,6 @@ namespace TSMapEditor.UI.CursorActions
             {
                 e.Handled = true;
                 source = null;
-                destination = null;
                 pathCellCoords.Clear();
             }
 
@@ -57,27 +57,29 @@ namespace TSMapEditor.UI.CursorActions
                 return;
             }
 
-            Point2D sourceCenterPoint = CellMath.CellCenterPointFromCellCoords(source.Value, CursorActionTarget.Map) - cameraTopLeftPoint;
+            Func<Point2D, Map, Point2D> getCellCenterPoint = Is2DMode ? CellMath.CellCenterPointFromCellCoords : CellMath.CellCenterPointFromCellCoords_3D;
+
+            Point2D sourceCenterPoint = getCellCenterPoint(source.Value, CursorActionTarget.Map) - cameraTopLeftPoint;
             Renderer.FillRectangle(GetDrawRectangleForMarker(sourceCenterPoint), sourceColor);
 
-            if (destination == null)
-            {
-                DrawText(cellCoords, cameraTopLeftPoint, "Click to select destination coordinate\r\n\r\nOr right-click to exit,\r\nor press C to clear", destinationColor);
-                return;
-            }
-
-            Point2D destinationCenterPoint = CellMath.CellCenterPointFromCellCoords(destination.Value, CursorActionTarget.Map) - cameraTopLeftPoint;
+            Point2D destinationCenterPoint = getCellCenterPoint(cellCoords, CursorActionTarget.Map) - cameraTopLeftPoint;
             Renderer.FillRectangle(GetDrawRectangleForMarker(destinationCenterPoint), Color.Red);
+
+            pathCellCoords.Clear();
+            FormPath(source.Value, cellCoords);
+            pathLength = pathCellCoords.Count;
+            if (cellCoords.X != source.Value.X && cellCoords.Y != source.Value.Y)
+                FormPath(cellCoords, source.Value); // Let's also draw another approach
 
             foreach (Point2D pathCell in pathCellCoords)
             {
-                Point2D pathCellCenterPoint = CellMath.CellCenterPointFromCellCoords(pathCell, CursorActionTarget.Map) - cameraTopLeftPoint;
+                Point2D pathCellCenterPoint = getCellCenterPoint(pathCell, CursorActionTarget.Map) - cameraTopLeftPoint;
                 pathCellCenterPoint = pathCellCenterPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
 
                 Renderer.FillRectangle(GetDrawRectangleForMarker(pathCellCenterPoint), Color.Yellow);
             }
 
-            string text = "Path Length In Cells: " + pathLength + "\r\n\r\nRight-click to exit\r\nPress C to clear";
+            string text = "Path Length In Cells: " + pathLength + "\r\n\r\nClick to select new source coordinate, or right-click to exit";
             DrawText(cellCoords, cameraTopLeftPoint, text, pathColor);
         }
 
@@ -94,21 +96,7 @@ namespace TSMapEditor.UI.CursorActions
 
         public override void LeftClick(Point2D cellCoords)
         {
-            if (source == null)
-            {
-                source = cellCoords;
-            }
-            else if (destination == null && source != cellCoords)
-            {
-                destination = cellCoords;
-
-                pathCellCoords.Clear();
-                FormPath(source.Value, destination.Value);
-                pathLength = pathCellCoords.Count;
-
-                if (destination.Value.X != source.Value.X && destination.Value.Y != source.Value.Y)
-                    FormPath(destination.Value, source.Value); // Let's also draw another approach
-            }
+            source = cellCoords;
         }
 
         private void FormPath(Point2D source, Point2D destination)
