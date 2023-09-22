@@ -16,18 +16,27 @@ namespace TSMapEditor.UI.CursorActions
 
         public override string GetName() => "Delete Object";
 
+        public override bool DrawCellCursor => true;
+
         public override void DrawPreview(Point2D cellCoords, Point2D cameraTopLeftPoint)
         {
-            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cellCoords, CursorActionTarget.Map) - cameraTopLeftPoint;
-            cellTopLeftPoint = cellTopLeftPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
+            Point2D cellCenterPoint;
+
+            if (CursorActionTarget.Is2DMode)
+                cellCenterPoint = CellMath.CellCenterPointFromCellCoords(cellCoords, Map) - cameraTopLeftPoint;
+            else
+                cellCenterPoint = CellMath.CellCenterPointFromCellCoords_3D(cellCoords, Map) - cameraTopLeftPoint;
+
+            cellCenterPoint = cellCenterPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
 
             const string text = "Delete";
             var textDimensions = Renderer.GetTextDimensions(text, Constants.UIBoldFont);
-            int x = cellTopLeftPoint.X - (int)(textDimensions.X - Constants.CellSizeX) / 2;
+            int x = cellCenterPoint.X - (int)(textDimensions.X / 2);
+            int y = cellCenterPoint.Y - (int)(textDimensions.Y / 2);
 
             Renderer.DrawStringWithShadow(text,
                 Constants.UIBoldFont,
-                new Vector2(x, cellTopLeftPoint.Y),
+                new Vector2(x, y),
                 Color.Red);
         }
 
