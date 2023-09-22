@@ -202,7 +202,7 @@ namespace TSMapEditor.Models.ArtConfig
 
         public Foundation Foundation { get; set; } = new();
         public int Height { get; set; }
-        public bool Remapable => true;
+        public bool Remapable => !TerrainPalette;
         public bool NewTheater { get; set; }
         public bool TerrainPalette { get; set; }
         public bool Theater { get; set; }
