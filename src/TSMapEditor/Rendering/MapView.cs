@@ -48,6 +48,7 @@ namespace TSMapEditor.Rendering
         MutationManager MutationManager { get; }
         IMutationTarget MutationTarget { get; }
         BrushSize BrushSize { get; }
+        bool Is2DMode { get; }
         Randomizer Randomizer { get; }
         bool AutoLATEnabled { get; }
         bool OnlyPaintOnClearGround { get; }
@@ -107,6 +108,7 @@ namespace TSMapEditor.Rendering
         public IMutationTarget MutationTarget => this;
         public House ObjectOwner => EditorState.ObjectOwner;
         public BrushSize BrushSize => EditorState.BrushSize;
+        public bool Is2DMode => EditorState.Is2DMode;
         public Randomizer Randomizer => EditorState.Randomizer;
         public bool AutoLATEnabled => EditorState.AutoLATEnabled;
         public bool OnlyPaintOnClearGround => EditorState.OnlyPaintOnClearGround;
@@ -1493,7 +1495,7 @@ namespace TSMapEditor.Rendering
                 var exitCellCenterPoint = CellMath.CellCenterPointFromCellCoords(tube.ExitPoint, Map);
                 var entryCell = Map.GetTile(tube.EntryPoint);
                 int height = 0;
-                if (entryCell != null)
+                if (entryCell != null && !EditorState.Is2DMode)
                     height = entryCell.Level * Constants.CellHeight;
 
                 Point2D currentPoint = tube.EntryPoint;
