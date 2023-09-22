@@ -178,6 +178,7 @@ namespace TSMapEditor.UI.Windows
             AITriggersWindow.TeamTypeOpened += AITriggersWindow_TeamTypeOpened;
             StructureOptionsWindow.TagOpened += ObjectOptionsWindow_TagOpened;
             VehicleOptionsWindow.TagOpened += ObjectOptionsWindow_TagOpened;
+            InfantryOptionsWindow.TagOpened += ObjectOptionsWindow_TagOpened;
 
             foreach (var window in Windows)
             {
@@ -264,6 +265,10 @@ namespace TSMapEditor.UI.Windows
         {
             TeamTypesWindow.TaskForceOpened -= TeamTypesWindow_TaskForceOpened;
             TeamTypesWindow.ScriptOpened -= TeamTypesWindow_ScriptOpened;
+            AITriggersWindow.TeamTypeOpened -= AITriggersWindow_TeamTypeOpened;
+            StructureOptionsWindow.TagOpened -= ObjectOptionsWindow_TagOpened;
+            VehicleOptionsWindow.TagOpened -= ObjectOptionsWindow_TagOpened;
+            InfantryOptionsWindow.TagOpened -= ObjectOptionsWindow_TagOpened;
             MapSizeWindow.OnResizeMapButtonClicked -= MapSizeWindow_OnResizeMapButtonClicked;
 
             foreach (var window in Windows)

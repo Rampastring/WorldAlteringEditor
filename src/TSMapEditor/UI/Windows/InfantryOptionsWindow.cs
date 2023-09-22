@@ -14,6 +14,8 @@ namespace TSMapEditor.UI.Windows
             this.map = map;
         }
 
+        public event EventHandler<TagEventArgs> TagOpened;
+
         private readonly Map map;
 
         private EditorNumberTextBox tbStrength;
@@ -45,6 +47,8 @@ namespace TSMapEditor.UI.Windows
 
             attachedTagSelector.LeftClick += AttachedTagSelector_LeftClick;
 
+            FindChild<EditorButton>("btnOpenAttachedTrigger").LeftClick += BtnOpenAttachedTrigger_LeftClick;
+
             selectTagWindow = new SelectTagWindow(WindowManager, map);
             var tagDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTagWindow);
             tagDarkeningPanel.Hidden += (s, e) =>
@@ -64,6 +68,15 @@ namespace TSMapEditor.UI.Windows
             }
 
             FindChild<EditorButton>("btnOK").LeftClick += BtnOK_LeftClick;
+        }
+
+        private void BtnOpenAttachedTrigger_LeftClick(object sender, EventArgs e)
+        {
+            if (infantry.AttachedTag == null)
+                return;
+
+            TagOpened?.Invoke(this, new TagEventArgs(infantry.AttachedTag));
+            PutOnBackground();
         }
 
         private void AttachedTagSelector_LeftClick(object sender, EventArgs e)
