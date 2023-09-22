@@ -14,7 +14,9 @@ namespace TSMapEditor.UI.CursorActions
 
         public override string GetName() => "Place Smudge Collection";
 
+        private Smudge oldSmudge;
         private Smudge smudge;
+
         private SmudgeCollection _smudgeCollection;
         public SmudgeCollection SmudgeCollection
         {
@@ -34,11 +36,19 @@ namespace TSMapEditor.UI.CursorActions
         public override void PreMapDraw(Point2D cellCoords)
         {
             var cell = CursorActionTarget.Map.GetTile(cellCoords);
-            if (cell.Smudge == null)
-            {
-                smudge.Position = cell.CoordsToPoint();
-                cell.Smudge = smudge;
-            }
+
+            // "Randomize" the smudge image, it makes it clearer that we're placing down one from a collection.
+            // If we used actual RNG here we'd need to avoid doing it every frame to avoid a constantly
+            // changing smudge even when the cursor is still. Using cell numbers gives the intended
+            // effect without pointless flickering.
+            int cellnum = cellCoords.X + cellCoords.Y;
+            int smudgeNumber = cellnum % SmudgeCollection.Entries.Length;
+            smudge.SmudgeType = SmudgeCollection.Entries[smudgeNumber].SmudgeType;
+
+            oldSmudge = cell.Smudge;
+
+            smudge.Position = cell.CoordsToPoint();
+            cell.Smudge = smudge;
 
             CursorActionTarget.AddRefreshPoint(cellCoords);
         }
@@ -48,7 +58,7 @@ namespace TSMapEditor.UI.CursorActions
             var cell = CursorActionTarget.Map.GetTile(cellCoords);
             if (cell.Smudge == smudge)
             {
-                cell.Smudge = null;
+                cell.Smudge = oldSmudge;
             }
 
             CursorActionTarget.AddRefreshPoint(cellCoords);
@@ -56,10 +66,6 @@ namespace TSMapEditor.UI.CursorActions
 
         public override void LeftDown(Point2D cellCoords)
         {
-            var cell = CursorActionTarget.Map.GetTile(cellCoords);
-            if (cell.Smudge != null)
-                return;
-
             var mutation = new PlaceSmudgeCollectionMutation(CursorActionTarget.MutationTarget, SmudgeCollection, cellCoords);
             CursorActionTarget.MutationManager.PerformMutation(mutation);
         }

@@ -12,7 +12,6 @@ namespace TSMapEditor.UI
         public struct SmudgeCollectionEntry
         {
             public SmudgeType SmudgeType;
-            public int Frame;
 
             public SmudgeCollectionEntry(SmudgeType smudgeType)
             {
