@@ -35,6 +35,14 @@ namespace TSMapEditor.UI.CursorActions
             }
         }
 
+        struct OriginalSmudgeInfo
+        {
+            public Point2D CellCoords;
+            public SmudgeType SmudgeType;
+
+
+        }
+
 
         private CopiedMapData copiedMapData;
 
@@ -86,9 +94,9 @@ namespace TSMapEditor.UI.CursorActions
                     var terrainEntry = entry as CopiedTerrainEntry;
                     cell.PreviewTileImage = CursorActionTarget.TheaterGraphics.GetTileGraphics(terrainEntry.TileIndex, 0);
                     cell.PreviewSubTileIndex = terrainEntry.SubTileIndex;
-                    cell.PreviewLevel = cell.Level;
+                    cell.PreviewLevel = Math.Min(Constants.MaxMapHeightLevel, cell.Level + terrainEntry.HeightOffset);
                 }
-                /*else if (entry.EntryType == CopiedEntryType.Overlay)
+                else if (entry.EntryType == CopiedEntryType.Overlay)
                 {
                     var overlayEntry = entry as CopiedOverlayEntry;
 
@@ -98,6 +106,12 @@ namespace TSMapEditor.UI.CursorActions
                     else
                         originalOverlay.Add(new OriginalOverlayInfo(cell.CoordsToPoint(), null, Constants.NO_OVERLAY));
 
+                    var overlayType = Map.Rules.OverlayTypes.Find(ot => ot.ININame == overlayEntry.OverlayTypeName);
+                    if (overlayType == null) 
+                    {
+                        continue;
+                    }
+
                     // Apply new overlay info
                     if (cell.Overlay == null)
                     {
@@ -105,21 +119,16 @@ namespace TSMapEditor.UI.CursorActions
                         cell.Overlay = new Overlay()
                         {
                             Position = cell.CoordsToPoint(),
-                            OverlayType = overlayEntry.O,
-                            FrameIndex = 0
+                            OverlayType = overlayType,
+                            FrameIndex = overlayEntry.FrameIndex
                         };
                     }
                     else
                     {
-                        tile.Overlay.OverlayType = OverlayType;
-                        tile.Overlay.FrameIndex = 0;
+                        cell.Overlay.OverlayType = overlayType;
+                        cell.Overlay.FrameIndex = overlayEntry.FrameIndex;
                     }
-
-                    if (FrameIndex == null)
-                        tile.Overlay.FrameIndex = CursorActionTarget.Map.GetOverlayFrameIndex(tile.CoordsToPoint());
-                    else
-                        tile.Overlay.FrameIndex = FrameIndex.Value;
-                }*/
+                }
             }
 
             CursorActionTarget.AddRefreshPoint(cellCoords, maxOffset);
@@ -141,6 +150,21 @@ namespace TSMapEditor.UI.CursorActions
                     continue;
 
                 cell.PreviewTileImage = null;
+            }
+
+            foreach (var originalOverlayEntry in originalOverlay)
+            {
+                MapTile cell = Map.GetTile(originalOverlayEntry.CellCoords);
+
+                if (originalOverlayEntry.OverlayType == null)
+                {
+                    cell.Overlay = null;
+                }
+                else
+                {
+                    cell.Overlay.OverlayType = originalOverlayEntry.OverlayType;
+                    cell.Overlay.FrameIndex = originalOverlayEntry.FrameIndex;
+                }
             }
 
             CursorActionTarget.AddRefreshPoint(cellCoords, maxOffset);

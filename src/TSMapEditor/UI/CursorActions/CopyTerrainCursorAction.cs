@@ -39,6 +39,19 @@ namespace TSMapEditor.UI.CursorActions
             int startX = Math.Min(cellCoords.X, startCellCoords.X);
             int endX = Math.Max(cellCoords.X, startCellCoords.X);
 
+            byte lowestHeight = byte.MaxValue;
+
+            // To handle height, we first look up the lowest height level of the copied
+            // area. Any cell higher than that gets assigned an offset for its height.
+            if ((EntryTypes & CopiedEntryType.Terrain) == CopiedEntryType.Terrain)
+            {
+                Map.DoForRectangle(startX, startY, endX, endY, cell =>
+                {
+                    if (cell.Level < lowestHeight)
+                        lowestHeight = cell.Level;
+                }, false);
+            }
+
             for (int y = startY; y <= endY; y++)
             {
                 for (int x = startX; x <= endX; x++)
@@ -50,7 +63,7 @@ namespace TSMapEditor.UI.CursorActions
 
                     if ((EntryTypes & CopiedEntryType.Terrain) == CopiedEntryType.Terrain)
                     {
-                        copiedMapData.CopiedMapEntries.Add(new CopiedTerrainEntry(offset, cell.TileIndex, cell.SubTileIndex));
+                        copiedMapData.CopiedMapEntries.Add(new CopiedTerrainEntry(offset, cell.TileIndex, cell.SubTileIndex, (byte)(cell.Level - lowestHeight)));
                     }
                     
                     if ((EntryTypes & CopiedEntryType.Overlay) == CopiedEntryType.Overlay)

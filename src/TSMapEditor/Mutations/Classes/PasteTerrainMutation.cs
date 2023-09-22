@@ -132,24 +132,27 @@ namespace TSMapEditor.Mutations.Classes
     {
         public int TileIndex;
         public byte SubTileIndex;
+        public byte HeightOffset;
 
         public CopiedTerrainEntry()
         {
         }
 
-        public CopiedTerrainEntry(Point2D offset, int tileIndex, byte subTileIndex) : base(offset)
+        public CopiedTerrainEntry(Point2D offset, int tileIndex, byte subTileIndex, byte heightOffset) : base(offset)
         {
             TileIndex = tileIndex;
             SubTileIndex = subTileIndex;
+            HeightOffset = heightOffset;
         }
 
         public override CopiedEntryType EntryType => CopiedEntryType.Terrain;
 
         protected override byte[] GetCustomData()
         {
-            byte[] returnValue = new byte[5];
+            byte[] returnValue = new byte[6];
             Array.Copy(BitConverter.GetBytes(TileIndex), returnValue, 4);
             returnValue[4] = SubTileIndex;
+            returnValue[5] = HeightOffset;
 
             return returnValue;
         }
@@ -158,6 +161,7 @@ namespace TSMapEditor.Mutations.Classes
         {
             TileIndex = ReadInt(stream);
             SubTileIndex = (byte)stream.ReadByte();
+            HeightOffset = (byte)stream.ReadByte();
         }
     }
 
@@ -506,11 +510,12 @@ namespace TSMapEditor.Mutations.Classes
                 if (cell == null)
                     continue;
 
-                terrainUndoData.Add(new OriginalCellTerrainData(cellCoords, cell.TileIndex, cell.SubTileIndex));
+                terrainUndoData.Add(new OriginalCellTerrainData(cellCoords, cell.TileIndex, cell.SubTileIndex, cell.Level));
 
                 cell.TileImage = null;
                 cell.TileIndex = copiedTerrainData.TileIndex;
                 cell.SubTileIndex = copiedTerrainData.SubTileIndex;
+                cell.Level = (byte)(cell.Level + copiedTerrainData.HeightOffset);
             }
 
             this.terrainUndoData = terrainUndoData.ToArray();
@@ -772,6 +777,7 @@ namespace TSMapEditor.Mutations.Classes
             {
                 var cell = MutationTarget.Map.GetTile(originalTerrainData.CellCoords);
                 cell.ChangeTileIndex(originalTerrainData.TileIndex, originalTerrainData.SubTileIndex);
+                cell.Level = originalTerrainData.HeightLevel;
             }
 
             foreach (OriginalOverlayInfo info in overlayUndoData)

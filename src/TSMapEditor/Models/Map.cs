@@ -1071,6 +1071,22 @@ namespace TSMapEditor.Models
             }
         }
 
+        public void DoForRectangle(int startX, int startY, int endX, int endY, Action<MapTile> action, bool callForNullTiles)
+        {
+            for (int y = startY; y <= endY; y++)
+            {
+                for (int x = startX; x <= endX; x++)
+                {
+                    MapTile tile = GetTile(x, y);
+
+                    if (tile == null && !callForNullTiles)
+                        continue;
+
+                    action(tile);
+                }
+            }
+        }
+
         public void DoForAllTechnos(Action<TechnoBase> action)
         {
             var aircraftCopy = new List<Aircraft>(Aircraft);
