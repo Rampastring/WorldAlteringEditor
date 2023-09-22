@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Rampastring.XNAUI;
+using System;
 using TSMapEditor.GameMath;
+using TSMapEditor.Models;
 using TSMapEditor.Mutations.Classes;
 using TSMapEditor.Rendering;
 
@@ -19,7 +21,8 @@ namespace TSMapEditor.UI.CursorActions
             var tube = CursorActionTarget.Map.Tubes.Find(tb => tb.EntryPoint == cellCoords || tb.ExitPoint == cellCoords);
             Color color = tube == null ? Color.Gray : Color.Red;
 
-            Point2D cellPixelCoords = CellMath.CellTopLeftPointFromCellCoords_3D(cellCoords, CursorActionTarget.Map) - cameraTopLeftPoint;
+            Func<Point2D, Map, Point2D> getCellCenterPoint = Is2DMode ? CellMath.CellCenterPointFromCellCoords : CellMath.CellCenterPointFromCellCoords_3D;
+            Point2D cellPixelCoords = getCellCenterPoint(cellCoords, CursorActionTarget.Map) - cameraTopLeftPoint;
             cellPixelCoords = new Point2D(cellPixelCoords.X + Constants.CellSizeX / 2, cellPixelCoords.Y);
             cellPixelCoords = cellPixelCoords.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
 
