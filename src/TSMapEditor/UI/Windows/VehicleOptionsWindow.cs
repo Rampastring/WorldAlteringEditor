@@ -21,6 +21,8 @@ namespace TSMapEditor.UI.Windows
             this.setFollowerCursorAction = new SetFollowerCursorAction(cursorActionTarget);
         }
 
+        public event EventHandler<TagEventArgs> TagOpened;
+
         private readonly Map map;
         private readonly EditorState editorState;
         private readonly SetFollowerCursorAction setFollowerCursorAction;
@@ -56,6 +58,8 @@ namespace TSMapEditor.UI.Windows
 
             attachedTagSelector.LeftClick += AttachedTagSelector_LeftClick;
 
+            FindChild<EditorButton>("btnOpenAttachedTrigger").LeftClick += BtnOpenAttachedTrigger_LeftClick;
+
             selectTagWindow = new SelectTagWindow(WindowManager, map);
             var tagDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTagWindow);
             tagDarkeningPanel.Hidden += (s, e) => SelectionWindow_ApplyEffect(w => unit.AttachedTag = w.SelectedObject, selectTagWindow);
@@ -72,6 +76,15 @@ namespace TSMapEditor.UI.Windows
             FindChild<EditorButton>("btnOK").LeftClick += BtnOK_LeftClick;
             followerSelector.LeftClick += FollowerSelector_LeftClick;
             setFollowerCursorAction.ActionExited += SetFollowerCursorAction_ActionExited;
+        }
+
+        private void BtnOpenAttachedTrigger_LeftClick(object sender, EventArgs e)
+        {
+            if (unit.AttachedTag == null)
+                return;
+
+            TagOpened?.Invoke(this, new TagEventArgs(unit.AttachedTag));
+            PutOnBackground();
         }
 
         private void SetFollowerCursorAction_ActionExited(object sender, EventArgs e)

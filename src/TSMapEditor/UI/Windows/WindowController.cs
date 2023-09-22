@@ -176,7 +176,8 @@ namespace TSMapEditor.UI.Windows
             TeamTypesWindow.TaskForceOpened += TeamTypesWindow_TaskForceOpened;
             TeamTypesWindow.ScriptOpened += TeamTypesWindow_ScriptOpened;
             AITriggersWindow.TeamTypeOpened += AITriggersWindow_TeamTypeOpened;
-            StructureOptionsWindow.TagOpened += StructureOptionsWindow_TagOpened;
+            StructureOptionsWindow.TagOpened += ObjectOptionsWindow_TagOpened;
+            VehicleOptionsWindow.TagOpened += ObjectOptionsWindow_TagOpened;
 
             foreach (var window in Windows)
             {
@@ -197,7 +198,7 @@ namespace TSMapEditor.UI.Windows
             Initialized?.Invoke(this, EventArgs.Empty);
         }
 
-        private void StructureOptionsWindow_TagOpened(object sender, TagEventArgs e)
+        private void ObjectOptionsWindow_TagOpened(object sender, TagEventArgs e)
         {
             if (e.Tag.Trigger == null)
             {

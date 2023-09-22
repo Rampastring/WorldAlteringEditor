@@ -7,16 +7,6 @@ using TSMapEditor.UI.Controls;
 
 namespace TSMapEditor.UI.Windows
 {
-    public class TagEventArgs : EventArgs
-    {
-        public TagEventArgs(Tag tag)
-        {
-            Tag = tag;
-        }
-
-        public Tag Tag { get; }
-    }
-
     /// <summary>
     /// A window that allows the user to edit the properties of a building.
     /// </summary>
