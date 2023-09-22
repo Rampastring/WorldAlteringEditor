@@ -3,6 +3,7 @@ using Rampastring.XNAUI;
 using Rampastring.XNAUI.Input;
 using System;
 using TSMapEditor.GameMath;
+using TSMapEditor.Models;
 using TSMapEditor.Models.Enums;
 using TSMapEditor.Mutations.Classes;
 using TSMapEditor.Rendering;
@@ -57,6 +58,8 @@ namespace TSMapEditor.UI.CursorActions
 
             Renderer.DrawStringWithShadow(text, Constants.UIBoldFont, textPosition, Color.Yellow);
 
+            Func<Point2D, Map, Point2D> getCellCenterPoint = Is2DMode ? CellMath.CellCenterPointFromCellCoords : CellMath.CellCenterPointFromCellCoords_3D;
+
             // Draw bridge lines
             if (startPoint != Point2D.NegativeOne && endPoint != Point2D.NegativeOne && endPoint != startPoint)
             {
@@ -84,19 +87,19 @@ namespace TSMapEditor.UI.CursorActions
                     cellEndPoint = new Point2D(actualEndPoint.X, actualStartPoint.Y);
 
                     corner1 = actualStartPoint + new Point2D(0, 1);
-                    corner1 = CellMath.CellCenterPointFromCellCoords(corner1, CursorActionTarget.Map) - cameraTopLeftPoint;
+                    corner1 = getCellCenterPoint(corner1, CursorActionTarget.Map) - cameraTopLeftPoint;
                     corner1 += new Point2D(Constants.CellSizeX / -2, 0);
 
                     corner2 = actualStartPoint + new Point2D(0, -1);
-                    corner2 = CellMath.CellCenterPointFromCellCoords(corner2, CursorActionTarget.Map) - cameraTopLeftPoint;
+                    corner2 = getCellCenterPoint(corner2, CursorActionTarget.Map) - cameraTopLeftPoint;
                     corner2 += new Point2D(0, Constants.CellSizeY / -2);
 
                     corner3 = cellEndPoint + new Point2D(0, 1);
-                    corner3 = CellMath.CellCenterPointFromCellCoords(corner3, CursorActionTarget.Map) - cameraTopLeftPoint;
+                    corner3 = getCellCenterPoint(corner3, CursorActionTarget.Map) - cameraTopLeftPoint;
                     corner3 += new Point2D(0, Constants.CellSizeY / 2);
 
                     corner4 = cellEndPoint + new Point2D(0, -1);
-                    corner4 = CellMath.CellCenterPointFromCellCoords(corner4, CursorActionTarget.Map) - cameraTopLeftPoint;
+                    corner4 = getCellCenterPoint(corner4, CursorActionTarget.Map) - cameraTopLeftPoint;
                     corner4 += new Point2D(Constants.CellSizeX / 2, 0);
                 }
                 else
@@ -113,19 +116,19 @@ namespace TSMapEditor.UI.CursorActions
                     cellEndPoint = new Point2D(actualStartPoint.X, actualEndPoint.Y);
 
                     corner1 = actualStartPoint + new Point2D(1, 0);
-                    corner1 = CellMath.CellCenterPointFromCellCoords(corner1, CursorActionTarget.Map) - cameraTopLeftPoint;
+                    corner1 = getCellCenterPoint(corner1, CursorActionTarget.Map) - cameraTopLeftPoint;
                     corner1 += new Point2D(Constants.CellSizeX / 2, 0);
                     
                     corner2 = actualStartPoint + new Point2D(-1, 0);
-                    corner2 = CellMath.CellCenterPointFromCellCoords(corner2, CursorActionTarget.Map) - cameraTopLeftPoint;
+                    corner2 = getCellCenterPoint(corner2, CursorActionTarget.Map) - cameraTopLeftPoint;
                     corner2 += new Point2D(0, Constants.CellSizeY / -2);
                     
                     corner3 = cellEndPoint + new Point2D(1, 0);
-                    corner3 = CellMath.CellCenterPointFromCellCoords(corner3, CursorActionTarget.Map) - cameraTopLeftPoint;
+                    corner3 = getCellCenterPoint(corner3, CursorActionTarget.Map) - cameraTopLeftPoint;
                     corner3 += new Point2D(0, Constants.CellSizeY / 2);
                     
                     corner4 = cellEndPoint + new Point2D(-1, 0);
-                    corner4 = CellMath.CellCenterPointFromCellCoords(corner4, CursorActionTarget.Map) - cameraTopLeftPoint;
+                    corner4 = getCellCenterPoint(corner4, CursorActionTarget.Map) - cameraTopLeftPoint;
                     corner4 += new Point2D(Constants.CellSizeX / -2, 0);
                 }
 
