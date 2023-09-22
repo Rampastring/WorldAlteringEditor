@@ -145,10 +145,7 @@ namespace TSMapEditor.UI.Windows
                 return;
 
             TaskForceOpened?.Invoke(this, new TaskForceEventArgs(editedTeamType.TaskForce));
-
-            // hack time! allow the other window to show on top of this one,
-            // we can't cancel the "left click" event on the child with current XNAUI
-            WindowManager.AddCallback(new Action(() => { DrawOrder -= 500; UpdateOrder -= 500; }));
+            PutOnBackground();
         }
 
         private void OpenScript()
@@ -157,10 +154,7 @@ namespace TSMapEditor.UI.Windows
                 return;
 
             ScriptOpened?.Invoke(this, new ScriptEventArgs(editedTeamType.Script));
-
-            // hack time! allow the other window to show on top of this one,
-            // we can't cancel the "left click" event on the child with current XNAUI
-            WindowManager.AddCallback(new Action(() => { DrawOrder -= 500; UpdateOrder -= 500; }));
+            PutOnBackground();
         }
 
         private void SelectionWindow_ApplyEffect<T>(Action<T> action, T window)

@@ -103,10 +103,7 @@ namespace TSMapEditor.UI.Windows
         private void OpenTeamType(TeamType teamType)
         {
             TeamTypeOpened?.Invoke(this, new TeamTypeEventArgs(teamType));
-
-            // hack time! allow the other window to show on top of this one,
-            // we can't cancel the "left click" event on the child with current XNAUI
-            WindowManager.AddCallback(new Action(() => { DrawOrder -= 500; UpdateOrder -= 500; }));
+            PutOnBackground();
         }
 
         private void BtnNew_LeftClick(object sender, EventArgs e)

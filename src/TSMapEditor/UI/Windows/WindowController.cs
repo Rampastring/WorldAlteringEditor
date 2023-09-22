@@ -176,6 +176,7 @@ namespace TSMapEditor.UI.Windows
             TeamTypesWindow.TaskForceOpened += TeamTypesWindow_TaskForceOpened;
             TeamTypesWindow.ScriptOpened += TeamTypesWindow_ScriptOpened;
             AITriggersWindow.TeamTypeOpened += AITriggersWindow_TeamTypeOpened;
+            StructureOptionsWindow.TagOpened += StructureOptionsWindow_TagOpened;
 
             foreach (var window in Windows)
             {
@@ -194,6 +195,20 @@ namespace TSMapEditor.UI.Windows
             this.windowParentControl = windowParentControl;
 
             Initialized?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void StructureOptionsWindow_TagOpened(object sender, TagEventArgs e)
+        {
+            if (e.Tag.Trigger == null)
+            {
+                EditorMessageBox.Show(windowParentControl.WindowManager, "No trigger attached",
+                    "The specified Tag has no attached Trigger!", MessageBoxButtons.OK);
+
+                return;
+            }
+
+            TriggersWindow.Open();
+            TriggersWindow.SelectTrigger(e.Tag.Trigger);
         }
 
         private void MapSizeWindow_OnResizeMapButtonClicked(object sender, EventArgs e)

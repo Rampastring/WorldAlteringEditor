@@ -904,7 +904,7 @@ namespace TSMapEditor.UI.Windows
             ListTriggers();
         }
 
-        private void SelectTrigger(Trigger trigger)
+        public void SelectTrigger(Trigger trigger)
         {
             lbTriggers.SelectedIndex = lbTriggers.Items.FindIndex(item => item.Tag == trigger);
 

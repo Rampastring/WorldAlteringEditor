@@ -7,6 +7,16 @@ using TSMapEditor.UI.Controls;
 
 namespace TSMapEditor.UI.Windows
 {
+    public class TagEventArgs : EventArgs
+    {
+        public TagEventArgs(Tag tag)
+        {
+            Tag = tag;
+        }
+
+        public Tag Tag { get; }
+    }
+
     /// <summary>
     /// A window that allows the user to edit the properties of a building.
     /// </summary>
@@ -16,6 +26,8 @@ namespace TSMapEditor.UI.Windows
         {
             this.map = map;
         }
+
+        public event EventHandler<TagEventArgs> TagOpened;
 
         private readonly Map map;
 
@@ -54,11 +66,22 @@ namespace TSMapEditor.UI.Windows
 
             attachedTagSelector.LeftClick += AttachedTagSelector_LeftClick;
 
+            FindChild<EditorButton>("btnOpenAttachedTrigger").LeftClick += BtnOpenAttachedTrigger_LeftClick;
+
             selectTagWindow = new SelectTagWindow(WindowManager, map);
             var tagDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTagWindow);
             tagDarkeningPanel.Hidden += (s, e) => SelectionWindow_ApplyEffect(w => structure.AttachedTag = w.SelectedObject, selectTagWindow);
 
             FindChild<EditorButton>("btnOK").LeftClick += BtnOK_LeftClick;
+        }
+
+        private void BtnOpenAttachedTrigger_LeftClick(object sender, EventArgs e)
+        {
+            if (structure.AttachedTag == null)
+                return;
+
+            TagOpened?.Invoke(this, new TagEventArgs(structure.AttachedTag));
+            PutOnBackground();
         }
 
         private void SelectionWindow_ApplyEffect<T>(Action<T> action, T window)

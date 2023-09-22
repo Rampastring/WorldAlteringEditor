@@ -59,6 +59,12 @@ namespace TSMapEditor.UI.Controls
             base.ParseControlINIAttribute(iniFile, key, value);
         }
 
+        public void PutOnBackground()
+        {
+            // hack time! allow the other window to show on top of this one
+            WindowManager.AddCallback(new Action(() => { DrawOrder -= 500; UpdateOrder -= 500; }));
+        }
+
         public void Hide()
         {
             AlphaRate = DisappearingRate;
