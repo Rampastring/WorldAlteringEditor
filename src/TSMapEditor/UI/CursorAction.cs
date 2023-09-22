@@ -51,6 +51,8 @@ namespace TSMapEditor.UI
 
         protected IMutationTarget MutationTarget => CursorActionTarget.MutationTarget;
 
+        protected bool Is2DMode => CursorActionTarget.Is2DMode;
+
         protected void PerformMutation(Mutation mutation) => CursorActionTarget.MutationManager.PerformMutation(mutation);
 
         /// <summary>

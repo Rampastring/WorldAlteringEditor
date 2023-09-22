@@ -123,10 +123,12 @@ namespace TSMapEditor.UI.CursorActions
             int startX = Math.Min(cellCoords.X, startCellCoords.X);
             int endX = Math.Max(cellCoords.X, startCellCoords.X);
 
-            Point2D startPoint = CellMath.CellTopLeftPointFromCellCoords_3D(new Point2D(startX, startY), CursorActionTarget.Map) - cameraTopLeftPoint + new Point2D(Constants.CellSizeX / 2, 0);
-            Point2D endPoint = CellMath.CellTopLeftPointFromCellCoords_3D(new Point2D(endX, endY), CursorActionTarget.Map) - cameraTopLeftPoint + new Point2D(Constants.CellSizeX / 2, Constants.CellSizeY);
-            Point2D corner1 = CellMath.CellTopLeftPointFromCellCoords_3D(new Point2D(startX, endY), CursorActionTarget.Map) - cameraTopLeftPoint + new Point2D(0, Constants.CellSizeY / 2);
-            Point2D corner2 = CellMath.CellTopLeftPointFromCellCoords_3D(new Point2D(endX, startY), CursorActionTarget.Map) - cameraTopLeftPoint + new Point2D(Constants.CellSizeX, Constants.CellSizeY / 2);
+            Func<Point2D, Map, Point2D> func = Is2DMode ? CellMath.CellTopLeftPointFromCellCoords : CellMath.CellTopLeftPointFromCellCoords_3D;
+
+            Point2D startPoint = func(new Point2D(startX, startY), CursorActionTarget.Map) - cameraTopLeftPoint + new Point2D(Constants.CellSizeX / 2, 0);
+            Point2D endPoint = func(new Point2D(endX, endY), CursorActionTarget.Map) - cameraTopLeftPoint + new Point2D(Constants.CellSizeX / 2, Constants.CellSizeY);
+            Point2D corner1 = func(new Point2D(startX, endY), CursorActionTarget.Map) - cameraTopLeftPoint + new Point2D(0, Constants.CellSizeY / 2);
+            Point2D corner2 = func(new Point2D(endX, startY), CursorActionTarget.Map) - cameraTopLeftPoint + new Point2D(Constants.CellSizeX, Constants.CellSizeY / 2);
 
             startPoint = startPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
             endPoint = endPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
