@@ -3,6 +3,7 @@ using Rampastring.XNAUI;
 using System;
 using System.Collections.Generic;
 using TSMapEditor.GameMath;
+using TSMapEditor.Models;
 using TSMapEditor.Mutations.Classes;
 using TSMapEditor.Rendering;
 
@@ -67,10 +68,12 @@ namespace TSMapEditor.UI.CursorActions
             int startX = Math.Min(cellCoords.X, startCellCoords.X);
             int endX = Math.Max(cellCoords.X, startCellCoords.X);
 
-            Point2D startPoint = CellMath.CellTopLeftPointFromCellCoords_3D(new Point2D(startX, startY), CursorActionTarget.Map) - cameraTopLeftPoint + new Point2D(Constants.CellSizeX / 2, 0);
-            Point2D endPoint = CellMath.CellTopLeftPointFromCellCoords_3D(new Point2D(endX, endY), CursorActionTarget.Map) - cameraTopLeftPoint + new Point2D(Constants.CellSizeX / 2, Constants.CellSizeY);
-            Point2D corner1 = CellMath.CellTopLeftPointFromCellCoords_3D(new Point2D(startX, endY), CursorActionTarget.Map) - cameraTopLeftPoint + new Point2D(0, Constants.CellSizeY / 2);
-            Point2D corner2 = CellMath.CellTopLeftPointFromCellCoords_3D(new Point2D(endX, startY), CursorActionTarget.Map) - cameraTopLeftPoint + new Point2D(Constants.CellSizeX, Constants.CellSizeY / 2);
+            Func<Point2D, Map, Point2D> getCellCenterPoint = Is2DMode ? CellMath.CellCenterPointFromCellCoords : CellMath.CellCenterPointFromCellCoords_3D;
+
+            Point2D startPoint = getCellCenterPoint(new Point2D(startX, startY), CursorActionTarget.Map) - cameraTopLeftPoint + new Point2D(Constants.CellSizeX / 2, 0);
+            Point2D endPoint = getCellCenterPoint(new Point2D(endX, endY), CursorActionTarget.Map) - cameraTopLeftPoint + new Point2D(Constants.CellSizeX / 2, Constants.CellSizeY);
+            Point2D corner1 = getCellCenterPoint(new Point2D(startX, endY), CursorActionTarget.Map) - cameraTopLeftPoint + new Point2D(0, Constants.CellSizeY / 2);
+            Point2D corner2 = getCellCenterPoint(new Point2D(endX, startY), CursorActionTarget.Map) - cameraTopLeftPoint + new Point2D(Constants.CellSizeX, Constants.CellSizeY / 2);
 
             startPoint = startPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
             endPoint = endPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
