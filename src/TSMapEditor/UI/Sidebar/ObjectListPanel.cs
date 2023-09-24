@@ -86,14 +86,6 @@ namespace TSMapEditor.UI.Sidebar
 
             Map.HousesChanged += (s, e) => RefreshHouseList();
             Map.HouseColorChanged += (s, e) => RefreshHouseList();
-
-            WindowManager.RenderResolutionChanged += WindowManager_RenderResolutionChanged;
-        }
-
-        private void WindowManager_RenderResolutionChanged(object sender, EventArgs e)
-        {
-            Height = WindowManager.RenderResolutionY - Y;
-            ObjectTreeView.Height = Height - ObjectTreeView.Y;
         }
 
         private void NextSidebarNode_Triggered(object sender, EventArgs e)
@@ -262,6 +254,8 @@ namespace TSMapEditor.UI.Sidebar
 
         private void Parent_ClientRectangleUpdated(object sender, EventArgs e)
         {
+            Height = Parent.Height - Y;
+            ObjectTreeView.Height = Height - ObjectTreeView.Y;
             RefreshSize();
         }
 

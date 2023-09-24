@@ -282,17 +282,17 @@ namespace TSMapEditor.UI.Sidebar
             AddChild(ScrollBar);
             ScrollBar.Refresh();
 
-            ParentChanged += Parent_ClientRectangleUpdated;
-
-            if (Parent != null)
-                Parent.ClientRectangleUpdated += Parent_ClientRectangleUpdated;
+            ClientRectangleUpdated += TreeView_ClientRectangleUpdated;
         }
 
-        private void Parent_ClientRectangleUpdated(object sender, EventArgs e)
+        private void TreeView_ClientRectangleUpdated(object sender, EventArgs e)
         {
-            ScrollBar.ClientRectangle = new Rectangle(Width - ScrollBar.ScrollWidth - 1,
-                1, ScrollBar.ScrollWidth, Height - 2);
-            RefreshScrollbar();
+            if (ScrollBar != null)
+            {
+                ScrollBar.ClientRectangle = new Rectangle(Width - ScrollBar.ScrollWidth - 1,
+                    1, ScrollBar.ScrollWidth, Height - 2);
+                RefreshScrollbar();
+            }
         }
 
         private void ScrollBar_Scrolled(object sender, EventArgs e)

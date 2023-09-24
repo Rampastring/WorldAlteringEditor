@@ -121,6 +121,7 @@ namespace TSMapEditor.UI.Sidebar
         private void WindowManager_RenderResolutionChanged(object sender, EventArgs e)
         {
             Height = WindowManager.RenderResolutionY - Y;
+            RefreshSize();
         }
 
         private void Keyboard_OnKeyPressed(object sender, Rampastring.XNAUI.Input.KeyPressEventArgs e)
