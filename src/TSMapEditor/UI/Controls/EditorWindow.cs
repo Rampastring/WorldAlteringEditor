@@ -77,9 +77,6 @@ namespace TSMapEditor.UI.Controls
             Enable();
 
             InteractedWith?.Invoke(this, EventArgs.Empty);
-
-            if (UserSettings.Instance.UpscaleUI && Width * 2 <= WindowManager.RenderResolutionX && Height * 2 <= WindowManager.RenderResolutionY)
-                Scaling = 2;
         }
 
         public override void Update(GameTime gameTime)

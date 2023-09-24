@@ -72,6 +72,13 @@ namespace TSMapEditor.UI
 
             KeyboardCommands.Instance.NextTile.Triggered += (s, e) => NextOverlayFrame();
             KeyboardCommands.Instance.PreviousTile.Triggered += (s, e) => PreviousOverlayFrame();
+            WindowManager.RenderResolutionChanged += WindowManager_RenderResolutionChanged;
+        }
+
+        private void WindowManager_RenderResolutionChanged(object sender, EventArgs e)
+        {
+            Width = WindowManager.RenderResolutionX - X;
+            Y = WindowManager.RenderResolutionY - Height;
         }
 
         /// <summary>

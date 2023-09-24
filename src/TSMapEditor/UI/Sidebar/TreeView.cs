@@ -290,7 +290,9 @@ namespace TSMapEditor.UI.Sidebar
 
         private void Parent_ClientRectangleUpdated(object sender, EventArgs e)
         {
-            ScrollBar.Refresh();
+            ScrollBar.ClientRectangle = new Rectangle(Width - ScrollBar.ScrollWidth - 1,
+                1, ScrollBar.ScrollWidth, Height - 2);
+            RefreshScrollbar();
         }
 
         private void ScrollBar_Scrolled(object sender, EventArgs e)

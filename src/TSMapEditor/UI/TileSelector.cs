@@ -85,6 +85,13 @@ namespace TSMapEditor.UI
 
             KeyboardCommands.Instance.NextTileSet.Action = NextTileSet;
             KeyboardCommands.Instance.PreviousTileSet.Action = PreviousTileSet;
+            WindowManager.RenderResolutionChanged += WindowManager_RenderResolutionChanged;
+        }
+
+        private void WindowManager_RenderResolutionChanged(object sender, EventArgs e)
+        {
+            Width = WindowManager.RenderResolutionX - X;
+            Y = WindowManager.RenderResolutionY - Height;
         }
 
         private void TbSearch_TextChanged(object sender, EventArgs e)

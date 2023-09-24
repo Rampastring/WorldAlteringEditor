@@ -96,6 +96,7 @@ namespace TSMapEditor.Rendering
 
             Camera = new Camera(WindowManager, Map);
             Camera.CameraUpdated += (s, e) => cameraMoved = true;
+            SetControlSize();
         }
 
         public EditorState EditorState { get; private set; }
@@ -197,6 +198,10 @@ namespace TSMapEditor.Rendering
             InvalidateMap();
         }
 
+        /// <summary>
+        /// Schedules the visible portion of the map to be re-rendered
+        /// on the next frame.
+        /// </summary>
         public void InvalidateMap()
         {
             if (!mapInvalidated)
@@ -205,6 +210,10 @@ namespace TSMapEditor.Rendering
             mapInvalidated = true;
         }
 
+        /// <summary>
+        /// Schedules the entire map to be re-rendered on the next frame, regardless
+        /// of what is visible on the screen.
+        /// </summary>
         public void InvalidateMapForMinimap()
         {
             InvalidateMap();
@@ -251,6 +260,17 @@ namespace TSMapEditor.Rendering
             InitRenderers();
 
             InvalidateMap();
+
+            windowController.RenderResolutionChanged += WindowController_RenderResolutionChanged;
+        }
+
+        private void WindowController_RenderResolutionChanged(object sender, EventArgs e) => SetControlSize();
+
+        private void SetControlSize()
+        {
+            Width = WindowManager.RenderResolutionX;
+            Height = WindowManager.RenderResolutionY;
+            InvalidateMapForMinimap();
         }
 
         private void PostWindowControllerInit(object sender, EventArgs e)
@@ -1310,7 +1330,7 @@ namespace TSMapEditor.Rendering
 
                 EditorMessageBox.Show(WindowManager, "Hotkey Help", text.ToString(), MessageBoxButtons.OK);
             }
-            else if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.F11)
+            else if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.F10)
             {
                 debugRenderDepthBuffer = !debugRenderDepthBuffer;
             }

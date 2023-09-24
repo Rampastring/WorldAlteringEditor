@@ -17,6 +17,8 @@ namespace TSMapEditor.UI.Windows
         void AddChild(XNAControl child);
         void RemoveChild(XNAControl child);
 
+        event EventHandler RenderResolutionChanged;
+
         WindowManager WindowManager { get; }
 
         INotificationManager NotificationManager { get; }
@@ -31,6 +33,7 @@ namespace TSMapEditor.UI.Windows
         private List<EditorWindow> Windows { get; } = new List<EditorWindow>();
 
         public event EventHandler Initialized;
+        public event EventHandler RenderResolutionChanged;
 
         public BasicSectionConfigWindow BasicSectionConfigWindow { get; private set; }
         public TaskforcesWindow TaskForcesWindow { get; private set; }
@@ -197,6 +200,8 @@ namespace TSMapEditor.UI.Windows
             this.windowParentControl = windowParentControl;
 
             Initialized?.Invoke(this, EventArgs.Empty);
+
+            windowParentControl.RenderResolutionChanged += (s, e) => RenderResolutionChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private void ObjectOptionsWindow_TagOpened(object sender, TagEventArgs e)

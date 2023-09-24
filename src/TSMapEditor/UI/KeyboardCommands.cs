@@ -43,6 +43,7 @@ namespace TSMapEditor.UI
                 GenerateTerrain,
                 ConfigureTerrainGenerator,
                 PlaceTunnel,
+                ToggleFullscreen,
 
                 AircraftMenu,
                 BuildingMenu,
@@ -121,6 +122,7 @@ namespace TSMapEditor.UI
         public KeyboardCommand GenerateTerrain { get; } = new KeyboardCommand("GenerateTerrain", "Generate Terrain", new KeyboardCommandInput(Keys.G, KeyboardModifiers.Ctrl));
         public KeyboardCommand ConfigureTerrainGenerator { get; } = new KeyboardCommand("ConfigureTerrainGenerator", "Configure Terrain Generator", new KeyboardCommandInput(Keys.G, KeyboardModifiers.Alt));
         public KeyboardCommand PlaceTunnel { get; } = new KeyboardCommand("PlaceTunnel", "Place Tunnel", new KeyboardCommandInput(Keys.OemPeriod, KeyboardModifiers.None));
+        public KeyboardCommand ToggleFullscreen { get; } = new KeyboardCommand("ToggleFullscreen", "ToggleFullScreen", new KeyboardCommandInput(Keys.F11, KeyboardModifiers.None));
 
         public KeyboardCommand AircraftMenu { get; } = new KeyboardCommand("AircraftMenu", "Aircraft Menu", new KeyboardCommandInput(Keys.D1, KeyboardModifiers.None));
         public KeyboardCommand BuildingMenu { get; } = new KeyboardCommand("BuildingMenu", "Building Menu", new KeyboardCommandInput(Keys.D2, KeyboardModifiers.None));

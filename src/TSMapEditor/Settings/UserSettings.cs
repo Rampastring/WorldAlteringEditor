@@ -24,15 +24,13 @@ namespace TSMapEditor.Settings
                 TargetFPS,
                 ResolutionWidth,
                 ResolutionHeight,
-                RenderResolutionWidth,
-                RenderResolutionHeight,
+                RenderScale,
                 Borderless,
                 FullscreenWindowed,
 
                 ScrollRate,
                 MapWideOverlayOpacity,
 
-                UpscaleUI,
                 Theme,
                 UseBoldFont,
                 AutoSaveInterval,
@@ -69,15 +67,13 @@ namespace TSMapEditor.Settings
         public IntSetting TargetFPS = new IntSetting(Display, "TargetFPS", 240);
         public IntSetting ResolutionWidth = new IntSetting(Display, "ResolutionWidth", -1);
         public IntSetting ResolutionHeight = new IntSetting(Display, "ResolutionHeight", -1);
-        public IntSetting RenderResolutionWidth = new IntSetting(Display, "RenderResolutionWidth", -1);
-        public IntSetting RenderResolutionHeight = new IntSetting(Display, "RenderResolutionHeight", -1);
+        public DoubleSetting RenderScale = new DoubleSetting(Display, "RenderScale", 1.0);
         public BoolSetting Borderless = new BoolSetting(Display, "Borderless", false);
         public BoolSetting FullscreenWindowed = new BoolSetting(Display, "FullscreenWindowed", false);
 
         public IntSetting ScrollRate = new IntSetting(MapView, nameof(ScrollRate), 15);
         public IntSetting MapWideOverlayOpacity = new IntSetting(MapView, "MapWideOverlayOpacity", 50);
 
-        public BoolSetting UpscaleUI = new BoolSetting(General, "UpscaleUI", false);
         public StringSetting Theme = new StringSetting(General, "Theme", "Default");
         public BoolSetting UseBoldFont = new BoolSetting(General, "UseBoldFont", false);
         public IntSetting AutoSaveInterval = new IntSetting(General, "AutoSaveInterval", 300);

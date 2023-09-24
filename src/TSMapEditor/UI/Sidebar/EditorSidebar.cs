@@ -115,6 +115,12 @@ namespace TSMapEditor.UI.Sidebar
             KeyboardCommands.Instance.SmudgeMenu.Action = () => lbSelection.SelectedIndex = 7;
 
             Keyboard.OnKeyPressed += Keyboard_OnKeyPressed;
+            WindowManager.RenderResolutionChanged += WindowManager_RenderResolutionChanged;
+        }
+
+        private void WindowManager_RenderResolutionChanged(object sender, EventArgs e)
+        {
+            Height = WindowManager.RenderResolutionY - Y;
         }
 
         private void Keyboard_OnKeyPressed(object sender, Rampastring.XNAUI.Input.KeyPressEventArgs e)

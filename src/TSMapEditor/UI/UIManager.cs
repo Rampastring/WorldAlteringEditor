@@ -16,6 +16,7 @@ using TSMapEditor.UI.Sidebar;
 using TSMapEditor.UI.TopBar;
 using TSMapEditor.UI.Windows;
 using TSMapEditor.UI.Windows.MainMenuWindows;
+using TSMapEditor.UI.Windows.TerrainGenerator;
 
 namespace TSMapEditor.UI
 {
@@ -47,6 +48,8 @@ namespace TSMapEditor.UI
             this.theaterGraphics = theaterGraphics;
             this.editorGraphics = editorGraphics;
         }
+
+        public event EventHandler RenderResolutionChanged;
 
         private Map map;
         private TheaterGraphics theaterGraphics;
@@ -89,6 +92,8 @@ namespace TSMapEditor.UI
         public override void Initialize()
         {
             Name = nameof(UIManager);
+
+            SetInitialDisplayMode();
 
             InitTheme();
 
@@ -185,6 +190,74 @@ namespace TSMapEditor.UI
             // screen so practically increases exit time from the user's perspective
             // WindowManager.GameClosing += (s, e) => ClearResources();
             WindowManager.GameClosing += WindowManager_GameClosing;
+            WindowManager.WindowSizeChangedByUser += WindowManager_WindowSizeChangedByUser;
+            KeyboardCommands.Instance.ToggleFullscreen.Triggered += ToggleFullscreen_Triggered;
+        }
+
+        private void SetInitialDisplayMode()
+        {
+            Game.Window.AllowUserResizing = true;
+            var form = (System.Windows.Forms.Form)System.Windows.Forms.Form.FromHandle(Game.Window.Handle);
+            form.MaximizeBox = false;
+
+            var screen = System.Windows.Forms.Screen.FromHandle(Game.Window.Handle);
+            int width = screen.Bounds.Width - 300;
+            int height = screen.Bounds.Height - 200;
+            bool borderless = UserSettings.Instance.FullscreenWindowed;
+            if (borderless)
+            {
+                width = screen.Bounds.Width;
+                height = screen.Bounds.Height;
+            }
+
+            WindowManager.InitGraphicsMode(width, height, borderless);
+
+            double renderScale = UserSettings.Instance.RenderScale;
+
+            WindowManager.SetRenderResolution((int)(WindowManager.WindowWidth / renderScale), (int)(WindowManager.WindowHeight / renderScale));
+            WindowManager.CenterOnScreen();
+            WindowManager.SetBorderlessMode(borderless);
+        }
+
+        private void ToggleFullscreen_Triggered(object sender, EventArgs e)
+        {
+            if (Game.Window.IsBorderless)
+            {
+                const int MarginX = 100;
+                const int MarginY = 200;
+                WindowManager.SetBorderlessMode(false);
+                Game.Window.AllowUserResizing = true;
+                var form = (System.Windows.Forms.Form)System.Windows.Forms.Form.FromHandle(Game.Window.Handle);
+                form.MaximizeBox = false;
+                WindowManager.InitGraphicsMode(WindowManager.WindowWidth - MarginX, WindowManager.WindowHeight - MarginY, false);
+                WindowManager_WindowSizeChangedByUser(this, EventArgs.Empty);
+                WindowManager.CenterOnScreen();
+            }
+            else
+            {
+#if WINDOWS
+                var screen = System.Windows.Forms.Screen.FromHandle(Game.Window.Handle);
+                WindowManager.InitGraphicsMode(screen.Bounds.Width, screen.Bounds.Height, true);
+                Game.Window.AllowUserResizing = false;
+                WindowManager_WindowSizeChangedByUser(this, EventArgs.Empty);
+                WindowManager.SetBorderlessMode(true);
+                WindowManager.CenterOnScreen();
+#endif
+            }
+        }
+
+        private void WindowManager_WindowSizeChangedByUser(object sender, EventArgs e)
+        {
+            int newRenderWidth = (int)(Game.Window.ClientBounds.Width / UserSettings.Instance.RenderScale);
+            int newRenderHeight = (int)(Game.Window.ClientBounds.Height / UserSettings.Instance.RenderScale);
+
+            if (newRenderWidth != WindowManager.RenderResolutionX || newRenderHeight != WindowManager.RenderResolutionY)
+            {
+                WindowManager.SetRenderResolution(newRenderWidth, newRenderHeight);
+                RenderResolutionChanged?.Invoke(this, EventArgs.Empty);
+                Width = WindowManager.RenderResolutionX;
+                Height = WindowManager.RenderResolutionY;
+            }
         }
 
         private void WindowManager_GameClosing(object sender, EventArgs e) => mapFileWatcher.StopWatching();
@@ -229,8 +302,6 @@ namespace TSMapEditor.UI
         private void InitMapView()
         {
             mapView = new MapView(WindowManager, map, theaterGraphics, editorGraphics, editorState, mutationManager, windowController);
-            mapView.Width = WindowManager.RenderResolutionX;
-            mapView.Height = WindowManager.RenderResolutionY;
             AddChild(mapView);
         }
 

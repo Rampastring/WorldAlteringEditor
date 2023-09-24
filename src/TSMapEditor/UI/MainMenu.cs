@@ -268,14 +268,11 @@ namespace TSMapEditor.UI
             if (fullscreenWindowed && !borderless)
                 throw new InvalidOperationException("Borderless= cannot be set to false if FullscreenWindowed= is enabled.");
 
-            WindowManager.InitGraphicsMode(
-                UserSettings.Instance.ResolutionWidth.GetValue(),
-                UserSettings.Instance.ResolutionHeight.GetValue(),
-                fullscreenWindowed);
+            var gameForm = (System.Windows.Forms.Form)System.Windows.Forms.Form.FromHandle(Game.Window.Handle);
 
-            WindowManager.SetRenderResolution(UserSettings.Instance.RenderResolutionWidth.GetValue(), UserSettings.Instance.RenderResolutionHeight.GetValue());
-            WindowManager.CenterOnScreen();
-            WindowManager.SetBorderlessMode(borderless);
+            double renderScale = UserSettings.Instance.RenderScale.GetValue();
+
+
 
             WindowManager.CenterControlOnScreen(this);
 

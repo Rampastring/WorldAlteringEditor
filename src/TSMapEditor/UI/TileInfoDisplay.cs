@@ -51,7 +51,14 @@ namespace TSMapEditor.UI
             textRenderer.Width = Width - Constants.UIEmptySideSpace * 2;
             AddChild(textRenderer);
 
+            WindowManager.RenderResolutionChanged += WindowManager_RenderResolutionChanged;
+
             base.Initialize();
+        }
+
+        private void WindowManager_RenderResolutionChanged(object sender, EventArgs e)
+        {
+            X = WindowManager.RenderResolutionX - Width;
         }
 
         private void RefreshInfo()

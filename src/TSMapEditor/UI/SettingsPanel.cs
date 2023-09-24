@@ -3,7 +3,9 @@ using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Windows.Forms;
+using TSMapEditor.GameMath;
 using TSMapEditor.Settings;
 
 namespace TSMapEditor.UI
@@ -72,10 +74,8 @@ namespace TSMapEditor.UI
         {
         }
 
-        private XNADropDown ddDisplayResolution;
-        private XNADropDown ddRenderResolution;
+        private XNADropDown ddRenderScale;
         private XNACheckBox chkBorderless;
-        private XNACheckBox chkUpscaleUI;
         private XNADropDown ddTheme;
         private XNADropDown ddScrollRate;
         private XNACheckBox chkUseBoldFont;
@@ -92,46 +92,46 @@ namespace TSMapEditor.UI
             AddChild(lblHeader);
             lblHeader.CenterOnParentHorizontally();
 
-            var lblDisplayResolution = new XNALabel(WindowManager);
-            lblDisplayResolution.Name = nameof(lblDisplayResolution);
-            lblDisplayResolution.Text = "Window Resolution:";
-            lblDisplayResolution.X = Constants.UIEmptySideSpace;
-            lblDisplayResolution.Y = lblHeader.Bottom + Constants.UIVerticalSpacing * 2;
-            AddChild(lblDisplayResolution);
+            var lblRenderScale = new XNALabel(WindowManager);
+            lblRenderScale.Name = nameof(lblRenderScale);
+            lblRenderScale.Text = "Render Scale:";
+            lblRenderScale.X = Constants.UIEmptySideSpace;
+            lblRenderScale.Y = lblHeader.Bottom + Constants.UIEmptyTopSpace + 1;
+            AddChild(lblRenderScale);
 
-            ddDisplayResolution = new XNADropDown(WindowManager);
-            ddDisplayResolution.Name = nameof(ddDisplayResolution);
-            ddDisplayResolution.X = 120;
-            ddDisplayResolution.Y = lblDisplayResolution.Y - 1;
-            ddDisplayResolution.Width = Width - ddDisplayResolution.X - Constants.UIEmptySideSpace;
-            AddChild(ddDisplayResolution);
+            const int MinWidth = 1024;
+            const int MinHeight = 600;
+            int MaxWidth = Screen.PrimaryScreen.Bounds.Width;
+            int MaxHeight = Screen.PrimaryScreen.Bounds.Height;
 
-            var lblRenderResolution = new XNALabel(WindowManager);
-            lblRenderResolution.Name = nameof(lblRenderResolution);
-            lblRenderResolution.Text = "Render Resolution:";
-            lblRenderResolution.X = lblDisplayResolution.X;
-            lblRenderResolution.Y = ddDisplayResolution.Bottom + Constants.UIVerticalSpacing + 1;
-            AddChild(lblRenderResolution);
-
-            ddRenderResolution = new XNADropDown(WindowManager);
-            ddRenderResolution.Name = nameof(ddRenderResolution);
-            ddRenderResolution.X = 120;
-            ddRenderResolution.Y = lblRenderResolution.Y - 1;
-            ddRenderResolution.Width = Width - ddRenderResolution.X - Constants.UIEmptySideSpace;
-            AddChild(ddRenderResolution);
+            ddRenderScale = new XNADropDown(WindowManager);
+            ddRenderScale.Name = nameof(ddRenderScale);
+            ddRenderScale.X = 120;
+            ddRenderScale.Y = lblRenderScale.Y - 1;
+            ddRenderScale.Width = Width - ddRenderScale.X - Constants.UIEmptySideSpace;
+            AddChild(ddRenderScale);
+            var renderScales = new double[] { 4.0, 2.5, 3.0, 2.5, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5 };
+            for (int i = 0; i < renderScales.Length; i++)
+            {
+                Point2D screenSize = new Point2D((int)(MaxWidth / renderScales[i]), (int)(MaxHeight / renderScales[i]));
+                if (screenSize.X > MinWidth && screenSize.Y > MinHeight)
+                {
+                    ddRenderScale.AddItem(new XNADropDownItem() { Text = renderScales[i].ToString("F2", CultureInfo.InvariantCulture) + "x", Tag = renderScales[i] });
+                }
+            }
 
             var lblTheme = new XNALabel(WindowManager);
             lblTheme.Name = nameof(lblTheme);
             lblTheme.Text = "Theme:";
-            lblTheme.X = lblDisplayResolution.X;
-            lblTheme.Y = ddRenderResolution.Bottom + Constants.UIEmptyTopSpace;
+            lblTheme.X = lblRenderScale.X;
+            lblTheme.Y = ddRenderScale.Bottom + Constants.UIEmptyTopSpace;
             AddChild(lblTheme);
 
             ddTheme = new XNADropDown(WindowManager);
             ddTheme.Name = nameof(ddTheme);
-            ddTheme.X = ddDisplayResolution.X;
+            ddTheme.X = ddRenderScale.X;
             ddTheme.Y = lblTheme.Y - 1;
-            ddTheme.Width = ddDisplayResolution.Width;
+            ddTheme.Width = ddRenderScale.Width;
             AddChild(ddTheme);
             foreach (var theme in EditorThemes.Themes)
                 ddTheme.AddItem(theme.Key);
@@ -139,15 +139,15 @@ namespace TSMapEditor.UI
             var lblScrollRate = new XNALabel(WindowManager);
             lblScrollRate.Name = nameof(lblScrollRate);
             lblScrollRate.Text = "Scroll Rate:";
-            lblScrollRate.X = lblDisplayResolution.X;
+            lblScrollRate.X = lblRenderScale.X;
             lblScrollRate.Y = ddTheme.Bottom + Constants.UIEmptyTopSpace;
             AddChild(lblScrollRate);
 
             ddScrollRate = new XNADropDown(WindowManager);
             ddScrollRate.Name = nameof(ddScrollRate);
-            ddScrollRate.X = ddDisplayResolution.X;
+            ddScrollRate.X = ddRenderScale.X;
             ddScrollRate.Y = lblScrollRate.Y - 1;
-            ddScrollRate.Width = ddDisplayResolution.Width;
+            ddScrollRate.Width = ddRenderScale.Width;
             AddChild(ddScrollRate);
             var scrollRateNames = new string[] { "Fastest", "Faster", "Fast", "Normal", "Slow", "Slower", "Slowest" };
             var scrollRateValues = new int[] { 21, 18, 15, 12, 9, 6, 3 };
@@ -160,31 +160,15 @@ namespace TSMapEditor.UI
             chkBorderless.Name = nameof(chkBorderless);
             chkBorderless.X = Constants.UIEmptySideSpace;
             chkBorderless.Y = ddScrollRate.Bottom + Constants.UIVerticalSpacing;
-            chkBorderless.Text = "Borderless Mode";
+            chkBorderless.Text = "Start In Borderless Mode";
             AddChild(chkBorderless);
-
-            chkUpscaleUI = new XNACheckBox(WindowManager);
-            chkUpscaleUI.Name = nameof(chkUpscaleUI);
-            chkUpscaleUI.X = Constants.UIEmptySideSpace;
-            chkUpscaleUI.Y = chkBorderless.Bottom + Constants.UIVerticalSpacing;
-            chkUpscaleUI.Text = "Upscale Windows";
-            AddChild(chkUpscaleUI);
 
             chkUseBoldFont = new XNACheckBox(WindowManager);
             chkUseBoldFont.Name = nameof(chkUseBoldFont);
             chkUseBoldFont.X = Constants.UIEmptySideSpace;
-            chkUseBoldFont.Y = chkUpscaleUI.Bottom + Constants.UIVerticalSpacing;
+            chkUseBoldFont.Y = chkBorderless.Bottom + Constants.UIVerticalSpacing;
             chkUseBoldFont.Text = "Use Bold Font";
             AddChild(chkUseBoldFont);
-
-            const int MinWidth = 1024;
-            const int MinHeight = 600;
-            int MaxWidth = Screen.PrimaryScreen.Bounds.Width;
-            int MaxHeight = Screen.PrimaryScreen.Bounds.Height;
-
-            var resolutions = GetResolutions(MinWidth, MinHeight, MaxWidth, MaxHeight);
-            resolutions.ForEach(res => ddDisplayResolution.AddItem(new XNADropDownItem() { Text = res.Width + "x" + res.Height, Tag = res }));
-            resolutions.ForEach(res => ddRenderResolution.AddItem(new XNADropDownItem() { Text = res.Width + "x" + res.Height, Tag = res }));
 
             LoadSettings();
 
@@ -195,23 +179,7 @@ namespace TSMapEditor.UI
         {
             var userSettings = UserSettings.Instance;
 
-            int width = userSettings.ResolutionWidth.GetValue();
-            int height = userSettings.ResolutionHeight.GetValue();
-
-            if (width < 0 || height < 0)
-            {
-                // First run - default to first resolution that is smaller than the user's desktop resolution
-                ddDisplayResolution.SelectedIndex = ddDisplayResolution.Items.FindLastIndex(item => ((ScreenResolution)item.Tag).Height < Screen.PrimaryScreen.Bounds.Height);
-                ddRenderResolution.SelectedIndex = ddDisplayResolution.SelectedIndex;
-            }
-            else
-            {
-                string dispResolution = userSettings.ResolutionWidth.GetValue() + "x" + userSettings.ResolutionHeight.GetValue();
-                ddDisplayResolution.SelectedIndex = ddDisplayResolution.Items.FindIndex(i => i.Text == dispResolution);
-
-                string renderResolution = userSettings.RenderResolutionWidth.GetValue() + "x" + userSettings.RenderResolutionHeight.GetValue();
-                ddRenderResolution.SelectedIndex = ddRenderResolution.Items.FindIndex(i => i.Text == renderResolution);
-            }
+            ddRenderScale.SelectedIndex = ddRenderScale.Items.FindIndex(i => (double)i.Tag == userSettings.RenderScale.GetValue());
 
             int selectedTheme = ddTheme.Items.FindIndex(i => i.Text == userSettings.Theme);
             if (selectedTheme == -1)
@@ -220,7 +188,6 @@ namespace TSMapEditor.UI
             ddScrollRate.SelectedIndex = ddScrollRate.Items.FindIndex(item => (int)item.Tag == userSettings.ScrollRate.GetValue());
 
             chkBorderless.Checked = userSettings.Borderless;
-            chkUpscaleUI.Checked = userSettings.UpscaleUI;
             chkUseBoldFont.Checked = userSettings.UseBoldFont;
         }
 
@@ -229,33 +196,19 @@ namespace TSMapEditor.UI
             var userSettings = UserSettings.Instance;
 
             ScreenResolution dispRes = null;
-            ScreenResolution renderRes = null;
 
-            userSettings.Borderless.UserDefinedValue = chkBorderless.Checked;
-            userSettings.UpscaleUI.UserDefinedValue = chkUpscaleUI.Checked;
             userSettings.UseBoldFont.UserDefinedValue = chkUseBoldFont.Checked;
 
             userSettings.Theme.UserDefinedValue = ddTheme.SelectedItem.Text;
             if (ddScrollRate.SelectedItem != null)
                 userSettings.ScrollRate.UserDefinedValue = (int)ddScrollRate.SelectedItem.Tag;
 
-            if (ddDisplayResolution.SelectedItem != null)
-            {
-                dispRes = (ScreenResolution)ddDisplayResolution.SelectedItem.Tag;
-                userSettings.ResolutionWidth.UserDefinedValue = dispRes.Width;
-                userSettings.ResolutionHeight.UserDefinedValue = dispRes.Height;
+            userSettings.Borderless.UserDefinedValue = chkBorderless.Checked;
+            userSettings.FullscreenWindowed.UserDefinedValue = chkBorderless.Checked;
 
-                if (dispRes.Width >= Screen.PrimaryScreen.Bounds.Width && dispRes.Height >= Screen.PrimaryScreen.Bounds.Height && chkBorderless.Checked)
-                    userSettings.FullscreenWindowed.UserDefinedValue = chkBorderless.Checked;
-                else
-                    userSettings.FullscreenWindowed.UserDefinedValue = false;
-            }
-
-            if (ddRenderResolution.SelectedItem != null)
+            if (ddRenderScale.SelectedItem != null)
             {
-                renderRes = (ScreenResolution)ddRenderResolution.SelectedItem.Tag;
-                userSettings.RenderResolutionWidth.UserDefinedValue = renderRes.Width;
-                userSettings.RenderResolutionHeight.UserDefinedValue = renderRes.Height;
+                userSettings.RenderScale.UserDefinedValue = (double)ddRenderScale.SelectedItem.Tag;
             }
         }
 
