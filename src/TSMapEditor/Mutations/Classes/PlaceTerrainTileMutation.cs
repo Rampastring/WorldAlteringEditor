@@ -146,19 +146,25 @@ namespace TSMapEditor.Mutations.Classes
             // This allows placing certain LATs on top of other LATs (example: snowy dirt on snow, when snow is also placed on grass)
             TileSet baseTileSet = null;
             TileSet altBaseTileSet = null;
-            var tileAutoLatGround = MutationTarget.Map.TheaterInstance.Theater.LATGrounds.Find(
+            var tileAutoLatGrounds = MutationTarget.Map.TheaterInstance.Theater.LATGrounds.FindAll(
                 g => g.GroundTileSet.Index == tile.TileSetId || g.TransitionTileSet.Index == tile.TileSetId);
 
-            if (tileAutoLatGround != null && tileAutoLatGround.BaseTileSet != null)
+            for (int i = 0; i < tileAutoLatGrounds.Count; i++)
             {
-                int baseTileSetId = tileAutoLatGround.BaseTileSet.Index;
-                var baseLatGround = MutationTarget.Map.TheaterInstance.Theater.LATGrounds.Find(
-                    g => g.GroundTileSet.Index == baseTileSetId || g.TransitionTileSet.Index == baseTileSetId);
+                var tileAutoLatGround = tileAutoLatGrounds[i];
 
-                if (baseLatGround != null)
+                if (tileAutoLatGround != null && tileAutoLatGround.BaseTileSet != null)
                 {
-                    baseTileSet = baseLatGround.GroundTileSet;
-                    altBaseTileSet = baseLatGround.TransitionTileSet;
+                    int baseTileSetId = tileAutoLatGround.BaseTileSet.Index;
+                    var baseLatGround = MutationTarget.Map.TheaterInstance.Theater.LATGrounds.Find(
+                        g => g.GroundTileSet.Index == baseTileSetId || g.TransitionTileSet.Index == baseTileSetId);
+
+                    if (baseLatGround != null)
+                    {
+                        baseTileSet = baseLatGround.GroundTileSet;
+                        altBaseTileSet = baseLatGround.TransitionTileSet;
+                        break;
+                    }
                 }
             }
 
@@ -249,7 +255,7 @@ namespace TSMapEditor.Mutations.Classes
                 var tileSet = MutationTarget.Map.TheaterInstance.Theater.TileSets[tileSetIndex];
 
                 // When applying auto-LAT to an alt. terrain tile set, don't apply a transition when we are
-                // evaluating a base alt. terrain tile set next to ground that is supposed on place on that
+                // evaluating a base alt. terrain tile set next to ground that is supposed to be placed on that
                 // alt. terrain
                 // For example, ~~~Snow shouldn't be auto-LAT'd when it's next to a tile belonging to ~~~Straight Dirt Roads
                 Func<TileSet, bool> miscChecker = null;
