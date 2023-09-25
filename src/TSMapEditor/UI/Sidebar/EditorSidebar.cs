@@ -195,6 +195,8 @@ namespace TSMapEditor.UI.Sidebar
 
             cursorActionTarget = null;
 
+            WindowManager.RenderResolutionChanged -= WindowManager_RenderResolutionChanged;
+
             base.Kill();
         }
     }

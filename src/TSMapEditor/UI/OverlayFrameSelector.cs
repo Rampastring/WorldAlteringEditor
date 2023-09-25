@@ -70,9 +70,27 @@ namespace TSMapEditor.UI
             BackgroundTexture = AssetLoader.CreateTexture(new Color(0, 0, 0, 196), 2, 2);
             PanelBackgroundDrawMode = PanelBackgroundImageDrawMode.STRETCHED;
 
-            KeyboardCommands.Instance.NextTile.Triggered += (s, e) => NextOverlayFrame();
-            KeyboardCommands.Instance.PreviousTile.Triggered += (s, e) => PreviousOverlayFrame();
+            KeyboardCommands.Instance.NextTile.Triggered += NextTile_Triggered;
+            KeyboardCommands.Instance.PreviousTile.Triggered += PreviousTile_Triggered;
             WindowManager.RenderResolutionChanged += WindowManager_RenderResolutionChanged;
+        }
+
+        public override void Kill()
+        {
+            KeyboardCommands.Instance.NextTile.Triggered -= NextTile_Triggered;
+            KeyboardCommands.Instance.PreviousTile.Triggered -= PreviousTile_Triggered;
+            WindowManager.RenderResolutionChanged -= WindowManager_RenderResolutionChanged;
+            base.Kill();
+        }
+
+        private void NextTile_Triggered(object sender, EventArgs e)
+        {
+            NextOverlayFrame();
+        }
+
+        private void PreviousTile_Triggered(object sender, EventArgs e)
+        {
+            PreviousOverlayFrame();
         }
 
         private void WindowManager_RenderResolutionChanged(object sender, EventArgs e)

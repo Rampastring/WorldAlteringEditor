@@ -94,6 +94,12 @@ namespace TSMapEditor.UI
             Y = WindowManager.RenderResolutionY - Height;
         }
 
+        public override void Kill()
+        {
+            WindowManager.RenderResolutionChanged -= WindowManager_RenderResolutionChanged;
+            base.Kill();
+        }
+
         private void TbSearch_TextChanged(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(tbSearch.Text) || tbSearch.Text == tbSearch.Suggestion)

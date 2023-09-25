@@ -290,6 +290,7 @@ namespace TSMapEditor.Rendering
             MutationManager = null;
             MapWideOverlay.Clear();
 
+            windowController.RenderResolutionChanged -= WindowController_RenderResolutionChanged;
             windowController = null;
 
             Map.MapResized -= Map_MapResized;

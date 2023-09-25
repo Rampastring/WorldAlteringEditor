@@ -445,6 +445,8 @@ namespace TSMapEditor.UI
             overlayPlacementAction.OverlayTypeChanged -= OverlayPlacementAction_OverlayTypeChanged;
 
             WindowManager.GameClosing -= WindowManager_GameClosing;
+            WindowManager.WindowSizeChangedByUser -= WindowManager_WindowSizeChangedByUser;
+            KeyboardCommands.Instance.ToggleFullscreen.Triggered -= ToggleFullscreen_Triggered;
 
             Disable();
 
