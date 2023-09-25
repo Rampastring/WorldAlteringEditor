@@ -23,7 +23,7 @@ jobs:
       shell: pwsh
       
     - name: Pack compiled binaries
-      run: 7z a -tzip WorldAlteringEditor_TSClient.zip "D:\a\TSMapEditor\TSMapEditor\Build\*.*"
+      run: 7z a -tzip -r WorldAlteringEditor_TSClient.zip "D:\a\TSMapEditor\TSMapEditor\Build\*.*"
     
     - name: Upload compiled binaries
       uses: actions/upload-release-asset@v1
