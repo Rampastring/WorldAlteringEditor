@@ -202,7 +202,7 @@ namespace TSMapEditor.UI.TopBar
                 btn.LeftClick += (s, e) => EnterLATPlacementMode(autoLATGround.GroundTileSet.StartTileIndex);
                 latPanel.AddChild(btn);
 
-                if (btn.Right > latPanel.Right)
+                if (btn.Right > latPanel.Width)
                 {
                     btn.X = btnClearTerrain.X;
                     prevRight = btn.Right;
