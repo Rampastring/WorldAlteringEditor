@@ -68,7 +68,7 @@ namespace TSMapEditor.UI.CursorActions
             int startX = Math.Min(cellCoords.X, startCellCoords.X);
             int endX = Math.Max(cellCoords.X, startCellCoords.X);
 
-            Func<Point2D, Map, Point2D> getCellCenterPoint = Is2DMode ? CellMath.CellCenterPointFromCellCoords : CellMath.CellCenterPointFromCellCoords_3D;
+            Func<Point2D, Map, Point2D> getCellCenterPoint = Is2DMode ? CellMath.CellTopLeftPointFromCellCoords : CellMath.CellTopLeftPointFromCellCoords_3D;
 
             Point2D startPoint = getCellCenterPoint(new Point2D(startX, startY), CursorActionTarget.Map) - cameraTopLeftPoint + new Point2D(Constants.CellSizeX / 2, 0);
             Point2D endPoint = getCellCenterPoint(new Point2D(endX, endY), CursorActionTarget.Map) - cameraTopLeftPoint + new Point2D(Constants.CellSizeX / 2, Constants.CellSizeY);
