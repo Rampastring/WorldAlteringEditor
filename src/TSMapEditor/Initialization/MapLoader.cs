@@ -230,7 +230,7 @@ namespace TSMapEditor.Initialization
                 var tile = map.GetTile(x, y);
                 if (tile == null)
                 {
-                    AddMapLoadError($"Terrain object {terrainType} has been placed outside of the valid map area, at {tile.CoordsToPoint()}. Skipping placing it on the map.");
+                    AddMapLoadError($"Terrain object {terrainType.ININame} has been placed outside of the valid map area, at {x}, {y}. Skipping placing it on the map.");
                     continue;
                 }
 
