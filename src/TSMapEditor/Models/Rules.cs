@@ -282,6 +282,11 @@ namespace TSMapEditor.Models
             return UnitTypes.Find(ut => ut.ININame == technoTypeININame);
         }
 
+        public OverlayType FindOverlayType(string overlayTypeININame)
+        {
+            return OverlayTypes.Find(ot => ot.ININame == overlayTypeININame);
+        }
+
         public void SolveDependencies()
         {
             //UnitTypes.ForEach(ot => SolveUnitTypeDependencies(ot));

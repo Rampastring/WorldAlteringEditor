@@ -11,19 +11,22 @@ using TSMapEditor.Rendering;
 namespace TSMapEditor.UI.CursorActions
 {
     /// <summary>
-    /// Cursor action for placing low bridges.
+    /// Cursor action for placing bridges.
     /// </summary>
-    public class PlaceLowBridgeCursorAction : CursorAction
+    public class PlaceBridgeCursorAction : CursorAction
     {
-        public PlaceLowBridgeCursorAction(ICursorActionTarget cursorActionTarget) : base(cursorActionTarget)
+        public PlaceBridgeCursorAction(ICursorActionTarget cursorActionTarget, BridgeType bridgeType) : base(cursorActionTarget)
         {
+            this.bridgeType = bridgeType;
         }
 
-        public override string GetName() => "Place Low Bridge";
+        public override string GetName() => "Draw Bridge";
 
         public override bool HandlesKeyboardInput => true;
 
         public override bool DrawCellCursor => true;
+
+        private readonly BridgeType bridgeType;
 
         private Point2D startPoint;
         private Point2D endPoint;
@@ -73,7 +76,7 @@ namespace TSMapEditor.UI.CursorActions
                 Point2D corner4;
 
                 // Time for math!
-                if (bridgeDirection == BridgeDirection.X)
+                if (bridgeDirection == BridgeDirection.EastWest)
                 {
                     Point2D actualStartPoint = startPoint;
                     Point2D actualEndPoint = new Point2D(endPoint.X, startPoint.Y);
@@ -167,9 +170,9 @@ namespace TSMapEditor.UI.CursorActions
             {
                 var bridgeDirection = GetBridgeDirection();
 
-                Point2D bridgeEndPoint = bridgeDirection == BridgeDirection.X ? new Point2D(endPoint.X, startPoint.Y) : new Point2D(startPoint.X, endPoint.Y);
+                Point2D bridgeEndPoint = bridgeDirection == BridgeDirection.EastWest ? new Point2D(endPoint.X, startPoint.Y) : new Point2D(startPoint.X, endPoint.Y);
 
-                CursorActionTarget.MutationManager.PerformMutation(new PlaceLowBridgeMutation(CursorActionTarget.MutationTarget, startPoint, bridgeEndPoint));
+                CursorActionTarget.MutationManager.PerformMutation(new PlaceBridgeMutation(CursorActionTarget.MutationTarget, startPoint, bridgeEndPoint, bridgeType));
 
                 ExitAction();
 
@@ -182,7 +185,7 @@ namespace TSMapEditor.UI.CursorActions
             int diffX = Math.Abs(startPoint.X - endPoint.X);
             int diffY = Math.Abs(startPoint.Y - endPoint.Y);
 
-            return diffX > diffY ? BridgeDirection.X : BridgeDirection.Y;
+            return diffX > diffY ? BridgeDirection.EastWest : BridgeDirection.NorthSouth;
         }
 
         public override void LeftClick(Point2D cellCoords)

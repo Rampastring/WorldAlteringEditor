@@ -25,6 +25,7 @@ namespace TSMapEditor.Models
         public Dictionary<int, TriggerEventType> TriggerEventTypes { get; } = new Dictionary<int, TriggerEventType>();
         public Dictionary<int, TriggerActionType> TriggerActionTypes { get; } = new Dictionary<int, TriggerActionType>();
         public List<Theater> Theaters { get; } = new List<Theater>();
+        public List<BridgeType> Bridges { get; } = new List<BridgeType>();
 
         public void Init(Rules rules)
         {
@@ -36,6 +37,7 @@ namespace TSMapEditor.Models
             ReadScriptActions();
             ReadTriggerEventTypes();
             ReadTriggerActionTypes();
+            ReadBridges(rules);
         }
 
         private void ReadTheaters()
@@ -189,6 +191,25 @@ namespace TSMapEditor.Models
                 triggerActionType.ReadPropertiesFromIniSection(section);
 
                 TriggerActionTypes.Add(triggerActionType.ID, triggerActionType);
+            }
+        }
+
+        private void ReadBridges(Rules rules)
+        {
+            var iniFile = new IniFile(Environment.CurrentDirectory + "/Config/Bridges.ini");
+            var section = iniFile.GetSection("Bridges");
+            if (section == null)
+                return;
+
+            foreach (var kvp in section.Keys)
+            {
+                string bridgeName = kvp.Value;
+                IniSection bridgeSection = iniFile.GetSection(bridgeName);
+                if (bridgeSection == null)
+                    continue;
+
+                BridgeType bridgeType = new BridgeType(bridgeSection, rules);
+                Bridges.Add(bridgeType);
             }
         }
     }

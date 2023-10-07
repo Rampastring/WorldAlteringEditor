@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using Rampastring.XNAUI;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations;
@@ -9,6 +10,7 @@ using TSMapEditor.Settings;
 using TSMapEditor.UI.Controls;
 using TSMapEditor.UI.CursorActions;
 using TSMapEditor.UI.Windows;
+using TSMapEditor.Initialization;
 
 #if WINDOWS
 using System.Windows.Forms;
@@ -39,12 +41,12 @@ namespace TSMapEditor.UI.TopBar
 
         private DeleteTubeCursorAction deleteTunnelCursorAction;
         private PlaceTubeCursorAction placeTubeCursorAction;
-        private PlaceLowBridgeCursorAction placeLowBridgeCursorAction;
         private ToggleIceGrowthCursorAction toggleIceGrowthCursorAction;
         private CheckDistanceCursorAction checkDistanceCursorAction;
         private CalculateTiberiumValueCursorAction calculateTiberiumValueCursorAction;
         private ManageBaseNodesCursorAction manageBaseNodesCursorAction;
-        
+
+        private SelectBridgeWindow selectBridgeWindow;
 
         public override void Initialize()
         {
@@ -52,11 +54,14 @@ namespace TSMapEditor.UI.TopBar
 
             deleteTunnelCursorAction = new DeleteTubeCursorAction(mapView);
             placeTubeCursorAction = new PlaceTubeCursorAction(mapView);
-            placeLowBridgeCursorAction = new PlaceLowBridgeCursorAction(mapView);
             toggleIceGrowthCursorAction = new ToggleIceGrowthCursorAction(mapView);
             checkDistanceCursorAction = new CheckDistanceCursorAction(mapView);
             calculateTiberiumValueCursorAction = new CalculateTiberiumValueCursorAction(mapView);
             manageBaseNodesCursorAction = new ManageBaseNodesCursorAction(mapView);
+
+            selectBridgeWindow = new SelectBridgeWindow(WindowManager, map);
+            var selectBridgeDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectBridgeWindow);
+            selectBridgeDarkeningPanel.Hidden += SelectBridgeDarkeningPanel_Hidden;
 
             var fileContextMenu = new EditorContextMenu(WindowManager);
             fileContextMenu.Name = nameof(fileContextMenu);
@@ -97,7 +102,22 @@ namespace TSMapEditor.UI.TopBar
             editContextMenu.AddItem("Place Tunnel", () => mapView.EditorState.CursorAction = placeTubeCursorAction, null, null, null, KeyboardCommands.Instance.PlaceTunnel.GetKeyDisplayString());
             editContextMenu.AddItem("Delete Tunnel", () => mapView.EditorState.CursorAction = deleteTunnelCursorAction, null, null, null);
             editContextMenu.AddItem(" ", null, () => false, null, null);
-            editContextMenu.AddItem("Place Low Bridge", () => mapView.EditorState.CursorAction = placeLowBridgeCursorAction, null, null, null);
+
+            int bridgeCount = map.EditorConfig.Bridges.Count;
+            if (bridgeCount > 0)
+            {
+                var bridges = map.EditorConfig.Bridges;
+                if (bridgeCount == 1 && bridges[0].Kind == BridgeKind.Low)
+                {
+                    editContextMenu.AddItem("Draw Low Bridge", () => mapView.EditorState.CursorAction =
+                        new PlaceBridgeCursorAction(mapView, bridges[0]), null, null, null);
+                }
+                else
+                {
+                    editContextMenu.AddItem("Draw Bridge...", SelectBridge, null, null, null);
+                }
+            }
+
             editContextMenu.AddItem("Toggle IceGrowth", () => { mapView.EditorState.CursorAction = toggleIceGrowthCursorAction; toggleIceGrowthCursorAction.ToggleIceGrowth = true; mapView.EditorState.HighlightIceGrowth = true; }, null, null, null);
             editContextMenu.AddItem("Clear IceGrowth", () => { mapView.EditorState.CursorAction = toggleIceGrowthCursorAction; toggleIceGrowthCursorAction.ToggleIceGrowth = false; mapView.EditorState.HighlightIceGrowth = true; }, null, null, null);
             editContextMenu.AddItem(" ", null, () => false, null, null);
@@ -213,6 +233,17 @@ namespace TSMapEditor.UI.TopBar
             var generateForestCursorAction = new GenerateTerrainCursorAction(mapView);
             generateForestCursorAction.TerrainGeneratorConfiguration = windowController.TerrainGeneratorConfigWindow.TerrainGeneratorConfig;
             mapView.CursorAction = generateForestCursorAction;
+        }
+
+        private void SelectBridge()
+        {
+            selectBridgeWindow.Open();
+        }
+
+        private void SelectBridgeDarkeningPanel_Hidden(object sender, EventArgs e)
+        {
+            if (selectBridgeWindow.Success && selectBridgeWindow.SelectedObject != null)
+                mapView.EditorState.CursorAction = new PlaceBridgeCursorAction(mapView, selectBridgeWindow.SelectedObject);
         }
 
         private void Open()
