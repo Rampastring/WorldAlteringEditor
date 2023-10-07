@@ -60,7 +60,7 @@ namespace TSMapEditor.UI.Windows
                     if (house.ININame.StartsWith(side))
                     {
                         house.Side = side;
-                        house.ActsLike = sideIndex;
+                        house.ActsLike = houses.FindIndex(h => house.ININame.StartsWith(h.ININame));
                         break;
                     }
                 }
@@ -73,6 +73,7 @@ namespace TSMapEditor.UI.Windows
             }
 
             map.AddHouses(houses);
+
             ReassignObjectHouses();
             Hide();
         }

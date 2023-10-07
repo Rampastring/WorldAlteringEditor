@@ -3,6 +3,7 @@ using Rampastring.Tools;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
+using System.Globalization;
 using System.Linq;
 using TSMapEditor.Models;
 using TSMapEditor.UI.Controls;
@@ -68,7 +69,6 @@ namespace TSMapEditor.UI.Windows
                 string sideName = map.Rules.Sides[i];
                 string sideString = i + " " + sideName;
                 ddSide.AddItem(new XNADropDownItem() { Text = sideString, Tag = sideName });
-                ddActsLike.AddItem(new XNADropDownItem() { Text = sideString, Tag = i });
             }
 
             foreach (RulesColor rulesColor in map.Rules.Colors.OrderBy(c => c.Name))
@@ -114,12 +114,12 @@ namespace TSMapEditor.UI.Windows
                 Allies = "NewHouse",
                 Color = map.Rules.Colors[0].Name,
                 Credits = 0, 
-                Edge = "North", 
+                Edge = "North",
                 ID = map.Houses.Count, 
                 IQ = 0, 
                 PercentBuilt = 100, 
                 PlayerControl = false, 
-                Side = map.Rules.Sides[0], 
+                Side = map.Rules.Sides[0],
                 TechLevel = 10, 
                 XNAColor = Color.White 
             });
@@ -237,7 +237,7 @@ namespace TSMapEditor.UI.Windows
             ddIQ.SelectedIndex = ddIQ.Items.FindIndex(item => Conversions.IntFromString(item.Text, -1) == editedHouse.IQ);
             ddMapEdge.SelectedIndex = ddMapEdge.Items.FindIndex(item => item.Text == editedHouse.Edge);
             ddSide.SelectedIndex = map.Rules.Sides.FindIndex(s => s == editedHouse.Side);
-            if (editedHouse.ActsLike < map.Rules.Sides.Count)
+            if (editedHouse.ActsLike < map.GetHouses().Count)
                 ddActsLike.SelectedIndex = editedHouse.ActsLike;
             else
                 ddActsLike.SelectedIndex = -1;
@@ -334,6 +334,8 @@ namespace TSMapEditor.UI.Windows
 
             ddHouseOfHumanPlayer.AddItem("None");
 
+            ddActsLike.Items.Clear();
+
             foreach (House house in map.Houses)
             {
                 lbHouseList.AddItem(
@@ -344,6 +346,8 @@ namespace TSMapEditor.UI.Windows
                         Tag = house
                     }
                 );
+
+                ddActsLike.AddItem(new XNADropDownItem() { Text = house.ID.ToString(CultureInfo.InvariantCulture) + " " + house.ININame, Tag = house.ID });
 
                 ddHouseOfHumanPlayer.AddItem(house.ININame, house.XNAColor);
             }

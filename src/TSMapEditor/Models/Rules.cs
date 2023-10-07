@@ -90,7 +90,7 @@ namespace TSMapEditor.Models
             {
                 foreach (var kvp in sidesSection.Keys)
                 {
-                    Sides.Add(kvp.Value);
+                    Sides.Add(kvp.Key);
                 }
             }
 
