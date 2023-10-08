@@ -484,7 +484,7 @@ namespace TSMapEditor.Mutations.Classes
 
         private OriginalCellTerrainData[] terrainUndoData;
         private OriginalOverlayInfo[] overlayUndoData;
-        private Point2D[] smudgeCells;
+        private OriginalSmudgeInfo[] smudgeUndoData;
         private Point2D[] terrainObjectCells;
         private Point2D[] vehicleCells;
         private Point2D[] structureCells;
@@ -565,7 +565,7 @@ namespace TSMapEditor.Mutations.Classes
             // Smudges
             // *******
 
-            var smudgeCells = new List<Point2D>();
+            var smudgeUndoData = new List<OriginalSmudgeInfo>();
 
             foreach (var entry in copiedMapData.CopiedMapEntries.FindAll(e => e.EntryType == CopiedEntryType.Smudge))
             {
@@ -576,18 +576,23 @@ namespace TSMapEditor.Mutations.Classes
                 if (cell == null)
                     continue;
 
-                if (cell.Smudge != null)
-                    continue;
-
                 var smudgeType = MutationTarget.Map.Rules.SmudgeTypes.Find(st => st.ININame == copiedSmudgeEntry.SmudgeTypeName);
                 if (smudgeType == null)
                     continue;
 
-                smudgeCells.Add(cellCoords);
-                cell.Smudge = new Smudge() { Position = cellCoords, SmudgeType = smudgeType };
+                if (cell.Smudge == null)
+                {
+                    smudgeUndoData.Add(new OriginalSmudgeInfo(-1, cellCoords));
+                    cell.Smudge = new Smudge() { Position = cellCoords, SmudgeType = smudgeType };
+                }
+                else
+                {
+                    smudgeUndoData.Add(new OriginalSmudgeInfo(cell.Smudge.SmudgeType.Index, cellCoords));
+                    cell.Smudge.SmudgeType = smudgeType;
+                }
             }
 
-            this.smudgeCells = smudgeCells.ToArray();
+            this.smudgeUndoData = smudgeUndoData.ToArray();
 
             // ***************
             // Terrain Objects
@@ -790,7 +795,7 @@ namespace TSMapEditor.Mutations.Classes
             foreach (OriginalOverlayInfo info in overlayUndoData)
             {
                 var cell = MutationTarget.Map.GetTile(info.CellCoords);
-                if (info.OverlayTypeIndex == -1)
+                if (info.OverlayTypeIndex < 0)
                 {
                     cell.Overlay = null;
                     continue;
@@ -804,9 +809,16 @@ namespace TSMapEditor.Mutations.Classes
                 };
             }
 
-            foreach (Point2D cellCoords in smudgeCells)
+            foreach (OriginalSmudgeInfo info in smudgeUndoData)
             {
-                MutationTarget.Map.GetTile(cellCoords).Smudge = null;
+                var cell = MutationTarget.Map.GetTile(info.CellCoords);
+                if (info.SmudgeTypeIndex < 0)
+                {
+                    cell.Smudge = null;
+                    continue;
+                }
+
+                cell.Smudge.SmudgeType = Map.Rules.SmudgeTypes[info.SmudgeTypeIndex];
             }
 
             foreach (Point2D cellCoords in terrainObjectCells)
