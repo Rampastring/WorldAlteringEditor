@@ -8,6 +8,7 @@
         Cell,
         LocalVariable,
         TeamType,
+        Techno,
         Building,
         Aircraft,
         Infantry,

@@ -184,17 +184,18 @@ namespace TSMapEditor.UI
                     if (triggerEventType == null)
                         continue;
 
-                    if ((triggerEventType.P1Type == TriggerParamType.Waypoint && condition.Parameter1 == waypoint.Identifier) ||
-                        (triggerEventType.P2Type == TriggerParamType.Waypoint && condition.Parameter2 == waypoint.Identifier))
+                    for (int i = 0; i < triggerEventType.Parameters.Length; i++)
                     {
-                        usageFound = true;
-                    }
-                    else
-                    {
-                        string waypointZZString = Helpers.WaypointNumberToAlphabeticalString(waypoint.Identifier);
+                        if (triggerEventType.Parameters[i] == null)
+                            continue;
 
-                        if ((triggerEventType.P1Type == TriggerParamType.WaypointZZ && condition.Parameter1.ToString(CultureInfo.InvariantCulture) == waypointZZString) ||
-                            (triggerEventType.P2Type == TriggerParamType.WaypointZZ && condition.Parameter2.ToString(CultureInfo.InvariantCulture) == waypointZZString))
+                        var param = triggerEventType.Parameters[i];
+
+                        if (param.TriggerParamType == TriggerParamType.Waypoint && condition.Parameters[i] == waypoint.Identifier.ToString())
+                        {
+                            usageFound = true;
+                        }
+                        else if (param.TriggerParamType == TriggerParamType.WaypointZZ && condition.Parameters[i] == Helpers.WaypointNumberToAlphabeticalString(waypoint.Identifier))
                         {
                             usageFound = true;
                         }

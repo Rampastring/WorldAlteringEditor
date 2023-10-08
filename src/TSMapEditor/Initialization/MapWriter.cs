@@ -288,7 +288,7 @@ namespace TSMapEditor.Initialization
             if (map.Triggers.Count == 0)
                 return;
 
-            map.Triggers.ForEach(t => t.WriteToIniFile(mapIni));
+            map.Triggers.ForEach(t => t.WriteToIniFile(mapIni, map.EditorConfig));
         }
 
         public static void WriteTags(IMap map, IniFile mapIni)

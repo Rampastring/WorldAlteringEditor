@@ -44,7 +44,7 @@
     <None Update="Config\BaseMap.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-	<None Update="Config\Bridges.ini">
+    <None Update="Config\Bridges.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Config\Constants.ini">
@@ -53,7 +53,7 @@
     <None Update="Config\EditorRules.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-	<None Update="Config\EditorThemes.ini">
+    <None Update="Config\EditorThemes.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Config\Events.ini">
@@ -164,7 +164,7 @@
     <None Update="Config\UI\Windows\SelectAnimationWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-	<None Update="Config\UI\Windows\SelectBridgeWindow.ini">
+    <None Update="Config\UI\Windows\SelectBridgeWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Config\UI\Windows\SelectBuildingTypeWindow.ini">
@@ -180,6 +180,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Config\UI\Windows\SelectScriptActionWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\UI\Windows\SelectTechnoTypeWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Config\UI\Windows\SelectHouseWindow.ini">

@@ -720,7 +720,7 @@ namespace TSMapEditor.Initialization
                 trigger.ParseActions(actionData);
 
                 string conditionData = mapIni.GetStringValue("Events", trigger.ID, null);
-                trigger.ParseConditions(conditionData);
+                trigger.ParseConditions(conditionData, map.EditorConfig);
 
                 trigger.ParseEditorInfo(mapIni);
             }

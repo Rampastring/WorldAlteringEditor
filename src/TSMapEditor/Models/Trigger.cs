@@ -123,7 +123,7 @@ namespace TSMapEditor.Models
             return clone;
         }
 
-        public void WriteToIniFile(IniFile iniFile)
+        public void WriteToIniFile(IniFile iniFile, EditorConfig editorConfig)
         {
             // Write entry to [Triggers]
             string linkedTriggerId = LinkedTrigger == null ? Constants.NoneValue1 : LinkedTrigger.ID;
@@ -138,8 +138,11 @@ namespace TSMapEditor.Models
             foreach (var condition in Conditions)
             {
                 conditionDataString.Append(condition.ConditionIndex);
-                conditionDataString.Append(condition.Parameter1);
-                conditionDataString.Append(condition.Parameter2);
+                for (int i = 0; i < TriggerCondition.DEF_PARAM_COUNT; i++)
+                    conditionDataString.Append(condition.ParamToString(i));
+
+                if (editorConfig.TriggerEventTypes[condition.ConditionIndex].UsesP3)
+                    conditionDataString.Append(condition.ParamToString(TriggerCondition.MAX_PARAM_COUNT - 1));
             }
 
             iniFile.SetStringValue("Events", ID, conditionDataString.ToString());
@@ -166,7 +169,7 @@ namespace TSMapEditor.Models
             EditorColor = iniFile.GetStringValue("EditorTriggerInfo", ID, null);
         }
 
-        public void ParseConditions(string data)
+        public void ParseConditions(string data, EditorConfig editorConfig)
         {
             if (string.IsNullOrWhiteSpace(data))
                 return;
@@ -180,11 +183,18 @@ namespace TSMapEditor.Models
             int startIndex = 1;
             for (int i = 0; i < eventCount; i++)
             {
-                var triggerEvent = TriggerCondition.ParseFromArray(dataArray, startIndex);
+                int conditionIndex = Conversions.IntFromString(dataArray[startIndex], -1);
+                bool usesP3 = editorConfig.TriggerEventTypes[conditionIndex].UsesP3;
+
+                var triggerEvent = TriggerCondition.ParseFromArray(dataArray, startIndex, usesP3);
                 if (triggerEvent == null)
                     return;
 
-                startIndex += TriggerCondition.INI_VALUE_COUNT;
+                if (usesP3)
+                    startIndex += TriggerCondition.MAX_PARAM_COUNT + 1;
+                else
+                    startIndex += TriggerCondition.DEF_PARAM_COUNT + 1;
+
                 Conditions.Add(triggerEvent);
             }
         }

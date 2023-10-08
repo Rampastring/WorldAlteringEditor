@@ -1022,6 +1022,17 @@ namespace TSMapEditor.Models
             }
         }
 
+        public List<TechnoType> GetAllTechnoTypes()
+        {
+            List<TechnoType> technoTypes = new List<TechnoType>();
+            technoTypes.AddRange(Rules.BuildingTypes);
+            technoTypes.AddRange(Rules.UnitTypes);
+            technoTypes.AddRange(Rules.InfantryTypes);
+            technoTypes.AddRange(Rules.AircraftTypes);
+
+            return technoTypes;
+        }
+
         public int GetOverlayFrameIndex(Point2D cellCoords)
         {
             var cell = GetTile(cellCoords);

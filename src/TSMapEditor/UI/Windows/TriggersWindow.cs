@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using Rampastring.Tools;
+using Rampastring.XNAUI;
+using Rampastring.XNAUI.XNAControls;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using Microsoft.Xna.Framework;
-using Rampastring.Tools;
-using Rampastring.XNAUI;
-using Rampastring.XNAUI.XNAControls;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Models;
 using TSMapEditor.Models.Enums;
@@ -25,9 +25,6 @@ namespace TSMapEditor.UI.Windows
 
     public class TriggersWindow : INItializableWindow
     {
-        private const int EVENT_PARAM_FIRST = 0;
-        private const int EVENT_PARAM_SECOND = 1;
-
         public TriggersWindow(WindowManager windowManager, Map map, EditorState editorState, ICursorActionTarget cursorActionTarget) : base(windowManager)
         {
             this.map = map;
@@ -63,7 +60,7 @@ namespace TSMapEditor.UI.Windows
         private EditorPopUpSelector selEventType;
         private EditorDescriptionPanel panelEventDescription;
         private EditorListBox lbEventParameters;
-        private EditorNumberTextBox tbEventParameterValue;
+        private EditorTextBox tbEventParameterValue;
 
         // Actions
         private EditorListBox lbActions;
@@ -83,6 +80,7 @@ namespace TSMapEditor.UI.Windows
         private SelectHouseWindow selectHouseWindow;
         private SelectTutorialLineWindow selectTutorialLineWindow;
         private SelectThemeWindow selectThemeWindow;
+        private SelectTechnoTypeWindow selectTechnoTypeWindow;
 
         private XNAContextMenu actionContextMenu;
         private XNAContextMenu eventContextMenu;
@@ -139,7 +137,7 @@ namespace TSMapEditor.UI.Windows
             selEventType = FindChild<EditorPopUpSelector>(nameof(selEventType));
             panelEventDescription = FindChild<EditorDescriptionPanel>(nameof(panelEventDescription));
             lbEventParameters = FindChild<EditorListBox>(nameof(lbEventParameters));
-            tbEventParameterValue = FindChild<EditorNumberTextBox>(nameof(tbEventParameterValue));
+            tbEventParameterValue = FindChild<EditorTextBox>(nameof(tbEventParameterValue));
 
             lbActions = FindChild<EditorListBox>(nameof(lbActions));
             selActionType = FindChild<EditorPopUpSelector>(nameof(selActionType));
@@ -220,6 +218,10 @@ namespace TSMapEditor.UI.Windows
             selectThemeWindow = new SelectThemeWindow(WindowManager, map);
             var themeDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectThemeWindow);
             themeDarkeningPanel.Hidden += ThemeDarkeningPanel_Hidden;
+
+            selectTechnoTypeWindow = new SelectTechnoTypeWindow(WindowManager, map);
+            var technoTypeDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTechnoTypeWindow);
+            technoTypeDarkeningPanel.Hidden += TechnoTypeDarkeningPanel_Hidden;
 
             eventContextMenu = new XNAContextMenu(WindowManager);
             eventContextMenu.Name = nameof(eventContextMenu);
@@ -526,21 +528,22 @@ namespace TSMapEditor.UI.Windows
             {
                 TriggerCondition condition = editedTrigger.Conditions[i];
 
-                if (map.EditorConfig.TriggerEventTypes[condition.ConditionIndex].P2Type == TriggerParamType.GlobalVariable)
+                if (map.EditorConfig.TriggerEventTypes[condition.ConditionIndex].Parameters[1].TriggerParamType == TriggerParamType.GlobalVariable)
                 {
-                    if (condition.Parameter2 < 0 && condition.Parameter2 >= map.Rules.GlobalVariables.Count)
+                    int paramValue = Conversions.IntFromString(condition.Parameters[1], 0);
+                    if (!map.Rules.GlobalVariables.Exists(gv => gv.Index == paramValue))
                         continue;
 
-                    if (map.Rules.GlobalVariables[condition.Parameter2].Name == "Difficulty Hard")
+                    if (map.Rules.GlobalVariables.Find(gv => gv.Index == paramValue).Name == "Difficulty Hard")
                     {
                         if (mediumDiffGlobalVariableIndex > -1)
                         {
-                            mediumDifficultyTrigger.Conditions[i].Parameter2 = mediumDiffGlobalVariableIndex;
+                            mediumDifficultyTrigger.Conditions[i].Parameters[1] = mediumDiffGlobalVariableIndex.ToString();
                         }
 
                         if (easyDiffGlobalVariableIndex > -1)
                         {
-                            easyDifficultyTrigger.Conditions[i].Parameter2 = easyDiffGlobalVariableIndex;
+                            easyDifficultyTrigger.Conditions[i].Parameters[1] = easyDiffGlobalVariableIndex.ToString();
                         }
                     }
                 }
@@ -661,32 +664,37 @@ namespace TSMapEditor.UI.Windows
             if (triggerEventType == null)
                 return;
 
-            TriggerParamType triggerParamType = paramIndex == EVENT_PARAM_FIRST ? triggerEventType.P1Type : triggerEventType.P2Type;
-            int paramValue = paramIndex == EVENT_PARAM_FIRST ? triggerEvent.Parameter1 : triggerEvent.Parameter2;
-
-            switch (triggerParamType)
+            int paramValue;
+            switch (triggerEventType.Parameters[paramIndex].TriggerParamType)
             {
                 case TriggerParamType.GlobalVariable:
-                    GlobalVariable existingGlobalVariable = map.Rules.GlobalVariables.Find(gv => gv.Index == paramValue);
+                    GlobalVariable existingGlobalVariable = map.Rules.GlobalVariables.Find(gv => gv.Index == Conversions.IntFromString(triggerEvent.Parameters[paramIndex], -1));
                     selectGlobalVariableWindow.IsForEvent = true;
                     selectGlobalVariableWindow.Open(existingGlobalVariable);
                     break;
                 case TriggerParamType.LocalVariable:
-                    LocalVariable existingLocalVariable = map.LocalVariables.Find(lv => lv.Index == paramValue);
+                    LocalVariable existingLocalVariable = map.LocalVariables.Find(lv => lv.Index == Conversions.IntFromString(triggerEvent.Parameters[paramIndex], -1));
                     selectLocalVariableWindow.IsForEvent = true;
                     selectLocalVariableWindow.Open(existingLocalVariable);
                     break;
                 case TriggerParamType.House:
                     selectHouseWindow.IsForEvent = true;
+                    paramValue = Conversions.IntFromString(triggerEvent.Parameters[paramIndex], -1);
                     if (paramValue > -1 && paramValue < map.GetHouses().Count)
                         selectHouseWindow.Open(map.GetHouses()[paramValue]);
                     else
                         selectHouseWindow.Open(null);
                     break;
                 case TriggerParamType.Building:
+                    paramValue = Conversions.IntFromString(triggerEvent.Parameters[paramIndex], -1);
                     BuildingType existingBuilding = paramValue < 0 || paramValue >= map.Rules.BuildingTypes.Count ? null : map.Rules.BuildingTypes[paramValue];
                     selectBuildingTypeWindow.IsForEvent = true;
                     selectBuildingTypeWindow.Open(existingBuilding);
+                    break;
+                case TriggerParamType.Techno:
+                    TechnoType existingTechno = map.GetAllTechnoTypes().Find(t => t.ININame == triggerEvent.Parameters[paramIndex]);
+                    selectTechnoTypeWindow.IsForEvent = true;
+                    selectTechnoTypeWindow.Open(existingTechno);
                     break;
                 default:
                     break;
@@ -775,6 +783,14 @@ namespace TSMapEditor.UI.Windows
             AssignParamValue(selectThemeWindow.IsForEvent, selectThemeWindow.SelectedObject.Index);
         }
 
+        private void TechnoTypeDarkeningPanel_Hidden(object sender, EventArgs e)
+        {
+            if (selectTechnoTypeWindow.SelectedObject == null)
+                return;
+
+            AssignParamValue(selectTechnoTypeWindow.IsForEvent, selectTechnoTypeWindow.SelectedObject.ININame);
+        }
+
         private void TutorialDarkeningPanel_Hidden(object sender, EventArgs e)
         {
             if (selectTutorialLineWindow.SelectedObject.ID < 0 || selectTutorialLineWindow.SelectedObject.Text == null)
@@ -815,15 +831,28 @@ namespace TSMapEditor.UI.Windows
             if (isForEvent)
             {
                 GetTriggerEventAndParamIndex(out TriggerCondition triggerCondition, out int paramIndex);
-                if (paramIndex == EVENT_PARAM_FIRST)
-                    triggerCondition.Parameter1 = paramValue;
-                else
-                    triggerCondition.Parameter2 = paramValue;
+                triggerCondition.Parameters[paramIndex] = paramValue.ToString();
             }
             else
             {
                 GetTriggerActionAndParamIndex(out TriggerAction triggerAction, out int paramIndex);
                 triggerAction.Parameters[paramIndex] = paramValue.ToString();
+            }
+
+            EditTrigger(editedTrigger);
+        }
+
+        private void AssignParamValue(bool isForEvent, string paramValue)
+        {
+            if (isForEvent)
+            {
+                GetTriggerEventAndParamIndex(out TriggerCondition triggerCondition, out int paramIndex);
+                triggerCondition.Parameters[paramIndex] = paramValue;
+            }
+            else
+            {
+                GetTriggerActionAndParamIndex(out TriggerAction triggerAction, out int paramIndex);
+                triggerAction.Parameters[paramIndex] = paramValue;
             }
 
             EditTrigger(editedTrigger);
@@ -919,14 +948,28 @@ namespace TSMapEditor.UI.Windows
             if (editedTrigger == null || lbEvents.SelectedItem == null || selectEventWindow.SelectedObject == null)
                 return;
 
+            TriggerEventType triggerEventType = selectEventWindow.SelectedObject;
             TriggerCondition condition = editedTrigger.Conditions[lbEvents.SelectedIndex];
             condition.ConditionIndex = selectEventWindow.SelectedObject.ID;
 
-            if (selectEventWindow.SelectedObject.P1Type == TriggerParamType.Unused)
-                condition.Parameter1 = 0;
+            for (int i = 0; i < TriggerEventType.MAX_PARAM_COUNT; i++)
+            {
+                if ((int)triggerEventType.Parameters[i].TriggerParamType < 0)
+                {
+                    condition.Parameters[i] = Math.Abs((int)triggerEventType.Parameters[i].TriggerParamType).ToString(CultureInfo.InvariantCulture);
+                    continue;
+                }
 
-            if (selectEventWindow.SelectedObject.P2Type == TriggerParamType.Unused)
-                condition.Parameter2 = 0;
+                if (triggerEventType.Parameters[i].TriggerParamType == TriggerParamType.Unused)
+                {
+                    // P3 needs to be empty instead of 0 if it's unused
+                    if (i == TriggerCondition.MAX_PARAM_COUNT - 1)
+                        condition.Parameters[i] = string.Empty;
+                    else
+                        condition.Parameters[i] = "0";
+                    continue;
+                }
+            }
 
             EditTrigger(editedTrigger);
         }
@@ -1193,7 +1236,6 @@ namespace TSMapEditor.UI.Windows
         private void LbActions_SelectedIndexChanged(object sender, EventArgs e)
         {
             lbActionParameters.SelectedIndexChanged -= LbActionParameters_SelectedIndexChanged;
-            selActionType.LeftClick -= SelActionType_LeftClick;
 
             if (lbActions.SelectedItem == null)
             {
@@ -1261,11 +1303,7 @@ namespace TSMapEditor.UI.Windows
             TriggerAction triggerAction = editedTrigger.Actions[lbActions.SelectedIndex];
             int paramNumber = (int)lbActionParameters.SelectedItem.Tag;
             var triggerActionType = GetTriggerActionType(triggerAction.ActionIndex);
-            var triggerParamType = TriggerParamType.Unknown;
-            if (triggerActionType != null)
-            {
-                triggerParamType = triggerActionType.Parameters[paramNumber].TriggerParamType;
-            }
+            var triggerParamType = triggerActionType.Parameters[paramNumber]?.TriggerParamType ?? TriggerParamType.Unknown;
 
             tbActionParameterValue.Text = GetParamValueText(triggerAction.Parameters[paramNumber], triggerParamType);
             tbActionParameterValue.TextColor = GetParamValueColor(triggerAction.Parameters[paramNumber], triggerParamType);
@@ -1283,11 +1321,7 @@ namespace TSMapEditor.UI.Windows
             int paramNumber = (int)lbActionParameters.SelectedItem.Tag;
             var triggerAction = (TriggerAction)lbActions.SelectedItem.Tag;
 
-            int spaceIndex = tbActionParameterValue.Text.IndexOf(' ');
-            string value = tbActionParameterValue.Text;
-            if (spaceIndex > -1)
-                value = value.Substring(0, spaceIndex);
-
+            string value = tbActionParameterValue.Text.Split(' ')[0];
             var triggerActionType = GetTriggerActionType(triggerAction.ActionIndex);
 
             if (triggerActionType != null && 
@@ -1336,16 +1370,21 @@ namespace TSMapEditor.UI.Windows
             lbEventParameters.Clear();
             if (triggerEventType == null)
             {
-                lbEventParameters.AddItem(new XNAListBoxItem() { Text = "Parameter 0", Tag = EVENT_PARAM_FIRST });
-                lbEventParameters.AddItem(new XNAListBoxItem() { Text = "Parameter 1", Tag = EVENT_PARAM_SECOND });
+                for (int i = 0; i < TriggerEventType.MAX_PARAM_COUNT; i++)
+                {
+                    lbEventParameters.AddItem(new XNAListBoxItem() { Text = $"Parameter {i}", Tag = i });
+                }
             }
             else
             {
-                if (triggerEventType.P1Type != TriggerParamType.Unused)
-                    lbEventParameters.AddItem(new XNAListBoxItem() { Text = triggerEventType.P1Type.ToString(), Tag = EVENT_PARAM_FIRST });
+                for (int i = 0; i < triggerEventType.Parameters.Length; i++)
+                {
+                    var param = triggerEventType.Parameters[i];
+                    if (param.TriggerParamType == TriggerParamType.Unused || (int)param.TriggerParamType < 0)
+                        continue;
 
-                if (triggerEventType.P2Type != TriggerParamType.Unused)
-                    lbEventParameters.AddItem(new XNAListBoxItem() { Text = triggerEventType.P2Type.ToString(), Tag = EVENT_PARAM_SECOND });
+                    lbEventParameters.AddItem(new XNAListBoxItem() { Text = param.NameOverride ?? param.TriggerParamType.ToString(), Tag = i });
+                }
             }
 
             if (lbEventParameters.SelectedItem == null && lbEventParameters.Items.Count > 0)
@@ -1376,27 +1415,13 @@ namespace TSMapEditor.UI.Windows
                 return;
             }
 
-            var triggerEventType = GetTriggerEventType(editedTrigger.Conditions[lbEvents.SelectedIndex].ConditionIndex);
-            var triggerParamType = TriggerParamType.Unknown;
-            int paramValue = -1;
+            TriggerCondition triggerCondition = editedTrigger.Conditions[lbEvents.SelectedIndex];
             int paramNumber = (int)lbEventParameters.SelectedItem.Tag;
-            if (paramNumber == EVENT_PARAM_FIRST)
-            {
-                paramValue = editedTrigger.Conditions[lbEvents.SelectedIndex].Parameter1;
+            var triggerEventType = GetTriggerEventType(editedTrigger.Conditions[lbEvents.SelectedIndex].ConditionIndex);
+            var triggerParamType = triggerEventType.Parameters[paramNumber]?.TriggerParamType ?? TriggerParamType.Unknown;
 
-                if (triggerEventType != null)
-                    triggerParamType = triggerEventType.P1Type;
-            }
-            else
-            {
-                paramValue = editedTrigger.Conditions[lbEvents.SelectedIndex].Parameter2;
-
-                if (triggerEventType != null)
-                    triggerParamType = triggerEventType.P2Type;
-            }
-
-            tbEventParameterValue.Text = GetParamValueText(paramValue.ToString(), triggerParamType);
-            tbEventParameterValue.TextColor = GetParamValueColor(paramValue.ToString(), triggerParamType);
+            tbEventParameterValue.Text = GetParamValueText(triggerCondition.Parameters[paramNumber], triggerParamType);
+            tbEventParameterValue.TextColor = GetParamValueColor(triggerCondition.Parameters[paramNumber], triggerParamType);
 
             tbEventParameterValue.TextChanged += TbEventParameterValue_TextChanged;
         }
@@ -1409,12 +1434,19 @@ namespace TSMapEditor.UI.Windows
             }
 
             int paramNumber = (int)lbEventParameters.SelectedItem.Tag;
-
             var triggerCondition = (TriggerCondition)lbEvents.SelectedItem.Tag;
-            if (paramNumber == EVENT_PARAM_FIRST)
-                triggerCondition.Parameter1 = tbEventParameterValue.Value;
-            else
-                triggerCondition.Parameter2 = tbEventParameterValue.Value;
+
+            string value = tbEventParameterValue.Text.Split(' ')[0];
+            var triggerEventType = GetTriggerActionType(triggerCondition.ConditionIndex);
+
+            if (triggerEventType != null &&
+                triggerEventType.Parameters[paramNumber].TriggerParamType == TriggerParamType.WaypointZZ)
+            {
+                // Write waypoint with A-ZZ notation
+                value = Helpers.WaypointNumberToAlphabeticalString(Conversions.IntFromString(value, 0));
+            }
+
+            triggerCondition.Parameters[paramNumber] = value;
         }
 
         private void AddEvent(TriggerCondition condition)
@@ -1533,7 +1565,7 @@ namespace TSMapEditor.UI.Windows
                     return GetObjectValueText(RTTIType.Unit, map.Rules.UnitTypes, paramValue);
                 case TriggerParamType.Text:
                     if (!intParseSuccess)
-                        return paramValue + " Unknown text line";
+                        return paramValue + " - Unknown text line";
 
                     return paramValue + " " + map.Rules.TutorialLines.GetStringByIdOrEmptyString(intValue);
                 case TriggerParamType.Theme:

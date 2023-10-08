@@ -21,6 +21,7 @@ namespace TSMapEditor.Initialization
         List<Infantry> Infantry { get; }
         IniFile LoadedINI { get; }
         Rules Rules { get; }
+        EditorConfig EditorConfig { get; }
         List<Structure> Structures { get; }
         List<TerrainObject> TerrainObjects { get; }
         List<Unit> Units { get; }
