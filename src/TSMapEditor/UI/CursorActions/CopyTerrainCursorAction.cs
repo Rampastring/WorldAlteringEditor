@@ -39,6 +39,9 @@ namespace TSMapEditor.UI.CursorActions
             int startX = Math.Min(cellCoords.X, startCellCoords.X);
             int endX = Math.Max(cellCoords.X, startCellCoords.X);
 
+            copiedMapData.Width = (ushort)(endX - startX);
+            copiedMapData.Height = (ushort)(endY - startY);
+
             byte lowestHeight = byte.MaxValue;
 
             // To handle height, we first look up the lowest height level of the copied

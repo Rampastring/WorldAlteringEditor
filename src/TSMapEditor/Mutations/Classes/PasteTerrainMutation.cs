@@ -116,10 +116,10 @@ namespace TSMapEditor.Mutations.Classes
         {
             stream.WriteByte((byte)EntryType);
             byte[] offsetData = Offset.GetData();
-            stream.Write(offsetData, 0, offsetData.Length);
+            stream.Write(offsetData);
 
             byte[] data = GetCustomData();
-            stream.Write(data, 0, data.Length);
+            stream.Write(data);
         }
 
         /// <summary>
@@ -370,6 +370,8 @@ namespace TSMapEditor.Mutations.Classes
     public class CopiedMapData
     {
         public List<CopiedMapEntry> CopiedMapEntries { get; set; } = new List<CopiedMapEntry>();
+        public ushort Width { get; set; }
+        public ushort Height { get; set; }
 
         public byte[] Serialize()
         {
@@ -377,8 +379,11 @@ namespace TSMapEditor.Mutations.Classes
 
             using (var memoryStream = new MemoryStream())
             {
+                memoryStream.Write(BitConverter.GetBytes(Width));
+                memoryStream.Write(BitConverter.GetBytes(Height));
+
                 // Write entry count
-                memoryStream.Write(BitConverter.GetBytes(CopiedMapEntries.Count), 0, sizeof(int));
+                memoryStream.Write(BitConverter.GetBytes(CopiedMapEntries.Count));
 
                 // Write entries
                 foreach (var entry in CopiedMapEntries)
@@ -394,17 +399,19 @@ namespace TSMapEditor.Mutations.Classes
 
         public void Deserialize(byte[] bytes)
         {
-            if (bytes.Length < 4)
+            if (bytes.Length < 8)
             {
-                Logger.Log("Failed to deserialize copied map data: provided array is less than 4 bytes in size.");
+                Logger.Log("Failed to deserialize copied map data: provided array is less than 8 bytes in size.");
                 return;
             }
 
-            int entryCount = BitConverter.ToInt32(bytes, 0);
+            Width = BitConverter.ToUInt16(bytes, 0);
+            Height = BitConverter.ToUInt16(bytes, 2);
+            int entryCount = BitConverter.ToInt32(bytes, 4);
 
             using (var memoryStream = new MemoryStream(bytes))
             {
-                memoryStream.Position = 4;
+                memoryStream.Position = 8;
 
                 for (int i = 0; i < entryCount; i++)
                 {
