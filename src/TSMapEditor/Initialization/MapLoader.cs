@@ -785,13 +785,13 @@ namespace TSMapEditor.Initialization
             }
         }
 
-        public static void ReadTeamTypes(IMap map, IniFile mapIni)
+        public static void ReadTeamTypes(IMap map, IniFile mapIni, List<TeamTypeFlag> teamTypeFlags)
         {
-            var section = mapIni.GetSection("TeamTypes");
-            if (section == null)
+            var teamTypeListSection = mapIni.GetSection("TeamTypes");
+            if (teamTypeListSection == null)
                 return;
 
-            foreach (var kvp in section.Keys)
+            foreach (var kvp in teamTypeListSection.Keys)
             {
                 if (string.IsNullOrWhiteSpace(kvp.Key) || string.IsNullOrWhiteSpace(kvp.Value))
                     continue;
@@ -811,6 +811,12 @@ namespace TSMapEditor.Initialization
                 teamType.Script = map.Scripts.Find(s => s.ININame == scriptId);
                 teamType.TaskForce = map.TaskForces.Find(t => t.ININame == taskForceId);
                 teamType.Tag = map.Tags.Find(t => t.ID == tagId);
+
+                teamTypeFlags.ForEach(ttflag =>
+                {
+                    if (teamTypeSection.GetBooleanValue(ttflag.Name, false))
+                        teamType.EnableFlag(ttflag.Name);
+                });
 
                 if (teamType.House == null)
                 {

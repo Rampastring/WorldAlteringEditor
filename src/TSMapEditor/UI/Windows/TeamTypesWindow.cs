@@ -170,7 +170,9 @@ namespace TSMapEditor.UI.Windows
 
         private void BtnNewTeamType_LeftClick(object sender, EventArgs e)
         {
-            map.TeamTypes.Add(new TeamType(map.GetNewUniqueInternalId()) { Name = "New TeamType" });
+            var teamType = new TeamType(map.GetNewUniqueInternalId()) { Name = "New TeamType" };
+            map.EditorConfig.TeamTypeFlags.ForEach(flag => { if (flag.DefaultValue) teamType.EnableFlag(flag.Name); });
+            map.TeamTypes.Add(teamType);
             ListTeamTypes();
             lbTeamTypes.SelectedIndex = map.TeamTypes.Count - 1;
             lbTeamTypes.ScrollToBottom();
@@ -211,29 +213,15 @@ namespace TSMapEditor.UI.Windows
 
         private void AddBooleanProperties(EditorPanel panelBooleans)
         {
-            var type = typeof(TeamType);
-            PropertyInfo[] properties = type.GetProperties();
-
             int currentColumnRight = 0;
             int currentColumnX = Constants.UIEmptySideSpace;
             XNACheckBox previousCheckBoxOnColumn = null;
 
-            foreach (var property in properties)
+            foreach (var teamTypeFlag in map.EditorConfig.TeamTypeFlags)
             {
-                if (property.PropertyType != typeof(bool))
-                    continue;
-
-                if (property.GetSetMethod() == null || property.GetGetMethod() == null)
-                    continue;
-
                 var checkBox = new XNACheckBox(WindowManager);
-                checkBox.Tag = property;
-                checkBox.CheckedChanged += (s, e) =>
-                {
-                    if (editedTeamType != null)
-                        property.SetValue(editedTeamType, checkBox.Checked);
-                };
-                checkBox.Text = property.Name;
+                checkBox.Tag = teamTypeFlag.Name;
+                checkBox.Text = teamTypeFlag.Name;
                 panelBooleans.AddChild(checkBox);
                 checkBoxes.Add(checkBox);
 
@@ -303,7 +291,7 @@ namespace TSMapEditor.UI.Windows
             tbTechLevel.TextChanged -= TbTechLevel_TextChanged;
             tbGroup.TextChanged -= TbGroup_TextChanged;
             tbWaypoint.TextChanged -= TbWaypoint_TextChanged;
-            checkBoxes.ForEach(chk => chk.CheckedChanged -= Chk_CheckedChanged);
+            checkBoxes.ForEach(chk => chk.CheckedChanged -= FlagCheckBox_CheckedChanged);
 
             editedTeamType = teamType;
 
@@ -356,7 +344,7 @@ namespace TSMapEditor.UI.Windows
             else
                 selTag.Text = string.Empty;
 
-            checkBoxes.ForEach(chk => chk.Checked = (bool)((PropertyInfo)chk.Tag).GetValue(editedTeamType));
+            checkBoxes.ForEach(chk => chk.Checked = editedTeamType.IsFlagEnabled((string)chk.Tag));
 
             tbName.TextChanged += TbName_TextChanged;
             ddVeteranLevel.SelectedIndexChanged += DdVeteranLevel_SelectedIndexChanged;
@@ -366,15 +354,16 @@ namespace TSMapEditor.UI.Windows
             tbTechLevel.TextChanged += TbTechLevel_TextChanged;
             tbGroup.TextChanged += TbGroup_TextChanged;
             tbWaypoint.TextChanged += TbWaypoint_TextChanged;
-            checkBoxes.ForEach(chk => chk.CheckedChanged += Chk_CheckedChanged);
+            checkBoxes.ForEach(chk => chk.CheckedChanged += FlagCheckBox_CheckedChanged);
         }
 
-        private void Chk_CheckedChanged(object sender, EventArgs e)
+        private void FlagCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             var checkBox = (XNACheckBox)sender;
-            var propertyInfo = (PropertyInfo)checkBox.Tag;
-
-            propertyInfo.SetValue(editedTeamType, checkBox.Checked);
+            if (checkBox.Checked)
+                editedTeamType.EnableFlag((string)checkBox.Tag);
+            else
+                editedTeamType.DisableFlag((string)checkBox.Tag);
         }
 
         private void TbWaypoint_TextChanged(object sender, EventArgs e)

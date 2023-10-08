@@ -26,6 +26,7 @@ namespace TSMapEditor.Models
         public Dictionary<int, TriggerActionType> TriggerActionTypes { get; } = new Dictionary<int, TriggerActionType>();
         public List<Theater> Theaters { get; } = new List<Theater>();
         public List<BridgeType> Bridges { get; } = new List<BridgeType>();
+        public List<TeamTypeFlag> TeamTypeFlags { get; } = new List<TeamTypeFlag>();
 
         public void Init(Rules rules)
         {
@@ -38,6 +39,7 @@ namespace TSMapEditor.Models
             ReadTriggerEventTypes();
             ReadTriggerActionTypes();
             ReadBridges(rules);
+            ReadTeamTypeFlags();
         }
 
         private void ReadTheaters()
@@ -196,6 +198,8 @@ namespace TSMapEditor.Models
 
         private void ReadBridges(Rules rules)
         {
+            Bridges.Clear();
+
             var iniFile = new IniFile(Environment.CurrentDirectory + "/Config/Bridges.ini");
             var section = iniFile.GetSection("Bridges");
             if (section == null)
@@ -210,6 +214,25 @@ namespace TSMapEditor.Models
 
                 BridgeType bridgeType = new BridgeType(bridgeSection, rules);
                 Bridges.Add(bridgeType);
+            }
+        }
+
+        private void ReadTeamTypeFlags()
+        {
+            TeamTypeFlags.Clear();
+
+            var iniFile = new IniFile(Environment.CurrentDirectory + "/Config/TeamTypeFlags.ini");
+            const string sectionName = "TeamTypeFlags";
+
+            var keys = iniFile.GetSectionKeys(sectionName);
+            if (keys == null)
+                return;
+
+            foreach (var key in keys)
+            {
+                string value = iniFile.GetStringValue(sectionName, key, string.Empty);
+                var teamTypeFlag = new TeamTypeFlag(key, Conversions.BooleanFromString(value, false));
+                TeamTypeFlags.Add(teamTypeFlag);
             }
         }
     }

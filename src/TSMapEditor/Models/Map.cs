@@ -213,7 +213,7 @@ namespace TSMapEditor.Models
             MapLoader.ReadTags(this, mapIni);
             MapLoader.ReadCellTags(this, mapIni);
             MapLoader.ReadScripts(this, mapIni);
-            MapLoader.ReadTeamTypes(this, mapIni);
+            MapLoader.ReadTeamTypes(this, mapIni, EditorConfig.TeamTypeFlags);
             MapLoader.ReadAITriggerTypes(this, mapIni);
             MapLoader.ReadLocalVariables(this, mapIni);
 
@@ -289,7 +289,7 @@ namespace TSMapEditor.Models
         {
             PreSave?.Invoke(this, EventArgs.Empty);
 
-            LoadedINI.Comment = "Written by the World-Altering Editor (WAE)\r\n; all comments have been truncated\r\n; github.com/Rampastring/TSMapEditor\r\n; if you wish to support the editor, subscribe at patreon.com/rampastring";
+            LoadedINI.Comment = "Written by the World-Altering Editor (WAE)\r\n; all comments have been truncated\r\n; github.com/Rampastring/TSMapEditor\r\n; if you wish to support the editor, you can subscribe at patreon.com/rampastring\r\n; or buy me a coffee at ko-fi.com/rampastring";
 
             MapWriter.WriteMapSection(this, LoadedINI);
             MapWriter.WriteBasicSection(this, LoadedINI);
@@ -311,7 +311,7 @@ namespace TSMapEditor.Models
             MapWriter.WriteTags(this, LoadedINI);
             MapWriter.WriteCellTags(this, LoadedINI);
             MapWriter.WriteScripts(this, LoadedINI);
-            MapWriter.WriteTeamTypes(this, LoadedINI);
+            MapWriter.WriteTeamTypes(this, LoadedINI, EditorConfig.TeamTypeFlags);
 
             MapWriter.WriteLocalVariables(this, LoadedINI);
 

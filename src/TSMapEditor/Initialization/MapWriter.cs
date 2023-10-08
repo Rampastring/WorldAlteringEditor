@@ -344,7 +344,7 @@ namespace TSMapEditor.Initialization
             }
         }
 
-        public static void WriteTeamTypes(IMap map, IniFile mapIni)
+        public static void WriteTeamTypes(IMap map, IniFile mapIni, List<TeamTypeFlag> teamTypeFlags)
         {
             const string sectionName = "TeamTypes";
             mapIni.RemoveSection(sectionName);
@@ -362,7 +362,7 @@ namespace TSMapEditor.Initialization
                 mapIni.RemoveSection(teamType.ININame);
                 var teamTypeSection = new IniSection(teamType.ININame);
                 mapIni.AddSection(teamTypeSection);
-                teamType.WriteToIniSection(teamTypeSection);
+                teamType.WriteToIniSection(teamTypeSection, teamTypeFlags);
             }
         }
 

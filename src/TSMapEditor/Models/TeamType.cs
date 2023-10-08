@@ -2,6 +2,7 @@
 using Rampastring.Tools;
 using Rampastring.XNAUI;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
@@ -26,30 +27,26 @@ namespace TSMapEditor.Models
         public TaskForce TaskForce { get; set; }
         public Tag Tag { get; set; }
         public int Max { get; set; }
-        public bool Full { get; set; }
-        public bool Whiner { get; set; }
-        public bool Droppod { get; set; }
-        public bool Suicide { get; set; }
-        public bool Loadable { get; set; }
-        public bool Prebuild { get; set; }
         public int Priority { get; set; }
         public string Waypoint { get; set; }
-        public bool Annoyance { get; set; }
-        public bool IonImmune { get; set; }
-        public bool Recruiter { get; set; }
-        public bool Reinforce { get; set; }
         public int TechLevel { get; set; }
-        public bool Aggressive { get; set; }
-        public bool Autocreate { get; set; }
-        public bool GuardSlower { get; set; }
-        public bool OnTransOnly { get; set; }
-        public bool AvoidThreats { get; set; }
-        public bool LooseRecruit { get; set; }
         public int VeteranLevel { get; set; }
-        public bool IsBaseDefense { get; set; }
-        public bool OnlyTargetHouseEnemy { get; set; }
-        public bool TransportsReturnOnUnload { get; set; }
-        public bool AreTeamMembersRecruitable { get; set; }
+        public List<string> EnabledTeamTypeFlags { get; set; }
+
+        public bool IsFlagEnabled(string flagName) => EnabledTeamTypeFlags.Contains(flagName);
+
+        public void EnableFlag(string flagName)
+        {
+            if (IsFlagEnabled(flagName))
+                return;
+
+            EnabledTeamTypeFlags.Add(flagName);
+        }
+
+        public void DisableFlag(string flagName)
+        {
+            EnabledTeamTypeFlags.Remove(flagName);
+        }
 
         public string GetHeaderText() => Name;
 
@@ -87,27 +84,7 @@ namespace TSMapEditor.Models
 
             stringBuilder.Append(Environment.NewLine + Environment.NewLine);
             AppendFlag(stringBuilder, nameof(Max), Max);
-            AppendFlag(stringBuilder, nameof(Full), Full);
-            AppendFlag(stringBuilder, nameof(Whiner), Whiner);
-            AppendFlag(stringBuilder, nameof(Droppod), Droppod);
-            AppendFlag(stringBuilder, nameof(Suicide), Suicide);
-            AppendFlag(stringBuilder, nameof(Loadable), Loadable);
-            AppendFlag(stringBuilder, nameof(Prebuild), Prebuild);
-            AppendFlag(stringBuilder, nameof(Priority), Priority);
-            AppendFlag(stringBuilder, nameof(Annoyance), Annoyance);
-            AppendFlag(stringBuilder, nameof(IonImmune), IonImmune);
-            AppendFlag(stringBuilder, nameof(Recruiter), Recruiter);
-            AppendFlag(stringBuilder, nameof(Reinforce), Reinforce);
-            AppendFlag(stringBuilder, nameof(Aggressive), Aggressive);
-            AppendFlag(stringBuilder, nameof(Autocreate), Autocreate);
-            AppendFlag(stringBuilder, nameof(GuardSlower), GuardSlower);
-            AppendFlag(stringBuilder, nameof(OnTransOnly), OnTransOnly);
-            AppendFlag(stringBuilder, nameof(AvoidThreats), AvoidThreats);
-            AppendFlag(stringBuilder, nameof(LooseRecruit), LooseRecruit);
-            AppendFlag(stringBuilder, nameof(IsBaseDefense), IsBaseDefense);
-            AppendFlag(stringBuilder, nameof(OnlyTargetHouseEnemy), OnlyTargetHouseEnemy);
-            AppendFlag(stringBuilder, nameof(TransportsReturnOnUnload), TransportsReturnOnUnload);
-            AppendFlag(stringBuilder, nameof(AreTeamMembersRecruitable), AreTeamMembersRecruitable);
+            EnabledTeamTypeFlags.ForEach(s => AppendFlag(stringBuilder, s, true));
 
             return stringBuilder.ToString();
         }
@@ -144,7 +121,7 @@ namespace TSMapEditor.Models
             return clone;
         }
 
-        public void WriteToIniSection(IniSection iniSection)
+        public void WriteToIniSection(IniSection iniSection, List<TeamTypeFlag> teamTypeFlags)
         {
             // This cuts it for all properties of standard types
             WritePropertiesToIniSection(iniSection);
@@ -157,6 +134,11 @@ namespace TSMapEditor.Models
                 iniSection.SetStringValue("TaskForce", TaskForce.ININame);
             if (Tag != null)
                 iniSection.SetStringValue("Tag", Tag.ID);
+
+            teamTypeFlags.ForEach(flag =>
+            {
+                iniSection.SetBooleanValue(flag.Name, IsFlagEnabled(flag.Name), BooleanStringStyle.YESNO_LOWERCASE);
+            });
         }
 
         public override RTTIType WhatAmI()
