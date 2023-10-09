@@ -40,7 +40,11 @@ namespace TSMapEditor.Models
 
         public TriggerCondition DoClone()
         {
-            return (TriggerCondition)MemberwiseClone();
+            TriggerCondition clone = (TriggerCondition)MemberwiseClone();
+            clone.Parameters = new string[Parameters.Length];
+            Array.Copy(Parameters, clone.Parameters, Parameters.Length);
+
+            return clone;
         }
 
         public static TriggerCondition ParseFromArray(string[] array, int startIndex, bool useP3)
