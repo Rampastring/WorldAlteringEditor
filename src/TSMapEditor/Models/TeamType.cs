@@ -31,7 +31,9 @@ namespace TSMapEditor.Models
         public string Waypoint { get; set; }
         public int TechLevel { get; set; }
         public int VeteranLevel { get; set; }
-        public List<string> EnabledTeamTypeFlags { get; set; }
+
+        [INI(false)]
+        public List<string> EnabledTeamTypeFlags { get; private set; } = new List<string>();
 
         public bool IsFlagEnabled(string flagName) => EnabledTeamTypeFlags.Contains(flagName);
 
