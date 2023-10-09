@@ -117,7 +117,8 @@ namespace TSMapEditor.Models
             clone.ININame = iniName;
             clone.Name = "Clone of " + Name;
 
-            // This class has no members that we'd need to deep clone
+            clone.EnabledTeamTypeFlags = new List<string>(EnabledTeamTypeFlags);
+
             return clone;
         }
 
