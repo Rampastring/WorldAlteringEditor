@@ -34,6 +34,8 @@ namespace TSMapEditor.Initialization
 
         public static void PreCheckMapIni(IniFile mapIni)
         {
+            Logger.Log("Performing pre-load map checkup.");
+
             var section = mapIni.GetSection("Map");
             if (section == null)
                 throw new MapLoadException("[Map] does not exist in the loaded file!");
@@ -59,10 +61,14 @@ namespace TSMapEditor.Initialization
                 throw new MapLoadException("Map height cannot be greater than " +
                     $"{Constants.MaxMapHeight} cells; the map is {height} cells high!");
             }
+
+            Logger.Log("Pre-load map checkup complete.");
         }
 
         public static void PostCheckMap(IMap map, TheaterGraphics theaterGraphics)
         {
+            Logger.Log("Performing post-load map checkup.");
+
             map.DoForAllValidTiles(t =>
             {
                 if (t.TileIndex >= theaterGraphics.TileCount)
@@ -100,10 +106,14 @@ namespace TSMapEditor.Initialization
                     t.ChangeTileIndex(0, 0);
                 }
             });
+
+            Logger.Log("Post-load map checkup complete.");
         }
 
         public static void ReadMapSection(IMap map, IniFile mapIni)
         {
+            Logger.Log("Reading [Map] section.");
+
             var section = mapIni.GetSection("Map");
             if (section == null)
                 throw new MapLoadException("[Map] does not exist in the loaded file!");
@@ -129,10 +139,14 @@ namespace TSMapEditor.Initialization
                 Conversions.IntFromString(parts[3], height));
 
             map.TheaterName = section.GetStringValue("Theater", string.Empty);
+
+            Logger.Log("[Map] section read successfully.");
         }
 
         public static void ReadIsoMapPack(IMap map, IniFile mapIni)
         {
+            Logger.Log("Reading IsoMapPack5.");
+
             var section = mapIni.GetSection("IsoMapPack5");
             if (section == null)
                 return;
@@ -193,19 +207,27 @@ namespace TSMapEditor.Initialization
             }
 
             map.SetTileData(tiles);
+
+            Logger.Log("IsoMapPack5 read successfully.");
         }
 
         public static void ReadBasicSection(IMap map, IniFile mapIni)
         {
+            Logger.Log("Reading [Basic] section.");
+
             var section = mapIni.GetSection("Basic");
             if (section == null)
                 return;
 
             map.Basic.ReadPropertiesFromIniSection(section);
+
+            Logger.Log("[Basic] section read successfully.");
         }
 
         public static void ReadTerrainObjects(IMap map, IniFile mapIni)
         {
+            Logger.Log("Reading TerrainObjects.");
+
             IniSection section = mapIni.GetSection("Terrain");
             if (section == null)
                 return;
@@ -237,6 +259,8 @@ namespace TSMapEditor.Initialization
                 map.TerrainObjects.Add(terrainObject);
                 tile.TerrainObject = terrainObject;
             }
+
+            Logger.Log("TerrainObjects read successfully.");
         }
 
         private static void FindAttachedTag(IMap map, TechnoBase techno, string attachedTagString)
@@ -256,6 +280,8 @@ namespace TSMapEditor.Initialization
 
         public static void ReadBuildings(IMap map, IniFile mapIni)
         {
+            Logger.Log("Reading Structures.");
+
             IniSection section = mapIni.GetSection("Structures");
             if (section == null)
                 return;
@@ -369,10 +395,14 @@ namespace TSMapEditor.Initialization
                     tile.Structures.Add(building);
                 });
             }
+
+            Logger.Log("Structures read successfully.");
         }
 
         public static void ReadAircraft(IMap map, IniFile mapIni)
         {
+            Logger.Log("Reading Aircraft.");
+
             IniSection section = mapIni.GetSection("Aircraft");
             if (section == null)
                 return;
@@ -426,10 +456,14 @@ namespace TSMapEditor.Initialization
                 if (tile != null)
                     tile.Aircraft.Add(aircraft);
             }
+
+            Logger.Log("Aircraft read successfully.");
         }
 
         public static void ReadUnits(IMap map, IniFile mapIni)
         {
+            Logger.Log("Reading Units.");
+
             IniSection section = mapIni.GetSection("Units");
             if (section == null)
                 return;
@@ -496,10 +530,14 @@ namespace TSMapEditor.Initialization
 
                 unit.FollowerUnit = map.Units[unit.FollowerID];
             }
+
+            Logger.Log("Units read successfully.");
         }
 
         public static void ReadInfantry(IMap map, IniFile mapIni)
         {
+            Logger.Log("Reading Infantry.");
+
             IniSection section = mapIni.GetSection("Infantry");
             if (section == null)
                 return;
@@ -557,10 +595,14 @@ namespace TSMapEditor.Initialization
                 if (tile != null)
                     tile.Infantry[(int)subCell] = infantry;
             }
+
+            Logger.Log("Infantry read successfully.");
         }
 
         public static void ReadSmudges(IMap map, IniFile mapIni)
         {
+            Logger.Log("Reading Smudges.");
+
             var smudgesSection = mapIni.GetSection("Smudge");
             if (smudgesSection == null)
                 return;
@@ -600,10 +642,14 @@ namespace TSMapEditor.Initialization
 
                 cell.Smudge = new Smudge() { SmudgeType = smudgeType, Position = new Point2D(x, y) };
             }
+
+            Logger.Log("Smudges read successfully.");
         }
 
         public static void ReadOverlays(IMap map, IniFile mapIni)
         {
+            Logger.Log("Reading Overlays (OverlayPack and OverlayDataPack).");
+
             var overlayPackSection = mapIni.GetSection("OverlayPack");
             var overlayDataPackSection = mapIni.GetSection("OverlayDataPack");
             if (overlayPackSection == null || overlayDataPackSection == null)
@@ -650,10 +696,14 @@ namespace TSMapEditor.Initialization
                     tile.Overlay = overlay;
                 }
             }
+
+            Logger.Log("Overlays read successfully.");
         }
 
         public static void ReadWaypoints(IMap map, IniFile mapIni)
         {
+            Logger.Log("Reading Waypoints.");
+
             var waypointsSection = mapIni.GetSection("Waypoints");
             if (waypointsSection == null)
                 return;
@@ -682,10 +732,14 @@ namespace TSMapEditor.Initialization
 
                 map.AddWaypoint(waypoint);
             }
+
+            Logger.Log("Waypoints read successfully.");
         }
 
         public static void ReadTaskForces(IMap map, IniFile mapIni)
         {
+            Logger.Log("Reading TaskForces.");
+
             var section = mapIni.GetSection("TaskForces");
             if (section == null)
                 return;
@@ -699,10 +753,14 @@ namespace TSMapEditor.Initialization
 
                 map.AddTaskForce(taskForce);
             }
+
+            Logger.Log("TaskForces read successfully.");
         }
 
         public static void ReadTriggers(IMap map, IniFile mapIni)
         {
+            Logger.Log("Reading Triggers (Triggers, Events and Actions).");
+
             var section = mapIni.GetSection("Triggers");
             if (section == null)
                 return;
@@ -733,10 +791,14 @@ namespace TSMapEditor.Initialization
 
                 trigger.LinkedTrigger = map.Triggers.Find(otherTrigger => otherTrigger.ID == trigger.LinkedTriggerId);
             }
+
+            Logger.Log("Triggers read successfully.");
         }
 
         public static void ReadTags(IMap map, IniFile mapIni)
         {
+            Logger.Log("Reading Tags.");
+
             var section = mapIni.GetSection("Tags");
             if (section == null)
                 return;
@@ -768,10 +830,14 @@ namespace TSMapEditor.Initialization
                 var tag = new Tag() { ID = kvp.Key, Repeating = repeating, Name = parts[1], Trigger = trigger };
                 map.AddTag(tag);
             }
+
+            Logger.Log("Tags read successfully.");
         }
 
         public static void ReadScripts(IMap map, IniFile mapIni)
         {
+            Logger.Log("Reading ScriptTypes.");
+
             var section = mapIni.GetSection("ScriptTypes");
             if (section == null)
                 return;
@@ -783,10 +849,14 @@ namespace TSMapEditor.Initialization
                 if (script != null)
                     map.AddScript(script);
             }
+
+            Logger.Log("ScriptTypes read successfully.");
         }
 
         public static void ReadTeamTypes(IMap map, IniFile mapIni, List<TeamTypeFlag> teamTypeFlags)
         {
+            Logger.Log("Reading TeamTypes.");
+
             var teamTypeListSection = mapIni.GetSection("TeamTypes");
             if (teamTypeListSection == null)
                 return;
@@ -835,10 +905,14 @@ namespace TSMapEditor.Initialization
 
                 map.AddTeamType(teamType);
             }
+
+            Logger.Log("TeamTypes read successfully.");
         }
 
         public static void ReadAITriggerTypes(IMap map, IniFile mapIni)
         {
+            Logger.Log("Reading AITriggerTypes.");
+
             var section = mapIni.GetSection("AITriggerTypes");
             if (section == null)
                 return;
@@ -922,10 +996,14 @@ namespace TSMapEditor.Initialization
 
                 map.AITriggerTypes.Add(aiTriggerType);
             }
+
+            Logger.Log("AITriggerTypes read successfully.");
         }
 
         public static void ReadHouses(IMap map, IniFile mapIni)
         {
+            Logger.Log("Reading Houses.");
+
             var section = mapIni.GetSection("Houses");
             if (section == null)
                 return;
@@ -950,10 +1028,14 @@ namespace TSMapEditor.Initialization
                         house.XNAColor = color.XNAColor;
                 }
             }
+
+            Logger.Log("Houses read successfully.");
         }
 
         public static void ReadCellTags(IMap map, IniFile mapIni)
         {
+            Logger.Log("Reading CellTags.");
+
             var section = mapIni.GetSection("CellTags");
             if (section == null)
                 return;
@@ -974,10 +1056,14 @@ namespace TSMapEditor.Initialization
 
                 map.AddCellTag(new CellTag() { Position = coords.Value, Tag = tag });
             }
+
+            Logger.Log("CellTags read successfully.");
         }
 
         public static void ReadLocalVariables(IMap map, IniFile mapIni)
         {
+            Logger.Log("Reading local variables (VariableNames).");
+
             var section = mapIni.GetSection("VariableNames");
             if (section == null)
                 return;
@@ -1010,10 +1096,14 @@ namespace TSMapEditor.Initialization
 
                 map.LocalVariables.Add(localVariable);
             }
+
+            Logger.Log("Local variables read successfully.");
         }
 
         public static void ReadTubes(IMap map, IniFile mapIni)
         {
+            Logger.Log("Reading Tubes.");
+
             var section = mapIni.GetSection("Tubes");
             if (section == null)
                 return;
@@ -1047,6 +1137,8 @@ namespace TSMapEditor.Initialization
                 var tube = new Tube(new Point2D(enterX, enterY), new Point2D(exitX, exitY), initialFacing, directions);
                 map.Tubes.Add(tube);
             }
+
+            Logger.Log("Tubes read successfully.");
         }
     }
 }

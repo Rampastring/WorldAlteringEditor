@@ -35,6 +35,8 @@ namespace TSMapEditor.Settings
                 UseBoldFont,
                 AutoSaveInterval,
 
+                MultithreadedTextureLoading,
+
                 GameDirectory,
                 LastScenarioPath
             };
@@ -77,6 +79,8 @@ namespace TSMapEditor.Settings
         public StringSetting Theme = new StringSetting(General, "Theme", "Default");
         public BoolSetting UseBoldFont = new BoolSetting(General, "UseBoldFont", false);
         public IntSetting AutoSaveInterval = new IntSetting(General, "AutoSaveInterval", 300);
+
+        public BoolSetting MultithreadedTextureLoading = new BoolSetting(General, "MultithreadedTextureLoading", true);
 
         public StringSetting GameDirectory = new StringSetting(General, "GameDirectory", string.Empty);
         public StringSetting LastScenarioPath = new StringSetting(General, nameof(LastScenarioPath), "Maps/Custom/");

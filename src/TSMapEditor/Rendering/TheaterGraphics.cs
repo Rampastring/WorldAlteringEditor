@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -7,8 +8,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using TSMapEditor.CCEngine;
-using TSMapEditor.GameMath;
 using TSMapEditor.Models;
+using TSMapEditor.Settings;
 
 namespace TSMapEditor.Rendering
 {
@@ -23,260 +24,6 @@ namespace TSMapEditor.Rendering
         ITileImage GetTile(int id);
         int GetOverlayFrameCount(OverlayType overlayType);
         Theater Theater { get; }
-    }
-
-    /// <summary>
-    /// Interface for a full tile image (containing all sub-tiles).
-    /// </summary>
-    public interface ITileImage
-    {
-        /// <summary>
-        /// Width of the tile in cells.
-        /// </summary>
-        int Width { get; }
-
-        /// <summary>
-        /// Height of the tile in cells.
-        /// </summary>
-        int Height { get; }
-
-        /// <summary>
-        /// The index of the tile's tileset.
-        /// </summary>
-        int TileSetId { get; }
-
-        /// <summary>
-        /// The index of the tile within its tileset.
-        /// </summary>
-        int TileIndexInTileSet { get; }
-
-        /// <summary>
-        /// The unique ID of this tile within all tiles in the game.
-        /// </summary>
-        int TileID { get; }
-
-        int SubTileCount { get; }
-
-        ISubTileImage GetSubTile(int index);
-
-        Point2D? GetSubTileCoordOffset(int index);
-    }
-
-    /// <summary>
-    /// Contains graphics for a single full TMP (all sub-tiles / all cells).
-    /// </summary>
-    public class TileImage : ITileImage
-    {
-        public TileImage(int width, int height, int tileSetId, int tileIndex, int tileId, MGTMPImage[] tmpImages)
-        {
-            Width = width;
-            Height = height;
-            TileSetId = tileSetId;
-            TileIndexInTileSet = tileIndex;
-            TileID = tileId;
-            TMPImages = tmpImages;
-        }
-
-        /// <summary>
-        /// Width of the tile in cells.
-        /// </summary>
-        public int Width { get; }
-
-        /// <summary>
-        /// Height of the tile in cells.
-        /// </summary>
-        public int Height { get; }
-
-        /// <summary>
-        /// The index of the tile set.
-        /// </summary>
-        public int TileSetId { get; set; }
-
-        /// <summary>
-        /// The index of the tile within its tileset.
-        /// </summary>
-        public int TileIndexInTileSet { get; set; }
-
-        /// <summary>
-        /// The unique ID of this tile within all tiles in the game.
-        /// </summary>
-        public int TileID { get; set; }
-
-        public ISubTileImage GetSubTile(int index) => TMPImages[index];
-
-        public Point2D? GetSubTileCoordOffset(int index)
-        {
-            if (TMPImages[index] == null)
-                return null;
-
-            int x = index % Width;
-            int y = index / Width;
-            return new Point2D(x, y);
-        }
-
-        public int SubTileCount => TMPImages.Length;
-
-        public MGTMPImage[] TMPImages { get; set; }
-
-        /// <summary>
-        /// Calculates and returns the width of this full tile image.
-        /// </summary>
-        public int GetWidth(out int outMinX)
-        {
-            outMinX = 0;
-
-            if (TMPImages == null)
-                return 0;
-
-            int maxX = int.MinValue;
-            int minX = int.MaxValue;
-
-            for (int i = 0; i < TMPImages.Length; i++)
-            {
-                if (TMPImages[i] == null)
-                    continue;
-
-                var tmpData = TMPImages[i].TmpImage;
-                if (tmpData == null)
-                    continue;
-
-                if (tmpData.X < minX)
-                    minX = tmpData.X;
-
-                int cellRightXCoordinate = tmpData.X + Constants.CellSizeX;
-                if (cellRightXCoordinate > maxX)
-                    maxX = cellRightXCoordinate;
-
-                if (TMPImages[i].ExtraTexture != null)
-                {
-                    int extraRightXCoordinate = tmpData.X + TMPImages[i].TmpImage.XExtra + TMPImages[i].ExtraTexture.Width;
-                    if (extraRightXCoordinate > maxX)
-                        maxX = extraRightXCoordinate;
-                }
-            }
-
-            outMinX = minX;
-            return maxX - minX;
-        }
-
-        /// <summary>
-        /// Calculates and returns the height of this full tile image.
-        /// </summary>
-        public int GetHeight()
-        {
-            if (TMPImages == null)
-                return 0;
-
-            int top = int.MaxValue;
-            int bottom = int.MinValue;
-
-            for (int i = 0; i < TMPImages.Length; i++)
-            {
-                if (TMPImages[i] == null)
-                    continue;
-
-                var tmpData = TMPImages[i].TmpImage;
-                if (tmpData == null)
-                    continue;
-
-                int heightOffset = Constants.CellHeight * tmpData.Height;
-
-                int cellTop = tmpData.Y - heightOffset;
-                int cellBottom = cellTop + Constants.CellSizeY;
-
-                if (cellTop < top)
-                    top = cellTop;
-
-                if (cellBottom > bottom)
-                    bottom = cellBottom;
-
-                if (TMPImages[i].ExtraTexture != null)
-                {
-                    int extraCellTop = tmpData.YExtra - heightOffset;
-                    int extraCellBottom = extraCellTop + TMPImages[i].ExtraTexture.Height;
-
-                    if (extraCellTop < top)
-                        top = extraCellTop;
-
-                    if (extraCellBottom > bottom)
-                        bottom = extraCellBottom;
-                }
-            }
-
-            return bottom - top;
-        }
-
-        public int GetYOffset()
-        {
-            int height = GetHeight();
-
-            // return 0;
-
-            int yOffset = 0;
-
-            int maxTopCoord = int.MaxValue;
-            int maxBottomCoord = int.MinValue;
-
-            for (int i = 0; i < TMPImages.Length; i++)
-            {
-                if (TMPImages[i] == null)
-                    continue;
-
-                var tmpData = TMPImages[i].TmpImage;
-                if (tmpData == null)
-                    continue;
-
-                int heightOffset = Constants.CellHeight * tmpData.Height;
-                int cellTopCoord = tmpData.Y - heightOffset;
-                int cellBottomCoord = tmpData.Y + Constants.CellSizeY - heightOffset;
-
-                if (cellTopCoord < maxTopCoord)
-                    maxTopCoord = cellTopCoord;
-
-                if (cellBottomCoord > maxBottomCoord)
-                    maxBottomCoord = cellBottomCoord;
-            }
-
-            for (int i = 0; i < TMPImages.Length; i++)
-            {
-                if (TMPImages[i] == null)
-                    continue;
-
-                var tmpData = TMPImages[i].TmpImage;
-                if (tmpData == null)
-                    continue;
-
-                if (TMPImages[i].ExtraTexture != null)
-                {
-                    int heightOffset = Constants.CellHeight * tmpData.Height;
-
-                    int extraTopCoord = TMPImages[i].TmpImage.YExtra - heightOffset;
-                    int extraBottomCoord = TMPImages[i].TmpImage.YExtra + TMPImages[i].ExtraTexture.Height - heightOffset;
-
-                    if (extraTopCoord < maxTopCoord)
-                        maxTopCoord = extraTopCoord;
-
-                    if (extraBottomCoord > maxBottomCoord)
-                        maxBottomCoord = extraBottomCoord;
-                }
-            }
-
-            if (maxTopCoord < 0)
-                yOffset = -maxTopCoord;
-            else if (maxBottomCoord > height)
-                yOffset = -(maxBottomCoord - height);
-
-            return yOffset;
-        }
-
-        public void Dispose()
-        {
-            Array.ForEach(TMPImages, tmp =>
-            {
-                if (tmp != null)
-                    tmp.Dispose();
-            });
-        }
     }
 
     public class ObjectImage
@@ -426,15 +173,29 @@ namespace TSMapEditor.Rendering
             if (!string.IsNullOrEmpty(Theater.TiberiumPaletteName))
                 tiberiumPalette = GetPaletteOrFail(Theater.TiberiumPaletteName);
 
-            var task1 = Task.Factory.StartNew(() => ReadTileTextures());
-            var task2 = Task.Factory.StartNew(() => ReadTerrainObjectTextures(rules.TerrainTypes));
-            var task3 = Task.Factory.StartNew(() => ReadBuildingTextures(rules.BuildingTypes));
-            var task4 = Task.Factory.StartNew(() => ReadUnitTextures(rules.UnitTypes));
-            var task5 = Task.Factory.StartNew(() => ReadInfantryTextures(rules.InfantryTypes));
-            var task6 = Task.Factory.StartNew(() => ReadOverlayTextures(rules.OverlayTypes));
-            var task7 = Task.Factory.StartNew(() => ReadSmudgeTextures(rules.SmudgeTypes));
-            var task8 = Task.Factory.StartNew(() => ReadAnimTextures(rules.AnimTypes));
-            Task.WaitAll(task1, task2, task3, task4, task5, task6, task7, task8);
+            if (UserSettings.Instance.MultithreadedTextureLoading)
+            {
+                var task1 = Task.Factory.StartNew(() => ReadTileTextures());
+                var task2 = Task.Factory.StartNew(() => ReadTerrainObjectTextures(rules.TerrainTypes));
+                var task3 = Task.Factory.StartNew(() => ReadBuildingTextures(rules.BuildingTypes));
+                var task4 = Task.Factory.StartNew(() => ReadUnitTextures(rules.UnitTypes));
+                var task5 = Task.Factory.StartNew(() => ReadInfantryTextures(rules.InfantryTypes));
+                var task6 = Task.Factory.StartNew(() => ReadOverlayTextures(rules.OverlayTypes));
+                var task7 = Task.Factory.StartNew(() => ReadSmudgeTextures(rules.SmudgeTypes));
+                var task8 = Task.Factory.StartNew(() => ReadAnimTextures(rules.AnimTypes));
+                Task.WaitAll(task1, task2, task3, task4, task5, task6, task7, task8);
+            }
+            else
+            {
+                ReadTileTextures();
+                ReadTerrainObjectTextures(rules.TerrainTypes);
+                ReadBuildingTextures(rules.BuildingTypes);
+                ReadUnitTextures(rules.UnitTypes);
+                ReadInfantryTextures(rules.InfantryTypes);
+                ReadOverlayTextures(rules.OverlayTypes);
+                ReadSmudgeTextures(rules.SmudgeTypes);
+                ReadAnimTextures(rules.AnimTypes);
+            }
 
             LoadBuildingZData();
         }
@@ -475,6 +236,8 @@ namespace TSMapEditor.Rendering
 
         private void ReadTileTextures()
         {
+            Logger.Log("Loading tile textures.");
+
             int currentTileIndex = 0; // Used for setting the starting tile ID of a tileset
 
             for (int tsId = 0; tsId < Theater.TileSets.Count; tsId++)
@@ -533,6 +296,8 @@ namespace TSMapEditor.Rendering
                 }
             }
 
+            Logger.Log("Assigning marble madness mode tile textures.");
+
             // Assign marble-madness (MM) mode tile graphics
             int tileIndex = 0;
             for (int tsId = 0; tsId < Theater.TileSets.Count; tsId++)
@@ -560,10 +325,14 @@ namespace TSMapEditor.Rendering
                 }
                 tileIndex += tileSet.LoadedTileCount;
             }
+
+            Logger.Log("Finished loading tile textures.");
         }
 
         public void ReadTerrainObjectTextures(List<TerrainType> terrainTypes)
         {
+            Logger.Log("Loading terrain object textures.");
+
             var unitPalette = GetPaletteOrFail(Theater.UnitPaletteName);
 
             TerrainObjectTextures = new ObjectImage[terrainTypes.Count];
@@ -600,12 +369,16 @@ namespace TSMapEditor.Rendering
                         terrainTypes[i].SpawnsTiberium ? unitPalette : theaterPalette);
                 }
             }
+
+            Logger.Log("Finished loading terrain object textures.");
         }
 
 
 
         public void ReadBuildingTextures(List<BuildingType> buildingTypes)
         {
+            Logger.Log("Loading building textures.");
+
             BuildingTextures = new ObjectImage[buildingTypes.Count];
             BuildingBibTextures = new ObjectImage[buildingTypes.Count];
 
@@ -710,10 +483,14 @@ namespace TSMapEditor.Rendering
                     BuildingBibTextures[i] = new ObjectImage(graphicsDevice, bibShpFile, shpData, palette, null, buildingType.ArtConfig.Remapable);
                 }
             }
+
+            Logger.Log("Finished loading building textures.");
         }
 
         public void ReadAnimTextures(List<AnimType> animTypes)
         {
+            Logger.Log("Loading animation textures.");
+
             AnimTextures = new ObjectImage[animTypes.Count];
 
             for (int i = 0; i < animTypes.Count; i++)
@@ -775,10 +552,14 @@ namespace TSMapEditor.Rendering
                 AnimTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, palette, null,
                     animType.ArtConfig.Remapable || animType.ArtConfig.IsBuildingAnim);
             }
+
+            Logger.Log("Finished loading animation textures.");
         }
 
         public void ReadUnitTextures(List<UnitType> unitTypes)
         {
+            Logger.Log("Loading unit textures.");
+
             var loadedTextures = new Dictionary<string, ObjectImage>();
             UnitTextures = new ObjectImage[unitTypes.Count];
 
@@ -820,10 +601,14 @@ namespace TSMapEditor.Rendering
                 UnitTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, unitPalette, framesToLoad, unitType.ArtConfig.Remapable);
                 loadedTextures[shpFileName] = UnitTextures[i];
             }
+
+            Logger.Log("Finished loading unit textures.");
         }
 
         public void ReadInfantryTextures(List<InfantryType> infantryTypes)
         {
+            Logger.Log("Loading infantry textures.");
+
             var loadedTextures = new Dictionary<string, ObjectImage>();
             InfantryTextures = new ObjectImage[infantryTypes.Count];
 
@@ -869,10 +654,14 @@ namespace TSMapEditor.Rendering
                 InfantryTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, unitPalette, null, infantryType.ArtConfig.Remapable);
                 loadedTextures[shpFileName] = InfantryTextures[i];
             }
+
+            Logger.Log("Finished loading infantry textures.");
         }
 
         public void ReadOverlayTextures(List<OverlayType> overlayTypes)
         {
+            Logger.Log("Loading overlay textures.");
+
             OverlayTextures = new ObjectImage[overlayTypes.Count];
             for (int i = 0; i < overlayTypes.Count; i++)
             {
@@ -947,10 +736,14 @@ namespace TSMapEditor.Rendering
                     OverlayTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, palette, null, isRemapable, null);
                 }
             }
+
+            Logger.Log("Finished loading overlay textures.");
         }
 
         public void ReadSmudgeTextures(List<SmudgeType> smudgeTypes)
         {
+            Logger.Log("Loading smudge textures.");
+
             SmudgeTextures = new ObjectImage[smudgeTypes.Count];
             for (int i = 0; i < smudgeTypes.Count; i++)
             {
@@ -969,6 +762,8 @@ namespace TSMapEditor.Rendering
                 Palette palette = theaterPalette;
                 SmudgeTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, palette);
             }
+
+            Logger.Log("Finished loading smudge textures.");
         }
 
         private Random random = new Random();
