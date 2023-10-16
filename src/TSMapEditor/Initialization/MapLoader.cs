@@ -190,10 +190,10 @@ namespace TSMapEditor.Initialization
                 position += inputSize + 4;
             }
 
-            // if (uncompressedData.Count % IsoMapPack5Tile.Size != 0)
-            //     throw new InvalidOperationException("Decompressed IsoMapPack5 size does not match expected struct size");
+            // if ((uncompressedData.Count % IsoMapPack5Tile.Size) != 4)
+            //      throw new InvalidOperationException("Decompressed IsoMapPack5 size does not match expected struct size");
 
-            var tiles = new List<MapTile>(uncompressedData.Count % IsoMapPack5Tile.Size);
+            var tiles = new List<MapTile>(uncompressedData.Count / IsoMapPack5Tile.Size);
             position = 0;
             while (position < uncompressedData.Count - IsoMapPack5Tile.Size)
             {

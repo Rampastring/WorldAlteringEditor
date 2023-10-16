@@ -95,6 +95,9 @@ namespace TSMapEditor.Initialization
                 buffer.Add(tile.IceGrowth);
             }
 
+            // Add 4 padding bytes
+            buffer.AddRange(new byte[4]);
+
             const int maxOutputSize = 8192;
             // generate IsoMapPack5 blocks
             int processedBytes = 0;
