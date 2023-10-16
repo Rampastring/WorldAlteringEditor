@@ -106,7 +106,7 @@ namespace TSMapEditor.Models
             extendedStringBuilder.Append(OwnerName);
             extendedStringBuilder.Append(TechLevel);
             extendedStringBuilder.Append((int)ConditionType);
-            extendedStringBuilder.Append(ConditionObjectString ?? Constants.NoneValue1);
+            extendedStringBuilder.Append(string.IsNullOrWhiteSpace(ConditionObjectString) ? Constants.NoneValue1 : ConditionObjectString);
             extendedStringBuilder.Append(Comparator.ToStringValue());
             extendedStringBuilder.Append(InitialWeight.ToString(".######", CultureInfo.InvariantCulture));
             extendedStringBuilder.Append(MinimumWeight.ToString(".######", CultureInfo.InvariantCulture));
