@@ -30,6 +30,11 @@ namespace TSMapEditor.Models
 
             return new ScriptActionEntry() { Action = action, Argument = argument };
         }
+
+        public ScriptActionEntry Clone()
+        {
+            return (ScriptActionEntry)MemberwiseClone();
+        }
     }
 
     public class Script : IIDContainer

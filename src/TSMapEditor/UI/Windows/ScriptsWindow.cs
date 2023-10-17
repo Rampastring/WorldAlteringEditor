@@ -91,6 +91,7 @@ namespace TSMapEditor.UI.Windows
             actionListContextMenu.Width = 150;
             actionListContextMenu.AddItem("Move Up", ActionListContextMenu_MoveUp, () => editedScript != null && lbActions.SelectedItem != null && lbActions.SelectedIndex > 0);
             actionListContextMenu.AddItem("Move Down", ActionListContextMenu_MoveDown, () => editedScript != null && lbActions.SelectedItem != null && lbActions.SelectedIndex < lbActions.Items.Count - 1);
+            actionListContextMenu.AddItem("Clone Action", ActionListContextMenu_CloneAction, () => editedScript != null && lbActions.SelectedItem != null);
             actionListContextMenu.AddItem("Insert New Action Here", ActionListContextMenu_Insert, () => editedScript != null && lbActions.SelectedItem != null);
             actionListContextMenu.AddItem("Delete Action", ActionListContextMenu_Delete, () => editedScript != null && lbActions.SelectedItem != null);
             AddChild(actionListContextMenu);
@@ -123,6 +124,21 @@ namespace TSMapEditor.UI.Windows
             editedScript.Actions.Swap(lbActions.SelectedIndex, lbActions.SelectedIndex + 1);
             EditScript(editedScript);
             lbActions.SelectedIndex++;
+            lbActions.ViewTop = viewTop;
+        }
+
+        private void ActionListContextMenu_CloneAction()
+        {
+            if (editedScript == null || lbActions.SelectedItem == null)
+                return;
+
+            int viewTop = lbActions.ViewTop;
+            int index = lbActions.SelectedIndex + 1;
+
+            var clonedEntry = editedScript.Actions[lbActions.SelectedIndex].Clone();
+            editedScript.Actions.Insert(index, clonedEntry);
+            EditScript(editedScript);
+            lbActions.SelectedIndex = index;
             lbActions.ViewTop = viewTop;
         }
 
