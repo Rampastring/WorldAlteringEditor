@@ -2,6 +2,7 @@
 using Rampastring.XNAUI.XNAControls;
 using System.Collections.Generic;
 using System.Linq;
+using TSMapEditor.Misc;
 using TSMapEditor.Models;
 using TSMapEditor.UI.Controls;
 
@@ -27,7 +28,10 @@ namespace TSMapEditor.UI.Windows
         private EditorSuggestionTextBox tbSearchUnit;
         private EditorListBox lbUnitType;
 
+        private XNAContextMenu unitListContextMenu;
+
         private TaskForce editedTaskForce;
+
 
         public override void Initialize()
         {
@@ -73,6 +77,88 @@ namespace TSMapEditor.UI.Windows
 
             tbTaskForceName.TextChanged += TbTaskForceName_TextChanged;
             tbGroup.TextChanged += TbGroup_TextChanged;
+
+            unitListContextMenu = new XNAContextMenu(WindowManager);
+            unitListContextMenu.Name = nameof(unitListContextMenu);
+            unitListContextMenu.Width = 150;
+            unitListContextMenu.AddItem("Move Up", UnitListContextMenu_MoveUp, () => editedTaskForce != null && lbUnitEntries.SelectedItem != null && lbUnitEntries.SelectedIndex > 0);
+            unitListContextMenu.AddItem("Move Down", UnitListContextMenu_MoveDown, () => editedTaskForce != null && lbUnitEntries.SelectedItem != null && lbUnitEntries.SelectedIndex < lbUnitEntries.Items.Count - 1);
+            unitListContextMenu.AddItem("Clone Unit Entry", UnitListContextMenu_CloneEntry, () => editedTaskForce != null && lbUnitEntries.SelectedItem != null && editedTaskForce.HasFreeTechnoSlot());
+            unitListContextMenu.AddItem("Insert New Unit Here", UnitListContextMenu_Insert, () => editedTaskForce != null && lbUnitEntries.SelectedItem != null && editedTaskForce.HasFreeTechnoSlot());
+            unitListContextMenu.AddItem("Delete Unit Entry", UnitListContextMenu_Delete, () => editedTaskForce != null && lbUnitEntries.SelectedItem != null);
+            AddChild(unitListContextMenu);
+            lbUnitEntries.AllowRightClickUnselect = false;
+            lbUnitEntries.RightClick += (s, e) => { if (editedTaskForce != null) { lbUnitEntries.SelectedIndex = lbUnitEntries.HoveredIndex; unitListContextMenu.Open(GetCursorPoint()); } };
+        }
+
+        private void UnitListContextMenu_MoveUp()
+        {
+            if (editedTaskForce == null || lbUnitEntries.SelectedItem == null || lbUnitEntries.SelectedIndex <= 0)
+                return;
+
+            int viewTop = lbUnitEntries.ViewTop;
+            editedTaskForce.TechnoTypes.Swap(lbUnitEntries.SelectedIndex - 1, lbUnitEntries.SelectedIndex);
+            EditTaskForce(editedTaskForce);
+            lbUnitEntries.SelectedIndex--;
+            lbUnitEntries.ViewTop = viewTop;
+        }
+
+        private void UnitListContextMenu_MoveDown()
+        {
+            if (editedTaskForce == null || lbUnitEntries.SelectedItem == null || lbUnitEntries.SelectedIndex >= lbUnitEntries.Items.Count - 1)
+                return;
+
+            int viewTop = lbUnitEntries.ViewTop;
+            editedTaskForce.TechnoTypes.Swap(lbUnitEntries.SelectedIndex, lbUnitEntries.SelectedIndex + 1);
+            EditTaskForce(editedTaskForce);
+            lbUnitEntries.SelectedIndex++;
+            lbUnitEntries.ViewTop = viewTop;
+        }
+
+        private void UnitListContextMenu_CloneEntry()
+        {
+            if (editedTaskForce == null || lbUnitEntries.SelectedItem == null || !editedTaskForce.HasFreeTechnoSlot())
+                return;
+
+            int viewTop = lbUnitEntries.ViewTop;
+            int newIndex = lbUnitEntries.SelectedIndex + 1;
+
+            var clonedEntry = editedTaskForce.TechnoTypes[lbUnitEntries.SelectedIndex].Clone();
+            editedTaskForce.InsertTechnoEntry(newIndex, clonedEntry);
+            EditTaskForce(editedTaskForce);
+            lbUnitEntries.SelectedIndex = newIndex;
+            lbUnitEntries.ViewTop = viewTop;
+        }
+
+        private void UnitListContextMenu_Insert()
+        {
+            if (editedTaskForce == null || lbUnitEntries.SelectedItem == null)
+                return;
+
+            int viewTop = lbUnitEntries.ViewTop;
+            int newIndex = lbUnitEntries.SelectedIndex;
+
+            editedTaskForce.InsertTechnoEntry(lbUnitEntries.SelectedIndex,
+                new TaskForceTechnoEntry()
+                {
+                    Count = 1,
+                    TechnoType = (TechnoType)lbUnitType.Items[0].Tag
+                });
+
+            EditTaskForce(editedTaskForce);
+            lbUnitEntries.SelectedIndex = newIndex;
+            lbUnitEntries.ViewTop = viewTop;
+        }
+
+        private void UnitListContextMenu_Delete()
+        {
+            if (editedTaskForce == null || lbUnitEntries.SelectedItem == null)
+                return;
+
+            int viewTop = lbUnitEntries.ViewTop;
+            editedTaskForce.RemoveTechnoEntry(lbUnitEntries.SelectedIndex);
+            EditTaskForce(editedTaskForce);
+            lbUnitEntries.ViewTop = viewTop;
         }
 
         private void BtnDeleteUnit_LeftClick(object sender, System.EventArgs e)
@@ -89,7 +175,7 @@ namespace TSMapEditor.UI.Windows
             if (editedTaskForce == null)
                 return;
 
-            if (editedTaskForce.TechnoTypes[TaskForce.MaxTechnoCount - 1] != null)
+            if (!editedTaskForce.HasFreeTechnoSlot())
                 return;
 
             editedTaskForce.AddTechnoEntry(
@@ -338,7 +424,6 @@ namespace TSMapEditor.UI.Windows
             tbGroup.Value = taskForce.Group;
 
             lbUnitEntries.SelectedIndexChanged -= LbUnitEntries_SelectedIndexChanged;
-            lbUnitEntries.SelectedIndex = -1;
             lbUnitEntries.Clear();
 
             for (int i = 0; i < taskForce.TechnoTypes.Length; i++)
@@ -352,7 +437,7 @@ namespace TSMapEditor.UI.Windows
 
             lbUnitEntries.SelectedIndexChanged += LbUnitEntries_SelectedIndexChanged;
 
-            if (lbUnitEntries.Items.Count > 0)
+            if (lbUnitEntries.SelectedItem == null && lbUnitEntries.Items.Count > 0)
             {
                 lbUnitEntries.SelectedIndex = 0;
             }

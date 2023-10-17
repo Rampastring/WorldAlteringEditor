@@ -42,10 +42,10 @@ namespace TSMapEditor.UI.Windows
         private MenuButton btnEditorPresetValues;
         private XNALabel lblActionDescriptionValue;
 
-        private Script editedScript;
-
         private SelectScriptActionWindow selectScriptActionWindow;
         private XNAContextMenu actionListContextMenu;
+
+        private Script editedScript;
 
         public override void Initialize()
         {

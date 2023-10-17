@@ -12,6 +12,11 @@ namespace TSMapEditor.Models
         public TechnoType TechnoType { get; set; }
         public int Count { get; set; }
 
+        public TaskForceTechnoEntry Clone()
+        {
+            return (TaskForceTechnoEntry)MemberwiseClone();
+        }
+
         public static TaskForceTechnoEntry CreateEntry(Rules rules, string data)
         {
             string[] parts = data.Split(',');
@@ -76,6 +81,33 @@ namespace TSMapEditor.Models
                     break;
                 }
             }
+        }
+
+        public bool HasFreeTechnoSlot()
+        {
+            for (int i = 0; i < MaxTechnoCount; i++)
+            {
+                if (TechnoTypes[i] == null)
+                    return true;
+            }
+
+            return false;
+        }
+
+        public void InsertTechnoEntry(int index, TaskForceTechnoEntry taskForceTechnoEntry)
+        {
+            if (index >= MaxTechnoCount)
+                throw new ArgumentException($"{nameof(InsertTechnoEntry)}: {nameof(index)} cannot be higher than {nameof(MaxTechnoCount)}.");
+
+            if (!HasFreeTechnoSlot())
+                throw new InvalidOperationException("Cannot insert a Techno entry when the TaskForce has no free techno slots!");
+
+            for (int i = MaxTechnoCount - 2; i >= index; i--)
+            {
+                TechnoTypes[i + 1] = TechnoTypes[i];
+            }
+
+            TechnoTypes[index] = taskForceTechnoEntry;
         }
 
         public void RemoveTechnoEntry(int technoEntryIndex)
