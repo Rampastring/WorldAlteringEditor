@@ -1111,6 +1111,9 @@ namespace TSMapEditor.UI.Windows
             chkDisabled.CheckedChanged -= ChkDisabled_CheckedChanged;
             selAttachedTrigger.LeftClick -= SelAttachedTrigger_LeftClick;
             ddTriggerColor.SelectedIndexChanged -= DdTriggerColor_SelectedIndexChanged;
+            chkEasy.CheckedChanged -= ChkEasy_CheckedChanged;
+            chkMedium.CheckedChanged -= ChkMedium_CheckedChanged;
+            chkHard.CheckedChanged -= ChkHard_CheckedChanged;
 
             editedTrigger = trigger;
 
@@ -1185,6 +1188,24 @@ namespace TSMapEditor.UI.Windows
             chkDisabled.CheckedChanged += ChkDisabled_CheckedChanged;
             selAttachedTrigger.LeftClick += SelAttachedTrigger_LeftClick;
             ddTriggerColor.SelectedIndexChanged += DdTriggerColor_SelectedIndexChanged;
+            chkEasy.CheckedChanged += ChkEasy_CheckedChanged;
+            chkMedium.CheckedChanged += ChkMedium_CheckedChanged;
+            chkHard.CheckedChanged += ChkHard_CheckedChanged;
+        }
+
+        private void ChkEasy_CheckedChanged(object sender, EventArgs e)
+        {
+            editedTrigger.Easy = chkEasy.Checked;
+        }
+
+        private void ChkMedium_CheckedChanged(object sender, EventArgs e)
+        {
+            editedTrigger.Normal = chkMedium.Checked;
+        }
+
+        private void ChkHard_CheckedChanged(object sender, EventArgs e)
+        {
+            editedTrigger.Hard = chkHard.Checked;
         }
 
         private void SelAttachedTrigger_LeftClick(object sender, EventArgs e)
