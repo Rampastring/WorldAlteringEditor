@@ -478,7 +478,7 @@ namespace TSMapEditor.Initialization
                 // INDEX=OWNER,ID,HEALTH,X,Y,FACING,MISSION,TAG,VETERANCY,GROUP,HIGH,FOLLOWS_INDEX,AUTOCREATE_NO_RECRUITABLE,AUTOCREATE_YES_RECRUITABLE
 
                 string attachedTag = GetAttachedTagName(unit);
-                string followsIndex = unit.FollowerUnit == null ? "-1" : map.Units.IndexOf(unit.FollowerUnit).ToString();
+                string followsIndex = unit.FollowerUnit == null ? "-1" : map.Units.IndexOf(unit.FollowerUnit).ToString(CultureInfo.InvariantCulture);
 
                 string value = $"{unit.Owner.ININame},{unit.ObjectType.ININame},{unit.HP}," +
                                $"{unit.Position.X},{unit.Position.Y},{unit.Facing}," +

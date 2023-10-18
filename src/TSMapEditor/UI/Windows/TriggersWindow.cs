@@ -81,6 +81,7 @@ namespace TSMapEditor.UI.Windows
         private SelectTutorialLineWindow selectTutorialLineWindow;
         private SelectThemeWindow selectThemeWindow;
         private SelectTechnoTypeWindow selectTechnoTypeWindow;
+        private SelectTagWindow selectTagWindow;
 
         private XNAContextMenu actionContextMenu;
         private XNAContextMenu eventContextMenu;
@@ -222,6 +223,10 @@ namespace TSMapEditor.UI.Windows
             selectTechnoTypeWindow = new SelectTechnoTypeWindow(WindowManager, map);
             var technoTypeDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTechnoTypeWindow);
             technoTypeDarkeningPanel.Hidden += TechnoTypeDarkeningPanel_Hidden;
+
+            selectTagWindow = new SelectTagWindow(WindowManager, map);
+            var tagDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTagWindow);
+            tagDarkeningPanel.Hidden += TagDarkeningPanel_Hidden;
 
             eventContextMenu = new XNAContextMenu(WindowManager);
             eventContextMenu.Name = nameof(eventContextMenu);
@@ -754,6 +759,11 @@ namespace TSMapEditor.UI.Windows
                 case TriggerParamType.Theme:
                     selectThemeWindow.Open(map.Rules.Themes.GetByIndex(Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1)));
                     break;
+                case TriggerParamType.Tag:
+                    Tag existingTag = map.Tags.Find(tag => tag.ID == triggerAction.Parameters[paramIndex]);
+                    selectTagWindow.IsForEvent = false;
+                    selectTagWindow.Open(existingTag);
+                    break;
                 default:
                     break;
             }
@@ -789,6 +799,14 @@ namespace TSMapEditor.UI.Windows
                 return;
 
             AssignParamValue(selectTechnoTypeWindow.IsForEvent, selectTechnoTypeWindow.SelectedObject.ININame);
+        }
+
+        private void TagDarkeningPanel_Hidden(object sender, EventArgs e)
+        {
+            if (selectTagWindow.SelectedObject == null)
+                return;
+
+            AssignParamValue(selectTagWindow.IsForEvent, selectTagWindow.SelectedObject.ID);
         }
 
         private void TutorialDarkeningPanel_Hidden(object sender, EventArgs e)
@@ -831,12 +849,12 @@ namespace TSMapEditor.UI.Windows
             if (isForEvent)
             {
                 GetTriggerEventAndParamIndex(out TriggerCondition triggerCondition, out int paramIndex);
-                triggerCondition.Parameters[paramIndex] = paramValue.ToString();
+                triggerCondition.Parameters[paramIndex] = paramValue.ToString(CultureInfo.InvariantCulture);
             }
             else
             {
                 GetTriggerActionAndParamIndex(out TriggerAction triggerAction, out int paramIndex);
-                triggerAction.Parameters[paramIndex] = paramValue.ToString();
+                triggerAction.Parameters[paramIndex] = paramValue.ToString(CultureInfo.InvariantCulture);
             }
 
             EditTrigger(editedTrigger);
@@ -1598,6 +1616,13 @@ namespace TSMapEditor.UI.Windows
                         return paramValue + " - nonexistent theme";
 
                     return paramValue + " " + theme.Name;
+                case TriggerParamType.Tag:
+                    Tag tag = map.Tags.Find(t => t.ID == paramValue);
+
+                    if (tag == null)
+                        return paramValue + " - nonexistent tag";
+
+                    return paramValue + " " + tag.Name;
                 case TriggerParamType.Boolean:
                 default:
                     return paramValue;
