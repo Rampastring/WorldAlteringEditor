@@ -255,11 +255,16 @@ namespace TSMapEditor.UI
                     Constants.UIDefaultFont, Color.White));
             textRenderer.AddTextPart(new XNATextPart(techno.Owner.ININame, Constants.UIBoldFont, techno.Owner.XNAColor));
 
+            if (techno.IsFoot())
+            {
+                var technoAsFoot = techno as Foot<T>;
+                textRenderer.AddTextPart(new XNATextPart("Mission: " + technoAsFoot.Mission, Constants.UIDefaultFont, Color.White));
+            }
+
             if (techno.WhatAmI() == RTTIType.Unit)
             {
                 var unit = techno as Unit;
                 int id = map.Units.IndexOf(unit);
-                textRenderer.AddTextPart(new XNATextPart("ID: " + id, Constants.UIDefaultFont, Color.White));
                 textRenderer.AddTextPart(new XNATextPart("Facing: " + techno.Facing, Constants.UIDefaultFont, Color.White));
 
                 if (unit.FollowerUnit != null)

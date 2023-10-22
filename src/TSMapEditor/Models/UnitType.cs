@@ -17,7 +17,7 @@ namespace TSMapEditor.Models
         public VehicleArtConfig ArtConfig { get; private set; } = new VehicleArtConfig();
         public IArtConfig GetArtConfig() => ArtConfig;
 
-        public override RTTIType WhatAmI() => RTTIType.Unit;
+        public override RTTIType WhatAmI() => RTTIType.UnitType;
 
         public bool Turret { get; set; }
         public string SpeedType { get; set; }
