@@ -114,22 +114,27 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             if (gameObject.IsTechno())
             {
                 var techno = gameObject as TechnoBase;
-                var cellCenterPoint = (drawPoint + new Point2D(Constants.CellSizeX / 2, Constants.CellSizeY / 2)).ToXNAVector();
-
-                float rad = (techno.Facing / 255.0f) * (float)Math.PI * 2.0f;
-
-                // The in-game compass is slightly rotated compared to the usual math compass
-                // and the compass used by MonoGame.
-                // In the usual compass, 0 rad points directly towards the right / east, in the in-game
-                // compass it points to top-right / northeast
-                rad -= (float)Math.PI / 4.0f;
-
-                var arrowEndPoint = Helpers.VectorFromLengthAndAngle(Constants.CellSizeX / 4, rad);
-                arrowEndPoint += new Vector2(arrowEndPoint.X, 0f); // Isometric perspective
-                RendererExtensions.DrawArrow(cellCenterPoint, cellCenterPoint + arrowEndPoint, Color.Yellow, 1f, 10f, 1);
+                DrawObjectFacingArrow(techno.Facing, drawPoint);
             }
 
             Renderer.DrawString(drawParams.IniName, 1, drawPoint.ToXNAVector(), ReplacementColor, 1.0f);
+        }
+
+        protected void DrawObjectFacingArrow(byte facing, Point2D drawPoint)
+        {
+            var cellCenterPoint = (drawPoint + new Point2D(Constants.CellSizeX / 2, Constants.CellSizeY / 2)).ToXNAVector();
+
+            float rad = (facing / 255.0f) * (float)Math.PI * 2.0f;
+
+            // The in-game compass is slightly rotated compared to the usual math compass
+            // and the compass used by MonoGame.
+            // In the usual compass, 0 rad points directly towards the right / east, in the in-game
+            // compass it points to top-right / northeast
+            rad -= (float)Math.PI / 4.0f;
+
+            var arrowEndPoint = Helpers.VectorFromLengthAndAngle(Constants.CellSizeX / 4, rad);
+            arrowEndPoint += new Vector2(arrowEndPoint.X, 0f); // Isometric perspective
+            RendererExtensions.DrawArrow(cellCenterPoint, cellCenterPoint + arrowEndPoint, Color.Yellow, 1f, 10f, 1);
         }
 
         private bool IsObjectInCamera(int drawPointX, int drawPointRight, int drawPointY, int drawPointBottom)

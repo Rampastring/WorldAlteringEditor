@@ -89,6 +89,15 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                     gameObject.GetFrameIndex(commonDrawParams.Graphics.Frames.Length),
                     Color.White, true, gameObject.GetRemapColor(), drawPoint, yDrawPointWithoutCellHeight);
             }
+
+            if (gameObject.ObjectType.Turret && gameObject.ObjectType.TurretAnimIsVoxel)
+            {
+                Point2D cellCenter = RenderDependencies.EditorState.Is2DMode ?
+                    CellMath.CellTopLeftPointFromCellCoords(gameObject.Position, Map) :
+                    CellMath.CellTopLeftPointFromCellCoords_3D(gameObject.Position, Map);
+
+                DrawObjectFacingArrow(gameObject.Facing, cellCenter);
+            }
         }
 
         protected override void DrawObjectReplacementText(Structure gameObject, CommonDrawParams drawParams, Point2D drawPoint)
