@@ -2,6 +2,7 @@
 using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
+using TSMapEditor.Models.Enums;
 
 namespace TSMapEditor.Models
 {
@@ -153,8 +154,25 @@ namespace TSMapEditor.Models
             foreach (var action in Actions)
             {
                 actionDataString.Append(action.ActionIndex);
-                for (int i = 0; i < TriggerAction.PARAM_COUNT; i++)
+                for (int i = 0; i < TriggerAction.PARAM_COUNT - 1; i++)
                     actionDataString.Append(action.ParamToString(i));
+
+                // Special handling for param #6 because Westwood <3
+                int specialIndex = TriggerAction.PARAM_COUNT - 1;
+
+                if (editorConfig.TriggerActionTypes.TryGetValue(action.ActionIndex, out var triggerActionType))
+                {
+                    if (triggerActionType.Parameters[specialIndex].TriggerParamType != TriggerParamType.Unused)
+                    {
+                        // If P7Type has been explicitly defined, write it as normal
+                        actionDataString.Append(action.ParamToString(specialIndex));
+                    }
+                    else
+                    {
+                        // Otherwise we need to write P7 as 'A' as it signifies waypoint 0.
+                        actionDataString.Append("A");
+                    }
+                }
             }
 
             iniFile.SetStringValue("Actions", ID, actionDataString.ToString());

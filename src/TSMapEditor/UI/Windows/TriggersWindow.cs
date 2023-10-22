@@ -1009,6 +1009,13 @@ namespace TSMapEditor.UI.Windows
                     continue;
                 }
 
+                // Special dirty hack for handling for P7Type, defaults to "WaypointZZ"
+                if (i == TriggerActionType.MAX_PARAM_COUNT - 1 && triggerActionType.Parameters[i].TriggerParamType == TriggerParamType.Unused)
+                {
+                    action.Parameters[i] = "A";
+                    continue;
+                }
+
                 if (triggerActionType.Parameters[i].TriggerParamType == TriggerParamType.Unused)
                 {
                     action.Parameters[i] = "0";
