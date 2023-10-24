@@ -149,7 +149,10 @@ namespace TSMapEditor.Initialization
 
             var section = mapIni.GetSection("IsoMapPack5");
             if (section == null)
+            {
+                map.SetTileData(new List<MapTile>(0));
                 return;
+            }
 
             if (section.Keys.Count == 0)
             {
