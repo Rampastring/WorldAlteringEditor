@@ -508,6 +508,9 @@ namespace TSMapEditor.Mutations.Classes
 
             var terrainUndoData = new List<OriginalCellTerrainData>();
 
+            MapTile originCell = MutationTarget.Map.GetTile(origin);
+            int originLevel = originCell?.Level ?? -1;
+
             foreach (var entry in copiedMapData.CopiedMapEntries.FindAll(e => e.EntryType == CopiedEntryType.Terrain))
             {
                 var copiedTerrainData = entry as CopiedTerrainEntry;
@@ -522,7 +525,7 @@ namespace TSMapEditor.Mutations.Classes
                 cell.TileImage = null;
                 cell.TileIndex = copiedTerrainData.TileIndex;
                 cell.SubTileIndex = copiedTerrainData.SubTileIndex;
-                cell.Level = (byte)(cell.Level + copiedTerrainData.HeightOffset);
+                cell.Level = (byte)(originLevel + copiedTerrainData.HeightOffset);
             }
 
             this.terrainUndoData = terrainUndoData.ToArray();

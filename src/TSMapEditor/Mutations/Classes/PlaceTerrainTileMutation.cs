@@ -59,29 +59,7 @@ namespace TSMapEditor.Mutations.Classes
             DoForArea(AddUndoDataForTile, MutationTarget.AutoLATEnabled);
 
             MapTile originCell = MutationTarget.Map.GetTile(targetCellCoords);
-            int originLevel = originCell != null ? originCell.Level : -1;
-
-            // Find the lowest origin level from the affected cells
-            brushSize.DoForBrushSize(offset =>
-            {
-                for (int i = 0; i < tile.TMPImages.Length; i++)
-                {
-                    MGTMPImage image = tile.TMPImages[i];
-
-                    if (image.TmpImage == null)
-                        continue;
-
-                    int cx = targetCellCoords.X + (offset.X * tile.Width) + i % tile.Width;
-                    int cy = targetCellCoords.Y + (offset.Y * tile.Height) + i / tile.Width;
-
-                    var mapTile = MutationTarget.Map.GetTile(cx, cy);
-                    if (mapTile != null)
-                    {
-                        if (mapTile.Level < originLevel)
-                            originLevel = mapTile.Level;
-                    }
-                }
-            });
+            int originLevel = originCell?.Level ?? -1;
 
             // Place the terrain
             brushSize.DoForBrushSize(offset =>

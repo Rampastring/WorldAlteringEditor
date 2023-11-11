@@ -82,6 +82,8 @@ namespace TSMapEditor.UI.CursorActions
             originalOverlay.Clear();
 
             int maxOffset = 0;
+            MapTile originCell = MutationTarget.Map.GetTile(cellCoords);
+            int originLevel = originCell?.Level ?? -1;
 
             foreach (var entry in copiedMapData.CopiedMapEntries)
             {
@@ -96,7 +98,7 @@ namespace TSMapEditor.UI.CursorActions
                     var terrainEntry = entry as CopiedTerrainEntry;
                     cell.PreviewTileImage = CursorActionTarget.TheaterGraphics.GetTileGraphics(terrainEntry.TileIndex, 0);
                     cell.PreviewSubTileIndex = terrainEntry.SubTileIndex;
-                    cell.PreviewLevel = Math.Min(Constants.MaxMapHeightLevel, cell.Level + terrainEntry.HeightOffset);
+                    cell.PreviewLevel = Math.Min(Constants.MaxMapHeightLevel, originLevel + terrainEntry.HeightOffset);
                 }
                 else if (entry.EntryType == CopiedEntryType.Overlay)
                 {
