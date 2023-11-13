@@ -36,6 +36,7 @@ namespace TSMapEditor.UI.Sidebar
         private readonly OverlayPlacementAction overlayPlacementAction;
 
         private OverlayCollectionPlacementAction overlayCollectionPlacementAction;
+        private ConnectedOverlayPlacementAction connectedOverlayPlacementAction;
 
         public override void Initialize()
         {
@@ -62,8 +63,10 @@ namespace TSMapEditor.UI.Sidebar
             base.Initialize();
 
             overlayCollectionPlacementAction = new OverlayCollectionPlacementAction(cursorActionTarget);
+            connectedOverlayPlacementAction = new ConnectedOverlayPlacementAction(cursorActionTarget);
             ObjectTreeView.SelectedItemChanged += ObjectTreeView_SelectedItemChanged;
             overlayCollectionPlacementAction.ActionExited += (s, e) => ObjectTreeView.SelectedNode = null;
+            connectedOverlayPlacementAction.ActionExited += (s, e) => ObjectTreeView.SelectedNode = null;
             overlayPlacementAction.ActionExited += (s, e) => ObjectTreeView.SelectedNode = null;
 
             InitOverlays();
@@ -85,6 +88,11 @@ namespace TSMapEditor.UI.Sidebar
             {
                 overlayCollectionPlacementAction.OverlayCollection = collection;
                 EditorState.CursorAction = overlayCollectionPlacementAction;
+            }
+            else if (tag is ConnectedOverlayType connectedOverlay)
+            {
+                connectedOverlayPlacementAction.ConnectedOverlayType = connectedOverlay;
+                EditorState.CursorAction = connectedOverlayPlacementAction;
             }
             else if (tag is OverlayType overlayType)
             {
@@ -166,6 +174,41 @@ namespace TSMapEditor.UI.Sidebar
                     {
                         Text = collection.Name,
                         Tag = collection,
+                        Texture = texture
+                    });
+                }
+            }
+
+            if (Map.EditorConfig.ConnectedOverlays.Count > 0)
+            {
+                var connectedOverlaysCategory = new TreeViewCategory() { Text = "Connected Overlays" };
+                categories.Add(connectedOverlaysCategory);
+
+                foreach (var connectedOverlay in Map.EditorConfig.ConnectedOverlays)
+                {
+                    if (connectedOverlay.FrameCount == 0)
+                        continue;
+
+                    Texture2D texture = null;
+                    var firstEntry = connectedOverlay.Frames[0];
+                    var textures = TheaterGraphics.OverlayTextures[firstEntry.OverlayType.Index];
+                    if (textures != null)
+                    {
+                        var frames = textures.Frames;
+                        int frameNumber = firstEntry.FrameIndex;
+
+                        if (frames != null && frames.Length > frameNumber)
+                        {
+                            var frame = frames[frameNumber];
+                            if (frame != null)
+                                texture = frame.Texture;
+                        }
+                    }
+
+                    connectedOverlaysCategory.Nodes.Add(new TreeViewNode()
+                    {
+                        Text = connectedOverlay.Name,
+                        Tag = connectedOverlay,
                         Texture = texture
                     });
                 }

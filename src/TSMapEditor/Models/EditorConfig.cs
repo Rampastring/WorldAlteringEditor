@@ -26,6 +26,7 @@ namespace TSMapEditor.Models
         public Dictionary<int, TriggerActionType> TriggerActionTypes { get; } = new Dictionary<int, TriggerActionType>();
         public List<Theater> Theaters { get; } = new List<Theater>();
         public List<BridgeType> Bridges { get; } = new List<BridgeType>();
+        public List<ConnectedOverlayType> ConnectedOverlays { get; } = new List<ConnectedOverlayType>();
         public List<TeamTypeFlag> TeamTypeFlags { get; } = new List<TeamTypeFlag>();
 
         public void Init(Rules rules)
@@ -39,6 +40,7 @@ namespace TSMapEditor.Models
             ReadTriggerEventTypes();
             ReadTriggerActionTypes();
             ReadBridges(rules);
+            ReadConnectedOverlays(rules);
             ReadTeamTypeFlags();
         }
 
@@ -214,6 +216,27 @@ namespace TSMapEditor.Models
 
                 BridgeType bridgeType = new BridgeType(bridgeSection, rules);
                 Bridges.Add(bridgeType);
+            }
+        }
+
+        private void ReadConnectedOverlays(Rules rules)
+        {
+            ConnectedOverlays.Clear();
+
+            var iniFile = new IniFile(Environment.CurrentDirectory + "/Config/ConnectedOverlays.ini");
+            var section = iniFile.GetSection("ConnectedOverlays");
+            if (section == null)
+                return;
+
+            foreach (var kvp in section.Keys)
+            {
+                string overlayName = kvp.Value;
+                IniSection overlaySection = iniFile.GetSection(overlayName);
+                if (overlaySection == null)
+                    continue;
+
+                ConnectedOverlayType overlayType = new ConnectedOverlayType(overlaySection, rules);
+                ConnectedOverlays.Add(overlayType);
             }
         }
 
