@@ -134,7 +134,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
             var arrowEndPoint = Helpers.VectorFromLengthAndAngle(Constants.CellSizeX / 4, rad);
             arrowEndPoint += new Vector2(arrowEndPoint.X, 0f); // Isometric perspective
-            RendererExtensions.DrawArrow(cellCenterPoint, cellCenterPoint + arrowEndPoint, Color.Yellow, 1f, 10f, 1);
+            RendererExtensions.DrawArrow(cellCenterPoint, cellCenterPoint + arrowEndPoint, Color.Yellow, 1f, 10f, 2);
         }
 
         private bool IsObjectInCamera(int drawPointX, int drawPointRight, int drawPointY, int drawPointBottom)
