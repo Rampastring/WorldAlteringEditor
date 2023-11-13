@@ -26,7 +26,14 @@ namespace TSMapEditor.UI.Controls
             BackgroundTexture = AssetLoader.CreateTexture(new Color(0, 0, 0, 128), 1, 1);
             DrawBorders = false;
 
+            WindowManager.RenderResolutionChanged += WindowManager_RenderResolutionChanged;
+
             base.Initialize();
+        }
+
+        private void WindowManager_RenderResolutionChanged(object sender, EventArgs e)
+        {
+            SetPositionAndSize();
         }
 
         public override void Kill()
@@ -36,6 +43,8 @@ namespace TSMapEditor.UI.Controls
                 BackgroundTexture.Dispose();
                 BackgroundTexture = null;
             }
+
+            WindowManager.RenderResolutionChanged -= WindowManager_RenderResolutionChanged;
 
             base.Kill();
         }
