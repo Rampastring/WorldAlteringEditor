@@ -90,7 +90,8 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                     Color.White, true, gameObject.GetRemapColor(), drawPoint, yDrawPointWithoutCellHeight);
             }
 
-            if (gameObject.ObjectType.Turret && gameObject.ObjectType.TurretAnimIsVoxel)
+            if (gameObject.ObjectType.HasSpotlight ||
+                (gameObject.ObjectType.Turret && gameObject.ObjectType.TurretAnimIsVoxel))
             {
                 Point2D cellCenter = RenderDependencies.EditorState.Is2DMode ?
                     CellMath.CellTopLeftPointFromCellCoords(gameObject.Position, Map) :
