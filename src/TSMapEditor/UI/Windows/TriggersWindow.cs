@@ -61,6 +61,7 @@ namespace TSMapEditor.UI.Windows
         private EditorDescriptionPanel panelEventDescription;
         private EditorListBox lbEventParameters;
         private EditorTextBox tbEventParameterValue;
+        private XNAContextMenu ctxEventParameterPresetValues;
 
         // Actions
         private EditorListBox lbActions;
@@ -68,6 +69,7 @@ namespace TSMapEditor.UI.Windows
         private EditorDescriptionPanel panelActionDescription;
         private EditorListBox lbActionParameters;
         private EditorTextBox tbActionParameterValue;
+        private XNAContextMenu ctxActionParameterPresetValues;
 
         private SelectEventWindow selectEventWindow;
         private SelectActionWindow selectActionWindow;
@@ -140,11 +142,23 @@ namespace TSMapEditor.UI.Windows
             lbEventParameters = FindChild<EditorListBox>(nameof(lbEventParameters));
             tbEventParameterValue = FindChild<EditorTextBox>(nameof(tbEventParameterValue));
 
+            ctxEventParameterPresetValues = new XNAContextMenu(WindowManager);
+            ctxEventParameterPresetValues.Name = nameof(ctxEventParameterPresetValues);
+            ctxEventParameterPresetValues.Width = 150;
+            AddChild(ctxEventParameterPresetValues);
+            ctxEventParameterPresetValues.OptionSelected += CtxEventParameterPresetValues_OptionSelected;
+
             lbActions = FindChild<EditorListBox>(nameof(lbActions));
             selActionType = FindChild<EditorPopUpSelector>(nameof(selActionType));
             panelActionDescription = FindChild<EditorDescriptionPanel>(nameof(panelActionDescription));
             lbActionParameters = FindChild<EditorListBox>(nameof(lbActionParameters));
             tbActionParameterValue = FindChild<EditorTextBox>(nameof(tbActionParameterValue));
+
+            ctxActionParameterPresetValues = new XNAContextMenu(WindowManager);
+            ctxActionParameterPresetValues.Name = nameof(ctxActionParameterPresetValues);
+            ctxActionParameterPresetValues.Width = 150;
+            AddChild(ctxActionParameterPresetValues);
+            ctxActionParameterPresetValues.OptionSelected += CtxActionParameterPresetValues_OptionSelected;
 
             ddType.AddItem("0 - one-time, single-object condition");
             ddType.AddItem("1 - one-time, multi-object condition");
@@ -673,14 +687,24 @@ namespace TSMapEditor.UI.Windows
             switch (triggerEventType.Parameters[paramIndex].TriggerParamType)
             {
                 case TriggerParamType.GlobalVariable:
-                    GlobalVariable existingGlobalVariable = map.Rules.GlobalVariables.Find(gv => gv.Index == Conversions.IntFromString(triggerEvent.Parameters[paramIndex], -1));
-                    selectGlobalVariableWindow.IsForEvent = true;
-                    selectGlobalVariableWindow.Open(existingGlobalVariable);
+                    ctxEventParameterPresetValues.ClearItems();
+                    ctxEventParameterPresetValues.Width = 250;
+                    map.Rules.GlobalVariables.ForEach(globalVariable => ctxEventParameterPresetValues.AddItem(globalVariable.Index.ToString(CultureInfo.InvariantCulture) + " " + globalVariable.Name));
+                    ctxEventParameterPresetValues.Open(GetCursorPoint());
+
+                    // GlobalVariable existingGlobalVariable = map.Rules.GlobalVariables.Find(gv => gv.Index == Conversions.IntFromString(triggerEvent.Parameters[paramIndex], -1));
+                    // selectGlobalVariableWindow.IsForEvent = true;
+                    // selectGlobalVariableWindow.Open(existingGlobalVariable);
                     break;
                 case TriggerParamType.LocalVariable:
-                    LocalVariable existingLocalVariable = map.LocalVariables.Find(lv => lv.Index == Conversions.IntFromString(triggerEvent.Parameters[paramIndex], -1));
-                    selectLocalVariableWindow.IsForEvent = true;
-                    selectLocalVariableWindow.Open(existingLocalVariable);
+                    ctxEventParameterPresetValues.ClearItems();
+                    ctxEventParameterPresetValues.Width = 250;
+                    map.LocalVariables.ForEach(localVariable => ctxEventParameterPresetValues.AddItem(localVariable.Index.ToString(CultureInfo.InvariantCulture) + " " + localVariable.Name));
+                    ctxEventParameterPresetValues.Open(GetCursorPoint());
+
+                    // LocalVariable existingLocalVariable = map.LocalVariables.Find(lv => lv.Index == Conversions.IntFromString(triggerEvent.Parameters[paramIndex], -1));
+                    // selectLocalVariableWindow.IsForEvent = true;
+                    // selectLocalVariableWindow.Open(existingLocalVariable);
                     break;
                 case TriggerParamType.House:
                     selectHouseWindow.IsForEvent = true;
@@ -701,9 +725,21 @@ namespace TSMapEditor.UI.Windows
                     selectTechnoTypeWindow.IsForEvent = true;
                     selectTechnoTypeWindow.Open(existingTechno);
                     break;
+                case TriggerParamType.Waypoint:
+                case TriggerParamType.WaypointZZ:
+                    ctxEventParameterPresetValues.ClearItems();
+                    ctxEventParameterPresetValues.Width = 100;
+                    map.Waypoints.ForEach(wp => ctxEventParameterPresetValues.AddItem(wp.Identifier.ToString(CultureInfo.InvariantCulture)));
+                    ctxEventParameterPresetValues.Open(GetCursorPoint());
+                    return;
                 default:
                     break;
             }
+        }
+
+        private void CtxActionParameterPresetValues_OptionSelected(object sender, ContextMenuItemSelectedEventArgs e)
+        {
+            tbActionParameterValue.Text = ctxActionParameterPresetValues.Items[e.ItemIndex].Text;
         }
 
         private void BtnActionParameterValuePreset_LeftClick(object sender, EventArgs e)
@@ -718,7 +754,18 @@ namespace TSMapEditor.UI.Windows
             if (triggerActionType == null)
                 return;
 
-            switch (triggerActionType.Parameters[paramIndex].TriggerParamType)
+            TriggerActionParam parameter = triggerActionType.Parameters[paramIndex];
+
+            // If the parameter has preset options defined, then show them in a context menu instead of opening a window
+            if (parameter.PresetOptions != null && parameter.PresetOptions.Count > 0)
+            {
+                ctxActionParameterPresetValues.ClearItems();
+                parameter.PresetOptions.ForEach(ctxActionParameterPresetValues.AddItem);
+                ctxActionParameterPresetValues.Open(GetCursorPoint());
+                return;
+            }
+
+            switch (parameter.TriggerParamType)
             {
                 case TriggerParamType.Animation:
                     AnimType existingAnimType = map.Rules.AnimTypes.Find(at => at.Index == Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1));
@@ -736,14 +783,24 @@ namespace TSMapEditor.UI.Windows
                     selectTriggerWindow.Open(existingTrigger);
                     break;
                 case TriggerParamType.GlobalVariable:
-                    GlobalVariable existingGlobalVariable = map.Rules.GlobalVariables.Find(gv => gv.Index == Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1));
-                    selectGlobalVariableWindow.IsForEvent = false;
-                    selectGlobalVariableWindow.Open(existingGlobalVariable);
+                    ctxActionParameterPresetValues.ClearItems();
+                    ctxActionParameterPresetValues.Width = 250;
+                    map.Rules.GlobalVariables.ForEach(globalVariable => ctxActionParameterPresetValues.AddItem(globalVariable.Index.ToString(CultureInfo.InvariantCulture) + " " + globalVariable.Name));
+                    ctxActionParameterPresetValues.Open(GetCursorPoint());
+
+                    // GlobalVariable existingGlobalVariable = map.Rules.GlobalVariables.Find(gv => gv.Index == Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1));
+                    // selectGlobalVariableWindow.IsForEvent = false;
+                    // selectGlobalVariableWindow.Open(existingGlobalVariable);
                     break;
                 case TriggerParamType.LocalVariable:
-                    LocalVariable existingLocalVariable = map.LocalVariables.Find(lv => lv.Index == Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1));
-                    selectLocalVariableWindow.IsForEvent = false;
-                    selectLocalVariableWindow.Open(existingLocalVariable);
+                    ctxActionParameterPresetValues.ClearItems();
+                    ctxActionParameterPresetValues.Width = 250;
+                    map.LocalVariables.ForEach(localVariable => ctxActionParameterPresetValues.AddItem(localVariable.Index.ToString(CultureInfo.InvariantCulture) + " " + localVariable.Name));
+                    ctxActionParameterPresetValues.Open(GetCursorPoint());
+
+                    // LocalVariable existingLocalVariable = map.LocalVariables.Find(lv => lv.Index == Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1));
+                    // selectLocalVariableWindow.IsForEvent = false;
+                    // selectLocalVariableWindow.Open(existingLocalVariable);
                     break;
                 case TriggerParamType.House:
                     int houseIndex = Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1);
@@ -764,6 +821,13 @@ namespace TSMapEditor.UI.Windows
                     selectTagWindow.IsForEvent = false;
                     selectTagWindow.Open(existingTag);
                     break;
+                case TriggerParamType.WaypointZZ:
+                case TriggerParamType.Waypoint:
+                    ctxActionParameterPresetValues.ClearItems();
+                    ctxActionParameterPresetValues.Width = 100;
+                    map.Waypoints.ForEach(wp => ctxActionParameterPresetValues.AddItem(wp.Identifier.ToString(CultureInfo.InvariantCulture)));
+                    ctxActionParameterPresetValues.Open(GetCursorPoint());
+                    return;
                 default:
                     break;
             }
@@ -1349,9 +1413,10 @@ namespace TSMapEditor.UI.Windows
             TriggerAction triggerAction = editedTrigger.Actions[lbActions.SelectedIndex];
             int paramNumber = (int)lbActionParameters.SelectedItem.Tag;
             var triggerActionType = GetTriggerActionType(triggerAction.ActionIndex);
-            var triggerParamType = triggerActionType.Parameters[paramNumber]?.TriggerParamType ?? TriggerParamType.Unknown;
+            var triggerActionParam = triggerActionType.Parameters[paramNumber];
+            var triggerParamType = triggerActionParam.TriggerParamType;
 
-            tbActionParameterValue.Text = GetParamValueText(triggerAction.Parameters[paramNumber], triggerParamType);
+            tbActionParameterValue.Text = GetParamValueText(triggerAction.Parameters[paramNumber], triggerParamType, triggerActionParam.PresetOptions);
             tbActionParameterValue.TextColor = GetParamValueColor(triggerAction.Parameters[paramNumber], triggerParamType);
 
             tbActionParameterValue.TextChanged += TbActionParameterValue_TextChanged;
@@ -1476,10 +1541,15 @@ namespace TSMapEditor.UI.Windows
             var triggerEventType = GetTriggerEventType(editedTrigger.Conditions[lbEvents.SelectedIndex].ConditionIndex);
             var triggerParamType = triggerEventType.Parameters[paramNumber]?.TriggerParamType ?? TriggerParamType.Unknown;
 
-            tbEventParameterValue.Text = GetParamValueText(triggerCondition.Parameters[paramNumber], triggerParamType);
+            tbEventParameterValue.Text = GetParamValueText(triggerCondition.Parameters[paramNumber], triggerParamType, null);
             tbEventParameterValue.TextColor = GetParamValueColor(triggerCondition.Parameters[paramNumber], triggerParamType);
 
             tbEventParameterValue.TextChanged += TbEventParameterValue_TextChanged;
+        }
+
+        private void CtxEventParameterPresetValues_OptionSelected(object sender, ContextMenuItemSelectedEventArgs e)
+        {
+            tbEventParameterValue.Text = ctxEventParameterPresetValues.Items[e.ItemIndex].Text;
         }
 
         private void TbEventParameterValue_TextChanged(object sender, EventArgs e)
@@ -1551,11 +1621,21 @@ namespace TSMapEditor.UI.Windows
             }
         }
 
-        private string GetParamValueText(string paramValue, TriggerParamType paramType)
+        private string GetParamValueText(string paramValue, TriggerParamType paramType, List<string> presetOptions)
         {
             bool intParseSuccess = int.TryParse(paramValue, NumberStyles.None, CultureInfo.InvariantCulture, out int intValue);
             if (paramValue == null)
                 paramValue = string.Empty;
+
+            if (presetOptions != null && presetOptions.Count > 0)
+            {
+                if (!intParseSuccess)
+                    return paramValue;
+
+                string presetOption = presetOptions.Find(s => s.StartsWith(intValue.ToString(CultureInfo.InvariantCulture)));
+                if (presetOption != null)
+                    return presetOption;
+            }
 
             switch (paramType)
             {

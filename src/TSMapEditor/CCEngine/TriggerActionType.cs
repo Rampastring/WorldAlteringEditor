@@ -1,19 +1,24 @@
 ﻿using Rampastring.Tools;
 using System;
+using System.Collections.Generic;
 using TSMapEditor.Models.Enums;
 
 namespace TSMapEditor.CCEngine
 {
     public class TriggerActionParam
     {
-        public TriggerActionParam(TriggerParamType triggerParamType, string nameOverride)
+        public TriggerActionParam(TriggerParamType triggerParamType, string nameOverride, List<string> presetOptions = null)
         {
             TriggerParamType = triggerParamType;
             NameOverride = nameOverride;
+            PresetOptions = presetOptions;
         }
 
         public TriggerParamType TriggerParamType { get; }
         public string NameOverride { get; }
+        public List<string> PresetOptions { get; }
+
+        public bool HasPresetOptions() => PresetOptions != null && PresetOptions.Count > 0;
     }
 
     public class TriggerActionType
@@ -41,6 +46,7 @@ namespace TSMapEditor.CCEngine
             {
                 string key = $"P{i + 1}Type";
                 string nameOverrideKey = $"P{i + 1}Name";
+                string presetOptionsKey = $"P{i + 1}PresetOptions";
 
                 if (!iniSection.KeyExists(key))
                 {
@@ -53,7 +59,14 @@ namespace TSMapEditor.CCEngine
                 if (triggerParamType == TriggerParamType.WaypointZZ && string.IsNullOrWhiteSpace(nameOverride))
                     nameOverride = "Waypoint";
 
-                Parameters[i] = new TriggerActionParam(triggerParamType, nameOverride);
+                List<string> presetOptions = null;
+                string presetOptionsString = iniSection.GetStringValue(presetOptionsKey, null);
+                if (!string.IsNullOrWhiteSpace(presetOptionsString))
+                {
+                    presetOptions = new List<string>(presetOptionsString.Split(new char[] {','}, StringSplitOptions.RemoveEmptyEntries));
+                }
+
+                Parameters[i] = new TriggerActionParam(triggerParamType, nameOverride, presetOptions);
             }
         }
     }
