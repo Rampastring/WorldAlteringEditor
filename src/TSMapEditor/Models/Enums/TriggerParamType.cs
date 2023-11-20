@@ -5,6 +5,7 @@
         Unused,
         Unknown,
         Number,
+        Float,
         Cell,
         LocalVariable,
         TeamType,

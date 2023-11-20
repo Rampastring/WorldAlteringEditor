@@ -1370,11 +1370,21 @@ namespace TSMapEditor.UI.Windows
             string value = tbActionParameterValue.Text.Split(' ')[0];
             var triggerActionType = GetTriggerActionType(triggerAction.ActionIndex);
 
-            if (triggerActionType != null && 
-                triggerActionType.Parameters[paramNumber].TriggerParamType == TriggerParamType.WaypointZZ)
+            if (triggerActionType != null)
             {
-                // Write waypoint with A-ZZ notation
-                value = Helpers.WaypointNumberToAlphabeticalString(Conversions.IntFromString(value, 0));
+                var triggerParamType = triggerActionType.Parameters[paramNumber].TriggerParamType;
+
+                if (triggerParamType == TriggerParamType.WaypointZZ)
+                {
+                    // Write waypoint with A-ZZ notation
+                    value = Helpers.WaypointNumberToAlphabeticalString(Conversions.IntFromString(value, 0));
+                }
+                else if (triggerParamType == TriggerParamType.Float)
+                {
+                    // Float values need to be converted into integers
+                    if (float.TryParse(value, CultureInfo.InvariantCulture, out float floatValue))
+                        value = BitConverter.ToInt32(BitConverter.GetBytes(floatValue)).ToString(CultureInfo.InvariantCulture);
+                }
             }
 
             triggerAction.Parameters[paramNumber] = value;
@@ -1630,6 +1640,13 @@ namespace TSMapEditor.UI.Windows
                         return paramValue + " - nonexistent tag";
 
                     return paramValue + " " + tag.Name;
+                case TriggerParamType.Float:
+                    if (!intParseSuccess)
+                        return paramValue;
+
+                    float floatValue = BitConverter.ToSingle(BitConverter.GetBytes(intValue));
+                    return floatValue.ToString(CultureInfo.InvariantCulture) + " (" + paramValue + ")";
+
                 case TriggerParamType.Boolean:
                 default:
                     return paramValue;
