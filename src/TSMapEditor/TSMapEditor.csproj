@@ -257,6 +257,9 @@
     <None Update="Config\UI\Windows\VehicleOptionsWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Content\celltag.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Content\checkBoxChecked.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

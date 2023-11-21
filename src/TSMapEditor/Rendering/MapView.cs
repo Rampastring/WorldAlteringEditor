@@ -998,20 +998,14 @@ namespace TSMapEditor.Rendering
 
         private void DrawCellTag(CellTag cellTag)
         {
-            const int cellTagBorderOffsetX = 12;
-            const int cellTagBorderOffsetY = 4;
-
             Point2D drawPoint = EditorState.Is2DMode ? 
                 CellMath.CellTopLeftPointFromCellCoords(cellTag.Position, Map) : 
                 CellMath.CellTopLeftPointFromCellCoords_3D(cellTag.Position, Map);
 
-            var rect = new Rectangle(drawPoint.X + cellTagBorderOffsetX,
-                drawPoint.Y + cellTagBorderOffsetY,
-                Constants.CellSizeX - (cellTagBorderOffsetX * 2),
-                Constants.CellSizeY - (cellTagBorderOffsetY * 2));
+            const float cellTagAlpha = 0.45f;
 
-            FillRectangle(rect, new Color(128, 0, 0, 128));
-            DrawRectangle(rect, Color.Yellow);
+            Color color = cellTag.Tag.Trigger.EditorColor == null ? UISettings.ActiveSettings.AltColor : cellTag.Tag.Trigger.XNAColor;
+            DrawTexture(EditorGraphics.CellTagTexture, drawPoint.ToXNAPoint(), color * cellTagAlpha);
         }
 
         private void DrawMapBorder()
