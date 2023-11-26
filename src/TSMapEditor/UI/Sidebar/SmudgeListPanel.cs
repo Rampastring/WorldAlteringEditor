@@ -97,6 +97,15 @@ namespace TSMapEditor.UI.Sidebar
             }
         }
 
+        public override void RefreshSize()
+        {
+            Width = Parent.Width;
+            SearchBox.Width = Width - Constants.UIEmptySideSpace * 2;
+            ObjectTreeView.Width = Width;
+            Height = Parent.Height - Y;
+            ObjectTreeView.Height = Height - ObjectTreeView.Y;
+        }
+
         private void NextSidebarNode_Triggered(object sender, EventArgs e)
         {
             if (Enabled)
