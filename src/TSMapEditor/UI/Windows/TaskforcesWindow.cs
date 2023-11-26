@@ -1,5 +1,6 @@
 ﻿using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TSMapEditor.Misc;
@@ -440,6 +441,10 @@ namespace TSMapEditor.UI.Windows
             if (lbUnitEntries.SelectedItem == null && lbUnitEntries.Items.Count > 0)
             {
                 lbUnitEntries.SelectedIndex = 0;
+            }
+            else
+            {
+                LbUnitEntries_SelectedIndexChanged(this, EventArgs.Empty);
             }
         }
 
