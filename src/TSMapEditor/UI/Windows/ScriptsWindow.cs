@@ -45,6 +45,8 @@ namespace TSMapEditor.UI.Windows
         private SelectScriptActionWindow selectScriptActionWindow;
         private XNAContextMenu actionListContextMenu;
 
+        private SelectBuildingTargetWindow selectBuildingTargetWindow;
+
         private Script editedScript;
 
         public override void Initialize()
@@ -73,8 +75,12 @@ namespace TSMapEditor.UI.Windows
             lbActions.SelectedIndexChanged += LbActions_SelectedIndexChanged;
 
             selectScriptActionWindow = new SelectScriptActionWindow(WindowManager, map.EditorConfig);
-            var darkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectScriptActionWindow);
-            darkeningPanel.Hidden += DarkeningPanel_Hidden;
+            var selectScriptActionDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectScriptActionWindow);
+            selectScriptActionDarkeningPanel.Hidden += SelectScriptActionDarkeningPanel_Hidden;
+
+            selectBuildingTargetWindow = new SelectBuildingTargetWindow(WindowManager, map);
+            var buildingTargetWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectBuildingTargetWindow);
+            buildingTargetWindowDarkeningPanel.Hidden += BuildingTargetWindowDarkeningPanel_Hidden;
 
             selTypeOfAction.MouseLeftDown += SelTypeOfAction_MouseLeftDown;
 
@@ -99,6 +105,17 @@ namespace TSMapEditor.UI.Windows
             lbActions.RightClick += (s, e) => { if (editedScript != null) { lbActions.SelectedIndex = lbActions.HoveredIndex; actionListContextMenu.Open(GetCursorPoint()); } };
         }
 
+        private void BuildingTargetWindowDarkeningPanel_Hidden(object sender, EventArgs e)
+        {
+            if (editedScript == null || lbActions.SelectedItem == null)
+                return;
+
+            if (selectBuildingTargetWindow.SelectedObject > -1)
+            {
+                tbParameterValue.Text = GetBuildingWithPropertyText(selectBuildingTargetWindow.SelectedObject);
+            }
+        }
+
         private void ActionListContextMenu_MoveUp()
         {
             if (editedScript == null || lbActions.SelectedItem == null || lbActions.SelectedIndex <= 0)
@@ -109,10 +126,6 @@ namespace TSMapEditor.UI.Windows
             EditScript(editedScript);
             lbActions.SelectedIndex--;
             lbActions.ViewTop = viewTop;
-
-            // var tmp = editedScript.Actions[lbActions.SelectedIndex - 1];
-            // editedScript.Actions[lbActions.SelectedIndex - 1] = editedScript.Actions[lbActions.SelectedIndex];
-            // editedScript.Actions[lbActions.SelectedIndex] = tmp;
         }
 
         private void ActionListContextMenu_MoveDown()
@@ -191,6 +204,10 @@ namespace TSMapEditor.UI.Windows
             {
                 editorState.CursorAction = selectCellCursorAction;
                 notificationManager.AddNotification("Select a cell from the map.");
+            }
+            else if (action.ParamType == TriggerParamType.BuildingWithProperty)
+            {
+                selectBuildingTargetWindow.Open(entry.Argument);
             }
         }
 
@@ -290,7 +307,7 @@ namespace TSMapEditor.UI.Windows
             selectScriptActionWindow.Open(scriptAction);
         }
 
-        private void DarkeningPanel_Hidden(object sender, EventArgs e)
+        private void SelectScriptActionDarkeningPanel_Hidden(object sender, EventArgs e)
         {
             if (lbActions.SelectedItem == null || editedScript == null)
             {
@@ -324,21 +341,69 @@ namespace TSMapEditor.UI.Windows
             selTypeOfAction.Text = GetActionNameFromIndex(entry.Action);
 
             tbParameterValue.TextChanged -= TbParameterValue_TextChanged;
-            int presetIndex = action.PresetOptions.FindIndex(p => p.Value == entry.Argument);
-            if (presetIndex > -1)
-            {
-                tbParameterValue.Text = action.PresetOptions[presetIndex].GetOptionText();
-            }
-            else
-            {
-                tbParameterValue.Value = entry.Argument;
-            }
+            SetParameterEntryText(entry, action);
             tbParameterValue.TextChanged += TbParameterValue_TextChanged;
 
             lblParameterDescription.Text = action == null ? "Parameter:" : action.ParamDescription + ":";
             lblActionDescriptionValue.Text = GetActionDescriptionFromIndex(entry.Action);
 
             FillPresetContextMenu(entry, action);
+        }
+
+        private void SetParameterEntryText(ScriptActionEntry scriptActionEntry, ScriptAction action)
+        {
+            if (action.ParamType == TriggerParamType.BuildingWithProperty)
+            {
+                tbParameterValue.Text = GetBuildingWithPropertyText(scriptActionEntry.Argument);
+                return;
+            }
+
+            int presetIndex = action.PresetOptions.FindIndex(p => p.Value == scriptActionEntry.Argument);
+
+            if (presetIndex > -1)
+            {
+                tbParameterValue.Text = action.PresetOptions[presetIndex].GetOptionText();
+            }
+            else
+            {
+                tbParameterValue.Value = scriptActionEntry.Argument;
+            }
+        }
+
+        private string GetBuildingWithPropertyText(int argument)
+        {
+            string description = "";
+            BuildingType buildingType = null;
+
+            if (argument < (int)BuildingWithPropertyType.HighestThreat) // range 0x00000 - 0x0FFFF
+            {
+                buildingType = map.Rules.BuildingTypes.GetElementIfInRange(argument);
+                description = "Least threat";
+            }
+            else if (argument < (int)BuildingWithPropertyType.Nearest) // range 0x10000 - 0x1FFFF
+            {
+                buildingType = map.Rules.BuildingTypes.GetElementIfInRange(argument - (int)BuildingWithPropertyType.HighestThreat);
+                description = "Highest threat";
+            }
+            else if (argument < (int)BuildingWithPropertyType.Farthest) // range 0x20000 - 0x2FFFF
+            {
+                buildingType = map.Rules.BuildingTypes.GetElementIfInRange(argument - (int)BuildingWithPropertyType.Nearest);
+                description = "Nearest";
+            }
+            else if (argument < (int)BuildingWithPropertyType.Invalid) // range 0x30000 - 0x3FFFF
+            {
+                buildingType = map.Rules.BuildingTypes.GetElementIfInRange(argument - (int)BuildingWithPropertyType.Farthest);
+                description = "Farthest";
+            }
+            else
+            {
+                description = "";
+            }
+
+            if (buildingType == null)
+                return argument + " - invalid value";
+
+            return argument + " - " + buildingType.GetEditorDisplayName() + " (" + description + ")";
         }
 
         private void FillPresetContextMenu(ScriptActionEntry entry, ScriptAction action)

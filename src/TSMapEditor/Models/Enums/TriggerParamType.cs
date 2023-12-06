@@ -11,6 +11,7 @@
         TeamType,
         Techno,
         Building,
+        BuildingWithProperty,
         Aircraft,
         Infantry,
         Unit,
