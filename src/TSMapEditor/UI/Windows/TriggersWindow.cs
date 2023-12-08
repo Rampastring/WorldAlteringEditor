@@ -523,9 +523,17 @@ namespace TSMapEditor.UI.Windows
                 Repeating = originalTag == null ? 0 : originalTag.Repeating
             });
 
+            mediumDifficultyTrigger.Name = editedTrigger.Name.Replace("Hard", "Medium");
+            if (editedTrigger.Name.StartsWith("H "))
+                mediumDifficultyTrigger.Name = "M " + editedTrigger.Name[2..];
+            else if (editedTrigger.Name.EndsWith(" H"))
+                mediumDifficultyTrigger.Name = editedTrigger.Name[..^2] + " M";
 
-            mediumDifficultyTrigger.Name = editedTrigger.Name.Replace("H ", "M ").Replace(" H", " M").Replace("Hard", "Medium");
-            easyDifficultyTrigger.Name = editedTrigger.Name.Replace("H ", "E ").Replace(" H", " E").Replace("Hard", "Easy");
+            easyDifficultyTrigger.Name = editedTrigger.Name.Replace("Hard", "Easy");
+            if (editedTrigger.Name.StartsWith("H "))
+                easyDifficultyTrigger.Name = "E " + editedTrigger.Name[2..];
+            else if (editedTrigger.Name.EndsWith(" H"))
+                easyDifficultyTrigger.Name = editedTrigger.Name[..^2] + " E";
 
             int mediumDiffGlobalVariableIndex = map.Rules.GlobalVariables.FindIndex(gv => gv.Name == "Difficulty Medium");
             int easyDiffGlobalVariableIndex = map.Rules.GlobalVariables.FindIndex(gv => gv.Name == "Difficulty Easy");
@@ -537,7 +545,7 @@ namespace TSMapEditor.UI.Windows
 
             if (easyDiffGlobalVariableIndex < 0)
             {
-                Logger.Log($"{nameof(TriggersWindow)}.{nameof(DoCloneForEasierDifficulties)}: Medium difficulty global variable not found!");
+                Logger.Log($"{nameof(TriggersWindow)}.{nameof(DoCloneForEasierDifficulties)}: Easy difficulty global variable not found!");
             }
 
             // Go through used events. If there's a reference to the
