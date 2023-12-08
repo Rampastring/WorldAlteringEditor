@@ -95,8 +95,6 @@ namespace TSMapEditor.UI.TopBar
             editContextMenu.AddItem("Basic", () => windowController.BasicSectionConfigWindow.Open(), null, null, null);
             editContextMenu.AddItem("Map Size", () => windowController.MapSizeWindow.Open(), null, null, null, null);
             editContextMenu.AddItem(" ", null, () => false, null, null);
-            editContextMenu.AddItem("Houses", () => windowController.HousesWindow.Open(), null, null, null);
-            editContextMenu.AddItem(" ", null, () => false, null, null);
             editContextMenu.AddItem("Lighting", () => windowController.LightingSettingsWindow.Open(), null, null, null);
             editContextMenu.AddItem(" ", null, () => false, null, null);
             editContextMenu.AddItem("Place Tunnel", () => mapView.EditorState.CursorAction = placeTubeCursorAction, null, null, null, KeyboardCommands.Instance.PlaceTunnel.GetKeyDisplayString());
@@ -125,9 +123,21 @@ namespace TSMapEditor.UI.TopBar
 
             var editButton = new MenuButton(WindowManager, editContextMenu);
             editButton.Name = nameof(editButton);
-            editButton.X = fileButton.Right + 1;
+            editButton.X = fileButton.Right;
             editButton.Text = "Edit";
             AddChild(editButton);
+
+            var viewContextMenu = new EditorContextMenu(WindowManager);
+            viewContextMenu.Name = nameof(viewContextMenu);
+            viewContextMenu.AddItem("Toggle Impassable Cells", () => mapView.EditorState.HighlightImpassableCells = !mapView.EditorState.HighlightImpassableCells, null, null, null);
+            viewContextMenu.AddItem("Toggle IceGrowth Preview", () => mapView.EditorState.HighlightIceGrowth = !mapView.EditorState.HighlightIceGrowth, null, null, null);
+            viewContextMenu.AddItem("View Minimap", () => windowController.MinimapWindow.Open(), null, null, null);
+
+            var viewButton = new MenuButton(WindowManager, viewContextMenu);
+            viewButton.Name = nameof(viewButton);
+            viewButton.X = editButton.Right;
+            viewButton.Text = "View";
+            AddChild(viewButton);
 
             var toolsContextMenu = new EditorContextMenu(WindowManager);
             toolsContextMenu.Name = nameof(toolsContextMenu);
@@ -140,10 +150,6 @@ namespace TSMapEditor.UI.TopBar
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("Apply INI Code...", () => windowController.ApplyINICodeWindow.Open(), null, null, null);
             toolsContextMenu.AddItem("Run Script...", () => windowController.RunScriptWindow.Open(), null, null, null, null);
-            toolsContextMenu.AddItem(" ", null, () => false, null, null);
-            toolsContextMenu.AddItem("View Minimap", () => windowController.MinimapWindow.Open(), null, null, null);
-            toolsContextMenu.AddItem("Toggle Impassable Cells", () => mapView.EditorState.HighlightImpassableCells = !mapView.EditorState.HighlightImpassableCells, null, null, null);
-            toolsContextMenu.AddItem("Toggle IceGrowth Preview", () => mapView.EditorState.HighlightIceGrowth = !mapView.EditorState.HighlightIceGrowth, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("Smoothen Ice", SmoothenIce, null, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
@@ -159,12 +165,13 @@ namespace TSMapEditor.UI.TopBar
 
             var toolsButton = new MenuButton(WindowManager, toolsContextMenu);
             toolsButton.Name = nameof(toolsButton);
-            toolsButton.X = editButton.Right + 1;
+            toolsButton.X = viewButton.Right;
             toolsButton.Text = "Tools";
             AddChild(toolsButton);
 
             var scriptingContextMenu = new EditorContextMenu(WindowManager);
             scriptingContextMenu.Name = nameof(scriptingContextMenu);
+            scriptingContextMenu.AddItem("Houses", () => windowController.HousesWindow.Open(), null, null, null);
             scriptingContextMenu.AddItem("Triggers", () => windowController.TriggersWindow.Open(), null, null, null);
             scriptingContextMenu.AddItem("TaskForces", () => windowController.TaskForcesWindow.Open(), null, null, null);
             scriptingContextMenu.AddItem("Scripts", () => windowController.ScriptsWindow.Open(), null, null, null);
@@ -174,7 +181,7 @@ namespace TSMapEditor.UI.TopBar
 
             var scriptingButton = new MenuButton(WindowManager, scriptingContextMenu);
             scriptingButton.Name = nameof(scriptingButton);
-            scriptingButton.X = toolsButton.Right + 1;
+            scriptingButton.X = toolsButton.Right;
             scriptingButton.Text = "Scripting";
             AddChild(scriptingButton);
 
@@ -182,7 +189,7 @@ namespace TSMapEditor.UI.TopBar
 
             Height = fileButton.Height;
 
-            menuButtons = new MenuButton[] { fileButton, editButton, toolsButton, scriptingButton };
+            menuButtons = new MenuButton[] { fileButton, editButton, viewButton, toolsButton, scriptingButton };
             Array.ForEach(menuButtons, b => b.MouseEnter += MenuButton_MouseEnter);
 
             KeyboardCommands.Instance.ConfigureCopiedObjects.Triggered += (s, e) => windowController.CopiedEntryTypesWindow.Open();
