@@ -151,6 +151,8 @@ namespace TSMapEditor.UI.TopBar
             toolsContextMenu.AddItem("Apply INI Code...", () => windowController.ApplyINICodeWindow.Open(), null, null, null);
             toolsContextMenu.AddItem("Run Script...", () => windowController.RunScriptWindow.Open(), null, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
+            toolsContextMenu.AddItem("Change Map Height...", () => windowController.ChangeHeightWindow.Open(), null, () => !Constants.IsFlatWorld, null, null);
+            toolsContextMenu.AddItem(" ", null, () => false, () => !Constants.IsFlatWorld, null);
             toolsContextMenu.AddItem("Smoothen Ice", SmoothenIce, null, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("Check Distance...", () => mapView.EditorState.CursorAction = checkDistanceCursorAction, null, null, null);

@@ -247,6 +247,7 @@ namespace TSMapEditor.Rendering
             windowController.Initialized += PostWindowControllerInit;
             Map.LocalSizeChanged += (s, e) => InvalidateMap();
             Map.MapResized += Map_MapResized;
+            Map.MapHeightChanged += (s, e) => InvalidateMap();
 
             Map.HouseColorChanged += (s, e) => InvalidateMap();
             EditorState.HighlightImpassableCellsChanged += (s, e) => InvalidateMap();

@@ -32,6 +32,7 @@ namespace TSMapEditor.Models
         public event EventHandler<HouseEventArgs> HouseColorChanged;
         public event EventHandler LocalSizeChanged;
         public event EventHandler MapResized;
+        public event EventHandler MapHeightChanged;
         public event EventHandler MapManuallySaved;
         public event EventHandler MapAutoSaved;
         public event EventHandler PreSave;
@@ -574,6 +575,33 @@ namespace TSMapEditor.Models
             {
                 Tiles[i] = new MapTile[TileBufferSize];
             }
+        }
+
+        /// <summary>
+        /// Changes the height of the entire map by the given value.
+        /// </summary>
+        /// <param name="height">The number of height levels to add to the height of each cell on the map. Can be negative.</param>
+        public void ChangeHeight(int height)
+        {
+            if (height == 0)
+                return;
+
+            DoForAllValidTiles(cell =>
+            {
+                if (height > 0)
+                {
+                    cell.Level = (byte)Math.Min(cell.Level + height, Constants.MaxMapHeightLevel);
+                }
+                else
+                {
+                    if (Math.Abs(height) > cell.Level)
+                        cell.Level = 0;
+                    else
+                        cell.Level = (byte)(cell.Level - Math.Abs(height));
+                }
+            });
+
+            MapHeightChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public void PlaceTerrainTileAt(ITileImage tile, Point2D cellCoords)

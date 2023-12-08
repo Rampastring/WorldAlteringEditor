@@ -122,6 +122,9 @@
     <None Update="Config\UI\Windows\BasicSectionConfigWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Config\UI\Windows\ChangeHeightWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Config\UI\Windows\CopiedEntryTypesWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

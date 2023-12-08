@@ -60,6 +60,7 @@ namespace TSMapEditor.UI.Windows
         public HotkeyConfigurationWindow HotkeyConfigurationWindow { get; private set; }
         public MapSizeWindow MapSizeWindow { get; private set; }
         public ExpandMapWindow ExpandMapWindow { get; private set; }
+        public ChangeHeightWindow ChangeHeightWindow { get; private set; }
         public AboutWindow AboutWindow { get; private set; }
 
         private IWindowParentControl windowParentControl;
@@ -172,6 +173,9 @@ namespace TSMapEditor.UI.Windows
 
             ExpandMapWindow = new ExpandMapWindow(windowParentControl.WindowManager, map);
             Windows.Add(ExpandMapWindow);
+
+            ChangeHeightWindow = new ChangeHeightWindow(windowParentControl.WindowManager, map);
+            Windows.Add(ChangeHeightWindow);
 
             AboutWindow = new AboutWindow(windowParentControl.WindowManager);
             Windows.Add(AboutWindow);
