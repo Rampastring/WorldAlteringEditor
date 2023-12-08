@@ -344,6 +344,9 @@ namespace TSMapEditor.Rendering
 
         private void Map_MapResized(object sender, EventArgs e)
         {
+            // Resizing the map makes previous undo/redo entries invalid
+            MutationManager.ClearUndoAndRedoLists();
+
             // We need to re-create our map textures
             RefreshRenderTargets();
 

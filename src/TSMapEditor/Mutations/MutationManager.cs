@@ -52,5 +52,11 @@ namespace TSMapEditor.Mutations
             UndoList.Add(RedoList[lastRedoIndex]);
             RedoList.RemoveAt(lastRedoIndex);
         }
+
+        public void ClearUndoAndRedoLists()
+        {
+            UndoList.Clear();
+            RedoList.Clear();
+        }
     }
 }
