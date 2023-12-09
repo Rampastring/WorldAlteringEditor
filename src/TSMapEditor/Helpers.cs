@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Rampastring.Tools;
 using Rampastring.XNAUI;
 using System;
+using System.Globalization;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Models.Enums;
@@ -270,6 +271,18 @@ namespace TSMapEditor
                 a = Conversions.IntFromString(parts[3], a);
 
             return new Color((byte)r, (byte)g, (byte)b, (byte)a);
+        }
+
+        public static string ColorToString(Color color, bool includeAlpha)
+        {
+            string returnValue = color.R.ToString(CultureInfo.InvariantCulture) + "," + 
+                color.G.ToString(CultureInfo.InvariantCulture) + "," + 
+                color.B.ToString(CultureInfo.InvariantCulture);
+
+            if (includeAlpha)
+                returnValue += "," + color.A.ToString(CultureInfo.InvariantCulture);
+
+            return returnValue;
         }
 
         public static Color GetHouseUITextColor(House house)

@@ -1,4 +1,5 @@
-﻿using Rampastring.Tools;
+﻿using Microsoft.Xna.Framework;
+using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,10 +23,12 @@ namespace TSMapEditor.Mutations.Classes
             List<TerrainGeneratorTerrainTypeGroup> terrainTypeGroups,
             List<TerrainGeneratorTileGroup> tileGroups,
             List<TerrainGeneratorOverlayGroup> overlayGroups,
-            List<TerrainGeneratorSmudgeGroup> smudgeGroups)
+            List<TerrainGeneratorSmudgeGroup> smudgeGroups,
+            Color? color = null)
         {
             Name = name;
             Theater = theater;
+            Color = color;
             IsUserConfiguration = isUserConfiguration;
             TerrainTypeGroups = terrainTypeGroups;
             TileGroups = tileGroups;
@@ -35,6 +38,7 @@ namespace TSMapEditor.Mutations.Classes
 
         public string Name { get; }
         public string Theater { get; }
+        public Color? Color { get; }
         public bool IsUserConfiguration { get; }
         public List<TerrainGeneratorTerrainTypeGroup> TerrainTypeGroups { get; }
         public List<TerrainGeneratorTileGroup> TileGroups { get; }
@@ -47,6 +51,8 @@ namespace TSMapEditor.Mutations.Classes
 
             iniSection.SetStringValue("Name", Name);
             iniSection.SetStringValue("Theater", Theater);
+            if (Color != null)
+                iniSection.SetStringValue("Color", Helpers.ColorToString(Color.Value, false));
 
             for (int i = 0; i < TerrainTypeGroups.Count; i++)
             {
@@ -84,6 +90,9 @@ namespace TSMapEditor.Mutations.Classes
 
             string configName = section.GetStringValue("Name", "Unnamed Configuration");
             string theater = section.GetStringValue("Theater", string.Empty);
+            Color? color = null;
+            if (section.KeyExists("Color"))
+                color = Helpers.ColorFromString(section.GetStringValue("Color", "255,255,255"));
 
             int i = 0;
             while (true)
@@ -166,7 +175,7 @@ namespace TSMapEditor.Mutations.Classes
             }
 
             if (terrainTypeGroups.Count > 0 || tileGroups.Count > 0 || overlayGroups.Count > 0 || smudgeGroups.Count > 0)
-                return new TerrainGeneratorConfiguration(configName, theater, isUserConfiguration, terrainTypeGroups, tileGroups, overlayGroups, smudgeGroups);
+                return new TerrainGeneratorConfiguration(configName, theater, isUserConfiguration, terrainTypeGroups, tileGroups, overlayGroups, smudgeGroups, color);
 
             return null;
         }

@@ -259,7 +259,7 @@ namespace TSMapEditor.UI.Windows.TerrainGenerator
                     map.Rules.SmudgeTypes);
 
                 if (presetConfiguration != null)
-                    ddPresets.AddItem(new XNADropDownItem() { Text = presetConfiguration.Name, Tag = presetConfiguration });
+                    ddPresets.AddItem(new XNADropDownItem() { Text = presetConfiguration.Name, Tag = presetConfiguration, TextColor = presetConfiguration.Color });
             }
         }
 
