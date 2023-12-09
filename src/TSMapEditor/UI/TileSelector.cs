@@ -230,7 +230,14 @@ namespace TSMapEditor.UI
                     continue;
 
                 if (tileSet.AllowToPlace && tileSet.LoadedTileCount > 0)
-                    lbTileSetList.AddItem(new XNAListBoxItem() { Text = tileSet.SetName, Tag = tileSet });
+                {
+                    lbTileSetList.AddItem(new XNAListBoxItem()
+                    {
+                        Text = tileSet.SetName,
+                        Tag = tileSet,
+                        TextColor = tileSet.Color.HasValue ? tileSet.Color.Value : UISettings.ActiveSettings.AltColor
+                    });
+                }
             }
         }
 

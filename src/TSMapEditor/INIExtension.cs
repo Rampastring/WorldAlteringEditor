@@ -1,4 +1,5 @@
-﻿using Rampastring.Tools;
+﻿using Microsoft.Xna.Framework;
+using Rampastring.Tools;
 using System;
 
 namespace TSMapEditor
@@ -21,6 +22,11 @@ namespace TSMapEditor
 
                 action(kvp.Value);
             }
+        }
+
+        public static Color GetColorValue(this IniSection iniSection, string keyName, Color defaultValue, bool includeAlpha = false)
+        {
+            return Helpers.ColorFromString(iniSection.GetStringValue(keyName, Helpers.ColorToString(defaultValue, includeAlpha)));
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using Rampastring.Tools;
+﻿using Microsoft.Xna.Framework;
+using Rampastring.Tools;
+using Rampastring.XNAUI;
 using TSMapEditor.Models;
 
 namespace TSMapEditor.CCEngine
@@ -22,6 +24,7 @@ namespace TSMapEditor.CCEngine
         public bool AllowTiberium { get; set; }
         public bool AllowToPlace { get; set; } = true;
         public bool Only1x1 { get; set; }
+        public Color? Color { get; set; }
 
         /// <summary>
         /// The unique tile ID of the first tile of this tileset.
@@ -51,6 +54,10 @@ namespace TSMapEditor.CCEngine
                 if (SetName != null && SetName.ToLowerInvariant().Contains(namepart))
                     Only1x1 = true;
             }
+
+            const string colorKeyName = "EditorColor";
+            if (iniSection.KeyExists(colorKeyName))
+                Color = iniSection.GetColorValue(colorKeyName, UISettings.ActiveSettings.AltColor);
         }
     }
 }
