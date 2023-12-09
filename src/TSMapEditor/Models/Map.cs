@@ -1633,6 +1633,25 @@ namespace TSMapEditor.Models
                 }
             }
 
+            // Check for triggers being attached to themselves (potentially recursively)
+            foreach (var trigger in Triggers)
+            {
+                if (trigger.LinkedTrigger == null)
+                    continue;
+
+                Trigger linkedTrigger = trigger.LinkedTrigger;
+                while (linkedTrigger != null)
+                {
+                    if (linkedTrigger == trigger)
+                    {
+                        issueList.Add($"Trigger '{trigger.Name}' is attached to itself (potentially through other triggers). This will cause the game to crash!");
+                        break;
+                    }
+
+                    linkedTrigger = linkedTrigger.LinkedTrigger;
+                }
+            }
+
             return issueList;
         }
 
