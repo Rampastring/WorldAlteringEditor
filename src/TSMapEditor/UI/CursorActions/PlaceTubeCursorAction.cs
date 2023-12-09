@@ -40,7 +40,7 @@ namespace TSMapEditor.UI.CursorActions
 
             cellTopLeftPoint = cellTopLeftPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
 
-            const string text = "Hold left click to draw tunnel.\r\n\r\nENTER to confirm\r\nShift + ENTER to also create opposing tunnel\r\nESC to clear\r\nShift + ESC to exit";
+            const string text = "Hold left click or click on cells to draw tunnel.\r\n\r\nENTER to confirm\r\nShift + ENTER to also create opposing tunnel\r\nESC to clear\r\nBackspace to step back\r\nRight click to exit";
             var textDimensions = Renderer.GetTextDimensions(text, Constants.UIBoldFont);
             int x = cellTopLeftPoint.X - (int)(textDimensions.X - Constants.CellSizeX) / 2;
 
@@ -87,6 +87,18 @@ namespace TSMapEditor.UI.CursorActions
                 }
 
                 tube = null;
+
+                e.Handled = true;
+            }
+            else if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.Back && tube != null && tube.Directions.Count > 0)
+            {
+                TubeRefreshHelper.MapViewRefreshTube(tube, CursorActionTarget.MutationTarget);
+                tube.Directions.RemoveAt(tube.Directions.Count - 1);
+
+                if (tube.Directions.Count == 0)
+                {
+                    tube = null;
+                }
 
                 e.Handled = true;
             }
