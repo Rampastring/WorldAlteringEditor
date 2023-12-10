@@ -21,7 +21,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
         {
             var targetCell = Map.GetTile(OriginCell);
 
-            if (targetCell == null || targetCell.Level >= Constants.MaxMapHeightLevel || !targetCell.IsClearGround() && !RampTileSet.ContainsTile(targetCell.TileIndex))
+            if (targetCell == null || targetCell.Level >= Constants.MaxMapHeightLevel || !IsCellMorphable(targetCell))
                 return;
 
             int targetCellHeight = targetCell.Level;
@@ -40,7 +40,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
                 {
                     var otherCellCoords = OriginCell + offset;
                     var otherCell = Map.GetTile(otherCellCoords);
-                    if (otherCell == null || !otherCell.IsClearGround() || otherCell.Level != height)
+                    if (otherCell == null || !IsCellMorphable(otherCell) || otherCell.Level != height)
                         canCreateSmallHill = false;
                 });
 

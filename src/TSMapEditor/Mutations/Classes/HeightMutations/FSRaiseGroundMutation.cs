@@ -8,10 +8,11 @@ using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI;
 using HCT = TSMapEditor.Mutations.Classes.HeightMutations.HeightComparisonType;
+using SharpDX.Direct3D9;
 
 namespace TSMapEditor.Mutations.Classes.HeightMutations
 {
-    public class FSRaiseGroundMutation : Mutation
+    public class FSRaiseGroundMutation : AlterElevationMutationBase
     {
         public FSRaiseGroundMutation(IMutationTarget mutationTarget, Point2D originCell, BrushSize brushSize) : base(mutationTarget)
         {
@@ -75,7 +76,14 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
             new TransitionRampInfo(RampType.MidSW, new() { HCT.HigherOrEqual, HCT.HigherOrEqual, HCT.Higher, HCT.HigherOrEqual, HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.HigherOrEqual }),
             new TransitionRampInfo(RampType.MidSW, new() { HCT.Higher, HCT.HigherOrEqual, HCT.HigherOrEqual, HCT.HigherOrEqual, HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.LowerOrEqual, HCT.HigherOrEqual }),
 
-            // Special on-ramp-placement height fix checks
+            // In case it's anything else, we probably need to flatten it
+            new TransitionRampInfo(RampType.None, new() { HCT.Irrelevant, HCT.Irrelevant, HCT.Irrelevant, HCT.Irrelevant, HCT.Irrelevant, HCT.Irrelevant, HCT.Irrelevant, HCT.Irrelevant }, 0),
+        };
+
+        // Pre-ramp-placement height fix checks
+        private static readonly TransitionRampInfo[] heightFixers = new[]
+        {
+            new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Equal, HCT.Equal }, 1),
             new TransitionRampInfo(RampType.None, new() { HCT.Equal, HCT.Equal, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher }, 1),
             new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher, HCT.Equal, HCT.Equal }, 1),
             new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Higher, HCT.Higher }, 1),
@@ -92,18 +100,10 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
             new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Equal, HCT.Higher, HCT.Equal, HCT.HigherOrEqual, HCT.Higher, HCT.Equal, HCT.HigherOrEqual }, 1),
             new TransitionRampInfo(RampType.None, new() { HCT.HigherOrEqual, HCT.Higher, HCT.Equal, HCT.HigherOrEqual, HCT.Higher, HCT.Equal, HCT.Higher, HCT.Equal }, 1),
             new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Equal, HCT.HigherOrEqual, HCT.Higher, HCT.Equal, HCT.HigherOrEqual, HCT.Higher, HCT.Equal }, 1),
+            new TransitionRampInfo(RampType.None, new() { HCT.Irrelevant, HCT.Irrelevant, HCT.Higher, HCT.Irrelevant, HCT.Irrelevant, HCT.Higher, HCT.Irrelevant, HCT.Higher }, 1),
 
             new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Irrelevant, HCT.Irrelevant, HCT.Irrelevant, HCT.Higher, HCT.Irrelevant, HCT.Irrelevant, HCT.Irrelevant }, 1),
             new TransitionRampInfo(RampType.None, new() { HCT.Irrelevant, HCT.Irrelevant, HCT.Higher, HCT.Irrelevant, HCT.Higher, HCT.Irrelevant, HCT.Higher, HCT.Irrelevant }, 1),
-
-            // In case it's anything else, we probably need to flatten it
-            new TransitionRampInfo(RampType.None, new() { HCT.Irrelevant, HCT.Irrelevant, HCT.Irrelevant, HCT.Irrelevant, HCT.Irrelevant, HCT.Irrelevant, HCT.Irrelevant, HCT.Irrelevant }, 0),
-        };
-
-        // Pre-ramp-placement height fix checks
-        private static readonly TransitionRampInfo[] heightFixers = new[]
-        {
-            new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Equal, HCT.Equal }, 1),
         };
 
         protected static readonly Point2D[] SurroundingTiles = new Point2D[] { new Point2D(-1, 0), new Point2D(1, 0), new Point2D(0, -1), new Point2D(0, 1),
@@ -117,7 +117,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
         {
             var targetCell = Map.GetTile(OriginCell);
 
-            if (targetCell == null || targetCell.Level >= Constants.MaxMapHeightLevel || !targetCell.IsClearGround() && !RampTileSet.ContainsTile(targetCell.TileIndex))
+            if (targetCell == null || targetCell.Level >= Constants.MaxMapHeightLevel || !IsCellMorphable(targetCell))
                 return;
 
             int targetCellHeight = targetCell.Level;
@@ -136,7 +136,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
                 {
                     var otherCellCoords = OriginCell + offset;
                     var otherCell = Map.GetTile(otherCellCoords);
-                    if (otherCell == null || !otherCell.IsClearGround() || otherCell.Level != height)
+                    if (otherCell == null || !IsCellMorphable(otherCell) || otherCell.Level != height)
                         canCreateSmallHill = false;
                 });
 
@@ -295,7 +295,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
             if (thisCell == null)
                 return;
 
-            if (!thisCell.IsClearGround() && !RampTileSet.ContainsTile(thisCell.TileIndex))
+            if (!IsCellMorphable(thisCell))
                 return;
 
             int biggestHeightDiff = 0;
@@ -304,6 +304,9 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
             {
                 var cell = Map.GetTile(cellCoords + Helpers.VisualDirectionToPoint((Direction)direction));
                 if (cell == null)
+                    continue;
+
+                if (!IsCellMorphable(cell))
                     continue;
 
                 if (cell.Level > thisCell.Level)
@@ -329,7 +332,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
             if (cell == null)
                 return;
 
-            if (!cell.IsClearGround() && !RampTileSet.ContainsTile(cell.TileIndex))
+            if (!IsCellMorphable(cell))
                 return;
 
             Point2D otherCellCoords = cellCoords + new Point2D(isXAxis ? 1 : 0, isXAxis ? 0 : 1);
@@ -365,7 +368,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
             if (cell == null)
                 return;
 
-            if (!cell.IsClearGround() && !RampTileSet.ContainsTile(cell.TileIndex))
+            if (!IsCellMorphable(cell))
                 return;
 
             int totalLevelDifference = 0;
@@ -421,7 +424,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
                     if (cell == null)
                         return;
 
-                    if (!cell.IsClearGround() && !RampTileSet.ContainsTile(cell.TileIndex))
+                    if (!IsCellMorphable(cell))
                         return;
 
                     var applyingTransition = Array.Find(heightFixers, tri => tri.Matches(Map, cc, cell.Level));
@@ -470,7 +473,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
                 if (cell == null)
                     continue;
 
-                if (!cell.IsClearGround() && !RampTileSet.ContainsTile(cell.TileIndex))
+                if (!IsCellMorphable(cell))
                     continue;
 
                 LandType landType = (LandType)Map.TheaterInstance.GetTile(cell.TileIndex).GetSubTile(cell.SubTileIndex).TmpImage.TerrainType;

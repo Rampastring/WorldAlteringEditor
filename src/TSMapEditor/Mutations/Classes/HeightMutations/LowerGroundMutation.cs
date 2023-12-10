@@ -7,12 +7,13 @@ using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI;
 using System.Linq;
+using SharpDX.Direct3D9;
 
 namespace TSMapEditor.Mutations.Classes.HeightMutations
 {
     using HCT = HeightComparisonType;
 
-    internal class LowerGroundMutation : Mutation
+    internal class LowerGroundMutation : AlterElevationMutationBase
     {
         public LowerGroundMutation(IMutationTarget mutationTarget, Point2D originCell, BrushSize brushSize) : base(mutationTarget)
         {
@@ -27,7 +28,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
         {
             var targetCell = Map.GetTile(OriginCell);
 
-            if (targetCell == null || targetCell.Level < 1 || !targetCell.IsClearGround() && !RampTileSet.ContainsTile(targetCell.TileIndex))
+            if (targetCell == null || targetCell.Level < 1 || !IsCellMorphable(targetCell))
                 return;
 
             int targetCellHeight = targetCell.Level;
@@ -256,31 +257,31 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
             if (thisCell == null)
                 return;
 
-            if (!thisCell.IsClearGround() && !RampTileSet.ContainsTile(thisCell.TileIndex))
+            if (!IsCellMorphable(thisCell))
                 return;
 
             int biggestHeightDiff = 0;
 
             var northernCell = Map.GetTile(cellCoords + new Point2D(0, -1));
-            if (northernCell != null && northernCell.Level < thisCell.Level)
+            if (northernCell != null && northernCell.Level < thisCell.Level && IsCellMorphable(northernCell))
             {
                 biggestHeightDiff = Math.Max(biggestHeightDiff, thisCell.Level - northernCell.Level);
             }
 
             var southernCell = Map.GetTile(cellCoords + new Point2D(0, 1));
-            if (southernCell != null && southernCell.Level < thisCell.Level)
+            if (southernCell != null && southernCell.Level < thisCell.Level && IsCellMorphable(southernCell))
             {
                 biggestHeightDiff = Math.Max(biggestHeightDiff, thisCell.Level - southernCell.Level);
             }
 
             var westernCell = Map.GetTile(cellCoords + new Point2D(-1, 0));
-            if (westernCell != null && westernCell.Level < thisCell.Level)
+            if (westernCell != null && westernCell.Level < thisCell.Level && IsCellMorphable(westernCell))
             {
                 biggestHeightDiff = Math.Max(biggestHeightDiff, thisCell.Level - westernCell.Level);
             }
 
             var easternCell = Map.GetTile(cellCoords + new Point2D(1, 0));
-            if (easternCell != null && easternCell.Level < thisCell.Level)
+            if (easternCell != null && easternCell.Level < thisCell.Level && IsCellMorphable(easternCell))
             {
                 biggestHeightDiff = Math.Max(biggestHeightDiff, thisCell.Level - easternCell.Level);
             }
@@ -311,7 +312,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
             if (cell == null)
                 return;
 
-            if (!cell.IsClearGround() && !RampTileSet.ContainsTile(cell.TileIndex))
+            if (!IsCellMorphable(cell))
                 return;
 
             Point2D otherCellCoords = cellCoords + new Point2D(isXAxis ? 1 : 0, isXAxis ? 0 : 1);
@@ -347,7 +348,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
             if (cell == null)
                 return;
 
-            if (!cell.IsClearGround() && !RampTileSet.ContainsTile(cell.TileIndex))
+            if (!IsCellMorphable(cell))
                 return;
 
             int totalLevelDifference = 0;
@@ -403,7 +404,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
                     if (cell == null)
                         return;
 
-                    if (!cell.IsClearGround() && !RampTileSet.ContainsTile(cell.TileIndex))
+                    if (!IsCellMorphable(cell))
                         return;
 
                     var applyingTransition = Array.Find(heightFixers, tri => tri.Matches(Map, cc, cell.Level));
@@ -452,7 +453,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
                 if (cell == null)
                     continue;
 
-                if (!cell.IsClearGround() && !RampTileSet.ContainsTile(cell.TileIndex))
+                if (!IsCellMorphable(cell))
                     continue;
 
                 LandType landType = (LandType)Map.TheaterInstance.GetTile(cell.TileIndex).GetSubTile(cell.SubTileIndex).TmpImage.TerrainType;

@@ -46,8 +46,8 @@ namespace TSMapEditor.UI.CursorActions.HeightActions
                 return;
             }
 
-            // Don't act on non-clear terrain
-            if (!cell.IsClearGround() && !Map.TheaterInstance.Theater.RampTileSet.ContainsTile(cell.TileIndex))
+            // Don't act on non-morphable terrain
+            if (!Map.TheaterInstance.Theater.TileSets[Map.TheaterInstance.GetTileSetId(cell.TileIndex)].Morphable)
             {
                 return;
             }

@@ -15,7 +15,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
     /// Adjusts a target cell's height to a desired level and then processes all surrounding
     /// tiles for the height level to match.
     /// </summary>
-    public class FlattenGroundMutation : Mutation
+    public class FlattenGroundMutation : AlterElevationMutationBase
     {
         public FlattenGroundMutation(IMutationTarget mutationTarget, Point2D originCell, BrushSize brushSize, int desiredHeightLevel) : base(mutationTarget)
         {
@@ -224,7 +224,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
             if (thisCell == null)
                 return;
 
-            if (!thisCell.IsClearGround() && !RampTileSet.ContainsTile(thisCell.TileIndex))
+            if (!IsCellMorphable(thisCell))
                 return;
 
             int biggestHeightDiff = 0;
@@ -233,6 +233,9 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
             {
                 var cell = Map.GetTile(cellCoords + Helpers.VisualDirectionToPoint((Direction)direction));
                 if (cell == null)
+                    continue;
+
+                if (!IsCellMorphable(cell))
                     continue;
 
                 if (cell.Level > thisCell.Level)
@@ -258,7 +261,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
             if (cell == null)
                 return;
 
-            if (!cell.IsClearGround() && !RampTileSet.ContainsTile(cell.TileIndex))
+            if (!IsCellMorphable(cell))
                 return;
 
             Point2D otherCellCoords = cellCoords + new Point2D(isXAxis ? 1 : 0, isXAxis ? 0 : 1);
@@ -294,7 +297,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
             if (cell == null)
                 return;
 
-            if (!cell.IsClearGround() && !RampTileSet.ContainsTile(cell.TileIndex))
+            if (!IsCellMorphable(cell))
                 return;
 
             int totalLevelDifference = 0;
@@ -350,7 +353,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
                     if (cell == null)
                         return;
 
-                    if (!cell.IsClearGround() && !RampTileSet.ContainsTile(cell.TileIndex))
+                    if (!IsCellMorphable(cell))
                         return;
 
                     var applyingTransition = Array.Find(heightFixers, tri => tri.Matches(Map, cc, cell.Level));
@@ -399,7 +402,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
                 if (cell == null)
                     continue;
 
-                if (!cell.IsClearGround() && !RampTileSet.ContainsTile(cell.TileIndex))
+                if (!IsCellMorphable(cell))
                     continue;
 
                 LandType landType = (LandType)Map.TheaterInstance.GetTile(cell.TileIndex).GetSubTile(cell.SubTileIndex).TmpImage.TerrainType;

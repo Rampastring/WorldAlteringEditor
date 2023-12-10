@@ -166,7 +166,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
     /// Used to be a base class for mutations that alter terrain height.
     /// Currently mostly obsolete. TODO to be refactored and put into use again
     /// </summary>
-    public abstract class AlterGroundElevationMutation : Mutation
+    public abstract class AlterGroundElevationMutation : AlterElevationMutationBase
     {
         public AlterGroundElevationMutation(IMutationTarget mutationTarget, Point2D originCell, BrushSize brushSize) : base(mutationTarget)
         {
@@ -356,31 +356,31 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
             if (thisCell == null)
                 return;
 
-            if (!thisCell.IsClearGround() && !RampTileSet.ContainsTile(thisCell.TileIndex))
+            if (!IsCellMorphable(thisCell))
                 return;
 
             int biggestHeightDiff = 0;
 
             var northernCell = Map.GetTile(cellCoords + new Point2D(0, -1));
-            if (northernCell != null && northernCell.Level > thisCell.Level)
+            if (northernCell != null && northernCell.Level > thisCell.Level && IsCellMorphable(northernCell))
             {
                 biggestHeightDiff = Math.Max(biggestHeightDiff, northernCell.Level - thisCell.Level);
             }
 
             var southernCell = Map.GetTile(cellCoords + new Point2D(0, 1));
-            if (southernCell != null && southernCell.Level > thisCell.Level)
+            if (southernCell != null && southernCell.Level > thisCell.Level && IsCellMorphable(southernCell))
             {
                 biggestHeightDiff = Math.Max(biggestHeightDiff, southernCell.Level - thisCell.Level);
             }
 
             var westernCell = Map.GetTile(cellCoords + new Point2D(-1, 0));
-            if (westernCell != null && westernCell.Level > thisCell.Level)
+            if (westernCell != null && westernCell.Level > thisCell.Level && IsCellMorphable(westernCell))
             {
                 biggestHeightDiff = Math.Max(biggestHeightDiff, westernCell.Level - thisCell.Level);
             }
 
             var easternCell = Map.GetTile(cellCoords + new Point2D(1, 0));
-            if (easternCell != null && easternCell.Level > thisCell.Level)
+            if (easternCell != null && easternCell.Level > thisCell.Level && IsCellMorphable(easternCell))
             {
                 biggestHeightDiff = Math.Max(biggestHeightDiff, easternCell.Level - thisCell.Level);
             }
@@ -404,7 +404,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
             if (cell == null)
                 return;
 
-            if (!cell.IsClearGround() && !RampTileSet.ContainsTile(cell.TileIndex))
+            if (!IsCellMorphable(cell))
                 return;
 
             Point2D otherCellCoords = cellCoords + new Point2D(isXAxis ? 1 : 0, isXAxis ? 0 : 1);
@@ -440,7 +440,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
             if (cell == null)
                 return;
 
-            if (!cell.IsClearGround() && !RampTileSet.ContainsTile(cell.TileIndex))
+            if (!IsCellMorphable(cell))
                 return;
 
             int totalLevelDifference = 0;
@@ -496,7 +496,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
                     if (cell == null)
                         return;
 
-                    if (!cell.IsClearGround() && !RampTileSet.ContainsTile(cell.TileIndex))
+                    if (!IsCellMorphable(cell))
                         return;
 
                     var applyingTransition = Array.Find(heightFixers, tri => tri.Matches(Map, cc, cell.Level));
@@ -545,7 +545,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
                 if (cell == null)
                     continue;
 
-                if (!cell.IsClearGround() && !RampTileSet.ContainsTile(cell.TileIndex))
+                if (!IsCellMorphable(cell))
                     continue;
 
                 LandType landType = (LandType)Map.TheaterInstance.GetTile(cell.TileIndex).GetSubTile(cell.SubTileIndex).TmpImage.TerrainType;
