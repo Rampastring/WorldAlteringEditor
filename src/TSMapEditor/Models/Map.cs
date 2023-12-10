@@ -9,6 +9,7 @@ using TSMapEditor.CCEngine;
 using TSMapEditor.Extensions;
 using TSMapEditor.GameMath;
 using TSMapEditor.Initialization;
+using TSMapEditor.Models.Enums;
 using TSMapEditor.Rendering;
 
 namespace TSMapEditor.Models
@@ -1649,6 +1650,28 @@ namespace TSMapEditor.Models
                     }
 
                     linkedTrigger = linkedTrigger.LinkedTrigger;
+                }
+            }
+
+            // Check for invalid TeamType parameter values in triggers
+            foreach (var trigger in Triggers)
+            {
+                foreach (var action in trigger.Actions)
+                {
+                    if (!EditorConfig.TriggerActionTypes.TryGetValue(action.ActionIndex, out var triggerActionType))
+                        continue;
+
+                    for (int i = 0; i < triggerActionType.Parameters.Length; i++)
+                    {
+                        if (triggerActionType.Parameters[i].TriggerParamType == TriggerParamType.TeamType)
+                        {
+                            if (!TeamTypes.Exists(tt => tt.ININame == action.Parameters[i]))
+                            {
+                                issueList.Add($"Trigger '{trigger.Name}' has a nonexistent TeamType specified as a parameter for one or more of its actions.");
+                                break;
+                            }
+                        }
+                    }
                 }
             }
 
