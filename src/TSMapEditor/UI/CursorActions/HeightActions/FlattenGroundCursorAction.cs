@@ -24,6 +24,8 @@ namespace TSMapEditor.UI.CursorActions.HeightActions
 
         public override bool DrawCellCursor => true;
 
+        public override bool SeeThrough => false;
+
         public override void LeftDown(Point2D cellCoords)
         {
             var cell = Map.GetTile(cellCoords);

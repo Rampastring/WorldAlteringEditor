@@ -1285,7 +1285,7 @@ namespace TSMapEditor.Rendering
             Point2D cursorMapPoint = GetCursorMapPoint();
             Point2D tileCoords = EditorState.Is2DMode ? 
                 CellMath.CellCoordsFromPixelCoords_2D(cursorMapPoint, Map) : 
-                CellMath.CellCoordsFromPixelCoords(cursorMapPoint, Map);
+                CellMath.CellCoordsFromPixelCoords(cursorMapPoint, Map, CursorAction == null || CursorAction.SeeThrough);
 
             var tile = Map.GetTile(tileCoords.X, tileCoords.Y);
 

@@ -43,6 +43,13 @@ namespace TSMapEditor.UI
         /// </summary>
         public virtual bool DrawCellCursor => false;
 
+        /// <summary>
+        /// Override in derived classes to disable "see-through" cell cursor behaviour.
+        /// "See-through" behaviour allows the cursor action to reach cells behind "walls"
+        /// in the game world, such as cliffs.
+        /// </summary>
+        public virtual bool SeeThrough => true;
+
         public abstract string GetName();
 
         protected Map Map => CursorActionTarget.Map;

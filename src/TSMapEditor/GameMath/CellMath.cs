@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using System;
 using TSMapEditor.Models;
 
 namespace TSMapEditor.GameMath
@@ -75,7 +76,14 @@ namespace TSMapEditor.GameMath
             return new Point2D(cx, cy);
         }
 
-        public static Point2D CellCoordsFromPixelCoords(Point2D pixelCoords, Map map)
+        /// <summary>
+        /// Calculates and returns the game-logical coordinates of a cell at given pixel-based coordinates in the world.
+        /// </summary>
+        /// <param name="pixelCoords">The pixel-based location.</param>
+        /// <param name="map">The map.</param>
+        /// <param name="seethrough">Whether we should "see through" walls in the game world, such as cliffs,
+        /// allowing us to reach cells that are behind cliffs.</param>
+        public static Point2D CellCoordsFromPixelCoords(Point2D pixelCoords, Map map, bool seethrough = true)
         {
             Point2D coords2D = CellCoordsFromPixelCoords_2D(pixelCoords, map);
 
@@ -85,31 +93,74 @@ namespace TSMapEditor.GameMath
             Point2D nearestCenterCoords = new Point2D(-1, -1);
             float nearestDistance = float.MaxValue;
 
+            const int threshold = 1;
+            const int scanSize = 3;
+
+
+            // Take isometric perspective into account
+            Vector2 worldCoordsNonIsometric = new Point2D(pixelCoords.X / 2, pixelCoords.Y).ToXNAVector();
+
             // Scan all cells that are deemed to be "close enough" to the initial cell
             // to see if our cursor is on the cell
-            for (int y = -3; y <= 3; y++)
+            for (int y = -scanSize; y <= scanSize; y++)
             {
-                for (int x = -3; x <= 3; x++)
+                for (int x = -scanSize; x <= scanSize; x++)
                 {
                     // traverse height
-                    for (int i = 0; i < 14; i++)
+                    for (int i = 0; i <= Constants.MaxMapHeightLevel; i++)
                     {
                         var otherCellCoords = coords2D + new Point2D(x, y) + new Point2D(i, i);
                         var otherCell = map.GetTile(otherCellCoords);
 
                         if (otherCell != null)
                         {
-                            var tlCoords = CellTopLeftPointFromCellCoords(otherCellCoords, map);
                             var centerCoords = CellCenterPointFromCellCoords_3D(otherCellCoords, map);
 
+                            // Take isometric perspective into account
                             centerCoords = new Point2D(centerCoords.X / 2, centerCoords.Y);
-                            var twpx = new Point2D(pixelCoords.X / 2, pixelCoords.Y);
 
-                            float distance = Vector2.Distance(centerCoords.ToXNAVector(), twpx.ToXNAVector());
+                            float distance = Vector2.Distance(centerCoords.ToXNAVector(), worldCoordsNonIsometric);
                             if (distance <= nearestDistance)
                             {
-                                nearestDistance = distance;
-                                nearestCenterCoords = otherCellCoords;
+                                bool acceptCell = true;
+
+                                if (!seethrough)
+                                {
+                                    // If seethrough is disabled and the "currently nearest" cell is below the evaluated cell in 2D coords,
+                                    // only accept the evaluated cell as nearest if it is significantly closer than the nearest cell.
+                                    if (otherCellCoords.X + otherCellCoords.Y < nearestCenterCoords.X + nearestCenterCoords.Y)
+                                    {
+                                        if (nearestDistance - distance <= threshold)
+                                        {
+                                            acceptCell = false;
+                                        }
+                                    }
+                                }
+
+                                if (acceptCell)
+                                {
+                                    nearestDistance = distance;
+                                    nearestCenterCoords = otherCellCoords;
+                                }
+                            }
+
+                            // If seethrough is disabled, we need to additionally check if the evaluated cell could be the closest cell at
+                            // any potential height level, if it'd be below the current nearest cell in 2D mode
+                            if (!seethrough && otherCellCoords.X + otherCellCoords.Y > nearestCenterCoords.X + nearestCenterCoords.Y)
+                            {
+                                for (int h = 0; h < otherCell.Level; h++)
+                                {
+                                    centerCoords = CellCenterPointFromCellCoords(otherCellCoords, map);
+                                    centerCoords = new Point2D(centerCoords.X / 2, centerCoords.Y - Constants.CellHeight * h);
+
+                                    distance = Vector2.Distance(centerCoords.ToXNAVector(), worldCoordsNonIsometric);
+
+                                    if (distance <= nearestDistance)
+                                    {
+                                        nearestDistance = distance;
+                                        nearestCenterCoords = otherCellCoords;
+                                    }
+                                }
                             }
                         }
                     }
