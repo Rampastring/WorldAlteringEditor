@@ -100,6 +100,10 @@ namespace TSMapEditor.Models
             connectionMask.And(ConnectionMask);
             var frames = Frames.FindAll(frame =>
                 ((BitArray)frame.ConnectsTo.Clone()).Xor(connectionMask).OfType<bool>().All(e => !e));
+
+            if (frames.Count == 0)
+                return Frames[0];
+
             return frames.ElementAt(random.Next(frames.Count));
         }
 
