@@ -73,7 +73,8 @@ namespace TSMapEditor.Mutations.Classes
             if (tile?.Overlay == null || !connectedOverlayType.ContainsOverlay(tile.Overlay))
                 return;
 
-            var connectedOverlayFrame = connectedOverlayType.GetOverlayForCell(MutationTarget, tile.CoordsToPoint());
+            var connectedOverlayFrame = connectedOverlayType.GetContainedConnectedOverlayType(tile.Overlay)
+                ?.GetOverlayForCell(MutationTarget, tile.CoordsToPoint());
             if (connectedOverlayFrame == null)
                 return;
 

@@ -238,6 +238,12 @@ namespace TSMapEditor.Models
                 ConnectedOverlayType overlayType = new ConnectedOverlayType(overlaySection, rules);
                 ConnectedOverlays.Add(overlayType);
             }
+
+            foreach (var connectedOverlay in ConnectedOverlays)
+            {
+                IniSection overlaySection = iniFile.GetSection(connectedOverlay.Name);
+                connectedOverlay.InitializeRelatedOverlays(overlaySection, ConnectedOverlays);
+            }
         }
 
         private void ReadTeamTypeFlags()

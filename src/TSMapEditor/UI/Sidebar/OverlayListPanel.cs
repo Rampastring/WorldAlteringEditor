@@ -216,7 +216,7 @@ namespace TSMapEditor.UI.Sidebar
 
                     connectedOverlaysCategory.Nodes.Add(new TreeViewNode()
                     {
-                        Text = connectedOverlay.Name,
+                        Text = connectedOverlay.UIName,
                         Tag = connectedOverlay,
                         Texture = texture
                     });
