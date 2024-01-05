@@ -34,10 +34,15 @@ namespace TSMapEditor.Rendering
         bool OnlyPaintOnClearGround { get; }
     }
 
+    public interface IMapView
+    {
+        Camera Camera { get; }
+    }
+
     /// <summary>
     /// An interface for an object that cursor actions use to interact with the map.
     /// </summary>
-    public interface ICursorActionTarget
+    public interface ICursorActionTarget : IMapView
     {
         Map Map { get; }
         TheaterGraphics TheaterGraphics { get; }
@@ -55,12 +60,11 @@ namespace TSMapEditor.Rendering
         CopiedMapData CopiedMapData { get; set; }
         Texture2D MinimapTexture { get; }
         HashSet<object> MinimapUsers { get; }
-        Camera Camera { get; }
         TechnoBase TechnoUnderCursor { get; set; }
     }
 
 
-    public class MapView : XNAControl, ICursorActionTarget, IMutationTarget
+    public class MapView : XNAControl, ICursorActionTarget, IMutationTarget, IMapView
     {
         private const float RightClickScrollRateDivisor = 64f;
         private const double ZoomStep = 0.1;

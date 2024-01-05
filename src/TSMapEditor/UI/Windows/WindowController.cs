@@ -61,6 +61,7 @@ namespace TSMapEditor.UI.Windows
         public MapSizeWindow MapSizeWindow { get; private set; }
         public ExpandMapWindow ExpandMapWindow { get; private set; }
         public ChangeHeightWindow ChangeHeightWindow { get; private set; }
+        public FindWaypointWindow FindWaypointWindow { get; private set; }
         public AboutWindow AboutWindow { get; private set; }
 
         private IWindowParentControl windowParentControl;
@@ -176,6 +177,9 @@ namespace TSMapEditor.UI.Windows
 
             ChangeHeightWindow = new ChangeHeightWindow(windowParentControl.WindowManager, map);
             Windows.Add(ChangeHeightWindow);
+
+            FindWaypointWindow = new FindWaypointWindow(windowParentControl.WindowManager, map, cursorActionTarget);
+            Windows.Add(FindWaypointWindow);
 
             AboutWindow = new AboutWindow(windowParentControl.WindowManager);
             Windows.Add(AboutWindow);

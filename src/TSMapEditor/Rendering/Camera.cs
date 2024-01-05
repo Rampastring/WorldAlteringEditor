@@ -84,6 +84,16 @@ namespace TSMapEditor.Rendering
 
         public int ScaleIntWithZoom(int value) => (int)(value * ZoomLevel);
 
+        public void CenterOnCell(Point2D cellCoords)
+        {
+            Point2D cellPixelCoords = CellMath.CellCenterPointFromCellCoords_3D(cellCoords, Map);
+
+            int width = (int)(WindowManager.RenderResolutionX / ZoomLevel);
+            int height = (int)(WindowManager.RenderResolutionY / ZoomLevel);
+
+            TopLeftPoint = new Point2D(cellPixelCoords.X - (width / 2), cellPixelCoords.Y - (height / 2));
+        }
+
         public void KeyboardUpdate(RKeyboard keyboard, int scrollRate)
         {
             scrollRate = (int)(scrollRate / ZoomLevel);

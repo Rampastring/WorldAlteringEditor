@@ -131,7 +131,9 @@ namespace TSMapEditor.UI.TopBar
             viewContextMenu.Name = nameof(viewContextMenu);
             viewContextMenu.AddItem("Toggle Impassable Cells", () => mapView.EditorState.HighlightImpassableCells = !mapView.EditorState.HighlightImpassableCells, null, null, null);
             viewContextMenu.AddItem("Toggle IceGrowth Preview", () => mapView.EditorState.HighlightIceGrowth = !mapView.EditorState.HighlightIceGrowth, null, null, null);
-            viewContextMenu.AddItem("View Minimap", () => windowController.MinimapWindow.Open(), null, null, null);
+            viewContextMenu.AddItem("View Minimap", () => windowController.MinimapWindow.Open());
+            viewContextMenu.AddItem(" ", null, () => false, null, null);
+            viewContextMenu.AddItem("Find Waypoint...", () => windowController.FindWaypointWindow.Open());
 
             var viewButton = new MenuButton(WindowManager, viewContextMenu);
             viewButton.Name = nameof(viewButton);
