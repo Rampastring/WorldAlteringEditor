@@ -1,6 +1,7 @@
 ﻿using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace TSMapEditor.Models
 {
@@ -72,10 +73,33 @@ namespace TSMapEditor.Models
                     setter.Invoke(this, new object[] { (byte)Math.Min(byte.MaxValue, iniSection.GetIntValue(property.Name, (byte)property.GetValue(this, null))) });
                 else if (propertyType.Equals(typeof(char)))
                     setter.Invoke(this, new object[] { iniSection.GetStringValue(property.Name, ((char)property.GetValue(this, null)).ToString())[0] });
+                else if (propertyType.Equals(typeof(int?)))
+                {
+                    if (int.TryParse(iniSection.GetStringValue(property.Name, ""), CultureInfo.InvariantCulture, out int value))
+                        setter.Invoke(this, new object[] { value });
+                }
+                else if (propertyType.Equals(typeof(double?)))
+                {
+                    if (double.TryParse(iniSection.GetStringValue(property.Name, ""), CultureInfo.InvariantCulture, out double value))
+                        setter.Invoke(this, new object[] { value });
+                }
+                else if (propertyType.Equals(typeof(float?)))
+                {
+                    if (float.TryParse(iniSection.GetStringValue(property.Name, ""), CultureInfo.InvariantCulture, out float value))
+                        setter.Invoke(this, new object[] { value });
+                }
+                else if (propertyType.Equals(typeof(bool?)))
+                {
+                    if (iniSection.KeyExists(property.Name))
+                    {
+                        setter.Invoke(this, new object[] { iniSection.GetBooleanValue(property.Name, ((bool?)property.GetValue(this, null)).GetValueOrDefault()) });
+                    }
+                }
                 else if (propertyType.Equals(typeof(List<string>)))
                     setter.Invoke(this, new object[] { iniSection.GetListValue(property.Name, ',', (s) => s) });
             }
         }
+
 
         public void WritePropertiesToIniSection(IniSection iniSection)
         {
@@ -124,6 +148,42 @@ namespace TSMapEditor.Models
 
                     if (value != null)
                         iniSection.SetStringValue(property.Name, value);
+                    else
+                        iniSection.RemoveKey(property.Name);
+                }
+                else if (propertyType.Equals(typeof(int?)))
+                {
+                    int? value = (int?)getter.Invoke(this, null);
+
+                    if (value != null)
+                        iniSection.SetIntValue(property.Name, value.Value);
+                    else
+                        iniSection.RemoveKey(property.Name);
+                }
+                else if (propertyType.Equals(typeof(double?)))
+                {
+                    double? value = (double?)getter.Invoke(this, null);
+
+                    if (value != null)
+                        iniSection.SetDoubleValue(property.Name, value.Value);
+                    else
+                        iniSection.RemoveKey(property.Name);
+                }
+                else if (propertyType.Equals(typeof(float?)))
+                {
+                    float? value = (float?)getter.Invoke(this, null);
+
+                    if (value != null)
+                        iniSection.SetFloatValue(property.Name, value.Value);
+                    else
+                        iniSection.RemoveKey(property.Name);
+                }
+                else if (propertyType.Equals(typeof(bool?)))
+                {
+                    bool? value = (bool?)getter.Invoke(this, null);
+
+                    if (value != null)
+                        iniSection.SetBooleanValue(property.Name, value.Value, BooleanStringStyle);
                     else
                         iniSection.RemoveKey(property.Name);
                 }
