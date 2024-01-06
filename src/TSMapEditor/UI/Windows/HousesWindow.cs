@@ -5,6 +5,7 @@ using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Globalization;
 using System.Linq;
+using TSMapEditor.Initialization;
 using TSMapEditor.Models;
 using TSMapEditor.UI.Controls;
 
@@ -108,20 +109,33 @@ namespace TSMapEditor.UI.Windows
 
         private void BtnAddHouse_LeftClick(object sender, System.EventArgs e)
         {
-            map.AddHouse(new House("NewHouse") 
-            { 
+            HouseType houseType = null;
+
+            if (!Constants.UseCountries)
+            {
+                houseType = new HouseType("NewHouse");
+                houseType.ID = map.HouseTypes.Count;
+                map.HouseTypes.Add(houseType);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+
+            map.AddHouse(new House("NewHouse", houseType) 
+            {
                 ActsLike = 0,
                 Allies = "NewHouse",
                 Color = map.Rules.Colors[0].Name,
                 Credits = 0, 
                 Edge = "North",
-                ID = map.Houses.Count, 
+                ID = map.Houses.Count,
                 IQ = 0, 
                 PercentBuilt = 100, 
                 PlayerControl = false, 
                 Side = map.Rules.Sides[0],
-                TechLevel = 10, 
-                XNAColor = Color.White 
+                TechLevel = 10,
+                XNAColor = Color.White
             });
 
             ListHouses();
@@ -134,6 +148,12 @@ namespace TSMapEditor.UI.Windows
             {
                 if (map.DeleteHouse(editedHouse))
                 {
+                    if (!Constants.UseCountries)
+                    {
+                        if (!map.DeleteHouseType(editedHouse.HouseType))
+                            throw new InvalidOperationException("Failed to delete HouseType associated with house " + editedHouse.ININame);
+                    }    
+
                     editedHouse = null;
                     ListHouses();
                     lbHouseList.SelectedIndex = -1;
@@ -237,8 +257,8 @@ namespace TSMapEditor.UI.Windows
             ddIQ.SelectedIndex = ddIQ.Items.FindIndex(item => Conversions.IntFromString(item.Text, -1) == editedHouse.IQ);
             ddMapEdge.SelectedIndex = ddMapEdge.Items.FindIndex(item => item.Text == editedHouse.Edge);
             ddSide.SelectedIndex = map.Rules.Sides.FindIndex(s => s == editedHouse.Side);
-            if (editedHouse.ActsLike < map.GetHouses().Count)
-                ddActsLike.SelectedIndex = editedHouse.ActsLike;
+            if (editedHouse.ActsLike.GetValueOrDefault() < map.GetHouses().Count)
+                ddActsLike.SelectedIndex = editedHouse.ActsLike.GetValueOrDefault();
             else
                 ddActsLike.SelectedIndex = -1;
 
@@ -265,6 +285,10 @@ namespace TSMapEditor.UI.Windows
         private void TbName_TextChanged(object sender, System.EventArgs e)
         {
             editedHouse.ININame = tbName.Text;
+
+            if (!Constants.UseCountries)
+                editedHouse.HouseType.ININame = editedHouse.ININame;
+
             ListHouses();
         }
 
@@ -292,6 +316,13 @@ namespace TSMapEditor.UI.Windows
         {
             editedHouse.Color = ddColor.SelectedItem.Text;
             editedHouse.XNAColor = ddColor.SelectedItem.TextColor.Value;
+
+            if (!Constants.UseCountries)
+            {
+                editedHouse.HouseType.Color = editedHouse.Color;
+                editedHouse.HouseType.XNAColor = editedHouse.XNAColor;
+            }
+
             map.HouseColorUpdated(editedHouse);
             ListHouses();
         }

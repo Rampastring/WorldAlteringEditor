@@ -2,7 +2,6 @@
 using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using TSMapEditor.Models;
 using TSMapEditor.UI.Controls;
 
@@ -260,7 +259,7 @@ namespace TSMapEditor.UI.Windows
         private void ListHouses()
         {
             ddHouse.Items.Clear();
-            map.GetHouses().ForEach(h => ddHouse.AddItem(h.ININame, h.XNAColor));
+            map.GetHouseTypes().ForEach(ht => ddHouse.AddItem(ht.ININame, ht.XNAColor));
         }
 
         private void ListTeamTypes()
@@ -322,7 +321,7 @@ namespace TSMapEditor.UI.Windows
 
             tbName.Text = editedTeamType.Name;
             ddVeteranLevel.SelectedIndex = editedTeamType.VeteranLevel - 1;
-            ddHouse.SelectedIndex = ddHouse.Items.FindIndex(i => i.Text == (editedTeamType.House == null ? "" : editedTeamType.House.ININame));
+            ddHouse.SelectedIndex = ddHouse.Items.FindIndex(i => i.Text == (editedTeamType.HouseType == null ? "" : editedTeamType.HouseType.ININame));
             tbPriority.Value = editedTeamType.Priority;
             tbMax.Value = editedTeamType.Max;
             tbTechLevel.Value = editedTeamType.TechLevel;
@@ -393,8 +392,8 @@ namespace TSMapEditor.UI.Windows
 
         private void DdHouse_SelectedIndexChanged(object sender, EventArgs e)
         {
-            editedTeamType.House = map.GetHouses()[ddHouse.SelectedIndex];
-            lbTeamTypes.SelectedItem.TextColor = editedTeamType.House.XNAColor;
+            editedTeamType.HouseType = map.GetHouseTypes()[ddHouse.SelectedIndex];
+            lbTeamTypes.SelectedItem.TextColor = editedTeamType.HouseType.XNAColor;
         }
 
         private void DdVeteranLevel_SelectedIndexChanged(object sender, EventArgs e)

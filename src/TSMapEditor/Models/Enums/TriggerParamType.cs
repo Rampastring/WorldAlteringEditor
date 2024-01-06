@@ -30,6 +30,7 @@
         WaypointZZ,
         String,
         GlobalVariable,
+        HouseType,
         House,
         Quarry,
         Weapon,

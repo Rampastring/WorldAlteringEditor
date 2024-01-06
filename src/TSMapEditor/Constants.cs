@@ -16,6 +16,7 @@ namespace TSMapEditor
         public static bool TheaterPaletteForTiberium = false;
         public static bool NewTheaterGenericBuilding = false;
         public static bool DrawBuildingAnimationShadows = false;
+        public static bool UseCountries = false;
 
         public static string ExpectedClientExecutableName = "DTA.exe";
         public static string GameRegistryInstallPath = "SOFTWARE\\DawnOfTheTiberiumAge";
@@ -102,6 +103,7 @@ namespace TSMapEditor
             TheaterPaletteForTiberium = constantsIni.GetBooleanValue(ConstantsSectionName, nameof(TheaterPaletteForTiberium), TheaterPaletteForTiberium);
             NewTheaterGenericBuilding = constantsIni.GetBooleanValue(ConstantsSectionName, nameof(NewTheaterGenericBuilding), NewTheaterGenericBuilding);
             DrawBuildingAnimationShadows = constantsIni.GetBooleanValue(ConstantsSectionName, nameof(DrawBuildingAnimationShadows), DrawBuildingAnimationShadows);
+            UseCountries = constantsIni.GetBooleanValue(ConstantsSectionName, nameof(UseCountries), UseCountries);
 
             ExpectedClientExecutableName = constantsIni.GetStringValue(ConstantsSectionName, nameof(ExpectedClientExecutableName), ExpectedClientExecutableName);
             GameRegistryInstallPath = constantsIni.GetStringValue(ConstantsSectionName, nameof(GameRegistryInstallPath), GameRegistryInstallPath);

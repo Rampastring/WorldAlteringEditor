@@ -23,6 +23,7 @@
         Bullet,
         Cell,
         Factory,
+        House,
         HouseType,
         Infantry,
         InfantryType,

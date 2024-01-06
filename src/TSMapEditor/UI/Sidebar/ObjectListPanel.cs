@@ -176,7 +176,7 @@ namespace TSMapEditor.UI.Sidebar
                         House house = Map.StandardHouses.Find(h => h.ININame == ownerName);
                         if (house != null)
                         {
-                            int actsLike = house.ActsLike;
+                            int actsLike = house.ActsLike.GetValueOrDefault(-1);
                             if (actsLike > -1)
                                 ownerName = Map.StandardHouses[actsLike].ININame;
                         }

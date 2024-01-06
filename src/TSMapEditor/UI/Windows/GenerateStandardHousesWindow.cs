@@ -70,6 +70,15 @@ namespace TSMapEditor.UI.Windows
                     house.Side = map.Rules.Sides[0];
                     house.ActsLike = 0;
                 }
+
+                if (!Constants.UseCountries)
+                {
+                    var houseType = new HouseType(house.ININame);
+                    houseType.ID = i;
+                    houseType.Color = house.Color;
+                    map.AddHouseType(houseType);
+                    house.HouseType = houseType;
+                }
             }
 
             map.AddHouses(houses);

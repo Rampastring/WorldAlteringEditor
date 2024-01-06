@@ -95,13 +95,34 @@ namespace TSMapEditor.Models
         public List<Structure> Structures { get; private set; } = new List<Structure>();
 
         /// <summary>
-        /// The list of standard houses loaded from Rules.ini.
-        /// Relevant when the map itself has no houses specified.
-        /// New houses might be added to this list if the map has
-        /// objects whose owner does not exist in the map's list of houses
-        /// or in the Rules.ini standard house list.
+        /// The list of standard house types loaded from EditorRules.ini, or Rules.ini as a fallback.
+        /// Relevant when the map itself has no house types specified.
+        /// New house types might be added to this list if the map has
+        /// objects whose owner does not exist in the map's list of house types
+        /// or in the Rules.ini standard house type list.
         /// </summary>
+        public List<HouseType> StandardHouseTypes { get; set; }
         public List<House> StandardHouses { get; set; }
+
+        /// <summary>
+        /// The list of house types defined in the map itself.
+        /// For Tiberian Sun, this is the full house type list (if it has entries at all).
+        /// For Yuri's Revenge, it only contains "bonus" house types defined in the map itself,
+        /// which need to be appended into the Rules house type list for most use cases.
+        ///
+        /// In Tiberian Sun maps, each House has one and exactly one HouseType associated with it.
+        /// In Yuri's Revenge this is not the case, but instead, multiple Houses can use one
+        /// HouseType, and there can also be completely unused HouseTypes.
+        /// </summary>
+        public List<HouseType> HouseTypes { get; protected set; } = new List<HouseType>();
+        public List<HouseType> GetHouseTypes()
+        {
+            if (Constants.UseCountries)
+                return Rules.RulesHouseTypes.Concat(HouseTypes).ToList();
+            else
+                return HouseTypes.Count > 0 ? HouseTypes : StandardHouseTypes;
+        }
+
         public List<House> Houses { get; protected set; } = new List<House>();
         public List<House> GetHouses() => Houses.Count > 0 ? Houses : StandardHouses;
 
@@ -202,6 +223,7 @@ namespace TSMapEditor.Models
             MapLoader.ReadMapSection(this, mapIni);
             MapLoader.ReadIsoMapPack(this, mapIni);
 
+            MapLoader.ReadHouseTypes(this, mapIni);
             MapLoader.ReadHouses(this, mapIni);
 
             MapLoader.ReadSmudges(this, mapIni);
@@ -300,6 +322,7 @@ namespace TSMapEditor.Models
 
             Lighting.WriteToIniFile(LoadedINI);
 
+            MapWriter.WriteHouseTypes(this, LoadedINI);
             MapWriter.WriteHouses(this, LoadedINI);
 
             MapWriter.WriteSmudges(this, LoadedINI);
@@ -329,9 +352,14 @@ namespace TSMapEditor.Models
             PostSave?.Invoke(this, EventArgs.Empty);
         }
 
+        public HouseType FindHouseType(string houseTypeName)
+        {
+            return GetHouseTypes().Find(ht => ht.ININame == houseTypeName);
+        }
+
         /// <summary>
         /// Finds a house with the given name from the map's or the game's house lists.
-        /// If no house is found, creates one and adds it to the game's house list.
+        /// If no house is found, creates one and adds it to the standard house list.
         /// Returns the house that was found or created.
         /// </summary>
         /// <param name="houseName">The name of the house to find.</param>
@@ -345,7 +373,19 @@ namespace TSMapEditor.Models
             if (house != null)
                 return house;
 
-            house = new House(houseName);
+            // Try to find a matching standard house type for this house.
+            // If we can't find one, create one.
+            HouseType houseType = Rules.RulesHouseTypes.Find(ht => houseName.StartsWith(ht.ININame));
+            if (houseType == null)
+                houseType = Rules.RulesHouseTypes.Find(ht => ht.ININame == "Neutral");
+
+            if (houseType == null)
+            {
+                houseType = new HouseType(houseName);
+                StandardHouseTypes.Add(houseType);
+            }
+            
+            house = new House(houseName, houseType);
             StandardHouses.Add(house);
             return house;
         }
@@ -734,6 +774,11 @@ namespace TSMapEditor.Models
             LoadedINI.RemoveSection(teamType.ININame);
         }
 
+        public void AddHouseType(HouseType houseType)
+        {
+            HouseTypes.Add(houseType);
+        }
+
         public void AddHouses(List<House> houses)
         {
             if (houses.Count > 0)
@@ -753,7 +798,24 @@ namespace TSMapEditor.Models
         {
             if (Houses.Remove(house))
             {
+                for (int i = 0; i < Houses.Count; i++)
+                    Houses[i].ID = i;
+
+                LoadedINI.RemoveSection(house.ININame);
                 HousesChanged?.Invoke(this, EventArgs.Empty);
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool DeleteHouseType(HouseType houseType)
+        {
+            if (HouseTypes.Remove(houseType))
+            {
+                for (int i = 0; i < HouseTypes.Count; i++)
+                    HouseTypes[i].ID = i;
+
                 return true;
             }
 
@@ -1326,11 +1388,7 @@ namespace TSMapEditor.Models
 
             Rules.InitFromINI(editorRulesIni, initializer, false);
 
-            StandardHouses = Rules.GetStandardHouses(editorRulesIni);
-            if (StandardHouses.Count == 0)
-                StandardHouses = Rules.GetStandardHouses(rulesIni);
-            if (StandardHouses.Count == 0 && firestormIni != null)
-                StandardHouses = Rules.GetStandardHouses(firestormIni);
+            InitStandardHouseTypesAndHouses(editorRulesIni, rulesIni, firestormIni);
 
             // Load impassable cell information for terrain types
             var impassableTerrainObjectsIni = new IniFile(Environment.CurrentDirectory + "/Config/TerrainTypeImpassability.ini");
@@ -1353,6 +1411,29 @@ namespace TSMapEditor.Models
             });
         }
 
+        private void InitStandardHouseTypesAndHouses(IniFile editorRulesIni, IniFile rulesIni, IniFile firestormIni)
+        {
+            StandardHouseTypes = Rules.GetStandardHouseTypes(editorRulesIni);
+            if (StandardHouseTypes.Count == 0)
+                StandardHouseTypes = Rules.GetStandardHouseTypes(rulesIni);
+            if (StandardHouseTypes.Count == 0 && firestormIni != null)
+                StandardHouseTypes = Rules.GetStandardHouseTypes(firestormIni);
+
+            StandardHouses = StandardHouseTypes.Select(ht => HouseFromHouseType(ht)).ToList();
+        }
+
+        public House HouseFromHouseType(HouseType houseType)
+        {
+            var house = new House(houseType.ININame, houseType);
+            house.XNAColor = houseType.XNAColor;
+
+            if (!Constants.UseCountries)
+                house.ActsLike = houseType.ID;
+            else
+                house.Country = houseType.ININame;
+
+            return house;
+        }
 
         /// <summary>
         /// Re-initializes art.

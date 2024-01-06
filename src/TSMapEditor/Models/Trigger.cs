@@ -48,7 +48,7 @@ namespace TSMapEditor.Models
         public void SetInternalID(string id) => ID = id;
 
         public string ID { get; private set; }
-        public string House { get; set; }
+        public string HouseType { get; set; }
 
         /// <summary>
         /// The linked trigger ID loaded from the map.
@@ -129,7 +129,7 @@ namespace TSMapEditor.Models
             // Write entry to [Triggers]
             string linkedTriggerId = LinkedTrigger == null ? Constants.NoneValue1 : LinkedTrigger.ID;
             iniFile.SetStringValue("Triggers", ID,
-                $"{House},{linkedTriggerId},{Name}," +
+                $"{HouseType},{linkedTriggerId},{Name}," +
                 $"{Helpers.BoolToIntString(Disabled)}," +
                 $"{Helpers.BoolToIntString(Easy)},{Helpers.BoolToIntString(Normal)},{Helpers.BoolToIntString(Hard)},0");
 
@@ -260,7 +260,7 @@ namespace TSMapEditor.Models
 
             return new Trigger(id)
             {
-                House = parts[0],
+                HouseType = parts[0],
                 LinkedTriggerId = parts[1],
                 Name = parts[2],
                 Disabled = Conversions.BooleanFromString(parts[3], false),

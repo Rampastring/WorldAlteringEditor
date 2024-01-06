@@ -875,12 +875,12 @@ namespace TSMapEditor.Initialization
 
                 var teamType = new TeamType(kvp.Value);
                 teamType.ReadPropertiesFromIniSection(teamTypeSection);
-                string houseIniName = teamTypeSection.GetStringValue("House", string.Empty);
+                string houseTypeIniName = teamTypeSection.GetStringValue("House", string.Empty);
                 string scriptId = teamTypeSection.GetStringValue("Script", string.Empty);
                 string taskForceId = teamTypeSection.GetStringValue("TaskForce", string.Empty);
                 string tagId = teamTypeSection.GetStringValue("Tag", string.Empty);
 
-                teamType.House = map.FindHouse(houseIniName);
+                teamType.HouseType = map.FindHouseType(houseTypeIniName);
                 teamType.Script = map.Scripts.Find(s => s.ININame == scriptId);
                 teamType.TaskForce = map.TaskForces.Find(t => t.ININame == taskForceId);
                 teamType.Tag = map.Tags.Find(t => t.ID == tagId);
@@ -891,9 +891,9 @@ namespace TSMapEditor.Initialization
                         teamType.EnableFlag(ttflag.Name);
                 });
 
-                if (teamType.House == null)
+                if (teamType.HouseType == null)
                 {
-                    AddMapLoadError($"TeamType {teamType.ININame} has an invalid house ({houseIniName}) specified!");
+                    AddMapLoadError($"TeamType {teamType.ININame} has an invalid owner ({houseTypeIniName}) specified!");
                 }
 
                 if (teamType.Script == null)
@@ -937,7 +937,6 @@ namespace TSMapEditor.Initialization
                 aiTriggerType.Name = parts[0];
                 aiTriggerType.PrimaryTeam = map.TeamTypes.Find(tt => tt.ININame == parts[1]);
                 aiTriggerType.OwnerName = parts[2];
-                aiTriggerType.Owner = map.FindHouse(aiTriggerType.OwnerName);
 
                 if (!int.TryParse(parts[3], CultureInfo.InvariantCulture, out int techLevel))
                 {
@@ -1003,6 +1002,53 @@ namespace TSMapEditor.Initialization
             Logger.Log("AITriggerTypes read successfully.");
         }
 
+        public static void ReadHouseTypes(IMap map, IniFile mapIni)
+        {
+            Logger.Log("Reading HouseTypes. Using countries: " + Constants.UseCountries);
+
+            var section = mapIni.GetSection(Constants.UseCountries ? "Countries" : "Houses");
+            if (section == null)
+                return;
+
+            int id = 0;
+            foreach (var kvp in section.Keys)
+            {
+                // HouseTypes can't be redefined, check if the HouseType already exists
+                if (Constants.UseCountries)
+                {
+                    if (map.FindHouseType(kvp.Value) != null)
+                        continue;
+                }
+                else
+                {
+                    if (map.HouseTypes.Exists(ht => ht.ININame == kvp.Value))
+                        continue;
+                }
+
+                var houseType = new HouseType(kvp.Value);
+                houseType.ID = id + (Constants.UseCountries ? map.Rules.RulesHouseTypes.Count + id : 0);
+                id++;
+
+                var houseTypeSection = mapIni.GetSection(houseType.ININame);
+                if (houseTypeSection != null)
+                    houseType.ReadFromIniSection(houseTypeSection);
+
+                var color = map.Rules.Colors.Find(c => c.Name == houseType.Color);
+                if (color == null)
+                {
+                    houseType.XNAColor = Color.Black;
+                }
+                else
+                {
+                    houseType.XNAColor = color.XNAColor;
+                }
+
+                map.HouseTypes.Add(houseType);
+            }
+
+            Logger.Log("HouseTypes read successfully.");
+        }
+
         public static void ReadHouses(IMap map, IniFile mapIni)
         {
             Logger.Log("Reading Houses.");
@@ -1011,11 +1057,15 @@ namespace TSMapEditor.Initialization
             if (section == null)
                 return;
 
+            int id = 0;
             foreach (var kvp in section.Keys)
             {
                 string houseName = kvp.Value;
+                HouseType houseType = null;
+
                 var house = new House(houseName);
-                house.ID = Conversions.IntFromString(kvp.Key, -1);
+                house.ID = id;
+                id++;
 
                 map.Houses.Add(house);
 
@@ -1023,13 +1073,31 @@ namespace TSMapEditor.Initialization
                 if (houseSection != null)
                 {
                     house.ReadFromIniSection(houseSection);
-
                     var color = map.Rules.Colors.Find(c => c.Name == house.Color);
                     if (color == null)
+                    {
                         house.XNAColor = Color.Black;
-                    else 
+                    }
+                    else
+                    {
                         house.XNAColor = color.XNAColor;
+                    }
                 }
+
+                if (Constants.UseCountries)
+                {
+                    if (house.Country != null)
+                        houseType = map.FindHouseType(house.Country);
+
+                    if (houseType == null)
+                        AddMapLoadError("Nonexistent Country= or no Country= specified for House " + houseName);
+                }
+                else
+                {
+                    houseType = map.HouseTypes[house.ID];
+                }
+
+                house.HouseType = houseType;
             }
 
             Logger.Log("Houses read successfully.");

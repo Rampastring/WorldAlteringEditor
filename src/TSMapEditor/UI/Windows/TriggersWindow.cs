@@ -46,7 +46,7 @@ namespace TSMapEditor.UI.Windows
 
         // General trigger settings
         private EditorTextBox tbName;
-        private XNADropDown ddHouse;
+        private XNADropDown ddHouseType;
         private XNADropDown ddType;
         private EditorPopUpSelector selAttachedTrigger;
         private XNADropDown ddTriggerColor;
@@ -80,6 +80,7 @@ namespace TSMapEditor.UI.Windows
         private SelectGlobalVariableWindow selectGlobalVariableWindow;
         private SelectLocalVariableWindow selectLocalVariableWindow;
         private SelectHouseWindow selectHouseWindow;
+        private SelectHouseTypeWindow selectHouseTypeWindow;
         private SelectTutorialLineWindow selectTutorialLineWindow;
         private SelectThemeWindow selectThemeWindow;
         private SelectTechnoTypeWindow selectTechnoTypeWindow;
@@ -120,7 +121,7 @@ namespace TSMapEditor.UI.Windows
             tbName = FindChild<EditorTextBox>(nameof(tbName));
             tbName.AllowComma = false;
 
-            ddHouse = FindChild<XNADropDown>(nameof(ddHouse));
+            ddHouseType = FindChild<XNADropDown>(nameof(ddHouseType));
             ddType = FindChild<XNADropDown>(nameof(ddType));
             selAttachedTrigger = FindChild<EditorPopUpSelector>(nameof(selAttachedTrigger));
             chkDisabled = FindChild<XNACheckBox>(nameof(chkDisabled));
@@ -225,6 +226,10 @@ namespace TSMapEditor.UI.Windows
             selectHouseWindow = new SelectHouseWindow(WindowManager, map);
             var houseDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectHouseWindow);
             houseDarkeningPanel.Hidden += HouseDarkeningPanel_Hidden;
+
+            selectHouseTypeWindow = new SelectHouseTypeWindow(WindowManager, map);
+            var houseTypeDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectHouseTypeWindow);
+            houseTypeDarkeningPanel.Hidden += HouseTypeDarkeningPanel_Hidden;
 
             selectTutorialLineWindow = new SelectTutorialLineWindow(WindowManager, map);
             var tutorialDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTutorialLineWindow);
@@ -714,6 +719,14 @@ namespace TSMapEditor.UI.Windows
                     // selectLocalVariableWindow.IsForEvent = true;
                     // selectLocalVariableWindow.Open(existingLocalVariable);
                     break;
+                case TriggerParamType.HouseType:
+                    selectHouseTypeWindow.IsForEvent = true;
+                    paramValue = Conversions.IntFromString(triggerEvent.Parameters[paramIndex], -1);
+                    if (paramValue > -1 && paramValue < map.GetHouseTypes().Count)
+                        selectHouseTypeWindow.Open(map.GetHouseTypes()[paramValue]);
+                    else
+                        selectHouseTypeWindow.Open(null);
+                    break;
                 case TriggerParamType.House:
                     selectHouseWindow.IsForEvent = true;
                     paramValue = Conversions.IntFromString(triggerEvent.Parameters[paramIndex], -1);
@@ -810,6 +823,14 @@ namespace TSMapEditor.UI.Windows
                     // selectLocalVariableWindow.IsForEvent = false;
                     // selectLocalVariableWindow.Open(existingLocalVariable);
                     break;
+                case TriggerParamType.HouseType:
+                    int houseTypeIndex = Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1);
+                    selectHouseTypeWindow.IsForEvent = false;
+                    if (houseTypeIndex > -1 && houseTypeIndex < map.GetHouseTypes().Count)
+                        selectHouseTypeWindow.Open(map.GetHouseTypes()[houseTypeIndex]);
+                    else
+                        selectHouseTypeWindow.Open(null);
+                    break;
                 case TriggerParamType.House:
                     int houseIndex = Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1);
                     selectHouseWindow.IsForEvent = false;
@@ -887,6 +908,15 @@ namespace TSMapEditor.UI.Windows
                 return;
 
             AssignParamValue(selectTutorialLineWindow.IsForEvent, selectTutorialLineWindow.SelectedObject.ID);
+        }
+
+        private void HouseTypeDarkeningPanel_Hidden(object sender, EventArgs e)
+        {
+            if (selectHouseTypeWindow.SelectedObject == null)
+                return;
+
+            int houseTypeIndex = map.GetHouseTypes().FindIndex(ht => ht == selectHouseTypeWindow.SelectedObject);
+            AssignParamValue(selectHouseTypeWindow.IsForEvent, houseTypeIndex);
         }
 
         private void HouseDarkeningPanel_Hidden(object sender, EventArgs e)
@@ -989,7 +1019,7 @@ namespace TSMapEditor.UI.Windows
 
         private void BtnNewTrigger_LeftClick(object sender, EventArgs e)
         {
-            var newTrigger = new Trigger(map.GetNewUniqueInternalId()) { Name = "New trigger", House = "Neutral" };
+            var newTrigger = new Trigger(map.GetNewUniqueInternalId()) { Name = "New trigger", HouseType = "Neutral" };
             map.Triggers.Add(newTrigger);
             map.Tags.Add(new Tag() { ID = map.GetNewUniqueInternalId(), Name = "New tag", Trigger = newTrigger });
             ListTriggers();
@@ -1162,8 +1192,8 @@ namespace TSMapEditor.UI.Windows
 
         private void RefreshHouses()
         {
-            ddHouse.Items.Clear();
-            map.GetHouses().ForEach(h => ddHouse.AddItem(h.ININame, h.XNAColor));
+            ddHouseType.Items.Clear();
+            map.GetHouseTypes().ForEach(ht => ddHouseType.AddItem(ht.ININame, ht.XNAColor));
         }
 
         private void ListTriggers()
@@ -1203,7 +1233,7 @@ namespace TSMapEditor.UI.Windows
             lbEvents.SelectedIndexChanged -= LbEvents_SelectedIndexChanged;
             lbActions.SelectedIndexChanged -= LbActions_SelectedIndexChanged;
             tbName.TextChanged -= TbName_TextChanged;
-            ddHouse.SelectedIndexChanged -= DdHouse_SelectedIndexChanged;
+            ddHouseType.SelectedIndexChanged -= DdHouse_SelectedIndexChanged;
             ddType.SelectedIndexChanged -= DdType_SelectedIndexChanged;
             chkDisabled.CheckedChanged -= ChkDisabled_CheckedChanged;
             selAttachedTrigger.LeftClick -= SelAttachedTrigger_LeftClick;
@@ -1217,7 +1247,7 @@ namespace TSMapEditor.UI.Windows
             if (editedTrigger == null)
             {
                 tbName.Text = string.Empty;
-                ddHouse.SelectedIndex = -1;
+                ddHouseType.SelectedIndex = -1;
                 ddType.SelectedIndex = -1;
                 selAttachedTrigger.Text = string.Empty;
 
@@ -1253,7 +1283,7 @@ namespace TSMapEditor.UI.Windows
             }
 
             tbName.Text = editedTrigger.Name;
-            ddHouse.SelectedIndex = map.GetHouses().FindIndex(h => h.ININame == trigger.House);
+            ddHouseType.SelectedIndex = map.GetHouses().FindIndex(h => h.ININame == trigger.HouseType);
             ddType.SelectedIndex = tag == null ? 3 : tag.Repeating;
             selAttachedTrigger.Text = editedTrigger.LinkedTrigger == null ? Constants.NoneValue1 : editedTrigger.LinkedTrigger.Name;
             selAttachedTrigger.Tag = editedTrigger.LinkedTrigger;
@@ -1280,7 +1310,7 @@ namespace TSMapEditor.UI.Windows
             lbEvents.SelectedIndexChanged += LbEvents_SelectedIndexChanged;
             lbActions.SelectedIndexChanged += LbActions_SelectedIndexChanged;
             tbName.TextChanged += TbName_TextChanged;
-            ddHouse.SelectedIndexChanged += DdHouse_SelectedIndexChanged;
+            ddHouseType.SelectedIndexChanged += DdHouse_SelectedIndexChanged;
             ddType.SelectedIndexChanged += DdType_SelectedIndexChanged;
             chkDisabled.CheckedChanged += ChkDisabled_CheckedChanged;
             selAttachedTrigger.LeftClick += SelAttachedTrigger_LeftClick;
@@ -1333,7 +1363,7 @@ namespace TSMapEditor.UI.Windows
 
         private void DdHouse_SelectedIndexChanged(object sender, EventArgs e)
         {
-            editedTrigger.House = ddHouse.SelectedItem.Text;
+            editedTrigger.HouseType = ddHouseType.SelectedItem.Text;
         }
 
         private void ChkDisabled_CheckedChanged(object sender, EventArgs e)
@@ -1612,6 +1642,16 @@ namespace TSMapEditor.UI.Windows
 
             switch (paramType)
             {
+                case TriggerParamType.HouseType:
+                    if (intParseSuccess)
+                    {
+                        var houseTypes = map.GetHouseTypes();
+                        if (intValue >= houseTypes.Count)
+                            goto case TriggerParamType.Unused;
+
+                        return houseTypes[intValue].XNAColor;
+                    }
+                    goto case TriggerParamType.Unused;
                 case TriggerParamType.House:
                     if (intParseSuccess)
                     {

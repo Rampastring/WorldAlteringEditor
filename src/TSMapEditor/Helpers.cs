@@ -287,10 +287,20 @@ namespace TSMapEditor
 
         public static Color GetHouseUITextColor(House house)
         {
-            if (house == null || house.HasDarkHouseColor())
+            if (house == null || IsColorDark(house.XNAColor))
                 return UISettings.ActiveSettings.AltColor;
 
             return house.XNAColor;
         }
+
+        public static Color GetHouseTypeUITextColor(HouseType houseType)
+        {
+            if (houseType == null || IsColorDark(houseType.XNAColor))
+                return UISettings.ActiveSettings.AltColor;
+
+            return houseType.XNAColor;
+        }
+
+        public static bool IsColorDark(Color color) => color.R < 32 && color.G < 32 && color.B < 64;
     }
 }

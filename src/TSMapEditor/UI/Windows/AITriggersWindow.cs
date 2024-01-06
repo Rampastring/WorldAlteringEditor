@@ -30,7 +30,7 @@ namespace TSMapEditor.UI.Windows
         private EditorListBox lbAITriggers;
         private EditorTextBox tbName;
         private XNADropDown ddSide;
-        private XNADropDown ddHouse;
+        private XNADropDown ddHouseType;
         private XNADropDown ddConditionType;
         private XNADropDown ddComparator;
         private EditorNumberTextBox tbQuantity;
@@ -56,7 +56,7 @@ namespace TSMapEditor.UI.Windows
             lbAITriggers = FindChild<EditorListBox>(nameof(lbAITriggers));
             tbName = FindChild<EditorTextBox>(nameof(tbName));
             ddSide = FindChild<XNADropDown>(nameof(ddSide));
-            ddHouse = FindChild<XNADropDown>(nameof(ddHouse));
+            ddHouseType = FindChild<XNADropDown>(nameof(ddHouseType));
             ddConditionType = FindChild<XNADropDown>(nameof(ddConditionType));
             ddComparator = FindChild<XNADropDown>(nameof(ddComparator));
             tbQuantity = FindChild<EditorNumberTextBox>(nameof(tbQuantity));
@@ -178,7 +178,7 @@ namespace TSMapEditor.UI.Windows
         {
             tbName.TextChanged -= TbName_TextChanged;
             ddSide.SelectedIndexChanged -= DdSide_SelectedIndexChanged;
-            ddHouse.SelectedIndexChanged -= DdHouse_SelectedIndexChanged;
+            ddHouseType.SelectedIndexChanged -= DdHouse_SelectedIndexChanged;
             ddConditionType.SelectedIndexChanged -= DdConditionType_SelectedIndexChanged;
             ddComparator.SelectedIndexChanged -= DdComparator_SelectedIndexChanged;
             tbQuantity.TextChanged -= TbQuantity_TextChanged;
@@ -198,7 +198,7 @@ namespace TSMapEditor.UI.Windows
             {
                 tbName.Text = string.Empty;
                 ddSide.SelectedIndex = -1;
-                ddHouse.SelectedIndex = -1;
+                ddHouseType.SelectedIndex = -1;
                 ddConditionType.SelectedIndex = -1;
                 ddComparator.SelectedIndex = -1;
                 tbQuantity.Text = string.Empty;
@@ -218,7 +218,7 @@ namespace TSMapEditor.UI.Windows
 
             tbName.Text = editedAITrigger.Name;
             ddSide.SelectedIndex = editedAITrigger.Side < ddSide.Items.Count ? editedAITrigger.Side : 0;
-            ddHouse.SelectedIndex = ddHouse.Items.FindIndex(ddi => ddi.Text == editedAITrigger.OwnerName);
+            ddHouseType.SelectedIndex = ddHouseType.Items.FindIndex(ddi => ddi.Text == editedAITrigger.OwnerName);
             ddConditionType.SelectedIndex = ((int)aiTriggerType.ConditionType + 1);
             ddComparator.SelectedIndex = (int)aiTriggerType.Comparator.ComparatorOperator;
             tbQuantity.Value = aiTriggerType.Comparator.Quantity;
@@ -236,7 +236,7 @@ namespace TSMapEditor.UI.Windows
 
             tbName.TextChanged += TbName_TextChanged;
             ddSide.SelectedIndexChanged += DdSide_SelectedIndexChanged;
-            ddHouse.SelectedIndexChanged += DdHouse_SelectedIndexChanged;
+            ddHouseType.SelectedIndexChanged += DdHouse_SelectedIndexChanged;
             ddConditionType.SelectedIndexChanged += DdConditionType_SelectedIndexChanged;
             ddComparator.SelectedIndexChanged += DdComparator_SelectedIndexChanged;
             tbQuantity.TextChanged += TbQuantity_TextChanged;
@@ -264,7 +264,7 @@ namespace TSMapEditor.UI.Windows
 
         private void DdHouse_SelectedIndexChanged(object sender, System.EventArgs e)
         {
-            editedAITrigger.OwnerName = ddHouse.SelectedItem.Text;
+            editedAITrigger.OwnerName = ddHouseType.SelectedItem.Text;
         }
 
         private void DdConditionType_SelectedIndexChanged(object sender, System.EventArgs e)
@@ -342,7 +342,7 @@ namespace TSMapEditor.UI.Windows
         {
             lbAITriggers.Clear();
             ddSide.Items.Clear();
-            ddHouse.Items.Clear();
+            ddHouseType.Items.Clear();
 
             map.AITriggerTypes.ForEach(aitt =>
             {
@@ -355,8 +355,8 @@ namespace TSMapEditor.UI.Windows
                 ddSide.AddItem((i + 1).ToString() + " " + map.Rules.Sides[i]);
             }
 
-            ddHouse.AddItem("<all>");
-            map.GetHouses().ForEach(house => ddHouse.AddItem(house.ININame, Helpers.GetHouseUITextColor(house)));
+            ddHouseType.AddItem("<all>");
+            map.GetHouseTypes().ForEach(houseType => ddHouseType.AddItem(houseType.ININame, Helpers.GetHouseTypeUITextColor(houseType)));
 
             LbAITriggers_SelectedIndexChanged(this, EventArgs.Empty);
         }

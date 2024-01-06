@@ -22,7 +22,7 @@ namespace TSMapEditor.Models
 
         public string Name { get; set; }
         public int Group { get; set; } = -1;
-        public House House { get; set; }
+        public HouseType HouseType { get; set; }
         public Script Script { get; set; }
         public TaskForce TaskForce { get; set; }
         public Tag Tag { get; set; }
@@ -55,7 +55,7 @@ namespace TSMapEditor.Models
         public string GetHintText()
         {
             var stringBuilder = new StringBuilder();
-            stringBuilder.Append("Owner: " + (House == null ? Constants.NoneValue2 : House.ININame));
+            stringBuilder.Append("Owner: " + (HouseType == null ? Constants.NoneValue2 : HouseType.ININame));
             stringBuilder.Append(Environment.NewLine + Environment.NewLine);
             stringBuilder.Append("Script: " + (Script == null ? Constants.NoneValue2 : Script.Name));
             stringBuilder.Append(Environment.NewLine + Environment.NewLine);
@@ -129,8 +129,8 @@ namespace TSMapEditor.Models
             // This cuts it for all properties of standard types
             WritePropertiesToIniSection(iniSection);
 
-            if (House != null)
-                iniSection.SetStringValue("House", House.ININame);
+            if (HouseType != null)
+                iniSection.SetStringValue("House", HouseType.ININame);
             if (Script != null)
                 iniSection.SetStringValue("Script", Script.ININame);
             if (TaskForce != null)
@@ -149,6 +149,6 @@ namespace TSMapEditor.Models
             return RTTIType.TeamType;
         }
 
-        public Color GetXNAColor() => Helpers.GetHouseUITextColor(House);
+        public Color GetXNAColor() => Helpers.GetHouseTypeUITextColor(HouseType);
     }
 }

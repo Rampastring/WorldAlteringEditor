@@ -26,6 +26,8 @@ namespace TSMapEditor.Models
         public List<GlobalVariable> GlobalVariables = new List<GlobalVariable>();
         public List<Weapon> Weapons = new List<Weapon>();
 
+        public List<HouseType> RulesHouseTypes = new List<HouseType>();
+
         public TutorialLines TutorialLines { get; set; }
         public Themes Themes { get; set; }
 
@@ -44,6 +46,11 @@ namespace TSMapEditor.Models
             InitFromTypeSection(iniFile, "Animations", AnimTypes);
             InitFromTypeSection(iniFile, "Weapons", Weapons);
 
+            if (Constants.UseCountries)
+                InitFromTypeSection(iniFile, "Countries", RulesHouseTypes);
+            else
+                InitFromTypeSection(iniFile, "Houses", RulesHouseTypes);
+
             // Go through all the lists and get object properties
             UnitTypes.ForEach(ot => initializer.ReadObjectTypePropertiesFromINI(ot, iniFile));
             InfantryTypes.ForEach(ot => initializer.ReadObjectTypePropertiesFromINI(ot, iniFile));
@@ -54,6 +61,7 @@ namespace TSMapEditor.Models
             SmudgeTypes.ForEach(ot => initializer.ReadObjectTypePropertiesFromINI(ot, iniFile));
             Weapons.ForEach(w => initializer.ReadObjectTypePropertiesFromINI(w, iniFile));
             AnimTypes.ForEach(a => initializer.ReadObjectTypePropertiesFromINI(a, iniFile));
+            RulesHouseTypes.ForEach(ht => initializer.ReadObjectTypePropertiesFromINI(ht, iniFile));
 
             var colorsSection = iniFile.GetSection("Colors");
             if (colorsSection != null)
@@ -165,13 +173,49 @@ namespace TSMapEditor.Models
             }
         }
 
-        public List<House> GetStandardHouses(IniFile iniFile)
+        public List<HouseType> GetStandardHouseTypes(IniFile iniFile)
         {
-            var houses = GetHousesFrom(iniFile, "Houses");
-            if (houses.Count > 0)
-                return houses;
+            var houseTypes = GetHouseTypesFrom(iniFile, "Houses");
+            if (houseTypes.Count > 0)
+                return houseTypes;
 
-            return GetHousesFrom(iniFile, "Countries");
+            return GetHouseTypesFrom(iniFile, "Countries");
+        }
+
+        public List<HouseType> GetHouseTypesFrom(IniFile iniFile, string sectionName)
+        {
+            var houseTypesSection = iniFile.GetSection(sectionName);
+            if (houseTypesSection == null)
+                return new List<HouseType>(0);
+
+            var houseTypes = new List<HouseType>();
+
+            foreach (var kvp in houseTypesSection.Keys)
+            {
+                string houseTypeName = kvp.Value;
+                var houseType = new HouseType(houseTypeName);
+                houseType.ID = houseTypes.Count;
+                InitHouseType(iniFile, houseType);
+                houseTypes.Add(houseType);
+            }
+
+            return houseTypes;
+        }
+
+        private void InitHouseType(IniFile iniFile, HouseType houseType)
+        {
+            var section = iniFile.GetSection(houseType.ININame);
+            if (section == null)
+                return;
+
+            houseType.ReadPropertiesFromIniSection(iniFile.GetSection(houseType.ININame));
+            //house.Name = iniFile.GetStringValue(house.ININame, "Name", house.ININame);
+            //house.Color = iniFile.GetStringValue(house.ININame, "Color", "Grey");
+            var color = Colors.Find(c => c.Name == houseType.Color);
+            if (color == null)
+                houseType.XNAColor = Color.Black;
+            else
+                houseType.XNAColor = color.XNAColor;
         }
 
         public List<House> GetHousesFrom(IniFile iniFile, string sectionName)

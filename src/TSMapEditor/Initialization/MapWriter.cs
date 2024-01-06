@@ -402,6 +402,32 @@ namespace TSMapEditor.Initialization
             }
         }
 
+        public static void WriteHouseTypes(IMap map, IniFile mapIni)
+        {
+            var houseTypes = map.HouseTypes;
+
+            string sectionName = Constants.UseCountries ? "Countries" : "Houses";
+            mapIni.RemoveSection(sectionName);
+
+            if (map.HouseTypes.Count == 0)
+                return;
+
+            var houseTypesSection = new IniSection(sectionName);
+            mapIni.AddSection(houseTypesSection);
+
+            for (int i = 0; i < houseTypes.Count; i++)
+            {
+                HouseType houseType = houseTypes[i];
+                houseTypesSection.SetStringValue(
+                    houseType.ID > -1 ? houseType.ID.ToString(CultureInfo.InvariantCulture) : i.ToString(CultureInfo.InvariantCulture), 
+                    houseType.ININame);
+
+                mapIni.RemoveSection(houseType.ININame);
+                var houseTypeSection = FindOrMakeSection(houseType.ININame, mapIni);
+                houseType.WriteToIniSection(houseTypeSection);
+            }
+        }
+
         public static void WriteHouses(IMap map, IniFile mapIni)
         {
             const string sectionName = "Houses";
@@ -418,8 +444,9 @@ namespace TSMapEditor.Initialization
                 House house = map.Houses[i];
                 housesSection.SetStringValue(house.ID > -1 ? house.ID.ToString() : i.ToString(), house.ININame);
 
-                // TODO don't remove section until we can handle base nodes
-                // mapIni.RemoveSection(house.ININame);
+                if (Constants.UseCountries)
+                    mapIni.RemoveSection(house.ININame);
+
                 var houseSection = FindOrMakeSection(house.ININame, mapIni);
                 house.WriteToIniSection(houseSection);
             }

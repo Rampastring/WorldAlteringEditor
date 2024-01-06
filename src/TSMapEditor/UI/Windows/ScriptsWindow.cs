@@ -426,6 +426,13 @@ namespace TSMapEditor.UI.Windows
                     btnEditorPresetValues.ContextMenu.AddItem(new XNAContextMenuItem() { Text = waypoint.Identifier.ToString() });
                 }
             }
+            else if (action.ParamType == TriggerParamType.HouseType)
+            {
+                foreach (var houseType in map.GetHouseTypes())
+                {
+                    btnEditorPresetValues.ContextMenu.AddItem(new XNAContextMenuItem() { Text = houseType.ID + " " + houseType.ININame, TextColor = Helpers.GetHouseTypeUITextColor(houseType) });
+                }
+            }
             else if (action.ParamType == TriggerParamType.House)
             {
                 foreach (var house in map.GetHouses())

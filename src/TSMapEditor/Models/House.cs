@@ -52,21 +52,29 @@ namespace TSMapEditor.Models
     {
         private const int MaxBaseNodeCount = 1000;
 
-        public override RTTIType WhatAmI() => RTTIType.HouseType;
+        public override RTTIType WhatAmI() => RTTIType.House;
 
         public House(string iniName)
         {
             ININame = iniName;
         }
 
+        public House(string iniName, HouseType houseType) : this(iniName)
+        {
+            HouseType = houseType;
+        }
+
         [INI(false)]
         public string ININame { get; set; }
+        public HouseType HouseType { get; set; }
+
         public int IQ { get; set; }
         public string Edge { get; set; }
         public string Color { get; set; } = "White";
         public string Allies { get; set; }
         public int Credits { get; set; }
-        public int ActsLike { get; set; } = -1;
+        public string Country { get; set; }  // This is for YR
+        public int? ActsLike { get; set; }   // This is for TS
         public int TechLevel { get; set; }
         public int PercentBuilt { get; set; }
         public bool PlayerControl { get; set; }
@@ -119,7 +127,5 @@ namespace TSMapEditor.Models
                 iniSection.RemoveKey(i.ToString("D3"));
             }
         }
-
-        public bool HasDarkHouseColor() => XNAColor.R < 32 && XNAColor.G < 32 && XNAColor.B < 64;
     }
 }
