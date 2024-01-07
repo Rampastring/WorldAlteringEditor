@@ -46,10 +46,13 @@ namespace TSMapEditor.Models
             InitFromTypeSection(iniFile, "Animations", AnimTypes);
             InitFromTypeSection(iniFile, "Weapons", Weapons);
 
-            if (Constants.UseCountries)
-                InitFromTypeSection(iniFile, "Countries", RulesHouseTypes);
-            else
-                InitFromTypeSection(iniFile, "Houses", RulesHouseTypes);
+            if (!isMapIni)
+            {
+                if (Constants.UseCountries)
+                    InitFromTypeSection(iniFile, "Countries", RulesHouseTypes);
+                else
+                    InitFromTypeSection(iniFile, "Houses", RulesHouseTypes);
+            }
 
             // Go through all the lists and get object properties
             UnitTypes.ForEach(ot => initializer.ReadObjectTypePropertiesFromINI(ot, iniFile));
