@@ -161,11 +161,20 @@ namespace TSMapEditor.UI.Windows
             {
                 if (map.DeleteHouse(editedHouse))
                 {
-                    if (!Constants.UseCountries)
+                    if (Constants.UseCountries)
                     {
+                        // Also delete the associated HouseType if the HouseType is non-standard and is not used by any other House
+                        if (map.HouseTypes.Contains(editedHouse.HouseType) && !map.Houses.Exists(h => h.HouseType == editedHouse.HouseType))
+                            map.DeleteHouseType(editedHouse.HouseType);
+                    }
+                    else
+                    {
+                        // In Tiberian Sun, each House has one unique HouseType associated with it.
+                        // We need to always delete the associated HouseType, if that fails for some reason then
+                        // something has gone terribly wrong in our internal editor logic.
                         if (!map.DeleteHouseType(editedHouse.HouseType))
                             throw new InvalidOperationException("Failed to delete HouseType associated with house " + editedHouse.ININame);
-                    }    
+                    }
 
                     editedHouse = null;
                     ListHouses();
