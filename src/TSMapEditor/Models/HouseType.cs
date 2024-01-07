@@ -67,7 +67,7 @@ namespace TSMapEditor.Models
         [INI(false)] public Color XNAColor { get; set; } = Microsoft.Xna.Framework.Color.White;
 
         [INI(false)]
-        public int ID { get; set; }
+        public int Index { get; set; }
 
         public void ReadFromIniSection(IniSection iniSection)
         {

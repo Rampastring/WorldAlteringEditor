@@ -53,29 +53,31 @@ namespace TSMapEditor.UI.Windows
                 house.Allies = house.ININame;
                 house.TechLevel = 7;
 
-                for (int sideIndex = 0; sideIndex < map.Rules.Sides.Count; sideIndex++)
-                {
-                    string side = map.Rules.Sides[sideIndex];
-
-                    if (house.ININame.StartsWith(side))
-                    {
-                        house.Side = side;
-                        house.ActsLike = houses.FindIndex(h => house.ININame.StartsWith(h.ININame));
-                        break;
-                    }
-                }
-
-                if (string.IsNullOrWhiteSpace(house.Side))
-                {
-                    house.Side = map.Rules.Sides[0];
-                    house.ActsLike = 0;
-                }
-
                 if (!Constants.UseCountries)
                 {
                     var houseType = new HouseType(house.ININame);
-                    houseType.ID = i;
+                    houseType.Index = i;
                     houseType.Color = house.Color;
+
+                    // Find reasonable default for Side and ActsLike
+                    for (int sideIndex = 0; sideIndex < map.Rules.Sides.Count; sideIndex++)
+                    {
+                        string side = map.Rules.Sides[sideIndex];
+
+                        if (house.ININame.StartsWith(side))
+                        {
+                            houseType.Side = side;
+                            house.ActsLike = houses.FindIndex(h => house.ININame.StartsWith(h.ININame));
+                            break;
+                        }
+                    }
+
+                    if (string.IsNullOrWhiteSpace(houseType.Side))
+                    {
+                        houseType.Side = map.Rules.Sides[0];
+                        house.ActsLike = 0;
+                    }
+
                     map.AddHouseType(houseType);
                     house.HouseType = houseType;
                 }

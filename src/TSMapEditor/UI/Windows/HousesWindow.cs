@@ -116,7 +116,8 @@ namespace TSMapEditor.UI.Windows
             if (!Constants.UseCountries)
             {
                 houseType = new HouseType("NewHouse");
-                houseType.ID = map.HouseTypes.Count;
+                houseType.Index = map.HouseTypes.Count;
+                houseType.Side = map.Rules.Sides[0];
                 map.HouseTypes.Add(houseType);
             }
             else
@@ -135,7 +136,6 @@ namespace TSMapEditor.UI.Windows
                 IQ = 0, 
                 PercentBuilt = 100, 
                 PlayerControl = false, 
-                Side = map.Rules.Sides[0],
                 TechLevel = 10,
                 XNAColor = Color.White
             });
@@ -259,7 +259,7 @@ namespace TSMapEditor.UI.Windows
             tbName.Text = editedHouse.ININame;
             ddIQ.SelectedIndex = ddIQ.Items.FindIndex(item => Conversions.IntFromString(item.Text, -1) == editedHouse.IQ);
             ddMapEdge.SelectedIndex = ddMapEdge.Items.FindIndex(item => item.Text == editedHouse.Edge);
-            ddSide.SelectedIndex = map.Rules.Sides.FindIndex(s => s == editedHouse.Side);
+            ddSide.SelectedIndex = map.Rules.Sides.FindIndex(s => s == editedHouse.HouseType?.Side);
             if (editedHouse.ActsLike.GetValueOrDefault() < map.GetHouses().Count)
                 ddActsLike.SelectedIndex = editedHouse.ActsLike.GetValueOrDefault();
             else
@@ -269,6 +269,8 @@ namespace TSMapEditor.UI.Windows
                 ddCountry.SelectedIndex = ddCountry.Items.FindIndex(ddi => ddi.Tag == editedHouse.HouseType);
             else
                 ddCountry.SelectedIndex = -1;
+
+            ddSide.AllowDropDown = !Constants.UseCountries;
 
             ddColor.SelectedIndex = ddColor.Items.FindIndex(item => item.Text == editedHouse.Color);
             ddTechnologyLevel.SelectedIndex = ddTechnologyLevel.Items.FindIndex(item => Conversions.IntFromString(item.Text, -1) == editedHouse.TechLevel);
@@ -313,7 +315,7 @@ namespace TSMapEditor.UI.Windows
 
         private void DdSide_SelectedIndexChanged(object sender, System.EventArgs e)
         {
-            editedHouse.Side = (string)ddSide.SelectedItem.Tag;
+            editedHouse.HouseType.Side = (string)ddSide.SelectedItem.Tag;
         }
 
         private void DdActsLike_SelectedIndexChanged(object sender, System.EventArgs e)
@@ -408,7 +410,7 @@ namespace TSMapEditor.UI.Windows
             ddCountry.Items.Clear();
             foreach (var houseType in map.GetHouseTypes())
             {
-                ddCountry.AddItem(new XNADropDownItem() { Text = houseType.ID.ToString(CultureInfo.InvariantCulture) + " " + houseType.ININame, Tag = houseType });
+                ddCountry.AddItem(new XNADropDownItem() { Text = houseType.Index.ToString(CultureInfo.InvariantCulture) + " " + houseType.ININame, TextColor = houseType.XNAColor, Tag = houseType });
             }
 
             ddHouseOfHumanPlayer.SelectedIndex = map.Houses.FindIndex(h => h.ININame == map.Basic.Player) + 1;

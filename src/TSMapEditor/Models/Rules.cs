@@ -194,7 +194,7 @@ namespace TSMapEditor.Models
             {
                 string houseTypeName = kvp.Value;
                 var houseType = new HouseType(houseTypeName);
-                houseType.ID = houseTypes.Count;
+                houseType.Index = houseTypes.Count;
                 InitHouseType(iniFile, houseType);
                 houseTypes.Add(houseType);
             }

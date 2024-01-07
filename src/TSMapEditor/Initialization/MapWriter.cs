@@ -419,7 +419,7 @@ namespace TSMapEditor.Initialization
             {
                 HouseType houseType = houseTypes[i];
                 houseTypesSection.SetStringValue(
-                    houseType.ID > -1 ? houseType.ID.ToString(CultureInfo.InvariantCulture) : i.ToString(CultureInfo.InvariantCulture), 
+                    houseType.Index > -1 ? houseType.Index.ToString(CultureInfo.InvariantCulture) : i.ToString(CultureInfo.InvariantCulture),
                     houseType.ININame);
 
                 mapIni.RemoveSection(houseType.ININame);

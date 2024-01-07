@@ -1035,7 +1035,7 @@ namespace TSMapEditor.Initialization
                 }
 
                 var houseType = new HouseType(kvp.Value);
-                houseType.ID = id + (Constants.UseCountries ? map.Rules.RulesHouseTypes.Count : 0);
+                houseType.Index = id + (Constants.UseCountries ? map.Rules.RulesHouseTypes.Count : 0);
                 id++;
 
                 if (houseTypeSection != null)

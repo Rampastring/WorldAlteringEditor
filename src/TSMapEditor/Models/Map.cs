@@ -814,7 +814,7 @@ namespace TSMapEditor.Models
             if (HouseTypes.Remove(houseType))
             {
                 for (int i = 0; i < HouseTypes.Count; i++)
-                    HouseTypes[i].ID = i;
+                    HouseTypes[i].Index = i;
 
                 return true;
             }
@@ -1428,7 +1428,7 @@ namespace TSMapEditor.Models
             house.XNAColor = houseType.XNAColor;
 
             if (!Constants.UseCountries)
-                house.ActsLike = houseType.ID;
+                house.ActsLike = houseType.Index;
             else
                 house.Country = houseType.ININame;
 

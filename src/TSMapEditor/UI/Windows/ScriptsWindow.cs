@@ -430,7 +430,7 @@ namespace TSMapEditor.UI.Windows
             {
                 foreach (var houseType in map.GetHouseTypes())
                 {
-                    btnEditorPresetValues.ContextMenu.AddItem(new XNAContextMenuItem() { Text = houseType.ID + " " + houseType.ININame, TextColor = Helpers.GetHouseTypeUITextColor(houseType) });
+                    btnEditorPresetValues.ContextMenu.AddItem(new XNAContextMenuItem() { Text = houseType.Index + " " + houseType.ININame, TextColor = Helpers.GetHouseTypeUITextColor(houseType) });
                 }
             }
             else if (action.ParamType == TriggerParamType.House)
