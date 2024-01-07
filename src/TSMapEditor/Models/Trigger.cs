@@ -173,6 +173,11 @@ namespace TSMapEditor.Models
                         actionDataString.Append("A");
                     }
                 }
+                else
+                {
+                    // Unknown trigger action type, do not modify P7
+                    actionDataString.Append(action.ParamToString(6));
+                }
             }
 
             iniFile.SetStringValue("Actions", ID, actionDataString.ToString());
