@@ -1045,6 +1045,23 @@ namespace TSMapEditor.UI.Windows
             if (editedTrigger == null)
                 return;
 
+            if (Keyboard.IsShiftHeldDown())
+            {
+                DeleteTrigger();
+            }
+            else
+            {
+                var msgBox = EditorMessageBox.Show(WindowManager,
+                    "Are you sure?",
+                    "Do you really want to delete trigger \"" + editedTrigger.Name + "\"?" + Environment.NewLine + Environment.NewLine +
+                    "(You can hold Shift to skip this confirmation dialog.)", MessageBoxButtons.YesNo);
+
+                msgBox.YesClickedAction = _ => DeleteTrigger();
+            }
+        }
+
+        private void DeleteTrigger()
+        {
             map.Triggers.Remove(editedTrigger);
             map.Triggers.ForEach(t => { if (t.LinkedTrigger == editedTrigger) t.LinkedTrigger = null; });
             map.Tags.RemoveAll(t => t.Trigger == editedTrigger);
