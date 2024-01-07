@@ -461,7 +461,12 @@ namespace TSMapEditor.UI.Windows
                     return value + structure.ObjectType.Power;
 
                 return value;
-            });
+            }) + Environment.NewLine;
+
+            stats += Environment.NewLine + "Aircraft: " + map.Aircraft.Count(s => s.Owner == editedHouse);
+            stats += Environment.NewLine + "Infantry: " + map.Infantry.Count(s => s.Owner == editedHouse);
+            stats += Environment.NewLine + "Vehicles: " + map.Units.Count(s => s.Owner == editedHouse);
+            stats += Environment.NewLine + "Buildings: " + map.Structures.Count(s => s.Owner == editedHouse);
 
             lblStatsValue.Text = stats;
         }
