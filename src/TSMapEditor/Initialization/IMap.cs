@@ -44,6 +44,7 @@ namespace TSMapEditor.Initialization
 
         void SetTileData(List<MapTile> tiles);
         void PlaceTerrainTileAt(ITileImage tile, Point2D cellCoords);
+        List<HouseType> GetHouseTypes();
         HouseType FindHouseType(string houseTypeName);
         House FindOrMakeHouse(string houseName);
         House FindHouse(string houseName);

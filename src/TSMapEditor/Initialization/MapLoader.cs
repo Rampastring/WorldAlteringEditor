@@ -1013,11 +1013,20 @@ namespace TSMapEditor.Initialization
             int id = 0;
             foreach (var kvp in section.Keys)
             {
-                // HouseTypes can't be redefined, check if the HouseType already exists
+                IniSection houseTypeSection = mapIni.GetSection(kvp.Value);
+
+                // HouseTypes can't be redefined, check if the HouseType already exists.
+                // If it does and we are using countries, still read the HouseType's properties.
                 if (Constants.UseCountries)
                 {
-                    if (map.FindHouseType(kvp.Value) != null)
+                    var existingHouseType = map.FindHouseType(kvp.Value);
+                    if (existingHouseType != null)
+                    {
+                        if (houseTypeSection != null)
+                            existingHouseType.ReadFromIniSection(houseTypeSection);
+
                         continue;
+                    }
                 }
                 else
                 {
@@ -1026,13 +1035,18 @@ namespace TSMapEditor.Initialization
                 }
 
                 var houseType = new HouseType(kvp.Value);
-                houseType.ID = id + (Constants.UseCountries ? map.Rules.RulesHouseTypes.Count + id : 0);
+                houseType.ID = id + (Constants.UseCountries ? map.Rules.RulesHouseTypes.Count : 0);
                 id++;
 
-                var houseTypeSection = mapIni.GetSection(houseType.ININame);
                 if (houseTypeSection != null)
                     houseType.ReadFromIniSection(houseTypeSection);
 
+                map.HouseTypes.Add(houseType);
+            }
+
+            // Assign colors
+            map.GetHouseTypes().ForEach(houseType =>
+            {
                 var color = map.Rules.Colors.Find(c => c.Name == houseType.Color);
                 if (color == null)
                 {
@@ -1042,9 +1056,7 @@ namespace TSMapEditor.Initialization
                 {
                     houseType.XNAColor = color.XNAColor;
                 }
-
-                map.HouseTypes.Add(houseType);
-            }
+            });
 
             Logger.Log("HouseTypes read successfully.");
         }
@@ -1098,6 +1110,11 @@ namespace TSMapEditor.Initialization
                 }
 
                 house.HouseType = houseType;
+                if (houseType != null)
+                {
+                    houseType.Color = house.Color;
+                    houseType.XNAColor = house.XNAColor;
+                }
             }
 
             Logger.Log("Houses read successfully.");
