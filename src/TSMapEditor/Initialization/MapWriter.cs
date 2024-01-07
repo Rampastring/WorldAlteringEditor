@@ -426,6 +426,21 @@ namespace TSMapEditor.Initialization
                 var houseTypeSection = FindOrMakeSection(houseType.ININame, mapIni);
                 houseType.WriteToIniSection(houseTypeSection);
             }
+
+            if (Constants.UseCountries)
+            {
+                // Write Rules house types that have been modified in the map
+                for (int i = 0; i < map.Rules.RulesHouseTypes.Count; i++)
+                {
+                    HouseType houseType = map.Rules.RulesHouseTypes[i];
+                    if (houseType.ModifiedInMap)
+                    {
+                        mapIni.RemoveSection(houseType.ININame);
+                        var houseTypeSection = FindOrMakeSection(houseType.ININame, mapIni);
+                        houseType.WriteToIniSection(houseTypeSection);
+                    }
+                }
+            }
         }
 
         public static void WriteHouses(IMap map, IniFile mapIni)
@@ -447,7 +462,12 @@ namespace TSMapEditor.Initialization
                 // When countries are not in use, the section is already removed by WriteHouseTypes
                 if (Constants.UseCountries)
                 {
-                    mapIni.RemoveSection(house.ININame);
+                    // Only remove the section if no similarly-named modified HouseType exists - if one does,
+                    // the section was possibly already removed by WriteHouseTypes
+                    var houseType = map.FindHouseType(house.ININame);
+                    if (houseType == null)
+                        mapIni.RemoveSection(house.ININame);
+
                     house.Country = house.HouseType.ININame; // Make sure the country property matches our model
                 }
 

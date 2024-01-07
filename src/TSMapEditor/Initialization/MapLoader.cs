@@ -1023,7 +1023,10 @@ namespace TSMapEditor.Initialization
                     if (existingHouseType != null)
                     {
                         if (houseTypeSection != null)
+                        {
                             existingHouseType.ReadFromIniSection(houseTypeSection);
+                            existingHouseType.ModifiedInMap = true;
+                        }
 
                         continue;
                     }

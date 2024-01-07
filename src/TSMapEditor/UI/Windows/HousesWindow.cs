@@ -43,6 +43,7 @@ namespace TSMapEditor.UI.Windows
         private House editedHouse;
 
         private GenerateStandardHousesWindow generateStandardHousesWindow;
+        private EditHouseTypeWindow editHouseTypeWindow;
         private NewHouseWindow newHouseWindow;
 
         public override void Initialize()
@@ -83,6 +84,8 @@ namespace TSMapEditor.UI.Windows
             FindChild<EditorButton>("btnAddHouse").LeftClick += BtnAddHouse_LeftClick;
             FindChild<EditorButton>("btnDeleteHouse").LeftClick += BtnDeleteHouse_LeftClick;
             FindChild<EditorButton>("btnStandardHouses").LeftClick += BtnStandardHouses_LeftClick;
+            var btnEditHouseType = FindChild<EditorButton>("btnEditHouseType");
+            btnEditHouseType.LeftClick += BtnEditHouseType_LeftClick;
             FindChild<EditorButton>("btnMakeHouseRepairBuildings").LeftClick += BtnMakeHouseRepairBuildings_LeftClick;
             FindChild<EditorButton>("btnMakeHouseNotRepairBuildings").LeftClick += BtnMakeHouseNotRepairBuildings_LeftClick;
 
@@ -91,10 +94,15 @@ namespace TSMapEditor.UI.Windows
 
             generateStandardHousesWindow = new GenerateStandardHousesWindow(WindowManager, map);
             var standardHousesWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, generateStandardHousesWindow);
-            standardHousesWindowDarkeningPanel.Hidden += StandardHousesWindowDarkeningPanel_Hidden;
+            standardHousesWindowDarkeningPanel.Hidden += (s, e) => ListHouses();
+
+            editHouseTypeWindow = new EditHouseTypeWindow(WindowManager, map);
+            var editHouseTypeWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, editHouseTypeWindow);
+            editHouseTypeWindowDarkeningPanel.Hidden += (s, e) => RefreshHouseInfo();
 
             if (Constants.UseCountries)
             {
+                btnEditHouseType.Text = "Edit Country";
                 newHouseWindow = new NewHouseWindow(WindowManager, map);
                 var newHouseWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, newHouseWindow);
                 newHouseWindowDarkeningPanel.Hidden += NewHouseWindowDarkeningPanel_Hidden;
@@ -105,11 +113,6 @@ namespace TSMapEditor.UI.Windows
         {
             if (newHouseWindow.Success)
                 ListHouses();
-        }
-
-        private void StandardHousesWindowDarkeningPanel_Hidden(object sender, EventArgs e)
-        {
-            ListHouses();
         }
 
         private void DdHouseOfHumanPlayer_SelectedIndexChanged(object sender, System.EventArgs e)
@@ -196,6 +199,14 @@ namespace TSMapEditor.UI.Windows
             }
 
             generateStandardHousesWindow.Open();
+        }
+
+        private void BtnEditHouseType_LeftClick(object sender, EventArgs e)
+        {
+            if (editedHouse == null)
+                return;
+
+            editHouseTypeWindow.Open(editedHouse.HouseType);
         }
 
         private void BtnMakeHouseRepairBuildings_LeftClick(object sender, EventArgs e)

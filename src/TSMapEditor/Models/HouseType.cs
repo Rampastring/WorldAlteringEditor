@@ -69,6 +69,12 @@ namespace TSMapEditor.Models
         [INI(false)]
         public int Index { get; set; }
 
+        /// <summary>
+        /// If set, this is a standard HouseType that has been somehow modified in the map.
+        /// </summary>
+        [INI(false)]
+        public bool ModifiedInMap { get; set; }
+
         public void ReadFromIniSection(IniSection iniSection)
         {
             ReadPropertiesFromIniSection(iniSection);
