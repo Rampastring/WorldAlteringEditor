@@ -30,6 +30,7 @@ namespace TSMapEditor.UI.Windows
         private XNADropDown ddMapEdge;
         private XNADropDown ddSide;
         private XNADropDown ddActsLike;
+        private XNADropDown ddCountry;
         private XNADropDown ddColor;
         private XNADropDown ddTechnologyLevel;
         private XNADropDown ddPercentBuilt;
@@ -55,6 +56,7 @@ namespace TSMapEditor.UI.Windows
             ddMapEdge = FindChild<XNADropDown>(nameof(ddMapEdge));
             ddSide = FindChild<XNADropDown>(nameof(ddSide));
             ddActsLike = FindChild<XNADropDown>(nameof(ddActsLike));
+            ddCountry = FindChild<XNADropDown>(nameof(ddCountry));
             ddColor = FindChild<XNADropDown>(nameof(ddColor));
             ddTechnologyLevel = FindChild<XNADropDown>(nameof(ddTechnologyLevel));
             ddPercentBuilt = FindChild<XNADropDown>(nameof(ddPercentBuilt));
@@ -243,6 +245,7 @@ namespace TSMapEditor.UI.Windows
                 ddMapEdge.SelectedIndex = -1;
                 ddSide.SelectedIndex = -1;
                 ddActsLike.SelectedIndex = -1;
+                ddCountry.SelectedIndex = -1;
                 ddColor.SelectedIndex = -1;
                 ddTechnologyLevel.SelectedIndex = -1;
                 ddPercentBuilt.SelectedIndex = -1;
@@ -262,6 +265,11 @@ namespace TSMapEditor.UI.Windows
             else
                 ddActsLike.SelectedIndex = -1;
 
+            if (editedHouse.HouseType != null)
+                ddCountry.SelectedIndex = ddCountry.Items.FindIndex(ddi => ddi.Tag == editedHouse.HouseType);
+            else
+                ddCountry.SelectedIndex = -1;
+
             ddColor.SelectedIndex = ddColor.Items.FindIndex(item => item.Text == editedHouse.Color);
             ddTechnologyLevel.SelectedIndex = ddTechnologyLevel.Items.FindIndex(item => Conversions.IntFromString(item.Text, -1) == editedHouse.TechLevel);
             ddPercentBuilt.SelectedIndex = ddPercentBuilt.Items.FindIndex(item => Conversions.IntFromString(item.Text, -1) == editedHouse.PercentBuilt);
@@ -274,6 +282,7 @@ namespace TSMapEditor.UI.Windows
             ddMapEdge.SelectedIndexChanged += DdMapEdge_SelectedIndexChanged;
             ddSide.SelectedIndexChanged += DdSide_SelectedIndexChanged;
             ddActsLike.SelectedIndexChanged += DdActsLike_SelectedIndexChanged;
+            ddCountry.SelectedIndexChanged += DdCountry_SelectedIndexChanged;
             ddColor.SelectedIndexChanged += DdColor_SelectedIndexChanged;
             ddTechnologyLevel.SelectedIndexChanged += DdTechnologyLevel_SelectedIndexChanged;
             ddPercentBuilt.SelectedIndexChanged += DdPercentBuilt_SelectedIndexChanged;
@@ -309,7 +318,20 @@ namespace TSMapEditor.UI.Windows
 
         private void DdActsLike_SelectedIndexChanged(object sender, System.EventArgs e)
         {
+            if (Constants.UseCountries)
+                return;
+
             editedHouse.ActsLike = ddActsLike.SelectedIndex;
+        }
+
+        private void DdCountry_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (!Constants.UseCountries)
+                return;
+
+            var ddItem = ddCountry.SelectedItem;
+            editedHouse.Country = ddItem.Text;
+            editedHouse.HouseType = (HouseType)ddItem.Tag;
         }
 
         private void DdColor_SelectedIndexChanged(object sender, System.EventArgs e)
@@ -381,6 +403,12 @@ namespace TSMapEditor.UI.Windows
                 ddActsLike.AddItem(new XNADropDownItem() { Text = house.ID.ToString(CultureInfo.InvariantCulture) + " " + house.ININame, Tag = house.ID });
 
                 ddHouseOfHumanPlayer.AddItem(house.ININame, house.XNAColor);
+            }
+
+            ddCountry.Items.Clear();
+            foreach (var houseType in map.GetHouseTypes())
+            {
+                ddCountry.AddItem(new XNADropDownItem() { Text = houseType.ID.ToString(CultureInfo.InvariantCulture) + " " + houseType.ININame, Tag = houseType });
             }
 
             ddHouseOfHumanPlayer.SelectedIndex = map.Houses.FindIndex(h => h.ININame == map.Basic.Player) + 1;

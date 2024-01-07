@@ -444,8 +444,12 @@ namespace TSMapEditor.Initialization
                 House house = map.Houses[i];
                 housesSection.SetStringValue(house.ID > -1 ? house.ID.ToString() : i.ToString(), house.ININame);
 
+                // When countries are not in use, the section is already removed by WriteHouseTypes
                 if (Constants.UseCountries)
+                {
                     mapIni.RemoveSection(house.ININame);
+                    house.Country = house.HouseType.ININame; // Make sure the country property matches our model
+                }
 
                 var houseSection = FindOrMakeSection(house.ININame, mapIni);
                 house.WriteToIniSection(houseSection);

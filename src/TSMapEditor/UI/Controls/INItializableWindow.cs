@@ -139,6 +139,14 @@ namespace TSMapEditor.UI.Controls
                         throw new FormatException("Invalid format for AnchorPoint: " + kvp.Value);
                     ((XNALabel)control).AnchorPoint = new Vector2(Parser.Instance.GetExprValue(parts[0], control), Parser.Instance.GetExprValue(parts[1], control));
                 }
+                else if (kvp.Key == "$Enabled")
+                {
+                    int value = Parser.Instance.GetExprValue(kvp.Value, control);
+                    if (value < 1)
+                        control.Disable();
+                    else
+                        control.Enable();
+                }
                 else if (kvp.Key == "$LeftClickAction")
                 {
                     if (kvp.Value == "Disable")
