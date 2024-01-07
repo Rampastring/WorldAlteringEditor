@@ -60,23 +60,10 @@ namespace TSMapEditor.UI.Windows
                     houseType.Color = house.Color;
 
                     // Find reasonable default for Side and ActsLike
-                    for (int sideIndex = 0; sideIndex < map.Rules.Sides.Count; sideIndex++)
-                    {
-                        string side = map.Rules.Sides[sideIndex];
-
-                        if (house.ININame.StartsWith(side))
-                        {
-                            houseType.Side = side;
-                            house.ActsLike = houses.FindIndex(h => house.ININame.StartsWith(h.ININame));
-                            break;
-                        }
-                    }
-
-                    if (string.IsNullOrWhiteSpace(houseType.Side))
-                    {
-                        houseType.Side = map.Rules.Sides[0];
+                    Helpers.FindDefaultSideForNewHouseType(houseType, map.Rules);
+                    house.ActsLike = houses.FindIndex(h => house.ININame.StartsWith(h.ININame));
+                    if (house.ActsLike < 0)
                         house.ActsLike = 0;
-                    }
 
                     map.AddHouseType(houseType);
                     house.HouseType = houseType;

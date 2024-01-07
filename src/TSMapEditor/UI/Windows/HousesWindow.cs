@@ -43,6 +43,7 @@ namespace TSMapEditor.UI.Windows
         private House editedHouse;
 
         private GenerateStandardHousesWindow generateStandardHousesWindow;
+        private NewHouseWindow newHouseWindow;
 
         public override void Initialize()
         {
@@ -89,11 +90,24 @@ namespace TSMapEditor.UI.Windows
             lbHouseList.SelectedIndexChanged += LbHouseList_SelectedIndexChanged;
 
             generateStandardHousesWindow = new GenerateStandardHousesWindow(WindowManager, map);
-            var darkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, generateStandardHousesWindow);
-            darkeningPanel.Hidden += DarkeningPanel_Hidden;
+            var standardHousesWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, generateStandardHousesWindow);
+            standardHousesWindowDarkeningPanel.Hidden += StandardHousesWindowDarkeningPanel_Hidden;
+
+            if (Constants.UseCountries)
+            {
+                newHouseWindow = new NewHouseWindow(WindowManager, map);
+                var newHouseWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, newHouseWindow);
+                newHouseWindowDarkeningPanel.Hidden += NewHouseWindowDarkeningPanel_Hidden;
+            }
         }
 
-        private void DarkeningPanel_Hidden(object sender, EventArgs e)
+        private void NewHouseWindowDarkeningPanel_Hidden(object sender, EventArgs e)
+        {
+            if (newHouseWindow.Success)
+                ListHouses();
+        }
+
+        private void StandardHousesWindowDarkeningPanel_Hidden(object sender, EventArgs e)
         {
             ListHouses();
         }
@@ -111,19 +125,16 @@ namespace TSMapEditor.UI.Windows
 
         private void BtnAddHouse_LeftClick(object sender, System.EventArgs e)
         {
-            HouseType houseType = null;
+            if (Constants.UseCountries)
+            {
+                newHouseWindow.Open();
+                return;
+            }
 
-            if (!Constants.UseCountries)
-            {
-                houseType = new HouseType("NewHouse");
-                houseType.Index = map.HouseTypes.Count;
-                houseType.Side = map.Rules.Sides[0];
-                map.HouseTypes.Add(houseType);
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
+            HouseType houseType = new HouseType("NewHouse");
+            houseType.Index = map.HouseTypes.Count;
+            Helpers.FindDefaultSideForNewHouseType(houseType, map.Rules);
+            map.HouseTypes.Add(houseType);
 
             map.AddHouse(new House("NewHouse", houseType) 
             {

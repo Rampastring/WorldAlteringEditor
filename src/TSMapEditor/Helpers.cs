@@ -5,6 +5,7 @@ using Rampastring.XNAUI;
 using System;
 using System.Globalization;
 using TSMapEditor.GameMath;
+using TSMapEditor.Initialization;
 using TSMapEditor.Models;
 using TSMapEditor.Models.Enums;
 
@@ -302,5 +303,24 @@ namespace TSMapEditor
         }
 
         public static bool IsColorDark(Color color) => color.R < 32 && color.G < 32 && color.B < 64;
+
+        public static void FindDefaultSideForNewHouseType(HouseType houseType, Rules rules)
+        {
+            for (int sideIndex = 0; sideIndex < rules.Sides.Count; sideIndex++)
+            {
+                string side = rules.Sides[sideIndex];
+
+                if (houseType.ININame.StartsWith(side))
+                {
+                    houseType.Side = side;
+                    break;
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(houseType.Side))
+            {
+                houseType.Side = rules.Sides[0];
+            }
+        }
     }
 }

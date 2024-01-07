@@ -73,8 +73,19 @@ namespace TSMapEditor.Models
         public string Color { get; set; } = "White";
         public string Allies { get; set; }
         public int Credits { get; set; }
-        public string Country { get; set; }  // This is for YR
-        public int? ActsLike { get; set; }   // This is for TS
+
+        /// <summary>
+        /// The country of the house in Red Alert 2. Unused in Tiberian Sun.
+        ///
+        /// NOTE: This should only be used for saving and loading the map. Otherwise, use <see cref="HouseType"/>
+        /// to refer to the country that the house is using.
+        /// </summary>
+        public string Country { get; set; }
+
+        /// <summary>
+        /// Which HouseType this house "acts like" in Tiberian Sun. Unused in Red Alert 2.
+        /// </summary>
+        public int? ActsLike { get; set; }
         public int TechLevel { get; set; }
         public int PercentBuilt { get; set; }
         public bool PlayerControl { get; set; }
