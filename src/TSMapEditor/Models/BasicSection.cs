@@ -27,7 +27,7 @@
         public int NewINIFormat { get; set; } = 4;
         public string NextScenario { get; set; }
         public string AltNextScenario { get; set; }
-        public int RequiredAddOn { get; set; }
+        public int? RequiredAddOn { get; set; }
         public bool SkipMapSelect { get; set; }
         public double CarryOverMoney { get; set; }
         public bool MultiplayerOnly { get; set; }

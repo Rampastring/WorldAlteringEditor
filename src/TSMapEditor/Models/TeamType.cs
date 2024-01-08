@@ -29,6 +29,8 @@ namespace TSMapEditor.Models
         public int Max { get; set; }
         public int Priority { get; set; }
         public string Waypoint { get; set; }
+        public string TransportWaypoint { get; set; }
+        public int? MindControlDecision { get; set; }
         public int TechLevel { get; set; }
         public int VeteranLevel { get; set; }
 
@@ -67,6 +69,12 @@ namespace TSMapEditor.Models
             }
 
             stringBuilder.Append("Waypoint: " + (string.IsNullOrWhiteSpace(Waypoint) ? Constants.NoneValue2 : Helpers.GetWaypointNumberFromAlphabeticalString(Waypoint)));
+
+            if (Constants.UseCountries)
+            {
+                stringBuilder.Append("TransportWaypoint: " + (string.IsNullOrWhiteSpace(TransportWaypoint) ? Constants.NoneValue2 : Helpers.GetWaypointNumberFromAlphabeticalString(TransportWaypoint)));
+            }
+
             stringBuilder.Append(Environment.NewLine + Environment.NewLine);
 
             if (VeteranLevel > 1)

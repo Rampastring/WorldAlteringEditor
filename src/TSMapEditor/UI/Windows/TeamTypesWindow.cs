@@ -46,6 +46,8 @@ namespace TSMapEditor.UI.Windows
         private EditorNumberTextBox tbPriority;
         private EditorNumberTextBox tbMax;
         private EditorNumberTextBox tbTechLevel;
+        private XNADropDown ddMindControlDecision;
+        private EditorNumberTextBox tbTransportWaypoint;
         private EditorNumberTextBox tbGroup;
         private EditorNumberTextBox tbWaypoint;
         private EditorPopUpSelector selTaskForce;
@@ -71,6 +73,8 @@ namespace TSMapEditor.UI.Windows
             tbPriority = FindChild<EditorNumberTextBox>(nameof(tbPriority));
             tbMax = FindChild<EditorNumberTextBox>(nameof(tbMax));
             tbTechLevel = FindChild<EditorNumberTextBox>(nameof(tbTechLevel));
+            ddMindControlDecision = FindChild<XNADropDown>(nameof(ddMindControlDecision));
+            tbTransportWaypoint = FindChild<EditorNumberTextBox>(nameof(tbTransportWaypoint));
             tbGroup = FindChild<EditorNumberTextBox>(nameof(tbGroup));
             tbWaypoint = FindChild<EditorNumberTextBox>(nameof(tbWaypoint));
             selTaskForce = FindChild<EditorPopUpSelector>(nameof(selTaskForce));
@@ -79,10 +83,6 @@ namespace TSMapEditor.UI.Windows
 
             var panelBooleans = FindChild<EditorPanel>("panelBooleans");
             AddBooleanProperties(panelBooleans);
-
-            ddVeteranLevel.AddItem("Regular");
-            ddVeteranLevel.AddItem("Veteran");
-            ddVeteranLevel.AddItem("Elite");
 
             lbTeamTypes.SelectedIndexChanged += LbTeamTypes_SelectedIndexChanged;
 
@@ -288,8 +288,10 @@ namespace TSMapEditor.UI.Windows
             tbPriority.TextChanged -= TbPriority_TextChanged;
             tbMax.TextChanged -= TbMax_TextChanged;
             tbTechLevel.TextChanged -= TbTechLevel_TextChanged;
+            ddMindControlDecision.SelectedIndexChanged -= DdMindControlDecision_SelectedIndexChanged;
             tbGroup.TextChanged -= TbGroup_TextChanged;
             tbWaypoint.TextChanged -= TbWaypoint_TextChanged;
+            tbTransportWaypoint.TextChanged -= TbTransportWaypoint_TextChanged;
             checkBoxes.ForEach(chk => chk.CheckedChanged -= FlagCheckBox_CheckedChanged);
 
             editedTeamType = teamType;
@@ -302,8 +304,11 @@ namespace TSMapEditor.UI.Windows
                 tbPriority.Text = string.Empty;
                 tbMax.Text = string.Empty;
                 tbTechLevel.Text = string.Empty;
+                ddMindControlDecision.SelectedIndex = -1;
+
                 tbGroup.Text = string.Empty;
                 tbWaypoint.Text = string.Empty;
+                tbTransportWaypoint.Text = string.Empty;
 
                 selTaskForce.Text = string.Empty;
                 selTaskForce.Tag = null;
@@ -328,6 +333,12 @@ namespace TSMapEditor.UI.Windows
             tbGroup.Value = editedTeamType.Group;
             tbWaypoint.Value = Helpers.GetWaypointNumberFromAlphabeticalString(editedTeamType.Waypoint);
 
+            if (Constants.UseCountries)
+            {
+                ddMindControlDecision.SelectedIndex = editedTeamType.MindControlDecision ?? -1;
+                tbTransportWaypoint.Value = Helpers.GetWaypointNumberFromAlphabeticalString(editedTeamType.TransportWaypoint);
+            }
+            
             if (editedTeamType.TaskForce != null)
                 selTaskForce.Text = editedTeamType.TaskForce.Name + " (" + editedTeamType.TaskForce.ININame + ")";
             else
@@ -351,8 +362,10 @@ namespace TSMapEditor.UI.Windows
             tbPriority.TextChanged += TbPriority_TextChanged;
             tbMax.TextChanged += TbMax_TextChanged;
             tbTechLevel.TextChanged += TbTechLevel_TextChanged;
+            ddMindControlDecision.SelectedIndexChanged += DdMindControlDecision_SelectedIndexChanged;
             tbGroup.TextChanged += TbGroup_TextChanged;
             tbWaypoint.TextChanged += TbWaypoint_TextChanged;
+            tbTransportWaypoint.TextChanged += TbTransportWaypoint_TextChanged;
             checkBoxes.ForEach(chk => chk.CheckedChanged += FlagCheckBox_CheckedChanged);
         }
 
@@ -368,6 +381,14 @@ namespace TSMapEditor.UI.Windows
         private void TbWaypoint_TextChanged(object sender, EventArgs e)
         {
             editedTeamType.Waypoint = Helpers.WaypointNumberToAlphabeticalString(tbWaypoint.Value);
+        }
+
+        private void TbTransportWaypoint_TextChanged(object sender, EventArgs e)
+        {
+            if (Constants.UseCountries)
+            {
+                editedTeamType.TransportWaypoint = Helpers.WaypointNumberToAlphabeticalString(tbTransportWaypoint.Value);
+            }
         }
 
         private void TbGroup_TextChanged(object sender, EventArgs e)
@@ -399,6 +420,14 @@ namespace TSMapEditor.UI.Windows
         private void DdVeteranLevel_SelectedIndexChanged(object sender, EventArgs e)
         {
             editedTeamType.VeteranLevel = ddVeteranLevel.SelectedIndex + 1;
+        }
+
+        private void DdMindControlDecision_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (Constants.UseCountries)
+            {
+                editedTeamType.MindControlDecision = ddMindControlDecision.SelectedIndex;
+            }
         }
 
         private void TbName_TextChanged(object sender, EventArgs e)
