@@ -180,8 +180,8 @@ namespace TSMapEditor.UI.Windows
                     }
 
                     editedHouse = null;
-                    ListHouses();
                     lbHouseList.SelectedIndex = -1;
+                    ListHouses();
                 }
             }
         }
@@ -262,6 +262,7 @@ namespace TSMapEditor.UI.Windows
             ddMapEdge.SelectedIndexChanged -= DdMapEdge_SelectedIndexChanged;
             ddSide.SelectedIndexChanged -= DdSide_SelectedIndexChanged;
             ddActsLike.SelectedIndexChanged -= DdActsLike_SelectedIndexChanged;
+            ddCountry.SelectedIndexChanged -= DdCountry_SelectedIndexChanged;
             ddColor.SelectedIndexChanged -= DdColor_SelectedIndexChanged;
             ddTechnologyLevel.SelectedIndexChanged -= DdTechnologyLevel_SelectedIndexChanged;
             ddPercentBuilt.SelectedIndexChanged -= DdPercentBuilt_SelectedIndexChanged;
