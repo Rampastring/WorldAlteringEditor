@@ -180,6 +180,8 @@ namespace TSMapEditor.UI
 
             // Try to select "Neutral" as default house
             editorState.ObjectOwner = map.GetHouses().Find(h => h.ININame == "Neutral");
+            if (editorState.ObjectOwner == null && map.GetHouses().Count > 0)
+                editorState.ObjectOwner = map.GetHouses()[0];
             editorState.CursorAction = null;
 
             Alpha = 0f;

@@ -20,6 +20,14 @@ namespace TSMapEditor.Models
         public double IonLevel { get; set; }
         public double IonGround { get; set; }
 
+        public double? DominatorRed { get; set; }
+        public double? DominatorGreen { get; set; }
+        public double? DominatorBlue { get; set; }
+        public double? DominatorAmbient { get; set; }
+        public double? DominatorAmbientChangeRate { get; set; }
+        public double? DominatorLevel { get; set; }
+        public double? DominatorGround { get; set; }
+
         public void ReadFromIniFile(IniFile iniFile)
         {
             var lightingSection = iniFile.GetSection(LightingIniSectionName);
