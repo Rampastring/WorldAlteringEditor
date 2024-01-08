@@ -41,7 +41,7 @@ namespace TSMapEditor.UI.Windows
             {
                 HouseType houseType = houseTypes[i];
 
-                lbObjectList.AddItem(new XNAListBoxItem() { Text = $"{i} {houseType.ININame}", TextColor = houseType.XNAColor, Tag = houseType });
+                lbObjectList.AddItem(new XNAListBoxItem() { Text = $"{houseType.Index} {houseType.ININame}", TextColor = houseType.XNAColor, Tag = houseType });
                 if (houseType == SelectedObject)
                     lbObjectList.SelectedIndex = lbObjectList.Items.Count - 1;
             }

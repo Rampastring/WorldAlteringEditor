@@ -118,9 +118,16 @@ namespace TSMapEditor.Models
         public List<HouseType> GetHouseTypes()
         {
             if (Constants.UseCountries)
-                return Rules.RulesHouseTypes.Concat(HouseTypes).ToList();
+            {
+                if (HouseTypes.Count > 0)
+                    return Rules.RulesHouseTypes.Concat(HouseTypes).ToList();
+                else
+                    return StandardHouseTypes;
+            }
             else
+            {
                 return HouseTypes.Count > 0 ? HouseTypes : StandardHouseTypes;
+            }
         }
 
         public List<House> Houses { get; protected set; } = new List<House>();
@@ -355,6 +362,11 @@ namespace TSMapEditor.Models
         public HouseType FindHouseType(string houseTypeName)
         {
             return GetHouseTypes().Find(ht => ht.ININame == houseTypeName);
+        }
+
+        public HouseType FindHouseType(int index)
+        {
+            return GetHouseTypes().Find(ht => ht.Index == index);
         }
 
         /// <summary>

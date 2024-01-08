@@ -3,8 +3,10 @@ using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using TSMapEditor.Extensions;
 using TSMapEditor.Initialization;
 using TSMapEditor.Models.ArtConfig;
+using TSMapEditor.UI;
 
 namespace TSMapEditor.Models
 {
@@ -66,6 +68,32 @@ namespace TSMapEditor.Models
             AnimTypes.ForEach(a => initializer.ReadObjectTypePropertiesFromINI(a, iniFile));
             RulesHouseTypes.ForEach(ht => initializer.ReadObjectTypePropertiesFromINI(ht, iniFile));
 
+            if (!isMapIni)
+                InitColors(iniFile);
+
+            if (!isMapIni)
+                InitTiberiums(iniFile);
+
+            InitSides(iniFile);
+
+            if (!isMapIni)
+            {
+                // Don't load local variables defined in the map as globals
+
+                IniSection variableNamesSection = iniFile.GetSection("VariableNames");
+                if (variableNamesSection != null)
+                {
+                    for (int i = 0; i < variableNamesSection.Keys.Count; i++)
+                    {
+                        var kvp = variableNamesSection.Keys[i];
+                        GlobalVariables.Add(new GlobalVariable(int.Parse(kvp.Key, CultureInfo.InvariantCulture), kvp.Value));
+                    }
+                }
+            }
+        }
+
+        private void InitColors(IniFile iniFile)
+        {
             var colorsSection = iniFile.GetSection("Colors");
             if (colorsSection != null)
             {
@@ -75,8 +103,20 @@ namespace TSMapEditor.Models
                 }
             }
 
+            // Assign Rules housetype colors
+            RulesHouseTypes.ForEach(ht =>
+            {
+                var color = Colors.Find(c => c.Name == ht.Color);
+
+                if (color != null)
+                    ht.XNAColor = color.XNAColor;
+            });
+        }
+
+        private void InitTiberiums(IniFile iniFile)
+        {
             var tiberiumsSection = iniFile.GetSection("Tiberiums");
-            if (tiberiumsSection != null && !isMapIni)
+            if (tiberiumsSection != null)
             {
                 for (int i = 0; i < tiberiumsSection.Keys.Count; i++)
                 {
@@ -95,28 +135,16 @@ namespace TSMapEditor.Models
                     }
                 }
             }
+        }
 
+        private void InitSides(IniFile iniFile)
+        {
             var sidesSection = iniFile.GetSection("Sides");
             if (sidesSection != null)
             {
                 foreach (var kvp in sidesSection.Keys)
                 {
                     Sides.Add(kvp.Key);
-                }
-            }
-
-            if (!isMapIni)
-            {
-                // Don't load local variables defined in the map as globals
-
-                IniSection variableNamesSection = iniFile.GetSection("VariableNames");
-                if (variableNamesSection != null)
-                {
-                    for (int i = 0; i < variableNamesSection.Keys.Count; i++)
-                    {
-                        var kvp = variableNamesSection.Keys[i];
-                        GlobalVariables.Add(new GlobalVariable(int.Parse(kvp.Key, CultureInfo.InvariantCulture), kvp.Value));
-                    }
                 }
             }
         }
@@ -197,7 +225,11 @@ namespace TSMapEditor.Models
             {
                 string houseTypeName = kvp.Value;
                 var houseType = new HouseType(houseTypeName);
-                houseType.Index = houseTypes.Count;
+                houseType.Index = Conversions.IntFromString(kvp.Key, -1);
+
+                if (houseType.Index < 0 || houseTypes.Exists(ht => ht.Index == houseType.Index))
+                    throw new INIConfigException($"Invalid index for HouseType in standard houses. Section: {sectionName}, HouseType name: {houseTypeName}");
+
                 InitHouseType(iniFile, houseType);
                 houseTypes.Add(houseType);
             }
@@ -207,6 +239,14 @@ namespace TSMapEditor.Models
 
         private void InitHouseType(IniFile iniFile, HouseType houseType)
         {
+            // Fetch some default properties from Rules so they don't need to be duplicated in EditorRules.
+            // Aside from the color most of these aren't used, but maybe they might be useful one day.
+            var rulesHouseType = RulesHouseTypes.Find(ht => ht.ININame == houseType.ININame);
+            if (rulesHouseType != null)
+            {
+                houseType.CopyBasicPropertiesFrom(rulesHouseType);
+            }
+
             var section = iniFile.GetSection(houseType.ININame);
             if (section == null)
                 return;

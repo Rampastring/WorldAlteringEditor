@@ -84,5 +84,18 @@ namespace TSMapEditor.Models
         {
             WritePropertiesToIniSection(iniSection);
         }
+
+        public void CopyBasicPropertiesFrom(HouseType other)
+        {
+            Color = other.Color;
+            XNAColor = other.XNAColor;
+            Prefix = other.Prefix;
+            Suffix = other.Suffix;
+            Side = other.Side;
+            Multiplay = other.Multiplay;
+            MultiplayPassive = other.MultiplayPassive;
+            SmartAI = other.SmartAI;
+            WallOwner = other.WallOwner;
+        }
     }
 }

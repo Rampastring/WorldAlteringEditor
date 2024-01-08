@@ -915,7 +915,7 @@ namespace TSMapEditor.UI.Windows
             if (selectHouseTypeWindow.SelectedObject == null)
                 return;
 
-            int houseTypeIndex = map.GetHouseTypes().FindIndex(ht => ht == selectHouseTypeWindow.SelectedObject);
+            int houseTypeIndex = selectHouseTypeWindow.SelectedObject.Index;
             AssignParamValue(selectHouseTypeWindow.IsForEvent, houseTypeIndex);
         }
 
@@ -1662,11 +1662,11 @@ namespace TSMapEditor.UI.Windows
                 case TriggerParamType.HouseType:
                     if (intParseSuccess)
                     {
-                        var houseTypes = map.GetHouseTypes();
-                        if (intValue >= houseTypes.Count)
+                        var houseType = map.FindHouseType(intValue);
+                        if (houseType == null)
                             goto case TriggerParamType.Unused;
 
-                        return houseTypes[intValue].XNAColor;
+                        return houseType.XNAColor;
                     }
                     goto case TriggerParamType.Unused;
                 case TriggerParamType.House:
@@ -1712,6 +1712,17 @@ namespace TSMapEditor.UI.Windows
                         return intValue + " - nonexistent animation";
 
                     return intValue + " " + map.Rules.AnimTypes[intValue].ININame;
+                case TriggerParamType.HouseType:
+                    if (intParseSuccess)
+                    {
+                        var houseType = map.FindHouseType(intValue);
+                        if (houseType == null)
+                            return intValue.ToString() + " - Unknown HouseType";
+
+                        return intValue + " " + houseType.ININame;
+                    }
+
+                    return paramValue;
                 case TriggerParamType.House:
                     if (intParseSuccess)
                     {
