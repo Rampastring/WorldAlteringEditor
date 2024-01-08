@@ -814,7 +814,7 @@ namespace TSMapEditor.Models
             if (HouseTypes.Remove(houseType))
             {
                 for (int i = 0; i < HouseTypes.Count; i++)
-                    HouseTypes[i].Index = i;
+                    HouseTypes[i].Index = i + (Constants.UseCountries ? Rules.RulesHouseTypes.Count : 0);
 
                 return true;
             }
