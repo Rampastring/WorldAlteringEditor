@@ -14,7 +14,7 @@ namespace TSMapEditor.Models
     {
         public OverlayType OverlayType { get; set; }
         public int FrameIndex { get; set; }
-        public BitArray ConnectsTo { get; set; }
+        public byte ConnectsTo { get; set; }
     }
 
     public class ConnectedOverlayType
@@ -32,7 +32,7 @@ namespace TSMapEditor.Models
             if (connectionMaskString == null || connectionMaskString.Length != (int)Direction.Count || Regex.IsMatch(connectionMaskString, "[^01]"))
                 throw new INIConfigException ($"Connected overlay type {Name} has an invalid connection mask {connectionMaskString}!");
 
-            ConnectionMask = new BitArray(connectionMaskString.Select(c => c == '1').ToArray());
+            ConnectionMask = Convert.ToByte(connectionMaskString, 2);
 
             for (int i = 0; i < FrameCount; i++)
             {
@@ -48,7 +48,7 @@ namespace TSMapEditor.Models
                 if (connectsToString == null || connectsToString.Length != (int)Direction.Count || Regex.IsMatch(connectsToString, "[^01]"))
                     throw new INIConfigException ($"Connected overlay type {Name}, frame {i} has an invalid ConnectsTo mask {connectsToString}!");
 
-                BitArray connectsTo = new BitArray(connectsToString.Select(c => c == '1').ToArray());
+                byte connectsTo = Convert.ToByte(connectsToString, 2);
 
                 Frames.Add(new ConnectedOverlayFrame()
                 {
@@ -62,7 +62,7 @@ namespace TSMapEditor.Models
         public string Name { get; protected set; }
         public string UIName { get; protected set; }
         public int FrameCount { get; protected set; }
-        public BitArray ConnectionMask { get; protected set; }
+        public byte ConnectionMask { get; protected set; }
         public List<ConnectedOverlayFrame> Frames { get; protected set; } = new();
         public List<ConnectedOverlayType> RelatedOverlays { get; protected set; } = new();
         private readonly Random random = new ();
@@ -84,7 +84,7 @@ namespace TSMapEditor.Models
 
         public ConnectedOverlayFrame GetOverlayForCell(IMutationTarget mutationTarget, Point2D cellCoords)
         {
-            BitArray connectionMask = new BitArray((int)Direction.Count);
+            byte connectionMask = 0;
 
             for (int direction = 0; direction < (int)Direction.Count; direction++)
             {
@@ -94,12 +94,11 @@ namespace TSMapEditor.Models
                     continue;
 
                 if (ContainsOverlay(tile.Overlay))
-                    connectionMask.Set(direction, true);
+                    connectionMask |= (byte)(0b10000000 >> direction);
             }
 
-            connectionMask.And(ConnectionMask);
-            var frames = Frames.FindAll(frame =>
-                ((BitArray)frame.ConnectsTo.Clone()).Xor(connectionMask).OfType<bool>().All(e => !e));
+            connectionMask &= ConnectionMask;
+            var frames = Frames.FindAll(frame => frame.ConnectsTo == connectionMask);
 
             if (frames.Count == 0)
                 return Frames[0];
