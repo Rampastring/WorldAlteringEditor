@@ -150,6 +150,14 @@ namespace TSMapEditor.CCEngine
             }
         }
 
+        public void FreeImageData()
+        {
+            ColorData = null;
+            ZData = null;
+            ExtraGraphicsColorData = null;
+            ExtraGraphicsZData = null;
+        }
+
         private int ReadIntFromStream(Stream stream)
         {
             stream.Read(buffer, 0, 4);

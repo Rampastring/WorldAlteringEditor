@@ -31,6 +31,8 @@ namespace TSMapEditor.Rendering
                 {
                     ExtraTexture = TextureFromExtraTmpData(gd, tmpImage, palette);
                 }
+
+                tmpImage.FreeImageData();
             }
 
             TileSetId = tileSetId;
