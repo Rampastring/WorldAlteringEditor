@@ -10,6 +10,7 @@ namespace TSMapEditor.Models
 
         public string Image { get; set; }
         public string Owner { get; set; }
+        public bool NoShadow { get; set; }
 
         public Weapon Primary { get; set; }
         public Weapon Secondary { get; set; }

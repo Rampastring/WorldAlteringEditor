@@ -83,7 +83,8 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
             if (commonDrawParams.Graphics != null)
             {
-                DrawShadow(gameObject, commonDrawParams, drawPoint, yDrawPointWithoutCellHeight);
+                if (!gameObject.ObjectType.NoShadow)
+                    DrawShadow(gameObject, commonDrawParams, drawPoint, yDrawPointWithoutCellHeight);
 
                 DrawObjectImage(gameObject, commonDrawParams, commonDrawParams.Graphics,
                     gameObject.GetFrameIndex(commonDrawParams.Graphics.Frames.Length),

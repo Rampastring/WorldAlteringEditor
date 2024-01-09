@@ -21,7 +21,8 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
         protected override void Render(Unit gameObject, int yDrawPointWithoutCellHeight, Point2D drawPoint, CommonDrawParams commonDrawParams)
         {
-            DrawShadow(gameObject, commonDrawParams, drawPoint, yDrawPointWithoutCellHeight);
+            if (!gameObject.ObjectType.NoShadow)
+                DrawShadow(gameObject, commonDrawParams, drawPoint, yDrawPointWithoutCellHeight);
 
             DrawObjectImage(gameObject, commonDrawParams, commonDrawParams.Graphics, 
                 gameObject.GetFrameIndex(commonDrawParams.Graphics.Frames.Length),
