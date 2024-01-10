@@ -53,10 +53,33 @@ namespace TSMapEditor.UI.CursorActions
             Point2D adjustedCellCoords = GetAdjustedCellCoords(cellCoords);
 
             MapTile originTile = CursorActionTarget.Map.GetTile(adjustedCellCoords);
-            int originLevel = originTile?.Level ?? -1;
+            int originLevel = -1;
 
             BrushSize brush = CursorActionTarget.BrushSize;
 
+            // First, look up the lowest point within the tile area for origin level
+            brush.DoForBrushSize(offset =>
+            {
+                for (int i = 0; i < Tile.TMPImages.Length; i++)
+                {
+                    MGTMPImage image = Tile.TMPImages[i];
+
+                    if (image.TmpImage == null)
+                        continue;
+
+                    int cx = adjustedCellCoords.X + (offset.X * Tile.Width) + i % Tile.Width;
+                    int cy = adjustedCellCoords.Y + (offset.Y * Tile.Height) + i / Tile.Width;
+
+                    var mapTile = MutationTarget.Map.GetTile(cx, cy);
+                    if (mapTile != null)
+                    {
+                        if (originLevel < 0 || mapTile.Level < originLevel)
+                            originLevel = mapTile.Level;
+                    }
+                }
+            });
+
+            // Then apply the preview data
             brush.DoForBrushSize(offset =>
             {
                 for (int i = 0; i < Tile.TMPImages.Length; i++)
