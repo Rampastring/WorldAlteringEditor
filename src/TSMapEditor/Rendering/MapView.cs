@@ -1254,6 +1254,9 @@ namespace TSMapEditor.Rendering
                 if (tileUnderCursor.Vehicles.Count > 0)
                     windowController.VehicleOptionsWindow.Open(tileUnderCursor.Vehicles[0]);
 
+                if (tileUnderCursor.Aircraft.Count > 0)
+                    windowController.AircraftOptionsWindow.Open(tileUnderCursor.Aircraft[0]);
+
                 Infantry infantry = tileUnderCursor.GetFirstInfantry();
                 if (infantry != null)
                     windowController.InfantryOptionsWindow.Open(infantry);

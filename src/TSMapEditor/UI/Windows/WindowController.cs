@@ -46,6 +46,7 @@ namespace TSMapEditor.UI.Windows
         public StructureOptionsWindow StructureOptionsWindow { get; private set; }
         public VehicleOptionsWindow VehicleOptionsWindow { get; private set; }
         public InfantryOptionsWindow InfantryOptionsWindow { get; private set; }
+        public AircraftOptionsWindow AircraftOptionsWindow { get; private set; }
         public HousesWindow HousesWindow { get; private set; }
         public SaveMapAsWindow SaveMapAsWindow { get; private set; }
         public CreateNewMapWindow CreateNewMapWindow { get; private set; }
@@ -132,6 +133,9 @@ namespace TSMapEditor.UI.Windows
             InfantryOptionsWindow = new InfantryOptionsWindow(windowParentControl.WindowManager, map);
             Windows.Add(InfantryOptionsWindow);
 
+            AircraftOptionsWindow = new AircraftOptionsWindow(windowParentControl.WindowManager, map);
+            Windows.Add(AircraftOptionsWindow);
+
             HousesWindow = new HousesWindow(windowParentControl.WindowManager, map);
             Windows.Add(HousesWindow);
 
@@ -190,6 +194,7 @@ namespace TSMapEditor.UI.Windows
             StructureOptionsWindow.TagOpened += ObjectOptionsWindow_TagOpened;
             VehicleOptionsWindow.TagOpened += ObjectOptionsWindow_TagOpened;
             InfantryOptionsWindow.TagOpened += ObjectOptionsWindow_TagOpened;
+            AircraftOptionsWindow.TagOpened += ObjectOptionsWindow_TagOpened;
 
             foreach (var window in Windows)
             {
