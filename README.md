@@ -9,22 +9,22 @@ Modern open-source map and scenario editor for
 ## Motivation
 
 The World-Altering Editor is a new map editor for the second-generation classic Command & Conquer games,
-designed to replace the old FinalSun/FinalAlert (FS/FA) map editor developed in the TS/RA2 modding community in the early 2000s.
+designed to replace the old FinalSun/FinalAlert2 (FS/FA2) map editor developed in the TS/RA2 modding community in the early 2000s.
 
-To make it familiar for existing mappers, the editor is designed to follow the FS/FA UI design,
+To make it familiar for existing mappers, the editor is designed to follow the FS/FA2 UI design,
 but with modernizations and changes to make the editor smoother and more efficient to use.
 
 ## State of the project
 
-The editor includes practically all tools present in FS/FA and a significant number of
+The editor includes practically all tools present in FS/FA2 and a significant number of
 new ones. Many familiar tools have also been improved with significant quality-of-life improvements.
 These improvements make it much more efficient to create maps with WAE than the old FS/FA map editors.
 
 New functionality and helpful features are being constantly added to make the mapping experience smoother and more efficient.
 
-Graphically the editor is better than FinalSun aside from lacking voxel support
+Graphically the editor is better than FS/FA2 aside from lacking voxel support
 and requiring a higher-end system. However, if you do have a powerful system, the editor
-runs far more smoothly than the original FinalSun/FinalAlert editors.
+runs far more smoothly than the older editors.
 
 ## System requirements
 
@@ -38,10 +38,10 @@ Dawn of the Tiberium Age, the editor appears to allocate roughly 1 GB of VRAM.
 
 ## Downloads
 
-For most end-users, it is recommended that you download our latest official release: https://github.com/Rampastring/TSMapEditor/releases
+For most end-users, it is recommended that you download our latest official release: https://github.com/Rampastring/WorldAlteringEditor/releases
 
 Development builds are available through our automated build workflow which is run whenever new commits are pushed. You can download the editor from the build artifacts:
-https://github.com/Rampastring/TSMapEditor/actions
+https://github.com/Rampastring/WorldAlteringEditor/actions
 
 If you are mapping for Dawn of the Tiberium Age, the editor is bundled with the mod.
 
@@ -61,12 +61,12 @@ EA has not endorsed and does not support the World-Altering Editor.
 
 ## Screenshot
 
-![Screenshot of the editor](https://github.com/Rampastring/TSMapEditor/raw/master/mapeditor.jpg "Map Editor Screenshot")
+![Screenshot of the editor](https://github.com/Rampastring/WorldAlteringEditor/raw/master/mapeditor.jpg "Map Editor Screenshot")
 
 ## Introduction video
 
-[![Dawn of the Tiberium Age Scenario Editor Introduction](https://github.com/Rampastring/TSMapEditor/raw/master/videopreview.jpg)](https://www.youtube.com/watch?v=jIcr3nCqx7M "Dawn of the Tiberium Age Scenario Editor Introduction")
+[![Dawn of the Tiberium Age Scenario Editor Introduction](https://github.com/Rampastring/WorldAlteringEditor/raw/master/videopreview.jpg)](https://www.youtube.com/watch?v=jIcr3nCqx7M "Dawn of the Tiberium Age Scenario Editor Introduction")
 
 The World-Altering Editor was originally developed by the Dawn of the Tiberium Age staff for their mod. TS and YR support were added later to offer a boost in mapping efficiency to the rest of the second-generation C&C community.
 
-[![Dawn of the Tiberium Age Scenario Editor Introduction](https://github.com/Rampastring/TSMapEditor/raw/master/dtalogo.png)](https://www.moddb.com/mods/the-dawn-of-the-tiberium-age "Dawn of the Tiberium Age Homepage")
+[![Dawn of the Tiberium Age Scenario Editor Introduction](https://github.com/Rampastring/WorldAlteringEditor/raw/master/dtalogo.png)](https://www.moddb.com/mods/the-dawn-of-the-tiberium-age "Dawn of the Tiberium Age Homepage")
