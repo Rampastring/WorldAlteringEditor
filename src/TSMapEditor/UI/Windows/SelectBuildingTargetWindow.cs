@@ -24,7 +24,7 @@ namespace TSMapEditor.UI.Windows
 
         protected override void LbObjectList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (lbObjectList.SelectedItem == null)
+            if (lbObjectList.SelectedItem?.Tag == null)
             {
                 SelectedObject = -1;
                 return;
@@ -36,8 +36,6 @@ namespace TSMapEditor.UI.Windows
         protected override void ListObjects()
         {
             lbObjectList.Clear();
-
-            lbObjectList.AddItem(new XNAListBoxItem() { Text = "None" });
 
             bool useDifferentColor = false;
 
