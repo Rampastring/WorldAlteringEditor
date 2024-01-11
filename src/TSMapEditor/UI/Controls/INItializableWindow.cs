@@ -139,6 +139,10 @@ namespace TSMapEditor.UI.Controls
                         throw new FormatException("Invalid format for AnchorPoint: " + kvp.Value);
                     ((XNALabel)control).AnchorPoint = new Vector2(Parser.Instance.GetExprValue(parts[0], control), Parser.Instance.GetExprValue(parts[1], control));
                 }
+                else if (kvp.Key == "$MaxValue" && control is XNATrackbar)
+                {
+                    ((XNATrackbar)control).MaxValue = Parser.Instance.GetExprValue(kvp.Value, control);
+                }
                 else if (kvp.Key == "$Enabled")
                 {
                     int value = Parser.Instance.GetExprValue(kvp.Value, control);

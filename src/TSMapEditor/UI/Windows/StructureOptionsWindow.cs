@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using TSMapEditor.Models;
@@ -21,7 +22,8 @@ namespace TSMapEditor.UI.Windows
 
         private readonly Map map;
 
-        private EditorNumberTextBox tbStrength;
+        private XNATrackbar trbStrength;
+        private XNALabel lblStrengthValue;
         private XNACheckBox chkSellable;
         private XNACheckBox chkRebuild;
         private XNACheckBox chkPowered;
@@ -42,7 +44,8 @@ namespace TSMapEditor.UI.Windows
             Name = nameof(StructureOptionsWindow);
             base.Initialize();
 
-            tbStrength = FindChild<EditorNumberTextBox>(nameof(tbStrength));
+            trbStrength = FindChild<XNATrackbar>(nameof(trbStrength));
+            lblStrengthValue = FindChild<XNALabel>(nameof(lblStrengthValue));
             chkSellable = FindChild<XNACheckBox>(nameof(chkSellable));
             chkRebuild = FindChild<XNACheckBox>(nameof(chkRebuild));
             chkPowered = FindChild<XNACheckBox>(nameof(chkPowered));
@@ -54,6 +57,7 @@ namespace TSMapEditor.UI.Windows
             ddUpgrade3 = FindChild<XNADropDown>(nameof(ddUpgrade3));
             attachedTagSelector = FindChild<EditorPopUpSelector>(nameof(attachedTagSelector));
 
+            trbStrength.ValueChanged += TrbStrength_ValueChanged;
             attachedTagSelector.LeftClick += AttachedTagSelector_LeftClick;
 
             FindChild<EditorButton>("btnOpenAttachedTrigger").LeftClick += BtnOpenAttachedTrigger_LeftClick;
@@ -63,6 +67,11 @@ namespace TSMapEditor.UI.Windows
             tagDarkeningPanel.Hidden += (s, e) => SelectionWindow_ApplyEffect(w => structure.AttachedTag = w.SelectedObject, selectTagWindow);
 
             FindChild<EditorButton>("btnOK").LeftClick += BtnOK_LeftClick;
+        }
+
+        private void TrbStrength_ValueChanged(object sender, EventArgs e)
+        {
+            lblStrengthValue.Text = trbStrength.Value.ToString(CultureInfo.InvariantCulture);
         }
 
         private void BtnOpenAttachedTrigger_LeftClick(object sender, EventArgs e)
@@ -131,7 +140,7 @@ namespace TSMapEditor.UI.Windows
             FillUpgradesForDropDown(ddUpgrade2, 1, possibleUpgrades);
             FillUpgradesForDropDown(ddUpgrade3, 2, possibleUpgrades);
 
-            tbStrength.Value = structure.HP;
+            trbStrength.Value = structure.HP;
             chkSellable.Checked = structure.AISellable;
             chkRebuild.Checked = structure.AIRebuildable;
             chkPowered.Checked = structure.Powered;
@@ -147,7 +156,7 @@ namespace TSMapEditor.UI.Windows
 
         private void BtnOK_LeftClick(object sender, EventArgs e)
         {
-            structure.HP = Math.Max(0, Math.Min(tbStrength.Value, Constants.ObjectHealthMax));
+            structure.HP = Math.Max(0, Math.Min(trbStrength.Value, Constants.ObjectHealthMax));
             structure.AISellable = chkSellable.Checked;
             structure.AIRebuildable = chkRebuild.Checked;
             structure.Powered = chkPowered.Checked;

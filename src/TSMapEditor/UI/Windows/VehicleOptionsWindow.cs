@@ -27,7 +27,8 @@ namespace TSMapEditor.UI.Windows
         private readonly EditorState editorState;
         private readonly SetFollowerCursorAction setFollowerCursorAction;
 
-        private EditorNumberTextBox tbStrength;
+        private XNATrackbar trbStrength;
+        private XNALabel lblStrengthValue;
         private XNADropDown ddMission;
         private XNADropDown ddVeterancy;
         private EditorNumberTextBox tbGroup;
@@ -46,7 +47,8 @@ namespace TSMapEditor.UI.Windows
             Name = nameof(VehicleOptionsWindow);
             base.Initialize();
 
-            tbStrength = FindChild<EditorNumberTextBox>(nameof(tbStrength));
+            trbStrength = FindChild<XNATrackbar>(nameof(trbStrength));
+            lblStrengthValue = FindChild<XNALabel>(nameof(lblStrengthValue));
             ddMission = FindChild<XNADropDown>(nameof(ddMission));
             ddVeterancy = FindChild<XNADropDown>(nameof(ddVeterancy));
             tbGroup = FindChild<EditorNumberTextBox>(nameof(tbGroup));
@@ -56,6 +58,7 @@ namespace TSMapEditor.UI.Windows
             chkAutocreateYesRecruitable = FindChild<XNACheckBox>(nameof(chkAutocreateYesRecruitable));
             attachedTagSelector = FindChild<EditorPopUpSelector>(nameof(attachedTagSelector));
 
+            trbStrength.ValueChanged += TrbStrength_ValueChanged;
             attachedTagSelector.LeftClick += AttachedTagSelector_LeftClick;
 
             FindChild<EditorButton>("btnOpenAttachedTrigger").LeftClick += BtnOpenAttachedTrigger_LeftClick;
@@ -76,6 +79,11 @@ namespace TSMapEditor.UI.Windows
             FindChild<EditorButton>("btnOK").LeftClick += BtnOK_LeftClick;
             followerSelector.LeftClick += FollowerSelector_LeftClick;
             setFollowerCursorAction.ActionExited += SetFollowerCursorAction_ActionExited;
+        }
+
+        private void TrbStrength_ValueChanged(object sender, EventArgs e)
+        {
+            lblStrengthValue.Text = trbStrength.Value.ToString(CultureInfo.InvariantCulture);
         }
 
         private void BtnOpenAttachedTrigger_LeftClick(object sender, EventArgs e)
@@ -119,7 +127,7 @@ namespace TSMapEditor.UI.Windows
 
         private void RefreshValues()
         {
-            tbStrength.Value = unit.HP;
+            trbStrength.Value = unit.HP;
             ddMission.SelectedIndex = ddMission.Items.FindIndex(item => item.Text == unit.Mission);
             int veterancyIndex = ddVeterancy.Items.FindIndex(i => (int)i.Tag == unit.Veterancy);
             ddVeterancy.SelectedIndex = Math.Max(0, veterancyIndex);
@@ -135,7 +143,7 @@ namespace TSMapEditor.UI.Windows
 
         private void BtnOK_LeftClick(object sender, EventArgs e)
         {
-            unit.HP = Math.Min(Constants.ObjectHealthMax, Math.Max(tbStrength.Value, 0));
+            unit.HP = Math.Min(Constants.ObjectHealthMax, Math.Max(trbStrength.Value, 0));
             unit.Mission = ddMission.SelectedItem == null ? unit.Mission : ddMission.SelectedItem.Text;
             unit.Veterancy = (int)ddVeterancy.SelectedItem.Tag;
             unit.Group = tbGroup.Value;
