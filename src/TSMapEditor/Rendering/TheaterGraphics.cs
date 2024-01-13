@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Models;
+using TSMapEditor.Rendering.ObjectRenderers;
 using TSMapEditor.Settings;
 
 namespace TSMapEditor.Rendering
@@ -26,9 +27,124 @@ namespace TSMapEditor.Rendering
         Theater Theater { get; }
     }
 
-    public class ObjectImage
+    public class VoxelModel : IDisposable
     {
-        public ObjectImage(GraphicsDevice graphicsDevice, ShpFile shp, byte[] shpFileData, Palette palette, List<int> framesToLoad = null, bool remapable = false, PositionedTexture pngTexture = null)
+        public VoxelModel(GraphicsDevice graphicsDevice, VxlFile vxl, HvaFile hva, Palette palette,
+            bool remapable = false, VplFile vpl = null)
+        {
+            this.graphicsDevice = graphicsDevice;
+            this.vxl = vxl;
+            this.hva = hva;
+            this.vpl = vpl;
+            this.palette = palette;
+            this.remapable = remapable;
+        }
+
+        private readonly GraphicsDevice graphicsDevice;
+        private readonly VxlFile vxl;
+        private readonly HvaFile hva;
+        private readonly VplFile vpl;
+        private readonly Palette palette;
+        private readonly bool remapable;
+
+        public void Dispose()
+        {
+            foreach (var frame in Frames)
+                frame.Value.Dispose();
+
+            foreach (var frame in RemapFrames)
+                frame.Value.Dispose();
+        }
+
+        public PositionedTexture GetFrame(byte facing, RampType ramp)
+        {
+            // The game only renders 32 facings, so round it to the closest true facing
+            facing = Convert.ToByte(Math.Round((float)facing / 8, MidpointRounding.AwayFromZero) * 8);
+
+            var key = (facing, ramp);
+            if (Frames.TryGetValue(key, out PositionedTexture value))
+                return value;
+
+            var texture = VxlRenderer.Render(graphicsDevice, facing, ramp, vxl, hva, palette, vpl, forRemap: false);
+            var positionedTexture = new PositionedTexture(texture.Width, texture.Height, 0, 0, texture);
+            Frames[key] = positionedTexture;
+            return Frames[key];
+        }
+
+        public PositionedTexture GetRemapFrame(byte facing, RampType ramp)
+        {
+            if (!(remapable && Constants.HQRemap))
+                return null;
+
+            // The game only renders 32 facings, so round it to the closest true facing
+            facing = Convert.ToByte(Math.Round((float)facing / 8, MidpointRounding.AwayFromZero) * 8);
+
+            var key = (facing, ramp);
+            if (RemapFrames.TryGetValue(key, out PositionedTexture value))
+                return value;
+
+            var texture = VxlRenderer.Render(graphicsDevice, facing, ramp, vxl, hva, palette, vpl, forRemap: true);
+            var colorData = new Color[texture.Width * texture.Height];
+            texture.GetData(colorData);
+
+            // The renderer has rendered the rest of the unit as Magenta, now strip it out
+            for (int i = 0; i < colorData.Length; i++)
+            {
+                if (colorData[i] == Color.Magenta)
+                    colorData[i] = Color.Transparent;
+            }
+
+            if (Constants.HQRemap)
+            {
+                Color[] remapColorArray = colorData.Select(color =>
+                {
+                    // Convert the color to grayscale
+                    float remapColor = Math.Max(color.R / 255.0f, Math.Max(color.G / 255.0f, color.B / 255.0f));
+
+                    // Brighten it up a bit
+                    remapColor *= Constants.RemapBrightenFactor;
+                    return new Color(remapColor, remapColor, remapColor, color.A);
+
+                }).ToArray();
+
+                var remapTexture = new Texture2D(graphicsDevice, texture.Width, texture.Height, false, SurfaceFormat.Color);
+                remapTexture.SetData(remapColorArray);
+                RemapFrames[key] = new PositionedTexture(remapTexture.Width, remapTexture.Height, 0, 0, remapTexture);
+                return RemapFrames[key];
+            }
+            else
+            {
+                // Convert colors to grayscale
+                // Get HSV value, change S = 0, convert back to RGB and assign
+                // With S = 0, the formula for converting HSV to RGB can be reduced to a quite simple form :)
+
+                System.Drawing.Color[] sdColorArray = colorData.Select(c => System.Drawing.Color.FromArgb(c.A, c.R, c.G, c.B)).ToArray();
+                for (int j = 0; j < sdColorArray.Length; j++)
+                {
+                    if (colorData[j] == Color.Transparent)
+                        continue;
+
+                    float remapColor = sdColorArray[j].GetBrightness() * Constants.RemapBrightenFactor;
+                    if (remapColor > 1.0f)
+                        remapColor = 1.0f;
+                    colorData[j] = new Color(remapColor, remapColor, remapColor, colorData[j].A);
+                }
+
+                var remapTexture = new Texture2D(graphicsDevice, texture.Width, texture.Height, false, SurfaceFormat.Color);
+                remapTexture.SetData(colorData);
+                RemapFrames[key] = new PositionedTexture(remapTexture.Width, remapTexture.Height, 0, 0, remapTexture);
+                return RemapFrames[key];
+            }
+        }
+
+        public Dictionary<(byte facing, RampType ramp), PositionedTexture> Frames { get; set; } = new();
+        public Dictionary<(byte facing, RampType ramp), PositionedTexture> RemapFrames { get; set; } = new();
+    }
+
+    public class ShapeImage : IDisposable
+    {
+        public ShapeImage(GraphicsDevice graphicsDevice, ShpFile shp, byte[] shpFileData, Palette palette,
+            List<int> framesToLoad = null, bool remapable = false, PositionedTexture pngTexture = null)
         {
             if (pngTexture != null && !remapable)
             {
@@ -109,18 +225,18 @@ namespace TSMapEditor.Rendering
 
         public void Dispose()
         {
-            Array.ForEach(Frames, f =>
+            Array.ForEach(Frames, frame =>
             {
-                if (f != null)
-                    f.Dispose();
+                if (frame != null)
+                    frame.Dispose();
             });
 
             if (RemapFrames != null)
             {
-                Array.ForEach(RemapFrames, f =>
+                Array.ForEach(RemapFrames, frame =>
                 {
-                    if (f != null)
-                        f.Dispose();
+                    if (frame != null)
+                        frame.Dispose();
                 });
             }
         }
@@ -159,7 +275,10 @@ namespace TSMapEditor.Rendering
     public class TheaterGraphics : ITheater
     {
         private const string SHP_FILE_EXTENSION = ".SHP";
+        private const string VXL_FILE_EXTENSION = ".VXL";
+        private const string HVA_FILE_EXTENSION = ".HVA";
         private const string PNG_FILE_EXTENSION = ".PNG";
+        private const string TURRET_FILE_SUFFIX = "TUR";
 
         public TheaterGraphics(GraphicsDevice graphicsDevice, Theater theater, CCFileManager fileManager, Rules rules)
         {
@@ -178,19 +297,27 @@ namespace TSMapEditor.Rendering
                 var task1 = Task.Factory.StartNew(() => ReadTileTextures());
                 var task2 = Task.Factory.StartNew(() => ReadTerrainObjectTextures(rules.TerrainTypes));
                 var task3 = Task.Factory.StartNew(() => ReadBuildingTextures(rules.BuildingTypes));
-                var task4 = Task.Factory.StartNew(() => ReadUnitTextures(rules.UnitTypes));
-                var task5 = Task.Factory.StartNew(() => ReadInfantryTextures(rules.InfantryTypes));
-                var task6 = Task.Factory.StartNew(() => ReadOverlayTextures(rules.OverlayTypes));
-                var task7 = Task.Factory.StartNew(() => ReadSmudgeTextures(rules.SmudgeTypes));
-                var task8 = Task.Factory.StartNew(() => ReadAnimTextures(rules.AnimTypes));
-                Task.WaitAll(task1, task2, task3, task4, task5, task6, task7, task8);
+                var task4 = Task.Factory.StartNew(() => ReadBuildingTurretModels(rules.BuildingTypes));
+                var task5 = Task.Factory.StartNew(() => ReadUnitTextures(rules.UnitTypes));
+                var task6 = Task.Factory.StartNew(() => ReadUnitModels(rules.UnitTypes));
+                var task7 = Task.Factory.StartNew(() => ReadUnitTurretModels(rules.UnitTypes));
+                var task8 = Task.Factory.StartNew(() => ReadAircraftModels(rules.AircraftTypes));
+                var task9 = Task.Factory.StartNew(() => ReadInfantryTextures(rules.InfantryTypes));
+                var task10 = Task.Factory.StartNew(() => ReadOverlayTextures(rules.OverlayTypes));
+                var task11 = Task.Factory.StartNew(() => ReadSmudgeTextures(rules.SmudgeTypes));
+                var task12 = Task.Factory.StartNew(() => ReadAnimTextures(rules.AnimTypes));
+                Task.WaitAll(task1, task2, task3, task4, task5, task6, task7, task8, task9, task10, task11, task12);
             }
             else
             {
                 ReadTileTextures();
                 ReadTerrainObjectTextures(rules.TerrainTypes);
                 ReadBuildingTextures(rules.BuildingTypes);
+                ReadBuildingTurretModels(rules.BuildingTypes);
                 ReadUnitTextures(rules.UnitTypes);
+                ReadUnitModels(rules.UnitTypes);
+                ReadUnitTurretModels(rules.UnitTypes);
+                ReadAircraftModels(rules.AircraftTypes);
                 ReadInfantryTextures(rules.InfantryTypes);
                 ReadOverlayTextures(rules.OverlayTypes);
                 ReadSmudgeTextures(rules.SmudgeTypes);
@@ -231,7 +358,7 @@ namespace TSMapEditor.Rendering
 
             var shpFile = new ShpFile();
             shpFile.ParseFromBuffer(buildingZData);
-            BuildingZ = new ObjectImage(graphicsDevice, shpFile, buildingZData, palette);
+            BuildingZ = new ShapeImage(graphicsDevice, shpFile, buildingZData, palette);
         }
 
         private void ReadTileTextures()
@@ -335,7 +462,7 @@ namespace TSMapEditor.Rendering
 
             var unitPalette = GetPaletteOrFail(Theater.UnitPaletteName);
 
-            TerrainObjectTextures = new ObjectImage[terrainTypes.Count];
+            TerrainObjectTextures = new ShapeImage[terrainTypes.Count];
             for (int i = 0; i < terrainTypes.Count; i++)
             {
                 string shpFileName = terrainTypes[i].Image != null ? terrainTypes[i].Image : terrainTypes[i].ININame;
@@ -352,7 +479,7 @@ namespace TSMapEditor.Rendering
                 {
                     // Load graphics as PNG
 
-                    TerrainObjectTextures[i] = new ObjectImage(graphicsDevice, null, null, null, null, false, PositionedTextureFromBytes(data));
+                    TerrainObjectTextures[i] = new ShapeImage(graphicsDevice, null, null, null, null, false, PositionedTextureFromBytes(data));
                 }
                 else
                 {
@@ -365,7 +492,7 @@ namespace TSMapEditor.Rendering
 
                     var shpFile = new ShpFile(shpFileName);
                     shpFile.ParseFromBuffer(data);
-                    TerrainObjectTextures[i] = new ObjectImage(graphicsDevice, shpFile, data,
+                    TerrainObjectTextures[i] = new ShapeImage(graphicsDevice, shpFile, data,
                         terrainTypes[i].SpawnsTiberium ? unitPalette : theaterPalette);
                 }
             }
@@ -373,14 +500,12 @@ namespace TSMapEditor.Rendering
             Logger.Log("Finished loading terrain object textures.");
         }
 
-
-
         public void ReadBuildingTextures(List<BuildingType> buildingTypes)
         {
             Logger.Log("Loading building textures.");
 
-            BuildingTextures = new ObjectImage[buildingTypes.Count];
-            BuildingBibTextures = new ObjectImage[buildingTypes.Count];
+            BuildingTextures = new ShapeImage[buildingTypes.Count];
+            BuildingBibTextures = new ShapeImage[buildingTypes.Count];
 
             for (int i = 0; i < buildingTypes.Count; i++)
             {
@@ -439,7 +564,7 @@ namespace TSMapEditor.Rendering
 
                 var shpFile = new ShpFile(loadedShpName);
                 shpFile.ParseFromBuffer(shpData);
-                BuildingTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, palette, null, buildingType.ArtConfig.Remapable);
+                BuildingTextures[i] = new ShapeImage(graphicsDevice, shpFile, shpData, palette, null, buildingType.ArtConfig.Remapable);
 
                 // If this building has a bib, attempt to load it
                 if (!string.IsNullOrWhiteSpace(buildingType.ArtConfig.BibShape))
@@ -480,18 +605,66 @@ namespace TSMapEditor.Rendering
 
                     var bibShpFile = new ShpFile(loadedShpName);
                     bibShpFile.ParseFromBuffer(shpData);
-                    BuildingBibTextures[i] = new ObjectImage(graphicsDevice, bibShpFile, shpData, palette, null, buildingType.ArtConfig.Remapable);
+                    BuildingBibTextures[i] = new ShapeImage(graphicsDevice, bibShpFile, shpData, palette, null, buildingType.ArtConfig.Remapable);
                 }
             }
 
             Logger.Log("Finished loading building textures.");
         }
 
+        public void ReadBuildingTurretModels(List<BuildingType> buildingTypes)
+        {
+            Logger.Log("Loading building turrets' voxel models.");
+
+            var loadedModels = new Dictionary<string, VoxelModel>();
+            BuildingTurretModels = new VoxelModel[buildingTypes.Count];
+
+            for (int i = 0; i < buildingTypes.Count; i++)
+            {
+                var buildingType = buildingTypes[i];
+
+                if (!(buildingType.Turret && buildingType.TurretAnimIsVoxel))
+                    continue;
+
+                string turretImage = string.IsNullOrWhiteSpace(buildingType.Image) ? buildingType.ININame : buildingType.Image;
+                turretImage += TURRET_FILE_SUFFIX;
+                if (loadedModels.TryGetValue(turretImage, out VoxelModel loadedModel))
+                {
+                    BuildingTurretModels[i] = loadedModel;
+                    continue;
+                }
+
+                byte[] vxlData = fileManager.LoadFile(turretImage + VXL_FILE_EXTENSION);
+                if (vxlData == null)
+                    continue;
+
+                byte[] hvaData = fileManager.LoadFile(turretImage + HVA_FILE_EXTENSION);
+
+                if (hvaData == null)
+                {
+                    Logger.Log($"WARNING: Building {buildingType.ININame} is missing .hva file for its turret {turretImage + HVA_FILE_EXTENSION}! This will cause the game to crash!");
+                    continue;
+                }
+
+                var vxlFile = new VxlFile(vxlData, turretImage);
+                var hvaFile = new HvaFile(hvaData, turretImage);
+
+                Palette palette = buildingType.ArtConfig.TerrainPalette ? theaterPalette : unitPalette;
+                if (!string.IsNullOrWhiteSpace(buildingType.ArtConfig.Palette))
+                    palette = GetPaletteOrFail(buildingType.ArtConfig.Palette + Theater.FileExtension[1..] + ".pal");
+
+                BuildingTurretModels[i] = new VoxelModel(graphicsDevice, vxlFile, hvaFile, palette, buildingType.ArtConfig.Remapable, GetVplFile());
+                loadedModels[turretImage] = BuildingTurretModels[i];
+            }
+
+            Logger.Log("Finished loading unit turrets' voxel models.");
+        }
+
         public void ReadAnimTextures(List<AnimType> animTypes)
         {
             Logger.Log("Loading animation textures.");
 
-            AnimTextures = new ObjectImage[animTypes.Count];
+            AnimTextures = new ShapeImage[animTypes.Count];
 
             for (int i = 0; i < animTypes.Count; i++)
             {
@@ -549,7 +722,7 @@ namespace TSMapEditor.Rendering
 
                 var shpFile = new ShpFile(loadedShpName);
                 shpFile.ParseFromBuffer(shpData);
-                AnimTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, palette, null,
+                AnimTextures[i] = new ShapeImage(graphicsDevice, shpFile, shpData, palette, null,
                     animType.ArtConfig.Remapable || animType.ArtConfig.IsBuildingAnim);
             }
 
@@ -560,16 +733,19 @@ namespace TSMapEditor.Rendering
         {
             Logger.Log("Loading unit textures.");
 
-            var loadedTextures = new Dictionary<string, ObjectImage>();
-            UnitTextures = new ObjectImage[unitTypes.Count];
+            var loadedTextures = new Dictionary<string, ShapeImage>();
+            UnitTextures = new ShapeImage[unitTypes.Count];
 
             for (int i = 0; i < unitTypes.Count; i++)
             {
                 var unitType = unitTypes[i];
 
+                if (unitType.ArtConfig.Voxel)
+                    continue;
+
                 string shpFileName = string.IsNullOrWhiteSpace(unitType.Image) ? unitType.ININame : unitType.Image;
                 shpFileName += SHP_FILE_EXTENSION;
-                if (loadedTextures.TryGetValue(shpFileName, out ObjectImage loadedImage))
+                if (loadedTextures.TryGetValue(shpFileName, out ShapeImage loadedImage))
                 {
                     UnitTextures[i] = loadedImage;
                     continue;
@@ -598,19 +774,146 @@ namespace TSMapEditor.Rendering
                 for (int j = 0; j < regularFrameCount; j++)
                     framesToLoad.Add(framesToLoad[j] + (shpFile.FrameCount / 2));
 
-                UnitTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, unitPalette, framesToLoad, unitType.ArtConfig.Remapable);
+                UnitTextures[i] = new ShapeImage(graphicsDevice, shpFile, shpData, unitPalette, framesToLoad, unitType.ArtConfig.Remapable);
                 loadedTextures[shpFileName] = UnitTextures[i];
             }
 
             Logger.Log("Finished loading unit textures.");
         }
 
+        public void ReadUnitModels(List<UnitType> unitTypes)
+        {
+            Logger.Log("Loading unit voxel models.");
+
+            var loadedModels = new Dictionary<string, VoxelModel>();
+            UnitModels = new VoxelModel[unitTypes.Count];
+
+            for (int i = 0; i < unitTypes.Count; i++)
+            {
+                var unitType = unitTypes[i];
+
+                if (!unitType.ArtConfig.Voxel)
+                    continue;
+
+                string unitImage = string.IsNullOrWhiteSpace(unitType.Image) ? unitType.ININame : unitType.Image;
+                if (loadedModels.TryGetValue(unitImage, out VoxelModel loadedModel))
+                {
+                    UnitModels[i] = loadedModel;
+                    continue;
+                }
+
+                byte[] vxlData = fileManager.LoadFile(unitImage + VXL_FILE_EXTENSION);
+                if (vxlData == null)
+                    continue;
+
+                byte[] hvaData = fileManager.LoadFile(unitImage + HVA_FILE_EXTENSION);
+
+                if (hvaData == null)
+                {
+                    Logger.Log($"WARNING: Unit {unitType.ININame} is missing its .hva file {unitImage + HVA_FILE_EXTENSION}! This will cause the game to crash!");
+                    continue;
+                }
+
+                var vxlFile = new VxlFile(vxlData, unitImage);
+                var hvaFile = new HvaFile(hvaData, unitImage);
+
+                UnitModels[i] = new VoxelModel(graphicsDevice, vxlFile, hvaFile, unitPalette, unitType.ArtConfig.Remapable, GetVplFile());
+                loadedModels[unitImage] = UnitModels[i];
+            }
+
+            Logger.Log("Finished loading unit voxel models.");
+        }
+
+        public void ReadUnitTurretModels(List<UnitType> unitTypes)
+        {
+            Logger.Log("Loading unit turrets' voxel models.");
+
+            var loadedModels = new Dictionary<string, VoxelModel>();
+            UnitTurretModels = new VoxelModel[unitTypes.Count];
+
+            for (int i = 0; i < unitTypes.Count; i++)
+            {
+                var unitType = unitTypes[i];
+
+                if (!(unitType.Turret && unitType.ArtConfig.Voxel))
+                    continue;
+
+                string turretImage = string.IsNullOrWhiteSpace(unitType.Image) ? unitType.ININame : unitType.Image;
+                turretImage += TURRET_FILE_SUFFIX;
+                if (loadedModels.TryGetValue(turretImage, out VoxelModel loadedModel))
+                {
+                    UnitTurretModels[i] = loadedModel;
+                    continue;
+                }
+
+                byte[] vxlData = fileManager.LoadFile(turretImage + VXL_FILE_EXTENSION);
+                if (vxlData == null)
+                    continue;
+
+                byte[] hvaData = fileManager.LoadFile(turretImage + HVA_FILE_EXTENSION);
+
+                if (hvaData == null)
+                {
+                    Logger.Log($"WARNING: Unit {unitType.ININame} is missing .hva file for its turret {turretImage + HVA_FILE_EXTENSION}! This will cause the game to crash!");
+                    continue;
+                }
+
+                var vxlFile = new VxlFile(vxlData, turretImage);
+                var hvaFile = new HvaFile(hvaData, turretImage);
+
+                UnitTurretModels[i] = new VoxelModel(graphicsDevice, vxlFile, hvaFile, unitPalette, unitType.ArtConfig.Remapable, GetVplFile());
+                loadedModels[turretImage] = UnitTurretModels[i];
+            }
+
+            Logger.Log("Finished loading unit turrets' voxel models.");
+        }
+
+        public void ReadAircraftModels(List<AircraftType> aircraftTypes)
+        {
+            Logger.Log("Loading aircraft voxel models.");
+
+            var loadedModels = new Dictionary<string, VoxelModel>();
+            AircraftModels = new VoxelModel[aircraftTypes.Count];
+
+            for (int i = 0; i < aircraftTypes.Count; i++)
+            {
+                var aircraftType = aircraftTypes[i];
+
+                string aircraftImage = string.IsNullOrWhiteSpace(aircraftType.Image) ? aircraftType.ININame : aircraftType.Image;
+                if (loadedModels.TryGetValue(aircraftImage, out VoxelModel loadedModel))
+                {
+                    AircraftModels[i] = loadedModel;
+                    continue;
+                }
+
+                byte[] vxlData = fileManager.LoadFile(aircraftImage + VXL_FILE_EXTENSION);
+                if (vxlData == null)
+                    continue;
+
+                byte[] hvaData = fileManager.LoadFile(aircraftImage + HVA_FILE_EXTENSION);
+
+                if (hvaData == null)
+                {
+                    Logger.Log($"WARNING: Aircraft {aircraftType.ININame} is missing its .hva file {aircraftImage + HVA_FILE_EXTENSION}! This will cause the game to crash!");
+                    continue;
+                }
+
+                var vxlFile = new VxlFile(vxlData, aircraftImage);
+                var hvaFile = new HvaFile(hvaData, aircraftImage);
+
+                AircraftModels[i] = new VoxelModel(graphicsDevice, vxlFile, hvaFile, unitPalette, aircraftType.ArtConfig.Remapable, GetVplFile());
+                loadedModels[aircraftImage] = AircraftModels[i];
+            }
+
+            Logger.Log("Finished loading aircraft voxel models.");
+        }
+
         public void ReadInfantryTextures(List<InfantryType> infantryTypes)
         {
             Logger.Log("Loading infantry textures.");
 
-            var loadedTextures = new Dictionary<string, ObjectImage>();
-            InfantryTextures = new ObjectImage[infantryTypes.Count];
+            var loadedTextures = new Dictionary<string, ShapeImage>();
+            InfantryTextures = new ShapeImage[infantryTypes.Count];
 
             for (int i = 0; i < infantryTypes.Count; i++)
             {
@@ -619,7 +922,7 @@ namespace TSMapEditor.Rendering
                 string image = string.IsNullOrWhiteSpace(infantryType.Image) ? infantryType.ININame : infantryType.Image;
                 string shpFileName = string.IsNullOrWhiteSpace(infantryType.ArtConfig.Image) ? image : infantryType.ArtConfig.Image;
                 shpFileName += SHP_FILE_EXTENSION;
-                if (loadedTextures.TryGetValue(shpFileName, out ObjectImage loadedImage))
+                if (loadedTextures.TryGetValue(shpFileName, out ShapeImage loadedImage))
                 {
                     InfantryTextures[i] = loadedImage;
                     continue;
@@ -651,7 +954,7 @@ namespace TSMapEditor.Rendering
                 for (int j = 0; j < regularFrameCount; j++)
                     framesToLoad.Add(framesToLoad[j] + (shpFile.FrameCount / 2));
 
-                InfantryTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, unitPalette, null, infantryType.ArtConfig.Remapable);
+                InfantryTextures[i] = new ShapeImage(graphicsDevice, shpFile, shpData, unitPalette, null, infantryType.ArtConfig.Remapable);
                 loadedTextures[shpFileName] = InfantryTextures[i];
             }
 
@@ -662,7 +965,7 @@ namespace TSMapEditor.Rendering
         {
             Logger.Log("Loading overlay textures.");
 
-            OverlayTextures = new ObjectImage[overlayTypes.Count];
+            OverlayTextures = new ShapeImage[overlayTypes.Count];
             for (int i = 0; i < overlayTypes.Count; i++)
             {
                 var overlayType = overlayTypes[i];
@@ -681,7 +984,7 @@ namespace TSMapEditor.Rendering
                 {
                     // Load graphics as PNG
 
-                    OverlayTextures[i] = new ObjectImage(graphicsDevice, null, null, null, null, false, PositionedTextureFromBytes(pngData));
+                    OverlayTextures[i] = new ShapeImage(graphicsDevice, null, null, null, null, false, PositionedTextureFromBytes(pngData));
                 }
                 else
                 {
@@ -733,7 +1036,7 @@ namespace TSMapEditor.Rendering
 
                     bool isRemapable = overlayType.Tiberium && !Constants.TheaterPaletteForTiberium;
 
-                    OverlayTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, palette, null, isRemapable, null);
+                    OverlayTextures[i] = new ShapeImage(graphicsDevice, shpFile, shpData, palette, null, isRemapable, null);
                 }
             }
 
@@ -744,7 +1047,7 @@ namespace TSMapEditor.Rendering
         {
             Logger.Log("Loading smudge textures.");
 
-            SmudgeTextures = new ObjectImage[smudgeTypes.Count];
+            SmudgeTextures = new ShapeImage[smudgeTypes.Count];
             for (int i = 0; i < smudgeTypes.Count; i++)
             {
                 var smudgeType = smudgeTypes[i];
@@ -760,7 +1063,7 @@ namespace TSMapEditor.Rendering
                 var shpFile = new ShpFile(finalShpName);
                 shpFile.ParseFromBuffer(shpData);
                 Palette palette = theaterPalette;
-                SmudgeTextures[i] = new ObjectImage(graphicsDevice, shpFile, shpData, palette);
+                SmudgeTextures[i] = new ShapeImage(graphicsDevice, shpFile, shpData, palette);
             }
 
             Logger.Log("Finished loading smudge textures.");
@@ -808,17 +1111,21 @@ namespace TSMapEditor.Rendering
             return OverlayTextures[overlayType.Index].Frames.Length / 2;
         }
 
-        public ObjectImage[] TerrainObjectTextures { get; set; }
-        public ObjectImage[] BuildingTextures { get; set; }
-        public ObjectImage[] BuildingBibTextures { get; set; }
-        public ObjectImage[] UnitTextures { get; set; }
-        public ObjectImage[] InfantryTextures { get; set; }
-        public ObjectImage[] OverlayTextures { get; set; }
-        public ObjectImage[] SmudgeTextures { get; set; }
-        public ObjectImage[] AnimTextures { get; set; }
+        public ShapeImage[] TerrainObjectTextures { get; set; }
+        public ShapeImage[] BuildingTextures { get; set; }
+        public VoxelModel[] BuildingTurretModels { get; set; }
+        public ShapeImage[] BuildingBibTextures { get; set; }
+        public ShapeImage[] UnitTextures { get; set; }
+        public VoxelModel[] UnitModels { get; set; }
+        public VoxelModel[] UnitTurretModels { get; set; }
+        public VoxelModel[] AircraftModels { get; set; }
+        public ShapeImage[] InfantryTextures { get; set; }
+        public ShapeImage[] OverlayTextures { get; set; }
+        public ShapeImage[] SmudgeTextures { get; set; }
+        public ShapeImage[] AnimTextures { get; set; }
 
 
-        public ObjectImage BuildingZ { get; set; }
+        public ShapeImage BuildingZ { get; set; }
 
         /// <summary>
         /// Frees up all memory used by the theater graphics textures
@@ -829,14 +1136,18 @@ namespace TSMapEditor.Rendering
         {
             var task1 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(TerrainObjectTextures));
             var task2 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(BuildingTextures));
-            var task3 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(UnitTextures));
-            var task4 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(InfantryTextures));
-            var task5 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(OverlayTextures));
-            var task6 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(SmudgeTextures));
-            var task7 = Task.Factory.StartNew(() => { terrainGraphicsList.ForEach(tileImageArray => Array.ForEach(tileImageArray, tileImage => tileImage.Dispose())); terrainGraphicsList.Clear(); });
-            var task8 = Task.Factory.StartNew(() => { mmTerrainGraphicsList.ForEach(tileImageArray => Array.ForEach(tileImageArray, tileImage => tileImage.Dispose())); mmTerrainGraphicsList.Clear(); });
-            var task9 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(AnimTextures));
-            Task.WaitAll(task1, task2, task3, task4, task5, task6, task7, task8, task9);
+            var task3 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(BuildingTurretModels));
+            var task4 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(UnitTextures));
+            var task5 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(UnitModels));
+            var task6 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(UnitTurretModels));
+            var task7 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(AircraftModels));
+            var task8 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(InfantryTextures));
+            var task9 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(OverlayTextures));
+            var task10 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(SmudgeTextures));
+            var task11 = Task.Factory.StartNew(() => { terrainGraphicsList.ForEach(tileImageArray => Array.ForEach(tileImageArray, tileImage => tileImage.Dispose())); terrainGraphicsList.Clear(); });
+            var task12 = Task.Factory.StartNew(() => { mmTerrainGraphicsList.ForEach(tileImageArray => Array.ForEach(tileImageArray, tileImage => tileImage.Dispose())); mmTerrainGraphicsList.Clear(); });
+            var task13 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(AnimTextures));
+            Task.WaitAll(task1, task2, task3, task4, task5, task6, task7, task8, task9, task10, task11, task12, task13);
 
             TerrainObjectTextures = null;
             BuildingTextures = null;
@@ -847,7 +1158,7 @@ namespace TSMapEditor.Rendering
             AnimTextures = null;
         }
 
-        private void DisposeObjectImagesFromArray(ObjectImage[] objImageArray)
+        private void DisposeObjectImagesFromArray(IDisposable[] objImageArray)
         {
             Array.ForEach(objImageArray, objectImage => { if (objectImage != null) objectImage.Dispose(); });
             Array.Clear(objImageArray);
@@ -867,6 +1178,15 @@ namespace TSMapEditor.Rendering
             if (paletteData == null)
                 return palette;
             return new Palette(paletteData);
+        }
+
+        private VplFile GetVplFile(string filename = "voxels.vpl")
+        {
+            byte[] vplData = fileManager.LoadFile(filename);
+            if (vplData == null)
+                throw new KeyNotFoundException(filename + " not found from loaded MIX files!");
+
+            return new VplFile(vplData);
         }
 
         private PositionedTexture PositionedTextureFromBytes(byte[] data)

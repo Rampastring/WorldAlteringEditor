@@ -8,10 +8,8 @@ namespace TSMapEditor.Models
         {
         }
 
-        public IArtConfig GetArtConfig()
-        {
-            return null;
-        }
+        public AircraftArtConfig ArtConfig { get; private set; } = new AircraftArtConfig();
+        public IArtConfig GetArtConfig() => ArtConfig;
 
         public override RTTIType WhatAmI() => RTTIType.AircraftType;
     }

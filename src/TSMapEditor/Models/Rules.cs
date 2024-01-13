@@ -3,7 +3,6 @@ using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using TSMapEditor.Extensions;
 using TSMapEditor.Initialization;
 using TSMapEditor.Models.ArtConfig;
 using TSMapEditor.UI;
@@ -159,6 +158,9 @@ namespace TSMapEditor.Models
                 string.IsNullOrWhiteSpace(bt.Image) ? bt.ININame : bt.Image));
 
             UnitTypes.ForEach(ut => initializer.ReadObjectTypeArtPropertiesFromINI(ut, iniFile,
+                string.IsNullOrWhiteSpace(ut.Image) ? ut.ININame : ut.Image));
+
+            AircraftTypes.ForEach(ut => initializer.ReadObjectTypeArtPropertiesFromINI(ut, iniFile,
                 string.IsNullOrWhiteSpace(ut.Image) ? ut.ININame : ut.Image));
 
             InfantryTypes.ForEach(it => initializer.ReadObjectTypeArtPropertiesFromINI(it, iniFile,

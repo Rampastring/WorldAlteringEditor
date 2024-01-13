@@ -46,12 +46,12 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             }
         }
 
-        protected override CommonDrawParams GetDrawParams(Structure gameObject)
+        protected override ICommonDrawParams GetDrawParams(Structure gameObject)
         {
             var graphics = RenderDependencies.TheaterGraphics.BuildingTextures[gameObject.ObjectType.Index];
             string iniName = gameObject.ObjectType.ININame;
 
-            return new CommonDrawParams(graphics, iniName);
+            return new ShapeDrawParams(graphics, iniName);
         }
 
         protected override bool ShouldRenderReplacementText(Structure gameObject)
@@ -67,27 +67,27 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             return base.ShouldRenderReplacementText(gameObject);
         }
 
-        private void DrawBibGraphics(Structure gameObject, ObjectImage bibGraphics, int yDrawPointWithoutCellHeight, Point2D drawPoint, CommonDrawParams commonDrawParams)
+        private void DrawBibGraphics(Structure gameObject, ShapeImage bibGraphics, int yDrawPointWithoutCellHeight, Point2D drawPoint, ICommonDrawParams drawParams)
         {
-            DrawObjectImage(gameObject, commonDrawParams, bibGraphics, 0, Color.White, true, gameObject.GetRemapColor(), drawPoint, yDrawPointWithoutCellHeight);
+            DrawShapeImage(gameObject, drawParams, bibGraphics, 0, Color.White, true, gameObject.GetRemapColor(), drawPoint, yDrawPointWithoutCellHeight);
         }
 
-        protected override void Render(Structure gameObject, int yDrawPointWithoutCellHeight, Point2D drawPoint, CommonDrawParams commonDrawParams)
+        protected override void Render(Structure gameObject, int yDrawPointWithoutCellHeight, Point2D drawPoint, ICommonDrawParams drawParams)
         {
             DrawFoundationLines(gameObject);
 
             var bibGraphics = RenderDependencies.TheaterGraphics.BuildingBibTextures[gameObject.ObjectType.Index];
             
             if (bibGraphics != null)
-                DrawBibGraphics(gameObject, bibGraphics, yDrawPointWithoutCellHeight, drawPoint, commonDrawParams);
+                DrawBibGraphics(gameObject, bibGraphics, yDrawPointWithoutCellHeight, drawPoint, drawParams);
 
-            if (commonDrawParams.Graphics != null)
+            if (drawParams is ShapeDrawParams shapeDrawParams)
             {
                 if (!gameObject.ObjectType.NoShadow)
-                    DrawShadow(gameObject, commonDrawParams, drawPoint, yDrawPointWithoutCellHeight);
+                    DrawShadow(gameObject, shapeDrawParams, drawPoint, yDrawPointWithoutCellHeight);
 
-                DrawObjectImage(gameObject, commonDrawParams, commonDrawParams.Graphics,
-                    gameObject.GetFrameIndex(commonDrawParams.Graphics.Frames.Length),
+                DrawShapeImage(gameObject, shapeDrawParams, shapeDrawParams.Graphics,
+                    gameObject.GetFrameIndex(shapeDrawParams.Graphics.Frames.Length),
                     Color.White, true, gameObject.GetRemapColor(), drawPoint, yDrawPointWithoutCellHeight);
             }
 
@@ -102,7 +102,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             }
         }
 
-        protected override void DrawObjectReplacementText(Structure gameObject, CommonDrawParams drawParams, Point2D drawPoint)
+        protected override void DrawObjectReplacementText(Structure gameObject, ICommonDrawParams drawParams, Point2D drawPoint)
         {
             DrawFoundationLines(gameObject);
 

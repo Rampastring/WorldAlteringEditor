@@ -126,7 +126,7 @@ namespace TSMapEditor.UI.Sidebar
 
         protected abstract void InitObjects();
 
-        protected void InitObjectsBase<T>(List<T> objectTypeList, ObjectImage[] textures, Func<T, bool> filter = null) where T : TechnoType, IArtConfigContainer
+        protected void InitObjectsBase<T>(List<T> objectTypeList, ShapeImage[] textures, Func<T, bool> filter = null) where T : TechnoType, IArtConfigContainer
         {
             var sideCategories = new List<TreeViewCategory>();
             for (int i = 0; i < objectTypeList.Count; i++)

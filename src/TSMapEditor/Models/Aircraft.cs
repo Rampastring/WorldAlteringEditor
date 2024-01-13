@@ -6,6 +6,8 @@
         {
         }
 
+        public AircraftType AircraftType => ObjectType;
+
         // [Aircraft]
         // INDEX=OWNER,ID,HEALTH,X,Y,FACING,MISSION,TAG,VETERANCY,GROUP,AUTOCREATE_NO_RECRUITABLE,AUTOCREATE_YES_RECRUITABLE
 

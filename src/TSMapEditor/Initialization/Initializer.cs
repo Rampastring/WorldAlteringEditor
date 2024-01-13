@@ -49,6 +49,7 @@ namespace TSMapEditor.Initialization
                 { typeof(BuildingType), InitArtConfigGeneric },
                 { typeof(OverlayType), InitArtConfigGeneric },
                 { typeof(UnitType), InitArtConfigGeneric },
+                { typeof(AircraftType), InitArtConfigGeneric },
                 { typeof(InfantryType), InitInfantryArtConfig },
                 { typeof(AnimType), InitArtConfigGeneric }
             };

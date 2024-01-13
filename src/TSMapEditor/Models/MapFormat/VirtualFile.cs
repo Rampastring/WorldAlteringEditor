@@ -11,22 +11,22 @@ namespace CNCMaps.FileFormats.VirtualFileSystem
     /// </summary>
     public class VirtualFile : Stream
     {
-        public Stream BaseStream { get; internal protected set; }
+        public Stream BaseStream { get; protected internal set; }
         protected int BaseOffset;
         protected long Size;
         protected long Pos;
-        virtual public string FileName { get; set; }
+        public virtual string FileName { get; set; }
 
-        byte[] _buff;
-        readonly bool _isBuffered;
-        bool _isBufferInitialized;
+        byte[] buff;
+        readonly bool isBuffered;
+        bool isBufferInitialized;
 
         public VirtualFile(Stream baseStream, string filename, int baseOffset, long fileSize, bool isBuffered = false)
         {
             Size = fileSize;
             BaseOffset = baseOffset;
             BaseStream = baseStream;
-            _isBuffered = isBuffered;
+            this.isBuffered = isBuffered;
             FileName = filename;
         }
 
@@ -35,38 +35,30 @@ namespace CNCMaps.FileFormats.VirtualFileSystem
             BaseStream = baseStream;
             BaseOffset = 0;
             Size = baseStream.Length;
-            _isBuffered = isBuffered;
+            this.isBuffered = isBuffered;
             FileName = filename;
         }
 
-        public override bool CanRead
-        {
-            get { return Pos < Size; }
-        }
+        public override bool CanRead => Pos < Size;
 
-        public override bool CanWrite
-        {
-            get { return false; }
-        }
+        public override bool CanWrite => false;
 
-        public override long Length
-        {
-            get { return Size; }
-        }
+        public override long Length => Size;
 
         public override void Flush()
         {
+
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
             count = Math.Min(count, (int)(Length - Position));
-            if (_isBuffered)
+            if (isBuffered)
             {
-                if (!_isBufferInitialized)
+                if (!isBufferInitialized)
                     InitBuffer();
 
-                Array.Copy(_buff, Pos, buffer, offset, count);
+                Array.Copy(buff, Pos, buffer, offset, count);
             }
             else
             {
@@ -91,13 +83,13 @@ namespace CNCMaps.FileFormats.VirtualFileSystem
         public unsafe int Read(byte* buffer, int count)
         {
             count = Math.Min(count, (int)(Length - Position));
-            if (_isBuffered)
+            if (isBuffered)
             {
-                if (!_isBufferInitialized)
+                if (!isBufferInitialized)
                     InitBuffer();
 
                 for (int i = 0; i < count; i++)
-                    *buffer++ = _buff[Pos + i];
+                    *buffer++ = buff[Pos + i];
             }
             else
             {
@@ -116,9 +108,9 @@ namespace CNCMaps.FileFormats.VirtualFileSystem
         {
             // ensure
             BaseStream.Position = BaseOffset + Pos;
-            _buff = new byte[Size];
-            BaseStream.Read(_buff, 0, (int)Size);
-            _isBufferInitialized = true;
+            buff = new byte[Size];
+            BaseStream.Read(buff, 0, (int)Size);
+            isBufferInitialized = true;
         }
 
         public byte[] Read(int numBytes)
@@ -214,7 +206,7 @@ namespace CNCMaps.FileFormats.VirtualFileSystem
             set
             {
                 Pos = value;
-                if (!_isBuffered && Pos + BaseOffset != BaseStream.Position)
+                if (!isBuffered && Pos + BaseOffset != BaseStream.Position)
                     BaseStream.Seek(Pos + BaseOffset, SeekOrigin.Begin);
             }
         }
