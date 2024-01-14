@@ -144,6 +144,9 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
             Renderer.PopRenderTarget();
             renderTarget.Dispose();
+            basicEffect.Dispose();
+            vertexBuffer.Dispose();
+            triangleListIndexBuffer.Dispose();
 
             return tex;
         }
