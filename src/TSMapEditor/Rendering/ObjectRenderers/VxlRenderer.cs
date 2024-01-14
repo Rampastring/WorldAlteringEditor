@@ -49,6 +49,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             Matrix world = rotateToWorld * tilt * Scale;
 
             var vertexData = new List<VertexPositionColorNormal>();
+            var vertexIndices = new List<int>();
 
             Rectangle imageBounds = new Rectangle();
 
@@ -86,7 +87,9 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                                 ? Color.Magenta
                                 : palette.Data[colorIndex].ToXnaColor();
 
-                            vertexData.AddRange(RenderVoxel(transformedPosition, color, Vector3.Up));
+                            var voxelVertices = RenderVoxel(transformedPosition, color, Vector3.Up, vertexData.Count);
+                            vertexData.AddRange(voxelVertices.vertices);
+                            vertexIndices.AddRange(voxelVertices.indices);
                         }
                     }
                 }
@@ -97,13 +100,13 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             
             /********** Rendering *********/
 
-            Matrix projection = Matrix.CreateOrthographic(imageBounds.Width, imageBounds.Height, NearClip, FarClip);
-
             var renderTarget = new RenderTarget2D(graphicsDevice, Convert.ToInt32(imageBounds.Width / ModelScale), Convert.ToInt32(imageBounds.Height / ModelScale), false, SurfaceFormat.Color, DepthFormat.Depth24);
             Renderer.PushRenderTarget(renderTarget);
 
             graphicsDevice.Clear(Color.Transparent);
             graphicsDevice.DepthStencilState = DepthStencilState.Default;
+
+            Matrix projection = Matrix.CreateOrthographic(imageBounds.Width, imageBounds.Height, NearClip, FarClip);
 
             BasicEffect basicEffect = new BasicEffect(graphicsDevice);
             basicEffect.VertexColorEnabled = true;
@@ -113,19 +116,14 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
             VertexBuffer vertexBuffer = new VertexBuffer(graphicsDevice,
                 typeof(VertexPositionColorNormal), vertexData.Count, BufferUsage.None);
-
             vertexBuffer.SetData(vertexData.ToArray());
-
-            var triangleListIndices = new int[vertexData.Count];
-            for (int i = 0; i < triangleListIndices.Length; i++)
-                triangleListIndices[i] = i;
 
             IndexBuffer triangleListIndexBuffer = new IndexBuffer(
                 graphicsDevice,
                 IndexElementSize.ThirtyTwoBits,
-                triangleListIndices.Length,
+                vertexIndices.Count,
                 BufferUsage.None);
-            triangleListIndexBuffer.SetData(triangleListIndices);
+            triangleListIndexBuffer.SetData(vertexIndices.ToArray());
 
             graphicsDevice.Indices = triangleListIndexBuffer;
             graphicsDevice.SetVertexBuffer(vertexBuffer);
@@ -133,14 +131,14 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             foreach (EffectPass pass in basicEffect.CurrentTechnique.Passes)
             {
                 pass.Apply();
-                graphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexData.Count / 3);
+                graphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexIndices.Count / 3);
             }
 
             var colorData = new Color[renderTarget.Width * renderTarget.Height];
             renderTarget.GetData(colorData);
 
-            Texture2D tex = new Texture2D(graphicsDevice, renderTarget.Width, renderTarget.Height);
-            tex.SetData(colorData);
+            Texture2D texture = new Texture2D(graphicsDevice, renderTarget.Width, renderTarget.Height);
+            texture.SetData(colorData);
 
             Renderer.PopRenderTarget();
             renderTarget.Dispose();
@@ -148,7 +146,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             vertexBuffer.Dispose();
             triangleListIndexBuffer.Dispose();
 
-            return tex;
+            return texture;
         }
 
         private static readonly int[] SlopeAxisZAngles =
@@ -160,11 +158,12 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             0, 90, 180, -90
         };
 
-        private static List<VertexPositionColorNormal> RenderVoxel(Vector3 position, Color color, Vector3 normal)
+        private static (VertexPositionColorNormal[] vertices, List<int> indices) RenderVoxel(Vector3 position, Color color, Vector3 normal, int vertexIndexCount)
         {
             const float radius = 0.5f;
 
-            Vector3[] vertices =
+            // Set up the coordinates of the voxel's corners
+            Vector3[] vertexCoordinates =
             {
                 new(-1, 1, -1), // A1 // 0
                 new(1, 1, -1), // B1 // 1           
@@ -177,12 +176,18 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 new(-1, -1, 1) // D2 // 7
             };
 
-            for (int i = 0; i < vertices.Length; i++)
+            for (int i = 0; i < vertexCoordinates.Length; i++)
             {
-                vertices[i] *= radius;
-                vertices[i] += position;
+                vertexCoordinates[i] *= radius;
+                vertexCoordinates[i] += position;
             }
 
+            // Set up the vertices themselves
+            var vertices = new VertexPositionColorNormal[8];
+            for (int i = 0; i < vertices.Length; i++)
+                vertices[i] = new VertexPositionColorNormal(vertexCoordinates[i], color, normal);
+
+            // Now create triangles out of the vertices
             int[][] triangles =
             {
                 new [] { 0, 1, 2 }, new [] { 2, 3, 0 }, // up
@@ -193,21 +198,16 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 new [] { 4, 0, 3 }, new [] { 3, 7, 4 }, // left
             };
 
-            List<VertexPositionColorNormal> newVertices = new();
-
+            List<int> vertexIndices = new();
+            
             foreach (var triangle in triangles)
             {
-                AddTriangle(vertices[triangle[0]], vertices[triangle[1]], vertices[triangle[2]]);
+                vertexIndices.Add(triangle[0] + vertexIndexCount);
+                vertexIndices.Add(triangle[1] + vertexIndexCount);
+                vertexIndices.Add(triangle[2] + vertexIndexCount);
             }
 
-            void AddTriangle(Vector3 vertex1, Vector3 vertex2, Vector3 vertex3)
-            {
-                newVertices.Add(new VertexPositionColorNormal(vertex1, color, normal));
-                newVertices.Add(new VertexPositionColorNormal(vertex2, color, normal));
-                newVertices.Add(new VertexPositionColorNormal(vertex3, color, normal));
-            }
-
-            return newVertices;
+            return (vertices, vertexIndices);
         }
 
         private static byte[] PreCalculateLighting(Vector3[] normalsTable, int normalsMode, float rotation)
