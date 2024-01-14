@@ -52,7 +52,7 @@ namespace TSMapEditor.CCEngine
 
         private void Initialize()
         {
-            Logger.Log("Loading HVA file {0}", FileName);
+            Logger.Log($"Loading HVA file {FileName}");
             Seek(0, SeekOrigin.Begin);
             ReadCString(16); // filename
             NumFrames = ReadInt32();

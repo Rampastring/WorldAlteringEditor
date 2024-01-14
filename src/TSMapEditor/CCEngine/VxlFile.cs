@@ -172,7 +172,7 @@ namespace TSMapEditor.CCEngine
             public uint StartingSpanOffset;
             public uint EndingSpanOffset;
             public uint DataSpanOffset;
-            public float HvaMultiplier;
+            public float HvaMatrixScaleFactor;
             public TransfMatrix TransfMatrix = new();
             public Vector3 MinBounds;
             public Vector3 MaxBounds;
@@ -238,7 +238,7 @@ namespace TSMapEditor.CCEngine
                 StartingSpanOffset = vxlFile.ReadUInt32();
                 EndingSpanOffset = vxlFile.ReadUInt32();
                 DataSpanOffset = vxlFile.ReadUInt32();
-                HvaMultiplier = vxlFile.ReadFloat();
+                HvaMatrixScaleFactor = vxlFile.ReadFloat();
                 TransfMatrix.Read(vxlFile);
                 MinBounds.X = vxlFile.ReadFloat();
                 MinBounds.Y = vxlFile.ReadFloat();
