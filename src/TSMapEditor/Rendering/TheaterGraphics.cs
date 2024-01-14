@@ -80,7 +80,10 @@ namespace TSMapEditor.Rendering
                 return null;
 
             // The game only renders 32 facings, so round it to the closest true facing
-            facing = Convert.ToByte(Math.Round((float)facing / 8, MidpointRounding.AwayFromZero) * 8);
+            facing = Convert.ToByte(Math.Clamp(
+                Math.Round((float)facing / 8, MidpointRounding.AwayFromZero) * 8,
+                byte.MinValue,
+                byte.MaxValue));
 
             var key = (facing, ramp);
             if (RemapFrames.TryGetValue(key, out PositionedTexture value))
