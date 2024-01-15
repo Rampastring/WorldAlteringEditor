@@ -25,6 +25,17 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         private static readonly Vector3 YRLight = Vector3.Transform(-Vector3.UnitX,
             Matrix.CreateRotationZ(MathHelper.ToRadians(45)));
 
+        // Static table for creating triangles out of vertices
+        private static int[][] vertexIndexTriangles =
+            {
+                new [] { 0, 1, 2 }, new [] { 2, 3, 0 }, // up
+                new [] { 7, 6, 5 }, new [] { 5, 4, 7 }, // down
+                new [] { 4, 5, 1 }, new [] { 1, 0, 4 }, // forward
+                new [] { 3, 2, 6 }, new [] { 6, 7, 3 }, // backward
+                new [] { 1, 5, 6 }, new [] { 6, 2, 1 }, // right
+                new [] { 4, 0, 3 }, new [] { 3, 7, 4 }, // left
+            };
+
         public static Texture2D Render(GraphicsDevice graphicsDevice, byte facing, RampType ramp, VxlFile vxl, HvaFile hva, Palette palette, VplFile vpl = null, bool forRemap = false)
         {
             /*********** Voxel space setup **********/
@@ -52,6 +63,9 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             var vertexIndices = new List<int>();
 
             Rectangle imageBounds = new Rectangle();
+
+            // Allocate memory for vertices to use in loop below
+            var verticesArray = new VertexPositionColorNormal[8];
 
             foreach (var section in vxl.Sections)
             {
@@ -87,9 +101,8 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                                 ? Color.Magenta
                                 : palette.Data[colorIndex].ToXnaColor();
 
-                            var voxelVertices = RenderVoxel(transformedPosition, color, Vector3.Up, vertexData.Count);
-                            vertexData.AddRange(voxelVertices.vertices);
-                            vertexIndices.AddRange(voxelVertices.indices);
+                            RenderVoxel(transformedPosition, color, Vector3.Up, vertexData.Count, vertexIndices, verticesArray);
+                            vertexData.AddRange(verticesArray);
                         }
                     }
                 }
@@ -158,12 +171,13 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             0, 90, 180, -90
         };
 
-        private static (VertexPositionColorNormal[] vertices, List<int> indices) RenderVoxel(Vector3 position, Color color, Vector3 normal, int vertexIndexCount)
+        private static void RenderVoxel(Vector3 position, Color color, Vector3 normal, int vertexIndexCount, List<int> vertexIndices, VertexPositionColorNormal[] verticesArray)
         {
             const float radius = 0.5f;
 
             // Set up the coordinates of the voxel's corners
-            Vector3[] vertexCoordinates =
+
+            Span<Vector3> vertexCoordinates = stackalloc Vector3[]
             {
                 new(-1, 1, -1), // A1 // 0
                 new(1, 1, -1), // B1 // 1           
@@ -183,31 +197,16 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             }
 
             // Set up the vertices themselves
-            var vertices = new VertexPositionColorNormal[8];
-            for (int i = 0; i < vertices.Length; i++)
-                vertices[i] = new VertexPositionColorNormal(vertexCoordinates[i], color, normal);
+            for (int i = 0; i < verticesArray.Length; i++)
+                verticesArray[i] = new VertexPositionColorNormal(vertexCoordinates[i], color, normal);
 
-            // Now create triangles out of the vertices
-            int[][] triangles =
+            for (int i = 0; i < vertexIndexTriangles.Length; i++)
             {
-                new [] { 0, 1, 2 }, new [] { 2, 3, 0 }, // up
-                new [] { 7, 6, 5 }, new [] { 5, 4, 7 }, // down
-                new [] { 4, 5, 1 }, new [] { 1, 0, 4 }, // forward
-                new [] { 3, 2, 6 }, new [] { 6, 7, 3 }, // backward
-                new [] { 1, 5, 6 }, new [] { 6, 2, 1 }, // right
-                new [] { 4, 0, 3 }, new [] { 3, 7, 4 }, // left
-            };
-
-            List<int> vertexIndices = new();
-            
-            foreach (var triangle in triangles)
-            {
+                var triangle = vertexIndexTriangles[i];
                 vertexIndices.Add(triangle[0] + vertexIndexCount);
                 vertexIndices.Add(triangle[1] + vertexIndexCount);
                 vertexIndices.Add(triangle[2] + vertexIndexCount);
             }
-
-            return (vertices, vertexIndices);
         }
 
         private static byte[] PreCalculateLighting(Vector3[] normalsTable, int normalsMode, float rotation)
