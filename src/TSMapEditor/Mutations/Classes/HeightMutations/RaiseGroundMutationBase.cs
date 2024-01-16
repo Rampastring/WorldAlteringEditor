@@ -6,6 +6,7 @@ using TSMapEditor.GameMath;
 using TSMapEditor.Models.Enums;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI;
+using HCT = TSMapEditor.Mutations.Classes.HeightMutations.HeightComparisonType;
 
 namespace TSMapEditor.Mutations.Classes.HeightMutations
 {
@@ -29,6 +30,8 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
 
         protected static readonly Point2D[] SurroundingTiles = new Point2D[] { new Point2D(-1, 0), new Point2D(1, 0), new Point2D(0, -1), new Point2D(0, 1),
                                                                              new Point2D(-1, -1), new Point2D(-1, 1), new Point2D(1, -1), new Point2D(1, 1) };
+
+        private TransitionRampInfo flatGroundCheck = new TransitionRampInfo(RampType.None, new() { HCT.Equal, HCT.Equal, HCT.Equal, HCT.Equal, HCT.Equal, HCT.Equal, HCT.Equal, HCT.Equal });
 
         /// <summary>
         /// Adds a cell's data to the undo data structure.
@@ -336,21 +339,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
 
         private void ApplyRamps()
         {
-            var cellsToProcess = new List<Point2D>(totalProcessedCells);
-
-            // Go through all processed cells and add their neighbours to be processed too
-            totalProcessedCells.ForEach(cc =>
-            {
-                for (int i = 0; i < (int)Direction.Count; i++)
-                {
-                    var otherCellCoords = cc + Helpers.VisualDirectionToPoint((Direction)i);
-
-                    if (!cellsToProcess.Contains(otherCellCoords))
-                        cellsToProcess.Add(otherCellCoords);
-                }
-            });
-
-            foreach (var cellCoords in cellsToProcess)
+            foreach (var cellCoords in totalProcessedCells)
             {
                 var cell = Map.GetTile(cellCoords);
                 if (cell == null)
@@ -384,6 +373,59 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
                         }
 
                         break;
+                    }
+                }
+            }
+
+            CheckForRampsOnFlatGround();
+        }
+
+        /// <summary>
+        /// Checks for leftover ramps on ground surrouding the altered area.
+        /// </summary>
+        private void CheckForRampsOnFlatGround()
+        {
+            var cellsToProcess = new List<Point2D>(totalProcessedCells);
+
+            // Go through all processed cells and add their neighbours to be processed too
+            totalProcessedCells.ForEach(cc =>
+            {
+                for (int i = 0; i < (int)Direction.Count; i++)
+                {
+                    var otherCellCoords = cc + Helpers.VisualDirectionToPoint((Direction)i);
+
+                    if (!cellsToProcess.Contains(otherCellCoords))
+                        cellsToProcess.Add(otherCellCoords);
+                }
+            });
+
+            for (int i = totalProcessedCells.Count; i < cellsToProcess.Count; i++)
+            {
+                var cellCoords = cellsToProcess[i];
+
+                var cell = Map.GetTile(cellCoords);
+                if (cell == null)
+                    continue;
+
+                if (!IsCellMorphable(cell))
+                    continue;
+
+                var subTile = Map.TheaterInstance.GetTile(cell.TileIndex).GetSubTile(cell.SubTileIndex);
+                LandType landType = (LandType)subTile.TmpImage.TerrainType;
+                if (landType == LandType.Rock || landType == LandType.Water)
+                    continue;
+
+                if (flatGroundCheck.Matches(Map, cellCoords, cell.Level) && subTile.TmpImage.RampType != RampType.None)
+                {
+                    cell.ChangeTileIndex(0, 0);
+
+                    // Add surroundings of the cell to check as well
+                    for (int dir = 0; dir < (int)Direction.Count; dir++)
+                    {
+                        var otherCellCoords = cellCoords + Helpers.VisualDirectionToPoint((Direction)dir);
+
+                        if (!cellsToProcess.Contains(otherCellCoords))
+                            cellsToProcess.Add(otherCellCoords);
                     }
                 }
             }
