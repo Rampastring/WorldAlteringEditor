@@ -17,14 +17,15 @@ but with modernizations and changes to make the editor smoother and more efficie
 ## State of the project
 
 The editor includes practically all tools present in FS/FA2 and a significant number of
-new ones. Many familiar tools have also been improved with significant quality-of-life improvements.
-These improvements make it much more efficient to create maps with WAE than the old FS/FA map editors.
+new ones. Many familiar tools have been improved with significant quality-of-life improvements.
+These improvements make it much more efficient to create maps with WAE than the old FS/FA2 map editors.
 
 New functionality and helpful features are being constantly added to make the mapping experience smoother and more efficient.
+Some examples include a zoom function, a new, powerful trigger editor interface, and a terrain generator for rapid detailing of large areas.
 
-Graphically the editor is better than FS/FA2 aside from lacking voxel support
-and requiring a higher-end system. However, if you do have a powerful system, the editor
-runs far more smoothly than the older editors.
+Graphically the editor is more demanding than FS/FA2, but can also utilize modern hardware
+much more efficiently, meaning that if you have a decently modern computer, WAE achieves far smoother
+performance with better graphical quality than the old editors.
 
 ## System requirements
 
@@ -33,8 +34,10 @@ A DirectX11 compatible GPU and a 64-bit system is required.
 If you absolutely need a 32-bit build, you can modify the source to produce one.
 
 The editor needs considerable VRAM, as the sprite graphics of the game are currently
-converted into full 32-bit ARGB textures prior to drawing. In case of
-Dawn of the Tiberium Age, the editor appears to allocate roughly 1 GB of VRAM.
+converted into full 32-bit ARGB textures prior to drawing. The exact amount of VRAM
+required depends on the map and the game or mod and can range from a hundred megabytes
+on a light map in original Tiberian Sun to some gigabytes on a heavy map in a mod that has
+tons of custom assets.
 
 ## Downloads
 
