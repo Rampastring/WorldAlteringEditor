@@ -17,12 +17,9 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
     /// </summary>
     public class FlattenGroundMutation : AlterElevationMutationBase
     {
-        public FlattenGroundMutation(IMutationTarget mutationTarget, Point2D originCell, BrushSize brushSize, int desiredHeightLevel) : base(mutationTarget)
+        public FlattenGroundMutation(IMutationTarget mutationTarget, Point2D originCell, BrushSize brushSize, int desiredHeightLevel) : base(mutationTarget, originCell, brushSize)
         {
             this.desiredHeightLevel = desiredHeightLevel;
-            OriginCell = originCell;
-            BrushSize = brushSize;
-            RampTileSet = Map.TheaterInstance.Theater.RampTileSet;
         }
 
         private readonly int desiredHeightLevel;
@@ -47,15 +44,6 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
 
             Process();
         }
-
-        protected readonly Point2D OriginCell;
-        protected readonly BrushSize BrushSize;
-        protected TileSet RampTileSet;
-
-        private List<Point2D> cellsToProcess = new List<Point2D>();
-        private List<Point2D> processedCellsThisIteration = new List<Point2D>();
-        private List<Point2D> totalProcessedCells = new List<Point2D>();
-        private List<AlterGroundElevationUndoData> undoData = new List<AlterGroundElevationUndoData>();
 
         private static readonly TransitionRampInfo[] transitionRampInfos = new[]
         {
@@ -134,86 +122,11 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
             new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Equal, HCT.Equal }, 1),
         };
 
-        protected static readonly Point2D[] SurroundingTiles = new Point2D[] { new Point2D(-1, 0), new Point2D(1, 0), new Point2D(0, -1), new Point2D(0, 1),
-                                                                             new Point2D(-1, -1), new Point2D(-1, 1), new Point2D(1, -1), new Point2D(1, 1) };
+        protected override TransitionRampInfo[] GetTransitionRampInfos() => transitionRampInfos;
 
+        protected override TransitionRampInfo[] GetHeightFixers() => heightFixers;
 
-        /// <summary>
-        /// Adds a cell's data to the undo data structure.
-        /// Does nothing if the cell has already been added to the undo data structure.
-        /// </summary>
-        protected void AddCellToUndoData(Point2D cellCoords)
-        {
-            var cell = Map.GetTile(cellCoords);
-            if (cell == null)
-                return;
-
-            if (undoData.Exists(u => u.CellCoords == cellCoords))
-                return;
-
-            undoData.Add(new AlterGroundElevationUndoData(cellCoords, cell.TileIndex, cell.SubTileIndex, cell.Level));
-        }
-
-
-        /// <summary>
-        /// Main function for ground height level alteration.
-        /// Prior to this, a derived class has already raised or lowered
-        /// some target cells. Now we need to figure out what kinds of changes
-        /// to the map are necessary for these altered height levels to look smooth.
-        /// 
-        /// Algorithm goes as follows:
-        /// 
-        /// 1) Check surrounding cells for height differences of 2 levels, if found then
-        ///    raise the relevant cells to lower the difference to only 1 level.
-        ///    Repeat this process recursively until there are no cells to change.
-        /// 
-        /// 2) Apply some miscellaneous cell height fixes, the game does not have ramps for
-        ///    every potential case.
-        /// 
-        /// 3) Check the affected cells and their neighbours for necessary ramp changes.
-        /// </summary>
-        protected void Process()
-        {
-            ProcessCells();
-
-            CellHeightFixes();
-
-            ApplyRamps();
-
-            MutationTarget.InvalidateMap();
-        }
-
-        protected void RegisterCell(Point2D cellCoords)
-        {
-            if (processedCellsThisIteration.Contains(cellCoords) || cellsToProcess.Contains(cellCoords))
-                return;
-
-            cellsToProcess.Add(cellCoords);
-        }
-
-        protected void MarkCellAsProcessed(Point2D cellCoords)
-        {
-            processedCellsThisIteration.Add(cellCoords);
-            cellsToProcess.Remove(cellCoords);
-
-            if (!totalProcessedCells.Contains(cellCoords))
-                totalProcessedCells.Add(cellCoords);
-        }
-
-        private void ProcessCells()
-        {
-            while (cellsToProcess.Count > 0)
-            {
-                var cellsCopy = new List<Point2D>(cellsToProcess);
-                cellsToProcess.Clear();
-                processedCellsThisIteration.Clear();
-
-                foreach (var cell in cellsCopy)
-                    RecursiveCheckCell(cell);
-            }
-        }
-
-        private void RecursiveCheckCell(Point2D cellCoords)
+        protected override void CheckCell(Point2D cellCoords)
         {
             if (processedCellsThisIteration.Contains(cellCoords) || cellsToProcess.Contains(cellCoords))
                 return;
@@ -323,7 +236,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
         /// <summary>
         /// Applies miscellaneous fixes to height data of processed cells.
         /// </summary>
-        private void CellHeightFixes()
+        protected override void CellHeightFixes()
         {
             // We process one set of cells at a time, starting from the cells
             // processed so far.
@@ -380,7 +293,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
             }
         }
 
-        private void ApplyRamps()
+        protected override void ApplyRamps()
         {
             var cellsToProcess = new List<Point2D>(totalProcessedCells);
 
@@ -433,18 +346,6 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
                     }
                 }
             }
-        }
-
-        public override void Undo()
-        {
-            foreach (var entry in undoData)
-            {
-                var cell = Map.GetTile(entry.CellCoords);
-                cell.ChangeTileIndex(entry.TileIndex, (byte)entry.SubTileIndex);
-                cell.Level = (byte)entry.HeightLevel;
-            }
-
-            MutationTarget.InvalidateMap();
         }
     }
 }
