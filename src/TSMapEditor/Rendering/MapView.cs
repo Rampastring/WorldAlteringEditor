@@ -726,13 +726,13 @@ namespace TSMapEditor.Rendering
 
             int extraDrawY = drawPoint.Y + tmpImage.TmpImage.YExtra - tmpImage.TmpImage.Y;
 
-            if (!minimapNeedsRefresh && drawPoint.Y - (tile.Level * Constants.CellHeight) > GetCameraBottomYCoord())
+            if (!minimapNeedsRefresh && drawPoint.Y - (level * Constants.CellHeight) > GetCameraBottomYCoord())
             {
                 if (tmpImage.ExtraTexture == null)
                     return;
 
                 // If we have extra graphics, need to check whether they are on screen
-                if (extraDrawY - (tile.Level * Constants.CellHeight) > GetCameraBottomYCoord())
+                if (extraDrawY - (level * Constants.CellHeight) > GetCameraBottomYCoord())
                     return;
             }
 
@@ -778,7 +778,7 @@ namespace TSMapEditor.Rendering
                     !TheaterGraphics.HasSeparateMarbleMadnessTileGraphics(tileImage.TileID))
                 {
                     textureToDraw = EditorGraphics.GenericTileWithBorderTexture;
-                    color = MarbleMadnessTileHeightLevelColors[tile.Level];
+                    color = MarbleMadnessTileHeightLevelColors[level];
                 }
 
                 DrawTexture(textureToDraw, new Rectangle(drawPoint.X, drawPoint.Y,
