@@ -58,26 +58,25 @@ namespace TSMapEditor.UI.CursorActions
             BrushSize brush = CursorActionTarget.BrushSize;
 
             // First, look up the lowest point within the tile area for origin level
-            brush.DoForBrushSize(offset =>
+            // Only use a 1x1 brush size for this (meaning no brush at all)
+            // so users can use larger brush sizes to "paint height"
+            for (int i = 0; i < Tile.TMPImages.Length; i++)
             {
-                for (int i = 0; i < Tile.TMPImages.Length; i++)
+                MGTMPImage image = Tile.TMPImages[i];
+
+                if (image.TmpImage == null)
+                    continue;
+
+                int cx = adjustedCellCoords.X + Tile.Width + i % Tile.Width;
+                int cy = adjustedCellCoords.Y + Tile.Height + i / Tile.Width;
+
+                var mapTile = MutationTarget.Map.GetTile(cx, cy);
+                if (mapTile != null)
                 {
-                    MGTMPImage image = Tile.TMPImages[i];
-
-                    if (image.TmpImage == null)
-                        continue;
-
-                    int cx = adjustedCellCoords.X + (offset.X * Tile.Width) + i % Tile.Width;
-                    int cy = adjustedCellCoords.Y + (offset.Y * Tile.Height) + i / Tile.Width;
-
-                    var mapTile = MutationTarget.Map.GetTile(cx, cy);
-                    if (mapTile != null)
-                    {
-                        if (originLevel < 0 || mapTile.Level < originLevel)
-                            originLevel = mapTile.Level;
-                    }
+                    if (originLevel < 0 || mapTile.Level < originLevel)
+                        originLevel = mapTile.Level;
                 }
-            });
+            }
 
             // Then apply the preview data
             brush.DoForBrushSize(offset =>
