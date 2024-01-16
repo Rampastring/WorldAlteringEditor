@@ -981,28 +981,23 @@ namespace TSMapEditor.Rendering
 
         private void DrawWaypoint(Waypoint waypoint)
         {
-            const int waypointBorderOffsetX = 8;
-            const int waypointBorderOffsetY = 4;
-            const int textOffset = 3;
-
             Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords(waypoint.Position, Map);
 
             var cell = Map.GetTile(waypoint.Position);
             if (cell != null && !EditorState.Is2DMode)
                 drawPoint -= new Point2D(0, cell.Level * Constants.CellHeight);
 
-            var rect = new Rectangle(drawPoint.X + waypointBorderOffsetX,
-                drawPoint.Y + waypointBorderOffsetY,
-                Constants.CellSizeX - (waypointBorderOffsetX * 2),
-                Constants.CellSizeY - (waypointBorderOffsetY * 2));
-
             Color waypointColor = Color.Fuchsia;
 
-            FillRectangle(rect, new Color(0, 0, 0, 128));
-            DrawRectangle(rect, waypointColor);
-            DrawStringWithShadow(waypoint.Identifier.ToString(),
-                Constants.UIDefaultFont, 
-                new Vector2(rect.X + textOffset, rect.Y),
+            DrawTexture(EditorGraphics.GenericTileTexture, drawPoint.ToXNAPoint(), new Color(0, 0, 0, 128));
+            DrawTexture(EditorGraphics.TileBorderTexture, drawPoint.ToXNAPoint(), waypointColor);
+
+            int fontIndex = Constants.UIBoldFont;
+            string waypointIdentifier = waypoint.Identifier.ToString();
+            var textDimensions = Renderer.GetTextDimensions(waypointIdentifier, fontIndex);
+            DrawStringWithShadow(waypointIdentifier,
+                fontIndex,
+                new Vector2(drawPoint.X + ((Constants.CellSizeX - textDimensions.X) / 2), drawPoint.Y + ((Constants.CellSizeY - textDimensions.Y) / 2)),
                 waypointColor);
         }
 

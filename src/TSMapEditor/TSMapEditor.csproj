@@ -347,6 +347,9 @@
     <None Update="Content\SpriteFont1.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Content\tileborder.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Content\ToolIcons\2dmode.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

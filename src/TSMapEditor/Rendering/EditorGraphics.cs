@@ -10,6 +10,7 @@ namespace TSMapEditor.Rendering
     {
         public Texture2D GenericTileTexture { get; private set; }
         public Texture2D GenericTileWithBorderTexture { get; private set; }
+        public Texture2D TileBorderTexture { get; private set; }
         public Texture2D CellTagTexture { get; private set; }
         public Texture2D ImpassableCellHighlightTexture { get; private set; }
         public Texture2D IceGrowthHighlightTexture { get; private set; }
@@ -19,6 +20,7 @@ namespace TSMapEditor.Rendering
         {
             GenericTileTexture = AssetLoader.LoadTextureUncached("generictile.png");
             GenericTileWithBorderTexture = AssetLoader.LoadTextureUncached("generictilewithborder.png");
+            TileBorderTexture = AssetLoader.LoadTextureUncached("tileborder.png");
             CellTagTexture = AssetLoader.LoadTextureUncached("celltag.png");
             ImpassableCellHighlightTexture = AssetLoader.LoadTextureUncached("impassablehighlight.png");
             IceGrowthHighlightTexture = AssetLoader.LoadTextureUncached("icehighlight.png");
@@ -29,6 +31,8 @@ namespace TSMapEditor.Rendering
         {
             GenericTileTexture.Dispose();
             GenericTileWithBorderTexture.Dispose();
+            TileBorderTexture.Dispose();
+            CellTagTexture.Dispose();
             ImpassableCellHighlightTexture.Dispose();
             IceGrowthHighlightTexture.Dispose();
             RangeIndicatorTexture.Dispose();
