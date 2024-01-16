@@ -136,7 +136,8 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
                 {
                     var otherCellCoords = OriginCell + offset;
                     var otherCell = Map.GetTile(otherCellCoords);
-                    if (otherCell == null || !IsCellMorphable(otherCell) || otherCell.Level != height)
+                    var subTile = Map.TheaterInstance.GetTile(otherCell.TileIndex).GetSubTile(otherCell.SubTileIndex);
+                    if (otherCell == null || !IsCellMorphable(otherCell) || otherCell.Level != height || subTile.TmpImage.RampType != RampType.None)
                         canCreateSmallHill = false;
                 });
 
