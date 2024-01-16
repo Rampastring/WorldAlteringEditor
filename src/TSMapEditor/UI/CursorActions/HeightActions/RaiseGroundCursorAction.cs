@@ -12,6 +12,11 @@ namespace TSMapEditor.UI.CursorActions.HeightActions
 
         public override string GetName() => "Raise Ground (Steep Ramps)";
 
+        public override void OnActionEnter()
+        {
+            CursorActionTarget.BrushSize = Map.EditorConfig.BrushSizes.Find(bs => bs.Width == 3 && bs.Height == 3) ?? Map.EditorConfig.BrushSizes[0];
+        }
+
         public override bool DrawCellCursor => true;
 
         public override void LeftClick(Point2D cellCoords)

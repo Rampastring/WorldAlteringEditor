@@ -54,7 +54,7 @@ namespace TSMapEditor.Rendering
         void InvalidateMap();
         MutationManager MutationManager { get; }
         IMutationTarget MutationTarget { get; }
-        BrushSize BrushSize { get; }
+        BrushSize BrushSize { get; set; }
         bool Is2DMode { get; }
         Randomizer Randomizer { get; }
         bool AutoLATEnabled { get; }
@@ -114,7 +114,7 @@ namespace TSMapEditor.Rendering
 
         public IMutationTarget MutationTarget => this;
         public House ObjectOwner => EditorState.ObjectOwner;
-        public BrushSize BrushSize => EditorState.BrushSize;
+        public BrushSize BrushSize { get => EditorState.BrushSize; set => EditorState.BrushSize = value; }
         public bool Is2DMode => EditorState.Is2DMode;
         public Randomizer Randomizer => EditorState.Randomizer;
         public bool AutoLATEnabled => EditorState.AutoLATEnabled;
