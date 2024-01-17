@@ -67,14 +67,23 @@ namespace TSMapEditor.UI.CursorActions
                 if (image.TmpImage == null)
                     continue;
 
-                int cx = adjustedCellCoords.X + Tile.Width + i % Tile.Width;
-                int cy = adjustedCellCoords.Y + Tile.Height + i / Tile.Width;
+                int cx = adjustedCellCoords.X + i % Tile.Width;
+                int cy = adjustedCellCoords.Y + i / Tile.Width;
 
                 var mapTile = MutationTarget.Map.GetTile(cx, cy);
+
                 if (mapTile != null)
                 {
-                    if (originLevel < 0 || mapTile.Level < originLevel)
-                        originLevel = mapTile.Level;
+                    var existingTile = Map.TheaterInstance.GetTile(mapTile.TileIndex).GetSubTile(mapTile.SubTileIndex);
+
+                    int cellLevel = mapTile.Level;
+
+                    // Allow replacing back cliffs
+                    if (existingTile.TmpImage.Height == image.TmpImage.Height)
+                        cellLevel -= existingTile.TmpImage.Height;
+
+                    if (originLevel < 0 || cellLevel < originLevel)
+                        originLevel = cellLevel;
                 }
             }
 
