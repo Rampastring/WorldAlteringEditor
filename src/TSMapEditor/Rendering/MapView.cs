@@ -641,6 +641,9 @@ namespace TSMapEditor.Rendering
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetCameraBottomYCoord() => Math.Min(Camera.TopLeftPoint.Y + GetCameraHeight(), Map.Size.Y * Constants.CellSizeY);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Rectangle GetCameraRectangle() => new Rectangle(Camera.TopLeftPoint.X, Camera.TopLeftPoint.Y, GetCameraWidth(), GetCameraHeight());
+
         public void DrawTerrainTileAndRegisterObjects(MapTile tile)
         {
             DrawTerrainTile(tile);
@@ -802,15 +805,23 @@ namespace TSMapEditor.Rendering
                 else
                     SetEffectParams(colorDrawEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTarget);
 
-                DrawTexture(tmpImage.ExtraTexture,
-                    new Rectangle(exDrawPointX,
+                var exDrawRectangle = new Rectangle(exDrawPointX,
                     exDrawPointY,
                     tmpImage.ExtraTexture.Width,
-                    tmpImage.ExtraTexture.Height),
+                    tmpImage.ExtraTexture.Height);
+
+                DrawTexture(tmpImage.ExtraTexture,
+                    exDrawRectangle,
                     null,
                     Color.White,
                     0f,
                     Vector2.Zero, SpriteEffects.None, 0f);
+
+                var cameraRectangle = GetCameraRectangle();
+
+                // If this tile was only rendered partially, then we need to redraw it properly later
+                if (!cameraRectangle.Contains(exDrawRectangle))
+                    tile.LastRefreshIndex = 0;
             }
         }
 
