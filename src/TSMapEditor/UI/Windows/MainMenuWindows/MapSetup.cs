@@ -1,13 +1,15 @@
+using Microsoft.Xna.Framework.Graphics;
 using Rampastring.Tools;
 using Rampastring.XNAUI;
 using System;
 using System.IO;
 using TSMapEditor.CCEngine;
+using TSMapEditor.Extensions;
 using TSMapEditor.GameMath;
 using TSMapEditor.Initialization;
+using TSMapEditor.Misc;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
-using TSMapEditor.Extensions;
 
 namespace TSMapEditor.UI.Windows.MainMenuWindows
 {
@@ -80,6 +82,11 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
             LoadedMap = map;
 
             return null;
+        }
+
+        public static void ImportTerrain(TerrainImporter importer, Texture2D terrainMap, Texture2D heightMap, byte basicLevel)
+        {
+            importer.Import(LoadedMap, terrainMap, heightMap, basicLevel);
         }
 
         /// <summary>

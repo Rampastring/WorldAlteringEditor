@@ -10,6 +10,7 @@ using TSMapEditor.UI.Controls;
 using TSMapEditor.UI.Windows;
 using TSMapEditor.UI.Windows.MainMenuWindows;
 using MessageBoxButtons = TSMapEditor.UI.Windows.MessageBoxButtons;
+using TSMapEditor.Misc;
 
 #if WINDOWS
 using System.Windows.Forms;
@@ -23,9 +24,7 @@ namespace TSMapEditor.UI
         private const string DirectoryPrefix = "<DIR> ";
         private const int BrowseButtonWidth = 70;
 
-        public MainMenu(WindowManager windowManager) : base(windowManager)
-        {
-        }
+        public MainMenu(WindowManager windowManager) : base(windowManager) { }
 
         private string gameDirectory;
 
@@ -199,7 +198,18 @@ namespace TSMapEditor.UI
                 throw new InvalidOperationException("Failed to create new map! Returned error message: " + error);
 
             MapSetup.LoadTheaterGraphics(WindowManager, gameDirectory);
-            ((CreateNewMapWindow)sender).OnCreateNewMap -= CreateMapWindow_OnCreateNewMap;
+
+            if(!(e.TerrainImage == null && e.Heightmap != null && e.BasicLevel > 0))
+            {
+                var configuration = new TerrainImporter.Configuration(string.IsNullOrEmpty(e.ImportConfig) ?
+                   Environment.CurrentDirectory + "/Config/Importer/Default.ini" : e.ImportConfig
+                );
+                var importer = new TerrainImporter(configuration);
+
+                MapSetup.ImportTerrain(importer, e.TerrainImage, e.Heightmap, e.BasicLevel);
+            }
+
+            ((CreateNewMapWindow) sender).OnCreateNewMap -= CreateMapWindow_OnCreateNewMap;
         }
 
         private void ReadGameInstallDirectoryFromRegistry()
@@ -303,7 +313,7 @@ namespace TSMapEditor.UI
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
                 openFileDialog.InitialDirectory = tbMapPath.Text;
-                openFileDialog.Filter = Constants.OpenFileDialogFilter.Replace(':', ';');
+                openFileDialog.Filter = Constants.OpenMapFileDialogFilter.Replace(':', ';');
                 openFileDialog.RestoreDirectory = true;
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)

@@ -265,7 +265,7 @@ namespace TSMapEditor.UI.TopBar
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
                 openFileDialog.InitialDirectory = initialPath;
-                openFileDialog.Filter = Constants.OpenFileDialogFilter.Replace(':', ';');
+                openFileDialog.Filter = Constants.OpenMapFileDialogFilter.Replace(':', ';');
                 openFileDialog.RestoreDirectory = true;
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
@@ -287,7 +287,7 @@ namespace TSMapEditor.UI.TopBar
             {
                 saveFileDialog.InitialDirectory = Path.GetDirectoryName(initialPath);
                 saveFileDialog.FileName = Path.GetFileName(initialPath);
-                saveFileDialog.Filter = Constants.OpenFileDialogFilter.Replace(':', ';');
+                saveFileDialog.Filter = Constants.OpenMapFileDialogFilter.Replace(':', ';');
                 saveFileDialog.RestoreDirectory = true;
 
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)

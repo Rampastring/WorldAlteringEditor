@@ -1786,6 +1786,38 @@ namespace TSMapEditor.Models
             }
         }
 
+        public bool ApplyHeightDeltaOnWholeMap(int delta)
+        {
+            var theater = TheaterInstance;
+
+            for (int y = 0; y < Size.Y; y++)
+                for (int x = 0; x < Size.X; x++)
+                {
+                    var point = new Point2D(x, y);
+                    var tile = GetTile(point);
+                    if (tile == null)
+                    {
+                        PlaceTerrainTileAt(theater.GetTile(0), point);
+                        tile = GetTile(point);
+                    }
+
+                    short level = tile.Level;
+                    var newLevel = level + delta;
+                    if (newLevel > Constants.MaxMapHeightLevel || newLevel < 0)
+                        return false;
+                }
+
+            for (int y = 0; y < Size.Y; y++)
+                for (int x = 0; x < Size.X; x++)
+                {
+                    var point = new Point2D(x, y);
+                    var tile = GetTile(point);
+                    tile.Level = (byte)(tile.Level + delta);
+                }
+
+            return true;
+        }
+
         public void Clear()
         {
             LoadedINI = null;
