@@ -312,6 +312,7 @@ namespace TSMapEditor.Rendering
             animPalette = GetPaletteOrFail("anim.pal");
             if (!string.IsNullOrEmpty(Theater.TiberiumPaletteName))
                 tiberiumPalette = GetPaletteOrFail(Theater.TiberiumPaletteName);
+            vplFile = GetVplFile();
 
             if (UserSettings.Instance.MultithreadedTextureLoading)
             {
@@ -675,7 +676,7 @@ namespace TSMapEditor.Rendering
                 if (!string.IsNullOrWhiteSpace(buildingType.ArtConfig.Palette))
                     palette = GetPaletteOrFail(buildingType.ArtConfig.Palette + Theater.FileExtension[1..] + ".pal");
 
-                BuildingTurretModels[i] = new VoxelModel(graphicsDevice, vxlFile, hvaFile, palette, buildingType.ArtConfig.Remapable, GetVplFile());
+                BuildingTurretModels[i] = new VoxelModel(graphicsDevice, vxlFile, hvaFile, palette, buildingType.ArtConfig.Remapable, vplFile);
                 loadedModels[turretImage] = BuildingTurretModels[i];
             }
 
@@ -824,7 +825,7 @@ namespace TSMapEditor.Rendering
                 var vxlFile = new VxlFile(vxlData, unitImage);
                 var hvaFile = new HvaFile(hvaData, unitImage);
 
-                UnitModels[i] = new VoxelModel(graphicsDevice, vxlFile, hvaFile, unitPalette, unitType.ArtConfig.Remapable, GetVplFile());
+                UnitModels[i] = new VoxelModel(graphicsDevice, vxlFile, hvaFile, unitPalette, unitType.ArtConfig.Remapable, vplFile);
                 loadedModels[unitImage] = UnitModels[i];
             }
 
@@ -868,7 +869,7 @@ namespace TSMapEditor.Rendering
                 var vxlFile = new VxlFile(vxlData, turretImage);
                 var hvaFile = new HvaFile(hvaData, turretImage);
 
-                UnitTurretModels[i] = new VoxelModel(graphicsDevice, vxlFile, hvaFile, unitPalette, unitType.ArtConfig.Remapable, GetVplFile());
+                UnitTurretModels[i] = new VoxelModel(graphicsDevice, vxlFile, hvaFile, unitPalette, unitType.ArtConfig.Remapable, vplFile);
                 loadedModels[turretImage] = UnitTurretModels[i];
             }
 
@@ -908,7 +909,7 @@ namespace TSMapEditor.Rendering
                 var vxlFile = new VxlFile(vxlData, aircraftImage);
                 var hvaFile = new HvaFile(hvaData, aircraftImage);
 
-                AircraftModels[i] = new VoxelModel(graphicsDevice, vxlFile, hvaFile, unitPalette, aircraftType.ArtConfig.Remapable, GetVplFile());
+                AircraftModels[i] = new VoxelModel(graphicsDevice, vxlFile, hvaFile, unitPalette, aircraftType.ArtConfig.Remapable, vplFile);
                 loadedModels[aircraftImage] = AircraftModels[i];
             }
 
@@ -1086,6 +1087,7 @@ namespace TSMapEditor.Rendering
         private readonly Palette unitPalette;
         private readonly Palette tiberiumPalette;
         private readonly Palette animPalette;
+        private readonly VplFile vplFile;
 
         private List<TileImage[]> terrainGraphicsList = new List<TileImage[]>();
         private List<TileImage[]> mmTerrainGraphicsList = new List<TileImage[]>();
