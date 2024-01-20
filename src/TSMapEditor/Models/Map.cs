@@ -171,6 +171,8 @@ namespace TSMapEditor.Models
         public ITheater TheaterInstance { get; set; }
         public string LoadedTheaterName => TheaterInstance.Theater.UIName;
 
+        public StringTable StringTable { get; private set; }
+
         private readonly Initializer initializer;
 
         private readonly CCFileManager ccFileManager;
@@ -256,6 +258,8 @@ namespace TSMapEditor.Models
             CreateGraphicalNodesFromBaseNodes();
 
             Lighting.ReadFromIniFile(mapIni);
+
+            StringTable = new(ccFileManager.CsfFiles);
         }
 
         private void CreateGraphicalNodesFromBaseNodes()
