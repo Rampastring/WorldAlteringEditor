@@ -13,16 +13,19 @@ namespace TSMapEditor.Mutations.Classes
     /// </summary>
     public class PlaceTerrainTileMutation : Mutation
     {
-        public PlaceTerrainTileMutation(IMutationTarget mutationTarget, Point2D targetCellCoords, TileImage tile) : base(mutationTarget)
+        public PlaceTerrainTileMutation(IMutationTarget mutationTarget, Point2D targetCellCoords, TileImage tile, int heightOffset) : base(mutationTarget)
         {
             this.targetCellCoords = targetCellCoords;
             this.tile = tile;
+            this.heightOffset = heightOffset;
             this.brushSize = mutationTarget.BrushSize;
         }
 
         private readonly Point2D targetCellCoords;
         private readonly TileImage tile;
+        private readonly int heightOffset;
         private readonly BrushSize brushSize;
+
         private List<OriginalTerrainData> undoData;
 
         private static readonly Point2D[] surroundingTiles = new Point2D[] { new Point2D(-1, 0), new Point2D(1, 0), new Point2D(0, -1), new Point2D(0, 1) };
@@ -91,6 +94,10 @@ namespace TSMapEditor.Mutations.Classes
                 }
             }
 
+            originLevel += heightOffset;
+            if (originLevel < 0)
+                originLevel = 0;
+
             // Place the terrain
             brushSize.DoForBrushSize(offset =>
             {
@@ -107,9 +114,6 @@ namespace TSMapEditor.Mutations.Classes
                     var mapTile = MutationTarget.Map.GetTile(cx, cy);
                     if (mapTile != null && (!MutationTarget.OnlyPaintOnClearGround || mapTile.IsClearGround()))
                     {
-                        if (originLevel < 0)
-                            originLevel = mapTile.Level;
-
                         mapTile.ChangeTileIndex(tile.TileID, (byte)i);
                         mapTile.Level = (byte)Math.Min(originLevel + image.TmpImage.Height, Constants.MaxMapHeightLevel);
                     }

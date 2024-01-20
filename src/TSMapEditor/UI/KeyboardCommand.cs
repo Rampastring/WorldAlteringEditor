@@ -102,13 +102,14 @@ namespace TSMapEditor.UI
 
     public class KeyboardCommand
     {
-        public KeyboardCommand(string iniName, string uiName, KeyboardCommandInput defaultKey, bool allowedWithModifiersOnly = false)
+        public KeyboardCommand(string iniName, string uiName, KeyboardCommandInput defaultKey, bool allowedWithModifiersOnly = false, bool forActionsOnly = false)
         {
             ININame = iniName;
             UIName = uiName;
             AllowedWithModifiersOnly = allowedWithModifiersOnly;
             DefaultKey = defaultKey;
             Key = new KeyboardCommandInput(defaultKey.Key, defaultKey.Modifiers);
+            ForActionsOnly = forActionsOnly;
         }
 
         public event EventHandler Triggered;
@@ -116,9 +117,9 @@ namespace TSMapEditor.UI
         public string ININame { get; }
         public string UIName { get; }
         public bool AllowedWithModifiersOnly { get; }
+        public bool ForActionsOnly { get; }
         public KeyboardCommandInput DefaultKey { get; }
         public KeyboardCommandInput Key { get; set; }
-        
 
         private Action action;
         public Action Action

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Rampastring.XNAUI.Input;
+using System;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations;
@@ -15,7 +16,43 @@ namespace TSMapEditor.UI.CursorActions
 
         public override string GetName() => "Place Terrain Tiles";
 
-        public TileImage Tile { get; set; }
+        public override bool HandlesKeyboardInput => true;
+
+        private TileImage _tile;
+        public TileImage Tile
+        {
+            get => _tile;
+            set
+            {
+                _tile = value;
+                heightOffset = 0;
+            }
+        }
+
+        private int heightOffset;
+
+        public override void OnActionEnter()
+        {
+            heightOffset = 0;
+        }
+
+        public override void OnKeyPressed(KeyPressEventArgs e)
+        {
+            if (KeyboardCommands.Instance.AdjustTileHeightDown.Key.Key == e.PressedKey)
+            {
+                if (heightOffset > -Constants.MaxMapHeight)
+                    heightOffset--;
+
+                e.Handled = true;
+            }
+            else if (KeyboardCommands.Instance.AdjustTileHeightUp.Key.Key == e.PressedKey)
+            {
+                if (heightOffset < Constants.MaxMapHeight)
+                    heightOffset++;
+
+                e.Handled = true;
+            }
+        }
 
         private Point2D GetAdjustedCellCoords(Point2D cellCoords)
         {
@@ -87,6 +124,10 @@ namespace TSMapEditor.UI.CursorActions
                 }
             }
 
+            originLevel += heightOffset;
+            if (originLevel < 0)
+                originLevel = 0;
+
             // Then apply the preview data
             brush.DoForBrushSize(offset =>
             {
@@ -103,9 +144,6 @@ namespace TSMapEditor.UI.CursorActions
                     var mapTile = CursorActionTarget.Map.GetTile(cx, cy);
                     if (mapTile != null && (!CursorActionTarget.OnlyPaintOnClearGround || mapTile.IsClearGround()))
                     {
-                        if (originLevel < 0)
-                            originLevel = mapTile.Level;
-
                         mapTile.PreviewSubTileIndex = i;
                         mapTile.PreviewLevel = Math.Min(originLevel + image.TmpImage.Height, Constants.MaxMapHeightLevel);
                         action(mapTile);
@@ -137,7 +175,7 @@ namespace TSMapEditor.UI.CursorActions
             }
             else
             {
-                mutation = new PlaceTerrainTileMutation(CursorActionTarget.MutationTarget, adjustedCellCoords, Tile);
+                mutation = new PlaceTerrainTileMutation(CursorActionTarget.MutationTarget, adjustedCellCoords, Tile, heightOffset);
             }
 
             CursorActionTarget.MutationManager.PerformMutation(mutation);

@@ -558,6 +558,9 @@ namespace TSMapEditor.UI
             // one if Alt is down
             foreach (var keyboardCommand in KeyboardCommands.Instance.Commands)
             {
+                if (keyboardCommand.ForActionsOnly)
+                    continue;
+
                 if (e.PressedKey == keyboardCommand.Key.Key)
                 {
                     // Key matches, check modifiers
@@ -586,6 +589,9 @@ namespace TSMapEditor.UI
             {
                 foreach (var keyboardCommand in KeyboardCommands.Instance.Commands)
                 {
+                    if (keyboardCommand.ForActionsOnly)
+                        continue;
+
                     if (e.PressedKey == keyboardCommand.Key.Key)
                     {
                         // Key matches, check modifiers
