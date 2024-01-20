@@ -23,7 +23,7 @@ namespace TSMapEditor.Models
                 anim.IsBuildingAnim = true;
                 anims.Add(anim);
             }
-            ActiveAnims = anims.ToArray();
+            Anims = anims.ToArray();
 
             if (objectType.Turret && !objectType.TurretAnimIsVoxel && objectType.ArtConfig.TurretAnim != null)
             {
@@ -43,7 +43,7 @@ namespace TSMapEditor.Models
             {
                 _position = value;
 
-                foreach (var anim in ActiveAnims)
+                foreach (var anim in Anims)
                     anim.Position = value;
 
                 if (TurretAnim != null)
@@ -59,7 +59,7 @@ namespace TSMapEditor.Models
             {
                 _owner = value;
 
-                foreach (var anim in ActiveAnims)
+                foreach (var anim in Anims)
                     anim.Owner = value;
 
                 if (TurretAnim != null)
@@ -108,7 +108,7 @@ namespace TSMapEditor.Models
 
         public bool AIRepairable { get; set; }
         public bool Nominal { get; set; }
-        public Animation[] ActiveAnims { get; set; }
+        public Animation[] Anims { get; set; }
         public Animation TurretAnim { get; set; }
 
         public override int GetYDrawOffset()
@@ -138,7 +138,7 @@ namespace TSMapEditor.Models
         {
             var clone = MemberwiseClone() as Structure;
 
-            clone.ActiveAnims = ActiveAnims.Select(anim => anim.Clone() as Animation).ToArray();
+            clone.Anims = Anims.Select(anim => anim.Clone() as Animation).ToArray();
 
             if (TurretAnim != null)
                 clone.TurretAnim = TurretAnim.Clone() as Animation;

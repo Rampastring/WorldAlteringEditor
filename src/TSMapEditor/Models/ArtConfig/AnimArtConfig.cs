@@ -10,6 +10,8 @@ namespace TSMapEditor.Models.ArtConfig
         public string Image { get; set; }
         public int YDrawOffset { get; set; }
         public int XDrawOffset { get; set; } // Phobos
+        public int BuildingAnimYSort { get; set; }
+        public int BuildingAnimZAdjust { get; set; }
         public bool NewTheater { get; set; }
         public bool Theater { get; set; }
         public bool AltPalette { get; set; }

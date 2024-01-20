@@ -196,6 +196,13 @@ namespace TSMapEditor.Models.ArtConfig
         }
     }
 
+    public struct BuildingAnimType
+    {
+        public string ININame { get; set; }
+        public int YSort { get; set; }
+        public int ZAdjust { get; set; }
+    }
+
     public class BuildingArtConfig : IArtConfig
     {
         public BuildingArtConfig() { }
@@ -208,7 +215,7 @@ namespace TSMapEditor.Models.ArtConfig
         public bool Theater { get; set; }
         public string Image { get; set; }
         public string BibShape { get; set; }
-        public string[] AnimNames { get; set; } = Array.Empty<string>();
+        public List<BuildingAnimType> BuildingAnimTypes { get; set; } = new();
         public AnimType[] Anims { get; set; } = Array.Empty<AnimType>();
         public AnimType TurretAnim { get; set; }
 
@@ -216,6 +223,13 @@ namespace TSMapEditor.Models.ArtConfig
         /// Palette override introduced in Red Alert 2.
         /// </summary>
         public string Palette { get; set; }
+
+        private static readonly Dictionary<string, string[]> BuildingAnimClasses = new()
+        {
+            { "ActiveAnim", new [] { "", "Two", "Three", "Four" } },
+            { "IdleAnim", new [] { "", "Two" } },
+            { "SuperAnim", new [] { "" } }
+        };
 
         public void ReadFromIniSection(IniSection iniSection)
         {
@@ -231,16 +245,32 @@ namespace TSMapEditor.Models.ArtConfig
             BibShape = iniSection.GetStringValue(nameof(BibShape), BibShape);
             Palette = iniSection.GetStringValue(nameof(Palette), Palette);
 
-            var animNames = new List<string>();
-            foreach (var i in new string[] { "", "Two", "Three", "Four" })
-            {
-                string animTypeName = iniSection.GetStringValue("ActiveAnim" + i, null);
-                if (string.IsNullOrEmpty(animTypeName))
-                    break;
+            var anims = new List<BuildingAnimType>();
 
-                animNames.Add(animTypeName);
+            foreach (var animClass in BuildingAnimClasses)
+            {
+                string name = animClass.Key;
+                string[] suffixes = animClass.Value;
+
+                foreach (var suffix in suffixes)
+                {
+                    string animTypeName = iniSection.GetStringValue(name + suffix, null);
+                    if (string.IsNullOrEmpty(animTypeName))
+                        break;
+
+                    int animYSort = iniSection.GetIntValue(name + suffix + "YSort", 0);
+                    int animZAdjust = iniSection.GetIntValue(name + suffix + "ZAdjust", 0);
+
+                    anims.Add(new BuildingAnimType
+                    {
+                        ININame = animTypeName,
+                        YSort = animYSort,
+                        ZAdjust = animZAdjust
+                    });
+                }
             }
-            AnimNames = animNames.ToArray();
+
+            BuildingAnimTypes = anims;
         }
 
         public void DoForFoundationCoords(Action<Point2D> action)
