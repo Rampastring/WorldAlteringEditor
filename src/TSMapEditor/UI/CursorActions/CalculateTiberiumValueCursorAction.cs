@@ -74,9 +74,9 @@ namespace TSMapEditor.UI.CursorActions
         {
             int tiberiumValue = 0;
 
-            for (int y = startY; y < endY; y++)
+            for (int y = startY; y <= endY; y++)
             {
-                for (int x = startX; x < endX; x++)
+                for (int x = startX; x <= endX; x++)
                 {
                     if (!Map.IsCoordWithinMap(x, y))
                         continue;
@@ -86,7 +86,7 @@ namespace TSMapEditor.UI.CursorActions
                     if (cell.Overlay == null || cell.Overlay.OverlayType == null || !cell.Overlay.OverlayType.Tiberium)
                         continue;
 
-                    int tiberiumIndex = cell.Overlay.OverlayType.GetTiberiumIndex();
+                    int tiberiumIndex = cell.Overlay.OverlayType.GetTiberiumIndex(Constants.UseCountries);
                     if (tiberiumIndex > -1)
                     {
                         int tiberiumTypeValue = Map.Rules.TiberiumTypes[tiberiumIndex].Value;
