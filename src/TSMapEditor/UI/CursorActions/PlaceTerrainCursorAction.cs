@@ -38,6 +38,9 @@ namespace TSMapEditor.UI.CursorActions
 
         public override void OnKeyPressed(KeyPressEventArgs e)
         {
+            if (Constants.IsFlatWorld)
+                return;
+
             if (KeyboardCommands.Instance.AdjustTileHeightDown.Key.Key == e.PressedKey)
             {
                 if (heightOffset > -Constants.MaxMapHeight)
