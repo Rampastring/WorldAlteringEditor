@@ -140,6 +140,9 @@ namespace TSMapEditor.Initialization
         {
             var buildingType = (BuildingType)obj;
             CommonTechnoInit(buildingType, rulesIni, section);
+
+            buildingType.RadialColor = section.KeyExists(nameof(buildingType.RadialColor)) ?
+                Helpers.ColorFromString(section.GetStringValue(nameof(buildingType.RadialColor), null)) : buildingType.RadialColor;
         }
 
         private void InitInfantryType(INIDefineable obj, IniFile rulesIni, IniSection section)

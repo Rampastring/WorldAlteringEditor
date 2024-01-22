@@ -23,6 +23,10 @@ namespace TSMapEditor.Models
 
         public override double GetCloakGeneratorRange() => 0.0;
 
+        public override double GetSensorArrayRange() => 0.0;
+
+        public override Color GetRadialColor() => Owner?.XNAColor ?? Color.White;
+
         public T ObjectType { get; }
     }
 
@@ -42,6 +46,8 @@ namespace TSMapEditor.Models
         public abstract double GetGuardRange();
         public abstract double GetGapGeneratorRange();
         public abstract double GetCloakGeneratorRange();
+        public abstract double GetSensorArrayRange();
+        public abstract Color GetRadialColor();
 
         public override Color GetRemapColor() => Remapable() ? Owner.XNAColor : Color.White;
     }

@@ -1120,7 +1120,13 @@ namespace TSMapEditor.Rendering
             range = TechnoUnderCursor.GetCloakGeneratorRange();
             if (range > 0.0)
             {
-                DrawRangeIndicator(TechnoUnderCursor.Position, range, Color.Black * 0.5f);
+                DrawRangeIndicator(TechnoUnderCursor.Position, range, TechnoUnderCursor.GetRadialColor());
+            }
+
+            range = TechnoUnderCursor.GetSensorArrayRange();
+            if (range > 0.0)
+            {
+                DrawRangeIndicator(TechnoUnderCursor.Position, range, TechnoUnderCursor.GetRadialColor());
             }
         }
 

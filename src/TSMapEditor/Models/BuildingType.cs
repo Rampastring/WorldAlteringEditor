@@ -1,4 +1,5 @@
-﻿using TSMapEditor.Models.ArtConfig;
+﻿using Microsoft.Xna.Framework;
+using TSMapEditor.Models.ArtConfig;
 
 namespace TSMapEditor.Models
 {
@@ -18,6 +19,8 @@ namespace TSMapEditor.Models
         public int TurretAnimX { get; set; }
         public int TurretAnimY { get; set; }
         public bool CloakGenerator { get; set; }
+        public bool SensorArray { get; set; }
+        public Color? RadialColor { get; set; }
         public int CloakRadiusInCells { get; set; }
 
         public BuildingArtConfig ArtConfig { get; set; } = new BuildingArtConfig();

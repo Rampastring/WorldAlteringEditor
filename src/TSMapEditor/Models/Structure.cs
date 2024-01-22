@@ -1,6 +1,7 @@
 ﻿using TSMapEditor.GameMath;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Xna.Framework;
 
 namespace TSMapEditor.Models
 {
@@ -122,6 +123,16 @@ namespace TSMapEditor.Models
         public override double GetCloakGeneratorRange()
         {
             return ObjectType.CloakGenerator ? ObjectType.CloakRadiusInCells : 0.0;
+        }
+
+        public override double GetSensorArrayRange()
+        {
+            return ObjectType.SensorArray ? ObjectType.CloakRadiusInCells : 0.0;
+        }
+
+        public override Color GetRadialColor()
+        {
+            return ObjectType.RadialColor.GetValueOrDefault(base.GetRadialColor());
         }
 
         public override int GetYDrawOffset()
