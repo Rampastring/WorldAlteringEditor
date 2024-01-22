@@ -107,6 +107,7 @@ namespace TSMapEditor
                 case 0x3:
                 case 0x4:
                 case 0x9:
+                case 0xA:
                     return considerLandUnitsOnly;
                 case 0x7:
                 case 0x8:
