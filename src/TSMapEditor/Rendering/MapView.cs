@@ -854,21 +854,55 @@ namespace TSMapEditor.Rendering
             // For buildings, we take their foundation into account when calculating their center pixel coords.
 
             // In case the pixels coords are identical, sort by RTTI type.
-            Point2D obj1point = obj1.WhatAmI() == RTTIType.Building ? GetBuildingCenterPoint((Structure)obj1) :
-                CellMath.CellCenterPointFromCellCoords(obj1.Position, Map);
+            Point2D obj1Point = GetObjectCoordsForComparison(obj1);
+            Point2D obj2Point = GetObjectCoordsForComparison(obj2);
 
-            Point2D obj2point = obj2.WhatAmI() == RTTIType.Building ? GetBuildingCenterPoint((Structure)obj2) :
-                CellMath.CellCenterPointFromCellCoords(obj2.Position, Map);
+            // Special case: building animation compared to its own building
+            if (obj1.WhatAmI() == RTTIType.Anim &&
+                obj2.WhatAmI() == RTTIType.Building &&
+                ((Animation)obj1).IsBuildingAnim &&
+                ((Animation)obj1).ParentBuilding == obj2)
+            {
+                const float leptonsDiagonal = 362.0f;
 
-            int result = obj1point.Y.CompareTo(obj2point.Y);
+                var anim = (Animation)obj1;
+                int animScore = obj1Point.X + obj1Point.Y +
+                                anim.AnimType.ArtConfig.BuildingAnimYSort -
+                                Convert.ToInt32(anim.AnimType.ArtConfig.BuildingAnimZAdjust / leptonsDiagonal * Constants.CellSizeY);
+
+                int buildingScore = obj2Point.X + obj2Point.Y;
+
+                return animScore - buildingScore;
+            }
+            else if (obj2.WhatAmI() == RTTIType.Anim &&
+                     obj1.WhatAmI() == RTTIType.Building &&
+                     ((Animation)obj2).IsBuildingAnim &&
+                     ((Animation)obj2).ParentBuilding == obj1)
+            {
+                return -CompareGameObjectsForRendering(obj2, obj1);
+            }
+
+            int result = obj1Point.Y.CompareTo(obj2Point.Y);
             if (result != 0)
                 return result;
 
-            result = obj1point.X.CompareTo(obj2point.X);
+            result = obj1Point.X.CompareTo(obj2Point.X);
             if (result != 0)
                 return result;
 
             return ((int)obj1.WhatAmI()).CompareTo((int)obj2.WhatAmI());
+        }
+
+        private Point2D GetObjectCoordsForComparison(GameObject obj)
+        {
+            return obj.WhatAmI() switch
+            {
+                RTTIType.Building => GetBuildingCenterPoint((Structure)obj),
+                RTTIType.Anim => ((Animation)obj).IsBuildingAnim ?
+                    GetBuildingCenterPoint(((Animation)obj).ParentBuilding) :
+                    CellMath.CellCenterPointFromCellCoords(obj.Position, Map),
+                _ => CellMath.CellCenterPointFromCellCoords(obj.Position, Map)
+            };
         }
 
         private void DrawSmudges()

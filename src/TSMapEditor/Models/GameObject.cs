@@ -37,7 +37,7 @@ namespace TSMapEditor.Models
 
         public virtual int GetShadowFrameIndex(int frameCount)
         {
-            return (frameCount / 2);
+            return frameCount / 2;
         }
 
         public override int GetHashCode()

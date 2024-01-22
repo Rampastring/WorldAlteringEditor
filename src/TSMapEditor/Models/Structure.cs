@@ -19,17 +19,25 @@ namespace TSMapEditor.Models
                 if (!animType.RenderInEditor)
                     continue;
 
-                var anim = new Animation(animType);
-                anim.IsBuildingAnim = true;
+                var anim = new Animation(animType)
+                {
+                    IsBuildingAnim = true,
+                    ParentBuilding = this
+                };
+
                 anims.Add(anim);
             }
             Anims = anims.ToArray();
 
             if (objectType.Turret && !objectType.TurretAnimIsVoxel && objectType.ArtConfig.TurretAnim != null)
             {
-                TurretAnim = new Animation(objectType.ArtConfig.TurretAnim);
-                TurretAnim.IsTurretAnim = TurretAnim.IsBuildingAnim = true;
-                TurretAnim.ExtraDrawOffset = new Point2D(objectType.TurretAnimX, objectType.TurretAnimY);
+                TurretAnim = new Animation(objectType.ArtConfig.TurretAnim)
+                {
+                    IsTurretAnim = true,
+                    IsBuildingAnim = true,
+                    ParentBuilding = this,
+                    ExtraDrawOffset = new Point2D(objectType.TurretAnimX, objectType.TurretAnimY)
+                };
             }
         }
 

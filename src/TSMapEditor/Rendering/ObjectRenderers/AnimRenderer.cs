@@ -28,7 +28,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             if (drawParams is not ShapeDrawParams shapeDrawParams || shapeDrawParams.Graphics == null)
                 return;
 
-            int frameIndex = gameObject.AnimType.ArtConfig.Start;
+            int frameIndex = gameObject.GetFrameIndex(shapeDrawParams.Graphics.GetFrameCount());
             if (gameObject.IsTurretAnim)
             {
                 // Turret anims have their facing frames reversed
