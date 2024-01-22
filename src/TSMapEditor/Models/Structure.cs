@@ -111,6 +111,11 @@ namespace TSMapEditor.Models
         public Animation[] Anims { get; set; }
         public Animation TurretAnim { get; set; }
 
+        public override double GetCloakGeneratorRange()
+        {
+            return ObjectType.CloakGenerator ? ObjectType.CloakRadiusInCells : 0.0;
+        }
+
         public override int GetYDrawOffset()
         {
             return Constants.CellSizeY / -2;

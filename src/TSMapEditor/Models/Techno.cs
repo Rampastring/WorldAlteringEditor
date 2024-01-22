@@ -13,11 +13,15 @@ namespace TSMapEditor.Models
 
         public override double GetGuardRange()
         {
-            if (ObjectType.GuardRange == 0.0)
-                return GetWeaponRange();
-
             return ObjectType.GuardRange > 0.0 ? ObjectType.GuardRange : GetWeaponRange();
         }
+
+        public override double GetGapGeneratorRange()
+        {
+            return ObjectType.GapGenerator ? ObjectType.GapRadiusInCells : 0.0;
+        }
+
+        public override double GetCloakGeneratorRange() => 0.0;
 
         public T ObjectType { get; }
     }
@@ -36,6 +40,8 @@ namespace TSMapEditor.Models
 
         public abstract double GetWeaponRange();
         public abstract double GetGuardRange();
+        public abstract double GetGapGeneratorRange();
+        public abstract double GetCloakGeneratorRange();
 
         public override Color GetRemapColor() => Remapable() ? Owner.XNAColor : Color.White;
     }
