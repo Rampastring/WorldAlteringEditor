@@ -313,6 +313,11 @@ namespace TSMapEditor.Models
 
                 var objectType = typeof(T);
 
+                // If we encounter the same object listed twice, don't create a duplicate
+                var iniNameProperty = objectType.GetProperty("ININame");
+                if (targetList.Exists(t => iniNameProperty?.GetValue(t)?.ToString() == typeName))
+                    continue;
+
                 // We assume that the type has a constructor
                 // that takes a single string (ININame) as a parameter
                 var constructor = objectType.GetConstructor(new Type[] { typeof(string) });
