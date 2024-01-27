@@ -407,8 +407,7 @@ namespace TSMapEditor.UI
 
             string error = MapSetup.InitializeMap(UserSettings.Instance.GameDirectory, createNew,
                 loadMapFilePath,
-                createNew ? newMapInfo.Theater : null,
-                createNew ? newMapInfo.MapSize : Point2D.Zero,
+                createNew ? newMapInfo : null,
                 WindowManager);
 
             if (error != null)

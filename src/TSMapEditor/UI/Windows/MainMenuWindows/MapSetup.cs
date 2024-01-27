@@ -30,7 +30,7 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
         /// <param name="newMapSize">The size of the map, if creating a new map.</param>
         /// <param name="windowManager">The XNAUI window manager.</param>
         /// <returns>Null of loading the map was successful, otherwise an error message.</returns>
-        public static string InitializeMap(string gameDirectory, bool createNew, string existingMapPath, string newMapTheater, Point2D newMapSize, WindowManager windowManager)
+        public static string InitializeMap(string gameDirectory, bool createNew, string existingMapPath, CreateNewMapEventArgs newMapParameters, WindowManager windowManager)
         {
             ccFileManager = new() { GameDirectory = gameDirectory };
             ccFileManager.ReadConfig();
@@ -49,7 +49,10 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
 
             if (createNew)
             {
-                map.InitNew(rulesIni, firestormIni, artIni, artFSIni, newMapTheater, newMapSize);
+                if (newMapParameters == null)
+                    throw new NullReferenceException("Null new map parameters encountered when creating a new map!");
+
+                map.InitNew(rulesIni, firestormIni, artIni, artFSIni, newMapParameters.Theater, newMapParameters.MapSize, newMapParameters.StartingLevel);
             }
             else
             {

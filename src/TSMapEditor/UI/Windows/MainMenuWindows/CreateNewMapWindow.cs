@@ -1,6 +1,7 @@
 ﻿using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
+using System.Globalization;
 using TSMapEditor.GameMath;
 using TSMapEditor.UI.Controls;
 
@@ -8,14 +9,16 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
 {
     public class CreateNewMapEventArgs : EventArgs
     {
-        public CreateNewMapEventArgs(string theater, Point2D mapSize)
+        public CreateNewMapEventArgs(string theater, Point2D mapSize, byte startingLevel)
         {
             Theater = theater;
             MapSize = mapSize;
+            StartingLevel = startingLevel;
         }
 
         public string Theater { get; }
         public Point2D MapSize { get; }
+        public byte StartingLevel { get; }
     }
 
     public class CreateNewMapWindow : INItializableWindow
@@ -35,6 +38,7 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
         private XNADropDown ddTheater;
         private EditorNumberTextBox tbWidth;
         private EditorNumberTextBox tbHeight;
+        private XNADropDown ddStartingLevel;
 
 
         public override void Initialize()
@@ -47,10 +51,19 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
             ddTheater = FindChild<XNADropDown>(nameof(ddTheater));
             tbWidth = FindChild<EditorNumberTextBox>(nameof(tbWidth));
             tbHeight = FindChild<EditorNumberTextBox>(nameof(tbHeight));
+            ddStartingLevel = FindChild<XNADropDown>(nameof(ddStartingLevel));
 
             FindChild<EditorButton>("btnCreate").LeftClick += BtnCreate_LeftClick;
 
             ddTheater.SelectedIndex = 0;
+
+            if (!Constants.IsFlatWorld)
+            {
+                for (byte i = 0; i <= Constants.MaxMapHeightLevel; i++)
+                    ddStartingLevel.AddItem(new XNADropDownItem() { Text = i.ToString(CultureInfo.InvariantCulture), Tag = i });
+
+                ddStartingLevel.SelectedIndex = 0;
+            }
 
             CenterOnParent();
         }
@@ -92,7 +105,8 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
                 return;
             }
 
-            OnCreateNewMap?.Invoke(this, new CreateNewMapEventArgs(ddTheater.SelectedItem.Text, new Point2D(tbWidth.Value, tbHeight.Value)));
+            OnCreateNewMap?.Invoke(this, new CreateNewMapEventArgs(ddTheater.SelectedItem.Text, 
+                new Point2D(tbWidth.Value, tbHeight.Value), Constants.IsFlatWorld ? (byte)0 : (byte)ddStartingLevel.SelectedItem.Tag));
             WindowManager.RemoveControl(this);
         }
     }

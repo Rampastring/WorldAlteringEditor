@@ -1,4 +1,4 @@
-﻿using Rampastring.XNAUI;
+using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;
@@ -29,6 +29,7 @@ namespace TSMapEditor.UI
             globalConstants.Add("BUTTON_HEIGHT", Constants.UIButtonHeight);
             globalConstants.Add("USE_COUNTRIES", Constants.UseCountries ? 1 : 0);
             globalConstants.Add("OBJECT_HEALTH_MAX", Constants.ObjectHealthMax);
+            globalConstants.Add("IS_FLAT_WORLD", Constants.IsFlatWorld ? 1 : 0);
 
             _instance = this;
         }

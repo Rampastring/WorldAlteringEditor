@@ -42,7 +42,7 @@ namespace TSMapEditor.Initialization
         Rectangle LocalSize { get; set; }
         string TheaterName { get; set; }
 
-        void SetTileData(List<MapTile> tiles);
+        void SetTileData(List<MapTile> tiles, byte defaultLevel = 0, bool overrideExisting = false);
         void PlaceTerrainTileAt(ITileImage tile, Point2D cellCoords);
         List<HouseType> GetHouseTypes();
         HouseType FindHouseType(string houseTypeName);

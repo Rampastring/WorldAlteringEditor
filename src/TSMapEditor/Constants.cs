@@ -39,7 +39,7 @@ namespace TSMapEditor
         public static int MaxMapWidth;
         public static int MaxMapHeight;
 
-        public const int MaxMapHeightLevel = 14;
+        public const byte MaxMapHeightLevel = 12;
 
         public static int MaxWaypoint = 100;
 
