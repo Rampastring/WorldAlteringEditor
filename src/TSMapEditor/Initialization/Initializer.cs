@@ -134,6 +134,12 @@ namespace TSMapEditor.Initialization
 
             if (technoType.ElitePrimary == null)
                 technoType.ElitePrimary = FetchWeapon(rulesIni, section, "Elite");
+
+            if (technoType.ElitePrimary == null)
+                technoType.ElitePrimary = FetchWeapon(rulesIni, section, "ElitePrimary");
+
+            if (technoType.EliteSecondary == null)
+                technoType.EliteSecondary = FetchWeapon(rulesIni, section, "EliteSecondary");
         }
 
         private void InitBuildingType(INIDefineable obj, IniFile rulesIni, IniSection section)
