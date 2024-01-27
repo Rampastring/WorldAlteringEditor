@@ -3,7 +3,6 @@ using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Linq;
-using TSMapEditor.GameMath;
 using TSMapEditor.Misc;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations;
@@ -191,6 +190,7 @@ namespace TSMapEditor.UI
             // This makes the exit process technically faster, but the editor stays longer on the
             // screen so practically increases exit time from the user's perspective
             // WindowManager.GameClosing += (s, e) => ClearResources();
+            WindowManager.SetMaximizeBox(true);
             WindowManager.GameClosing += WindowManager_GameClosing;
             WindowManager.WindowSizeChangedByUser += WindowManager_WindowSizeChangedByUser;
             KeyboardCommands.Instance.ToggleFullscreen.Triggered += ToggleFullscreen_Triggered;
@@ -229,8 +229,6 @@ namespace TSMapEditor.UI
                 const int MarginY = 200;
                 WindowManager.SetBorderlessMode(false);
                 Game.Window.AllowUserResizing = true;
-                var form = (System.Windows.Forms.Form)System.Windows.Forms.Form.FromHandle(Game.Window.Handle);
-                form.MaximizeBox = false;
                 WindowManager.InitGraphicsMode(WindowManager.WindowWidth - MarginX, WindowManager.WindowHeight - MarginY, false);
                 WindowManager_WindowSizeChangedByUser(this, EventArgs.Empty);
                 WindowManager.CenterOnScreen();
@@ -238,11 +236,16 @@ namespace TSMapEditor.UI
             else
             {
 #if WINDOWS
+                // Hack to prevent Windows or MG from weirdly assigning our window off-screen
+                // upon switching to fullscreen mode if our window happens to be maximized
+                System.Windows.Forms.Form form = (System.Windows.Forms.Form)System.Windows.Forms.Control.FromHandle(Game.Window.Handle);
+                form.WindowState = System.Windows.Forms.FormWindowState.Normal;
+
+                WindowManager.SetBorderlessMode(true);
+                Game.Window.AllowUserResizing = false;
                 var screen = System.Windows.Forms.Screen.FromHandle(Game.Window.Handle);
                 WindowManager.InitGraphicsMode(screen.Bounds.Width, screen.Bounds.Height, true);
-                Game.Window.AllowUserResizing = false;
                 WindowManager_WindowSizeChangedByUser(this, EventArgs.Empty);
-                WindowManager.SetBorderlessMode(true);
                 WindowManager.CenterOnScreen();
 #endif
             }
