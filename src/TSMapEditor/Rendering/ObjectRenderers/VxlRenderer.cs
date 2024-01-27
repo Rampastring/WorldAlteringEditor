@@ -112,8 +112,12 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 Rectangle sectionImageBounds = GetSectionBounds(section, world, sectionTransform);
                 imageBounds = Rectangle.Union(imageBounds, sectionImageBounds);
             }
-            
+
             /********** Rendering *********/
+
+            // The model is actually empty, return null so we can draw replacement text
+            if (vertexData.Count == 0)
+                return null;
 
             var renderTarget = new RenderTarget2D(graphicsDevice, Convert.ToInt32(imageBounds.Width / ModelScale), Convert.ToInt32(imageBounds.Height / ModelScale), false, SurfaceFormat.Color, DepthFormat.Depth24);
             Renderer.PushRenderTarget(renderTarget);
