@@ -755,6 +755,11 @@ namespace TSMapEditor.Initialization
                     continue;
 
                 var taskForce = TaskForce.ParseTaskForce(map.Rules, mapIni.GetSection(kvp.Value));
+                if (taskForce == null)
+                {
+                    AddMapLoadError($"Failed to load TaskForce {kvp.Value}. It might be missing a section or be otherwise invalid.");
+                    continue;
+                }
 
                 map.AddTaskForce(taskForce);
             }
