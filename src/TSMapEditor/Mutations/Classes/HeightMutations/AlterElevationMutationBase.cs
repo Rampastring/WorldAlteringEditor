@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
@@ -12,7 +13,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
         protected AlterElevationMutationBase(IMutationTarget mutationTarget, Point2D originCell, BrushSize brushSize) : base(mutationTarget)
         {
             OriginCell = originCell;
-            BrushSize = brushSize;
+            BrushSize = brushSize ?? throw new ArgumentNullException(nameof(brushSize));
             RampTileSet = Map.TheaterInstance.Theater.RampTileSet;
         }
 

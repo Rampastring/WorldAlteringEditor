@@ -10,7 +10,7 @@ using HCT = TSMapEditor.Mutations.Classes.HeightMutations.HeightComparisonType;
 
 namespace TSMapEditor.Mutations.Classes.HeightMutations
 {
-    internal class FSLowerGroundMutation : LowerGroundMutationBase
+    public class FSLowerGroundMutation : LowerGroundMutationBase
     {
         public FSLowerGroundMutation(IMutationTarget mutationTarget, Point2D originCell, BrushSize brushSize) : base(mutationTarget, originCell, brushSize)
         {

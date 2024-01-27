@@ -45,6 +45,7 @@ namespace TSMapEditor.UI.TopBar
         private CheckDistanceCursorAction checkDistanceCursorAction;
         private CalculateTiberiumValueCursorAction calculateTiberiumValueCursorAction;
         private ManageBaseNodesCursorAction manageBaseNodesCursorAction;
+        private PlaceVeinholeMonsterCursorAction placeVeinholeMonsterCursorAction;
 
         private SelectBridgeWindow selectBridgeWindow;
 
@@ -58,6 +59,7 @@ namespace TSMapEditor.UI.TopBar
             checkDistanceCursorAction = new CheckDistanceCursorAction(mapView);
             calculateTiberiumValueCursorAction = new CalculateTiberiumValueCursorAction(mapView);
             manageBaseNodesCursorAction = new ManageBaseNodesCursorAction(mapView);
+            placeVeinholeMonsterCursorAction = new PlaceVeinholeMonsterCursorAction(mapView);
 
             selectBridgeWindow = new SelectBridgeWindow(WindowManager, map);
             var selectBridgeDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectBridgeWindow);
@@ -120,6 +122,12 @@ namespace TSMapEditor.UI.TopBar
             editContextMenu.AddItem("Clear IceGrowth", () => { mapView.EditorState.CursorAction = toggleIceGrowthCursorAction; toggleIceGrowthCursorAction.ToggleIceGrowth = false; mapView.EditorState.HighlightIceGrowth = true; }, null, null, null);
             editContextMenu.AddItem(" ", null, () => false, null, null);
             editContextMenu.AddItem("Manage Base Nodes", ManageBaseNodes_Selected, null, null, null);
+
+            if (map.Rules.OverlayTypes.Exists(ot => ot.ININame == Constants.VeinholeMonsterTypeName) && map.Rules.OverlayTypes.Exists(ot => ot.ININame == Constants.VeinholeDummyTypeName))
+            {
+                editContextMenu.AddItem(" ", null, () => false, null, null);
+                editContextMenu.AddItem("Place Veinhole Monster", () => mapView.EditorState.CursorAction = placeVeinholeMonsterCursorAction, null, null, null, null);
+            }
 
             var editButton = new MenuButton(WindowManager, editContextMenu);
             editButton.Name = nameof(editButton);
