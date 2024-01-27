@@ -1,6 +1,5 @@
-Dawn of the Tiberium Age Scenario Editor
-Copyright (C) Rami 'Rampastring' Pasanen 2021
-http://rampastring.net
+World-Altering Editor
+Copyright (C) Rami 'Rampastring' Pasanen 2024
 https://github.com/Rampastring
 https://www.moddb.com/mods/the-dawn-of-the-tiberium-age
 
