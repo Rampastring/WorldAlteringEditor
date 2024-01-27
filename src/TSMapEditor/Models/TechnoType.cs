@@ -16,6 +16,7 @@ namespace TSMapEditor.Models
         public Weapon Secondary { get; set; }
         public Weapon ElitePrimary { get; set; }
         public Weapon EliteSecondary { get; set; }
+        public int WeaponCount { get; set; }
 
         public double GuardRange { get; set; }
 

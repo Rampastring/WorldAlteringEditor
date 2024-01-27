@@ -1,6 +1,7 @@
 ﻿using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using TSMapEditor.Models;
 using TSMapEditor.Models.ArtConfig;
 using TSMapEditor.Models.Enums;
@@ -140,6 +141,14 @@ namespace TSMapEditor.Initialization
 
             if (technoType.EliteSecondary == null)
                 technoType.EliteSecondary = FetchWeapon(rulesIni, section, "EliteSecondary");
+
+            // RA2/YR IFV weapon logic
+            for (int i = 1; i <= technoType.WeaponCount; i++)
+            {
+                // Just load these weapons, do not assign them
+                FetchWeapon(rulesIni, section, "Weapon" + i.ToString(CultureInfo.InvariantCulture));
+                FetchWeapon(rulesIni, section, "EliteWeapon" + i.ToString(CultureInfo.InvariantCulture));
+            }
         }
 
         private void InitBuildingType(INIDefineable obj, IniFile rulesIni, IniSection section)
