@@ -16,6 +16,8 @@ namespace TSMapEditor.Rendering
 {
     public class GameClass : Microsoft.Xna.Framework.Game
     {
+        private const double PowerSavingTime = 100.0;
+
         private GraphicsDeviceManager graphics;
 
         public GameClass()
@@ -45,7 +47,7 @@ namespace TSMapEditor.Rendering
             Window.Title = "C&C World-Altering Editor (WAE)";
 
             //IsFixedTimeStep = false;
-            TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / UserSettings.Instance.TargetFPS);
+            SetTargetFPS();
         }
 
         private void HandleUnhandledException(Exception ex)
@@ -84,6 +86,8 @@ namespace TSMapEditor.Rendering
         }
 
         private WindowManager windowManager;
+
+        private bool wasActiveOnPreviousFrame;
 
         private readonly char DSC = Path.DirectorySeparatorChar;
 
@@ -138,6 +142,26 @@ namespace TSMapEditor.Rendering
             var mainMenu = new MainMenu(windowManager);
             windowManager.AddAndInitializeControl(mainMenu);
             windowManager.CenterControlOnScreen(mainMenu);
+        }
+
+        private void SetTargetFPS()
+        {
+            TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / UserSettings.Instance.TargetFPS);
+        }
+
+        protected override void Update(GameTime gameTime)
+        {
+            if (IsActive != wasActiveOnPreviousFrame)
+            {
+                if (!IsActive)
+                    TargetElapsedTime = TimeSpan.FromMilliseconds(PowerSavingTime); // Don't run at max FPS if we're not the active window
+                else
+                    SetTargetFPS();
+
+                wasActiveOnPreviousFrame = IsActive;
+            }
+
+            base.Update(gameTime);
         }
     }
 }
