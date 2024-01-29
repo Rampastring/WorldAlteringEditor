@@ -59,7 +59,6 @@ namespace TSMapEditor.UI
             AddChild(tbSearch);
             UIHelpers.AddSearchTipsBoxToControl(tbSearch);
             tbSearch.TextChanged += TbSearch_TextChanged;
-            tbSearch.EnterPressed += (s, e) => FindNext();
 
             lbTileSetList = new XNAListBox(WindowManager);
             lbTileSetList.Name = nameof(lbTileSetList);
@@ -102,24 +101,28 @@ namespace TSMapEditor.UI
 
         private void TbSearch_TextChanged(object sender, EventArgs e)
         {
+            lbTileSetList.ViewTop = 0;
+
             if (string.IsNullOrWhiteSpace(tbSearch.Text) || tbSearch.Text == tbSearch.Suggestion)
-                return;
-
-            lbTileSetList.SelectedIndex = -1;
-            FindNext();
-        }
-
-        private void FindNext()
-        {
-            for (int i = lbTileSetList.SelectedIndex + 1; i < lbTileSetList.Items.Count; i++)
             {
-                if (lbTileSetList.Items[i].Text.ToUpperInvariant().Contains(tbSearch.Text.ToUpperInvariant()))
+                foreach (var item in lbTileSetList.Items)
+                    item.Visible = true;
+            }
+            else
+            {
+                lbTileSetList.SelectedIndex = -1;
+
+                for (int i = 0; i < lbTileSetList.Items.Count; i++)
                 {
-                    lbTileSetList.SelectedIndex = i;
-                    lbTileSetList.ViewTop = lbTileSetList.SelectedIndex * lbTileSetList.LineHeight;
-                    break;
+                    var item = lbTileSetList.Items[i];
+                    item.Visible = item.Text.Contains(tbSearch.Text, StringComparison.OrdinalIgnoreCase);
+
+                    if (item.Visible && lbTileSetList.SelectedIndex == -1)
+                        lbTileSetList.SelectedIndex = i;
                 }
             }
+
+            lbTileSetList.RefreshScrollbar();
         }
 
         private void NextTileSet()
