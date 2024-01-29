@@ -55,7 +55,7 @@ namespace TSMapEditor.UI.Windows
             FindChild<EditorButton>("btnSelect").LeftClick += (s, e) => Hide();
 
             tbSearch.TextChanged += TbSearch_TextChanged;
-            tbSearch.EnterPressed += (s, e) => FindNext();
+            tbSearch.EnterPressed += (s, e) => { if (lbObjectList.SelectedItem != null) Hide(); };
 
             // Make pressing X not save changes
             if (btnClose != null)
@@ -69,11 +69,28 @@ namespace TSMapEditor.UI.Windows
 
         private void TbSearch_TextChanged(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(tbSearch.Text) || tbSearch.Text == tbSearch.Suggestion)
-                return;
+            lbObjectList.ViewTop = 0;
 
-            lbObjectList.SelectedIndex = -1;
-            FindNext();
+            if (string.IsNullOrWhiteSpace(tbSearch.Text) || tbSearch.Text == tbSearch.Suggestion)
+            {
+                foreach (var item in lbObjectList.Items)
+                    item.Visible = true;
+            }
+            else
+            {
+                lbObjectList.SelectedIndex = -1;
+
+                for (int i = 0; i < lbObjectList.Items.Count; i++)
+                {
+                    var item = lbObjectList.Items[i];
+                    item.Visible = item.Text.Contains(tbSearch.Text, StringComparison.OrdinalIgnoreCase);
+
+                    if (item.Visible && lbObjectList.SelectedIndex == -1)
+                        lbObjectList.SelectedIndex = i;
+                }
+            }
+
+            lbObjectList.RefreshScrollbar();
         }
 
         private void SelectObjectWindow_EnabledChanged(object sender, EventArgs e)
@@ -81,19 +98,6 @@ namespace TSMapEditor.UI.Windows
             if (!Enabled)
             {
                 HideInfoPanel();
-            }
-        }
-
-        private void FindNext()
-        {
-            for (int i = lbObjectList.SelectedIndex + 1; i < lbObjectList.Items.Count; i++)
-            {
-                if (lbObjectList.Items[i].Text.ToUpperInvariant().Contains(tbSearch.Text.ToUpperInvariant()))
-                {
-                    lbObjectList.SelectedIndex = i;
-                    lbObjectList.ViewTop = lbObjectList.SelectedIndex * lbObjectList.LineHeight;
-                    break;
-                }
             }
         }
 
@@ -130,6 +134,8 @@ namespace TSMapEditor.UI.Windows
             }
 
             Show();
+
+            tbSearch.Text = string.Empty;
             WindowManager.SelectedControl = tbSearch;
         }
 
