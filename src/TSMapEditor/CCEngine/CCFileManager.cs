@@ -224,7 +224,8 @@ namespace TSMapEditor.CCEngine
             {
                 case "$TSECACHE":
                 case "$RA2ECACHE":
-                case "$ELOCAL":
+                case "$TSELOCAL":
+                case "$RA2ELOCAL":
                 case "$EXPAND":
                 case "$EXPANDMD":
                     return true;
