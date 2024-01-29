@@ -253,6 +253,9 @@ namespace TSMapEditor.UI
 
         private void WindowManager_WindowSizeChangedByUser(object sender, EventArgs e)
         {
+            if (Game.Window.ClientBounds.Width == 0 || Game.Window.ClientBounds.Height == 0)
+                return;
+
             int newRenderWidth = (int)(Game.Window.ClientBounds.Width / UserSettings.Instance.RenderScale);
             int newRenderHeight = (int)(Game.Window.ClientBounds.Height / UserSettings.Instance.RenderScale);
 
