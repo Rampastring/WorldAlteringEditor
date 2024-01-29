@@ -4,6 +4,7 @@ using Rampastring.Tools;
 using Rampastring.XNAUI;
 using System;
 using System.Globalization;
+using System.IO;
 using TSMapEditor.GameMath;
 using TSMapEditor.Initialization;
 using TSMapEditor.Models;
@@ -322,6 +323,13 @@ namespace TSMapEditor
             {
                 houseType.Side = rules.Sides[0];
             }
+        }
+
+        public static string NormalizePath(string path)
+        {
+            return Path.GetFullPath(new Uri(path).LocalPath)
+                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                .ToUpperInvariant();
         }
     }
 }

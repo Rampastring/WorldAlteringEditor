@@ -100,7 +100,7 @@ namespace TSMapEditor.CCEngine
 
             for (i = 0; i < 10000; i++)
             {
-                IniSection tileSetSection = theaterIni.GetSection(string.Format("TileSet{0:D4}", i));
+                IniSection tileSetSection = theaterIni.GetSection($"TileSet{i:D4}");
 
                 if (tileSetSection == null)
                     break;

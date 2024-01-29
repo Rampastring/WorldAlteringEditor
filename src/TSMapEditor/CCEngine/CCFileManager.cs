@@ -1,4 +1,4 @@
-﻿using Rampastring.Tools;
+using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,34 +8,35 @@ namespace TSMapEditor.CCEngine
     public class CCFileManager
     {
         public string GameDirectory { get; set; }
+        
+        private List<string> searchDirectories = new();
 
         /// <summary>
         /// Contains information on which MIX file each found game file can be loaded from.
         /// </summary>
-        private Dictionary<uint, FileLocationInfo> fileLocationInfos = new Dictionary<uint, FileLocationInfo>();
+        private Dictionary<uint, FileLocationInfo> fileLocationInfos = new();
 
         /// <summary>
-        /// List of all MIX files that have been registered to the file manager.
+        /// List of all MIX files that have been registered with the file manager.
         /// </summary>
-        private List<MixFile> mixFiles = new List<MixFile>();
+        private List<MixFile> mixFiles = new();
 
         /// <summary>
-        /// List of all CSF files that have been registered to the file manager.
+        /// List of all CSF files that have been registered with the file manager.
         /// </summary>
         public List<CsfFile> CsfFiles { get; } = new();
 
-        private List<string> searchDirectories = new List<string>();
-
-
         public void ReadConfig()
         {
-            var iniFile = new IniFile(Environment.CurrentDirectory + "/Config/FileManagerConfig.ini");
+            string configPath =
+                Helpers.NormalizePath(Path.Combine(Environment.CurrentDirectory, "Config", "FileManagerConfig.ini"));
+            var iniFile = new IniFile(configPath);
 
             AddSearchDirectory(Environment.CurrentDirectory);
             iniFile.DoForEveryValueInSection("SearchDirectories", v => AddSearchDirectory(Path.Combine(GameDirectory, v)));
-            iniFile.DoForEveryValueInSection("PrimaryMIXFiles", v => LoadPrimaryMixFile(v));
-            iniFile.DoForEveryValueInSection("SecondaryMIXFiles", v => LoadSecondaryMixFile(v));
-            iniFile.DoForEveryValueInSection("StringTables", v => LoadStringTable(v));
+            iniFile.DoForEveryValueInSection("PrimaryMIXFiles", LoadPrimaryMixFile);
+            iniFile.DoForEveryValueInSection("SecondaryMIXFiles", LoadSecondaryMixFile);
+            iniFile.DoForEveryValueInSection("StringTables", LoadStringTable);
         }
 
         /// <summary>
@@ -45,10 +46,7 @@ namespace TSMapEditor.CCEngine
         /// <param name="path">The path to the directory.</param>
         public void AddSearchDirectory(string path)
         {
-            char lastChar = path[path.Length - 1];
-            if (lastChar != '/' && lastChar != '\\')
-                path = path + "/";
-            searchDirectories.Add(path);
+            searchDirectories.Add(Helpers.NormalizePath(path));
         }
 
         /// <summary>
@@ -58,7 +56,7 @@ namespace TSMapEditor.CCEngine
         /// </summary>
         /// <param name="name">The name of the MIX file.</param>
         /// <returns>True if the MIX file was successfully loaded, otherwise false.</returns>
-        private bool LoadMIXFile(string name)
+        private bool LoadMixFile(string name)
         {
             uint identifier = MixFile.GetFileID(name);
 
@@ -91,7 +89,7 @@ namespace TSMapEditor.CCEngine
 
             foreach (string dir in searchDirectories)
             {
-                if (File.Exists(dir + name))
+                if (File.Exists(Path.Combine(dir, name)))
                 {
                     searchDir = dir;
                     break;
@@ -102,7 +100,7 @@ namespace TSMapEditor.CCEngine
                 return false;
 
             var mixFile = new MixFile();
-            mixFile.Parse(searchDir + name);
+            mixFile.Parse(Path.Combine(searchDir, name));
             AddMix(mixFile);
 
             return true;
@@ -119,6 +117,9 @@ namespace TSMapEditor.CCEngine
 
             foreach (MixFileEntry fileEntry in mixFile.GetEntries())
             {
+                if (fileLocationInfos.ContainsKey(fileEntry.Identifier))
+                    continue;
+
                 fileLocationInfos[fileEntry.Identifier] = new FileLocationInfo(mixFile, fileEntry.Offset, fileEntry.Size);
             }
         }
@@ -130,7 +131,13 @@ namespace TSMapEditor.CCEngine
         /// <param name="name">The name of the MIX file.</param>
         public void LoadPrimaryMixFile(string name)
         {
-            if (!LoadMIXFile(name))
+            if (IsSpecialMixName(name))
+            {
+                HandleSpecialMixName(name);
+                return;
+            }
+
+            if (!LoadMixFile(name))
             {
                 throw new FileNotFoundException("Primary MIX file not found: " + name);
             }
@@ -143,9 +150,36 @@ namespace TSMapEditor.CCEngine
         /// <param name="name">The name of the MIX file.</param>
         public void LoadSecondaryMixFile(string name)
         {
-            if (!LoadMIXFile(name))
+            if (!LoadMixFile(name))
             {
                 Logger.Log("Secondary MIX file not found: " + name);
+            }
+        }
+
+        /// <summary>
+        /// Loads MIX files of the format NAME##.
+        /// </summary>
+        /// <param name="name">The common name of the MIX files.</param>
+        public void LoadIndexedMixFiles(string name)
+        {
+            for (int i = 99; i >= 0; i--)
+                LoadMixFile($"{name}{i:00}.mix");
+        }
+
+        /// <summary>
+        /// Loads MIX files with a wildcard.
+        /// </summary>
+        /// <param name="name">The common name of the MIX files.</param>
+        public void LoadWildcardMixFiles(string name)
+        {
+            foreach (string searchDirectory in searchDirectories)
+            {
+                if (!Directory.Exists(searchDirectory))
+                    continue;
+
+                var files = Directory.GetFiles(searchDirectory, name);
+                foreach (string file in files)
+                    LoadMixFile(Path.GetFileName(file));
             }
         }
 
@@ -166,8 +200,12 @@ namespace TSMapEditor.CCEngine
 
         public byte[] LoadFile(string name)
         {
-            if (File.Exists(Path.Combine(Environment.CurrentDirectory, name)))
-                return File.ReadAllBytes(Path.Combine(Environment.CurrentDirectory, name));
+            foreach (string searchDirectory in searchDirectories)
+            {
+                string looseFilePath = Path.Combine(searchDirectory, name);
+                if (File.Exists(looseFilePath))
+                    return File.ReadAllBytes(looseFilePath);
+            }
 
             uint id = MixFile.GetFileID(name);
 
@@ -177,6 +215,48 @@ namespace TSMapEditor.CCEngine
             }
 
             return null;
+        }
+
+        private bool IsSpecialMixName(string name)
+        {
+            name = name.ToUpper();
+            switch (name)
+            {
+                case "$TSECACHE":
+                case "$RA2ECACHE":
+                case "$ELOCAL":
+                case "$EXPAND":
+                case "$EXPANDMD":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private void HandleSpecialMixName(string name)
+        {
+            name = name.ToUpper();
+            switch (name)
+            {
+                case "$TSECACHE":
+                    LoadIndexedMixFiles("ecache");
+                    break;
+                case "$RA2ECACHE":
+                    LoadWildcardMixFiles("ecache*.mix");
+                    break;
+                case "$TSELOCAL":
+                    LoadIndexedMixFiles("elocal");
+                    break;
+                case "$RA2ELOCAL":
+                    LoadWildcardMixFiles("elocal*.mix");
+                    break;
+                case "$EXPAND":
+                    LoadIndexedMixFiles("expand");
+                    break;
+                case "$EXPANDMD":
+                    LoadIndexedMixFiles("expandmd");
+                    break;
+            }
         }
     }
 
