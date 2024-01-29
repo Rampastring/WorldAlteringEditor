@@ -40,6 +40,9 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
         public static Texture2D Render(GraphicsDevice graphicsDevice, byte facing, RampType ramp, VxlFile vxl, HvaFile hva, Palette palette, VplFile vpl = null, bool forRemap = false)
         {
+            if (vxl.Sections.Count > hva.Sections.Count)
+                return null;
+
             /*********** Voxel space setup **********/
 
             float rotationFromFacing = 2 * (float)Math.PI * ((float)facing / Constants.FacingMax);
