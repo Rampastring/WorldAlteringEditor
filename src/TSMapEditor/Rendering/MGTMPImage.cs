@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Rampastring.Tools;
+using System;
 using TSMapEditor.CCEngine;
 
 namespace TSMapEditor.Rendering
@@ -48,8 +50,19 @@ namespace TSMapEditor.Rendering
 
         public void Dispose()
         {
-            if (Texture != null)
-                Texture.Dispose();
+            if (Texture == null && ExtraTexture == null)
+                return;
+
+            // Workaround for a bug in SharpDX where it can crash when freeing a texture
+            try
+            {
+                Texture?.Dispose();
+                ExtraTexture?.Dispose();
+            }
+            catch (InvalidOperationException)
+            {
+                Logger.Log($"Failed to free a TMP texture! TileSet: {TileSetId}");
+            }
         }
 
         private Texture2D TextureFromTmpImage(GraphicsDevice graphicsDevice, TmpImage image, Palette palette)
