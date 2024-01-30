@@ -50,6 +50,8 @@ namespace TSMapEditor.UI
 
         public event EventHandler RenderResolutionChanged;
 
+        private static bool InitialDisplayModeSet = false;
+
         private Map map;
         private TheaterGraphics theaterGraphics;
         private EditorGraphics editorGraphics;
@@ -198,6 +200,11 @@ namespace TSMapEditor.UI
 
         private void SetInitialDisplayMode()
         {
+            if (InitialDisplayModeSet)
+                return;
+
+            InitialDisplayModeSet = true;
+
             Game.Window.AllowUserResizing = true;
             var form = (System.Windows.Forms.Form)System.Windows.Forms.Form.FromHandle(Game.Window.Handle);
             form.MaximizeBox = false;
@@ -213,10 +220,7 @@ namespace TSMapEditor.UI
             }
 
             WindowManager.InitGraphicsMode(width, height, borderless);
-
-            double renderScale = UserSettings.Instance.RenderScale;
-
-            WindowManager.SetRenderResolution((int)(WindowManager.WindowWidth / renderScale), (int)(WindowManager.WindowHeight / renderScale));
+            RefreshRenderResolution();
             WindowManager.CenterOnScreen();
             WindowManager.SetBorderlessMode(borderless);
         }
@@ -251,7 +255,7 @@ namespace TSMapEditor.UI
             }
         }
 
-        private void WindowManager_WindowSizeChangedByUser(object sender, EventArgs e)
+        private void RefreshRenderResolution()
         {
             if (Game.Window.ClientBounds.Width == 0 || Game.Window.ClientBounds.Height == 0)
                 return;
@@ -266,6 +270,11 @@ namespace TSMapEditor.UI
                 Width = WindowManager.RenderResolutionX;
                 Height = WindowManager.RenderResolutionY;
             }
+        }
+
+        private void WindowManager_WindowSizeChangedByUser(object sender, EventArgs e)
+        {
+            RefreshRenderResolution();
         }
 
         private void WindowManager_GameClosing(object sender, EventArgs e) => mapFileWatcher.StopWatching();
