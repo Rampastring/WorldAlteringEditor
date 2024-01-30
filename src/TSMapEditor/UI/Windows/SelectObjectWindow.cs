@@ -69,15 +69,20 @@ namespace TSMapEditor.UI.Windows
 
         private void TbSearch_TextChanged(object sender, EventArgs e)
         {
-            lbObjectList.ViewTop = 0;
-
             if (string.IsNullOrWhiteSpace(tbSearch.Text) || tbSearch.Text == tbSearch.Suggestion)
             {
                 foreach (var item in lbObjectList.Items)
+                {
+                    if (!item.Visible)
+                        lbObjectList.ViewTop = 0;
+
                     item.Visible = true;
+                }
             }
             else
             {
+                lbObjectList.ViewTop = 0;
+
                 lbObjectList.SelectedIndex = -1;
 
                 for (int i = 0; i < lbObjectList.Items.Count; i++)
