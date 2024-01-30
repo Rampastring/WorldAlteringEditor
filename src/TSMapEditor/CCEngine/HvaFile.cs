@@ -52,7 +52,6 @@ namespace TSMapEditor.CCEngine
 
         private void Initialize()
         {
-            Logger.Log($"Loading HVA file {FileName}");
             Seek(0, SeekOrigin.Begin);
             ReadCString(16); // filename
             NumFrames = ReadInt32();
@@ -60,18 +59,18 @@ namespace TSMapEditor.CCEngine
             Sections = new List<Section>(numSections);
 
             for (int i = 0; i < numSections; i++)
+            {
                 Sections.Add(new Section(NumFrames)
                 {
                     Name = ReadCString(16)
                 });
+            }
 
             for (int frame = 0; frame < NumFrames; frame++)
             {
                 for (int section = 0; section < Sections.Count; section++)
                     Sections[section].Matrices.Add(ReadMatrix());
             }
-            
-            Logger.Log("Loaded HVA file {0} with {1} sections", FileName, Sections.Count);
         }
 
         private float[] ReadMatrix()
