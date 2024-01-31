@@ -223,9 +223,9 @@ namespace TSMapEditor.UI.Windows
             ddComparator.SelectedIndex = (int)aiTriggerType.Comparator.ComparatorOperator;
             tbQuantity.Value = aiTriggerType.Comparator.Quantity;
             tbComparisonObjectType.Text = string.IsNullOrWhiteSpace(aiTriggerType.ConditionObjectString) ? string.Empty : aiTriggerType.ConditionObjectString;
-            selPrimaryTeam.Text = aiTriggerType.PrimaryTeam != null ? aiTriggerType.PrimaryTeam.Name : string.Empty;
+            selPrimaryTeam.Text = aiTriggerType.PrimaryTeam != null ? aiTriggerType.PrimaryTeam.GetDisplayName() : string.Empty;
             selPrimaryTeam.Tag = aiTriggerType.PrimaryTeam;
-            selSecondaryTeam.Text = aiTriggerType.SecondaryTeam != null ? aiTriggerType.SecondaryTeam.Name : string.Empty;
+            selSecondaryTeam.Text = aiTriggerType.SecondaryTeam != null ? aiTriggerType.SecondaryTeam.GetDisplayName() : string.Empty;
             selSecondaryTeam.Tag = aiTriggerType.SecondaryTeam;
             tbInitial.Value = (int)aiTriggerType.InitialWeight;
             tbMinimum.Value = (int)aiTriggerType.MinimumWeight;

@@ -847,7 +847,8 @@ namespace TSMapEditor.Initialization
                 name => map.TaskForces.Concat(map.Rules.TaskForces).First(tf => tf.ININame == name),
                 name => map.Tags.Find(t => t.ID == name),
                 teamTypeFlags,
-                AddMapLoadError);
+                AddMapLoadError,
+                false);
 
             Logger.Log("TeamTypes read successfully.");
         }

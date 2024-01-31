@@ -35,7 +35,12 @@ namespace TSMapEditor.Models
         [INI(false)]
         public List<string> EnabledTeamTypeFlags { get; private set; } = new List<string>();
 
+        [INI(false)]
+        public bool IsGlobalTeamType { get; set; }
+
         public bool IsFlagEnabled(string flagName) => EnabledTeamTypeFlags.Contains(flagName);
+
+        public string GetDisplayName() => IsGlobalTeamType ? "(global) " + Name : Name;
 
         public void EnableFlag(string flagName)
         {

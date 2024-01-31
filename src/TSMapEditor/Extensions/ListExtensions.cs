@@ -76,7 +76,8 @@ namespace TSMapEditor.Extensions
             Func<string, TaskForce> taskForceFinder,
             Func<string, Tag> tagFinder,
             List<TeamTypeFlag> teamTypeFlags,
-            Action<string> errorLogger)
+            Action<string> errorLogger,
+            bool isGlobal)
         {
             var teamTypeListSection = iniFile.GetSection("TeamTypes");
             if (teamTypeListSection == null)
@@ -92,6 +93,7 @@ namespace TSMapEditor.Extensions
                     continue;
 
                 var teamType = new TeamType(kvp.Value);
+                teamType.IsGlobalTeamType = isGlobal;
                 teamType.ReadPropertiesFromIniSection(teamTypeSection);
                 string houseTypeIniName = teamTypeSection.GetStringValue("House", string.Empty);
                 string scriptId = teamTypeSection.GetStringValue("Script", string.Empty);

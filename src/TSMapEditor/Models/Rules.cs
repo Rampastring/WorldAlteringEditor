@@ -188,7 +188,8 @@ namespace TSMapEditor.Models
                 (name) => TaskForces.Find(tf => tf.ININame == name),
                 null,
                 teamTypeFlags,
-                Logger.Log);
+                Logger.Log,
+                true);
         }
 
         public void InitEditorOverrides(IniFile iniFile)
