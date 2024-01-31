@@ -3,7 +3,6 @@ using Rampastring.XNAUI;
 using System;
 using System.IO;
 using TSMapEditor.CCEngine;
-using TSMapEditor.GameMath;
 using TSMapEditor.Initialization;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
@@ -35,12 +34,7 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
             ccFileManager = new() { GameDirectory = gameDirectory };
             ccFileManager.ReadConfig();
 
-            IniFileEx rulesIni = IniFileEx.FromPathOrMix(Constants.RulesIniPath, gameDirectory, ccFileManager);
-            IniFileEx firestormIni = IniFileEx.FromPathOrMix(Constants.FirestormIniPath, gameDirectory, ccFileManager);
-            IniFileEx artIni = IniFileEx.FromPathOrMix(Constants.ArtIniPath, gameDirectory, ccFileManager);
-            IniFileEx artFSIni = IniFileEx.FromPathOrMix(Constants.FirestormArtIniPath, gameDirectory, ccFileManager);
-            IniFile artOverridesIni = new(Path.Combine(Environment.CurrentDirectory, "Config/ArtOverrides.ini"));
-            IniFile.ConsolidateIniFiles(artFSIni, artOverridesIni);
+            var gameConfigIniFiles = new GameConfigINIFiles(gameDirectory, ccFileManager);
 
             var tutorialLines = new TutorialLines(Path.Combine(gameDirectory, Constants.TutorialIniPath), a => windowManager.AddCallback(a, null));
             var themes = new Themes(IniFileEx.FromPathOrMix(Constants.ThemeIniPath, gameDirectory, ccFileManager));
@@ -52,7 +46,7 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
                 if (newMapParameters == null)
                     throw new NullReferenceException("Null new map parameters encountered when creating a new map!");
 
-                map.InitNew(rulesIni, firestormIni, artIni, artFSIni, newMapParameters.Theater, newMapParameters.MapSize, newMapParameters.StartingLevel);
+                map.InitNew(gameConfigIniFiles, newMapParameters.Theater, newMapParameters.MapSize, newMapParameters.StartingLevel);
             }
             else
             {
@@ -62,7 +56,7 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
 
                     MapLoader.PreCheckMapIni(mapIni);
 
-                    map.LoadExisting(rulesIni, firestormIni, artIni, artFSIni, mapIni);
+                    map.LoadExisting(gameConfigIniFiles, mapIni);
                 }
                 catch (IniParseException ex)
                 {

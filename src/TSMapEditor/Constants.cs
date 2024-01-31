@@ -31,6 +31,8 @@ namespace TSMapEditor
         public static string FirestormIniPath;
         public static string ArtIniPath;
         public static string FirestormArtIniPath;
+        public static string AIIniPath;
+        public static string FirestormAIIniPath;
         public static string TutorialIniPath;
         public static string ThemeIniPath;
 
@@ -123,6 +125,8 @@ namespace TSMapEditor
             FirestormIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Firestorm", "INI/Enhance.ini");
             ArtIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Art", "INI/Art.ini");
             FirestormArtIniPath = constantsIni.GetStringValue(FilePathsSectionName, "ArtFS", "INI/ArtE.ini");
+            AIIniPath = constantsIni.GetStringValue(FilePathsSectionName, "AI", "INI/AI.ini");
+            FirestormAIIniPath = constantsIni.GetStringValue(FilePathsSectionName, "AIFS", "INI/AIE.ini");
             TutorialIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Tutorial", "INI/Tutorial.ini");
             ThemeIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Theme", "INI/Theme.ini");
         }

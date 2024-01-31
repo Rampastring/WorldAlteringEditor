@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using TSMapEditor.Extensions;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Models.MapFormat;
@@ -745,24 +746,7 @@ namespace TSMapEditor.Initialization
         {
             Logger.Log("Reading TaskForces.");
 
-            var section = mapIni.GetSection("TaskForces");
-            if (section == null)
-                return;
-
-            foreach (var kvp in section.Keys)
-            {
-                if (string.IsNullOrWhiteSpace(kvp.Value))
-                    continue;
-
-                var taskForce = TaskForce.ParseTaskForce(map.Rules, mapIni.GetSection(kvp.Value));
-                if (taskForce == null)
-                {
-                    AddMapLoadError($"Failed to load TaskForce {kvp.Value}. It might be missing a section or be otherwise invalid.");
-                    continue;
-                }
-
-                map.AddTaskForce(taskForce);
-            }
+            map.TaskForces.ReadTaskForces(mapIni, map.Rules, AddMapLoadError);
 
             Logger.Log("TaskForces read successfully.");
         }
@@ -848,17 +832,7 @@ namespace TSMapEditor.Initialization
         {
             Logger.Log("Reading ScriptTypes.");
 
-            var section = mapIni.GetSection("ScriptTypes");
-            if (section == null)
-                return;
-
-            foreach (var kvp in section.Keys)
-            {
-                var script = Script.ParseScript(kvp.Value, mapIni.GetSection(kvp.Value));
-
-                if (script != null)
-                    map.AddScript(script);
-            }
+            map.Scripts.ReadScripts(mapIni, AddMapLoadError);
 
             Logger.Log("ScriptTypes read successfully.");
         }
@@ -867,54 +841,13 @@ namespace TSMapEditor.Initialization
         {
             Logger.Log("Reading TeamTypes.");
 
-            var teamTypeListSection = mapIni.GetSection("TeamTypes");
-            if (teamTypeListSection == null)
-                return;
-
-            foreach (var kvp in teamTypeListSection.Keys)
-            {
-                if (string.IsNullOrWhiteSpace(kvp.Key) || string.IsNullOrWhiteSpace(kvp.Value))
-                    continue;
-
-                var teamTypeSection = mapIni.GetSection(kvp.Value);
-                if (teamTypeSection == null)
-                    continue;
-
-                var teamType = new TeamType(kvp.Value);
-                teamType.ReadPropertiesFromIniSection(teamTypeSection);
-                string houseTypeIniName = teamTypeSection.GetStringValue("House", string.Empty);
-                string scriptId = teamTypeSection.GetStringValue("Script", string.Empty);
-                string taskForceId = teamTypeSection.GetStringValue("TaskForce", string.Empty);
-                string tagId = teamTypeSection.GetStringValue("Tag", string.Empty);
-
-                teamType.HouseType = map.FindHouseType(houseTypeIniName);
-                teamType.Script = map.Scripts.Find(s => s.ININame == scriptId);
-                teamType.TaskForce = map.TaskForces.Find(t => t.ININame == taskForceId);
-                teamType.Tag = map.Tags.Find(t => t.ID == tagId);
-
-                teamTypeFlags.ForEach(ttflag =>
-                {
-                    if (teamTypeSection.GetBooleanValue(ttflag.Name, false))
-                        teamType.EnableFlag(ttflag.Name);
-                });
-
-                if (teamType.HouseType == null)
-                {
-                    AddMapLoadError($"TeamType {teamType.ININame} has an invalid owner ({houseTypeIniName}) specified!");
-                }
-
-                if (teamType.Script == null)
-                {
-                    AddMapLoadError($"TeamType {teamType.ININame} has an invalid script ({scriptId}) specified!");
-                }
-
-                if (teamType.TaskForce == null)
-                {
-                    AddMapLoadError($"TeamType {teamType.ININame} has an invalid TaskForce ({taskForceId}) specified!");
-                }
-
-                map.AddTeamType(teamType);
-            }
+            map.TeamTypes.ReadTeamTypes(mapIni,
+                name => map.FindHouseType(name),
+                name => map.Scripts.Concat(map.Rules.Scripts).First(s => s.ININame == name),
+                name => map.TaskForces.Concat(map.Rules.TaskForces).First(tf => tf.ININame == name),
+                name => map.Tags.Find(t => t.ID == name),
+                teamTypeFlags,
+                AddMapLoadError);
 
             Logger.Log("TeamTypes read successfully.");
         }
@@ -942,7 +875,7 @@ namespace TSMapEditor.Initialization
                 var aiTriggerType = new AITriggerType(kvp.Key);
 
                 aiTriggerType.Name = parts[0];
-                aiTriggerType.PrimaryTeam = map.TeamTypes.Find(tt => tt.ININame == parts[1]);
+                aiTriggerType.PrimaryTeam = map.TeamTypes.Concat(map.Rules.TeamTypes).First(tt => tt.ININame == parts[1]);
 
                 if (aiTriggerType.PrimaryTeam == null)
                 {
@@ -997,7 +930,7 @@ namespace TSMapEditor.Initialization
 
                 if (!Helpers.IsStringNoneValue(parts[14]) )
                 {
-                    aiTriggerType.SecondaryTeam = map.TeamTypes.Find(tt => tt.ININame == parts[14]);
+                    aiTriggerType.SecondaryTeam = map.TeamTypes.Concat(map.Rules.TeamTypes).First(tt => tt.ININame == parts[1]);
 
                     if (aiTriggerType.SecondaryTeam == null)
                     {

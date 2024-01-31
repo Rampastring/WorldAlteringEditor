@@ -29,19 +29,23 @@ namespace TSMapEditor.Models
         public List<ConnectedOverlayType> ConnectedOverlays { get; } = new List<ConnectedOverlayType>();
         public List<TeamTypeFlag> TeamTypeFlags { get; } = new List<TeamTypeFlag>();
 
-        public void Init(Rules rules)
+        public void EarlyInit()
         {
-            ReadTheaters();
-            ReadOverlayCollections(rules);
-            ReadTerrainObjectCollections(rules);
-            ReadSmudgeCollections(rules);
             ReadBrushSizes();
             ReadScriptActions();
             ReadTriggerEventTypes();
             ReadTriggerActionTypes();
+            ReadTheaters();
+            ReadTeamTypeFlags();
+        }
+
+        public void RulesDependentInit(Rules rules)
+        {
+            ReadOverlayCollections(rules);
+            ReadTerrainObjectCollections(rules);
+            ReadSmudgeCollections(rules);
             ReadBridges(rules);
             ReadConnectedOverlays(rules);
-            ReadTeamTypeFlags();
         }
 
         private void ReadTheaters()

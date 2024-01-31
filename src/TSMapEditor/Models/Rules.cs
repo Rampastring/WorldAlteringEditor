@@ -3,6 +3,7 @@ using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using TSMapEditor.Extensions;
 using TSMapEditor.Initialization;
 using TSMapEditor.Models.ArtConfig;
 using TSMapEditor.UI;
@@ -26,6 +27,10 @@ namespace TSMapEditor.Models
         public List<AnimType> AnimTypes = new List<AnimType>();
         public List<GlobalVariable> GlobalVariables = new List<GlobalVariable>();
         public List<Weapon> Weapons = new List<Weapon>();
+
+        public List<TaskForce> TaskForces = new List<TaskForce>();
+        public List<Script> Scripts = new List<Script>();
+        public List<TeamType> TeamTypes = new List<TeamType>();
 
         public List<HouseType> RulesHouseTypes = new List<HouseType>();
 
@@ -170,6 +175,20 @@ namespace TSMapEditor.Models
                 string.IsNullOrWhiteSpace(ot.Image) ? ot.ININame : ot.Image));
 
             AnimTypes.ForEach(a => initializer.ReadObjectTypeArtPropertiesFromINI(a, iniFile, a.ININame));
+        }
+
+        public void InitAI(IniFile iniFile, List<TeamTypeFlag> teamTypeFlags)
+        {
+            TaskForces.ReadTaskForces(iniFile, this, Logger.Log);
+            Scripts.ReadScripts(iniFile, Logger.Log);
+
+            TeamTypes.ReadTeamTypes(iniFile,
+                (name) => RulesHouseTypes.Find(ht => ht.ININame == name),
+                (name) => Scripts.Find(s => s.ININame == name),
+                (name) => TaskForces.Find(tf => tf.ININame == name),
+                null,
+                teamTypeFlags,
+                Logger.Log);
         }
 
         public void InitEditorOverrides(IniFile iniFile)

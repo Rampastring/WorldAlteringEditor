@@ -193,37 +193,34 @@ namespace TSMapEditor.Models
             this.ccFileManager = ccFileManager;
         }
 
-        private void InitEditorConfig()
-        {
-            EditorConfig = new EditorConfig();
-            EditorConfig.Init(Rules);
-        }
-
-        public void InitNew(IniFile rulesIni, IniFile firestormIni, IniFile artIni, IniFile artFirestormIni, string theaterName, Point2D size, byte startingLevel)
+        public void InitNew(GameConfigINIFiles gameConfigINIFiles, string theaterName, Point2D size, byte startingLevel)
         {
             const int marginY = 6;
             const int marginX = 4;
 
-            InitializeRules(rulesIni, artIni, firestormIni, artFirestormIni);
+            InitializeRules(gameConfigINIFiles);
             LoadedINI = new IniFileEx();
             var baseMap = new IniFileEx(Environment.CurrentDirectory + "/Config/BaseMap.ini", ccFileManager);
             baseMap.FileName = string.Empty;
             baseMap.SetStringValue("Map", "Theater", theaterName);
             baseMap.SetStringValue("Map", "Size", $"0,0,{size.X},{size.Y}");
             baseMap.SetStringValue("Map", "LocalSize", $"{marginX},{marginY},{size.X - (marginX * 2)},{size.Y - (marginY * 2)}");
-            LoadExisting(rulesIni, firestormIni, artIni, artFirestormIni, baseMap);
+            LoadExisting(gameConfigINIFiles, baseMap);
             SetTileData(null, defaultLevel: startingLevel, overrideExisting: true);
         }
 
-        public void LoadExisting(IniFile rulesIni, IniFile firestormIni, IniFile artIni, IniFile artFirestormIni, IniFile mapIni)
+        public void LoadExisting(GameConfigINIFiles gameConfigINIFiles, IniFile mapIni)
         {
-            InitializeRules(rulesIni, artIni, firestormIni, artFirestormIni);
+            EditorConfig = new EditorConfig();
+            EditorConfig.EarlyInit();
+
+            InitializeRules(gameConfigINIFiles);
 
             LoadedINI = mapIni ?? throw new ArgumentNullException(nameof(mapIni));
             Rules.InitFromINI(mapIni, initializer, true);
-            InitEditorConfig();
+            EditorConfig.RulesDependentInit(Rules);
 
-            PostInitializeRules_ReinitializeArt(artIni, artFirestormIni);
+            PostInitializeRules_ReinitializeArt(gameConfigINIFiles.ArtIni, gameConfigINIFiles.ArtFSIni);
             Rules.SolveDependencies();
 
             MapLoader.MapLoadErrors.Clear();
@@ -1374,29 +1371,22 @@ namespace TSMapEditor.Models
             scriptElements.ForEach(se => se.SetInternalID(GetNewUniqueInternalId()));
         }
 
-
-        // public void StartNew(IniFile rulesIni, IniFile firestormIni, TheaterType theaterType, Point2D size)
-        // {
-        //     Initialize(rulesIni, firestormIni);
-        //     LoadedINI = new IniFileEx();
-        // }
-
-        public void InitializeRules(IniFile rulesIni, IniFile artIni, IniFile firestormIni, IniFile artFirestormIni)
+        public void InitializeRules(GameConfigINIFiles gameConfigINIFiles)
         {
-            if (rulesIni == null)
-                throw new ArgumentNullException(nameof(rulesIni));
+            if (gameConfigINIFiles == null)
+                throw new ArgumentNullException(nameof(gameConfigINIFiles));
 
             Rules = new Rules();
-            Rules.InitFromINI(rulesIni, initializer);
+            Rules.InitFromINI(gameConfigINIFiles.RulesIni, initializer);
 
-            Rules.InitArt(artIni, initializer);
+            Rules.InitArt(gameConfigINIFiles.ArtIni, initializer);
 
-            if (firestormIni != null)
+            if (gameConfigINIFiles.FirestormIni != null)
             {
-                Rules.InitFromINI(firestormIni, initializer);
+                Rules.InitFromINI(gameConfigINIFiles.FirestormIni, initializer);
 
-                if (artFirestormIni != null)
-                    Rules.InitArt(artFirestormIni, initializer);
+                if (gameConfigINIFiles.ArtFSIni != null)
+                    Rules.InitArt(gameConfigINIFiles.ArtFSIni, initializer);
             }
 
             var editorRulesIni = new IniFile(Environment.CurrentDirectory + "/Config/EditorRules.ini");
@@ -1404,7 +1394,13 @@ namespace TSMapEditor.Models
 
             Rules.InitFromINI(editorRulesIni, initializer, false);
 
-            InitStandardHouseTypesAndHouses(editorRulesIni, rulesIni, firestormIni);
+            InitStandardHouseTypesAndHouses(editorRulesIni, gameConfigINIFiles.RulesIni, gameConfigINIFiles.FirestormIni);
+
+            if (gameConfigINIFiles.AIIni != null)
+                Rules.InitAI(gameConfigINIFiles.AIIni, EditorConfig.TeamTypeFlags);
+
+            if (gameConfigINIFiles.AIFSIni != null)
+                Rules.InitAI(gameConfigINIFiles.AIFSIni, EditorConfig.TeamTypeFlags);
 
             // Load impassable cell information for terrain types
             var impassableTerrainObjectsIni = new IniFile(Environment.CurrentDirectory + "/Config/TerrainTypeImpassability.ini");
