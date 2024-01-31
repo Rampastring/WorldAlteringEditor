@@ -95,7 +95,19 @@ namespace TSMapEditor.UI.Controls
             base.ParseControlINIAttribute(iniFile, key, value);
         }
 
-        private bool ReadINIForControl(XNAControl control)
+        public void RefreshLayout()
+        {
+            Parser.Instance.SetPrimaryControl(this);
+
+            var controls = new List<XNAControl>() { this }.Concat(Children);
+
+            foreach (var control in controls)
+            {
+                ReadINIForControl(control, true);
+            }
+        }
+
+        private bool ReadINIForControl(XNAControl control, bool isForLayout = false)
         {
             var section = ConfigIni.GetSection(control.Name);
             if (section == null)
@@ -103,7 +115,7 @@ namespace TSMapEditor.UI.Controls
 
             foreach (var kvp in section.Keys)
             {
-                if (kvp.Key.StartsWith("$CC"))
+                if (!isForLayout && kvp.Key.StartsWith("$CC"))
                 {
                     var child = CreateChildControl(control, kvp.Value);
                     if (!ReadINIForControl(child))
@@ -139,11 +151,11 @@ namespace TSMapEditor.UI.Controls
                         throw new FormatException("Invalid format for AnchorPoint: " + kvp.Value);
                     ((XNALabel)control).AnchorPoint = new Vector2(Parser.Instance.GetExprValue(parts[0], control), Parser.Instance.GetExprValue(parts[1], control));
                 }
-                else if (kvp.Key == "$MaxValue" && control is XNATrackbar)
+                else if (!isForLayout && kvp.Key == "$MaxValue" && control is XNATrackbar)
                 {
                     ((XNATrackbar)control).MaxValue = Parser.Instance.GetExprValue(kvp.Value, control);
                 }
-                else if (kvp.Key == "$Enabled")
+                else if (!isForLayout && kvp.Key == "$Enabled")
                 {
                     int value = Parser.Instance.GetExprValue(kvp.Value, control);
                     if (value < 1)
@@ -151,17 +163,23 @@ namespace TSMapEditor.UI.Controls
                     else
                         control.Enable();
                 }
-                else if (kvp.Key == "$LeftClickAction")
+                else if (!isForLayout && kvp.Key == "$LeftClickAction")
                 {
                     if (kvp.Value == "Disable")
                     {
                         control.LeftClick += (s, e) => Hide();
                     }
                 }
-                else
+                else if (!isForLayout)
                 {
                     control.ParseINIAttribute(ConfigIni, kvp.Key, kvp.Value);
                 }
+            }
+
+            if (isForLayout)
+            {
+                foreach (var child in control.Children)
+                    ReadINIForControl(child, true);
             }
 
             return true;

@@ -65,6 +65,18 @@ namespace TSMapEditor.UI.Windows
             AddChild(infoPanel);
 
             EnabledChanged += SelectObjectWindow_EnabledChanged;
+            WindowManager.WindowSizeChangedByUser += WindowManager_WindowSizeChangedByUser;
+        }
+
+        private void WindowManager_WindowSizeChangedByUser(object sender, EventArgs e)
+        {
+            RefreshLayout();
+        }
+
+        public override void Kill()
+        {
+            WindowManager.WindowSizeChangedByUser -= WindowManager_WindowSizeChangedByUser;
+            base.Kill();
         }
 
         private void TbSearch_TextChanged(object sender, EventArgs e)
@@ -120,6 +132,7 @@ namespace TSMapEditor.UI.Windows
             HideInfoPanel();
             SelectedObject = initialSelection;
             this.initialSelection = SelectedObject;
+            OnOpen();
             ListObjects();
 
             if (lbObjectList.SelectedItem == null)
@@ -143,6 +156,11 @@ namespace TSMapEditor.UI.Windows
             tbSearch.Text = string.Empty;
             WindowManager.SelectedControl = tbSearch;
         }
+
+        /// <summary>
+        /// Can be overridden in derived classes to perform operations when the window is opened.
+        /// </summary>
+        protected virtual void OnOpen() { }
 
         protected abstract void LbObjectList_SelectedIndexChanged(object sender, EventArgs e);
 

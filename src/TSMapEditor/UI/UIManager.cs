@@ -94,6 +94,9 @@ namespace TSMapEditor.UI
         {
             Name = nameof(UIManager);
 
+            // We should be the first control to subscribe to this event
+            WindowManager.WindowSizeChangedByUser += WindowManager_WindowSizeChangedByUser;
+
             SetInitialDisplayMode();
 
             InitTheme();
@@ -194,7 +197,6 @@ namespace TSMapEditor.UI
             // WindowManager.GameClosing += (s, e) => ClearResources();
             WindowManager.SetMaximizeBox(true);
             WindowManager.GameClosing += WindowManager_GameClosing;
-            WindowManager.WindowSizeChangedByUser += WindowManager_WindowSizeChangedByUser;
             KeyboardCommands.Instance.ToggleFullscreen.Triggered += ToggleFullscreen_Triggered;
         }
 
@@ -269,6 +271,8 @@ namespace TSMapEditor.UI
                 RenderResolutionChanged?.Invoke(this, EventArgs.Empty);
                 Width = WindowManager.RenderResolutionX;
                 Height = WindowManager.RenderResolutionY;
+
+                Parser.Instance.RefreshResolutionConstants(WindowManager);
             }
         }
 

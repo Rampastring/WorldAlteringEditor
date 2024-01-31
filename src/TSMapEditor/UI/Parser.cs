@@ -19,8 +19,7 @@ namespace TSMapEditor.UI
                 throw new InvalidOperationException("Only one instance of Parser can exist at a time.");
 
             globalConstants = new Dictionary<string, int>();
-            globalConstants.Add("RESOLUTION_WIDTH", windowManager.RenderResolutionX);
-            globalConstants.Add("RESOLUTION_HEIGHT", windowManager.RenderResolutionY);
+            RefreshResolutionConstants(windowManager);
             globalConstants.Add("EMPTY_SPACE_TOP", Constants.UIEmptyTopSpace);
             globalConstants.Add("EMPTY_SPACE_BOTTOM", Constants.UIEmptyBottomSpace);
             globalConstants.Add("EMPTY_SPACE_SIDES", Constants.UIEmptySideSpace);
@@ -32,6 +31,12 @@ namespace TSMapEditor.UI
             globalConstants.Add("IS_FLAT_WORLD", Constants.IsFlatWorld ? 1 : 0);
 
             _instance = this;
+        }
+
+        public void RefreshResolutionConstants(WindowManager windowManager)
+        {
+            globalConstants["RESOLUTION_WIDTH"] = windowManager.RenderResolutionX;
+            globalConstants["RESOLUTION_HEIGHT"] = windowManager.RenderResolutionY;
         }
 
         private static Parser _instance;
