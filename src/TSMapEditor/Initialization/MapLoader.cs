@@ -943,6 +943,12 @@ namespace TSMapEditor.Initialization
 
                 aiTriggerType.Name = parts[0];
                 aiTriggerType.PrimaryTeam = map.TeamTypes.Find(tt => tt.ININame == parts[1]);
+
+                if (aiTriggerType.PrimaryTeam == null)
+                {
+                    AddMapLoadError($"AITriggerType \"{aiTriggerType.Name}\" ({kvp.Key}) has a nonexistent team ({parts[1]}) specified as its primary team!");
+                }
+
                 aiTriggerType.OwnerName = parts[2];
 
                 if (!int.TryParse(parts[3], CultureInfo.InvariantCulture, out int techLevel))
@@ -954,7 +960,7 @@ namespace TSMapEditor.Initialization
 
                 if (!int.TryParse(parts[4], CultureInfo.InvariantCulture, out int conditionType))
                 {
-                    AddMapLoadError($"AITriggerType {kvp.Key} has an invalid tech level, skipping parsing of the AI trigger.");
+                    AddMapLoadError($"AITriggerType {kvp.Key} has an invalid condition type, skipping parsing of the AI trigger.");
                     continue;
                 }
 
