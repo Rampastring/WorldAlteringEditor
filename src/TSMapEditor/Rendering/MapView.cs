@@ -1364,7 +1364,10 @@ namespace TSMapEditor.Rendering
                 TechnoUnderCursor = tileUnderCursor.GetTechno();
 
                 if (KeyboardCommands.Instance.DeleteObject.AreKeysDown(Keyboard))
-                    DeleteObjectFromCell(tileUnderCursor.CoordsToPoint());
+                {
+                    if (WindowManager.SelectedControl == null || WindowManager.SelectedControl is not XNATextBox)
+                        DeleteObjectFromCell(tileUnderCursor.CoordsToPoint());
+                }
             }
             
             base.Update(gameTime);
