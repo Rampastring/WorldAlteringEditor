@@ -98,7 +98,7 @@ namespace TSMapEditor.UI.Controls
                 }
                 else
                 {
-                    IsDragged = Cursor.LeftDown;
+                    IsDragged = IsDragged && Cursor.LeftDown;
 
                     if (IsDragged)
                     {
