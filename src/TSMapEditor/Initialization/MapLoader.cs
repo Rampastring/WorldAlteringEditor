@@ -843,8 +843,8 @@ namespace TSMapEditor.Initialization
 
             map.TeamTypes.ReadTeamTypes(mapIni,
                 name => map.FindHouseType(name),
-                name => map.Scripts.Concat(map.Rules.Scripts).First(s => s.ININame == name),
-                name => map.TaskForces.Concat(map.Rules.TaskForces).First(tf => tf.ININame == name),
+                name => map.Scripts.Concat(map.Rules.Scripts).FirstOrDefault(s => s.ININame == name),
+                name => map.TaskForces.Concat(map.Rules.TaskForces).FirstOrDefault(tf => tf.ININame == name),
                 name => map.Tags.Find(t => t.ID == name),
                 teamTypeFlags,
                 AddMapLoadError,
@@ -876,7 +876,7 @@ namespace TSMapEditor.Initialization
                 var aiTriggerType = new AITriggerType(kvp.Key);
 
                 aiTriggerType.Name = parts[0];
-                aiTriggerType.PrimaryTeam = map.TeamTypes.Concat(map.Rules.TeamTypes).First(tt => tt.ININame == parts[1]);
+                aiTriggerType.PrimaryTeam = map.TeamTypes.Concat(map.Rules.TeamTypes).FirstOrDefault(tt => tt.ININame == parts[1]);
 
                 if (aiTriggerType.PrimaryTeam == null)
                 {
