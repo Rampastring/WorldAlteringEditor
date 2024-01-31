@@ -7,10 +7,13 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading;
-using System.Windows.Forms;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Settings;
 using TSMapEditor.UI;
+
+#if !DEBUG
+using System.Windows.Forms;
+#endif
 
 namespace TSMapEditor.Rendering
 {
@@ -22,8 +25,10 @@ namespace TSMapEditor.Rendering
 
         public GameClass()
         {
+#if !DEBUG
             AppDomain.CurrentDomain.UnhandledException += (s, e) => HandleUnhandledException((Exception)e.ExceptionObject);
             Application.ThreadException += (s, e) => HandleUnhandledException(e.Exception);
+#endif
             Program.DisableExceptionHandler();
 
             Logger.WriteToConsole = true;
