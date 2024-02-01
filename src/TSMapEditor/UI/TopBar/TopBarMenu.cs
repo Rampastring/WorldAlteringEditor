@@ -142,6 +142,8 @@ namespace TSMapEditor.UI.TopBar
             viewContextMenu.AddItem("View Minimap", () => windowController.MinimapWindow.Open());
             viewContextMenu.AddItem(" ", null, () => false, null, null);
             viewContextMenu.AddItem("Find Waypoint...", () => windowController.FindWaypointWindow.Open());
+            viewContextMenu.AddItem(" ", null, () => false, null, null);
+            viewContextMenu.AddItem("Toggle Fullscreen Mode", () => KeyboardCommands.Instance.ToggleFullscreen.DoTrigger());
 
             var viewButton = new MenuButton(WindowManager, viewContextMenu);
             viewButton.Name = nameof(viewButton);
