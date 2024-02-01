@@ -14,6 +14,8 @@ namespace TSMapEditor.UI.Windows
 
         private readonly Map map;
 
+        public bool IncludeNone { get; set; }
+
         public bool IsForSecondaryTeam { get; set; }
 
         public override void Initialize()
@@ -36,6 +38,9 @@ namespace TSMapEditor.UI.Windows
         protected override void ListObjects()
         {
             lbObjectList.Clear();
+
+            if (IncludeNone)
+                lbObjectList.AddItem("None");
 
             foreach (TeamType teamType in map.TeamTypes)
             {

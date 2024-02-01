@@ -78,6 +78,7 @@ namespace TSMapEditor.UI.Windows
             FindChild<EditorButton>("btnOpenSecondaryTeam").LeftClick += BtnOpenSecondaryTeam_LeftClick;
 
             selectTeamTypeWindow = new SelectTeamTypeWindow(WindowManager, map);
+            selectTeamTypeWindow.IncludeNone = true;
             var teamTypeWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectTeamTypeWindow);
             teamTypeWindowDarkeningPanel.Hidden += TeamTypeWindowDarkeningPanel_Hidden;
 
