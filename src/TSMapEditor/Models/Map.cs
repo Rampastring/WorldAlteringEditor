@@ -1080,6 +1080,18 @@ namespace TSMapEditor.Models
             if (tile == null)
                 return;
 
+            if (tile.CellTag != null)
+            {
+                RemoveCellTagFrom(tile.CoordsToPoint());
+                return;
+            }
+
+            if (tile.Waypoints.Count > 0)
+            {
+                RemoveWaypointsFrom(tile.CoordsToPoint());
+                return;
+            }
+
             for (int i = 0; i < tile.Infantry.Length; i++)
             {
                 if (tile.Infantry[i] != null)
@@ -1110,18 +1122,6 @@ namespace TSMapEditor.Models
             if (tile.TerrainObject != null)
             {
                 RemoveTerrainObject(tile.CoordsToPoint());
-                return;
-            }
-
-            if (tile.CellTag != null)
-            {
-                RemoveCellTagFrom(tile.CoordsToPoint());
-                return;
-            }
-
-            if (tile.Waypoints.Count > 0)
-            {
-                RemoveWaypointsFrom(tile.CoordsToPoint());
                 return;
             }
         }
