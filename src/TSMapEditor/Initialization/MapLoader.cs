@@ -1092,7 +1092,7 @@ namespace TSMapEditor.Initialization
                 if (tag == null)
                     continue;
 
-                map.AddCellTag(new CellTag() { Position = coords.Value, Tag = tag });
+                map.AddCellTag(new CellTag(coords.Value, tag));
             }
 
             Logger.Log("CellTags read successfully.");

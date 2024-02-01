@@ -29,12 +29,14 @@ namespace TSMapEditor.UI.Windows
         {
             this.map = map;
             this.editorState = editorState;
+            this.cursorActionTarget = cursorActionTarget;
 
             placeCellTagCursorAction = new PlaceCellTagCursorAction(cursorActionTarget);
             changeAttachedTagCursorAction = new ChangeAttachedTagCursorAction(cursorActionTarget);
         }
 
         private readonly Map map;
+        private readonly ICursorActionTarget cursorActionTarget;
         private readonly PlaceCellTagCursorAction placeCellTagCursorAction;
         private readonly ChangeAttachedTagCursorAction changeAttachedTagCursorAction;
         private readonly EditorState editorState;
@@ -174,12 +176,14 @@ namespace TSMapEditor.UI.Windows
             FindChild<EditorButton>("btnCloneTrigger").LeftClick += BtnCloneTrigger_LeftClick;
             ddActions = FindChild<XNADropDown>(nameof(ddActions));
             ddActions.AddItem("Advanced...");
-            ddActions.AddItem("Place CellTag");
-            ddActions.AddItem("Attach to Objects");
-            ddActions.AddItem("View Attached Objects");
+            ddActions.AddItem(new XNADropDownItem() { Text = "Place CellTag", Tag = new Action(PlaceCellTag) });
+            ddActions.AddItem(new XNADropDownItem() { Text = "Clear CellTags", Tag = new Action(ClearCellTags) });
+            ddActions.AddItem(new XNADropDownItem() { Text = "Attach to Objects", Tag = new Action(AttachTagToObjects) });
+            ddActions.AddItem(new XNADropDownItem() { Text = "View Attached Objects", Tag = new Action(ShowAttachedObjects) });
             ddActions.AddItem(new XNADropDownItem() { Text = string.Empty, Selectable = false });
-            ddActions.AddItem("Re-generate trigger IDs");
-            ddActions.AddItem("Clone for easier Difficulties");
+            ddActions.AddItem(new XNADropDownItem() { Text = "Re-generate Trigger IDs", Tag = new Action(RegenerateIDs) });
+            ddActions.AddItem(new XNADropDownItem() { Text = "Clone for Easier Difficulties", Tag = new Action(CloneForEasierDifficulties) });
+
             ddActions.SelectedIndex = 0;
             ddActions.SelectedIndexChanged += DdActions_SelectedIndexChanged;
 
@@ -291,27 +295,15 @@ namespace TSMapEditor.UI.Windows
 
         private void DdActions_SelectedIndexChanged(object sender, EventArgs e)
         {
-            switch (ddActions.SelectedIndex)
-            {
-                case 1:
-                    PlaceCellTag();
-                    break;
-                case 2:
-                    AttachTagToObjects();
-                    break;
-                case 3:
-                    ShowAttachedObjects();
-                    break;
-                case 5:
-                    RegenerateIDs();
-                    break;
-                case 6:
-                    CloneForEasierDifficulties();
-                    break;
-                case 0:
-                default:
-                    return;
-            }
+            var item = ddActions.SelectedItem;
+            if (item == null)
+                return;
+
+            if (item.Tag == null)
+                return;
+
+            if (item.Tag is Action action)
+                action();
 
             ddActions.SelectedIndexChanged -= DdActions_SelectedIndexChanged;
             ddActions.SelectedIndex = 0;
@@ -326,12 +318,40 @@ namespace TSMapEditor.UI.Windows
             Tag tag = map.Tags.Find(t => t.Trigger == editedTrigger);
 
             if (tag == null)
-            {
                 return;
-            }
 
             placeCellTagCursorAction.Tag = tag;
             editorState.CursorAction = placeCellTagCursorAction;
+        }
+
+        private void ClearCellTags()
+        {
+            if (editedTrigger == null)
+                return;
+
+            Tag tag = map.Tags.Find(t => t.Trigger == editedTrigger);
+
+            if (tag == null)
+                return;
+
+            var messageBox = EditorMessageBox.Show(WindowManager, "Are you sure?",
+                $"This will delete all CellTags related to trigger \"{editedTrigger.Name}\". No un-do is available. Do you want to continue?",
+                MessageBoxButtons.YesNo);
+
+            messageBox.YesClickedAction = _ =>
+            {
+                var cellTagsCopy = new List<CellTag>(map.CellTags);
+
+                foreach (var cellTag in cellTagsCopy)
+                {
+                    if (cellTag.Tag == tag)
+                    {
+                        map.RemoveCellTagFrom(cellTag.Position);
+                    }
+                }
+
+                cursorActionTarget.InvalidateMap();
+            };
         }
 
         private void AttachTagToObjects()
