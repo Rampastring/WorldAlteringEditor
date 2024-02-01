@@ -2,6 +2,7 @@
 using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using TSMapEditor.Misc;
 using TSMapEditor.Models;
@@ -25,6 +26,7 @@ namespace TSMapEditor.UI.Windows
         private EditorTextBox tbTaskForceName;
         private EditorNumberTextBox tbGroup;
         private EditorListBox lbUnitEntries;
+        private XNALabel lblCost;
         private EditorNumberTextBox tbUnitCount;
         private EditorSuggestionTextBox tbSearchUnit;
         private EditorListBox lbUnitType;
@@ -44,6 +46,7 @@ namespace TSMapEditor.UI.Windows
             tbTaskForceName = FindChild<EditorTextBox>(nameof(tbTaskForceName));
             tbGroup = FindChild<EditorNumberTextBox>(nameof(tbGroup));
             lbUnitEntries = FindChild<EditorListBox>(nameof(lbUnitEntries));
+            lblCost = FindChild<XNALabel>(nameof(lblCost));
             tbUnitCount = FindChild<EditorNumberTextBox>(nameof(tbUnitCount));
             tbSearchUnit = FindChild<EditorSuggestionTextBox>(nameof(tbSearchUnit));
             UIHelpers.AddSearchTipsBoxToControl(tbSearchUnit);
@@ -279,6 +282,7 @@ namespace TSMapEditor.UI.Windows
             var taskForceTechno = editedTaskForce.TechnoTypes[lbUnitEntries.SelectedIndex];
             taskForceTechno.TechnoType = (TechnoType)lbUnitType.SelectedItem.Tag;
             unitEntry.Text = GetUnitEntryText(taskForceTechno);
+            RefreshTaskForceCost();
         }
 
         private void TbUnitCount_TextChanged(object sender, System.EventArgs e)
@@ -292,6 +296,7 @@ namespace TSMapEditor.UI.Windows
             var taskForceTechno = editedTaskForce.TechnoTypes[lbUnitEntries.SelectedIndex];
             taskForceTechno.Count = tbUnitCount.Value;
             unitEntry.Text = GetUnitEntryText(taskForceTechno);
+            RefreshTaskForceCost();
         }
 
         private void LbUnitEntries_SelectedIndexChanged(object sender, System.EventArgs e)
@@ -410,6 +415,8 @@ namespace TSMapEditor.UI.Windows
         {
             editedTaskForce = taskForce;
 
+            RefreshTaskForceCost();
+
             if (taskForce == null)
             {
                 tbTaskForceName.Text = string.Empty;
@@ -446,6 +453,24 @@ namespace TSMapEditor.UI.Windows
             {
                 LbUnitEntries_SelectedIndexChanged(this, EventArgs.Empty);
             }
+        }
+
+        private void RefreshTaskForceCost()
+        {
+            if (editedTaskForce == null)
+            {
+                lblCost.Text = string.Empty;
+                return;
+            }
+
+            int cost = 0;
+            foreach (var technoEntry in editedTaskForce.TechnoTypes)
+            {
+                if (technoEntry != null)
+                    cost += technoEntry.TechnoType.Cost * technoEntry.Count;
+            }
+
+            lblCost.Text = cost.ToString(CultureInfo.InvariantCulture) + "$";
         }
 
         private string GetUnitEntryText(TaskForceTechnoEntry taskForceTechno)

@@ -12,6 +12,8 @@ namespace TSMapEditor.Models
         public string Owner { get; set; }
         public bool NoShadow { get; set; }
 
+        public int Cost { get; set; }
+
         public Weapon Primary { get; set; }
         public Weapon Secondary { get; set; }
         public Weapon ElitePrimary { get; set; }
