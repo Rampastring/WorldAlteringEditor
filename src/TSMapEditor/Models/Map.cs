@@ -193,11 +193,18 @@ namespace TSMapEditor.Models
             this.ccFileManager = ccFileManager;
         }
 
+        private void InitEditorConfig()
+        {
+            EditorConfig = new EditorConfig();
+            EditorConfig.EarlyInit();
+        }
+
         public void InitNew(GameConfigINIFiles gameConfigINIFiles, string theaterName, Point2D size, byte startingLevel)
         {
             const int marginY = 6;
             const int marginX = 4;
 
+            InitEditorConfig();
             InitializeRules(gameConfigINIFiles);
             LoadedINI = new IniFileEx();
             var baseMap = new IniFileEx(Environment.CurrentDirectory + "/Config/BaseMap.ini", ccFileManager);
@@ -211,9 +218,7 @@ namespace TSMapEditor.Models
 
         public void LoadExisting(GameConfigINIFiles gameConfigINIFiles, IniFile mapIni)
         {
-            EditorConfig = new EditorConfig();
-            EditorConfig.EarlyInit();
-
+            InitEditorConfig();
             InitializeRules(gameConfigINIFiles);
 
             LoadedINI = mapIni ?? throw new ArgumentNullException(nameof(mapIni));
