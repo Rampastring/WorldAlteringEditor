@@ -16,6 +16,22 @@ namespace TSMapEditor.UI.Sidebar
     /// </summary>
     public abstract class ObjectListPanel : XNAPanel, ISearchBoxContainer
     {
+        /// <summary>
+        /// Helper structure used for building sidebar object categories.
+        /// Not used after the sidebar has been initialized.
+        /// </summary>
+        struct ObjectCategory
+        {
+            public string Name;
+            public Color RemapColor;
+
+            public ObjectCategory(string name, Color remapColor)
+            {
+                Name = name;
+                RemapColor = remapColor;
+            }
+        }
+
         public ObjectListPanel(WindowManager windowManager, EditorState editorState, Map map, TheaterGraphics theaterGraphics) : base(windowManager)
         {
             EditorState = editorState;
@@ -149,8 +165,7 @@ namespace TSMapEditor.UI.Sidebar
                 if (filter != null && !filter(objectType))
                     continue;
 
-                List<Color> remapColors = new List<Color>(1);
-                List<string> categories = new List<string>(1);
+                List<ObjectCategory> categories = new List<ObjectCategory>(1);
 
                 string categoriesString = objectType.EditorCategory;
 
@@ -159,8 +174,7 @@ namespace TSMapEditor.UI.Sidebar
 
                 if (string.IsNullOrWhiteSpace(categoriesString))
                 {
-                    categories.Add("Uncategorized");
-                    remapColors.Add(Color.White);
+                    categories.Add(new ObjectCategory("Uncategorized", Color.White));
                 }
                 else
                 {
@@ -188,10 +202,9 @@ namespace TSMapEditor.UI.Sidebar
                         // Prevent duplicates that can occur due to category overrides
                         // (For example, if objects owned by "Soviet1" are overridden to be listed under
                         // "Soviet", and a structure has both "Soviet" and "Soviet1" listed as its owner)
-                        if (!categories.Contains(ownerName))
+                        if (!categories.Exists(c => c.Name == ownerName))
                         {
-                            categories.Add(ownerName);
-                            remapColors.Add(remapColor);
+                            categories.Add(new ObjectCategory(ownerName, remapColor));
                         }
                     }
                 }
@@ -219,18 +232,18 @@ namespace TSMapEditor.UI.Sidebar
                     }
                 }
 
-                categories = categories.OrderBy(c => Map.EditorConfig.EditorRulesIni.GetIntValue("ObjectCategoryPriorities", c, 0)).ToList();
+                categories = categories.OrderBy(c => Map.EditorConfig.EditorRulesIni.GetIntValue("ObjectCategoryPriorities", c.Name, 0)).ToList();
 
                 for (int categoryIndex = 0; categoryIndex < categories.Count; categoryIndex++)
                 {
-                    var category = FindOrMakeCategory(categories[categoryIndex], sideCategories);
+                    var category = FindOrMakeCategory(categories[categoryIndex].Name, sideCategories);
 
                     category.Nodes.Add(new TreeViewNode()
                     {
                         Text = objectType.GetEditorDisplayName() + " (" + objectType.ININame + ")",
                         Texture = texture,
                         RemapTexture = remapTexture,
-                        RemapColor = remapColors[categoryIndex],
+                        RemapColor = categories[categoryIndex].RemapColor,
                         Tag = objectType
                     });
                 }
