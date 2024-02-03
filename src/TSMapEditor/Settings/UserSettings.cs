@@ -34,6 +34,7 @@ namespace TSMapEditor.Settings
                 Theme,
                 UseBoldFont,
                 AutoSaveInterval,
+                SidebarWidth,
 
                 MultithreadedTextureLoading,
 
@@ -79,6 +80,7 @@ namespace TSMapEditor.Settings
         public StringSetting Theme = new StringSetting(General, "Theme", "Default");
         public BoolSetting UseBoldFont = new BoolSetting(General, "UseBoldFont", false);
         public IntSetting AutoSaveInterval = new IntSetting(General, "AutoSaveInterval", 300);
+        public IntSetting SidebarWidth = new IntSetting(General, "SidebarWidth", 250);
 
         public BoolSetting MultithreadedTextureLoading = new BoolSetting(General, "MultithreadedTextureLoading", true);
 

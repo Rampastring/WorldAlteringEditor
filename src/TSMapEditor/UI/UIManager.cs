@@ -119,7 +119,7 @@ namespace TSMapEditor.UI
             overlayPlacementAction = new OverlayPlacementAction(mapView);
 
             editorSidebar = new EditorSidebar(WindowManager, editorState, map, theaterGraphics, mapView, overlayPlacementAction);
-            editorSidebar.Width = 250;
+            editorSidebar.Width = UserSettings.Instance.SidebarWidth.GetValue();
             editorSidebar.Y = Constants.UITopBarMenuHeight;
             editorSidebar.Height = WindowManager.RenderResolutionY - editorSidebar.Y;
             AddChild(editorSidebar);
