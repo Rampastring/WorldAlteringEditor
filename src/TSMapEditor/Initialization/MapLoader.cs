@@ -731,7 +731,6 @@ namespace TSMapEditor.Initialization
                 if (tile.Waypoints.Count > 0)
                 {
                     Logger.Log($"NOTE: Waypoint {waypoint.Identifier} exists in the cell at {waypoint.Position} that already contains other waypoints: {string.Join(", ", tile.Waypoints.Select(s => s.Identifier))}");
-                    continue;
                 }
 
                 waypoint.ParseEditorInfo(mapIni);
