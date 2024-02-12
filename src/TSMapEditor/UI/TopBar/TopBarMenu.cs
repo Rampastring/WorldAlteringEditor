@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using Rampastring.XNAUI;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations;
@@ -10,7 +9,6 @@ using TSMapEditor.Settings;
 using TSMapEditor.UI.Controls;
 using TSMapEditor.UI.CursorActions;
 using TSMapEditor.UI.Windows;
-using TSMapEditor.Initialization;
 
 #if WINDOWS
 using System.Windows.Forms;
@@ -142,6 +140,7 @@ namespace TSMapEditor.UI.TopBar
             viewContextMenu.AddItem("View Minimap", () => windowController.MinimapWindow.Open());
             viewContextMenu.AddItem(" ", null, () => false, null, null);
             viewContextMenu.AddItem("Find Waypoint...", () => windowController.FindWaypointWindow.Open());
+            viewContextMenu.AddItem("Center of Map", () => mapView.Camera.CenterOnMapCenterCell());
             viewContextMenu.AddItem(" ", null, () => false, null, null);
             viewContextMenu.AddItem("Toggle Fullscreen Mode", () => KeyboardCommands.Instance.ToggleFullscreen.DoTrigger());
 
