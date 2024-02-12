@@ -229,7 +229,8 @@ namespace TSMapEditor.UI.TopBar
             {
                 EditorMessageBox.Show(WindowManager, "Houses Required",
                     "The map has no houses set up. Houses need to be configured before base nodes can be added." + Environment.NewLine + Environment.NewLine +
-                    "You can configure Houses from Edit -> Houses.", TSMapEditor.UI.Windows.MessageBoxButtons.OK);
+                    "You can configure Houses from Scripting -> Houses.", TSMapEditor.UI.Windows.MessageBoxButtons.OK);
+
                 return;
             }
 
