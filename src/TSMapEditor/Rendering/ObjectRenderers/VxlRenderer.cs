@@ -118,6 +118,10 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
             /********** Rendering *********/
 
+            // Hack to fix bounds, scale them up by 2
+            imageBounds = new Rectangle(imageBounds.X - imageBounds.Width / 2, imageBounds.Y - imageBounds.Height / 2,
+                imageBounds.Width * 2, imageBounds.Height * 2);
+
             // The model is actually empty, return null so we can draw replacement text
             if (vertexData.Count == 0)
                 return null;
@@ -136,8 +140,11 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             basicEffect.Projection = projection;
             basicEffect.World = world;
 
-            VertexBuffer vertexBuffer = new VertexBuffer(graphicsDevice,
-                typeof(VertexPositionColor), vertexData.Count, BufferUsage.None);
+            VertexBuffer vertexBuffer = new VertexBuffer(
+                graphicsDevice,
+                typeof(VertexPositionColor),
+                vertexData.Count, 
+                BufferUsage.None);
             vertexBuffer.SetData(vertexData.ToArray());
 
             IndexBuffer triangleListIndexBuffer = new IndexBuffer(

@@ -12,16 +12,17 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
         protected override Color ReplacementColor => new Color(255, 0, 255);
 
-        protected override ICommonDrawParams GetDrawParams(Overlay gameObject)
+        protected override CommonDrawParams GetDrawParams(Overlay gameObject)
         {
-            return new ShapeDrawParams(TheaterGraphics.OverlayTextures[gameObject.OverlayType.Index], gameObject.OverlayType.ININame);
+            return new CommonDrawParams()
+            {
+                IniName = gameObject.OverlayType.ININame,
+                ShapeImage = TheaterGraphics.OverlayTextures[gameObject.OverlayType.Index]
+            };
         }
 
-        protected override void Render(Overlay gameObject, int yDrawPointWithoutCellHeight, Point2D drawPoint, ICommonDrawParams drawParams)
+        protected override void Render(Overlay gameObject, int heightOffset, Point2D drawPoint, in CommonDrawParams drawParams)
         {
-            if (drawParams is not ShapeDrawParams shapeDrawParams)
-                return;
-
             int tiberiumIndex = gameObject.OverlayType.GetTiberiumIndex(Constants.UseCountries);
 
             Color remapColor = Color.White;
@@ -51,8 +52,8 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 }
             }
 
-            DrawShadow(gameObject, shapeDrawParams, drawPoint, yDrawPointWithoutCellHeight);
-            DrawShapeImage(gameObject, shapeDrawParams, shapeDrawParams.Graphics, gameObject.FrameIndex, Color.White, true, remapColor, drawPoint, yDrawPointWithoutCellHeight);
+            DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
+            DrawShapeImage(gameObject, drawParams, drawParams.ShapeImage, gameObject.FrameIndex, Color.White, true, remapColor, drawPoint, heightOffset);
         }
     }
 }

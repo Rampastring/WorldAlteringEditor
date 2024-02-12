@@ -14,27 +14,20 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
         protected override Color ReplacementColor => Color.HotPink;
 
-        protected override ICommonDrawParams GetDrawParams(Aircraft gameObject)
+        protected override CommonDrawParams GetDrawParams(Aircraft gameObject)
         {
-            var graphics = TheaterGraphics.AircraftModels[gameObject.ObjectType.Index];
-            string iniName = gameObject.ObjectType.ININame;
-            return new VoxelDrawParams(graphics, iniName);
+            return new CommonDrawParams()
+            {
+                IniName = gameObject.ObjectType.ININame,
+                MainVoxel = TheaterGraphics.AircraftModels[gameObject.ObjectType.Index]
+            };
         }
 
-        protected override void Render(Aircraft gameObject, int yDrawPointWithoutCellHeight, Point2D drawPoint, ICommonDrawParams drawParams)
+        protected override void Render(Aircraft gameObject, int heightOffset, Point2D drawPoint, in CommonDrawParams drawParams)
         {
-            if (drawParams is VoxelDrawParams voxelDrawParams)
-                RenderVoxelModel(gameObject, yDrawPointWithoutCellHeight, drawPoint, voxelDrawParams);
-            else
-                throw new NotImplementedException();
-        }
-
-        private void RenderVoxelModel(Aircraft gameObject, int yDrawPointWithoutCellHeight, Point2D drawPoint,
-            VoxelDrawParams drawParams)
-        {
-            DrawVoxelModel(gameObject, drawParams, drawParams.Graphics,
+            DrawVoxelModel(gameObject, drawParams, drawParams.MainVoxel,
                 gameObject.Facing, RampType.None, Color.White, true, gameObject.GetRemapColor(),
-                drawPoint, yDrawPointWithoutCellHeight);
+                drawPoint, heightOffset);
         }
     }
 }

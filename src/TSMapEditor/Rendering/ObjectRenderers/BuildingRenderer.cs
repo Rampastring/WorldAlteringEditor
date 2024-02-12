@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 
@@ -46,12 +47,17 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             }
         }
 
-        protected override ICommonDrawParams GetDrawParams(Structure gameObject)
+        protected override CommonDrawParams GetDrawParams(Structure gameObject)
         {
-            var graphics = RenderDependencies.TheaterGraphics.BuildingTextures[gameObject.ObjectType.Index];
             string iniName = gameObject.ObjectType.ININame;
 
-            return new ShapeDrawParams(graphics, iniName);
+            return new CommonDrawParams()
+            {
+                IniName = iniName,
+                ShapeImage = RenderDependencies.TheaterGraphics.BuildingTextures[gameObject.ObjectType.Index],
+                TurretVoxel = RenderDependencies.TheaterGraphics.BuildingTurretModels[gameObject.ObjectType.Index],
+                BarrelVoxel = RenderDependencies.TheaterGraphics.BuildingBarrelModels[gameObject.ObjectType.Index]
+            };
         }
 
         protected override bool ShouldRenderReplacementText(Structure gameObject)
@@ -67,32 +73,66 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             return base.ShouldRenderReplacementText(gameObject);
         }
 
-        private void DrawBibGraphics(Structure gameObject, ShapeImage bibGraphics, int yDrawPointWithoutCellHeight, Point2D drawPoint, ICommonDrawParams drawParams)
+        private void DrawBibGraphics(Structure gameObject, ShapeImage bibGraphics, int heightOffset, Point2D drawPoint, in CommonDrawParams drawParams)
         {
-            DrawShapeImage(gameObject, drawParams, bibGraphics, 0, Color.White, true, gameObject.GetRemapColor(), drawPoint, yDrawPointWithoutCellHeight);
+            DrawShapeImage(gameObject, drawParams, bibGraphics, 0, Color.White, true, gameObject.GetRemapColor(), drawPoint, heightOffset);
         }
 
-        protected override void Render(Structure gameObject, int yDrawPointWithoutCellHeight, Point2D drawPoint, ICommonDrawParams drawParams)
+        protected override void Render(Structure gameObject, int heightOffset, Point2D drawPoint, in CommonDrawParams drawParams)
         {
             DrawFoundationLines(gameObject);
 
             var bibGraphics = RenderDependencies.TheaterGraphics.BuildingBibTextures[gameObject.ObjectType.Index];
             
             if (bibGraphics != null)
-                DrawBibGraphics(gameObject, bibGraphics, yDrawPointWithoutCellHeight, drawPoint, drawParams);
+                DrawBibGraphics(gameObject, bibGraphics, heightOffset, drawPoint, drawParams);
 
-            if (drawParams is ShapeDrawParams shapeDrawParams)
+            if (!gameObject.ObjectType.NoShadow)
+                DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
+
+            DrawShapeImage(gameObject, drawParams, drawParams.ShapeImage,
+                gameObject.GetFrameIndex(drawParams.ShapeImage.GetFrameCount()),
+                Color.White, true, gameObject.GetRemapColor(), drawPoint, heightOffset);
+
+            if (gameObject.ObjectType.Turret && gameObject.ObjectType.TurretAnimIsVoxel)
             {
-                if (!gameObject.ObjectType.NoShadow)
-                    DrawShadow(gameObject, shapeDrawParams, drawPoint, yDrawPointWithoutCellHeight);
+                var turretOffset = new Point2D(gameObject.ObjectType.TurretAnimX, gameObject.ObjectType.TurretAnimY);
+                var turretDrawPoint = drawPoint + turretOffset;
 
-                DrawShapeImage(gameObject, shapeDrawParams, shapeDrawParams.Graphics,
-                    gameObject.GetFrameIndex(shapeDrawParams.Graphics.GetFrameCount()),
-                    Color.White, true, gameObject.GetRemapColor(), drawPoint, yDrawPointWithoutCellHeight);
+                const byte facingStartDrawAbove = (byte)Direction.E * 32;
+                const byte facingEndDrawAbove = (byte)Direction.W * 32;
+
+                if (gameObject.Facing is > facingStartDrawAbove and <= facingEndDrawAbove)
+                {
+                    DrawVoxelModel(gameObject, drawParams, drawParams.TurretVoxel,
+                        gameObject.Facing, RampType.None, Color.White, true, gameObject.GetRemapColor(),
+                        turretDrawPoint, heightOffset);
+
+                    DrawVoxelModel(gameObject, drawParams, drawParams.BarrelVoxel,
+                        gameObject.Facing, RampType.None, Color.White, true, gameObject.GetRemapColor(),
+                        turretDrawPoint, heightOffset);
+                }
+                else
+                {
+                    DrawVoxelModel(gameObject, drawParams, drawParams.BarrelVoxel,
+                        gameObject.Facing, RampType.None, Color.White, true, gameObject.GetRemapColor(),
+                        turretDrawPoint, heightOffset);
+
+                    DrawVoxelModel(gameObject, drawParams, drawParams.TurretVoxel,
+                        gameObject.Facing, RampType.None, Color.White, true, gameObject.GetRemapColor(),
+                        turretDrawPoint, heightOffset);
+                }
+            }
+            else if (gameObject.ObjectType.Turret && !gameObject.ObjectType.TurretAnimIsVoxel &&
+                     gameObject.ObjectType.BarrelAnimIsVoxel)
+            {
+                DrawVoxelModel(gameObject, drawParams, drawParams.BarrelVoxel,
+                    gameObject.Facing, RampType.None, Color.White, true, gameObject.GetRemapColor(),
+                    drawPoint, heightOffset);
             }
 
             if (gameObject.ObjectType.HasSpotlight ||
-                (gameObject.ObjectType.Turret && gameObject.ObjectType.TurretAnimIsVoxel))
+                (gameObject.ObjectType.Turret && gameObject.ObjectType.TurretAnimIsVoxel && drawParams.TurretVoxel == null))
             {
                 Point2D cellCenter = RenderDependencies.EditorState.Is2DMode ?
                     CellMath.CellTopLeftPointFromCellCoords(gameObject.Position, Map) :
@@ -102,7 +142,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             }
         }
 
-        protected override void DrawObjectReplacementText(Structure gameObject, ICommonDrawParams drawParams, Point2D drawPoint)
+        protected override void DrawObjectReplacementText(Structure gameObject, in CommonDrawParams drawParams, Point2D drawPoint)
         {
             DrawFoundationLines(gameObject);
 

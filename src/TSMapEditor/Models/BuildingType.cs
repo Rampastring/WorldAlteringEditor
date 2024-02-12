@@ -18,6 +18,8 @@ namespace TSMapEditor.Models
         public bool TurretAnimIsVoxel { get; set; }
         public int TurretAnimX { get; set; }
         public int TurretAnimY { get; set; }
+        public string VoxelBarrelFile { get; set; }
+        public bool BarrelAnimIsVoxel { get; set; }
         public bool CloakGenerator { get; set; }
         public bool SensorArray { get; set; }
         public Color? RadialColor { get; set; }

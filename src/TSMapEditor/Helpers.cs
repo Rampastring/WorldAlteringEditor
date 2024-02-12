@@ -258,6 +258,15 @@ namespace TSMapEditor
             return new Vector2(length * (float)Math.Cos(angle), length * (float)Math.Sin(angle));
         }
 
+        public static Point2D ScreenCoordsFromWorldLeptons(Vector2 coords)
+        {
+            const int cellSideInLeptons = 256;
+            coords /= cellSideInLeptons;
+            int screenX = Convert.ToInt32((coords.X - coords.Y) * Constants.CellSizeX / 2);
+            int screenY = Convert.ToInt32((coords.X + coords.Y) * Constants.CellSizeY / 2);
+            return new Point2D(screenX, screenY);
+        }
+
         public static Color ColorFromString(string str)
         {
             string[] parts = str.Split(',');

@@ -12,17 +12,18 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
         protected override Color ReplacementColor => Color.Cyan;
 
-        protected override ICommonDrawParams GetDrawParams(Smudge gameObject)
+        protected override CommonDrawParams GetDrawParams(Smudge gameObject)
         {
-            return new ShapeDrawParams(TheaterGraphics.SmudgeTextures[gameObject.SmudgeType.Index], gameObject.SmudgeType.ININame);
+            return new CommonDrawParams()
+            {
+                IniName = gameObject.SmudgeType.ININame,
+                ShapeImage = TheaterGraphics.SmudgeTextures[gameObject.SmudgeType.Index]
+            };
         }
 
-        protected override void Render(Smudge gameObject, int yDrawPointWithoutCellHeight, Point2D drawPoint, ICommonDrawParams drawParams)
+        protected override void Render(Smudge gameObject, int heightOffset, Point2D drawPoint, in CommonDrawParams drawParams)
         {
-            if (drawParams is not ShapeDrawParams shapeDrawParams)
-                return;
-
-            DrawShapeImage(gameObject, shapeDrawParams, shapeDrawParams.Graphics, 0, Color.White, false, Color.White, drawPoint, yDrawPointWithoutCellHeight);
+            DrawShapeImage(gameObject, drawParams, drawParams.ShapeImage, 0, Color.White, false, Color.White, drawPoint, heightOffset);
         }
     }
 }

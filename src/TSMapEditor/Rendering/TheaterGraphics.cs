@@ -312,6 +312,7 @@ namespace TSMapEditor.Rendering
         private const string HVA_FILE_EXTENSION = ".HVA";
         private const string PNG_FILE_EXTENSION = ".PNG";
         private const string TURRET_FILE_SUFFIX = "TUR";
+        private const string BARREL_FILE_SUFFIX = "BARL";
 
         public TheaterGraphics(GraphicsDevice graphicsDevice, Theater theater, CCFileManager fileManager, Rules rules)
         {
@@ -332,15 +333,17 @@ namespace TSMapEditor.Rendering
                 var task2 = Task.Factory.StartNew(() => ReadTerrainObjectTextures(rules.TerrainTypes));
                 var task3 = Task.Factory.StartNew(() => ReadBuildingTextures(rules.BuildingTypes));
                 var task4 = Task.Factory.StartNew(() => ReadBuildingTurretModels(rules.BuildingTypes));
-                var task5 = Task.Factory.StartNew(() => ReadUnitTextures(rules.UnitTypes));
-                var task6 = Task.Factory.StartNew(() => ReadUnitModels(rules.UnitTypes));
-                var task7 = Task.Factory.StartNew(() => ReadUnitTurretModels(rules.UnitTypes));
-                var task8 = Task.Factory.StartNew(() => ReadAircraftModels(rules.AircraftTypes));
-                var task9 = Task.Factory.StartNew(() => ReadInfantryTextures(rules.InfantryTypes));
-                var task10 = Task.Factory.StartNew(() => ReadOverlayTextures(rules.OverlayTypes));
-                var task11 = Task.Factory.StartNew(() => ReadSmudgeTextures(rules.SmudgeTypes));
-                var task12 = Task.Factory.StartNew(() => ReadAnimTextures(rules.AnimTypes));
-                Task.WaitAll(task1, task2, task3, task4, task5, task6, task7, task8, task9, task10, task11, task12);
+                var task5 = Task.Factory.StartNew(() => ReadBuildingBarrelModels(rules.BuildingTypes));
+                var task6 = Task.Factory.StartNew(() => ReadUnitTextures(rules.UnitTypes));
+                var task7 = Task.Factory.StartNew(() => ReadUnitModels(rules.UnitTypes));
+                var task8 = Task.Factory.StartNew(() => ReadUnitTurretModels(rules.UnitTypes));
+                var task9 = Task.Factory.StartNew(() => ReadUnitBarrelModels(rules.UnitTypes));
+                var task10 = Task.Factory.StartNew(() => ReadAircraftModels(rules.AircraftTypes));
+                var task11 = Task.Factory.StartNew(() => ReadInfantryTextures(rules.InfantryTypes));
+                var task12 = Task.Factory.StartNew(() => ReadOverlayTextures(rules.OverlayTypes));
+                var task13 = Task.Factory.StartNew(() => ReadSmudgeTextures(rules.SmudgeTypes));
+                var task14 = Task.Factory.StartNew(() => ReadAnimTextures(rules.AnimTypes));
+                Task.WaitAll(task1, task2, task3, task4, task5, task6, task7, task8, task9, task10, task11, task12, task13, task14);
             }
             else
             {
@@ -348,9 +351,11 @@ namespace TSMapEditor.Rendering
                 ReadTerrainObjectTextures(rules.TerrainTypes);
                 ReadBuildingTextures(rules.BuildingTypes);
                 ReadBuildingTurretModels(rules.BuildingTypes);
+                ReadBuildingBarrelModels(rules.BuildingTypes);
                 ReadUnitTextures(rules.UnitTypes);
                 ReadUnitModels(rules.UnitTypes);
                 ReadUnitTurretModels(rules.UnitTypes);
+                ReadUnitBarrelModels(rules.UnitTypes);
                 ReadAircraftModels(rules.AircraftTypes);
                 ReadInfantryTextures(rules.InfantryTypes);
                 ReadOverlayTextures(rules.OverlayTypes);
@@ -661,38 +666,96 @@ namespace TSMapEditor.Rendering
                 if (!(buildingType.Turret && buildingType.TurretAnimIsVoxel))
                     continue;
 
-                string turretImage = string.IsNullOrWhiteSpace(buildingType.Image) ? buildingType.ININame : buildingType.Image;
-                turretImage += TURRET_FILE_SUFFIX;
-                if (loadedModels.TryGetValue(turretImage, out VoxelModel loadedModel))
+                string artName = string.IsNullOrWhiteSpace(buildingType.Image) ? buildingType.ArtConfig.Image : buildingType.Image;
+                if (string.IsNullOrEmpty(artName))
+                    artName = buildingType.ININame;
+
+                string turretModelName = string.IsNullOrEmpty(buildingType.TurretAnim) ? artName + TURRET_FILE_SUFFIX : buildingType.TurretAnim;
+                if (loadedModels.TryGetValue(turretModelName, out VoxelModel loadedModel))
                 {
                     BuildingTurretModels[i] = loadedModel;
                     continue;
                 }
 
-                byte[] vxlData = fileManager.LoadFile(turretImage + VXL_FILE_EXTENSION);
+                byte[] vxlData = fileManager.LoadFile(turretModelName + VXL_FILE_EXTENSION);
                 if (vxlData == null)
                     continue;
 
-                byte[] hvaData = fileManager.LoadFile(turretImage + HVA_FILE_EXTENSION);
+                byte[] hvaData = fileManager.LoadFile(turretModelName + HVA_FILE_EXTENSION);
 
                 if (hvaData == null)
                 {
-                    Logger.Log($"WARNING: Building {buildingType.ININame} is missing .hva file for its turret {turretImage + HVA_FILE_EXTENSION}! This will cause the game to crash!");
+                    Logger.Log($"WARNING: Building {buildingType.ININame} is missing .hva file for its turret {turretModelName + HVA_FILE_EXTENSION}! This will cause the game to crash!");
                     continue;
                 }
 
-                var vxlFile = new VxlFile(vxlData, turretImage);
-                var hvaFile = new HvaFile(hvaData, turretImage);
+                var vxlFile = new VxlFile(vxlData, turretModelName);
+                var hvaFile = new HvaFile(hvaData, turretModelName);
 
                 Palette palette = buildingType.ArtConfig.TerrainPalette ? theaterPalette : unitPalette;
                 if (!string.IsNullOrWhiteSpace(buildingType.ArtConfig.Palette))
                     palette = GetPaletteOrFail(buildingType.ArtConfig.Palette + Theater.FileExtension[1..] + ".pal");
 
                 BuildingTurretModels[i] = new VoxelModel(graphicsDevice, vxlFile, hvaFile, palette, buildingType.ArtConfig.Remapable, vplFile);
-                loadedModels[turretImage] = BuildingTurretModels[i];
+                loadedModels[turretModelName] = BuildingTurretModels[i];
             }
 
-            Logger.Log("Finished loading unit turrets' voxel models.");
+            Logger.Log("Finished loading building turrets' voxel models.");
+        }
+
+        public void ReadBuildingBarrelModels(List<BuildingType> buildingTypes)
+        {
+            Logger.Log("Loading building barrels' voxel models.");
+
+            var loadedModels = new Dictionary<string, VoxelModel>();
+            BuildingBarrelModels = new VoxelModel[buildingTypes.Count];
+
+            for (int i = 0; i < buildingTypes.Count; i++)
+            {
+                var buildingType = buildingTypes[i];
+
+                bool hasVoxelTurret = buildingType.Turret && buildingType.TurretAnimIsVoxel;
+                bool hasShapeTurretAndVoxelBarrel = buildingType.Turret && !buildingType.TurretAnimIsVoxel &&
+                                                    buildingType.BarrelAnimIsVoxel;
+
+                if (!(hasVoxelTurret || hasShapeTurretAndVoxelBarrel))
+                    continue;
+
+                string artName = string.IsNullOrWhiteSpace(buildingType.Image) ? buildingType.ArtConfig.Image : buildingType.Image;
+                if (string.IsNullOrEmpty(artName))
+                    artName = buildingType.ININame;
+
+                string barrelModelName = string.IsNullOrEmpty(buildingType.VoxelBarrelFile) ? artName + BARREL_FILE_SUFFIX : buildingType.VoxelBarrelFile;
+                if (loadedModels.TryGetValue(barrelModelName, out VoxelModel loadedModel))
+                {
+                    BuildingBarrelModels[i] = loadedModel;
+                    continue;
+                }
+
+                byte[] vxlData = fileManager.LoadFile(barrelModelName + VXL_FILE_EXTENSION);
+                if (vxlData == null)
+                    continue;
+
+                byte[] hvaData = fileManager.LoadFile(barrelModelName + HVA_FILE_EXTENSION);
+
+                if (hvaData == null)
+                {
+                    Logger.Log($"WARNING: Building {buildingType.ININame} is missing .hva file for its barrel {barrelModelName + HVA_FILE_EXTENSION}! This will cause the game to crash!");
+                    continue;
+                }
+
+                var vxlFile = new VxlFile(vxlData, barrelModelName);
+                var hvaFile = new HvaFile(hvaData, barrelModelName);
+
+                Palette palette = buildingType.ArtConfig.TerrainPalette ? theaterPalette : unitPalette;
+                if (!string.IsNullOrWhiteSpace(buildingType.ArtConfig.Palette))
+                    palette = GetPaletteOrFail(buildingType.ArtConfig.Palette + Theater.FileExtension[1..] + ".pal");
+
+                BuildingBarrelModels[i] = new VoxelModel(graphicsDevice, vxlFile, hvaFile, palette, buildingType.ArtConfig.Remapable, vplFile);
+                loadedModels[barrelModelName] = BuildingBarrelModels[i];
+            }
+
+            Logger.Log("Finished loading building barrels' voxel models.");
         }
 
         public void ReadAnimTextures(List<AnimType> animTypes)
@@ -855,37 +918,81 @@ namespace TSMapEditor.Rendering
             {
                 var unitType = unitTypes[i];
 
-                if (!(unitType.Turret && unitType.ArtConfig.Voxel))
+                if (!unitType.Turret)
                     continue;
 
-                string turretImage = string.IsNullOrWhiteSpace(unitType.Image) ? unitType.ININame : unitType.Image;
-                turretImage += TURRET_FILE_SUFFIX;
-                if (loadedModels.TryGetValue(turretImage, out VoxelModel loadedModel))
+                string turretModelName = string.IsNullOrWhiteSpace(unitType.Image) ? unitType.ININame : unitType.Image;
+                turretModelName += TURRET_FILE_SUFFIX;
+                if (loadedModels.TryGetValue(turretModelName, out VoxelModel loadedModel))
                 {
                     UnitTurretModels[i] = loadedModel;
                     continue;
                 }
 
-                byte[] vxlData = fileManager.LoadFile(turretImage + VXL_FILE_EXTENSION);
+                byte[] vxlData = fileManager.LoadFile(turretModelName + VXL_FILE_EXTENSION);
                 if (vxlData == null)
                     continue;
 
-                byte[] hvaData = fileManager.LoadFile(turretImage + HVA_FILE_EXTENSION);
+                byte[] hvaData = fileManager.LoadFile(turretModelName + HVA_FILE_EXTENSION);
 
                 if (hvaData == null)
                 {
-                    Logger.Log($"WARNING: Unit {unitType.ININame} is missing .hva file for its turret {turretImage + HVA_FILE_EXTENSION}! This will cause the game to crash!");
+                    Logger.Log($"WARNING: Unit {unitType.ININame} is missing .hva file for its turret {turretModelName + HVA_FILE_EXTENSION}! This will cause the game to crash!");
                     continue;
                 }
 
-                var vxlFile = new VxlFile(vxlData, turretImage);
-                var hvaFile = new HvaFile(hvaData, turretImage);
+                var vxlFile = new VxlFile(vxlData, turretModelName);
+                var hvaFile = new HvaFile(hvaData, turretModelName);
 
                 UnitTurretModels[i] = new VoxelModel(graphicsDevice, vxlFile, hvaFile, unitPalette, unitType.ArtConfig.Remapable, vplFile);
-                loadedModels[turretImage] = UnitTurretModels[i];
+                loadedModels[turretModelName] = UnitTurretModels[i];
             }
 
             Logger.Log("Finished loading unit turrets' voxel models.");
+        }
+
+        public void ReadUnitBarrelModels(List<UnitType> unitTypes)
+        {
+            Logger.Log("Loading unit barrels' voxel models.");
+
+            var loadedModels = new Dictionary<string, VoxelModel>();
+            UnitBarrelModels = new VoxelModel[unitTypes.Count];
+
+            for (int i = 0; i < unitTypes.Count; i++)
+            {
+                var unitType = unitTypes[i];
+
+                if (!unitType.Turret)
+                    continue;
+
+                string barrelModelName = string.IsNullOrWhiteSpace(unitType.Image) ? unitType.ININame : unitType.Image;
+                barrelModelName += BARREL_FILE_SUFFIX;
+                if (loadedModels.TryGetValue(barrelModelName, out VoxelModel loadedModel))
+                {
+                    UnitBarrelModels[i] = loadedModel;
+                    continue;
+                }
+
+                byte[] vxlData = fileManager.LoadFile(barrelModelName + VXL_FILE_EXTENSION);
+                if (vxlData == null)
+                    continue;
+
+                byte[] hvaData = fileManager.LoadFile(barrelModelName + HVA_FILE_EXTENSION);
+
+                if (hvaData == null)
+                {
+                    Logger.Log($"WARNING: Unit {unitType.ININame} is missing .hva file for its barrel {barrelModelName + HVA_FILE_EXTENSION}! This will cause the game to crash!");
+                    continue;
+                }
+
+                var vxlFile = new VxlFile(vxlData, barrelModelName);
+                var hvaFile = new HvaFile(hvaData, barrelModelName);
+
+                UnitBarrelModels[i] = new VoxelModel(graphicsDevice, vxlFile, hvaFile, unitPalette, unitType.ArtConfig.Remapable, vplFile);
+                loadedModels[barrelModelName] = UnitBarrelModels[i];
+            }
+
+            Logger.Log("Finished loading unit barrels' voxel models.");
         }
 
         public void ReadAircraftModels(List<AircraftType> aircraftTypes)
@@ -1135,11 +1242,13 @@ namespace TSMapEditor.Rendering
 
         public ShapeImage[] TerrainObjectTextures { get; set; }
         public ShapeImage[] BuildingTextures { get; set; }
-        public VoxelModel[] BuildingTurretModels { get; set; }
         public ShapeImage[] BuildingBibTextures { get; set; }
+        public VoxelModel[] BuildingTurretModels { get; set; }
+        public VoxelModel[] BuildingBarrelModels { get; set; }
         public ShapeImage[] UnitTextures { get; set; }
         public VoxelModel[] UnitModels { get; set; }
         public VoxelModel[] UnitTurretModels { get; set; }
+        public VoxelModel[] UnitBarrelModels { get; set; }
         public VoxelModel[] AircraftModels { get; set; }
         public ShapeImage[] InfantryTextures { get; set; }
         public ShapeImage[] OverlayTextures { get; set; }
@@ -1159,17 +1268,19 @@ namespace TSMapEditor.Rendering
             var task1 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(TerrainObjectTextures));
             var task2 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(BuildingTextures));
             var task3 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(BuildingTurretModels));
-            var task4 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(UnitTextures));
-            var task5 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(UnitModels));
-            var task6 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(UnitTurretModels));
-            var task7 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(AircraftModels));
-            var task8 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(InfantryTextures));
-            var task9 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(OverlayTextures));
-            var task10 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(SmudgeTextures));
-            var task11 = Task.Factory.StartNew(() => { terrainGraphicsList.ForEach(tileImageArray => Array.ForEach(tileImageArray, tileImage => tileImage.Dispose())); terrainGraphicsList.Clear(); });
-            var task12 = Task.Factory.StartNew(() => { mmTerrainGraphicsList.ForEach(tileImageArray => Array.ForEach(tileImageArray, tileImage => tileImage.Dispose())); mmTerrainGraphicsList.Clear(); });
-            var task13 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(AnimTextures));
-            Task.WaitAll(task1, task2, task3, task4, task5, task6, task7, task8, task9, task10, task11, task12, task13);
+            var task4 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(BuildingBarrelModels));
+            var task5 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(UnitTextures));
+            var task6 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(UnitModels));
+            var task7 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(UnitTurretModels));
+            var task8 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(UnitBarrelModels));
+            var task9 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(AircraftModels));
+            var task10 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(InfantryTextures));
+            var task11 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(OverlayTextures));
+            var task12 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(SmudgeTextures));
+            var task13 = Task.Factory.StartNew(() => { terrainGraphicsList.ForEach(tileImageArray => Array.ForEach(tileImageArray, tileImage => tileImage.Dispose())); terrainGraphicsList.Clear(); });
+            var task14 = Task.Factory.StartNew(() => { mmTerrainGraphicsList.ForEach(tileImageArray => Array.ForEach(tileImageArray, tileImage => tileImage.Dispose())); mmTerrainGraphicsList.Clear(); });
+            var task15 = Task.Factory.StartNew(() => DisposeObjectImagesFromArray(AnimTextures));
+            Task.WaitAll(task1, task2, task3, task4, task5, task6, task7, task8, task9, task10, task11, task12, task13, task14, task15);
 
             TerrainObjectTextures = null;
             BuildingTextures = null;

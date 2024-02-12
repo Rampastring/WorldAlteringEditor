@@ -48,18 +48,14 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             int heightOffset = RenderDependencies.EditorState.Is2DMode ? 0 : mapCell.Level * Constants.CellHeight;
             Point2D drawPoint = new Point2D(drawPointWithoutCellHeight.X, drawPointWithoutCellHeight.Y - heightOffset);
 
-            ICommonDrawParams drawParams = GetDrawParams(gameObject);
+            CommonDrawParams drawParams = GetDrawParams(gameObject);
 
             PositionedTexture frame = GetFrameTexture(gameObject, drawParams);
 
-            GetTextureDrawCoords(gameObject, frame, drawPoint,
-                drawPointWithoutCellHeight.Y,
-                out int finalDrawPointX, out int finalDrawPointRight,
-                out int finalDrawPointY, out int finalDrawPointBottom,
-                out int objectYDrawPointWithoutCellHeight);
+            Rectangle drawingBounds = GetTextureDrawCoords(gameObject, frame, drawPoint);
 
             // If the object is not in view, skip
-            if (checkInCamera && !IsObjectInCamera(finalDrawPointX, finalDrawPointRight, finalDrawPointY, finalDrawPointBottom))
+            if (checkInCamera && !IsObjectInCamera(drawingBounds))
                 return;
 
             if (frame == null && ShouldRenderReplacementText(gameObject))
@@ -68,7 +64,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             }
             else
             {
-                Render(gameObject, drawPointWithoutCellHeight.Y, drawPoint, drawParams);
+                Render(gameObject, heightOffset, drawPoint, drawParams);
             }
         }
 
@@ -89,16 +85,16 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         /// for drawing the type of object.
         /// </summary>
         /// <param name="gameObject">The game object to get the drawing parameters for.</param>
-        protected abstract ICommonDrawParams GetDrawParams(T gameObject);
+        protected abstract CommonDrawParams GetDrawParams(T gameObject);
 
         /// <summary>
         /// Renders an object. Override in derived classes to implement and customize the rendering process.
         /// </summary>
         /// <param name="gameObject">The game object to draw.</param>
-        /// <param name="yDrawPointWithoutCellHeight">The Y-axis draw coordinate of the object, prior to taking cell height into account.</param>
+        /// <param name="heightOffset">The Y-axis draw offset from cell height.</param>
         /// <param name="drawPoint">The draw point of the object, with cell height taken into account.</param>
         /// <param name="drawParams">Draw parameters.</param>
-        protected abstract void Render(T gameObject, int yDrawPointWithoutCellHeight, Point2D drawPoint, ICommonDrawParams drawParams);
+        protected abstract void Render(T gameObject, int heightOffset, Point2D drawPoint, in CommonDrawParams drawParams);
 
         /// <summary>
         /// Renders the replacement text of an object, displayed when no graphics for an object have been loaded.
@@ -107,7 +103,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         /// <param name="gameObject">The game object for which to draw a replacement text.</param>
         /// <param name="drawParams">Draw parameters.</param>
         /// <param name="drawPoint">The draw point of the object, with cell height taken into account.</param>
-        protected virtual void DrawObjectReplacementText(T gameObject, ICommonDrawParams drawParams, Point2D drawPoint)
+        protected virtual void DrawObjectReplacementText(T gameObject, in CommonDrawParams drawParams, Point2D drawPoint)
         {
             SetEffectParams(0.0f, 0.0f, Vector2.Zero, Vector2.Zero);
 
@@ -138,48 +134,49 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             RendererExtensions.DrawArrow(cellCenterPoint, cellCenterPoint + arrowEndPoint, Color.Yellow, 1f, 10f, 2);
         }
 
-        private bool IsObjectInCamera(int drawPointX, int drawPointRight, int drawPointY, int drawPointBottom)
+        private bool IsObjectInCamera(Rectangle drawingBounds)
         {
-            if (drawPointRight < RenderDependencies.Camera.TopLeftPoint.X || drawPointX > RenderDependencies.GetCameraRightXCoord())
+            if (drawingBounds.X + drawingBounds.Width < RenderDependencies.Camera.TopLeftPoint.X || drawingBounds.X > RenderDependencies.GetCameraRightXCoord())
                 return false;
 
-            if (drawPointBottom < RenderDependencies.Camera.TopLeftPoint.Y || drawPointY > RenderDependencies.GetCameraBottomYCoord())
+            if (drawingBounds.Y + drawingBounds.Height < RenderDependencies.Camera.TopLeftPoint.Y || drawingBounds.Y > RenderDependencies.GetCameraBottomYCoord())
                 return false;
 
             return true;
         }
 
-        private PositionedTexture GetFrameTexture(T gameObject, ICommonDrawParams drawParams)
+        private PositionedTexture GetFrameTexture(T gameObject, in CommonDrawParams drawParams)
         {
-            if (drawParams is ShapeDrawParams shapeDrawParams)
+            if (drawParams.ShapeImage != null && drawParams.ShapeImage.GetFrameCount() > 0)
             {
-                if (shapeDrawParams.Graphics != null && shapeDrawParams.Graphics.GetFrameCount() > 0)
-                {
-                    int frameIndex = gameObject.GetFrameIndex(shapeDrawParams.Graphics.GetFrameCount());
+                int frameIndex = gameObject.GetFrameIndex(drawParams.ShapeImage.GetFrameCount());
 
-                    if (frameIndex > -1 && frameIndex < shapeDrawParams.Graphics.GetFrameCount())
-                        return shapeDrawParams.Graphics.GetFrame(frameIndex);
-                }
+                if (frameIndex > -1 && frameIndex < drawParams.ShapeImage.GetFrameCount())
+                    return drawParams.ShapeImage.GetFrame(frameIndex);
             }
-            else if (drawParams is VoxelDrawParams voxelDrawParams)
+            else if (drawParams.MainVoxel?.Frames != null)
             {
-                if (voxelDrawParams.Graphics?.Frames != null)
-                    return voxelDrawParams.Graphics.GetFrame(0, RampType.None);
+                return drawParams.MainVoxel.GetFrame(0, RampType.None);
+            }
+            else if (drawParams.TurretVoxel?.Frames != null)
+            {
+                return drawParams.TurretVoxel.GetFrame(0, RampType.None);
+            }
+            else if (drawParams.BarrelVoxel?.Frames != null)
+            {
+                return drawParams.BarrelVoxel.GetFrame(0, RampType.None);
             }
 
             return null;
         }
 
-        private void GetTextureDrawCoords(T gameObject,
+        private Rectangle GetTextureDrawCoords(T gameObject,
             PositionedTexture frame,
-            Point2D initialDrawPoint,
-            int initialYDrawPointWithoutCellHeight,
-            out int finalDrawPointX, 
-            out int finalDrawPointRight, 
-            out int finalDrawPointY, 
-            out int finalDrawPointBottom,
-            out int objectYDrawPointWithoutCellHeight)
+            Point2D initialDrawPoint)
         {
+            int finalDrawPointX;
+            int finalDrawPointY;
+
             if (frame != null)
             {
                 int yDrawOffset = gameObject.GetYDrawOffset();
@@ -187,19 +184,16 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
                 finalDrawPointX = initialDrawPoint.X - frame.ShapeWidth / 2 + frame.OffsetX + Constants.CellSizeX / 2 + xDrawOffset;
                 finalDrawPointY = initialDrawPoint.Y - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset;
-                objectYDrawPointWithoutCellHeight = initialYDrawPointWithoutCellHeight - frame.ShapeHeight / 2 + frame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset;
 
-                finalDrawPointRight = finalDrawPointX + frame.Texture.Width;
-                finalDrawPointBottom = finalDrawPointY + frame.Texture.Height;
             }
             else
             {
                 finalDrawPointX = initialDrawPoint.X;
-                finalDrawPointRight = initialDrawPoint.X;
                 finalDrawPointY = initialDrawPoint.Y;
-                finalDrawPointBottom = initialDrawPoint.Y;
-                objectYDrawPointWithoutCellHeight = initialYDrawPointWithoutCellHeight;
             }
+
+            return new Rectangle(finalDrawPointX, finalDrawPointY,
+                finalDrawPointX + frame?.Texture.Width ?? 0, finalDrawPointY + frame?.Texture.Height ?? 0);
         }
 
         protected void SetEffectParams(float bottomDepth, float topDepth,
@@ -223,22 +217,25 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             }
         }
 
-        protected virtual void DrawShadow(T gameObject, ICommonDrawParams drawParams, Point2D drawPoint, int initialYDrawPointWithoutCellHeight)
+        protected virtual void DrawShadow(T gameObject, in CommonDrawParams drawParams, Point2D drawPoint, int heightOffset)
         {
-            if (drawParams is not ShapeDrawParams shapeDrawParams || shapeDrawParams.Graphics == null)
+            if (drawParams.ShapeImage == null)
                 return;
 
-            int shadowFrameIndex = gameObject.GetShadowFrameIndex(shapeDrawParams.Graphics.GetFrameCount());
-            if (shadowFrameIndex > 0 && shadowFrameIndex < shapeDrawParams.Graphics.GetFrameCount())
+            int shadowFrameIndex = gameObject.GetShadowFrameIndex(drawParams.ShapeImage.GetFrameCount());
+            if (shadowFrameIndex > 0 && shadowFrameIndex < drawParams.ShapeImage.GetFrameCount())
             {
-                DrawShapeImage(gameObject, shapeDrawParams, shapeDrawParams.Graphics, shadowFrameIndex,
-                    new Color(0, 0, 0, 128), false, Color.White, drawPoint, initialYDrawPointWithoutCellHeight);
+                DrawShapeImage(gameObject, drawParams, drawParams.ShapeImage, shadowFrameIndex,
+                    new Color(0, 0, 0, 128), false, Color.White, drawPoint, heightOffset);
             }
         }
 
-        protected void DrawShapeImage(T gameObject, ICommonDrawParams drawParams, ShapeImage image,
-            int frameIndex, Color color, bool drawRemap, Color remapColor, Point2D drawPoint, int initialYDrawPointWithoutCellHeight)
+        protected void DrawShapeImage(T gameObject, in CommonDrawParams drawParams, ShapeImage image,
+            int frameIndex, Color color, bool drawRemap, Color remapColor, Point2D drawPoint, int heightOffset)
         {
+            if (image == null)
+                return;
+
             PositionedTexture frame = image.GetFrame(frameIndex);
             if (frame == null || frame.Texture == null)
                 return;
@@ -247,16 +244,18 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             if (drawRemap && Constants.HQRemap && image.HasRemapFrames())
                 remapFrame = image.GetRemapFrame(frameIndex);
 
-            GetTextureDrawCoords(gameObject, frame, drawPoint, initialYDrawPointWithoutCellHeight, 
-                out int finalDrawPointX, out _, out int finalDrawPointY, out _, out int finalYDrawPointWithoutCellHeight);
+            Rectangle drawingBounds = GetTextureDrawCoords(gameObject, frame, drawPoint);
 
             RenderFrame(frame, remapFrame, color, drawRemap, remapColor,
-                finalDrawPointX, finalDrawPointY, finalYDrawPointWithoutCellHeight);
+                drawingBounds.X, drawingBounds.Y, heightOffset);
         }
 
-        protected void DrawVoxelModel(T gameObject, ICommonDrawParams drawParams, VoxelModel model,
-            byte facing, RampType ramp, Color color, bool drawRemap, Color remapColor, Point2D drawPoint, int initialYDrawPointWithoutCellHeight)
+        protected void DrawVoxelModel(T gameObject, in CommonDrawParams drawParams, VoxelModel model,
+            byte facing, RampType ramp, Color color, bool drawRemap, Color remapColor, Point2D drawPoint, int heightOffset)
         {
+            if (model == null)
+                return;
+
             PositionedTexture frame = model.GetFrame(facing, ramp);
             if (frame == null || frame.Texture == null)
                 return;
@@ -265,24 +264,22 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             if (drawRemap && Constants.HQRemap)
                 remapFrame = model.GetRemapFrame(facing, ramp);
 
-            GetTextureDrawCoords(gameObject, frame, drawPoint, initialYDrawPointWithoutCellHeight,
-                out int finalDrawPointX, out _, out int finalDrawPointY, out _, out int finalYDrawPointWithoutCellHeight);
+            Rectangle drawingBounds = GetTextureDrawCoords(gameObject, frame, drawPoint);
 
             RenderFrame(frame, remapFrame, color, drawRemap, remapColor,
-                finalDrawPointX, finalDrawPointY, finalYDrawPointWithoutCellHeight);
+                drawingBounds.X, drawingBounds.Y, heightOffset);
         }
 
         private void RenderFrame(PositionedTexture frame, PositionedTexture remapFrame, Color color, bool drawRemap, Color remapColor,
-            int finalDrawPointX, int finalDrawPointY, int finalYDrawPointWithoutCellHeight)
+            int finalDrawPointX, int finalDrawPointY, int heightOffset)
         {
             Texture2D texture = frame.Texture;
 
-            ApplyDepthEffectValues(finalYDrawPointWithoutCellHeight, texture, new Point2D(finalDrawPointX, finalDrawPointY));
+            ApplyDepthEffectValues(texture, new Point2D(finalDrawPointX, finalDrawPointY), heightOffset);
 
             Renderer.DrawTexture(texture, 
                 new Rectangle(finalDrawPointX, finalDrawPointY, texture.Width, texture.Height),
-                null, color,
-                0f, Vector2.Zero, SpriteEffects.None, 0f);
+                null, color, 0f, Vector2.Zero, SpriteEffects.None, 0f);
 
             if (drawRemap && Constants.HQRemap && remapFrame != null)
             {
@@ -297,12 +294,12 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             }
         }
 
-        private void ApplyDepthEffectValues(int yDrawPointWithoutCellHeight, Texture2D texture, Point2D finalDrawPoint)
+        private void ApplyDepthEffectValues(Texture2D texture, Point2D finalDrawPoint, int heightOffset)
         {
             int depthOffset = Constants.CellSizeY;
 
-            float depthTop = (yDrawPointWithoutCellHeight + depthOffset) / (float)Map.HeightInPixels;
-            float depthBottom = (yDrawPointWithoutCellHeight + texture.Height + depthOffset) / (float)Map.HeightInPixels;
+            float depthTop = (finalDrawPoint.Y + heightOffset + depthOffset) / (float)Map.HeightInPixels;
+            float depthBottom = (finalDrawPoint.Y + heightOffset + texture.Height + depthOffset) / (float)Map.HeightInPixels;
             depthTop = 1.0f - depthTop;
             depthBottom = 1.0f - depthBottom;
 
