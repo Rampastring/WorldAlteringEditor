@@ -22,6 +22,8 @@ namespace TSMapEditor.Models
         /// </summary>
         public bool SpawnsTiberium { get; set; }
 
+        public int YDrawFudge { get; set; }
+
         /// <summary>
         /// Defined in Art.ini. If set to true,
         /// the art for this terrain type is theater-specific;
