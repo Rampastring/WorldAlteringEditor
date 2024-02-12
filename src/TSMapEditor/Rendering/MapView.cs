@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
+using TSMapEditor.Misc;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations;
 using TSMapEditor.Mutations.Classes;
@@ -56,6 +57,7 @@ namespace TSMapEditor.Rendering
         IMutationTarget MutationTarget { get; }
         BrushSize BrushSize { get; set; }
         bool Is2DMode { get; }
+        DeletionMode DeletionMode { get; }
         Randomizer Randomizer { get; }
         bool AutoLATEnabled { get; }
         bool OnlyPaintOnClearGround { get; }
@@ -116,6 +118,7 @@ namespace TSMapEditor.Rendering
         public House ObjectOwner => EditorState.ObjectOwner;
         public BrushSize BrushSize { get => EditorState.BrushSize; set => EditorState.BrushSize = value; }
         public bool Is2DMode => EditorState.Is2DMode;
+        public DeletionMode DeletionMode => EditorState.DeletionMode;
         public Randomizer Randomizer => EditorState.Randomizer;
         public bool AutoLATEnabled => EditorState.AutoLATEnabled;
         public bool OnlyPaintOnClearGround => EditorState.OnlyPaintOnClearGround;
@@ -1573,7 +1576,7 @@ namespace TSMapEditor.Rendering
                 return;
 
             AddRefreshPoint(cellCoords, 2);
-            Map.DeleteObjectFromCell(cellCoords);
+            Map.DeleteObjectFromCell(cellCoords, EditorState.DeletionMode);
         }
 
         private void DrawTubes()

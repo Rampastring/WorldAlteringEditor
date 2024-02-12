@@ -63,6 +63,7 @@ namespace TSMapEditor.UI.Windows
         public ExpandMapWindow ExpandMapWindow { get; private set; }
         public ChangeHeightWindow ChangeHeightWindow { get; private set; }
         public FindWaypointWindow FindWaypointWindow { get; private set; }
+        public DeletionModeConfigurationWindow DeletionModeConfigurationWindow { get; private set; }
         public AboutWindow AboutWindow { get; private set; }
 
         private IWindowParentControl windowParentControl;
@@ -184,6 +185,9 @@ namespace TSMapEditor.UI.Windows
 
             FindWaypointWindow = new FindWaypointWindow(windowParentControl.WindowManager, map, cursorActionTarget);
             Windows.Add(FindWaypointWindow);
+
+            DeletionModeConfigurationWindow = new DeletionModeConfigurationWindow(windowParentControl.WindowManager, editorState);
+            Windows.Add(DeletionModeConfigurationWindow);
 
             AboutWindow = new AboutWindow(windowParentControl.WindowManager);
             Windows.Add(AboutWindow);

@@ -85,7 +85,7 @@ namespace TSMapEditor.UI.TopBar
 
             var editContextMenu = new EditorContextMenu(WindowManager);
             editContextMenu.Name = nameof(editContextMenu);
-            editContextMenu.AddItem("Configure Copied Objects", () => windowController.CopiedEntryTypesWindow.Open(), null, null, null, KeyboardCommands.Instance.ConfigureCopiedObjects.GetKeyDisplayString());
+            editContextMenu.AddItem("Configure Copied Objects...", () => windowController.CopiedEntryTypesWindow.Open(), null, null, null, KeyboardCommands.Instance.ConfigureCopiedObjects.GetKeyDisplayString());
             editContextMenu.AddItem("Copy", () => KeyboardCommands.Instance.Copy.DoTrigger(), null, null, null, KeyboardCommands.Instance.Copy.GetKeyDisplayString());
             editContextMenu.AddItem("Paste", () => KeyboardCommands.Instance.Paste.DoTrigger(), null, null, null, KeyboardCommands.Instance.Paste.GetKeyDisplayString());
             editContextMenu.AddItem(" ", null, () => false, null, null);
@@ -154,13 +154,15 @@ namespace TSMapEditor.UI.TopBar
             toolsContextMenu.Name = nameof(toolsContextMenu);
             // toolsContextMenu.AddItem("Options");
             if (windowController.AutoApplyImpassableOverlayWindow.IsAvailable)
-                toolsContextMenu.AddItem("Apply Impassable Overlay", () => windowController.AutoApplyImpassableOverlayWindow.Open(), null, null, null);
+                toolsContextMenu.AddItem("Apply Impassable Overlay...", () => windowController.AutoApplyImpassableOverlayWindow.Open(), null, null, null);
 
-            toolsContextMenu.AddItem("Terrain Generator Options", () => windowController.TerrainGeneratorConfigWindow.Open(), null, null, null, KeyboardCommands.Instance.ConfigureTerrainGenerator.GetKeyDisplayString());
+            toolsContextMenu.AddItem("Terrain Generator Options...", () => windowController.TerrainGeneratorConfigWindow.Open(), null, null, null, KeyboardCommands.Instance.ConfigureTerrainGenerator.GetKeyDisplayString());
             toolsContextMenu.AddItem("Generate Terrain", () => EnterTerrainGenerator(), null, null, null, KeyboardCommands.Instance.GenerateTerrain.GetKeyDisplayString());
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("Apply INI Code...", () => windowController.ApplyINICodeWindow.Open(), null, null, null);
             toolsContextMenu.AddItem("Run Script...", () => windowController.RunScriptWindow.Open(), null, null, null, null);
+            toolsContextMenu.AddItem(" ", null, () => false, null, null);
+            toolsContextMenu.AddItem("Deletion Options...", () => windowController.DeletionModeConfigurationWindow.Open());
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("Change Map Height...", () => windowController.ChangeHeightWindow.Open(), null, () => !Constants.IsFlatWorld, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, () => !Constants.IsFlatWorld, null);

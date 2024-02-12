@@ -134,6 +134,9 @@
     <None Update="Config\UI\Windows\DeleteTerrainGeneratorPresetWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Config\UI\Windows\DeletionModeConfigurationWindow.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Config\UI\Windows\EditHouseTypeWindow.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

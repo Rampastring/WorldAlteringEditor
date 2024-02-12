@@ -42,7 +42,7 @@ namespace TSMapEditor.UI.CursorActions
 
         public override void LeftClick(Point2D cellCoords)
         {
-            CursorActionTarget.Map.DeleteObjectFromCell(cellCoords);
+            CursorActionTarget.Map.DeleteObjectFromCell(cellCoords, CursorActionTarget.DeletionMode);
             CursorActionTarget.AddRefreshPoint(cellCoords);
         }
 

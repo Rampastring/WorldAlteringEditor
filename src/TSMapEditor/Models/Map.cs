@@ -9,6 +9,7 @@ using TSMapEditor.CCEngine;
 using TSMapEditor.Extensions;
 using TSMapEditor.GameMath;
 using TSMapEditor.Initialization;
+using TSMapEditor.Misc;
 using TSMapEditor.Models.Enums;
 using TSMapEditor.Rendering;
 
@@ -1079,52 +1080,55 @@ namespace TSMapEditor.Models
             return cell.CanAddObject((GameObject)movable, blocksSelf, overlapObjects);
         }
 
-        public void DeleteObjectFromCell(Point2D cellCoords)
+        public void DeleteObjectFromCell(Point2D cellCoords, DeletionMode deletionMode)
         {
             var tile = GetTile(cellCoords.X, cellCoords.Y);
             if (tile == null)
                 return;
 
-            if (tile.CellTag != null)
+            if (deletionMode.HasFlag(DeletionMode.CellTags) && tile.CellTag != null)
             {
                 RemoveCellTagFrom(tile.CoordsToPoint());
                 return;
             }
 
-            if (tile.Waypoints.Count > 0)
+            if (deletionMode.HasFlag(DeletionMode.Waypoints) && tile.Waypoints.Count > 0)
             {
                 RemoveWaypointsFrom(tile.CoordsToPoint());
                 return;
             }
 
-            for (int i = 0; i < tile.Infantry.Length; i++)
+            if (deletionMode.HasFlag(DeletionMode.Infantry))
             {
-                if (tile.Infantry[i] != null)
+                for (int i = 0; i < tile.Infantry.Length; i++)
                 {
-                    RemoveInfantry(tile.Infantry[i]);
-                    return;
+                    if (tile.Infantry[i] != null)
+                    {
+                        RemoveInfantry(tile.Infantry[i]);
+                        return;
+                    }
                 }
             }
 
-            if (tile.Aircraft.Count > 0)
+            if (deletionMode.HasFlag(DeletionMode.Aircraft) && tile.Aircraft.Count > 0)
             {
                 RemoveAircraftFrom(tile.CoordsToPoint());
                 return;
             }
 
-            if (tile.Vehicles.Count > 0)
+            if (deletionMode.HasFlag(DeletionMode.Vehicles) && tile.Vehicles.Count > 0)
             {
                 RemoveUnitsFrom(tile.CoordsToPoint());
                 return;
             }
 
-            if (tile.Structures.Count > 0)
+            if (deletionMode.HasFlag(DeletionMode.Structures) && tile.Structures.Count > 0)
             {
                 RemoveBuildingsFrom(tile.CoordsToPoint());
                 return;
             }
 
-            if (tile.TerrainObject != null)
+            if (deletionMode.HasFlag(DeletionMode.TerrainObjects) && tile.TerrainObject != null)
             {
                 RemoveTerrainObject(tile.CoordsToPoint());
                 return;

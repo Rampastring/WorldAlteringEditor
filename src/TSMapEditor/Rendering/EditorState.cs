@@ -1,5 +1,6 @@
 ﻿using System;
 using TSMapEditor.GameMath;
+using TSMapEditor.Misc;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations.Classes;
 using TSMapEditor.UI;
@@ -195,6 +196,8 @@ namespace TSMapEditor.Rendering
                 }
             }
         }
+
+        public DeletionMode DeletionMode { get; set; } = DeletionMode.All;
 
         public CopiedMapData CopiedMapData { get; set; }
     }
