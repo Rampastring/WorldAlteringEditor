@@ -151,7 +151,7 @@ namespace TSMapEditor.UI.TopBar
             btnClearTerrain.Y = 0;
             btnClearTerrain.Width = Constants.CellSizeX + Constants.UIHorizontalSpacing * 2;
             btnClearTerrain.Height = Constants.CellSizeY + 2;
-            btnClearTerrain.ExtraTexture = theaterGraphics.GetTileGraphics(0).TMPImages[0].Texture;
+            btnClearTerrain.ExtraTexture = theaterGraphics.GetTileGraphics(0).TMPImages[0].TextureFromTmpImage_RGBA(GraphicsDevice);
             btnClearTerrain.LeftClick += (s, e) => EnterLATPlacementMode(0);
             latPanel.AddChild(btnClearTerrain);
             var clearToolTip = new ToolTip(WindowManager, btnClearTerrain);
@@ -197,7 +197,7 @@ namespace TSMapEditor.UI.TopBar
                 btn.Width = btnClearTerrain.Width;
                 btn.Height = btnClearTerrain.Height;
                 var tileGraphics = theaterGraphics.GetTileGraphics(autoLATGround.GroundTileSet.StartTileIndex);
-                btn.ExtraTexture = tileGraphics != null && tileGraphics.TMPImages.Length > 0 ? tileGraphics.TMPImages[0].Texture : null;
+                btn.ExtraTexture = tileGraphics != null && tileGraphics.TMPImages.Length > 0 ? tileGraphics.TMPImages[0].TextureFromTmpImage_RGBA(GraphicsDevice) : null;
                 btn.Tag = autoLATGround;
                 btn.LeftClick += (s, e) => EnterLATPlacementMode(autoLATGround.GroundTileSet.StartTileIndex);
                 latPanel.AddChild(btn);

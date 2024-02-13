@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
@@ -78,6 +79,8 @@ namespace TSMapEditor.UI
             }
         }
 
+        private Effect palettedDrawEffect;
+
         private readonly EditorState editorState;
 
         public override void Initialize()
@@ -86,6 +89,8 @@ namespace TSMapEditor.UI
 
             BackgroundTexture = AssetLoader.CreateTexture(new Color(0, 0, 0, 196), 2, 2);
             PanelBackgroundDrawMode = PanelBackgroundImageDrawMode.STRETCHED;
+
+            palettedDrawEffect = AssetLoader.LoadEffect("Shaders/PalettedDrawNoDepth");
 
             KeyboardCommands.Instance.NextTile.Action = NextTile;
             KeyboardCommands.Instance.PreviousTile.Action = PreviousTile;
@@ -283,6 +288,11 @@ namespace TSMapEditor.UI
             }
         }
 
+        private void SetTileRenderSettings()
+        {
+            Renderer.PushSettings(new SpriteBatchSettings(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, palettedDrawEffect));
+        }
+
         public override void Draw(GameTime gameTime)
         {
             DrawPanel();
@@ -291,14 +301,29 @@ namespace TSMapEditor.UI
             {
                 var rectangle = new Rectangle(tile.Location.X, tile.Location.Y + (int)ViewY, tile.Size.X, tile.Size.Y);
                 FillRectangle(rectangle, Color.Black);
+            }
+
+            SetTileRenderSettings();
+
+            foreach (var tile in tilesInView)
+            {
+                var rectangle = new Rectangle(tile.Location.X, tile.Location.Y + (int)ViewY, tile.Size.X, tile.Size.Y);
 
                 if (tile.TileImageToDisplay.TMPImages.Length == 0)
                     continue;
+
+                bool paletteTextureSet = false;
 
                 foreach (MGTMPImage image in tile.TileImageToDisplay.TMPImages)
                 {
                     if (image == null || image.TmpImage == null)
                         continue;
+
+                    if (!paletteTextureSet)
+                    {
+                        palettedDrawEffect.Parameters["PaletteTexture"].SetValue(image.Palette.Texture);
+                        paletteTextureSet = true;
+                    }
 
                     int subTileHeightOffset = image.TmpImage.Height * Constants.CellHeight;
 
@@ -315,8 +340,15 @@ namespace TSMapEditor.UI
                 }
 
                 if (tile.TileImageToPlace == SelectedTile)
+                {
+                    // We can't draw a red rectangle while the shader is active
+                    Renderer.PopSettings();
                     DrawRectangle(rectangle, Color.Red, 2);
+                    SetTileRenderSettings();
+                }
             }
+
+            Renderer.PopSettings();
 
             DrawChildren(gameTime);
             DrawPanelBorders();

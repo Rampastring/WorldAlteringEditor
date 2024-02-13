@@ -158,8 +158,9 @@ namespace TSMapEditor.Rendering
         private RenderTarget2D compositeRenderTarget;                // Render target where all the above is combined
         private RenderTarget2D minimapRenderTarget;                  // For minimap and megamap rendering
 
-        private Effect colorDrawEffect;
-        private Effect depthApplyEffect;
+        private Effect colorDrawEffect;                              // Effect for rendering RGBA textures with depth testing
+        private Effect palettedColorDrawEffect;                      // Effect for rendering paletted textures with depth testing
+        private Effect depthApplyEffect;                             // Effect for rendering to depth buffer
 
         private MapTile tileUnderCursor;
         private MapTile lastTileUnderCursor;
@@ -330,6 +331,7 @@ namespace TSMapEditor.Rendering
         private void LoadShaders()
         {
             colorDrawEffect = AssetLoader.LoadEffect("Shaders/ColorDraw");
+            palettedColorDrawEffect = AssetLoader.LoadEffect("Shaders/PalettedColorDraw");
             depthApplyEffect = AssetLoader.LoadEffect("Shaders/DepthApply");
         }
 
@@ -496,10 +498,13 @@ namespace TSMapEditor.Rendering
             Renderer.PushRenderTarget(mapRenderTarget);
             // GraphicsDevice.Clear(Color.Black);
 
+            var palettedColorDrawSettings = new SpriteBatchSettings(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, palettedColorDrawEffect);
+            Renderer.PushSettings(palettedColorDrawSettings);
+            DoForVisibleCells(DrawTerrainTileAndRegisterObjects);
+            Renderer.PopSettings();
+
             var colorDrawSettings = new SpriteBatchSettings(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, colorDrawEffect);
             Renderer.PushSettings(colorDrawSettings);
-            DoForVisibleCells(DrawTerrainTileAndRegisterObjects);
-
             Renderer.PushRenderTarget(objectRenderTarget, colorDrawSettings);
             GraphicsDevice.Clear(Color.Transparent);
             DrawSmudges();
@@ -543,7 +548,7 @@ namespace TSMapEditor.Rendering
         }
 
         private void SetEffectParams(Effect effect, float bottomDepth, float topDepth,
-            Vector2 worldTextureCoordinates, Vector2 spriteSizeToWorldSizeRatio, Texture2D depthTexture)
+            Vector2 worldTextureCoordinates, Vector2 spriteSizeToWorldSizeRatio, Texture2D depthTexture, Texture2D paletteTexture)
         {
             effect.Parameters["SpriteDepthBottom"].SetValue(bottomDepth);
             effect.Parameters["SpriteDepthTop"].SetValue(topDepth);
@@ -555,6 +560,12 @@ namespace TSMapEditor.Rendering
             {
                 effect.Parameters["DepthTexture"].SetValue(depthTexture);
                 GraphicsDevice.Textures[1] = depthTexture;
+            }
+
+            if (paletteTexture != null)
+            {
+                effect.Parameters["PaletteTexture"].SetValue(paletteTexture);
+                GraphicsDevice.Textures[2] = paletteTexture;
             }
         }
 
@@ -771,9 +782,9 @@ namespace TSMapEditor.Rendering
                 Vector2 spriteSizeToWorldSizeRatio = new Vector2(Constants.CellSizeX / (float)Map.WidthInPixels, Constants.CellSizeY / (float)Map.HeightInPixels);
 
                 if (isRenderingDepth)
-                    SetEffectParams(depthApplyEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTargetCopy);
+                    SetEffectParams(depthApplyEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTargetCopy, null);
                 else
-                    SetEffectParams(colorDrawEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTarget);
+                    SetEffectParams(palettedColorDrawEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTarget, tmpImage.Palette.Texture);
 
                 var textureToDraw = tmpImage.Texture;
                 Color color = Color.White;
@@ -804,9 +815,9 @@ namespace TSMapEditor.Rendering
                 Vector2 spriteSizeToWorldSizeRatio = new Vector2(tmpImage.ExtraTexture.Width / (float)Map.WidthInPixels, tmpImage.ExtraTexture.Height / (float)Map.HeightInPixels);
 
                 if (isRenderingDepth)
-                    SetEffectParams(depthApplyEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTargetCopy);
+                    SetEffectParams(depthApplyEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTargetCopy, null);
                 else
-                    SetEffectParams(colorDrawEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTarget);
+                    SetEffectParams(palettedColorDrawEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTarget, tmpImage.Palette.Texture);
 
                 var exDrawRectangle = new Rectangle(exDrawPointX,
                     exDrawPointY,

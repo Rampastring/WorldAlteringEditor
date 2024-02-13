@@ -25,3 +25,15 @@
 /processorParam:DebugMode=Debug
 /build:Shaders/DepthApply.fx
 
+#begin Shaders/PalettedColorDraw.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Debug
+/build:Shaders/PalettedColorDraw.fx
+
+#begin Shaders/PalettedDrawNoDepth.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Debug
+/build:Shaders/PalettedDrawNoDepth.fx
+

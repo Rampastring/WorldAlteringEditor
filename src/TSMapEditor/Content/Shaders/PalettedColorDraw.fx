@@ -17,6 +17,31 @@ float2 SpriteSizeToWorldSizeRatio;
 sampler2D SpriteTextureSampler : register(s0)
 {
     Texture = (SpriteTexture); // this is set by spritebatch
+    MipFilter = Point;
+    MinFilter = Point;
+    MagFilter = Point;
+};
+
+Texture2D DepthTexture;
+sampler2D DepthTextureSampler
+{
+    Texture = <DepthTexture>; // passed in
+    AddressU = clamp;
+    AddressV = clamp;
+    MipFilter = Point;
+    MinFilter = Point;
+    MagFilter = Point;
+};
+
+Texture2D PaletteTexture;
+sampler2D PaletteTextureSampler
+{
+    Texture = <PaletteTexture>; // passed in
+    AddressU = clamp;
+    AddressV = clamp;
+    MipFilter = Point;
+    MinFilter = Point;
+    MagFilter = Point;
 };
 
 struct VertexShaderOutput
@@ -26,39 +51,32 @@ struct VertexShaderOutput
     float2 TextureCoordinates : TEXCOORD0;
 };
 
-sampler DepthTextureSampler : register(s1)
-{
-    Texture = <DepthTexture>; // passed in
-    AddressU = clamp;
-    AddressV = clamp;
-};
-
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
     // We need to read from the main texture first,
     // otherwise the output will be black!
     float4 tex = tex2D(SpriteTextureSampler, input.TextureCoordinates);
 
-    if (tex.a <= 0)
-    {
-        discard;
-    }
-
     float xRatio = SpriteSizeToWorldSizeRatio.x;
     float yRatio = SpriteSizeToWorldSizeRatio.y;
 
     float2 finalPosition = WorldTextureCoordinates + float2(input.TextureCoordinates.x * xRatio, input.TextureCoordinates.y * yRatio);
 
-    // Terrain increases in depth as we go up the screen
     float spriteDepth = SpriteDepthBottom + ((SpriteDepthTop - SpriteDepthBottom) * (1.0 - input.TextureCoordinates.y));
 
     float4 worldDepth = tex2D(DepthTextureSampler, finalPosition);
-    if (worldDepth.r < spriteDepth)
+
+    // Skip if worldDepth is smaller than spriteDepth, but leave some room
+    // due to float imprecision (z-fighting)
+    if (worldDepth.r - spriteDepth < -0.004)
     {
         discard;
     }
 
-    return float4(spriteDepth, 0, 0, 0);
+    // Get color from palette
+    float4 paletteColor = tex2D(PaletteTextureSampler, float2(tex.a + (0.00 / 256.0), 0.5));
+
+    return paletteColor; // * input.Color;
 }
 
 technique SpriteDrawing

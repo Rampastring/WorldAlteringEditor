@@ -1202,10 +1202,10 @@ namespace TSMapEditor.Rendering
 
         private CCFileManager fileManager;
 
-        private readonly Palette theaterPalette;
-        private readonly Palette unitPalette;
-        private readonly Palette tiberiumPalette;
-        private readonly Palette animPalette;
+        private readonly XNAPalette theaterPalette;
+        private readonly XNAPalette unitPalette;
+        private readonly XNAPalette tiberiumPalette;
+        private readonly XNAPalette animPalette;
         private readonly VplFile vplFile;
 
         private List<TileImage[]> terrainGraphicsList = new List<TileImage[]>();
@@ -1297,12 +1297,13 @@ namespace TSMapEditor.Rendering
             Array.Clear(objImageArray);
         }
 
-        private Palette GetPaletteOrFail(string paletteFileName)
+        private XNAPalette GetPaletteOrFail(string paletteFileName)
         {
             byte[] paletteData = fileManager.LoadFile(paletteFileName);
             if (paletteData == null)
                 throw new KeyNotFoundException(paletteFileName + " not found from loaded MIX files!");
-            return new Palette(paletteData);
+
+            return new XNAPalette(paletteData, graphicsDevice);
         }
 
         private Palette GetPaletteOrDefault(string paletteFileName, Palette palette)
