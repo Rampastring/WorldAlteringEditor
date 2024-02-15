@@ -459,11 +459,12 @@ namespace TSMapEditor.Mutations.Classes
     /// </summary>
     public class PasteTerrainMutation : Mutation
     {
-        public PasteTerrainMutation(IMutationTarget mutationTarget, CopiedMapData copiedMapData, Point2D origin, bool allowOverlap) : base(mutationTarget)
+        public PasteTerrainMutation(IMutationTarget mutationTarget, CopiedMapData copiedMapData, Point2D origin, bool allowOverlap, int heightOffset) : base(mutationTarget)
         {
             this.copiedMapData = copiedMapData;
             this.origin = origin;
             this.allowOverlap = allowOverlap;
+            this.heightOffset = heightOffset;
         }
 
         private struct PlacedInfantryInfo
@@ -481,6 +482,7 @@ namespace TSMapEditor.Mutations.Classes
         private readonly CopiedMapData copiedMapData;
         private readonly Point2D origin;
         private readonly bool allowOverlap;
+        private readonly int heightOffset;
 
         private OriginalCellTerrainData[] terrainUndoData;
         private OriginalOverlayInfo[] overlayUndoData;
@@ -525,7 +527,7 @@ namespace TSMapEditor.Mutations.Classes
                 cell.TileImage = null;
                 cell.TileIndex = copiedTerrainData.TileIndex;
                 cell.SubTileIndex = copiedTerrainData.SubTileIndex;
-                cell.Level = (byte)(originLevel + copiedTerrainData.HeightOffset);
+                cell.Level = (byte)Math.Max(0, Math.Min(Constants.MaxMapHeightLevel, originLevel + copiedTerrainData.HeightOffset + heightOffset));
             }
 
             this.terrainUndoData = terrainUndoData.ToArray();

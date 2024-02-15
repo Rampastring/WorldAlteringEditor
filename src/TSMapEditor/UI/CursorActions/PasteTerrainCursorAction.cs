@@ -23,6 +23,8 @@ namespace TSMapEditor.UI.CursorActions
 
         public override string GetName() => "Paste Copied Terrain";
 
+        public override bool HandlesKeyboardInput => true;
+
         struct OriginalOverlayInfo
         {
             public Point2D CellCoords;
@@ -52,9 +54,35 @@ namespace TSMapEditor.UI.CursorActions
 
         private RKeyboard keyboard;
 
+        private int originLevelOffset;
+
+
+        public override void OnKeyPressed(KeyPressEventArgs e)
+        {
+            if (Constants.IsFlatWorld)
+                return;
+
+            if (KeyboardCommands.Instance.AdjustTileHeightDown.Key.Key == e.PressedKey)
+            {
+                if (originLevelOffset > -Constants.MaxMapHeight)
+                    originLevelOffset--;
+
+                e.Handled = true;
+            }
+            else if (KeyboardCommands.Instance.AdjustTileHeightUp.Key.Key == e.PressedKey)
+            {
+                if (originLevelOffset < Constants.MaxMapHeight)
+                    originLevelOffset++;
+
+                e.Handled = true;
+            }
+        }
+
         public override void OnActionEnter()
         {
             base.OnActionEnter();
+
+            originLevelOffset = 0;
 
             if (!System.Windows.Forms.Clipboard.ContainsData(Constants.ClipboardMapDataFormatValue))
             {
@@ -98,7 +126,7 @@ namespace TSMapEditor.UI.CursorActions
                     var terrainEntry = entry as CopiedTerrainEntry;
                     cell.PreviewTileImage = CursorActionTarget.TheaterGraphics.GetTileGraphics(terrainEntry.TileIndex, 0);
                     cell.PreviewSubTileIndex = terrainEntry.SubTileIndex;
-                    cell.PreviewLevel = Math.Min(Constants.MaxMapHeightLevel, originLevel + terrainEntry.HeightOffset);
+                    cell.PreviewLevel = Math.Max(0, Math.Min(Constants.MaxMapHeightLevel, originLevel + terrainEntry.HeightOffset + originLevelOffset));
                 }
                 else if (entry.EntryType == CopiedEntryType.Overlay)
                 {
@@ -208,7 +236,7 @@ namespace TSMapEditor.UI.CursorActions
 
             bool allowOverlap = KeyboardCommands.Instance.OverlapObjects.AreKeysOrModifiersDown(keyboard);
             
-            var mutation = new PasteTerrainMutation(CursorActionTarget.MutationTarget, copiedMapData, cellCoords, allowOverlap);
+            var mutation = new PasteTerrainMutation(CursorActionTarget.MutationTarget, copiedMapData, cellCoords, allowOverlap, originLevelOffset);
             CursorActionTarget.MutationManager.PerformMutation(mutation);
         }
     }
