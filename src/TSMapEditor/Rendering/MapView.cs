@@ -5,10 +5,8 @@ using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
-using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
 using TSMapEditor.Misc;
 using TSMapEditor.Models;
@@ -265,6 +263,7 @@ namespace TSMapEditor.Rendering
             EditorState.DrawMapWideOverlayChanged += (s, e) => MapWideOverlay.Enabled = EditorState.DrawMapWideOverlay;
             EditorState.MarbleMadnessChanged += (s, e) => InvalidateMap();
             EditorState.Is2DModeChanged += (s, e) => InvalidateMap();
+            EditorState.RenderedObjectsChanged += (s, e) => InvalidateMap();
 
             refreshStopwatch = new Stopwatch();
 
@@ -527,10 +526,14 @@ namespace TSMapEditor.Rendering
             Renderer.PushRenderTarget(transparencyRenderTarget, new SpriteBatchSettings(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null));
             GraphicsDevice.Clear(Color.Transparent);
 
-            Map.GraphicalBaseNodes.ForEach(DrawBaseNode);
+            if ((EditorState.RenderObjectFlags & RenderObjectFlags.BaseNodes) == RenderObjectFlags.BaseNodes)
+                Map.GraphicalBaseNodes.ForEach(DrawBaseNode);
 
-            DrawCellTags();
-            DrawWaypoints();
+            if ((EditorState.RenderObjectFlags & RenderObjectFlags.CellTags) == RenderObjectFlags.CellTags)
+                DrawCellTags();
+
+            if ((EditorState.RenderObjectFlags & RenderObjectFlags.Waypoints) == RenderObjectFlags.Waypoints)
+                DrawWaypoints();
 
             DrawTubes();
 
@@ -660,31 +663,40 @@ namespace TSMapEditor.Rendering
 
         public void DrawTerrainTileAndRegisterObjects(MapTile tile)
         {
-            DrawTerrainTile(tile);
+            if ((EditorState.RenderObjectFlags & RenderObjectFlags.Terrain) == RenderObjectFlags.Terrain)
+                DrawTerrainTile(tile);
 
-            if (tile.Smudge != null)
+            if ((EditorState.RenderObjectFlags & RenderObjectFlags.Smudges) == RenderObjectFlags.Smudges && tile.Smudge != null)
                 smudgesToRender.Add(tile.Smudge);
 
-            if (tile.Overlay != null && tile.Overlay.OverlayType != null)
+            if ((EditorState.RenderObjectFlags & RenderObjectFlags.Overlay) == RenderObjectFlags.Overlay && tile.Overlay != null && tile.Overlay.OverlayType != null)
                 gameObjectsToRender.Add(tile.Overlay);
 
-            tile.DoForAllBuildings(structure =>
+            if ((EditorState.RenderObjectFlags & RenderObjectFlags.Structures) == RenderObjectFlags.Structures)
             {
-                if (structure.Position == tile.CoordsToPoint())
-                    gameObjectsToRender.Add(structure);
+                tile.DoForAllBuildings(structure =>
+                {
+                    if (structure.Position == tile.CoordsToPoint())
+                        gameObjectsToRender.Add(structure);
 
-                foreach (var anim in structure.Anims)
-                    gameObjectsToRender.Add(anim);
+                    foreach (var anim in structure.Anims)
+                        gameObjectsToRender.Add(anim);
 
-                if (structure.TurretAnim != null)
-                    gameObjectsToRender.Add(structure.TurretAnim);
-            });
+                    if (structure.TurretAnim != null)
+                        gameObjectsToRender.Add(structure.TurretAnim);
+                });
+            }
 
-            tile.DoForAllInfantry(inf => gameObjectsToRender.Add(inf));
-            tile.DoForAllAircraft(aircraft => gameObjectsToRender.Add(aircraft));
-            tile.DoForAllVehicles(unit => gameObjectsToRender.Add(unit));
+            if ((EditorState.RenderObjectFlags & RenderObjectFlags.Infantry) == RenderObjectFlags.Infantry)
+                tile.DoForAllInfantry(gameObjectsToRender.Add);
 
-            if (tile.TerrainObject != null)
+            if ((EditorState.RenderObjectFlags & RenderObjectFlags.Aircraft) == RenderObjectFlags.Aircraft)
+                tile.DoForAllAircraft(gameObjectsToRender.Add);
+
+            if ((EditorState.RenderObjectFlags & RenderObjectFlags.Vehicles) == RenderObjectFlags.Vehicles)
+                tile.DoForAllVehicles(gameObjectsToRender.Add);
+
+            if ((EditorState.RenderObjectFlags & RenderObjectFlags.TerrainObjects) == RenderObjectFlags.TerrainObjects && tile.TerrainObject != null)
                 gameObjectsToRender.Add(tile.TerrainObject);
         }
 

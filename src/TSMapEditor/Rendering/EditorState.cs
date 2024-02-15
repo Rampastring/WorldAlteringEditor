@@ -23,6 +23,7 @@ namespace TSMapEditor.Rendering
         public event EventHandler BrushSizeChanged;
         public event EventHandler MarbleMadnessChanged;
         public event EventHandler Is2DModeChanged;
+        public event EventHandler RenderedObjectsChanged;
 
         private CursorAction _cursorAction;
         public CursorAction CursorAction
@@ -198,6 +199,20 @@ namespace TSMapEditor.Rendering
         }
 
         public DeletionMode DeletionMode { get; set; } = DeletionMode.All;
+
+        private RenderObjectFlags _renderObjectFlags = RenderObjectFlags.All;
+        public RenderObjectFlags RenderObjectFlags 
+        {
+            get => _renderObjectFlags;
+            set
+            {
+                if (value != _renderObjectFlags)
+                {
+                    _renderObjectFlags = value;
+                    RenderedObjectsChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
 
         public CopiedMapData CopiedMapData { get; set; }
     }
