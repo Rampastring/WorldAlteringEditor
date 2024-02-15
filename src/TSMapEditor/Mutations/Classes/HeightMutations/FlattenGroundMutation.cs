@@ -28,21 +28,53 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
 
         private void FlattenGround()
         {
-            var cell = Map.GetTile(OriginCell);
-            if (cell == null || cell.Level == desiredHeightLevel)
-                return;
+            int xSize = BrushSize.Width;
+            int ySize = BrushSize.Height;
 
-            AddCellToUndoData(OriginCell);
-            cell.Level = (byte)desiredHeightLevel;
-            cell.ChangeTileIndex(0, 0);
-            foreach (Point2D surroundingCellOffset in SurroundingTiles)
+            int beginY = OriginCell.Y - (ySize - 1) / 2;
+            int endY = OriginCell.Y + ySize / 2;
+            int beginX = OriginCell.X - (xSize - 1) / 2;
+            int endX = OriginCell.X + xSize / 2;
+
+            for (int y = beginY; y <= endY; y++)
             {
-                RegisterCell(OriginCell + surroundingCellOffset);
+                for (int x = beginX; x <= endX; x++)
+                {
+                    var cellCoords = new Point2D(x, y);
+                    var targetCell = Map.GetTile(cellCoords);
+                    if (targetCell == null || targetCell.Level == desiredHeightLevel)
+                        continue;
+
+                    if (!IsCellMorphable(targetCell))
+                        continue;
+
+                    AddCellToUndoData(cellCoords);
+
+                    targetCell.Level = (byte)desiredHeightLevel;
+                    targetCell.ChangeTileIndex(0, 0);
+                    foreach (Point2D surroundingCellOffset in SurroundingTiles)
+                    {
+                        RegisterCell(cellCoords + surroundingCellOffset);
+                    }
+
+                    MarkCellAsProcessed(cellCoords);
+                }
             }
 
-            MarkCellAsProcessed(OriginCell);
-
             Process();
+
+            if (MutationTarget.AutoLATEnabled)
+                ApplyAutoLAT();
+        }
+
+        private void ApplyAutoLAT()
+        {
+            int minX = totalProcessedCells.Aggregate(int.MaxValue, (min, point) => point.X < min ? point.X : min) - 1;
+            int minY = totalProcessedCells.Aggregate(int.MaxValue, (min, point) => point.Y < min ? point.Y : min) - 1;
+            int maxX = totalProcessedCells.Aggregate(int.MinValue, (max, point) => point.X > max ? point.X : max) + 1;
+            int maxY = totalProcessedCells.Aggregate(int.MinValue, (max, point) => point.Y > max ? point.Y : max) + 1;
+
+            ApplyGenericAutoLAT(minX, minY, maxX, maxY);
         }
 
         private static readonly TransitionRampInfo[] transitionRampInfos = new[]
@@ -140,6 +172,16 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
             if (!IsCellMorphable(thisCell))
                 return;
 
+            if (thisCell.Level < desiredHeightLevel)
+                CheckCell_Higher(cellCoords);
+            else
+                CheckCell_Lower(cellCoords);
+        }
+
+        private void CheckCell_Higher(Point2D cellCoords)
+        {
+            var thisCell = Map.GetTileOrFail(cellCoords);
+
             int biggestHeightDiff = 0;
 
             for (int direction = 0; direction < (int)Direction.Count; direction++)
@@ -160,6 +202,45 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
             {
                 AddCellToUndoData(thisCell.CoordsToPoint());
                 thisCell.Level += (byte)(biggestHeightDiff - 1);
+
+                foreach (Point2D offset in SurroundingTiles)
+                {
+                    RegisterCell(cellCoords + offset);
+                }
+            }
+        }
+
+        private void CheckCell_Lower(Point2D cellCoords)
+        {
+            var thisCell = Map.GetTileOrFail(cellCoords);
+
+            int biggestHeightDiff = 0;
+
+            for (int direction = 0; direction < (int)Direction.Count; direction++)
+            {
+                var cell = Map.GetTile(cellCoords + Helpers.VisualDirectionToPoint((Direction)direction));
+                if (cell == null)
+                    continue;
+
+                if (!IsCellMorphable(cell))
+                    continue;
+
+                if (cell.Level < thisCell.Level)
+                    biggestHeightDiff = Math.Max(biggestHeightDiff, thisCell.Level - cell.Level);
+            }
+
+            // If nearby cells are lower by more than 1 cell, it's necessary to also lower this cell
+            if (biggestHeightDiff > 1)
+            {
+                AddCellToUndoData(thisCell.CoordsToPoint());
+
+                if (thisCell.Level > 0)
+                {
+                    if (thisCell.Level >= biggestHeightDiff - 1)
+                        thisCell.Level = (byte)(thisCell.Level - (biggestHeightDiff - 1));
+                    else
+                        thisCell.Level--;
+                }
 
                 foreach (Point2D offset in SurroundingTiles)
                 {
@@ -318,7 +399,8 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
                 if (!IsCellMorphable(cell))
                     continue;
 
-                LandType landType = (LandType)Map.TheaterInstance.GetTile(cell.TileIndex).GetSubTile(cell.SubTileIndex).TmpImage.TerrainType;
+                var cellTmpImage = Map.TheaterInstance.GetTile(cell.TileIndex).GetSubTile(cell.SubTileIndex).TmpImage;
+                LandType landType = (LandType)cellTmpImage.TerrainType;
                 if (landType == LandType.Rock || landType == LandType.Water)
                     continue;
 
@@ -330,7 +412,8 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
 
                         if (transitionRampInfo.RampType == RampType.None)
                         {
-                            cell.ChangeTileIndex(0, 0);
+                            if (cellTmpImage.RampType != RampType.None)
+                                cell.ChangeTileIndex(0, 0);
                         }
                         else
                         {

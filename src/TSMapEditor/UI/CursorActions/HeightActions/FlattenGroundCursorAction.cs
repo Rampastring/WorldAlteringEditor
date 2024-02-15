@@ -22,6 +22,11 @@ namespace TSMapEditor.UI.CursorActions.HeightActions
 
         public override string GetName() => "Flatten Ground";
 
+        public override void OnActionEnter()
+        {
+            CursorActionTarget.BrushSize = Map.EditorConfig.BrushSizes.Find(bs => bs.Width == 2 && bs.Height == 2) ?? Map.EditorConfig.BrushSizes[0];
+        }
+
         public override bool DrawCellCursor => true;
 
         public override bool SeeThrough => false;
@@ -41,10 +46,36 @@ namespace TSMapEditor.UI.CursorActions.HeightActions
                 return;
             }
 
-            if (cell.Level == desiredHeightLevel)
+            // Check the area of the brush on whether it has any cells that do not match
+            // the height of the origin cell.
+
+            int xSize = CursorActionTarget.BrushSize.Width;
+            int ySize = CursorActionTarget.BrushSize.Height;
+
+            int beginY = cellCoords.Y - (ySize - 1) / 2;
+            int endY = cellCoords.Y + ySize / 2;
+            int beginX = cellCoords.X - (xSize - 1) / 2;
+            int endX = cellCoords.X + xSize / 2;
+
+            bool perform = false;
+
+            for (int y = beginY; y <= endY; y++)
             {
-                return;
+                for (int x = beginX; x <= endX; x++)
+                {
+                    var targetCellCoords = new Point2D(x, y);
+                    var targetCell = Map.GetTile(targetCellCoords);
+
+                    if (targetCell != null && targetCell.Level != desiredHeightLevel)
+                    {
+                        perform = true;
+                        break;
+                    }
+                }
             }
+
+            if (!perform)
+                return;
 
             // Don't act on non-morphable terrain
             if (!Map.TheaterInstance.Theater.TileSets[Map.TheaterInstance.GetTileSetId(cell.TileIndex)].Morphable)
