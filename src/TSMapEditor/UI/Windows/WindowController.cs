@@ -65,6 +65,7 @@ namespace TSMapEditor.UI.Windows
         public FindWaypointWindow FindWaypointWindow { get; private set; }
         public DeletionModeConfigurationWindow DeletionModeConfigurationWindow { get; private set; }
         public RenderedObjectsConfigurationWindow RenderedObjectsConfigurationWindow { get; private set; }
+        public ConfigureAlliesWindow ConfigureAlliesWindow { get; private set; }
         public AboutWindow AboutWindow { get; private set; }
 
         private IWindowParentControl windowParentControl;
@@ -192,6 +193,9 @@ namespace TSMapEditor.UI.Windows
 
             RenderedObjectsConfigurationWindow = new RenderedObjectsConfigurationWindow(windowParentControl.WindowManager, editorState);
             Windows.Add(RenderedObjectsConfigurationWindow);
+
+            ConfigureAlliesWindow = new ConfigureAlliesWindow(windowParentControl.WindowManager, map);
+            Windows.Add(ConfigureAlliesWindow);
 
             AboutWindow = new AboutWindow(windowParentControl.WindowManager);
             Windows.Add(AboutWindow);

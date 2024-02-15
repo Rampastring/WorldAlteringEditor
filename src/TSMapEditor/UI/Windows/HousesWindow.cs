@@ -34,7 +34,7 @@ namespace TSMapEditor.UI.Windows
         private XNADropDown ddColor;
         private XNADropDown ddTechnologyLevel;
         private XNADropDown ddPercentBuilt;
-        private EditorTextBox tbAllies;
+        private EditorPopUpSelector selAllies;
         private EditorNumberTextBox tbMoney;
         private XNACheckBox chkPlayerControl;
 
@@ -45,6 +45,7 @@ namespace TSMapEditor.UI.Windows
         private GenerateStandardHousesWindow generateStandardHousesWindow;
         private EditHouseTypeWindow editHouseTypeWindow;
         private NewHouseWindow newHouseWindow;
+        private ConfigureAlliesWindow configureAlliesWindow;
 
         public override void Initialize()
         {
@@ -62,7 +63,7 @@ namespace TSMapEditor.UI.Windows
             ddColor = FindChild<XNADropDown>(nameof(ddColor));
             ddTechnologyLevel = FindChild<XNADropDown>(nameof(ddTechnologyLevel));
             ddPercentBuilt = FindChild<XNADropDown>(nameof(ddPercentBuilt));
-            tbAllies = FindChild<EditorTextBox>(nameof(tbAllies));
+            selAllies = FindChild<EditorPopUpSelector>(nameof(selAllies));
             tbMoney = FindChild<EditorNumberTextBox>(nameof(tbMoney));
             chkPlayerControl = FindChild<XNACheckBox>(nameof(chkPlayerControl));
 
@@ -99,6 +100,10 @@ namespace TSMapEditor.UI.Windows
             editHouseTypeWindow = new EditHouseTypeWindow(WindowManager, map);
             var editHouseTypeWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, editHouseTypeWindow);
             editHouseTypeWindowDarkeningPanel.Hidden += (s, e) => RefreshHouseInfo();
+
+            configureAlliesWindow = new ConfigureAlliesWindow(WindowManager, map);
+            var configureAlliesWindowDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, configureAlliesWindow);
+            configureAlliesWindow.AlliesUpdated += (s, e) => RefreshHouseInfo();
 
             if (Constants.UseCountries)
             {
@@ -266,7 +271,7 @@ namespace TSMapEditor.UI.Windows
             ddColor.SelectedIndexChanged -= DdColor_SelectedIndexChanged;
             ddTechnologyLevel.SelectedIndexChanged -= DdTechnologyLevel_SelectedIndexChanged;
             ddPercentBuilt.SelectedIndexChanged -= DdPercentBuilt_SelectedIndexChanged;
-            tbAllies.TextChanged -= TbAllies_TextChanged;
+            selAllies.LeftClick -= SelAllies_LeftClick;
             tbMoney.TextChanged -= TbMoney_TextChanged;
             chkPlayerControl.CheckedChanged -= ChkPlayerControl_CheckedChanged;
 
@@ -281,7 +286,7 @@ namespace TSMapEditor.UI.Windows
                 ddColor.SelectedIndex = -1;
                 ddTechnologyLevel.SelectedIndex = -1;
                 ddPercentBuilt.SelectedIndex = -1;
-                tbAllies.Text = string.Empty;
+                selAllies.Text = string.Empty;
                 tbMoney.Text = string.Empty;
                 chkPlayerControl.Checked = false;
                 lblStatsValue.Text = string.Empty;
@@ -307,7 +312,7 @@ namespace TSMapEditor.UI.Windows
             ddColor.SelectedIndex = ddColor.Items.FindIndex(item => item.Text == editedHouse.Color);
             ddTechnologyLevel.SelectedIndex = ddTechnologyLevel.Items.FindIndex(item => Conversions.IntFromString(item.Text, -1) == editedHouse.TechLevel);
             ddPercentBuilt.SelectedIndex = ddPercentBuilt.Items.FindIndex(item => Conversions.IntFromString(item.Text, -1) == editedHouse.PercentBuilt);
-            tbAllies.Text = editedHouse.Allies ?? "";
+            selAllies.Text = editedHouse.Allies ?? "";
             tbMoney.Value = editedHouse.Credits;
             chkPlayerControl.Checked = editedHouse.PlayerControl;
 
@@ -320,7 +325,7 @@ namespace TSMapEditor.UI.Windows
             ddColor.SelectedIndexChanged += DdColor_SelectedIndexChanged;
             ddTechnologyLevel.SelectedIndexChanged += DdTechnologyLevel_SelectedIndexChanged;
             ddPercentBuilt.SelectedIndexChanged += DdPercentBuilt_SelectedIndexChanged;
-            tbAllies.TextChanged += TbAllies_TextChanged;
+            selAllies.LeftClick += SelAllies_LeftClick;
             tbMoney.TextChanged += TbMoney_TextChanged;
             chkPlayerControl.CheckedChanged += ChkPlayerControl_CheckedChanged;
         }
@@ -331,6 +336,15 @@ namespace TSMapEditor.UI.Windows
 
             if (!Constants.UseCountries)
                 editedHouse.HouseType.ININame = editedHouse.ININame;
+
+            if (!string.IsNullOrWhiteSpace(editedHouse.ININame))
+            {
+                editedHouse.Allies = string.Join(',',
+                    new string[] { editedHouse.ININame }
+                    .Concat(editedHouse.Allies.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)[1..]));
+
+                selAllies.Text = editedHouse.Allies;
+            }
 
             ListHouses();
         }
@@ -393,9 +407,9 @@ namespace TSMapEditor.UI.Windows
             editedHouse.PercentBuilt = Conversions.IntFromString(ddPercentBuilt.SelectedItem.Text, 100);
         }
 
-        private void TbAllies_TextChanged(object sender, System.EventArgs e)
+        private void SelAllies_LeftClick(object sender, EventArgs e)
         {
-            editedHouse.Allies = tbAllies.Text;
+            configureAlliesWindow.Open(editedHouse);
         }
 
         private void TbMoney_TextChanged(object sender, System.EventArgs e)
