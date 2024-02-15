@@ -71,6 +71,19 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
             }
 
             Process();
+
+            if (MutationTarget.AutoLATEnabled)
+                ApplyAutoLAT();
+        }
+
+        private void ApplyAutoLAT()
+        {
+            int minX = totalProcessedCells.Aggregate(int.MaxValue, (min, point) => point.X < min ? point.X : min) - 1;
+            int minY = totalProcessedCells.Aggregate(int.MaxValue, (min, point) => point.Y < min ? point.Y : min) - 1;
+            int maxX = totalProcessedCells.Aggregate(int.MinValue, (max, point) => point.X > max ? point.X : max) + 1;
+            int maxY = totalProcessedCells.Aggregate(int.MinValue, (max, point) => point.Y > max ? point.Y : max) + 1;
+
+            ApplyGenericAutoLAT(minX, minY, maxX, maxY);
         }
 
         /// <summary>
@@ -146,7 +159,8 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
                 if (!IsCellMorphable(cell))
                     continue;
 
-                LandType landType = (LandType)Map.TheaterInstance.GetTile(cell.TileIndex).GetSubTile(cell.SubTileIndex).TmpImage.TerrainType;
+                var cellTmpImage = Map.TheaterInstance.GetTile(cell.TileIndex).GetSubTile(cell.SubTileIndex).TmpImage;
+                LandType landType = (LandType)cellTmpImage.TerrainType;
                 if (landType == LandType.Rock || landType == LandType.Water)
                     continue;
 
@@ -158,7 +172,8 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
 
                         if (transitionRampInfo.RampType == RampType.None)
                         {
-                            cell.ChangeTileIndex(0, 0);
+                            if (cellTmpImage.RampType != RampType.None)
+                                cell.ChangeTileIndex(0, 0);
                         }
                         else
                         {
