@@ -261,9 +261,9 @@ namespace TSMapEditor.Rendering
             EditorState.HighlightImpassableCellsChanged += (s, e) => InvalidateMap();
             EditorState.HighlightIceGrowthChanged += (s, e) => InvalidateMap();
             EditorState.DrawMapWideOverlayChanged += (s, e) => MapWideOverlay.Enabled = EditorState.DrawMapWideOverlay;
-            EditorState.MarbleMadnessChanged += (s, e) => InvalidateMap();
-            EditorState.Is2DModeChanged += (s, e) => InvalidateMap();
-            EditorState.RenderedObjectsChanged += (s, e) => InvalidateMap();
+            EditorState.MarbleMadnessChanged += (s, e) => InvalidateMapForMinimap();
+            EditorState.Is2DModeChanged += (s, e) => InvalidateMapForMinimap();
+            EditorState.RenderedObjectsChanged += (s, e) => InvalidateMapForMinimap();
 
             refreshStopwatch = new Stopwatch();
 
