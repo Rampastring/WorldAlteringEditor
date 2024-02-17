@@ -47,7 +47,7 @@ namespace TSMapEditor.Initialization
             {
                 { typeof(TerrainType), InitTerrainTypeArt },
                 { typeof(SmudgeType), InitSmudgeTypeArt },
-                { typeof(BuildingType), InitArtConfigGeneric },
+                { typeof(BuildingType), InitBuildingArtConfig },
                 { typeof(OverlayType), InitArtConfigGeneric },
                 { typeof(UnitType), InitArtConfigGeneric },
                 { typeof(AircraftType), InitArtConfigGeneric },
@@ -179,6 +179,13 @@ namespace TSMapEditor.Initialization
         {
             var artConfigContainer = (IArtConfigContainer)obj;
             artConfigContainer.GetArtConfig().ReadFromIniSection(artSection);
+        }
+
+        private static void InitBuildingArtConfig(IMap map, AbstractObject obj, IniFile artIni, IniSection artSection)
+        {
+            var buildingType = (BuildingType)obj;
+            buildingType.ArtConfig.ReadFromIniSection(artSection);
+            buildingType.ArtConfig.ReadUpgradeAnims(buildingType.Upgrades, artSection);
         }
 
         private static void InitInfantryArtConfig(IMap map, AbstractObject obj, IniFile artIni, IniSection artSection)

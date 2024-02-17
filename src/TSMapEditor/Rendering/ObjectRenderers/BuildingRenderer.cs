@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using System;
 using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
@@ -97,6 +98,21 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             DrawShapeImage(gameObject, drawParams, drawParams.ShapeImage,
                 gameObject.GetFrameIndex(drawParams.ShapeImage.GetFrameCount()),
                 nonRemapColor, false, true, gameObject.GetRemapColor(), drawPoint, heightOffset);
+
+            // Render building upgrades
+            for (int i = 0; i < gameObject.UpgradeCount; i++)
+            {
+                BuildingType upgradeBuilding = gameObject.Upgrades[i];
+                var upgradeShape = RenderDependencies.TheaterGraphics.BuildingTextures[upgradeBuilding.Index];
+
+                if (upgradeShape == null)
+                    continue;
+
+                var config = gameObject.ObjectType.ArtConfig.PowerUpAnims[i];
+                var upgradeDrawPoint = drawPoint + new Point2D(config.LocXX, config.LocYY);
+
+                DrawShapeImage(gameObject, drawParams, upgradeShape, 0, nonRemapColor, false, true, gameObject.GetRemapColor(), upgradeDrawPoint, heightOffset);
+            }
 
             if (gameObject.ObjectType.Turret && gameObject.ObjectType.TurretAnimIsVoxel)
             {

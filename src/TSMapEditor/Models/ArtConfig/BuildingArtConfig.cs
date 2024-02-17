@@ -203,6 +203,24 @@ namespace TSMapEditor.Models.ArtConfig
         public int ZAdjust { get; set; }
     }
 
+    public class PowerUpAnimConfig
+    {
+        public void ReadFromIniSection(IniSection iniSection, int i)
+        {
+            Anim = iniSection.GetStringValue($"PowerUp{i}Anim", Anim);
+            LocXX = iniSection.GetIntValue($"PowerUp{i}LocXX", LocXX);
+            LocYY = iniSection.GetIntValue($"PowerUp{i}LocYY", LocYY);
+            LocZZ = iniSection.GetIntValue($"PowerUp{i}LocZZ", LocZZ);
+            YSort = iniSection.GetIntValue($"PowerUp{i}LocXX", YSort);
+        }
+
+        public string Anim { get; set; }
+        public int LocXX { get; set; }
+        public int LocYY { get; set; }
+        public int LocZZ { get; set; }
+        public int YSort { get; set; }
+    }
+
     public class BuildingArtConfig : IArtConfig
     {
         public BuildingArtConfig() { }
@@ -216,6 +234,7 @@ namespace TSMapEditor.Models.ArtConfig
         public string Image { get; set; }
         public string BibShape { get; set; }
         public List<BuildingAnimType> BuildingAnimTypes { get; set; } = new();
+        public List<PowerUpAnimConfig> PowerUpAnims { get; set; } = new();
         public AnimType[] Anims { get; set; } = Array.Empty<AnimType>();
         public AnimType TurretAnim { get; set; }
 
@@ -271,6 +290,20 @@ namespace TSMapEditor.Models.ArtConfig
             }
 
             BuildingAnimTypes = anims;
+        }
+
+        public void ReadUpgradeAnims(int upgradeCount, IniSection iniSection)
+        {
+            if (upgradeCount > PowerUpAnims.Count)
+            {
+                for (int i = PowerUpAnims.Count; i < upgradeCount; i++)
+                    PowerUpAnims.Add(new PowerUpAnimConfig());
+            }
+
+            for (int i = 1; i <= upgradeCount; i++)
+            {
+                PowerUpAnims[i - 1].ReadFromIniSection(iniSection, i);
+            }
         }
 
         public void DoForFoundationCoords(Action<Point2D> action)
