@@ -50,7 +50,8 @@ namespace TSMapEditor.Models
             InitFromTypeSection(iniFile, "OverlayTypes", OverlayTypes);
             InitFromTypeSection(iniFile, "SmudgeTypes", SmudgeTypes);
             InitFromTypeSection(iniFile, "Animations", AnimTypes);
-            InitFromTypeSection(iniFile, "Weapons", Weapons);
+            InitFromTypeSection(iniFile, "Weapons", Weapons);      // TS CnCNet ts-patches + Vinifera
+            InitFromTypeSection(iniFile, "WeaponTypes", Weapons);  // YR Ares
 
             if (!isMapIni)
             {
