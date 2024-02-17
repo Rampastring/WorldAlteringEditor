@@ -1045,6 +1045,13 @@ namespace TSMapEditor.Initialization
                     }
                 }
 
+                var invalidBaseNodes = house.BaseNodes.FindAll(bn => !map.Rules.BuildingTypes.Exists(bt => bt.ININame == bn.StructureTypeName));
+                invalidBaseNodes.ForEach(bn =>
+                {
+                    AddMapLoadError($"Skipping loading invalid base node of house {houseName} for building type \"{bn.StructureTypeName}\". The building type does not exist in Rules!");
+                    house.BaseNodes.Remove(bn);
+                });
+
                 if (Constants.UseCountries)
                 {
                     if (house.Country != null)
