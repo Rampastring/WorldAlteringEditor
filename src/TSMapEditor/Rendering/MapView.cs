@@ -699,12 +699,6 @@ namespace TSMapEditor.Rendering
                 {
                     if (structure.Position == tile.CoordsToPoint())
                         gameObjectsToRender.Add(structure);
-
-                    foreach (var anim in structure.Anims)
-                        gameObjectsToRender.Add(anim);
-
-                    if (structure.TurretAnim != null)
-                        gameObjectsToRender.Add(structure.TurretAnim);
                 });
             }
 
@@ -906,32 +900,6 @@ namespace TSMapEditor.Rendering
             // In case the pixels coords are identical, sort by RTTI type.
             Point2D obj1Point = GetObjectCoordsForComparison(obj1);
             Point2D obj2Point = GetObjectCoordsForComparison(obj2);
-
-            // Special case: building animation compared to its own building
-            // causes flickering due to violating basic sorting principles
-            // if (obj1.WhatAmI() == RTTIType.Anim &&
-            //     obj2.WhatAmI() == RTTIType.Building &&
-            //     ((Animation)obj1).IsBuildingAnim &&
-            //     ((Animation)obj1).ParentBuilding == obj2)
-            // {
-            //     const float leptonsDiagonal = 362.0f;
-            // 
-            //     var anim = (Animation)obj1;
-            //     int animScore = obj1Point.X + obj1Point.Y +
-            //                     anim.AnimType.ArtConfig.BuildingAnimYSort -
-            //                     Convert.ToInt32(anim.AnimType.ArtConfig.BuildingAnimZAdjust / leptonsDiagonal * Constants.CellSizeY);
-            // 
-            //     int buildingScore = obj2Point.X + obj2Point.Y;
-            // 
-            //     return animScore - buildingScore;
-            // }
-            // else if (obj2.WhatAmI() == RTTIType.Anim &&
-            //          obj1.WhatAmI() == RTTIType.Building &&
-            //          ((Animation)obj2).IsBuildingAnim &&
-            //          ((Animation)obj2).ParentBuilding == obj1)
-            // {
-            //     return -CompareGameObjectsForRendering(obj2, obj1);
-            // }
 
             int result = obj1Point.Y.CompareTo(obj2Point.Y);
             if (result != 0)

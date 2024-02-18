@@ -3,6 +3,7 @@ using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using TSMapEditor.Extensions;
 using TSMapEditor.Initialization;
 using TSMapEditor.Models.ArtConfig;
@@ -419,19 +420,38 @@ namespace TSMapEditor.Models
         {
             var anims = new List<AnimType>();
 
-            foreach (var buildingAnimType in type.ArtConfig.BuildingAnimTypes)
+            foreach (var buildingAnimConfig in type.ArtConfig.BuildingAnimConfigs)
             {
-                AnimType anim = AnimTypes.Find(at => at.ININame == buildingAnimType.ININame);
+                AnimType anim = AnimTypes.Find(at => at.ININame == buildingAnimConfig.ININame);
                 if (anim != null)
                 {
                     anim.ArtConfig.IsBuildingAnim = true;
-                    anim.ArtConfig.BuildingAnimYSort = buildingAnimType.YSort;
-                    anim.ArtConfig.BuildingAnimZAdjust = buildingAnimType.ZAdjust;
                     anims.Add(anim);
                 }
             }
 
             type.ArtConfig.Anims = anims.ToArray();
+
+            var powerUpAnims = new List<AnimType>();
+
+            foreach (var powerUpType in BuildingTypes.Where(bt => !string.IsNullOrWhiteSpace(bt.PowersUpBuilding) &&
+                                                                  bt.PowersUpBuilding.Equals(type.ININame, StringComparison.OrdinalIgnoreCase)))
+            {
+                string image = powerUpType.ArtConfig.Image;
+                if (string.IsNullOrWhiteSpace(image))
+                    image = powerUpType.Image;
+                if (string.IsNullOrWhiteSpace(image))
+                    image = powerUpType.ININame;
+
+                AnimType anim = AnimTypes.Find(at => at.ININame == image);
+                if (anim != null)
+                {
+                    anim.ArtConfig.IsBuildingAnim = true;
+                    powerUpAnims.Add(anim);
+                }
+            }
+
+            type.ArtConfig.PowerUpAnims = powerUpAnims.ToArray();
 
             if (type.Turret && !type.TurretAnimIsVoxel)
             {

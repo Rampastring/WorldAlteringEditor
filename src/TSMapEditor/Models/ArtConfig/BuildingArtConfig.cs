@@ -196,25 +196,36 @@ namespace TSMapEditor.Models.ArtConfig
         }
     }
 
-    public struct BuildingAnimType
+    public class BuildingAnimArtConfig
     {
+        public void ReadFromIniSection(IniSection iniSection, string name)
+        {
+            ININame = iniSection.GetStringValue(name, ININame);
+            X = iniSection.GetIntValue($"{name}X", X);
+            Y = iniSection.GetIntValue($"{name}Y", Y);
+            YSort = iniSection.GetIntValue($"{name}YSort", YSort);
+            ZAdjust = iniSection.GetIntValue($"{name}ZAdjust", ZAdjust);
+        }
+
         public string ININame { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
         public int YSort { get; set; }
         public int ZAdjust { get; set; }
     }
 
-    public class PowerUpAnimConfig
+    public class PowerUpAnimArtConfig
     {
         public void ReadFromIniSection(IniSection iniSection, int i)
         {
-            Anim = iniSection.GetStringValue($"PowerUp{i}Anim", Anim);
+            ININame = iniSection.GetStringValue($"PowerUp{i}Anim", ININame);
             LocXX = iniSection.GetIntValue($"PowerUp{i}LocXX", LocXX);
             LocYY = iniSection.GetIntValue($"PowerUp{i}LocYY", LocYY);
             LocZZ = iniSection.GetIntValue($"PowerUp{i}LocZZ", LocZZ);
             YSort = iniSection.GetIntValue($"PowerUp{i}LocXX", YSort);
         }
 
-        public string Anim { get; set; }
+        public string ININame { get; set; }
         public int LocXX { get; set; }
         public int LocYY { get; set; }
         public int LocZZ { get; set; }
@@ -233,9 +244,10 @@ namespace TSMapEditor.Models.ArtConfig
         public bool Theater { get; set; }
         public string Image { get; set; }
         public string BibShape { get; set; }
-        public List<BuildingAnimType> BuildingAnimTypes { get; set; } = new();
-        public List<PowerUpAnimConfig> PowerUpAnims { get; set; } = new();
+        public List<BuildingAnimArtConfig> BuildingAnimConfigs { get; set; } = new();
+        public List<PowerUpAnimArtConfig> PowerUpAnimConfigs { get; set; } = new();
         public AnimType[] Anims { get; set; } = Array.Empty<AnimType>();
+        public AnimType[] PowerUpAnims { get; set; } = Array.Empty<AnimType>();
         public AnimType TurretAnim { get; set; }
 
         /// <summary>
@@ -243,11 +255,11 @@ namespace TSMapEditor.Models.ArtConfig
         /// </summary>
         public string Palette { get; set; }
 
-        private static readonly Dictionary<string, string[]> BuildingAnimClasses = new()
+        private static readonly List<(string Name, string[] Suffixes)> BuildingAnimClasses = new()
         {
-            { "ActiveAnim", new [] { "", "Two", "Three", "Four" } },
-            { "IdleAnim", new [] { "", "Two" } },
-            { "SuperAnim", new [] { "" } }
+            ("ActiveAnim", new [] { "", "Two", "Three", "Four" }),
+            ("IdleAnim", new [] { "", "Two" }),
+            ("SuperAnim", new [] { "" })
         };
 
         public void ReadFromIniSection(IniSection iniSection)
@@ -264,45 +276,36 @@ namespace TSMapEditor.Models.ArtConfig
             BibShape = iniSection.GetStringValue(nameof(BibShape), BibShape);
             Palette = iniSection.GetStringValue(nameof(Palette), Palette);
 
-            var anims = new List<BuildingAnimType>();
+            var anims = new List<BuildingAnimArtConfig>();
 
             foreach (var animClass in BuildingAnimClasses)
             {
-                string name = animClass.Key;
-                string[] suffixes = animClass.Value;
-
-                foreach (var suffix in suffixes)
+                foreach (var suffix in animClass.Suffixes)
                 {
-                    string animTypeName = iniSection.GetStringValue(name + suffix, null);
+                    string animTypeName = iniSection.GetStringValue(animClass.Name + suffix, null);
                     if (string.IsNullOrEmpty(animTypeName))
                         break;
 
-                    int animYSort = iniSection.GetIntValue(name + suffix + "YSort", 0);
-                    int animZAdjust = iniSection.GetIntValue(name + suffix + "ZAdjust", 0);
-
-                    anims.Add(new BuildingAnimType
-                    {
-                        ININame = animTypeName,
-                        YSort = animYSort,
-                        ZAdjust = animZAdjust
-                    });
+                    var animConfig = new BuildingAnimArtConfig();
+                    animConfig.ReadFromIniSection(iniSection, animClass.Name + suffix);
+                    anims.Add(animConfig);
                 }
             }
 
-            BuildingAnimTypes = anims;
+            BuildingAnimConfigs = anims;
         }
 
         public void ReadUpgradeAnims(int upgradeCount, IniSection iniSection)
         {
-            if (upgradeCount > PowerUpAnims.Count)
+            if (upgradeCount > PowerUpAnimConfigs.Count)
             {
-                for (int i = PowerUpAnims.Count; i < upgradeCount; i++)
-                    PowerUpAnims.Add(new PowerUpAnimConfig());
+                for (int i = PowerUpAnimConfigs.Count; i < upgradeCount; i++)
+                    PowerUpAnimConfigs.Add(new PowerUpAnimArtConfig());
             }
 
-            for (int i = 1; i <= upgradeCount; i++)
+            for (int i = 0; i < upgradeCount; i++)
             {
-                PowerUpAnims[i - 1].ReadFromIniSection(iniSection, i);
+                PowerUpAnimConfigs[i].ReadFromIniSection(iniSection, i + 1);
             }
         }
 
