@@ -400,6 +400,8 @@ namespace TSMapEditor.Initialization
                 });
             }
 
+            map.Structures.ForEach(s => s.UpdatePowerUpAnims());
+
             Logger.Log("Structures read successfully.");
         }
 
