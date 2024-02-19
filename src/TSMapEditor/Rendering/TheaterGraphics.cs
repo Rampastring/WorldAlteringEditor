@@ -50,10 +50,10 @@ namespace TSMapEditor.Rendering
         public void Dispose()
         {
             foreach (var frame in Frames)
-                frame.Value.Dispose();
+                frame.Value?.Dispose();
 
             foreach (var frame in RemapFrames)
-                frame.Value.Dispose();
+                frame.Value?.Dispose();
         }
 
         public PositionedTexture GetFrame(byte facing, RampType ramp)
