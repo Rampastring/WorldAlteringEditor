@@ -254,7 +254,7 @@ namespace TSMapEditor.Rendering
 
         public Texture2D GetPaletteTexture(bool useLighting)
         {
-            return Palette.GetTexture(useLighting && subjectToLighting);
+            return Palette?.GetTexture(useLighting && subjectToLighting);
         }
 
         private void GetFrameInfoAndData(int frameIndex, out ShpFrameInfo frameInfo, out byte[] frameData)
