@@ -327,7 +327,7 @@ namespace TSMapEditor.Models
         {
             PreSave?.Invoke(this, EventArgs.Empty);
 
-            LoadedINI.Comment = "Written by the World-Altering Editor (WAE)\r\n; all comments have been truncated\r\n; github.com/Rampastring/TSMapEditor\r\n; if you wish to support the editor, you can subscribe at patreon.com/rampastring\r\n; or buy me a coffee at ko-fi.com/rampastring";
+            LoadedINI.Comment = "Written by the World-Altering Editor (WAE)\r\n; all comments have been truncated\r\n; github.com/Rampastring/WorldAlteringEditor\r\n; if you wish to support the editor, you can subscribe at patreon.com/rampastring\r\n; or buy me a coffee at ko-fi.com/rampastring";
 
             MapWriter.WriteMapSection(this, LoadedINI);
             MapWriter.WriteBasicSection(this, LoadedINI);
@@ -358,6 +358,8 @@ namespace TSMapEditor.Models
             MapWriter.WriteUnits(this, LoadedINI);
             MapWriter.WriteInfantry(this, LoadedINI);
             MapWriter.WriteBuildings(this, LoadedINI);
+
+            MapWriter.WritePreview(this, LoadedINI);
 
             string savePath = filePath ?? LoadedINI.FileName;
 

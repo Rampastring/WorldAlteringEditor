@@ -656,6 +656,25 @@ namespace TSMapEditor.Initialization
             }
         }
 
+        public static void WritePreview(IMap map, IniFile mapIni)
+        {
+            if (!Constants.UseCountries)
+                return;
+
+            // RA2/YR will crash if the map has no preview.
+            // And the preview sections need to be the first sections in the INI file.
+            // We write a dummy preview to the file if necessary.
+            if (!mapIni.SectionExists("Preview") || !mapIni.SectionExists("PreviewPack"))
+            {
+                mapIni.SetStringValue("Preview", "Size", "0,0,106,61");
+                mapIni.SetStringValue("PreviewPack", "1", "yAsAIAXQ5PDQ5PDQ6JQATAEE6PDQ4PDI4JgBTAFEAkgAJyAATAG0AydEAEABpAJIA0wBVA");
+                mapIni.SetStringValue("PreviewPack", "2", "BIACcgAEwBtAMnRABAAaQCSANMAVQASAAnIABMAbQDJ0QAQAGkAkgDTAFUAEgAJyAATAG0");
+            }
+
+            mapIni.MoveSectionToFirst("PreviewPack");
+            mapIni.MoveSectionToFirst("Preview");
+        }
+
         private static string BoolToObjectStyle(bool value)
         {
             return Conversions.BooleanToString(value, BooleanStringStyle.ONEZERO);
