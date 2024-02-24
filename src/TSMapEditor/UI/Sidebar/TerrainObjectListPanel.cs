@@ -165,6 +165,8 @@ namespace TSMapEditor.UI.Sidebar
                 }
             }
 
+            var renderTarget = new RenderTarget2D(GraphicsDevice, ObjectTreeView.LineHeight * 3, ObjectTreeView.LineHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
+
             for (int i = 0; i < Map.Rules.TerrainTypes.Count; i++)
             {
                 TreeViewCategory category = null;
@@ -182,7 +184,7 @@ namespace TSMapEditor.UI.Sidebar
                     category = FindOrMakeCategory(terrainType.EditorCategory, categories);
                 }
 
-                Texture2D texture = null;
+                Texture2D fullSizeRGBATexture = null;
                 var terrainObjectGraphics = TheaterGraphics.TerrainObjectTextures[i];
                 if (terrainObjectGraphics != null)
                 {
@@ -194,21 +196,31 @@ namespace TSMapEditor.UI.Sidebar
                         var frame = terrainObjectGraphics.GetFrame(frameIndex);
                         if (frame != null)
                         {
-                            texture = frame.Texture;
+                            fullSizeRGBATexture = terrainObjectGraphics.GetTextureForFrame_RGBA(frameIndex);
                             break;
                         }
                     }
                 }
 
+                Texture2D finalTexture = null;
+                if (fullSizeRGBATexture != null)
+                {
+                    // Render a smaller version of the full-size texture
+                    finalTexture = Helpers.RenderTextureAsSmaller(fullSizeRGBATexture, new Point(renderTarget.Width, renderTarget.Height), renderTarget, GraphicsDevice);
+                    fullSizeRGBATexture.Dispose();
+                }
+
                 category.Nodes.Add(new TreeViewNode()
                 {
                     Text = terrainType.GetEditorDisplayName() + " (" + terrainType.ININame + ")",
-                    Texture = texture,
+                    Texture = finalTexture,
                     Tag = terrainType
                 });
 
                 category.Nodes = category.Nodes.OrderBy(n => n.Text).ToList();
             }
+
+            renderTarget.Dispose();
 
             categories.ForEach(c => ObjectTreeView.AddCategory(c));
         }

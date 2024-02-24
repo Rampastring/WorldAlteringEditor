@@ -6,7 +6,6 @@ using System;
 using System.Globalization;
 using System.IO;
 using TSMapEditor.GameMath;
-using TSMapEditor.Initialization;
 using TSMapEditor.Models;
 using TSMapEditor.Models.Enums;
 
@@ -339,6 +338,34 @@ namespace TSMapEditor
             return Path.GetFullPath(new Uri(path).LocalPath)
                 .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
                 .ToUpperInvariant();
+        }
+
+        public static Texture2D RenderTextureAsSmaller(Texture2D existingTexture, Point maxNewTextureSize, RenderTarget2D renderTarget, GraphicsDevice graphicsDevice)
+        {
+            if (maxNewTextureSize.X <= 0 || maxNewTextureSize.Y <= 0)
+                throw new ArgumentException(nameof(RenderTextureAsSmaller) + ": size cannot be below zero.");
+
+            Renderer.BeginDraw();
+            Renderer.PushRenderTarget(renderTarget);
+            graphicsDevice.Clear(Color.Transparent);
+
+            double ratioX = (double)existingTexture.Width / maxNewTextureSize.X;
+            double ratioY = (double)existingTexture.Height / maxNewTextureSize.Y;
+            double ratio = Math.Max(ratioX, ratioY);
+            Point newSize = new Point((int)(existingTexture.Width / ratio), (int)(existingTexture.Height / ratio));
+
+            Rectangle destinationRectangle = new Rectangle(0, 0, newSize.X, newSize.Y);
+
+            Renderer.DrawTexture(existingTexture, new Rectangle(0, 0, existingTexture.Width, existingTexture.Height),
+                destinationRectangle, Color.White);
+            Renderer.PopRenderTarget();
+            Renderer.EndDraw();
+
+            var texture = new Texture2D(graphicsDevice, destinationRectangle.Width, destinationRectangle.Height, false, SurfaceFormat.Color);
+            var colorData = new Color[destinationRectangle.Width * destinationRectangle.Height];
+            renderTarget.GetData(0, destinationRectangle, colorData, 0, destinationRectangle.Width * destinationRectangle.Height);
+            texture.SetData(colorData);
+            return texture;
         }
     }
 }

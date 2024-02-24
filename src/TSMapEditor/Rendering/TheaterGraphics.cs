@@ -266,6 +266,9 @@ namespace TSMapEditor.Rendering
 
         public void GenerateTexturesForFrame_RGBA(int index)
         {
+            if (shpFile == null)
+                return;
+
             GetFrameInfoAndData(index, out ShpFrameInfo frameInfo, out byte[] frameData);
 
             if (frameData == null)
@@ -283,6 +286,9 @@ namespace TSMapEditor.Rendering
 
         public void GenerateTexturesForFrame_Paletted(int index)
         {
+            if (shpFile == null)
+                return;
+
             GetFrameInfoAndData(index, out ShpFrameInfo frameInfo, out byte[] frameData);
 
             if (frameData == null)
@@ -316,6 +322,9 @@ namespace TSMapEditor.Rendering
 
         public Texture2D GetTextureForFrame_RGBA(int index)
         {
+            if (shpFile == null)
+                return null;
+
             GetFrameInfoAndData(index, out ShpFrameInfo frameInfo, out byte[] frameData);
 
             if (frameData == null)
