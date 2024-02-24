@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using TSMapEditor.Models;
 
 namespace TSMapEditor.CCEngine
 {
@@ -8,16 +9,18 @@ namespace TSMapEditor.CCEngine
     /// </summary>
     public class XNAPalette : Palette
     {
-        public XNAPalette(string name, byte[] buffer, GraphicsDevice graphicsDevice) : base(name, buffer)
+        public XNAPalette(string name, byte[] buffer, GraphicsDevice graphicsDevice, bool hasFullyBrightColors) : base(name, buffer)
         {
             PaletteWithLight = new(name, buffer);
             Texture = CreateTexture(graphicsDevice, this);
             TextureWithLight = CreateTexture(graphicsDevice, PaletteWithLight);
+            HasFullyBrightColors = hasFullyBrightColors;
         }
 
         private Texture2D Texture;
         private Texture2D TextureWithLight;
         private Palette PaletteWithLight;
+        private bool HasFullyBrightColors;
 
         public Texture2D GetTexture(bool subjectToLighting)
         {
@@ -44,20 +47,22 @@ namespace TSMapEditor.CCEngine
             return texture;
         }
 
-        public void ApplyLighting(Color color)
+        public void ApplyLighting(MapColor color)
         {
             Color[] colorData = new Color[LENGTH];
-            for (int i = 1; i < LENGTH - 8; i++)
+            int last = HasFullyBrightColors ? LENGTH - 16 : 255;
+
+            var adjustColor = (int i) =>
             {
-                RGBColor newColor = new
-                (
-                    (byte)((Data[i].R * color.R) / 255),
-                    (byte)((Data[i].G * color.G) / 255),
-                    (byte)((Data[i].B * color.B) / 255)
-                );
+                RGBColor newColor = Data[i] * color;
                 PaletteWithLight.Data[i] = newColor;
                 colorData[i] = newColor.ToXnaColor();
-            }
+            };
+
+            for (int i = 1; i < last; i++)
+                adjustColor(i);
+
+            adjustColor(255);
 
             TextureWithLight.SetData(colorData);
         }
