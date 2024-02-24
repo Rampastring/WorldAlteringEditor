@@ -233,7 +233,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             RenderDependencies.PalettedColorDrawEffect.Parameters["UseRemap"].SetValue(false); // Disable remap by default
         }
 
-        protected virtual void DrawShadow(T gameObject, in CommonDrawParams drawParams, bool affectedByLighting, Point2D drawPoint, int heightOffset)
+        protected virtual void DrawShadow(T gameObject, in CommonDrawParams drawParams, Point2D drawPoint, int heightOffset)
         {
             if (drawParams.ShapeImage == null)
                 return;
@@ -242,12 +242,12 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             if (shadowFrameIndex > 0 && shadowFrameIndex < drawParams.ShapeImage.GetFrameCount())
             {
                 DrawShapeImage(gameObject, drawParams, drawParams.ShapeImage, shadowFrameIndex,
-                    new Color(0, 0, 0, 128), true, false, Color.White, affectedByLighting, drawPoint, heightOffset);
+                    new Color(0, 0, 0, 128), true, false, Color.White, false, false, drawPoint, heightOffset);
             }
         }
 
         protected void DrawShapeImage(T gameObject, in CommonDrawParams drawParams, ShapeImage image,
-            int frameIndex, Color color, bool isShadow, bool drawRemap, Color remapColor, bool affectedByLighting, Point2D drawPoint, int heightOffset)
+            int frameIndex, Color color, bool isShadow, bool drawRemap, Color remapColor, bool affectedByLighting, bool affectedByAmbient, Point2D drawPoint, int heightOffset)
         {
             if (image == null)
                 return;
@@ -259,6 +259,12 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             PositionedTexture remapFrame = null;
             if (drawRemap && Constants.HQRemap && image.HasRemapFrames())
                 remapFrame = image.GetRemapFrame(frameIndex);
+
+            if (affectedByAmbient)
+            {
+                color = ScaleColorToAmbient(color);
+                remapColor = ScaleColorToAmbient(remapColor);
+            }
 
             Rectangle drawingBounds = GetTextureDrawCoords(gameObject, frame, drawPoint);
 
@@ -333,5 +339,18 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
         protected void DrawLine(Vector2 start, Vector2 end, Color color, int thickness = 1, float depth = 0f)
             => Renderer.DrawLine(start, end, color, thickness, depth);
+
+        protected Color ScaleColorToAmbient(Color color)
+        {
+            if (!RenderDependencies.EditorState.IsLighting)
+                return color;
+
+            double ambient = Map.Lighting.AmbientLevelFromPreviewMode(RenderDependencies.EditorState.LightingPreviewState, 0);
+
+            return new Color((int)(color.R * ambient),
+                (int)(color.G * ambient),
+                (int)(color.B * ambient),
+                color.A);
+        }
     }
 }

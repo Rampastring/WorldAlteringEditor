@@ -36,7 +36,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             }
             else
             {
-                RenderMainShape(gameObject, heightOffset, drawPoint, drawParams, affectedByLighting);
+                RenderMainShape(gameObject, heightOffset, drawPoint, drawParams);
             }
 
             if (gameObject.UnitType.Turret)
@@ -78,15 +78,15 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         }
 
         private void RenderMainShape(Unit gameObject, int heightOffset, Point2D drawPoint,
-            CommonDrawParams drawParams, bool affectedByLighting)
+            CommonDrawParams drawParams)
         {
             if (!gameObject.ObjectType.NoShadow)
-                DrawShadow(gameObject, drawParams, affectedByLighting, drawPoint, heightOffset);
+                DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
 
             DrawShapeImage(gameObject, drawParams, drawParams.ShapeImage, 
                 gameObject.GetFrameIndex(drawParams.ShapeImage.GetFrameCount()),
                 Color.White, false, true, gameObject.GetRemapColor(),
-                affectedByLighting, drawPoint, heightOffset);
+                false, true, drawPoint, heightOffset);
         }
 
         private void RenderTurretShape(Unit gameObject, int heightOffset, Point2D drawPoint,
@@ -103,7 +103,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
                 DrawShapeImage(gameObject, drawParams, drawParams.ShapeImage,
                     turretFrameIndex, Color.White, false, true, gameObject.GetRemapColor(),
-                    affectedByLighting, drawPoint, heightOffset);
+                    false, true, drawPoint, heightOffset);
             }
         }
 

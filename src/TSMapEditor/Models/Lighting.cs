@@ -2,6 +2,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using TSMapEditor.CCEngine;
+using TSMapEditor.Models.Enums;
 
 namespace TSMapEditor.Models
 {
@@ -114,12 +115,49 @@ namespace TSMapEditor.Models
             ColorsRefreshed?.Invoke(this, EventArgs.Empty);
         }
 
+        public double AmbientLevelFromPreviewMode(LightingPreviewMode lightingPreviewMode, int level)
+        {
+            return lightingPreviewMode switch
+            { 
+                LightingPreviewMode.NoLighting => 1.0,
+                LightingPreviewMode.Normal => Ambient,
+                LightingPreviewMode.IonStorm => IonAmbient,
+                LightingPreviewMode.Dominator => DominatorAmbient.HasValue ? DominatorAmbient.Value : 1.0,
+                _ => 1.0
+            };
+        }
+
         private static MapColor RefreshLightingColor(double? red, double? green, double? blue, double? ambient)
         {
             if (red == null || green == null || blue == null || ambient == null)
                 return MapColor.White;
 
-            return new MapColor((double)red, (double)green, (double)blue) * (double)ambient;
+            return RefreshLightingColor(red.Value, green.Value, blue.Value, ambient.Value);
+        }
+
+        private static MapColor RefreshLightingColor(double red, double green, double blue, double ambient)
+        {
+            const double TotalAmbientCap = 2.0;
+
+            red *= ambient;
+            blue *= ambient;
+            green *= ambient;
+
+            double highestComponent = Math.Max(red, Math.Max(green, blue));
+
+            // Tiberian Sun and Red Alert 2 limit the total ambient level.
+            // If any of the components exceed the cap, we need to scale
+            // them accordingly to fit within the cap.
+            // Strength of each color tint (R,G,B) is based on ratio to highest component.
+            if (highestComponent > TotalAmbientCap)
+            {
+                double scale = TotalAmbientCap / highestComponent;
+                red *= scale;
+                green *= scale;
+                blue *= scale;
+            }
+
+            return new MapColor(red, green, blue);
         }
     }
 }

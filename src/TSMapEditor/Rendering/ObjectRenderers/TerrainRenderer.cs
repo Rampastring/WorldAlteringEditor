@@ -25,10 +25,10 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         {
             bool affectedByLighting = RenderDependencies.EditorState.IsLighting;
 
-            DrawShadow(gameObject, drawParams, affectedByLighting, drawPoint, heightOffset);
+            DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
 
-            DrawShapeImage(gameObject, drawParams, drawParams.ShapeImage, 0, 
-                Color.White, false, false, Color.White, affectedByLighting, drawPoint, heightOffset);
+            DrawShapeImage(gameObject, drawParams, drawParams.ShapeImage, 0,
+                Color.White, false, false, Color.White, affectedByLighting, !drawParams.ShapeImage.SubjectToLighting, drawPoint, heightOffset);
         }
     }
 }

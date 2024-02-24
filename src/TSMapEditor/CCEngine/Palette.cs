@@ -47,22 +47,22 @@ namespace TSMapEditor.CCEngine
             return texture;
         }
 
+        private void AdjustColor(int i, Color[] colorData, MapColor color)
+        {
+            RGBColor newColor = Data[i] * color;
+            PaletteWithLight.Data[i] = newColor;
+            colorData[i] = newColor.ToXnaColor();
+        }
+
         public void ApplyLighting(MapColor color)
         {
             Color[] colorData = new Color[LENGTH];
             int last = HasFullyBrightColors ? LENGTH - 16 : 255;
 
-            var adjustColor = (int i) =>
-            {
-                RGBColor newColor = Data[i] * color;
-                PaletteWithLight.Data[i] = newColor;
-                colorData[i] = newColor.ToXnaColor();
-            };
-
             for (int i = 1; i < last; i++)
-                adjustColor(i);
+                AdjustColor(i, colorData, color);
 
-            adjustColor(255);
+            AdjustColor(255, colorData, color);
 
             TextureWithLight.SetData(colorData);
         }

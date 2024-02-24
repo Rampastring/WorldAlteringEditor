@@ -184,7 +184,7 @@ namespace TSMapEditor.Rendering
             this.shpFileData = shpFileData;
             Palette = palette;
             this.remapable = remapable;
-            this.subjectToLighting = subjectToLighting;
+            this.SubjectToLighting = subjectToLighting;
             this.graphicsDevice = graphicsDevice;
 
             if (pngTexture != null && !remapable)
@@ -220,8 +220,9 @@ namespace TSMapEditor.Rendering
         private ShpFile shpFile;
         private byte[] shpFileData;
         private bool remapable;
-        private bool subjectToLighting;
         private GraphicsDevice graphicsDevice;
+
+        public bool SubjectToLighting { get; }
 
         public int GetFrameCount() => Frames.Length;
 
@@ -254,7 +255,7 @@ namespace TSMapEditor.Rendering
 
         public Texture2D GetPaletteTexture(bool useLighting)
         {
-            return Palette?.GetTexture(useLighting && subjectToLighting);
+            return Palette?.GetTexture(useLighting && SubjectToLighting);
         }
 
         private void GetFrameInfoAndData(int frameIndex, out ShpFrameInfo frameInfo, out byte[] frameData)
@@ -708,7 +709,7 @@ namespace TSMapEditor.Rendering
                 var shpFile = new ShpFile(loadedShpName);
                 shpFile.ParseFromBuffer(shpData);
 
-                bool affectedByLighting = !buildingType.ArtConfig.TerrainPalette || Constants.TerrainPaletteBuildingsAffectedByLighting;
+                bool affectedByLighting = buildingType.ArtConfig.TerrainPalette && Constants.TerrainPaletteBuildingsAffectedByLighting;
 
                 BuildingTextures[i] = new ShapeImage(graphicsDevice, shpFile, shpData, palette,
                     affectedByLighting, buildingType.ArtConfig.Remapable);
@@ -931,7 +932,7 @@ namespace TSMapEditor.Rendering
                 var shpFile = new ShpFile(loadedShpName);
                 shpFile.ParseFromBuffer(shpData);
                 AnimTextures[i] = new ShapeImage(graphicsDevice, shpFile, shpData, palette,
-                    animType.ArtConfig.IsBuildingAnim, animType.ArtConfig.Remapable || animType.ArtConfig.IsBuildingAnim);
+                    !animType.ArtConfig.IsBuildingAnim, animType.ArtConfig.Remapable || animType.ArtConfig.IsBuildingAnim);
             }
 
             Logger.Log("Finished loading animation textures.");

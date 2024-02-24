@@ -82,7 +82,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         private void DrawBibGraphics(Structure gameObject, ShapeImage bibGraphics, int heightOffset, Point2D drawPoint, in CommonDrawParams drawParams, bool affectedByLighting)
         {
             DrawShapeImage(gameObject, drawParams, bibGraphics, 0, Color.White, false, true, gameObject.GetRemapColor(),
-                affectedByLighting, drawPoint, heightOffset);
+                affectedByLighting, !drawParams.ShapeImage.SubjectToLighting, drawPoint, heightOffset);
         }
 
         protected override void Render(Structure gameObject, int heightOffset, Point2D drawPoint, in CommonDrawParams drawParams)
@@ -114,12 +114,12 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
             // Then the building itself
             if (!gameObject.ObjectType.NoShadow)
-                DrawShadow(gameObject, drawParams, affectedByLighting, drawPoint, heightOffset);
+                DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
 
             DrawShapeImage(gameObject, drawParams, drawParams.ShapeImage,
                 gameObject.GetFrameIndex(drawParams.ShapeImage.GetFrameCount()),
                 nonRemapColor, false, true, gameObject.GetRemapColor(),
-                affectedByLighting, drawPoint, heightOffset);
+                affectedByLighting, !drawParams.ShapeImage.SubjectToLighting, drawPoint, heightOffset);
 
             // Then draw all anims with sort values >= 0
             foreach (var anim in animsList.Where(a => a.BuildingAnimDrawConfig.SortValue >= 0))
