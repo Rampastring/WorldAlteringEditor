@@ -38,6 +38,7 @@ namespace TSMapEditor.UI.Windows
 
         public event EventHandler<TaskForceEventArgs> TaskForceOpened;
         public event EventHandler<ScriptEventArgs> ScriptOpened;
+        public event EventHandler<TagEventArgs> TagOpened;
 
         private EditorListBox lbTeamTypes;
         private EditorTextBox tbName;
@@ -134,6 +135,7 @@ namespace TSMapEditor.UI.Windows
 
             FindChild<EditorButton>("btnOpenTaskForce").LeftClick += (s, e) => OpenTaskForce();
             FindChild<EditorButton>("btnOpenScript").LeftClick += (s, e) => OpenScript();
+            FindChild<EditorButton>("btnOpenTag").LeftClick += (s, e) => OpenTag();
 
             selTag.LeftClick += (s, e) => { if (editedTeamType != null) selectTagWindow.Open(editedTeamType.Tag); };
         }
@@ -153,6 +155,15 @@ namespace TSMapEditor.UI.Windows
                 return;
 
             ScriptOpened?.Invoke(this, new ScriptEventArgs(editedTeamType.Script));
+            PutOnBackground();
+        }
+
+        private void OpenTag()
+        {
+            if (editedTeamType == null || editedTeamType.Tag == null)
+                return;
+
+            TagOpened?.Invoke(this, new TagEventArgs(editedTeamType.Tag));
             PutOnBackground();
         }
 

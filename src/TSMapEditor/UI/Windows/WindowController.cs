@@ -202,11 +202,12 @@ namespace TSMapEditor.UI.Windows
 
             TeamTypesWindow.TaskForceOpened += TeamTypesWindow_TaskForceOpened;
             TeamTypesWindow.ScriptOpened += TeamTypesWindow_ScriptOpened;
+            TeamTypesWindow.TagOpened += Window_TagOpened;
             AITriggersWindow.TeamTypeOpened += AITriggersWindow_TeamTypeOpened;
-            StructureOptionsWindow.TagOpened += ObjectOptionsWindow_TagOpened;
-            VehicleOptionsWindow.TagOpened += ObjectOptionsWindow_TagOpened;
-            InfantryOptionsWindow.TagOpened += ObjectOptionsWindow_TagOpened;
-            AircraftOptionsWindow.TagOpened += ObjectOptionsWindow_TagOpened;
+            StructureOptionsWindow.TagOpened += Window_TagOpened;
+            VehicleOptionsWindow.TagOpened += Window_TagOpened;
+            InfantryOptionsWindow.TagOpened += Window_TagOpened;
+            AircraftOptionsWindow.TagOpened += Window_TagOpened;
 
             foreach (var window in Windows)
             {
@@ -229,7 +230,7 @@ namespace TSMapEditor.UI.Windows
             windowParentControl.RenderResolutionChanged += (s, e) => RenderResolutionChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        private void ObjectOptionsWindow_TagOpened(object sender, TagEventArgs e)
+        private void Window_TagOpened(object sender, TagEventArgs e)
         {
             if (e.Tag.Trigger == null)
             {
@@ -295,10 +296,11 @@ namespace TSMapEditor.UI.Windows
         {
             TeamTypesWindow.TaskForceOpened -= TeamTypesWindow_TaskForceOpened;
             TeamTypesWindow.ScriptOpened -= TeamTypesWindow_ScriptOpened;
+            TeamTypesWindow.TagOpened -= Window_TagOpened;
             AITriggersWindow.TeamTypeOpened -= AITriggersWindow_TeamTypeOpened;
-            StructureOptionsWindow.TagOpened -= ObjectOptionsWindow_TagOpened;
-            VehicleOptionsWindow.TagOpened -= ObjectOptionsWindow_TagOpened;
-            InfantryOptionsWindow.TagOpened -= ObjectOptionsWindow_TagOpened;
+            StructureOptionsWindow.TagOpened -= Window_TagOpened;
+            VehicleOptionsWindow.TagOpened -= Window_TagOpened;
+            InfantryOptionsWindow.TagOpened -= Window_TagOpened;
             MapSizeWindow.OnResizeMapButtonClicked -= MapSizeWindow_OnResizeMapButtonClicked;
 
             foreach (var window in Windows)
