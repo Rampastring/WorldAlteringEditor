@@ -79,9 +79,9 @@ namespace TSMapEditor.UI
             }
         }
 
-        private Effect palettedDrawEffect;
-
         private readonly EditorState editorState;
+
+        private Effect palettedDrawEffect;
 
         public override void Initialize()
         {

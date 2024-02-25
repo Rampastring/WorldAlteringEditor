@@ -11,17 +11,19 @@ namespace TSMapEditor.UI
 {
     class OverlayFrameSelectorFrame
     {
-        public OverlayFrameSelectorFrame(Point location, Point offset, Point size, Texture2D texture)
+        public OverlayFrameSelectorFrame(Point location, Point offset, Point size, int overlayFrameIndex, Texture2D texture)
         {
             Location = location;
             Offset = offset;
             Size = size;
+            OverlayFrameIndex = overlayFrameIndex;
             Texture = texture;
         }
 
         public Point Location { get; set; }
         public Point Offset { get; set; }
         public Point Size { get; set; }
+        public int OverlayFrameIndex { get; set; }
         public Texture2D Texture { get; set; }
     }
 
@@ -43,17 +45,28 @@ namespace TSMapEditor.UI
 
         public event EventHandler SelectedFrameChanged;
 
-        private int _selectedFrameIndex;
-        public int SelectedFrameIndex
+        private int _selectedArrayIndex;
+        private int SelectedArrayIndex
         {
-            get => _selectedFrameIndex;
+            get => _selectedArrayIndex;
             set
             {
-                if (_selectedFrameIndex != value)
+                if (_selectedArrayIndex != value)
                 {
-                    _selectedFrameIndex = value;
+                    _selectedArrayIndex = value;
                     SelectedFrameChanged?.Invoke(this, EventArgs.Empty);
                 }
+            }
+        }
+
+        public int SelectedFrameIndex
+        {
+            get
+            {
+                if (SelectedArrayIndex < 0 || SelectedArrayIndex >= framesInView.Count)
+                    return -1;
+
+                return framesInView[SelectedArrayIndex].OverlayFrameIndex;
             }
         }
 
@@ -63,12 +76,18 @@ namespace TSMapEditor.UI
 
         private int viewY = 0;
 
+        private Effect palettedDrawEffect;
+
+        private ShapeImage currentOverlayShape;
+
         public override void Initialize()
         {
             base.Initialize();
 
             BackgroundTexture = AssetLoader.CreateTexture(new Color(0, 0, 0, 196), 2, 2);
             PanelBackgroundDrawMode = PanelBackgroundImageDrawMode.STRETCHED;
+
+            palettedDrawEffect = AssetLoader.LoadEffect("Shaders/PalettedDrawNoDepth");
 
             KeyboardCommands.Instance.NextTile.Triggered += NextTile_Triggered;
             KeyboardCommands.Instance.PreviousTile.Triggered += PreviousTile_Triggered;
@@ -107,14 +126,14 @@ namespace TSMapEditor.UI
             if (!Enabled)
                 return;
 
-            int selectedFrameIndex = SelectedFrameIndex;
+            int selectedFrameIndex = SelectedArrayIndex;
 
             if (selectedFrameIndex < 0)
             {
                 // If no frame is selected, then select the first frame
 
                 if (framesInView.Count > 0)
-                    SelectedFrameIndex = 0;
+                    SelectedArrayIndex = 0;
 
                 return;
             }
@@ -128,7 +147,7 @@ namespace TSMapEditor.UI
             if (selectedFrameIndex >= framesInView.Count)
                 selectedFrameIndex = framesInView.Count - 1;
 
-            SelectedFrameIndex = selectedFrameIndex;
+            SelectedArrayIndex = selectedFrameIndex;
         }
 
         /// <summary>
@@ -139,17 +158,17 @@ namespace TSMapEditor.UI
             if (!Enabled)
                 return;
 
-            if (SelectedFrameIndex < 0)
+            if (SelectedArrayIndex < 0)
             {
                 // If no frame is selected, then select the last frame
 
                 if (framesInView.Count > 0)
-                    SelectedFrameIndex = framesInView.Count - 1;
+                    SelectedArrayIndex = framesInView.Count - 1;
 
                 return;
             }
 
-            int selectedFrameIndex = SelectedFrameIndex;
+            int selectedFrameIndex = SelectedArrayIndex;
 
             if (Keyboard.IsAltHeldDown())
                 selectedFrameIndex -= 5;
@@ -160,7 +179,7 @@ namespace TSMapEditor.UI
             if (selectedFrameIndex < 0)
                 selectedFrameIndex = 0;
 
-            SelectedFrameIndex = selectedFrameIndex;
+            SelectedArrayIndex = selectedFrameIndex;
         }
 
         protected override void OnClientRectangleUpdated()
@@ -177,7 +196,7 @@ namespace TSMapEditor.UI
             {
                 this.overlayType = overlayType;
                 RefreshGraphics();
-                SelectedFrameIndex = 0;
+                SelectedArrayIndex = 0;
             }
         }
 
@@ -193,6 +212,8 @@ namespace TSMapEditor.UI
             if (textures == null)
                 return;
 
+            currentOverlayShape = textures;
+
             var tilesOnCurrentLine = new List<OverlayFrameSelectorFrame>();
             int usableWidth = Width - (Constants.UIEmptySideSpace * 2);
             int y = Constants.UIEmptyTopSpace;
@@ -206,7 +227,7 @@ namespace TSMapEditor.UI
                 var frame = textures.GetFrame(i);
 
                 if (frame == null)
-                    break;
+                    continue;
 
                 int width = frame.Texture.Width;
                 int height = frame.Texture.Height;
@@ -222,11 +243,12 @@ namespace TSMapEditor.UI
                     tilesOnCurrentLine.Clear();
                 }
 
-                var tileDisplayTile = new OverlayFrameSelectorFrame(new Point(x, y), new Point(0, 0), new Point(width, height), frame.Texture);
+                var tileDisplayTile = new OverlayFrameSelectorFrame(new Point(x, y), new Point(0, 0), new Point(width, height), i, frame.Texture);
                 framesInView.Add(tileDisplayTile);
 
                 if (height > currentLineHeight)
                     currentLineHeight = height;
+
                 x += width + OVERLAY_FRAME_PADDING;
                 tilesOnCurrentLine.Add(tileDisplayTile);
             }
@@ -254,7 +276,7 @@ namespace TSMapEditor.UI
         public override void OnMouseLeftDown()
         {
             base.OnMouseLeftDown();
-            SelectedFrameIndex = GetFrameIndexUnderCursor();
+            SelectedArrayIndex = GetFrameIndexUnderCursor();
         }
 
         private int GetFrameIndexUnderCursor()
@@ -276,6 +298,11 @@ namespace TSMapEditor.UI
             return -1;
         }
 
+        private void SetOverlayRenderSettings()
+        {
+            Renderer.PushSettings(new SpriteBatchSettings(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, palettedDrawEffect));
+        }
+
         public override void Draw(GameTime gameTime)
         {
             DrawPanel();
@@ -286,15 +313,31 @@ namespace TSMapEditor.UI
 
                 var rectangle = new Rectangle(frame.Location.X, frame.Location.Y + viewY, frame.Size.X, frame.Size.Y);
                 FillRectangle(rectangle, Color.Black);
+            }
+
+            SetOverlayRenderSettings();
+
+            for (int i = 0; i < framesInView.Count; i++)
+            {
+                var frame = framesInView[i];
 
                 if (frame.Texture == null)
                     continue;
 
+                palettedDrawEffect.Parameters["PaletteTexture"].SetValue(currentOverlayShape.GetPaletteTexture(false));
+
                 DrawTexture(frame.Texture, new Rectangle(frame.Location.X + frame.Offset.X,
                     viewY + frame.Location.Y + frame.Offset.Y, frame.Texture.Width, frame.Texture.Height), Color.White);
+            }
 
-                if (i == SelectedFrameIndex)
-                    DrawRectangle(rectangle, Color.Red, 2);
+            Renderer.PopSettings();
+
+            // Draw frame selection rectangle
+            if (SelectedArrayIndex > -1 && SelectedArrayIndex < framesInView.Count)
+            {
+                var frame = framesInView[SelectedArrayIndex];
+                var rectangle = new Rectangle(frame.Location.X, frame.Location.Y + viewY, frame.Size.X, frame.Size.Y);
+                DrawRectangle(rectangle, Color.Red, 2);
             }
 
             DrawChildren(gameTime);
