@@ -618,6 +618,7 @@ namespace TSMapEditor.Rendering
                 GraphicsDevice.Textures[2] = paletteTexture;
             }
 
+            effect.Parameters["IsShadow"].SetValue(false);
             effect.Parameters["UsePalette"].SetValue(usePalette);
             effect.Parameters["UseRemap"].SetValue(false);
         }
