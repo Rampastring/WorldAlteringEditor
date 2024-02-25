@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using TSMapEditor.CCEngine;
+using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering.ObjectRenderers;
 using TSMapEditor.Settings;
@@ -71,14 +72,14 @@ namespace TSMapEditor.Rendering
                 return value;
 
             Palette palette = this.palette.GetPalette(subjectToLighting && affectedByLighting);
-            var texture = VxlRenderer.Render(graphicsDevice, facing, ramp, vxl, hva, palette, vpl, forRemap: false);
+            (Texture2D texture, Point2D offset) = VxlRenderer.Render(graphicsDevice, facing, ramp, vxl, hva, palette, vpl, forRemap: false);
             if (texture == null)
             {
                 Frames[key] = null;
                 return Frames[key];
             }
 
-            var positionedTexture = new PositionedTexture(texture.Width, texture.Height, 0, 0, texture);
+            var positionedTexture = new PositionedTexture(texture.Width, texture.Height, offset.X, offset.Y, texture);
             Frames[key] = positionedTexture;
             return Frames[key];
         }
@@ -99,7 +100,7 @@ namespace TSMapEditor.Rendering
                 return value;
 
             Palette palette = this.palette.GetPalette(subjectToLighting && affectedByLighting);
-            var texture = VxlRenderer.Render(graphicsDevice, facing, ramp, vxl, hva, palette, vpl, forRemap: true);
+            (Texture2D texture, Point2D offset) = VxlRenderer.Render(graphicsDevice, facing, ramp, vxl, hva, palette, vpl, forRemap: true);
             if (texture == null)
             {
                 RemapFrames[key] = null;
@@ -131,7 +132,7 @@ namespace TSMapEditor.Rendering
 
                 var remapTexture = new Texture2D(graphicsDevice, texture.Width, texture.Height, false, SurfaceFormat.Color);
                 remapTexture.SetData(remapColorArray);
-                RemapFrames[key] = new PositionedTexture(remapTexture.Width, remapTexture.Height, 0, 0, remapTexture);
+                RemapFrames[key] = new PositionedTexture(remapTexture.Width, remapTexture.Height, offset.X, offset.Y, remapTexture);
                 return RemapFrames[key];
             }
             else

@@ -353,6 +353,13 @@ namespace TSMapEditor
             double ratio = Math.Max(ratioX, ratioY);
             Point newSize = new Point((int)(existingTexture.Width / ratio), (int)(existingTexture.Height / ratio));
 
+            // Workaround to avoid crashing for too small textures, hopefully it's also better for visibility
+            if (newSize.X < 1 && existingTexture.Width > 0)
+                newSize.X = 1;
+
+            if (newSize.Y < 1 && existingTexture.Height > 0)
+                newSize.Y = 1;
+
             Rectangle destinationRectangle = new Rectangle(0, 0, newSize.X, newSize.Y);
 
             Renderer.DrawTexture(existingTexture, new Rectangle(0, 0, existingTexture.Width, existingTexture.Height),
@@ -365,6 +372,68 @@ namespace TSMapEditor
             renderTarget.GetData(0, destinationRectangle, colorData, 0, destinationRectangle.Width * destinationRectangle.Height);
             texture.SetData(colorData);
             return texture;
+        }
+
+        public static (Texture2D texture, Point2D positionOffset) CropTextureToVisiblePortion(Texture2D existingTexture, GraphicsDevice graphicsDevice)
+        {
+            var textureData = new Color[existingTexture.Width * existingTexture.Height];
+            existingTexture.GetData(textureData);
+
+            int firstNonTransparentX = int.MaxValue;
+            int firstNonTransparentY = int.MaxValue;
+            int lastNonTransparentX = -1;
+            int lastNonTransparentY = -1;
+
+            // Scan through the whole image.
+            // For every visible pixel, we check whether we should "expand" the bounds.
+            for (int y = 0; y < existingTexture.Height; y++)
+            {
+                for (int x = 0; x < existingTexture.Width; x++)
+                {
+                    int index = y * existingTexture.Width + x;
+
+                    Color color = textureData[index];
+                    if (color.A > 0)
+                    {
+                        if (x < firstNonTransparentX)
+                            firstNonTransparentX = x;
+
+                        if (y < firstNonTransparentY)
+                            firstNonTransparentY = y;
+
+                        if (x > lastNonTransparentX)
+                            lastNonTransparentX = x;
+
+                        if (y > lastNonTransparentY)
+                            lastNonTransparentY = y;
+                    }
+                }
+            }
+
+            int width = lastNonTransparentX - firstNonTransparentX;
+            int height = lastNonTransparentY - firstNonTransparentY;
+
+            // Now we know the exact rectangle of the texture that is visible.
+            // Create a new texture and render only the visible portion into it.
+            var renderTarget = new RenderTarget2D(graphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.None);
+
+            Renderer.PushRenderTarget(renderTarget);
+            graphicsDevice.Clear(Color.Transparent);
+            Renderer.DrawTexture(existingTexture, new Rectangle(firstNonTransparentX, firstNonTransparentY, width, height),
+                new Rectangle(0, 0, width, height), Color.White);
+            Renderer.PopRenderTarget();
+
+            var texture = new Texture2D(graphicsDevice, width, height, false, SurfaceFormat.Color);
+            var colorData = new Color[width * height];
+            renderTarget.GetData(colorData);
+            texture.SetData(colorData);
+            renderTarget.Dispose();
+
+            // Calculate offset
+            Point2D oldcenter = new Point2D(existingTexture.Width / 2, existingTexture.Height / 2);
+            Point2D newcenter = new Point2D(firstNonTransparentX + width / 2, firstNonTransparentY + height / 2);
+
+            return (texture, new Point2D(newcenter.X - oldcenter.X, newcenter.Y - oldcenter.Y));
         }
     }
 }

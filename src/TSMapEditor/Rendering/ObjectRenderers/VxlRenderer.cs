@@ -4,6 +4,7 @@ using Rampastring.XNAUI;
 using System;
 using System.Collections.Generic;
 using TSMapEditor.CCEngine;
+using TSMapEditor.GameMath;
 using static TSMapEditor.CCEngine.VxlFile;
 using Color = Microsoft.Xna.Framework.Color;
 using Vector3 = Microsoft.Xna.Framework.Vector3;
@@ -38,10 +39,10 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             new [] { 4, 0, 3 }, new [] { 3, 7, 4 }, // left
         };
 
-        public static Texture2D Render(GraphicsDevice graphicsDevice, byte facing, RampType ramp, VxlFile vxl, HvaFile hva, Palette palette, VplFile vpl = null, bool forRemap = false)
+        public static (Texture2D texture, Point2D offset) Render(GraphicsDevice graphicsDevice, byte facing, RampType ramp, VxlFile vxl, HvaFile hva, Palette palette, VplFile vpl = null, bool forRemap = false)
         {
             if (vxl.Sections.Count > hva.Sections.Count)
-                return null;
+                return (null, Point2D.Zero);
 
             /*********** Voxel space setup **********/
 
@@ -124,7 +125,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
             // The model is actually empty, return null so we can draw replacement text
             if (vertexData.Count == 0)
-                return null;
+                return (null, Point2D.Zero);
 
             var renderTarget = new RenderTarget2D(graphicsDevice, Convert.ToInt32(imageBounds.Width / ModelScale), Convert.ToInt32(imageBounds.Height / ModelScale), false, SurfaceFormat.Color, DepthFormat.Depth24);
             Renderer.PushRenderTarget(renderTarget);
@@ -163,11 +164,8 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 graphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexIndices.Count / 3);
             }
 
-            var colorData = new Color[renderTarget.Width * renderTarget.Height];
-            renderTarget.GetData(colorData);
-
-            Texture2D texture = new Texture2D(graphicsDevice, renderTarget.Width, renderTarget.Height);
-            texture.SetData(colorData);
+            // Crop the rendered voxel texture to save VRAM
+            (Texture2D texture, Point2D offset) = Helpers.CropTextureToVisiblePortion(renderTarget, graphicsDevice);
 
             Renderer.PopRenderTarget();
             renderTarget.Dispose();
@@ -175,7 +173,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             vertexBuffer.Dispose();
             triangleListIndexBuffer.Dispose();
 
-            return texture;
+            return (texture, offset);
         }
 
         private static readonly int[] SlopeAxisZAngles =
