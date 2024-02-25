@@ -72,6 +72,8 @@ namespace TSMapEditor
 
         public const int UITopBarMenuHeight = 23;
 
+        public static int UITreeViewLineHeight = 20;
+
         public const int MAX_MAP_LENGTH_IN_DIMENSION = 512;
         public const int NO_OVERLAY = 255; // 0xFF
         public const int OverlayPackFormat = 80;
@@ -137,6 +139,15 @@ namespace TSMapEditor
             FirestormAIIniPath = constantsIni.GetStringValue(FilePathsSectionName, "AIFS", "INI/AIE.ini");
             TutorialIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Tutorial", "INI/Tutorial.ini");
             ThemeIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Theme", "INI/Theme.ini");
+
+            InitUIConstants();
+        }
+
+        public static void InitUIConstants()
+        {
+            IniFile uiConstantsIni = new IniFile(Environment.CurrentDirectory + "/Config/UI/UIConstants.ini");
+
+            UITreeViewLineHeight = uiConstantsIni.GetIntValue("UI", nameof(UITreeViewLineHeight), UITreeViewLineHeight);
         }
     }
 }
