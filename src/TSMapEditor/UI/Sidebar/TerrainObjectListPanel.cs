@@ -165,7 +165,7 @@ namespace TSMapEditor.UI.Sidebar
                 }
             }
 
-            var renderTarget = new RenderTarget2D(GraphicsDevice, ObjectTreeView.LineHeight * 3, ObjectTreeView.LineHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
+            var renderTarget = new RenderTarget2D(GraphicsDevice, ObjectTreeView.Width, ObjectTreeView.LineHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
 
             for (int i = 0; i < Map.Rules.TerrainTypes.Count; i++)
             {
@@ -206,7 +206,7 @@ namespace TSMapEditor.UI.Sidebar
                 if (fullSizeRGBATexture != null)
                 {
                     // Render a smaller version of the full-size texture
-                    finalTexture = Helpers.RenderTextureAsSmaller(fullSizeRGBATexture, new Point(renderTarget.Width, renderTarget.Height), renderTarget, GraphicsDevice);
+                    finalTexture = Helpers.RenderTextureAsSmaller(fullSizeRGBATexture, renderTarget, GraphicsDevice);
                     fullSizeRGBATexture.Dispose();
                 }
 

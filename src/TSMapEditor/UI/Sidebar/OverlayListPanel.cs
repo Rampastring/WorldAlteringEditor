@@ -141,8 +141,41 @@ namespace TSMapEditor.UI.Sidebar
             ObjectTreeView.FindNode(SearchBox.Text, false);
         }
 
+        private Texture2D GetSidebarTextureForOverlay(OverlayType overlayType, RenderTarget2D renderTarget, int defaultFrameNumber = 0)
+        {
+            Texture2D fullSizeRGBATexture = null;
+
+            var textures = TheaterGraphics.OverlayTextures[overlayType.Index];
+            if (textures != null)
+            {
+                int frameCount = textures.GetFrameCount();
+                int overlayFrameNumber = defaultFrameNumber;
+                if (overlayType.Tiberium)
+                    overlayFrameNumber = (frameCount / 2) - 1;
+
+                if (frameCount > overlayFrameNumber)
+                {
+                    var frame = textures.GetFrame(overlayFrameNumber);
+                    if (frame != null)
+                        fullSizeRGBATexture = textures.GetTextureForFrame_RGBA(overlayFrameNumber);
+                }
+            }
+
+            Texture2D finalTexture = null;
+            if (fullSizeRGBATexture != null)
+            {
+                // Render a smaller version of the full-size texture to save VRAM
+                finalTexture = Helpers.RenderTextureAsSmaller(fullSizeRGBATexture, renderTarget, GraphicsDevice);
+                fullSizeRGBATexture.Dispose();
+            }
+
+            return finalTexture;
+        }
+
         private void InitOverlays()
         {
+            var renderTarget = new RenderTarget2D(GraphicsDevice, ObjectTreeView.Width, ObjectTreeView.LineHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
+
             var categories = new List<TreeViewCategory>();
 
             categories.Add(new TreeViewCategory()
@@ -161,29 +194,13 @@ namespace TSMapEditor.UI.Sidebar
                     if (collection.Entries.Length == 0)
                         continue;
 
-                    Texture2D texture = null;
                     var firstEntry = collection.Entries[0];
-                    var textures = TheaterGraphics.OverlayTextures[firstEntry.OverlayType.Index];
-                    if (textures != null)
-                    {
-                        int frameCount = textures.GetFrameCount();
-                        int frameNumber = firstEntry.Frame;
-                        if (firstEntry.OverlayType.Tiberium)
-                            frameNumber = (frameCount / 2) - 1;
-
-                        if (frameCount > frameNumber)
-                        {
-                            var frame = textures.GetFrame(frameNumber);
-                            if (frame != null)
-                                texture = frame.Texture;
-                        }
-                    }
 
                     collectionsCategory.Nodes.Add(new TreeViewNode()
                     {
                         Text = collection.Name,
                         Tag = collection,
-                        Texture = texture
+                        Texture = GetSidebarTextureForOverlay(firstEntry.OverlayType, renderTarget, firstEntry.Frame)
                     });
                 }
             }
@@ -198,27 +215,13 @@ namespace TSMapEditor.UI.Sidebar
                     if (connectedOverlay.FrameCount == 0)
                         continue;
 
-                    Texture2D texture = null;
                     var firstEntry = connectedOverlay.Frames[0];
-                    var textures = TheaterGraphics.OverlayTextures[firstEntry.OverlayType.Index];
-                    if (textures != null)
-                    {
-                        int frameCount = textures.GetFrameCount();
-                        int frameNumber = firstEntry.FrameIndex;
-
-                        if (frameCount > frameNumber)
-                        {
-                            var frame = textures.GetFrame(frameNumber);
-                            if (frame != null)
-                                texture = frame.Texture;
-                        }
-                    }
 
                     connectedOverlaysCategory.Nodes.Add(new TreeViewNode()
                     {
                         Text = connectedOverlay.UIName,
                         Tag = connectedOverlay,
-                        Texture = texture
+                        Texture = GetSidebarTextureForOverlay(firstEntry.OverlayType, renderTarget, firstEntry.FrameIndex)
                     });
                 }
             }
@@ -240,7 +243,7 @@ namespace TSMapEditor.UI.Sidebar
                     category = FindOrMakeCategory(overlayType.EditorCategory, categories);
                 }
 
-                Texture2D texture = null;
+                int frameNumber = 0;
                 var overlayImage = TheaterGraphics.OverlayTextures[i];
                 if (overlayImage != null)
                 {
@@ -251,7 +254,7 @@ namespace TSMapEditor.UI.Sidebar
                         var frame = overlayImage.GetFrame(frameIndex);
                         if (frame != null)
                         {
-                            texture = frame.Texture;
+                            frameNumber = frameIndex;
                             break;
                         }
                     }
@@ -260,7 +263,7 @@ namespace TSMapEditor.UI.Sidebar
                 category.Nodes.Add(new TreeViewNode()
                 {
                     Text = overlayType.Name + " (" + overlayType.ININame + ")",
-                    Texture = texture,
+                    Texture = GetSidebarTextureForOverlay(overlayType, renderTarget, frameNumber),
                     Tag = overlayType
                 });
 
@@ -268,6 +271,8 @@ namespace TSMapEditor.UI.Sidebar
             }
 
             categories.ForEach(c => ObjectTreeView.AddCategory(c));
+
+            renderTarget.Dispose();
         }
 
         private TreeViewCategory FindOrMakeCategory(string categoryName, List<TreeViewCategory> categoryList)

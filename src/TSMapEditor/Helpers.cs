@@ -340,14 +340,13 @@ namespace TSMapEditor
                 .ToUpperInvariant();
         }
 
-        public static Texture2D RenderTextureAsSmaller(Texture2D existingTexture, Point maxNewTextureSize, RenderTarget2D renderTarget, GraphicsDevice graphicsDevice)
+        public static Texture2D RenderTextureAsSmaller(Texture2D existingTexture, RenderTarget2D renderTarget, GraphicsDevice graphicsDevice)
         {
-            if (maxNewTextureSize.X <= 0 || maxNewTextureSize.Y <= 0)
-                throw new ArgumentException(nameof(RenderTextureAsSmaller) + ": size cannot be below zero.");
-
             Renderer.BeginDraw();
             Renderer.PushRenderTarget(renderTarget);
             graphicsDevice.Clear(Color.Transparent);
+
+            Point maxNewTextureSize = new Point(Math.Min(renderTarget.Width, existingTexture.Width), Math.Min(renderTarget.Height, existingTexture.Height));
 
             double ratioX = (double)existingTexture.Width / maxNewTextureSize.X;
             double ratioY = (double)existingTexture.Height / maxNewTextureSize.Y;
