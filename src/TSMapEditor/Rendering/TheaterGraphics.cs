@@ -1368,19 +1368,21 @@ namespace TSMapEditor.Rendering
         {
             int frameCount = OverlayTextures[overlayType.Index].GetFrameCount();
 
-            // We only consider non-blank frames as valid frames, so we need to look up
-            // the first blank frame to get the proper frame count
-            // According to Bittah, when we find an empty overlay frame,
-            // we can assume the rest of the overlay frames to be empty too
+            int lastValidFrame = -1;
+
+            // We only consider non-blank frames as valid frames
             for (int i = 0; i < frameCount; i++)
             {
                 var texture = OverlayTextures[overlayType.Index].GetFrame(i);
-                if (texture == null || texture.Texture == null)
-                    return i;
+                if (texture != null && texture.Texture != null)
+                    lastValidFrame = i;
             }
 
             // No blank overlay frame existed - return the full frame count divided by two (the rest are used up by shadows)
-            return OverlayTextures[overlayType.Index].GetFrameCount() / 2;
+            if (lastValidFrame == frameCount - 1)
+                return OverlayTextures[overlayType.Index].GetFrameCount() / 2;
+            else
+                return lastValidFrame;
         }
 
         public ShapeImage[] TerrainObjectTextures { get; set; }

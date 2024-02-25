@@ -54,10 +54,14 @@ namespace TSMapEditor.UI
                 if (_selectedArrayIndex != value)
                 {
                     _selectedArrayIndex = value;
-                    SelectedFrameChanged?.Invoke(this, EventArgs.Empty);
                 }
+
+                SelectedFrameIndex = _selectedArrayIndex < 0 || _selectedArrayIndex >= framesInView.Count ?
+                    -1 : framesInView[_selectedArrayIndex].OverlayFrameIndex;
             }
         }
+
+        private int _selectedFrameIndex = -1;
 
         public int SelectedFrameIndex
         {
@@ -67,6 +71,14 @@ namespace TSMapEditor.UI
                     return -1;
 
                 return framesInView[SelectedArrayIndex].OverlayFrameIndex;
+            }
+            set
+            {
+                if (value != _selectedFrameIndex)
+                {
+                    _selectedFrameIndex = value;
+                    SelectedFrameChanged?.Invoke(this, EventArgs.Empty);
+                }
             }
         }
 
@@ -126,9 +138,9 @@ namespace TSMapEditor.UI
             if (!Enabled)
                 return;
 
-            int selectedFrameIndex = SelectedArrayIndex;
+            int selectedArrayIndex = SelectedArrayIndex;
 
-            if (selectedFrameIndex < 0)
+            if (selectedArrayIndex < 0)
             {
                 // If no frame is selected, then select the first frame
 
@@ -139,15 +151,15 @@ namespace TSMapEditor.UI
             }
 
             if (Keyboard.IsAltHeldDown())
-                selectedFrameIndex += 5;
+                selectedArrayIndex += 5;
             else
-                selectedFrameIndex++;
+                selectedArrayIndex++;
 
             // Don't cross bounds
-            if (selectedFrameIndex >= framesInView.Count)
-                selectedFrameIndex = framesInView.Count - 1;
+            if (selectedArrayIndex >= framesInView.Count)
+                selectedArrayIndex = framesInView.Count - 1;
 
-            SelectedArrayIndex = selectedFrameIndex;
+            SelectedArrayIndex = selectedArrayIndex;
         }
 
         /// <summary>
@@ -168,18 +180,18 @@ namespace TSMapEditor.UI
                 return;
             }
 
-            int selectedFrameIndex = SelectedArrayIndex;
+            int selectedArrayIndex = SelectedArrayIndex;
 
             if (Keyboard.IsAltHeldDown())
-                selectedFrameIndex -= 5;
+                selectedArrayIndex -= 5;
             else
-                selectedFrameIndex--;
+                selectedArrayIndex--;
 
             // Don't cross bounds
-            if (selectedFrameIndex < 0)
-                selectedFrameIndex = 0;
+            if (selectedArrayIndex < 0)
+                selectedArrayIndex = 0;
 
-            SelectedArrayIndex = selectedFrameIndex;
+            SelectedArrayIndex = selectedArrayIndex;
         }
 
         protected override void OnClientRectangleUpdated()
