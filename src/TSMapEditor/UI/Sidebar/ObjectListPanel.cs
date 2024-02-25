@@ -8,6 +8,7 @@ using System.Linq;
 using TSMapEditor.Models;
 using TSMapEditor.Models.ArtConfig;
 using TSMapEditor.Rendering;
+using TSMapEditor.Rendering.ObjectRenderers;
 
 namespace TSMapEditor.UI.Sidebar
 {
@@ -142,6 +143,33 @@ namespace TSMapEditor.UI.Sidebar
 
         protected abstract void InitObjects();
 
+        protected virtual (Texture2D regular, Texture2D remap) GetObjectTextures<T>(T objectType, ShapeImage[] textures) where T : TechnoType, IArtConfigContainer
+        {
+            Texture2D texture = null;
+            Texture2D remapTexture = null;
+            if (textures != null)
+            {
+                if (textures[objectType.Index] != null)
+                {
+                    int frameCount = textures[objectType.Index].GetFrameCount();
+
+                    for (int frameIndex = 0; frameIndex < frameCount; frameIndex++)
+                    {
+                        var frame = textures[objectType.Index].GetFrame(frameIndex);
+                        if (frame != null)
+                        {
+                            texture = textures[objectType.Index].GetTextureForFrame_RGBA(frameIndex);
+                            if (Constants.HQRemap && objectType.GetArtConfig().Remapable && textures[objectType.Index].HasRemapFrames())
+                                remapTexture = textures[objectType.Index].GetRemapTextureForFrame_RGBA(frameIndex);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return (texture, remapTexture);
+        }
+
         protected void InitObjectsBase<T>(List<T> objectTypeList, ShapeImage[] textures, Func<T, bool> filter = null) where T : TechnoType, IArtConfigContainer
         {
             var sideCategories = new List<TreeViewCategory>();
@@ -209,28 +237,7 @@ namespace TSMapEditor.UI.Sidebar
                     }
                 }
 
-                Texture2D texture = null;
-                Texture2D remapTexture = null;
-                if (textures != null)
-                {
-                    if (textures[i] != null)
-                    {
-                        int frameCount = textures[i].GetFrameCount();
-
-                        // Find the first valid frame and use its RGBA variant as our texture
-                        for (int frameIndex = 0; frameIndex < frameCount; frameIndex++)
-                        {
-                            var frame = textures[i].GetFrame(frameIndex);
-                            if (frame != null)
-                            {
-                                texture = textures[i].GetTextureForFrame_RGBA(frameIndex);
-                                if (Constants.HQRemap && objectType.GetArtConfig().Remapable && textures[i].HasRemapFrames())
-                                    remapTexture = textures[i].GetRemapTextureForFrame_RGBA(frameIndex);
-                                break;
-                            }
-                        }
-                    }
-                }
+                var extractedTextures = GetObjectTextures(objectType, textures);
 
                 categories = categories.OrderBy(c => Map.EditorConfig.EditorRulesIni.GetIntValue("ObjectCategoryPriorities", c.Name, 0)).ToList();
 
@@ -241,8 +248,8 @@ namespace TSMapEditor.UI.Sidebar
                     category.Nodes.Add(new TreeViewNode()
                     {
                         Text = objectType.GetEditorDisplayName() + " (" + objectType.ININame + ")",
-                        Texture = texture,
-                        RemapTexture = remapTexture,
+                        Texture = extractedTextures.regular,
+                        RemapTexture = extractedTextures.remap,
                         RemapColor = categories[categoryIndex].RemapColor,
                         Tag = objectType
                     });
