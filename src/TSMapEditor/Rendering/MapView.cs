@@ -1652,8 +1652,10 @@ namespace TSMapEditor.Rendering
             if (tile == null)
                 return;
 
+            if (Map.HasObjectToDelete(cellCoords, EditorState.DeletionMode))
+                MutationManager.PerformMutation(new DeleteObjectMutation(MutationTarget, tile.CoordsToPoint(), EditorState.DeletionMode));
+
             AddRefreshPoint(cellCoords, 2);
-            Map.DeleteObjectFromCell(cellCoords, EditorState.DeletionMode);
         }
 
         private void DrawTubes()

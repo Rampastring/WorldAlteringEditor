@@ -1082,59 +1082,95 @@ namespace TSMapEditor.Models
             return cell.CanAddObject((GameObject)movable, blocksSelf, overlapObjects);
         }
 
-        public void DeleteObjectFromCell(Point2D cellCoords, DeletionMode deletionMode)
+        public AbstractObject DeleteObjectFromCell(Point2D cellCoords, DeletionMode deletionMode)
         {
             var tile = GetTile(cellCoords.X, cellCoords.Y);
             if (tile == null)
-                return;
+                return null;
+
+            AbstractObject returnValue = null;
 
             if (deletionMode.HasFlag(DeletionMode.CellTags) && tile.CellTag != null)
             {
+                returnValue = tile.CellTag;
                 RemoveCellTagFrom(tile.CoordsToPoint());
-                return;
             }
-
-            if (deletionMode.HasFlag(DeletionMode.Waypoints) && tile.Waypoints.Count > 0)
+            else if (deletionMode.HasFlag(DeletionMode.Waypoints) && tile.Waypoints.Count > 0)
             {
-                RemoveWaypointsFrom(tile.CoordsToPoint());
-                return;
+                returnValue = tile.Waypoints[0];
+                RemoveWaypoint(tile.Waypoints[0]);
             }
-
-            if (deletionMode.HasFlag(DeletionMode.Infantry))
+            else if (deletionMode.HasFlag(DeletionMode.Infantry) && tile.HasInfantry())
             {
                 for (int i = 0; i < tile.Infantry.Length; i++)
                 {
                     if (tile.Infantry[i] != null)
                     {
+                        returnValue = tile.Infantry[i];
                         RemoveInfantry(tile.Infantry[i]);
-                        return;
                     }
                 }
             }
-
-            if (deletionMode.HasFlag(DeletionMode.Aircraft) && tile.Aircraft.Count > 0)
+            else if (deletionMode.HasFlag(DeletionMode.Aircraft) && tile.Aircraft.Count > 0)
             {
-                RemoveAircraftFrom(tile.CoordsToPoint());
-                return;
+                returnValue = tile.Aircraft[0];
+                RemoveAircraft(tile.Aircraft[0]);
             }
-
-            if (deletionMode.HasFlag(DeletionMode.Vehicles) && tile.Vehicles.Count > 0)
+            else if (deletionMode.HasFlag(DeletionMode.Vehicles) && tile.Vehicles.Count > 0)
             {
-                RemoveUnitsFrom(tile.CoordsToPoint());
-                return;
+                returnValue = tile.Vehicles[0];
+                RemoveUnit(tile.Vehicles[0]);
             }
-
-            if (deletionMode.HasFlag(DeletionMode.Structures) && tile.Structures.Count > 0)
+            else if (deletionMode.HasFlag(DeletionMode.Structures) && tile.Structures.Count > 0)
             {
-                RemoveBuildingsFrom(tile.CoordsToPoint());
-                return;
+                returnValue = tile.Structures[0];
+                RemoveBuilding(tile.Structures[0]);
             }
-
-            if (deletionMode.HasFlag(DeletionMode.TerrainObjects) && tile.TerrainObject != null)
+            else if (deletionMode.HasFlag(DeletionMode.TerrainObjects) && tile.TerrainObject != null)
             {
+                returnValue = tile.TerrainObject;
                 RemoveTerrainObject(tile.CoordsToPoint());
-                return;
             }
+
+            return returnValue;
+        }
+
+        public bool HasObjectToDelete(Point2D cellCoords, DeletionMode deletionMode)
+        {
+            var tile = GetTile(cellCoords.X, cellCoords.Y);
+            if (tile == null)
+                return false;
+
+            if (deletionMode.HasFlag(DeletionMode.CellTags) && tile.CellTag != null)
+            {
+                return true;
+            }
+            else if (deletionMode.HasFlag(DeletionMode.Waypoints) && tile.Waypoints.Count > 0)
+            {
+                return true;
+            }
+            else if (deletionMode.HasFlag(DeletionMode.Infantry) && tile.HasInfantry())
+            {
+                return true;
+            }
+            else if (deletionMode.HasFlag(DeletionMode.Aircraft) && tile.Aircraft.Count > 0)
+            {
+                return true;
+            }
+            else if (deletionMode.HasFlag(DeletionMode.Vehicles) && tile.Vehicles.Count > 0)
+            {
+                return true;
+            }
+            else if (deletionMode.HasFlag(DeletionMode.Structures) && tile.Structures.Count > 0)
+            {
+                return true;
+            }
+            else if (deletionMode.HasFlag(DeletionMode.TerrainObjects) && tile.TerrainObject != null)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         public List<TechnoType> GetAllTechnoTypes()

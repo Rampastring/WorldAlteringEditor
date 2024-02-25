@@ -150,6 +150,8 @@ namespace TSMapEditor.Models
             return null;
         }
 
+        public bool HasInfantry() => GetFirstInfantry() != null;
+
         public bool HasTechno()
         {
             return Structures.Count > 0 || Vehicles.Count > 0 || Aircraft.Count > 0 || Array.Exists(Infantry, inf => inf != null);
