@@ -116,10 +116,13 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             if (!gameObject.ObjectType.NoShadow)
                 DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
 
+            int frameCount = drawParams.ShapeImage == null ? 0 : drawParams.ShapeImage.GetFrameCount();
+            bool affectedByAmbient = drawParams.ShapeImage != null && !drawParams.ShapeImage.SubjectToLighting;
+
             DrawShapeImage(gameObject, drawParams, drawParams.ShapeImage,
-                gameObject.GetFrameIndex(drawParams.ShapeImage.GetFrameCount()),
+                gameObject.GetFrameIndex(frameCount),
                 nonRemapColor, false, true, gameObject.GetRemapColor(),
-                affectedByLighting, !drawParams.ShapeImage.SubjectToLighting, drawPoint, heightOffset);
+                affectedByLighting, affectedByAmbient, drawPoint, heightOffset);
 
             // Then draw all anims with sort values >= 0
             foreach (var anim in animsList.Where(a => a.BuildingAnimDrawConfig.SortValue >= 0))
