@@ -1,4 +1,6 @@
 ﻿using CNCMaps.FileFormats.Encodings;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
@@ -98,58 +100,13 @@ namespace TSMapEditor.Initialization
             // Add 4 padding bytes
             buffer.AddRange(new byte[4]);
 
-            const int maxOutputSize = 8192;
-            // generate IsoMapPack5 blocks
-            int processedBytes = 0;
-            List<byte> finalData = new List<byte>();
-            List<byte> block = new List<byte>(maxOutputSize);
-            while (buffer.Count > processedBytes)
-            {
-                ushort blockOutputSize = (ushort)Math.Min(buffer.Count - processedBytes, maxOutputSize);
-                for (int i = processedBytes; i < processedBytes + blockOutputSize; i++)
-                {
-                    block.Add(buffer[i]);
-                }
-
-                byte[] compressedBlock = MiniLZO.MiniLZO.Compress(block.ToArray());
-                // InputSize
-                finalData.AddRange(BitConverter.GetBytes((ushort)compressedBlock.Length));
-                // OutputSize
-                finalData.AddRange(BitConverter.GetBytes(blockOutputSize));
-                // actual data
-                finalData.AddRange(compressedBlock);
-
-                processedBytes += blockOutputSize;
-                block.Clear();
-            }
+            // LZO encode
+            byte[] finalData = GenerateLZOBlocksFromData(buffer);
 
             // Base64 encode
             var section = new IniSection(sectionName);
             mapIni.AddSection(section);
-            WriteBase64ToSection(finalData.ToArray(), section);
-        }
-
-        /// <summary>
-        /// Generic method for writing a byte array as a 
-        /// base64-encoded line-length-limited block of data to a INI section.
-        /// Used for writing IsoMapPack5, OverlayPack and OverlayDataPack.
-        /// </summary>
-        private static void WriteBase64ToSection(byte[] data, IniSection section)
-        {
-            string base64String = Convert.ToBase64String(data.ToArray());
-            const int maxIsoMapPackEntryLineLength = 70;
-            int lineIndex = 1; // TS/RA2 IsoMapPack5, OverlayPack and OverlayDataPack is indexed starting from 1
-            int processedChars = 0;
-
-            while (processedChars < base64String.Length)
-            {
-                int length = Math.Min(base64String.Length - processedChars, maxIsoMapPackEntryLineLength);
-
-                string substring = base64String.Substring(processedChars, length);
-                section.SetStringValue(lineIndex.ToString(), substring);
-                lineIndex++;
-                processedChars += length;
-            }
+            WriteBase64ToSection(finalData, section);
         }
 
         public static void WriteOverlays(IMap map, IniFile mapIni)
@@ -656,7 +613,7 @@ namespace TSMapEditor.Initialization
             }
         }
 
-        public static void WritePreview(IMap map, IniFile mapIni)
+        public static void WriteDummyPreview(IMap map, IniFile mapIni)
         {
             if (!Constants.UseCountries)
                 return;
@@ -673,6 +630,98 @@ namespace TSMapEditor.Initialization
 
             mapIni.MoveSectionToFirst("PreviewPack");
             mapIni.MoveSectionToFirst("Preview");
+        }
+
+        public static void WriteActualPreview(Texture2D texture, IniFile mapIni)
+        {
+            mapIni.RemoveSection("PreviewPack");
+
+            mapIni.SetStringValue("Preview", "Size", $"0,0,{texture.Width},{texture.Height}");
+
+            var textureData = new Color[texture.Width * texture.Height];
+            texture.GetData(textureData);
+
+            // Preview is in BGR888 format
+            byte[] input = new byte[textureData.Length * 3];
+            for (int i = 0; i < textureData.Length; i++)
+            {
+                input[i * 3] = textureData[i].R;
+                input[i * 3 + 1] = textureData[i].G;
+                input[i * 3 + 2] = textureData[i].B;
+            }
+
+            var buffer = new List<byte>(input);
+
+            // Add 4 padding bytes
+            // buffer.AddRange(new byte[4]);
+
+            // LZO + Base64 encode
+            var section = new IniSection("PreviewPack");
+            mapIni.AddSection(section);
+            WriteBase64ToSection(GenerateLZOBlocksFromData(buffer), section);
+
+            if (Constants.UseCountries)
+            {
+                // RA2/YR expects these sections to be the first in the map file
+                mapIni.MoveSectionToFirst("PreviewPack");
+                mapIni.MoveSectionToFirst("Preview");
+            }
+        }
+
+        /// <summary>
+        /// Splits a buffer into LZO-compressed blocks.
+        /// Returns an array that contains the buffer's contents as LZO-compressed blocks.
+        /// </summary>
+        private static byte[] GenerateLZOBlocksFromData(List<byte> buffer)
+        {
+            const int maxOutputSize = 8192;
+            // generate blocks
+            int processedBytes = 0;
+            List<byte> finalData = new List<byte>();
+            List<byte> block = new List<byte>(maxOutputSize);
+            while (buffer.Count > processedBytes)
+            {
+                ushort blockOutputSize = (ushort)Math.Min(buffer.Count - processedBytes, maxOutputSize);
+                for (int i = processedBytes; i < processedBytes + blockOutputSize; i++)
+                {
+                    block.Add(buffer[i]);
+                }
+
+                byte[] compressedBlock = MiniLZO.MiniLZO.Compress(block.ToArray());
+                // InputSize
+                finalData.AddRange(BitConverter.GetBytes((ushort)compressedBlock.Length));
+                // OutputSize
+                finalData.AddRange(BitConverter.GetBytes(blockOutputSize));
+                // actual data
+                finalData.AddRange(compressedBlock);
+
+                processedBytes += blockOutputSize;
+                block.Clear();
+            }
+
+            return finalData.ToArray();
+        }
+
+        /// <summary>
+        /// Generic method for writing a byte array as a 
+        /// base64-encoded line-length-limited block of data to a INI section.
+        /// </summary>
+        private static void WriteBase64ToSection(byte[] data, IniSection section)
+        {
+            string base64String = Convert.ToBase64String(data.ToArray());
+            const int maxIsoMapPackEntryLineLength = 70;
+            int lineIndex = 1; // TS/RA2 IsoMapPack5, OverlayPack and OverlayDataPack is indexed starting from 1
+            int processedChars = 0;
+
+            while (processedChars < base64String.Length)
+            {
+                int length = Math.Min(base64String.Length - processedChars, maxIsoMapPackEntryLineLength);
+
+                string substring = base64String.Substring(processedChars, length);
+                section.SetStringValue(lineIndex.ToString(), substring);
+                lineIndex++;
+                processedChars += length;
+            }
         }
 
         private static string BoolToObjectStyle(bool value)

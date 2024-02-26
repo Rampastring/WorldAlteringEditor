@@ -76,6 +76,9 @@ namespace TSMapEditor.UI.TopBar
                 () => !string.IsNullOrWhiteSpace(map.LoadedINI.FileName),
                 null, null);
             fileContextMenu.AddItem(" ", null, () => false, null, null);
+            fileContextMenu.AddItem("Extract Megamap...", ExtractMegamap);
+            fileContextMenu.AddItem("Generate Map Preview...", WriteMapPreview);
+            fileContextMenu.AddItem(" ", null, () => false, null, null);
             fileContextMenu.AddItem("Exit", WindowManager.CloseGame);
 
             var fileButton = new MenuButton(WindowManager, fileContextMenu);
@@ -226,6 +229,43 @@ namespace TSMapEditor.UI.TopBar
             }
 
             map.Save();
+        }
+
+        private void ExtractMegamap()
+        {
+#if WINDOWS
+            string initialPath = string.IsNullOrWhiteSpace(UserSettings.Instance.LastScenarioPath.GetValue()) ? UserSettings.Instance.GameDirectory : UserSettings.Instance.LastScenarioPath.GetValue();
+
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.InitialDirectory = Path.GetDirectoryName(initialPath);
+                saveFileDialog.FileName = Path.ChangeExtension(Path.GetFileName(initialPath), ".png");
+                saveFileDialog.Filter = "PNG files|*.png|All files|*.*";
+                saveFileDialog.RestoreDirectory = true;
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    mapView.ExtractMegamapTo(saveFileDialog.FileName);
+                }
+            }
+#else
+            mapView.ExtractMegamapTo(Path.Combine(Environment.CurrentDirectory, "megamap.png"));
+#endif
+        }
+
+        private void WriteMapPreview()
+        {
+            var messageBox = EditorMessageBox.Show(WindowManager, "Confirmation",
+                "This will write the current minimap as the map preview to the map file." + Environment.NewLine + Environment.NewLine +
+                "This provides the map with a preview if it is used as a custom map" + Environment.NewLine + 
+                "in the CnCNet Client or in-game, but is not necessary if the map will" + Environment.NewLine +
+                "have an external preview. It will also significantly increase the size" + Environment.NewLine +
+                "of the map file." + Environment.NewLine + Environment.NewLine +
+                "Do you want to continue?" + Environment.NewLine + Environment.NewLine +
+                "Note: The preview won't be actually written to the map before" + Environment.NewLine + 
+                "you save the map.", Windows.MessageBoxButtons.YesNo);
+
+            messageBox.YesClickedAction = _ => mapView.AddPreviewToMap();
         }
 
         private void ManageBaseNodes_Selected()

@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
@@ -359,7 +360,7 @@ namespace TSMapEditor.Models
             MapWriter.WriteInfantry(this, LoadedINI);
             MapWriter.WriteBuildings(this, LoadedINI);
 
-            MapWriter.WritePreview(this, LoadedINI);
+            MapWriter.WriteDummyPreview(this, LoadedINI);
 
             string savePath = filePath ?? LoadedINI.FileName;
 
@@ -367,6 +368,8 @@ namespace TSMapEditor.Models
 
             PostSave?.Invoke(this, EventArgs.Empty);
         }
+
+        public void WritePreview(Texture2D texture) => MapWriter.WriteActualPreview(texture, LoadedINI);
 
         public HouseType FindHouseType(string houseTypeName)
         {

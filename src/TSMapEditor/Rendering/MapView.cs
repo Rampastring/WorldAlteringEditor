@@ -5,9 +5,11 @@ using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using TSMapEditor.GameMath;
+using TSMapEditor.Initialization;
 using TSMapEditor.Misc;
 using TSMapEditor.Models;
 using TSMapEditor.Models.Enums;
@@ -1138,22 +1140,31 @@ namespace TSMapEditor.Rendering
             DrawTexture(EditorGraphics.CellTagTexture, drawPoint.ToXNAPoint(), color * cellTagAlpha);
         }
 
-        private void DrawMapBorder()
+        public Rectangle GetMapLocalViewRectangle()
         {
-            const int BorderThickness = 4;
             const int InitialHeight = 3; // TS engine assumes that the first cell is at a height of 2
             const double HeightAddition = 4.5; // TS engine adds 4.5 to specified map height <3
-            const int TopImpassableCellCount = 3; // The northernmost 3 cells are impassable in the TS engine, we'll also display this border
 
             int x = (int)(Map.LocalSize.X * Constants.CellSizeX);
             int y = (int)(Map.LocalSize.Y - InitialHeight) * Constants.CellSizeY;
             int width = (int)(Map.LocalSize.Width * Constants.CellSizeX);
             int height = (int)(Map.LocalSize.Height + HeightAddition) * Constants.CellSizeY;
 
-            DrawRectangle(new Rectangle(x, y, width, height), Color.Blue, BorderThickness);
+            return new Rectangle(x, y, width, height);
+        }
 
-            int impassableY = (int)(y + (Constants.CellSizeY * TopImpassableCellCount));
-            FillRectangle(new Rectangle(x, impassableY - (BorderThickness / 2), width, BorderThickness), Color.Teal * 0.25f);
+        private void DrawMapBorder()
+        {
+            const int BorderThickness = 4;
+
+            const int TopImpassableCellCount = 3; // The northernmost 3 cells are impassable in the TS engine, we'll also display this border
+
+            var rectangle = GetMapLocalViewRectangle();
+
+            DrawRectangle(rectangle, Color.Blue, BorderThickness);
+
+            int impassableY = (int)(rectangle.Y + (Constants.CellSizeY * TopImpassableCellCount));
+            FillRectangle(new Rectangle(rectangle.X, impassableY - (BorderThickness / 2), rectangle.Width, BorderThickness), Color.Teal * 0.25f);
 
             // old code for rendering directly to screen
             /*
@@ -1698,6 +1709,13 @@ namespace TSMapEditor.Rendering
 
         public override void Draw(GameTime gameTime)
         {
+            DrawMap();
+
+            base.Draw(gameTime);
+        }
+
+        private void DrawMap()
+        {
             if (IsActive && tileUnderCursor != null && CursorAction != null)
             {
                 CursorAction.PreMapDraw(tileUnderCursor.CoordsToPoint());
@@ -1734,8 +1752,6 @@ namespace TSMapEditor.Rendering
             DrawOnTileUnderCursor();
 
             DrawOnMinimap();
-
-            base.Draw(gameTime);
         }
 
         private void DrawPerFrameTransparentElements()
@@ -1873,6 +1889,74 @@ namespace TSMapEditor.Rendering
                 Color.White);
 
             Renderer.PopSettings();
+        }
+
+        public void AddPreviewToMap()
+        {
+            InstantRenderMinimap();
+
+            // Include only the part within LocalSize
+            var visibleRectangle = GetMapLocalViewRectangle();
+            var localSizeRenderTarget = new RenderTarget2D(GraphicsDevice, visibleRectangle.Width, visibleRectangle.Height, false, SurfaceFormat.Color, DepthFormat.None);
+            Renderer.BeginDraw();
+            Renderer.PushRenderTarget(localSizeRenderTarget);
+            Renderer.DrawTexture(MinimapTexture, visibleRectangle, new Rectangle(0, 0, localSizeRenderTarget.Width, localSizeRenderTarget.Height), Color.White);
+            Renderer.PopRenderTarget();
+            Renderer.EndDraw();
+
+            // Scale down the minimap texture
+            var finalPreviewRenderTarget = new RenderTarget2D(GraphicsDevice, Constants.MapPreviewMaxWidth, Constants.MapPreviewMaxHeight, false, SurfaceFormat.Color, DepthFormat.None);
+            var minimapTexture = Helpers.RenderTextureAsSmaller(localSizeRenderTarget, finalPreviewRenderTarget, GraphicsDevice);
+
+            // Cleanup
+            localSizeRenderTarget.Dispose();
+            finalPreviewRenderTarget.Dispose();
+            MinimapUsers.Remove(this);
+
+            Map.WritePreview(minimapTexture);
+            InvalidateMapForMinimap();
+        }
+
+        public void ExtractMegamapTo(string path)
+        {
+            InstantRenderMinimap();
+
+            using (var stream = File.OpenWrite(path))
+            {
+                MinimapTexture.SaveAsPng(stream, MinimapTexture.Width, MinimapTexture.Height);
+            }
+        }
+
+        private void InstantRenderMinimap()
+        {
+            // Register ourselves as a minimap user so the minimap texture gets refreshed
+            MinimapUsers.Add(this);
+
+            Renderer.BeginDraw();
+
+            // Clear out existing map UI
+            Renderer.PushRenderTarget(transparencyPerFrameRenderTarget);
+            GraphicsDevice.Clear(Color.Transparent);
+            Renderer.PopRenderTarget();
+
+            // Maybe someone could want to generate a preview with these for some reason...?
+            // EditorState.Is2DMode = false;
+            // EditorState.IsMarbleMadness = false;
+            // EditorState.LightingPreviewState = LightingPreviewMode.Normal;
+            // EditorState.DrawMapWideOverlay = false;
+
+            InvalidateMapForMinimap();
+            DrawVisibleMapPortion();
+            CalculateMapRenderRectangles();
+            DrawWorld();
+            DrawOnMinimap();
+
+            mapInvalidated = false;
+            cameraMoved = false;
+
+            Renderer.EndDraw();
+
+            MinimapUsers.Remove(this);
         }
     }
 }

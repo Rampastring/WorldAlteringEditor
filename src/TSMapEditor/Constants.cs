@@ -74,6 +74,9 @@ namespace TSMapEditor
 
         public static int UITreeViewLineHeight = 20;
 
+        public static int MapPreviewMaxWidth = 800;
+        public static int MapPreviewMaxHeight = 400;
+
         public const int MAX_MAP_LENGTH_IN_DIMENSION = 512;
         public const int NO_OVERLAY = 255; // 0xFF
         public const int OverlayPackFormat = 80;
@@ -130,6 +133,9 @@ namespace TSMapEditor
             IntegerVariables = constantsIni.GetBooleanValue(ConstantsSectionName, nameof(IntegerVariables), IntegerVariables);
 
             MaxWaypoint = constantsIni.GetIntValue(ConstantsSectionName, nameof(MaxWaypoint), MaxWaypoint);
+
+            MapPreviewMaxWidth = constantsIni.GetIntValue(ConstantsSectionName, nameof(MapPreviewMaxWidth), MapPreviewMaxWidth);
+            MapPreviewMaxHeight = constantsIni.GetIntValue(ConstantsSectionName, nameof(MapPreviewMaxHeight), MapPreviewMaxHeight);
 
             RulesIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Rules", "INI/Rules.ini");
             FirestormIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Firestorm", "INI/Enhance.ini");
