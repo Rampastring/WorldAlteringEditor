@@ -221,12 +221,38 @@ namespace TSMapEditor.UI.Windows
 
         private void BtnDeleteScript_LeftClick(object sender, EventArgs e)
         {
+            if (editedScript == null)
+                return;
+
+            if (Keyboard.IsShiftHeldDown())
+            {
+                DeleteScript();
+            }
+            else
+            {
+                var messageBox = EditorMessageBox.Show(WindowManager,
+                    "Confirm",
+                    $"Are you sure you wish to delete '{editedScript.Name}'?" + Environment.NewLine + Environment.NewLine +
+                    $"You'll need to manually fix any TeamTypes using the Script." + Environment.NewLine + Environment.NewLine +
+                    "(You can hold Shift to skip this confirmation dialog.)",
+                    MessageBoxButtons.YesNo);
+                messageBox.YesClickedAction = _ => DeleteScript();
+            }
+        }
+
+        private void DeleteScript()
+        {
             if (lbScriptTypes.SelectedItem == null)
                 return;
 
             map.RemoveScript((Script)lbScriptTypes.SelectedItem.Tag);
-            lbScriptTypes.SelectedIndex = -1;
+            map.TeamTypes.ForEach(tt =>
+            {
+                if (tt.Script == editedScript)
+                    tt.Script = null;
+            });
             ListScripts();
+            RefreshSelectedScript();
         }
 
         private void BtnCloneScript_LeftClick(object sender, EventArgs e)
@@ -441,7 +467,9 @@ namespace TSMapEditor.UI.Windows
                 tbParameterValue.Text = fittingItem.Text;
         }
 
-        private void LbScriptTypes_SelectedIndexChanged(object sender, EventArgs e)
+        private void LbScriptTypes_SelectedIndexChanged(object sender, EventArgs e) => RefreshSelectedScript();
+
+        private void RefreshSelectedScript()
         {
             if (lbScriptTypes.SelectedItem == null)
             {

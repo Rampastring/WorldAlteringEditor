@@ -190,12 +190,41 @@ namespace TSMapEditor.UI.Windows
 
         private void BtnDeleteTeamType_LeftClick(object sender, EventArgs e)
         {
-            if (lbTeamTypes.SelectedItem == null)
+            if (editedTeamType == null)
                 return;
 
-            map.RemoveTeamType((TeamType)lbTeamTypes.SelectedItem.Tag);
+            if (Keyboard.IsShiftHeldDown())
+            {
+                DeleteTeamType();
+            }
+            else
+            {
+                var messageBox = EditorMessageBox.Show(WindowManager,
+                    "Confirm",
+                    $"Are you sure you wish to delete '{editedTeamType.Name}'?" + Environment.NewLine + Environment.NewLine +
+                    $"You'll need to manually fix any Triggers and AITriggers using the TeamType." + Environment.NewLine + Environment.NewLine +
+                    "(You can hold Shift to skip this confirmation dialog.)",
+                    MessageBoxButtons.YesNo);
+                messageBox.YesClickedAction = _ => DeleteTeamType();
+            }
+        }
+
+        private void DeleteTeamType()
+        {
+            if (editedTeamType == null)
+                return;
+
+            map.RemoveTeamType(editedTeamType);
+            map.AITriggerTypes.ForEach(aitt =>
+            {
+                if (aitt.PrimaryTeam == editedTeamType)
+                    aitt.PrimaryTeam = null;
+
+                if (aitt.SecondaryTeam == editedTeamType)
+                    aitt.SecondaryTeam = null;
+            });
             ListTeamTypes();
-            LbTeamTypes_SelectedIndexChanged(this, EventArgs.Empty);
+            RefreshSelectedTeamType();
         }
 
         private void BtnCloneTeamType_LeftClick(object sender, EventArgs e)
@@ -209,7 +238,9 @@ namespace TSMapEditor.UI.Windows
             lbTeamTypes.ScrollToBottom();
         }
 
-        private void LbTeamTypes_SelectedIndexChanged(object sender, EventArgs e)
+        private void LbTeamTypes_SelectedIndexChanged(object sender, EventArgs e) => RefreshSelectedTeamType();
+
+        private void RefreshSelectedTeamType()
         {
             if (lbTeamTypes.SelectedItem == null)
             {
