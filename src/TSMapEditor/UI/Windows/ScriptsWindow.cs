@@ -89,16 +89,20 @@ namespace TSMapEditor.UI.Windows
             FindChild<EditorButton>("btnCloneScript").LeftClick += BtnCloneScript_LeftClick;
             FindChild<EditorButton>("btnAddAction").LeftClick += BtnAddAction_LeftClick;
             FindChild<EditorButton>("btnDeleteAction").LeftClick += BtnDeleteAction_LeftClick;
+            FindChild<EditorButton>("btnInsertAction").LeftClick += (_, _) => InsertAction();
+            FindChild<EditorButton>("btnCloneAction").LeftClick += (_, _) => CloneAction();
+            FindChild<EditorButton>("btnMoveUp").LeftClick += (_, _) => MoveActionUp();
+            FindChild<EditorButton>("btnMoveDown").LeftClick += (_, _) => MoveActionDown();
 
             selectCellCursorAction.CellSelected += SelectCellCursorAction_CellSelected;
 
             actionListContextMenu = new XNAContextMenu(WindowManager);
             actionListContextMenu.Name = nameof(actionListContextMenu);
             actionListContextMenu.Width = 150;
-            actionListContextMenu.AddItem("Move Up", ActionListContextMenu_MoveUp, () => editedScript != null && lbActions.SelectedItem != null && lbActions.SelectedIndex > 0);
-            actionListContextMenu.AddItem("Move Down", ActionListContextMenu_MoveDown, () => editedScript != null && lbActions.SelectedItem != null && lbActions.SelectedIndex < lbActions.Items.Count - 1);
-            actionListContextMenu.AddItem("Clone Action", ActionListContextMenu_CloneAction, () => editedScript != null && lbActions.SelectedItem != null);
-            actionListContextMenu.AddItem("Insert New Action Here", ActionListContextMenu_Insert, () => editedScript != null && lbActions.SelectedItem != null);
+            actionListContextMenu.AddItem("Move Up", MoveActionUp, () => editedScript != null && lbActions.SelectedItem != null && lbActions.SelectedIndex > 0);
+            actionListContextMenu.AddItem("Move Down", MoveActionDown, () => editedScript != null && lbActions.SelectedItem != null && lbActions.SelectedIndex < lbActions.Items.Count - 1);
+            actionListContextMenu.AddItem("Clone Action", CloneAction, () => editedScript != null && lbActions.SelectedItem != null);
+            actionListContextMenu.AddItem("Insert New Action Here", InsertAction, () => editedScript != null && lbActions.SelectedItem != null);
             actionListContextMenu.AddItem("Delete Action", ActionListContextMenu_Delete, () => editedScript != null && lbActions.SelectedItem != null);
             AddChild(actionListContextMenu);
             lbActions.AllowRightClickUnselect = false;
@@ -116,7 +120,7 @@ namespace TSMapEditor.UI.Windows
             }
         }
 
-        private void ActionListContextMenu_MoveUp()
+        private void MoveActionUp()
         {
             if (editedScript == null || lbActions.SelectedItem == null || lbActions.SelectedIndex <= 0)
                 return;
@@ -128,7 +132,7 @@ namespace TSMapEditor.UI.Windows
             lbActions.ViewTop = viewTop;
         }
 
-        private void ActionListContextMenu_MoveDown()
+        private void MoveActionDown()
         {
             if (editedScript == null || lbActions.SelectedItem == null || lbActions.SelectedIndex >= editedScript.Actions.Count - 1)
                 return;
@@ -140,7 +144,7 @@ namespace TSMapEditor.UI.Windows
             lbActions.ViewTop = viewTop;
         }
 
-        private void ActionListContextMenu_CloneAction()
+        private void CloneAction()
         {
             if (editedScript == null || lbActions.SelectedItem == null)
                 return;
@@ -155,7 +159,7 @@ namespace TSMapEditor.UI.Windows
             lbActions.ViewTop = viewTop;
         }
 
-        private void ActionListContextMenu_Insert()
+        private void InsertAction()
         {
             if (editedScript == null || lbActions.SelectedItem == null)
                 return;
