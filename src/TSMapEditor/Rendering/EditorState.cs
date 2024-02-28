@@ -182,7 +182,7 @@ namespace TSMapEditor.Rendering
                 {
                     _isMarbleMadness = value;
                     MarbleMadnessChanged?.Invoke(this, EventArgs.Empty);
-                    IsLighting = false;
+                    RefreshLightingEnabledState();
                 }
             }
         }
@@ -205,14 +205,15 @@ namespace TSMapEditor.Rendering
         public bool IsLighting
         {
             get => _isLighting;
-            private set
-            {
-                bool oldIsLighting = _isLighting;
-                _isLighting = (LightingPreviewState != LightingPreviewMode.NoLighting) && !IsMarbleMadness;
+        }
 
-                if (oldIsLighting != _isLighting)
-                    IsLightingChanged?.Invoke(this, EventArgs.Empty);
-            }
+        private void RefreshLightingEnabledState()
+        {
+            bool oldIsLighting = _isLighting;
+            _isLighting = (LightingPreviewState != LightingPreviewMode.NoLighting) && !IsMarbleMadness;
+
+            if (oldIsLighting != _isLighting)
+                IsLightingChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private LightingPreviewMode _lightingPreviewState = LightingPreviewMode.NoLighting;
@@ -228,7 +229,7 @@ namespace TSMapEditor.Rendering
                     return;
 
                 _lightingPreviewState = value;
-                IsLighting = false;
+                RefreshLightingEnabledState();
             }
         }
 

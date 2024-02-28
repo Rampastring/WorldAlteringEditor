@@ -321,7 +321,7 @@ namespace TSMapEditor.UI
 
                     if (!paletteTextureSet)
                     {
-                        palettedDrawEffect.Parameters["PaletteTexture"].SetValue(image.GetPaletteTexture(true));
+                        palettedDrawEffect.Parameters["PaletteTexture"].SetValue(image.GetPaletteTexture(editorState.IsLighting));
                         paletteTextureSet = true;
                     }
 
