@@ -126,9 +126,39 @@ namespace TSMapEditor.UI.Sidebar
             ObjectTreeView.FindNode(SearchBox.Text, false);
         }
 
+        private Texture2D GetSidebarTextureForTerrainType(TerrainType terrainType, RenderTarget2D renderTarget)
+        {
+            Texture2D fullSizeRGBATexture = null;
+
+            var textures = TheaterGraphics.TerrainObjectTextures[terrainType.Index];
+            if (textures != null)
+            {
+                const int frameIndex = 0;
+
+                if (textures.GetFrameCount() > frameIndex)
+                {
+                    var frame = textures.GetFrame(frameIndex);
+                    if (frame != null)
+                        fullSizeRGBATexture = textures.GetTextureForFrame_RGBA(frameIndex);
+                }
+            }
+
+            Texture2D finalTexture = null;
+            if (fullSizeRGBATexture != null)
+            {
+                // Render a smaller version of the full-size texture to save VRAM
+                finalTexture = Helpers.RenderTextureAsSmaller(fullSizeRGBATexture, renderTarget, GraphicsDevice);
+                fullSizeRGBATexture.Dispose();
+            }
+
+            return finalTexture;
+        }
+
         private void InitTerrainObjects()
         {
             var categories = new List<TreeViewCategory>();
+
+            var renderTarget = new RenderTarget2D(GraphicsDevice, ObjectTreeView.Width, ObjectTreeView.LineHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
 
             if (Map.EditorConfig.TerrainObjectCollections.Count > 0)
             {
@@ -140,32 +170,16 @@ namespace TSMapEditor.UI.Sidebar
                     if (collection.Entries.Length == 0)
                         continue;
 
-                    Texture2D texture = null;
                     var firstEntry = collection.Entries[0];
-                    var textures = TheaterGraphics.TerrainObjectTextures[firstEntry.TerrainType.Index];
-                    if (textures != null)
-                    {
-                        int frameCount = textures.GetFrameCount();
-                        const int frameNumber = 0;
-
-                        if (frameCount > frameNumber)
-                        {
-                            var frame = textures.GetFrame(frameNumber);
-                            if (frame != null)
-                                texture = frame.Texture;
-                        }
-                    }
 
                     collectionsCategory.Nodes.Add(new TreeViewNode()
                     {
                         Text = collection.Name,
                         Tag = collection,
-                        Texture = texture
+                        Texture = GetSidebarTextureForTerrainType(firstEntry.TerrainType, renderTarget)
                     });
                 }
             }
-
-            var renderTarget = new RenderTarget2D(GraphicsDevice, ObjectTreeView.Width, ObjectTreeView.LineHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
 
             for (int i = 0; i < Map.Rules.TerrainTypes.Count; i++)
             {
@@ -184,36 +198,10 @@ namespace TSMapEditor.UI.Sidebar
                     category = FindOrMakeCategory(terrainType.EditorCategory, categories);
                 }
 
-                Texture2D fullSizeRGBATexture = null;
-                var terrainObjectGraphics = TheaterGraphics.TerrainObjectTextures[i];
-                if (terrainObjectGraphics != null)
-                {
-                    int frameCount = terrainObjectGraphics.GetFrameCount();
-
-                    // Find the first valid frame and use that as our texture
-                    for (int frameIndex = 0; frameIndex < frameCount; frameIndex++)
-                    {
-                        var frame = terrainObjectGraphics.GetFrame(frameIndex);
-                        if (frame != null)
-                        {
-                            fullSizeRGBATexture = terrainObjectGraphics.GetTextureForFrame_RGBA(frameIndex);
-                            break;
-                        }
-                    }
-                }
-
-                Texture2D finalTexture = null;
-                if (fullSizeRGBATexture != null)
-                {
-                    // Render a smaller version of the full-size texture
-                    finalTexture = Helpers.RenderTextureAsSmaller(fullSizeRGBATexture, renderTarget, GraphicsDevice);
-                    fullSizeRGBATexture.Dispose();
-                }
-
                 category.Nodes.Add(new TreeViewNode()
                 {
                     Text = terrainType.GetEditorDisplayName() + " (" + terrainType.ININame + ")",
-                    Texture = finalTexture,
+                    Texture = GetSidebarTextureForTerrainType(terrainType, renderTarget),
                     Tag = terrainType
                 });
 
