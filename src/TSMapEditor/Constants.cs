@@ -84,7 +84,6 @@ namespace TSMapEditor
         public const string NoneValue1 = "<none>";
         public const string NoneValue2 = "None";
 
-        public const bool HQRemap = true;
         public const float RemapBrightenFactor = 1.25f;
 
         public const bool DrawShadows = true;

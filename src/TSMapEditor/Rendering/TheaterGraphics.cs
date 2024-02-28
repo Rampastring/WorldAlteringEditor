@@ -86,7 +86,7 @@ namespace TSMapEditor.Rendering
 
         public PositionedTexture GetRemapFrame(byte facing, RampType ramp, bool affectedByLighting)
         {
-            if (!(remapable && Constants.HQRemap))
+            if (!remapable)
                 return null;
 
             // The game only renders 32 facings, so round it to the closest true facing
@@ -117,47 +117,21 @@ namespace TSMapEditor.Rendering
                     colorData[i] = Color.Transparent;
             }
 
-            if (Constants.HQRemap)
+            Color[] remapColorArray = colorData.Select(color =>
             {
-                Color[] remapColorArray = colorData.Select(color =>
-                {
-                    // Convert the color to grayscale
-                    float remapColor = Math.Max(color.R / 255.0f, Math.Max(color.G / 255.0f, color.B / 255.0f));
+                // Convert the color to grayscale
+                float remapColor = Math.Max(color.R / 255.0f, Math.Max(color.G / 255.0f, color.B / 255.0f));
 
-                    // Brighten it up a bit
-                    remapColor *= Constants.RemapBrightenFactor;
-                    return new Color(remapColor, remapColor, remapColor, color.A);
+                // Brighten it up a bit
+                remapColor *= Constants.RemapBrightenFactor;
+                return new Color(remapColor, remapColor, remapColor, color.A);
 
-                }).ToArray();
+            }).ToArray();
 
-                var remapTexture = new Texture2D(graphicsDevice, texture.Width, texture.Height, false, SurfaceFormat.Color);
-                remapTexture.SetData(remapColorArray);
-                RemapFrames[key] = new PositionedTexture(remapTexture.Width, remapTexture.Height, offset.X, offset.Y, remapTexture);
-                return RemapFrames[key];
-            }
-            else
-            {
-                // Convert colors to grayscale
-                // Get HSV value, change S = 0, convert back to RGB and assign
-                // With S = 0, the formula for converting HSV to RGB can be reduced to a quite simple form :)
-
-                System.Drawing.Color[] sdColorArray = colorData.Select(c => System.Drawing.Color.FromArgb(c.A, c.R, c.G, c.B)).ToArray();
-                for (int j = 0; j < sdColorArray.Length; j++)
-                {
-                    if (colorData[j] == Color.Transparent)
-                        continue;
-
-                    float remapColor = sdColorArray[j].GetBrightness() * Constants.RemapBrightenFactor;
-                    if (remapColor > 1.0f)
-                        remapColor = 1.0f;
-                    colorData[j] = new Color(remapColor, remapColor, remapColor, colorData[j].A);
-                }
-
-                var remapTexture = new Texture2D(graphicsDevice, texture.Width, texture.Height, false, SurfaceFormat.Color);
-                remapTexture.SetData(colorData);
-                RemapFrames[key] = new PositionedTexture(remapTexture.Width, remapTexture.Height, 0, 0, remapTexture);
-                return RemapFrames[key];
-            }
+            var remapTexture = new Texture2D(graphicsDevice, texture.Width, texture.Height, false, SurfaceFormat.Color);
+            remapTexture.SetData(remapColorArray);
+            RemapFrames[key] = new PositionedTexture(remapTexture.Width, remapTexture.Height, offset.X, offset.Y, remapTexture);
+            return RemapFrames[key];
         }
 
         public void ClearFrames()
@@ -195,7 +169,7 @@ namespace TSMapEditor.Rendering
             }
 
             Frames = new PositionedTexture[shp.FrameCount];
-            if (remapable && Constants.HQRemap)
+            if (remapable)
                 RemapFrames = new PositionedTexture[Frames.Length];
         }
 

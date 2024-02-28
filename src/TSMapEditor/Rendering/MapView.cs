@@ -1065,10 +1065,10 @@ namespace TSMapEditor.Rendering
                 DrawTexture(texture, new Rectangle(
                     bibFinalDrawPointX, bibFinalDrawPointY,
                     texture.Width, texture.Height),
-                    null, Constants.HQRemap ? nonRemapBaseNodeShade : remapColor,
+                    null,nonRemapBaseNodeShade,
                     0f, Vector2.Zero, SpriteEffects.None, 0f);
 
-                if (Constants.HQRemap && bibGraphics.HasRemapFrames())
+                if (bibGraphics.HasRemapFrames())
                 {
                     palettedColorDrawEffect.Parameters["UseRemap"].SetValue(true);
                     DrawTexture(bibGraphics.GetRemapFrame(0).Texture,
@@ -1097,9 +1097,9 @@ namespace TSMapEditor.Rendering
             palettedColorDrawEffect.Parameters["UseRemap"].SetValue(false);
             palettedColorDrawEffect.Parameters["PaletteTexture"].SetValue(graphics.GetPaletteTexture(EditorState.IsLighting));
 
-            DrawTexture(texture, drawRectangle, Constants.HQRemap ? nonRemapBaseNodeShade : remapColor);
+            DrawTexture(texture, drawRectangle, nonRemapBaseNodeShade);
 
-            if (Constants.HQRemap && graphics.HasRemapFrames())
+            if (graphics.HasRemapFrames())
             {
                 palettedColorDrawEffect.Parameters["UseRemap"].SetValue(true);
                 DrawTexture(graphics.GetRemapFrame(frameIndex).Texture, drawRectangle, remapColor);

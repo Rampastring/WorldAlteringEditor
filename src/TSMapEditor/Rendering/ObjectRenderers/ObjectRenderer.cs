@@ -257,7 +257,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 return;
 
             PositionedTexture remapFrame = null;
-            if (drawRemap && Constants.HQRemap && image.HasRemapFrames())
+            if (drawRemap && image.HasRemapFrames())
                 remapFrame = image.GetRemapFrame(frameIndex);
 
             if (affectedByAmbient)
@@ -283,7 +283,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 return;
 
             PositionedTexture remapFrame = null;
-            if (drawRemap && Constants.HQRemap)
+            if (drawRemap)
                 remapFrame = model.GetRemapFrame(facing, ramp, affectedByLighting);
 
             Rectangle drawingBounds = GetTextureDrawCoords(gameObject, frame, drawPoint);
@@ -304,7 +304,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 new Rectangle(finalDrawPointX, finalDrawPointY, texture.Width, texture.Height),
                 null, color, 0f, Vector2.Zero, SpriteEffects.None, 0f);
 
-            if (drawRemap && Constants.HQRemap && remapFrame != null)
+            if (drawRemap && remapFrame != null)
             {
                 RenderDependencies.PalettedColorDrawEffect.Parameters["UseRemap"].SetValue(true);
 

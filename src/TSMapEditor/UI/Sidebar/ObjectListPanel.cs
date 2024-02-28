@@ -159,7 +159,7 @@ namespace TSMapEditor.UI.Sidebar
                         if (frame != null)
                         {
                             texture = textures[objectType.Index].GetTextureForFrame_RGBA(frameIndex);
-                            if (Constants.HQRemap && objectType.GetArtConfig().Remapable && textures[objectType.Index].HasRemapFrames())
+                            if (objectType.GetArtConfig().Remapable && textures[objectType.Index].HasRemapFrames())
                                 remapTexture = textures[objectType.Index].GetRemapTextureForFrame_RGBA(frameIndex);
                             break;
                         }
