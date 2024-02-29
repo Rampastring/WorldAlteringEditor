@@ -1357,7 +1357,7 @@ namespace TSMapEditor.Rendering
             if (lastValidFrame == frameCount - 1)
                 return OverlayTextures[overlayType.Index].GetFrameCount() / 2;
             else
-                return lastValidFrame;
+                return lastValidFrame + 1;
         }
 
         public ShapeImage[] TerrainObjectTextures { get; set; }
