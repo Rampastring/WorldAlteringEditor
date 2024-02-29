@@ -293,7 +293,8 @@ namespace TSMapEditor.UI.Windows.TerrainGenerator
         {
             TerrainGeneratorConfig = GatherConfiguration("Customized Configuration");
 
-            Hide();
+            if (TerrainGeneratorConfig != null) // Do not close the window if there's an error condition
+                Hide();
         }
 
         public void Open()
