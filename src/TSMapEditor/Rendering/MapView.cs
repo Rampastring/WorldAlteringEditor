@@ -1043,7 +1043,7 @@ namespace TSMapEditor.Rendering
             int yDrawOffset = Constants.CellSizeY / -2;
             int frameIndex = 0;
 
-            if ((graphics == null || graphics.GetFrame(frameIndex) == null) && bibGraphics == null)
+            if ((graphics == null || graphics.GetFrame(frameIndex) == null) && (bibGraphics == null || bibGraphics.GetFrame(0) == null))
             {
                 DrawStringWithShadow(iniName, 1, drawPoint.ToXNAVector(), replacementColor, 1.0f);
                 return;
@@ -1054,31 +1054,35 @@ namespace TSMapEditor.Rendering
             if (bibGraphics != null)
             {
                 PositionedTexture bibFrame = bibGraphics.GetFrame(0);
-                texture = bibFrame.Texture;
 
-                int bibFinalDrawPointX = drawPoint.X - bibFrame.ShapeWidth / 2 + bibFrame.OffsetX + Constants.CellSizeX / 2;
-                int bibFinalDrawPointY = drawPoint.Y - bibFrame.ShapeHeight / 2 + bibFrame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset;
-
-                palettedColorDrawEffect.Parameters["UseRemap"].SetValue(false);
-                palettedColorDrawEffect.Parameters["PaletteTexture"].SetValue(bibGraphics.GetPaletteTexture(EditorState.IsLighting));
-
-                DrawTexture(texture, new Rectangle(
-                    bibFinalDrawPointX, bibFinalDrawPointY,
-                    texture.Width, texture.Height),
-                    null,nonRemapBaseNodeShade,
-                    0f, Vector2.Zero, SpriteEffects.None, 0f);
-
-                if (bibGraphics.HasRemapFrames())
+                if (bibFrame != null && bibFrame.Texture != null)
                 {
-                    palettedColorDrawEffect.Parameters["UseRemap"].SetValue(true);
-                    DrawTexture(bibGraphics.GetRemapFrame(0).Texture,
-                        new Rectangle(bibFinalDrawPointX, bibFinalDrawPointY, texture.Width, texture.Height),
-                        null,
-                        remapColor,
-                        0f,
-                        Vector2.Zero,
-                        SpriteEffects.None,
-                        0f);
+                    texture = bibFrame.Texture;
+
+                    int bibFinalDrawPointX = drawPoint.X - bibFrame.ShapeWidth / 2 + bibFrame.OffsetX + Constants.CellSizeX / 2;
+                    int bibFinalDrawPointY = drawPoint.Y - bibFrame.ShapeHeight / 2 + bibFrame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset;
+
+                    palettedColorDrawEffect.Parameters["UseRemap"].SetValue(false);
+                    palettedColorDrawEffect.Parameters["PaletteTexture"].SetValue(bibGraphics.GetPaletteTexture(EditorState.IsLighting));
+
+                    DrawTexture(texture, new Rectangle(
+                        bibFinalDrawPointX, bibFinalDrawPointY,
+                        texture.Width, texture.Height),
+                        null, nonRemapBaseNodeShade,
+                        0f, Vector2.Zero, SpriteEffects.None, 0f);
+
+                    if (bibGraphics.HasRemapFrames())
+                    {
+                        palettedColorDrawEffect.Parameters["UseRemap"].SetValue(true);
+                        DrawTexture(bibGraphics.GetRemapFrame(0).Texture,
+                            new Rectangle(bibFinalDrawPointX, bibFinalDrawPointY, texture.Width, texture.Height),
+                            null,
+                            remapColor,
+                            0f,
+                            Vector2.Zero,
+                            SpriteEffects.None,
+                            0f);
+                    }
                 }
             }
 
