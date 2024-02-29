@@ -62,6 +62,9 @@ namespace TSMapEditor.Rendering
 
             StringBuilder sb = new StringBuilder();
 
+            string fullName = typeof(GameClass).Assembly.FullName;
+
+            LogLineGenerate("World-Altering Editor (" + fullName + ")", sb, exceptLogPath);
             LogLineGenerate("Unhandled exception! @ " + DateTime.Now.ToLongTimeString(), sb, exceptLogPath);
             LogLineGenerate("Message: " + ex.Message, sb, exceptLogPath);
             LogLineGenerate("Stack trace: " + ex.StackTrace, sb, exceptLogPath);
