@@ -5,10 +5,10 @@ using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TSMapEditor.CCEngine;
 using TSMapEditor.Models;
 using TSMapEditor.Models.ArtConfig;
 using TSMapEditor.Rendering;
-using TSMapEditor.Rendering.ObjectRenderers;
 
 namespace TSMapEditor.UI.Sidebar
 {
@@ -143,6 +143,28 @@ namespace TSMapEditor.UI.Sidebar
 
         protected abstract void InitObjects();
 
+        protected (Texture2D regular, Texture2D remap) GetTextureForVoxel<T>(T objectType, VoxelModel[] typeGraphicsArray, RenderTarget2D renderTarget, byte facing) where T : TechnoType, IArtConfigContainer
+        {
+            Renderer.BeginDraw();
+
+            var frame = typeGraphicsArray[objectType.Index].GetFrame(facing, RampType.None, false);
+            if (frame == null || frame.Texture == null)
+                return (null, null);
+
+            var remapFrame = typeGraphicsArray[objectType.Index].GetRemapFrame(facing, RampType.None, false);
+
+            Renderer.EndDraw();
+
+            // Render them as smaller textures to be independent of the voxel cache
+            Texture2D regularTexture = Helpers.RenderTextureAsSmaller(frame.Texture, renderTarget, GraphicsDevice);
+            Texture2D remapTexture = null;
+
+            if (remapFrame != null && remapFrame.Texture != null)
+                remapTexture = Helpers.RenderTextureAsSmaller(remapFrame.Texture, renderTarget, GraphicsDevice);
+
+            return (regularTexture, remapTexture);
+        }
+
         protected virtual (Texture2D regular, Texture2D remap) GetObjectTextures<T>(T objectType, ShapeImage[] textures) where T : TechnoType, IArtConfigContainer
         {
             Texture2D texture = null;
@@ -218,7 +240,20 @@ namespace TSMapEditor.UI.Sidebar
 
                         House ownerHouse = Map.StandardHouses.Find(h => h.ININame == ownerName);
                         if (ownerHouse != null)
+                        {
                             remapColor = ownerHouse.XNAColor;
+                        }
+                        else
+                        {
+                            // As as last resort, check if EditorRules has a remap color specified for the side
+                            string colorOverrideName = Map.EditorConfig.EditorRulesIni.GetStringValue("ObjectOwnerColors", ownerName, null);
+                            if (!string.IsNullOrWhiteSpace(colorOverrideName))
+                            {
+                                var rulesColor = Map.Rules.Colors.Find(c => c.Name == colorOverrideName);
+                                if (rulesColor != null)
+                                    remapColor = rulesColor.XNAColor;
+                            }
+                        }
 
                         // Prevent duplicates that can occur due to category overrides
                         // (For example, if objects owned by "Soviet1" are overridden to be listed under

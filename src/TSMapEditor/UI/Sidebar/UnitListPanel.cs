@@ -1,4 +1,5 @@
-﻿using Rampastring.XNAUI;
+﻿using Microsoft.Xna.Framework.Graphics;
+using Rampastring.XNAUI;
 using System;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
@@ -27,6 +28,19 @@ namespace TSMapEditor.UI.Sidebar
         private readonly bool isNaval;
         private readonly UnitPlacementAction unitPlacementAction;
 
+        private RenderTarget2D renderTarget;
+
+        protected override (Texture2D regular, Texture2D remap) GetObjectTextures<T>(T objectType, ShapeImage[] textures)
+        {
+            const byte facingSouthEast = 64;
+
+            var unitType = objectType as UnitType;
+            if (unitType.ArtConfig.Voxel)
+                return GetTextureForVoxel(objectType, TheaterGraphics.UnitModels, renderTarget, facingSouthEast);
+
+            return base.GetObjectTextures(objectType, textures);
+        }
+
         protected override void InitObjects()
         {
             Func<UnitType, bool> filterFunction = null;
@@ -40,7 +54,9 @@ namespace TSMapEditor.UI.Sidebar
                 filterFunction = u => u.SpeedType != "Float" && u.MovementZone != "Water";
             }
 
+            renderTarget = new RenderTarget2D(GraphicsDevice, ObjectTreeView.Width, ObjectTreeView.LineHeight, false, SurfaceFormat.Color, DepthFormat.None);
             InitObjectsBase(Map.Rules.UnitTypes, TheaterGraphics.UnitTextures, filterFunction);
+            renderTarget.Dispose();
         }
 
         protected override void ObjectSelected()
