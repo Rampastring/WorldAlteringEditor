@@ -183,16 +183,6 @@ namespace TSMapEditor.UI.Sidebar
                 if (!objectType.IsValidForTheater(Map.LoadedTheaterName))
                     continue;
 
-                if (objectType.WhatAmI() == RTTIType.BuildingType)
-                {
-                    var buildingType = (BuildingType)(TechnoType)objectType;
-                    if (buildingType.PowersUpBuilding != null)
-                    {
-                        // Don't list upgrades
-                        continue;
-                    }
-                }
-
                 if (filter != null && !filter(objectType))
                     continue;
 
