@@ -180,6 +180,9 @@ namespace TSMapEditor.UI.Sidebar
                 if (!objectType.EditorVisible)
                     continue;
 
+                if (!objectType.IsValidForTheater(Map.LoadedTheaterName))
+                    continue;
+
                 if (objectType.WhatAmI() == RTTIType.BuildingType)
                 {
                     var buildingType = (BuildingType)(TechnoType)objectType;

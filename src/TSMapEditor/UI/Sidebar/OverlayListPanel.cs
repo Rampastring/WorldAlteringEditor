@@ -194,6 +194,9 @@ namespace TSMapEditor.UI.Sidebar
                     if (collection.Entries.Length == 0)
                         continue;
 
+                    if (!collection.IsValidForTheater(Map.LoadedTheaterName))
+                        continue;
+
                     var firstEntry = collection.Entries[0];
 
                     collectionsCategory.Nodes.Add(new TreeViewNode()
@@ -215,6 +218,9 @@ namespace TSMapEditor.UI.Sidebar
                     if (connectedOverlay.FrameCount == 0)
                         continue;
 
+                    if (!connectedOverlay.Frames.TrueForAll(cof => cof.OverlayType.IsValidForTheater(Map.LoadedTheaterName)))
+                        continue;
+
                     var firstEntry = connectedOverlay.Frames[0];
 
                     connectedOverlaysCategory.Nodes.Add(new TreeViewNode()
@@ -232,6 +238,9 @@ namespace TSMapEditor.UI.Sidebar
                 OverlayType overlayType = Map.Rules.OverlayTypes[i];
 
                 if (!overlayType.EditorVisible)
+                    continue;
+
+                if (!overlayType.IsValidForTheater(Map.LoadedTheaterName))
                     continue;
 
                 if (string.IsNullOrEmpty(overlayType.EditorCategory))

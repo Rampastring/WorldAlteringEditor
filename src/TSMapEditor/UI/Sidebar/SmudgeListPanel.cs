@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
-using SharpDX.Direct3D9;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -182,6 +181,9 @@ namespace TSMapEditor.UI.Sidebar
                     if (collection.Entries.Length == 0)
                         continue;
 
+                    if (!collection.IsValidForTheater(Map.LoadedTheaterName))
+                        continue;
+
                     var firstEntry = collection.Entries[0];
 
                     collectionsCategory.Nodes.Add(new TreeViewNode()
@@ -199,6 +201,9 @@ namespace TSMapEditor.UI.Sidebar
                 SmudgeType smudgeType = Map.Rules.SmudgeTypes[i];
 
                 if (!smudgeType.EditorVisible)
+                    continue;
+
+                if (!smudgeType.IsValidForTheater(Map.LoadedTheaterName))
                     continue;
 
                 if (string.IsNullOrEmpty(smudgeType.EditorCategory))

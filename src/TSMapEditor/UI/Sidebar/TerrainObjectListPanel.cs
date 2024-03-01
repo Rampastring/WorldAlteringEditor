@@ -170,6 +170,9 @@ namespace TSMapEditor.UI.Sidebar
                     if (collection.Entries.Length == 0)
                         continue;
 
+                    if (!collection.IsValidForTheater(Map.LoadedTheaterName))
+                        continue;
+
                     var firstEntry = collection.Entries[0];
 
                     collectionsCategory.Nodes.Add(new TreeViewNode()
@@ -187,6 +190,9 @@ namespace TSMapEditor.UI.Sidebar
                 TerrainType terrainType = Map.Rules.TerrainTypes[i];
 
                 if (!terrainType.EditorVisible)
+                    continue;
+
+                if (!terrainType.IsValidForTheater(Map.LoadedTheaterName))
                     continue;
 
                 if (string.IsNullOrEmpty(terrainType.EditorCategory))
@@ -210,7 +216,7 @@ namespace TSMapEditor.UI.Sidebar
 
             renderTarget.Dispose();
 
-            categories.ForEach(c => ObjectTreeView.AddCategory(c));
+            categories.ForEach(ObjectTreeView.AddCategory);
         }
 
         private TreeViewCategory FindOrMakeCategory(string categoryName, List<TreeViewCategory> categoryList)
