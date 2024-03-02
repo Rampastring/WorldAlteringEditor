@@ -358,6 +358,13 @@ namespace TSMapEditor.Initialization
                                 continue;
                             }
 
+                            if (appliedUpgrades >= buildingType.Upgrades)
+                            {
+                                AddMapLoadError($"Building {buildingTypeId} at {building.Position} has more upgrades ({appliedUpgrades + 1}) " +
+                                    $"than specified by its Upgrades= value ({buildingType.Upgrades}) in Rules. Skipping adding one or more of the building's upgrades.");
+                                break;
+                            }
+
                             building.Upgrades[appliedUpgrades] = upgradeBuildingType;
                             appliedUpgrades++;
                         }
