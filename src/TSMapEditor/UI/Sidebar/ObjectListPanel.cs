@@ -145,16 +145,21 @@ namespace TSMapEditor.UI.Sidebar
 
         protected (Texture2D regular, Texture2D remap) GetTextureForVoxel<T>(T objectType, VoxelModel[] typeGraphicsArray, RenderTarget2D renderTarget, byte facing) where T : TechnoType, IArtConfigContainer
         {
+            var voxelModel = typeGraphicsArray[objectType.Index];
+
+            if (voxelModel == null)
+                return (null, null);
+
             Renderer.BeginDraw();
 
-            var frame = typeGraphicsArray[objectType.Index].GetFrame(facing, RampType.None, false);
+            var frame = voxelModel.GetFrame(facing, RampType.None, false);
             if (frame == null || frame.Texture == null)
             {
                 Renderer.EndDraw();
                 return (null, null);
             }
 
-            var remapFrame = typeGraphicsArray[objectType.Index].GetRemapFrame(facing, RampType.None, false);
+            var remapFrame = voxelModel.GetRemapFrame(facing, RampType.None, false);
 
             Renderer.EndDraw();
 
