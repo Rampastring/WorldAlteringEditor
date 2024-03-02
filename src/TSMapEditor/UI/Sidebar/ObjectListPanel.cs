@@ -149,7 +149,10 @@ namespace TSMapEditor.UI.Sidebar
 
             var frame = typeGraphicsArray[objectType.Index].GetFrame(facing, RampType.None, false);
             if (frame == null || frame.Texture == null)
+            {
+                Renderer.EndDraw();
                 return (null, null);
+            }
 
             var remapFrame = typeGraphicsArray[objectType.Index].GetRemapFrame(facing, RampType.None, false);
 
