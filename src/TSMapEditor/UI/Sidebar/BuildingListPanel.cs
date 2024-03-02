@@ -108,6 +108,7 @@ namespace TSMapEditor.UI.Sidebar
             Renderer.BeginDraw();
 
             Renderer.PushRenderTarget(renderTarget);
+            GraphicsDevice.Clear(Color.Transparent);
 
             if (bibRegular != null)
             {
@@ -133,6 +134,7 @@ namespace TSMapEditor.UI.Sidebar
             Renderer.PopRenderTarget();
 
             Renderer.PushRenderTarget(remapRenderTarget);
+            GraphicsDevice.Clear(Color.Transparent);
 
             if (bibRemap != null)
             {
