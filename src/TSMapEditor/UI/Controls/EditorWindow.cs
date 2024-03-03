@@ -41,6 +41,20 @@ namespace TSMapEditor.UI.Controls
             PanelBackgroundDrawMode = PanelBackgroundImageDrawMode.STRETCHED;
 
             base.Initialize();
+
+            WindowManager.RenderResolutionChanged += WindowManager_RenderResolutionChanged;
+        }
+
+        private void WindowManager_RenderResolutionChanged(object sender, EventArgs e)
+        {
+            ConstrainPosition();
+        }
+
+        public override void Kill()
+        {
+            WindowManager.RenderResolutionChanged -= WindowManager_RenderResolutionChanged;
+
+            base.Kill();
         }
 
         private void CloseButton_LeftClick(object sender, EventArgs e)
@@ -76,7 +90,26 @@ namespace TSMapEditor.UI.Controls
             Alpha = 0f;
             Enable();
 
+            ConstrainPosition();
+
             InteractedWith?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void ConstrainPosition()
+        {
+            if (ScaledWidth > WindowManager.RenderResolutionX)
+                X = (WindowManager.RenderResolutionX - ScaledWidth) / 2;
+            else if (X + ScaledWidth > WindowManager.RenderResolutionX)
+                X = WindowManager.RenderResolutionX - ScaledWidth;
+            else if (X < 0)
+                X = 0;
+
+            if (ScaledHeight > WindowManager.RenderResolutionY)
+                Y = (WindowManager.RenderResolutionY - ScaledHeight) / 2;
+            else if (Y + ScaledHeight > WindowManager.RenderResolutionY)
+                Y = WindowManager.RenderResolutionY - ScaledHeight;
+            else if (Y < 0)
+                Y = 0;
         }
 
         public override void Update(GameTime gameTime)
@@ -105,15 +138,8 @@ namespace TSMapEditor.UI.Controls
                         Point newCursorPoint = GetCursorPoint();
                         X = X + (newCursorPoint.X - lastCursorPoint.X) * Scaling;
                         Y = Y + (newCursorPoint.Y - lastCursorPoint.Y) * Scaling;
-                        if (X + ScaledWidth > WindowManager.RenderResolutionX)
-                            X = WindowManager.RenderResolutionX - ScaledWidth;
-                        else if (X < 0)
-                            X = 0;
 
-                        if (Y + ScaledHeight > WindowManager.RenderResolutionY)
-                            Y = WindowManager.RenderResolutionY - ScaledHeight;
-                        else if (Y < 0)
-                            Y = 0;
+                        ConstrainPosition();
                     }
 
                     lastCursorPoint = GetCursorPoint();
