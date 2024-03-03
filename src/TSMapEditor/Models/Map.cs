@@ -1818,6 +1818,20 @@ namespace TSMapEditor.Models
                 }
             }
 
+            // Check for triggers having too many actions. This can cause a crash because the game's buffer for parsing trigger actions
+            // is limited (to 512 chars according to ModEnc)
+            if (Constants.WarnOfTooManyTriggerActions)
+            {
+                const int maxActionCount = 18;
+                foreach (var trigger in Triggers)
+                {
+                    if (trigger.Actions.Count > maxActionCount)
+                    {
+                        issueList.Add($"Trigger '{trigger.Name}' has more than {maxActionCount} actions! This can cause the game to crash! Consider splitting it up to multiple triggers.");
+                    }
+                }
+            }
+
             return issueList;
         }
 

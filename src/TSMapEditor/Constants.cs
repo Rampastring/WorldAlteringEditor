@@ -21,6 +21,7 @@ namespace TSMapEditor
         public static bool NewTheaterGenericBuilding = false;
         public static bool DrawBuildingAnimationShadows = false;
         public static bool UseCountries = false;
+        public static bool WarnOfTooManyTriggerActions = true;
 
         public static string ExpectedClientExecutableName = "DTA.exe";
         public static string GameRegistryInstallPath = "SOFTWARE\\DawnOfTheTiberiumAge";
@@ -121,6 +122,7 @@ namespace TSMapEditor
             NewTheaterGenericBuilding = constantsIni.GetBooleanValue(ConstantsSectionName, nameof(NewTheaterGenericBuilding), NewTheaterGenericBuilding);
             DrawBuildingAnimationShadows = constantsIni.GetBooleanValue(ConstantsSectionName, nameof(DrawBuildingAnimationShadows), DrawBuildingAnimationShadows);
             UseCountries = constantsIni.GetBooleanValue(ConstantsSectionName, nameof(UseCountries), UseCountries);
+            WarnOfTooManyTriggerActions = constantsIni.GetBooleanValue(ConstantsSectionName, nameof(WarnOfTooManyTriggerActions), WarnOfTooManyTriggerActions);
 
             ExpectedClientExecutableName = constantsIni.GetStringValue(ConstantsSectionName, nameof(ExpectedClientExecutableName), ExpectedClientExecutableName);
             GameRegistryInstallPath = constantsIni.GetStringValue(ConstantsSectionName, nameof(GameRegistryInstallPath), GameRegistryInstallPath);
