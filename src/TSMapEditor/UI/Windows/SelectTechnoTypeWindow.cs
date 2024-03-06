@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using TSMapEditor.Models;
@@ -40,7 +39,7 @@ namespace TSMapEditor.UI.Windows
 
             foreach (var technoType in technoTypes)
             {
-                lbObjectList.AddItem(new XNAListBoxItem() { Text = technoType.ININame, Tag = technoType });
+                lbObjectList.AddItem(new XNAListBoxItem() { Text = $"{technoType.Index} {technoType.Name} ({technoType.ININame})", Tag = technoType });
                 if (technoType == SelectedObject)
                     lbObjectList.SelectedIndex = lbObjectList.Items.Count - 1;
             }
