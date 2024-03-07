@@ -70,6 +70,8 @@ namespace TSMapEditor.Mutations.Classes
                     FrameIndex = 0
                 };
             }
+
+            MutationTarget.AddRefreshPoint(cellCoords, 2);
         }
 
         public override void Undo()
@@ -93,6 +95,8 @@ namespace TSMapEditor.Mutations.Classes
                     FrameIndex = info.FrameIndex
                 };
             }
+
+            MutationTarget.AddRefreshPoint(cellCoords, 2);
         }
     }
 }
