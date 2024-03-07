@@ -38,6 +38,7 @@
         ScriptType,
         TeamType,
         Waypoint,
-        CellTag
+        CellTag,
+        SuperWeaponType
     }
 }

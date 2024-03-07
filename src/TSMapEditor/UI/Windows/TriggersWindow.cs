@@ -778,6 +778,12 @@ namespace TSMapEditor.UI.Windows
                     map.Waypoints.ForEach(wp => ctxEventParameterPresetValues.AddItem(wp.Identifier.ToString(CultureInfo.InvariantCulture)));
                     ctxEventParameterPresetValues.Open(GetCursorPoint());
                     break;
+                case TriggerParamType.SuperWeapon:
+                    ctxEventParameterPresetValues.ClearItems();
+                    ctxEventParameterPresetValues.Width = 250;
+                    map.Rules.SuperWeaponTypes.ForEach(sw => ctxEventParameterPresetValues.AddItem(sw.GetDisplayString()));
+                    ctxEventParameterPresetValues.Open(GetCursorPoint());
+                    break;
                 default:
                     break;
             }
@@ -881,12 +887,18 @@ namespace TSMapEditor.UI.Windows
                     ctxActionParameterPresetValues.Width = 100;
                     map.Waypoints.ForEach(wp => ctxActionParameterPresetValues.AddItem(wp.Identifier.ToString(CultureInfo.InvariantCulture)));
                     ctxActionParameterPresetValues.Open(GetCursorPoint());
-                    return;
+                    break;
                 case TriggerParamType.StringTableEntry:
                     string label = triggerAction.Parameters[paramIndex];
                     CsfString existingString = map.StringTable.LookUpString(label) ?? new(label, string.Empty);
                     selectStringWindow.IsForEvent = false;
                     selectStringWindow.Open(existingString);
+                    break;
+                case TriggerParamType.SuperWeapon:
+                    ctxActionParameterPresetValues.ClearItems();
+                    ctxActionParameterPresetValues.Width = 250;
+                    map.Rules.SuperWeaponTypes.ForEach(sw => ctxActionParameterPresetValues.AddItem(sw.GetDisplayString()));
+                    ctxActionParameterPresetValues.Open(GetCursorPoint());
                     break;
                 default:
                     break;
@@ -1835,13 +1847,20 @@ namespace TSMapEditor.UI.Windows
                         return paramValue + " - nonexistent tag";
 
                     return paramValue + " " + tag.Name;
+                case TriggerParamType.SuperWeapon:
+                    if (!intParseSuccess)
+                        return paramValue;
+
+                    if (intValue >= map.Rules.SuperWeaponTypes.Count)
+                        return intValue + " - nonexistent super weapon";
+
+                    return intValue + " " + map.Rules.SuperWeaponTypes[intValue].GetDisplayStringWithoutIndex();
                 case TriggerParamType.Float:
                     if (!intParseSuccess)
                         return paramValue;
 
                     float floatValue = BitConverter.ToSingle(BitConverter.GetBytes(intValue));
                     return floatValue.ToString(CultureInfo.InvariantCulture) + " (" + paramValue + ")";
-
                 case TriggerParamType.Boolean:
                 default:
                     return paramValue;
