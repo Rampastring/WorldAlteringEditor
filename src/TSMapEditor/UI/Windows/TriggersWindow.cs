@@ -1133,10 +1133,23 @@ namespace TSMapEditor.UI.Windows
 
         private void EventWindowDarkeningPanel_Hidden(object sender, EventArgs e)
         {
-            if (editedTrigger == null || lbEvents.SelectedItem == null || selectEventWindow.SelectedObject == null)
+            if (editedTrigger == null || selectEventWindow.SelectedObject == null)
                 return;
 
             TriggerEventType triggerEventType = selectEventWindow.SelectedObject;
+
+            if (selectEventWindow.IsAddingNew)
+            {
+                editedTrigger.Conditions.Add(new TriggerCondition());
+                EditTrigger(editedTrigger);
+                lbEvents.SelectedIndex = lbEvents.Items.Count - 1;
+            }
+            else
+            {
+                if (lbEvents.SelectedItem == null)
+                    return;
+            }
+
             TriggerCondition condition = editedTrigger.Conditions[lbEvents.SelectedIndex];
             condition.ConditionIndex = selectEventWindow.SelectedObject.ID;
 
@@ -1164,10 +1177,26 @@ namespace TSMapEditor.UI.Windows
 
         private void ActionWindowDarkeningPanel_Hidden(object sender, EventArgs e)
         {
-            if (editedTrigger == null || lbActions.SelectedItem == null || selectActionWindow.SelectedObject == null)
+            if (editedTrigger == null || selectActionWindow.SelectedObject == null)
                 return;
 
             TriggerActionType triggerActionType = selectActionWindow.SelectedObject;
+
+            if (selectActionWindow.IsAddingNew)
+            {
+                if (triggerActionType == null)
+                    return;
+
+                editedTrigger.Actions.Add(new TriggerAction());
+                EditTrigger(editedTrigger);
+                lbActions.SelectedIndex = lbActions.Items.Count - 1;
+            }
+            else
+            {
+                if (lbActions.SelectedItem == null)
+                    return;
+            }
+
             TriggerAction action = editedTrigger.Actions[lbActions.SelectedIndex];
             action.ActionIndex = selectActionWindow.SelectedObject.ID;
 
@@ -1201,12 +1230,8 @@ namespace TSMapEditor.UI.Windows
             if (editedTrigger == null)
                 return;
 
-            editedTrigger.Actions.Add(new TriggerAction());
-            EditTrigger(editedTrigger);
-            lbActions.SelectedIndex = lbActions.Items.Count - 1;
-
-            if (Keyboard.IsCtrlHeldDown())
-                SelActionType_LeftClick(this, EventArgs.Empty);
+            selectActionWindow.IsAddingNew = true;
+            selectActionWindow.Open(null);
         }
 
         private void BtnDeleteAction_LeftClick(object sender, EventArgs e)
@@ -1223,12 +1248,8 @@ namespace TSMapEditor.UI.Windows
             if (editedTrigger == null)
                 return;
 
-            editedTrigger.Conditions.Add(new TriggerCondition());
-            EditTrigger(editedTrigger);
-            lbEvents.SelectedIndex = lbEvents.Items.Count - 1;
-
-            if (Keyboard.IsCtrlHeldDown())
-                SelEventType_LeftClick(this, EventArgs.Empty);
+            selectEventWindow.IsAddingNew = true;
+            selectEventWindow.Open(null);
         }
 
         private void BtnDeleteEvent_LeftClick(object sender, EventArgs e)
@@ -1503,6 +1524,7 @@ namespace TSMapEditor.UI.Windows
                 return;
 
             int actionTypeIndex = editedTrigger.Actions[lbActions.SelectedIndex].ActionIndex;
+            selectActionWindow.IsAddingNew = false;
             selectActionWindow.Open(GetTriggerActionType(actionTypeIndex));
         }
 
@@ -1629,6 +1651,7 @@ namespace TSMapEditor.UI.Windows
                 return;
 
             int eventTypeIndex = editedTrigger.Conditions[lbEvents.SelectedIndex].ConditionIndex;
+            selectEventWindow.IsAddingNew = false;
             selectEventWindow.Open(GetTriggerEventType(eventTypeIndex));
         }
 
