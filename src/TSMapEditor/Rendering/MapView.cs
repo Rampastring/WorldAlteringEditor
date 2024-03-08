@@ -1688,6 +1688,12 @@ namespace TSMapEditor.Rendering
 
                 Color color = tube.Pending ? Color.Orange : Color.LimeGreen;
 
+                if (tube.Directions.Count == 0)
+                {
+                    DrawTexture(EditorGraphics.GenericTileWithBorderTexture,
+                        CellMath.CellTopLeftPointFromCellCoords_3D(tube.EntryPoint, Map).ToXNAPoint(), color);
+                }
+
                 foreach (var direction in tube.Directions)
                 {
                     Point2D nextPoint = currentPoint.NextPointFromTubeDirection(direction);
