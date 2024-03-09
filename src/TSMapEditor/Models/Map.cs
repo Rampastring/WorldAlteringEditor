@@ -1337,6 +1337,11 @@ namespace TSMapEditor.Models
                 double currentG = globalLightingColor.G;
                 double currentB = globalLightingColor.B;
 
+                // Apply Level
+                currentR += Lighting.Level * cell.Level;
+                currentG += Lighting.Level * cell.Level;
+                currentB += Lighting.Level * cell.Level;
+
                 Point2D cellCoords = cell.CoordsToPoint();
 
                 // Check all the light sources and how they affect this light
