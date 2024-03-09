@@ -928,7 +928,7 @@ namespace TSMapEditor.Models
 
         public void MoveBuilding(Structure structure, Point2D newCoords)
         {
-            RemoveBuilding(structure);
+            RemoveBuilding(structure, false);
             structure.Position = newCoords;
             PlaceBuilding(structure);
         }
