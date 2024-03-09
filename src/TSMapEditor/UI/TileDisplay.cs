@@ -40,6 +40,7 @@ namespace TSMapEditor.UI
             PlaceTerrainCursorAction placeTerrainCursorAction, EditorState editorState) : base(windowManager)
         {
             this.theaterGraphics = theaterGraphics;
+            this.map = map;
             DrawMode = ControlDrawMode.UNIQUE_RENDER_TARGET;
             placeTerrainCursorAction.ActionExited += (s, e) => _selectedTile = null;
             this.editorState = editorState;
@@ -325,8 +326,7 @@ namespace TSMapEditor.UI
                     {
                         palettedDrawEffect.Parameters["PaletteTexture"].SetValue(image.GetPaletteTexture());
 
-                        if (editorState.IsLighting)
-                            palettedDrawEffect.Parameters["Lighting"].SetValue(map.Lighting.MapColorFromPreviewMode(editorState.LightingPreviewState).ToXNAVector4());
+                        palettedDrawEffect.Parameters["Lighting"].SetValue(map.Lighting.MapColorFromPreviewMode(editorState.LightingPreviewState).ToXNAVector4());
 
                         paletteTextureSet = true;
                     }
