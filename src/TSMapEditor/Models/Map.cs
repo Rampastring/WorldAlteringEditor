@@ -36,6 +36,7 @@ namespace TSMapEditor.Models
         public event EventHandler LocalSizeChanged;
         public event EventHandler MapResized;
         public event EventHandler MapHeightChanged;
+        public event EventHandler CellLightingModified;
         public event EventHandler MapManuallySaved;
         public event EventHandler MapAutoSaved;
         public event EventHandler PreSave;
@@ -883,17 +884,26 @@ namespace TSMapEditor.Models
             }
             
             Structures.Add(structure);
+            CheckForLightingChange(structure);
         }
 
         public void RemoveBuildingsFrom(Point2D cellCoords)
         {
             var cell = GetTile(cellCoords);
 
+            bool refreshLighting = false;
+
             while (cell.Structures.Count > 0)
-                RemoveBuilding(cell.Structures[0]);
+            {
+                refreshLighting = cell.Structures[0].ObjectType.LightVisibility > 0;
+                RemoveBuilding(cell.Structures[0], false);
+            }
+
+            if (refreshLighting)
+                CheckForLightingChange(null);
         }
 
-        public void RemoveBuilding(Structure structure)
+        public void RemoveBuilding(Structure structure, bool updateLighting = true)
         {
             structure.ObjectType.ArtConfig.DoForFoundationCoords(offset =>
             {
@@ -911,6 +921,9 @@ namespace TSMapEditor.Models
             }
 
             Structures.Remove(structure);
+
+            if (updateLighting)
+                CheckForLightingChange(structure);
         }
 
         public void MoveBuilding(Structure structure, Point2D newCoords)
@@ -918,6 +931,24 @@ namespace TSMapEditor.Models
             RemoveBuilding(structure);
             structure.Position = newCoords;
             PlaceBuilding(structure);
+        }
+
+        private void CheckForLightingChange(GameObject gameObject)
+        {
+            if (gameObject == null)
+            {
+                CellLightingModified?.Invoke(this, EventArgs.Empty);
+                return;
+            }
+
+            if (gameObject.WhatAmI() == RTTIType.Building)
+            {
+                var structure = (Structure)gameObject;
+                if (structure.ObjectType.LightVisibility > 0)
+                {
+                    CellLightingModified?.Invoke(this, EventArgs.Empty);
+                }
+            }
         }
 
         public void PlaceUnit(Unit unit)
@@ -1286,7 +1317,80 @@ namespace TSMapEditor.Models
             return -1;
         }
 
+        public void RefreshCellLighting(LightingPreviewMode lightingPreviewMode)
+        {
+            if (lightingPreviewMode == LightingPreviewMode.NoLighting)
+            {
+                DoForAllValidTiles(cell => cell.CellLighting = new MapColor(1.0, 1.0, 1.0));
+                return;
+            }
 
+            const double LeptonsPerCell = 256.0;
+
+            var lightSources = Structures.FindAll(s => s.ObjectType.LightVisibility > 0 && s.ObjectType.LightIntensity != 0);
+
+            MapColor globalLightingColor = Lighting.MapColorFromPreviewMode(lightingPreviewMode);
+
+            DoForAllValidTiles(cell =>
+            {
+                double currentR = globalLightingColor.R;
+                double currentG = globalLightingColor.G;
+                double currentB = globalLightingColor.B;
+
+                Point2D cellCoords = cell.CoordsToPoint();
+
+                // Check all the light sources and how they affect this light
+                foreach (var building in lightSources)
+                {
+                    int xDifference = cellCoords.X - building.Position.X;
+                    int yDifference = cellCoords.Y - building.Position.Y;
+
+                    double distanceInCells = Math.Sqrt(xDifference * xDifference + yDifference * yDifference);
+                    double distanceInLeptons = distanceInCells * LeptonsPerCell;
+
+                    if (distanceInLeptons > building.ObjectType.LightVisibility)
+                        continue;
+
+                    double distanceRatio = 1.0 - (distanceInLeptons / building.ObjectType.LightVisibility);
+
+                    double intensity = distanceRatio * building.ObjectType.LightIntensity;
+
+                    // Intensity applies equally to all components and is additive in contrast to ambient.
+                    // For example, if Ambient=0.5 and LightIntensity=1.0, in a cell that is fully
+                    // lit by the light post, the overall light level becomes 0.5 + 1.0 = 1.5
+
+                    // However, intensity is relative to global lighting color!
+                    double redStrength = intensity * globalLightingColor.R;
+                    double greenStrength = intensity * globalLightingColor.G;
+                    double blueStrength = intensity * globalLightingColor.B;
+
+                    // Apply tint, it is additive.
+                    // Tint does NOT recolor intensity, but instead is additional
+                    // per-component light applied on top of intensity!
+                    redStrength += building.ObjectType.LightRedTint * distanceRatio;
+                    greenStrength += building.ObjectType.LightGreenTint * distanceRatio;
+                    blueStrength += building.ObjectType.LightBlueTint * distanceRatio;
+
+                    currentR += redStrength;
+                    currentG += greenStrength;
+                    currentB += blueStrength;
+                }
+
+                const double LightingComponentMax = 2.0;
+
+                // In case the components exceed 2.0, they are all scaled down to fit within 0.0 to 2.0
+                double highestComponentValue = Math.Max(currentR, Math.Max(currentG, currentB));
+                if (highestComponentValue > LightingComponentMax)
+                {
+                    double ratio = LightingComponentMax / highestComponentValue;
+                    currentR *= ratio;
+                    currentG *= ratio;
+                    currentB *= ratio;
+                }
+
+                cell.CellLighting = new MapColor(currentR, currentG, currentB);
+            });
+        }
 
         /// <summary>
         /// Convenience structure for <see cref="TransitionArrayDataMatches(int[], MapTile, int, int)"/>.

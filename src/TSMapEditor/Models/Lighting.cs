@@ -3,6 +3,7 @@ using System;
 using Microsoft.Xna.Framework;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Models.Enums;
+using System.Linq.Expressions;
 
 namespace TSMapEditor.Models
 {
@@ -43,6 +44,28 @@ namespace TSMapEditor.Models
                 (byte)Math.Clamp(left.G * right.G, 0, 255.0),
                 (byte)Math.Clamp(left.B * right.B, 0, 255.0)
             );
+        }
+
+        public Vector4 ToXNAVector4(double extraLight) => new Vector4(
+            (float)(R + extraLight),
+            (float)(G + extraLight),
+            (float)(B + extraLight),
+            1.0f);
+
+        public Vector4 ToXNAVector4() => new Vector4((float)R, (float)G, (float)B, 1.0f);
+
+        public Vector4 ToXNAVector4Ambient(double extraLight)
+        {
+            double average = ((R + G + B) / 3.0) + extraLight;
+            return new Vector4((float)average, (float)average, (float)average, 1.0f);
+        }
+
+        public Vector4 ToXNAVector4Ambient()
+        {
+            // double highestComponent = Math.Max(R, Math.Max(G, B));
+            // return new Vector4((float)highestComponent, (float)highestComponent, (float)highestComponent, 1.0f);
+            double average = (R + G + B) / 3.0;
+            return new Vector4((float)average, (float)average, (float)average, 1.0f);
         }
 
         public static readonly MapColor White = new(1.0, 1.0, 1.0);
@@ -124,6 +147,18 @@ namespace TSMapEditor.Models
                 LightingPreviewMode.IonStorm => IonAmbient,
                 LightingPreviewMode.Dominator => DominatorAmbient.HasValue ? DominatorAmbient.Value : 1.0,
                 _ => 1.0
+            };
+        }
+
+        public MapColor MapColorFromPreviewMode(LightingPreviewMode lightingPreviewMode)
+        {
+            return lightingPreviewMode switch
+            {
+                LightingPreviewMode.NoLighting => new MapColor(1.0, 1.0, 1.0),
+                LightingPreviewMode.Normal => RefreshLightingColor(Red, Green, Blue, Ambient),
+                LightingPreviewMode.IonStorm => RefreshLightingColor(IonRed, IonGreen, IonBlue, IonAmbient),
+                LightingPreviewMode.Dominator => RefreshLightingColor(DominatorRed, DominatorGreen, DominatorBlue, DominatorAmbient),
+                _ => new MapColor(1.0, 1.0, 1.0)
             };
         }
 
