@@ -3,7 +3,6 @@ using System;
 using Microsoft.Xna.Framework;
 using TSMapEditor.CCEngine;
 using TSMapEditor.Models.Enums;
-using System.Linq.Expressions;
 
 namespace TSMapEditor.Models
 {
@@ -131,23 +130,11 @@ namespace TSMapEditor.Models
 
         public void RefreshLightingColors()
         {
-            NormalColor = RefreshLightingColor(Red, Green, Blue, Ambient);
-            IonColor = RefreshLightingColor(IonRed, IonGreen, IonBlue, IonAmbient);
-            DominatorColor = RefreshLightingColor(DominatorRed, DominatorGreen, DominatorBlue, DominatorAmbient);
+            NormalColor = GetLightingColor(Red, Green, Blue, Ambient);
+            IonColor = GetLightingColor(IonRed, IonGreen, IonBlue, IonAmbient);
+            DominatorColor = GetLightingColor(DominatorRed, DominatorGreen, DominatorBlue, DominatorAmbient);
 
             ColorsRefreshed?.Invoke(this, EventArgs.Empty);
-        }
-
-        public double AmbientLevelFromPreviewMode(LightingPreviewMode lightingPreviewMode, int level)
-        {
-            return lightingPreviewMode switch
-            { 
-                LightingPreviewMode.NoLighting => 1.0,
-                LightingPreviewMode.Normal => Ambient,
-                LightingPreviewMode.IonStorm => IonAmbient,
-                LightingPreviewMode.Dominator => DominatorAmbient.HasValue ? DominatorAmbient.Value : 1.0,
-                _ => 1.0
-            };
         }
 
         public MapColor MapColorFromPreviewMode(LightingPreviewMode lightingPreviewMode)
@@ -155,22 +142,70 @@ namespace TSMapEditor.Models
             return lightingPreviewMode switch
             {
                 LightingPreviewMode.NoLighting => new MapColor(1.0, 1.0, 1.0),
-                LightingPreviewMode.Normal => RefreshLightingColor(Red, Green, Blue, Ambient),
-                LightingPreviewMode.IonStorm => RefreshLightingColor(IonRed, IonGreen, IonBlue, IonAmbient),
-                LightingPreviewMode.Dominator => RefreshLightingColor(DominatorRed, DominatorGreen, DominatorBlue, DominatorAmbient),
+                LightingPreviewMode.Normal => GetLightingColor(Red, Green, Blue, Ambient),
+                LightingPreviewMode.IonStorm => GetLightingColor(IonRed, IonGreen, IonBlue, IonAmbient),
+                LightingPreviewMode.Dominator => GetLightingColor(DominatorRed, DominatorGreen, DominatorBlue, DominatorAmbient),
                 _ => new MapColor(1.0, 1.0, 1.0)
             };
         }
 
-        private static MapColor RefreshLightingColor(double? red, double? green, double? blue, double? ambient)
+        public double GetAmbientComponent(LightingPreviewMode lightingPreviewMode)
+        {
+            return lightingPreviewMode switch
+            {
+                LightingPreviewMode.NoLighting => 1.0,
+                LightingPreviewMode.Normal => Ambient,
+                LightingPreviewMode.IonStorm => IonAmbient,
+                LightingPreviewMode.Dominator => DominatorAmbient.GetValueOrDefault(1.0),
+                _ => 1.0
+            };
+        }
+
+        public double GetRedComponent(LightingPreviewMode lightingPreviewMode)
+        {
+            return lightingPreviewMode switch
+            {
+                LightingPreviewMode.NoLighting => 1.0,
+                LightingPreviewMode.Normal => Red,
+                LightingPreviewMode.IonStorm => IonRed,
+                LightingPreviewMode.Dominator => DominatorRed.GetValueOrDefault(1.0),
+                _ => 1.0
+            };
+        }
+
+        public double GetGreenComponent(LightingPreviewMode lightingPreviewMode)
+        {
+            return lightingPreviewMode switch
+            {
+                LightingPreviewMode.NoLighting => 1.0,
+                LightingPreviewMode.Normal => Green,
+                LightingPreviewMode.IonStorm => IonGreen,
+                LightingPreviewMode.Dominator => DominatorGreen.GetValueOrDefault(1.0),
+                _ => 1.0
+            };
+        }
+
+        public double GetBlueComponent(LightingPreviewMode lightingPreviewMode)
+        {
+            return lightingPreviewMode switch
+            {
+                LightingPreviewMode.NoLighting => 1.0,
+                LightingPreviewMode.Normal => Blue,
+                LightingPreviewMode.IonStorm => IonBlue,
+                LightingPreviewMode.Dominator => DominatorBlue.GetValueOrDefault(1.0),
+                _ => 1.0
+            };
+        }
+
+        private static MapColor GetLightingColor(double? red, double? green, double? blue, double? ambient)
         {
             if (red == null || green == null || blue == null || ambient == null)
                 return MapColor.White;
 
-            return RefreshLightingColor(red.Value, green.Value, blue.Value, ambient.Value);
+            return GetLightingColor(red.Value, green.Value, blue.Value, ambient.Value);
         }
 
-        private static MapColor RefreshLightingColor(double red, double green, double blue, double ambient)
+        private static MapColor GetLightingColor(double red, double green, double blue, double ambient)
         {
             const double TotalAmbientCap = 2.0;
 

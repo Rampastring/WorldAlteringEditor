@@ -1329,18 +1329,17 @@ namespace TSMapEditor.Models
 
             var lightSources = Structures.FindAll(s => s.ObjectType.LightVisibility > 0 && s.ObjectType.LightIntensity != 0);
 
-            MapColor globalLightingColor = Lighting.MapColorFromPreviewMode(lightingPreviewMode);
+            double globalAmbient = Lighting.GetAmbientComponent(lightingPreviewMode);
+            double globalRed = Lighting.GetRedComponent(lightingPreviewMode);
+            double globalGreen = Lighting.GetGreenComponent(lightingPreviewMode);
+            double globalBlue = Lighting.GetBlueComponent(lightingPreviewMode);
 
             DoForAllValidTiles(cell =>
             {
-                double currentR = globalLightingColor.R;
-                double currentG = globalLightingColor.G;
-                double currentB = globalLightingColor.B;
-
-                // Apply Level
-                currentR += Lighting.Level * cell.Level;
-                currentG += Lighting.Level * cell.Level;
-                currentB += Lighting.Level * cell.Level;
+                double cellAmbient = globalAmbient;
+                double cellR = globalRed;
+                double cellG = globalGreen;
+                double cellB = globalBlue;
 
                 Point2D cellCoords = cell.CoordsToPoint();
 
@@ -1360,40 +1359,47 @@ namespace TSMapEditor.Models
 
                     double intensity = distanceRatio * building.ObjectType.LightIntensity;
 
-                    // Intensity applies equally to all components and is additive in contrast to ambient.
+                    // Intensity modifies the cell ambient value.
                     // For example, if Ambient=0.5 and LightIntensity=1.0, in a cell that is fully
                     // lit by the light post, the overall light level becomes 0.5 + 1.0 = 1.5
 
                     // However, intensity is relative to global lighting color!
-                    double redStrength = intensity * globalLightingColor.R;
-                    double greenStrength = intensity * globalLightingColor.G;
-                    double blueStrength = intensity * globalLightingColor.B;
+                    cellAmbient += building.ObjectType.LightIntensity * distanceRatio;
 
-                    // Apply tint, it is additive.
-                    // Tint does NOT recolor intensity, but instead is additional
-                    // per-component light applied on top of intensity!
-                    redStrength += building.ObjectType.LightRedTint * distanceRatio;
-                    greenStrength += building.ObjectType.LightGreenTint * distanceRatio;
-                    blueStrength += building.ObjectType.LightBlueTint * distanceRatio;
+                    // Apply tint. Tint does NOT depend on LightIntensity, but is independent of it
+                    // (as long as LightIntensity != 0).
+                    // Strength of tint depends on strength of global tint. For example, adding local red of 1.0
+                    // to global red of 1.5 leads to a much smaller change than if the local red was added to global red of 0.5.
+                    double redStrength = (building.ObjectType.LightRedTint / globalRed) * distanceRatio;
+                    double greenStrength = (building.ObjectType.LightGreenTint / globalGreen) * distanceRatio;
+                    double blueStrength = (building.ObjectType.LightBlueTint / globalBlue) * distanceRatio;
 
-                    currentR += redStrength;
-                    currentG += greenStrength;
-                    currentB += blueStrength;
+                    cellR += redStrength;
+                    cellG += greenStrength;
+                    cellB += blueStrength;
                 }
+
+                // Apply Level
+                cellAmbient += Lighting.Level * cell.Level;
 
                 const double LightingComponentMax = 2.0;
 
+                // Apply Ambient to all components
+                cellR *= cellAmbient;
+                cellG *= cellAmbient;
+                cellB *= cellAmbient;
+
                 // In case the components exceed 2.0, they are all scaled down to fit within 0.0 to 2.0
-                double highestComponentValue = Math.Max(currentR, Math.Max(currentG, currentB));
+                double highestComponentValue = Math.Max(cellR, Math.Max(cellG, cellB));
                 if (highestComponentValue > LightingComponentMax)
                 {
-                    double ratio = LightingComponentMax / highestComponentValue;
-                    currentR *= ratio;
-                    currentG *= ratio;
-                    currentB *= ratio;
+                    double scale = LightingComponentMax / highestComponentValue;
+                    cellR *= scale;
+                    cellG *= scale;
+                    cellB *= scale;
                 }
 
-                cell.CellLighting = new MapColor(currentR, currentG, currentB);
+                cell.CellLighting = new MapColor(cellR, cellG, cellB);
             });
         }
 
