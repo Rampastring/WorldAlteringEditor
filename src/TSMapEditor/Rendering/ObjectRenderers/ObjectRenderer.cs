@@ -284,7 +284,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             Vector4 lighting = Vector4.One;
             var mapCell = Map.GetTile(gameObject.Position);
 
-            if (mapCell != null)
+            if (RenderDependencies.EditorState.IsLighting && mapCell != null)
             {
                 if (affectedByLighting && image.SubjectToLighting)
                 {
@@ -333,9 +333,9 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             Vector4 lighting = Vector4.One;
             var mapCell = Map.GetTile(gameObject.Position);
 
-            if (mapCell != null)
+            if (RenderDependencies.EditorState.IsLighting && mapCell != null)
             {
-                if (affectedByLighting)
+                if (affectedByLighting && Constants.VoxelsAffectedByLighting)
                 {
                     lighting = mapCell.CellLighting.ToXNAVector4(extraLight);
                 }
