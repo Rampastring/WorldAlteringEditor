@@ -10,6 +10,8 @@ using TSMapEditor.UI.Controls;
 using TSMapEditor.UI.CursorActions;
 using TSMapEditor.UI.Windows;
 using TSMapEditor.Models.Enums;
+using Rampastring.Tools;
+
 
 
 #if WINDOWS
@@ -242,7 +244,32 @@ namespace TSMapEditor.UI.TopBar
                 return;
             }
 
-            map.Save();
+            TrySaveMap();
+        }
+
+        private void TrySaveMap()
+        {
+            try
+            {
+                map.Save();
+            }
+            catch (Exception ex)
+            {
+                if (ex is UnauthorizedAccessException || ex is IOException)
+                {
+                    Logger.Log("Failed to save the map file. Returned error message: " + ex.Message);
+
+                    EditorMessageBox.Show(WindowManager, "Failed to save map",
+                        "Failed to write the map file. Please make sure that WAE has write access to the path." + Environment.NewLine + Environment.NewLine +
+                        "A common source of this error is trying to save the map to Program Files or another" + Environment.NewLine +
+                        "write-protected directory without running WAE with administrative rights." + Environment.NewLine + Environment.NewLine +
+                        "Returned error was: " + ex.Message, Windows.MessageBoxButtons.OK);
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
 
         private void ExtractMegamap()
@@ -362,7 +389,7 @@ namespace TSMapEditor.UI.TopBar
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     map.LoadedINI.FileName = saveFileDialog.FileName;
-                    map.Save();
+                    TrySaveMap();
 
                     if (UserSettings.Instance.LastScenarioPath.GetValue() != saveFileDialog.FileName)
                     {
