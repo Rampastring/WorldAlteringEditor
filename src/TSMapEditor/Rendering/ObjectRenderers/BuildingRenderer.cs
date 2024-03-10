@@ -93,7 +93,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         {
             DrawFoundationLines(gameObject);
 
-            bool affectedByLighting = RenderDependencies.EditorState.IsLighting;
+            bool affectedByLighting = RenderDependencies.EditorState.IsLighting && (drawParams.ShapeImage != null && drawParams.ShapeImage.SubjectToLighting);
 
             // Bib is on the ground, gets grawn first
             var bibGraphics = RenderDependencies.TheaterGraphics.BuildingBibTextures[gameObject.ObjectType.Index];
@@ -121,7 +121,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
 
             int frameCount = drawParams.ShapeImage == null ? 0 : drawParams.ShapeImage.GetFrameCount();
-            bool affectedByAmbient = drawParams.ShapeImage != null && !drawParams.ShapeImage.SubjectToLighting;
+            bool affectedByAmbient = !affectedByLighting;
 
             DrawShapeImage(gameObject, drawParams, drawParams.ShapeImage,
                 gameObject.GetFrameIndex(frameCount),

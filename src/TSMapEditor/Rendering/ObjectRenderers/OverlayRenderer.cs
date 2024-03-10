@@ -52,7 +52,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 }
             }
 
-            bool affectedByLighting = RenderDependencies.EditorState.IsLighting;
+            bool affectedByLighting = RenderDependencies.EditorState.IsLighting && drawParams.ShapeImage.SubjectToLighting;
             bool affectedByAmbient = Constants.TheaterPaletteForTiberium && !drawParams.ShapeImage.SubjectToLighting;
 
             DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
