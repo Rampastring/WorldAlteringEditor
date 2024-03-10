@@ -390,9 +390,15 @@ namespace TSMapEditor.Models
                 existing = new InfantrySequence(infantrySequenceName);
                 var section = artIni.GetSection(infantrySequenceName);
                 if (section == null)
-                    throw new KeyNotFoundException("Infantry sequence not found: " + infantrySequenceName);
+                {
+                    // Can't fast-fail, vanilla TS has a missing sequence...
+                    Logger.Log("WARNING: Section for infantry sequence not found: " + infantrySequenceName);
+                }
+                else
+                {
+                    existing.ParseFromINISection(section);
+                }
 
-                existing.ParseFromINISection(section);
                 InfantrySequences.Add(existing);
             }
 
