@@ -54,8 +54,8 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 }
             }
 
-            bool affectedByLighting = RenderDependencies.EditorState.IsLighting && drawParams.ShapeImage.SubjectToLighting;
-            bool affectedByAmbient = Constants.TheaterPaletteForTiberium && !drawParams.ShapeImage.SubjectToLighting;
+            bool affectedByLighting = drawParams.ShapeImage.SubjectToLighting;
+            bool affectedByAmbient = !gameObject.OverlayType.Tiberium && !affectedByLighting;
 
             DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
             DrawShapeImage(gameObject, drawParams, drawParams.ShapeImage, gameObject.FrameIndex, Color.White,

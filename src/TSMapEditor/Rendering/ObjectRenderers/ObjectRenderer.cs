@@ -289,14 +289,14 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 if (affectedByLighting && image.SubjectToLighting)
                 {
                     lighting = mapCell.CellLighting.ToXNAVector4(extraLight);
+                    remapColor = ScaleColorToAmbient(remapColor, mapCell.CellLighting);
                 }
                 else if (affectedByAmbient)
                 {
                     lighting = mapCell.CellLighting.ToXNAVector4Ambient(extraLight);
+                    remapColor = ScaleColorToAmbient(remapColor, mapCell.CellLighting);
                 }
             }
-
-            remapColor = ScaleColorToAmbient(remapColor, mapCell.CellLighting);
 
             RenderFrame(frame, remapFrame, color, drawRemap, remapColor, isShadow,
                 drawingBounds.X, drawingBounds.Y, heightOffset, image.GetPaletteTexture(), lighting);
