@@ -149,13 +149,18 @@ namespace TSMapEditor.UI
 
             if (!string.IsNullOrWhiteSpace(tbGameDirectory.Text))
             {
-                if (Path.IsPathRooted(tbMapPath.Text))
+                directoryPath = tbGameDirectory.Text;
+
+                if (!string.IsNullOrWhiteSpace(tbMapPath.Text))
                 {
-                    directoryPath = Path.GetDirectoryName(tbMapPath.Text);
-                }
-                else
-                {
-                    directoryPath = Path.GetDirectoryName(tbGameDirectory.Text + tbMapPath.Text);
+                    if (Path.IsPathRooted(tbMapPath.Text))
+                    {
+                        directoryPath = Path.GetDirectoryName(tbMapPath.Text);
+                    }
+                    else
+                    {
+                        directoryPath = Path.GetDirectoryName(tbGameDirectory.Text + tbMapPath.Text);
+                    }
                 }
 
                 directoryPath = directoryPath.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
@@ -224,7 +229,10 @@ namespace TSMapEditor.UI
                 }
                 else
                 {
-                    tbGameDirectory.Text = valueAsString;
+                    if (File.Exists(valueAsString))
+                        tbGameDirectory.Text = Path.GetDirectoryName(valueAsString);
+                    else
+                        tbGameDirectory.Text = valueAsString;
                 }
 
                 key.Close();
