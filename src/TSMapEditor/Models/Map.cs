@@ -1327,12 +1327,18 @@ namespace TSMapEditor.Models
 
             const double LeptonsPerCell = 256.0;
 
-            var lightSources = Structures.FindAll(s => s.ObjectType.LightVisibility > 0 && s.ObjectType.LightIntensity != 0);
+            var lightSources = Structures.FindAll(s => s.ObjectType.LightVisibility > 0 && s.ObjectType.LightIntensity != 0 && s.Powered);
 
             double globalAmbient = Lighting.GetAmbientComponent(lightingPreviewMode);
+            double globalLevel = Lighting.GetLevelComponent(lightingPreviewMode);
+            double globalGround = Lighting.GetGroundComponent(lightingPreviewMode);
             double globalRed = Lighting.GetRedComponent(lightingPreviewMode);
             double globalGreen = Lighting.GetGreenComponent(lightingPreviewMode);
             double globalBlue = Lighting.GetBlueComponent(lightingPreviewMode);
+
+            double redDivisor = globalRed >= 1.0 ? globalRed : 1.0;
+            double greenDivisor = globalGreen >= 1.0 ? globalGreen : 1.0;
+            double blueDivisor = globalBlue >= 1.0 ? globalBlue : 1.0;
 
             DoForAllValidTiles(cell =>
             {
@@ -1341,13 +1347,17 @@ namespace TSMapEditor.Models
                 double cellG = globalGreen;
                 double cellB = globalBlue;
 
-                Point2D cellCoords = cell.CoordsToPoint();
+                // Apply Ground
+                cellAmbient *= (1.0 - globalGround);
+
+                // Apply Level
+                cellAmbient += globalLevel * cell.Level;
 
                 // Check all the light sources and how they affect this light
                 foreach (var building in lightSources)
                 {
-                    int xDifference = cellCoords.X - building.Position.X;
-                    int yDifference = cellCoords.Y - building.Position.Y;
+                    int xDifference = cell.X - building.Position.X;
+                    int yDifference = cell.Y - building.Position.Y;
 
                     double distanceInCells = Math.Sqrt(xDifference * xDifference + yDifference * yDifference);
                     double distanceInLeptons = distanceInCells * LeptonsPerCell;
@@ -1357,30 +1367,23 @@ namespace TSMapEditor.Models
 
                     double distanceRatio = 1.0 - (distanceInLeptons / building.ObjectType.LightVisibility);
 
-                    double intensity = distanceRatio * building.ObjectType.LightIntensity;
-
                     // Intensity modifies the cell ambient value.
                     // For example, if Ambient=0.5 and LightIntensity=1.0, in a cell that is fully
-                    // lit by the light post, the overall light level becomes 0.5 + 1.0 = 1.5
-
-                    // However, intensity is relative to global lighting color!
+                    // lit by the light post, the overall ambient level becomes 0.5 + 1.0 = 1.5
                     cellAmbient += building.ObjectType.LightIntensity * distanceRatio;
 
                     // Apply tint. Tint does NOT depend on LightIntensity, but is independent of it
                     // (as long as LightIntensity != 0).
                     // Strength of tint depends on strength of global tint. For example, adding local red of 1.0
                     // to global red of 1.5 leads to a much smaller change than if the local red was added to global red of 0.5.
-                    double redStrength = (building.ObjectType.LightRedTint / globalRed) * distanceRatio;
-                    double greenStrength = (building.ObjectType.LightGreenTint / globalGreen) * distanceRatio;
-                    double blueStrength = (building.ObjectType.LightBlueTint / globalBlue) * distanceRatio;
+                    double redStrength = (building.ObjectType.LightRedTint / redDivisor) * distanceRatio;
+                    double greenStrength = (building.ObjectType.LightGreenTint / greenDivisor) * distanceRatio;
+                    double blueStrength = (building.ObjectType.LightBlueTint / blueDivisor) * distanceRatio;
 
                     cellR += redStrength;
                     cellG += greenStrength;
                     cellB += blueStrength;
                 }
-
-                // Apply Level
-                cellAmbient += Lighting.Level * cell.Level;
 
                 const double LightingComponentMax = 2.0;
 

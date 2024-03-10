@@ -161,6 +161,30 @@ namespace TSMapEditor.Models
             };
         }
 
+        public double GetLevelComponent(LightingPreviewMode lightingPreviewMode)
+        {
+            return lightingPreviewMode switch
+            {
+                LightingPreviewMode.NoLighting => 0.0,
+                LightingPreviewMode.Normal => Level,
+                LightingPreviewMode.IonStorm => IonLevel,
+                LightingPreviewMode.Dominator => DominatorLevel.GetValueOrDefault(0.0),
+                _ => 0.0
+            };
+        }
+
+        public double GetGroundComponent(LightingPreviewMode lightingPreviewMode)
+        {
+            return lightingPreviewMode switch
+            {
+                LightingPreviewMode.NoLighting => 0.0,
+                LightingPreviewMode.Normal => Ground,
+                LightingPreviewMode.IonStorm => IonGround,
+                LightingPreviewMode.Dominator => DominatorGround.GetValueOrDefault(0.0),
+                _ => 0.0
+            };
+        }
+
         public double GetRedComponent(LightingPreviewMode lightingPreviewMode)
         {
             return lightingPreviewMode switch
