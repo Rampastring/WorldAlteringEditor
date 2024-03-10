@@ -110,7 +110,9 @@ namespace TSMapEditor.UI.Controls
             var files = Directory.GetFiles(DirectoryPath);
             foreach (string file in files)
             {
-                if (!Path.GetExtension(file).Equals(".map", StringComparison.InvariantCultureIgnoreCase))
+                if (!Path.GetExtension(file).Equals(".map", StringComparison.InvariantCultureIgnoreCase) &&
+                    !Path.GetExtension(file).Equals(".mpr", StringComparison.InvariantCultureIgnoreCase) &&
+                    !Path.GetExtension(file).Equals(".yrm", StringComparison.InvariantCultureIgnoreCase))
                     continue;
 
                 AddItem(Path.GetFileName(file));
