@@ -9,6 +9,8 @@ using TSMapEditor.Settings;
 using TSMapEditor.UI.Controls;
 using TSMapEditor.UI.CursorActions;
 using TSMapEditor.UI.Windows;
+using TSMapEditor.Models.Enums;
+
 
 #if WINDOWS
 using System.Windows.Forms;
@@ -147,6 +149,18 @@ namespace TSMapEditor.UI.TopBar
             viewContextMenu.AddItem(" ", null, () => false, null, null);
             viewContextMenu.AddItem("Find Waypoint...", () => windowController.FindWaypointWindow.Open());
             viewContextMenu.AddItem("Center of Map", () => mapView.Camera.CenterOnMapCenterCell());
+            viewContextMenu.AddItem(" ", null, () => false, null, null);
+            viewContextMenu.AddItem("No Lighting", () => mapView.EditorState.LightingPreviewState = LightingPreviewMode.NoLighting);
+            viewContextMenu.AddItem("Normal Lighting", () => mapView.EditorState.LightingPreviewState = LightingPreviewMode.Normal);
+            if (Constants.UseCountries)
+            {
+                viewContextMenu.AddItem("Lightning Storm Lighting", () => mapView.EditorState.LightingPreviewState = LightingPreviewMode.IonStorm);
+                viewContextMenu.AddItem("Dominator Lighting", () => mapView.EditorState.LightingPreviewState = LightingPreviewMode.Dominator);
+            }
+            else
+            {
+                viewContextMenu.AddItem("Ion Storm Lighting", () => mapView.EditorState.LightingPreviewState = LightingPreviewMode.IonStorm);
+            }
             viewContextMenu.AddItem(" ", null, () => false, null, null);
             viewContextMenu.AddItem("Toggle Fullscreen Mode", () => KeyboardCommands.Instance.ToggleFullscreen.DoTrigger());
 

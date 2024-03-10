@@ -268,7 +268,8 @@ namespace TSMapEditor.Rendering
             EditorState.DrawMapWideOverlayChanged += (s, e) => MapWideOverlay.Enabled = EditorState.DrawMapWideOverlay;
             EditorState.MarbleMadnessChanged += (s, e) => InvalidateMapForMinimap();
             EditorState.Is2DModeChanged += (s, e) => InvalidateMapForMinimap();
-            EditorState.IsLightingChanged += (s, e) => IsLightingChanged();
+            EditorState.IsLightingChanged += (s, e) => LightingChanged();
+            EditorState.LightingPreviewStateChanged += (s, e) => LightingChanged();
             EditorState.RenderedObjectsChanged += (s, e) => InvalidateMapForMinimap();
 
             refreshStopwatch = new Stopwatch();
@@ -296,6 +297,8 @@ namespace TSMapEditor.Rendering
             windowController.Initialized -= PostWindowControllerInit;
             windowController.RunScriptWindow.ScriptRun += (s, e) => InvalidateMap();
             windowController.StructureOptionsWindow.EnabledChanged += (s, e) => { if (!((StructureOptionsWindow)s).Enabled) InvalidateMap(); };
+
+            Map_LightingColorsRefreshed();
         }
 
         public void Clear()
@@ -376,12 +379,12 @@ namespace TSMapEditor.Rendering
         private void Map_CellLightingModified(object sender, EventArgs e)
         {
             if (EditorState.IsLighting && EditorState.LightingPreviewState != LightingPreviewMode.NoLighting)
-                Map.RefreshCellLighting(EditorState.LightingPreviewState);
+                Map.RefreshCellLighting(EditorState.IsLighting ? EditorState.LightingPreviewState : LightingPreviewMode.NoLighting);
         }
 
-        private void IsLightingChanged()
+        private void LightingChanged()
         {
-            Map.RefreshCellLighting(EditorState.LightingPreviewState);
+            Map.RefreshCellLighting(EditorState.IsLighting ? EditorState.LightingPreviewState : LightingPreviewMode.NoLighting);
 
             InvalidateMapForMinimap();
             if (Constants.VoxelsAffectedByLighting)
@@ -398,15 +401,10 @@ namespace TSMapEditor.Rendering
                 _ => null,
             };
 
-            Map.RefreshCellLighting(EditorState.LightingPreviewState);
+            if (color != null)
+                TheaterGraphics.ApplyLightingToPalettes((MapColor)color);
 
-            if (color == null)
-                return;
-
-            TheaterGraphics.ApplyLightingToPalettes((MapColor)color);
-            InvalidateMapForMinimap();
-            if (Constants.VoxelsAffectedByLighting)
-                TheaterGraphics.InvalidateVoxelCache();
+            LightingChanged();
         }
 
         private void ClearRenderTargets()

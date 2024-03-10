@@ -25,6 +25,7 @@ namespace TSMapEditor.Rendering
         public event EventHandler MarbleMadnessChanged;
         public event EventHandler Is2DModeChanged;
         public event EventHandler RenderedObjectsChanged;
+        public event EventHandler LightingPreviewStateChanged;
         public event EventHandler IsLightingChanged;
 
         private CursorAction _cursorAction;
@@ -201,7 +202,7 @@ namespace TSMapEditor.Rendering
             }
         }
 
-        private bool _isLighting = false;
+        private bool _isLighting = true;
         public bool IsLighting
         {
             get => _isLighting;
@@ -216,7 +217,7 @@ namespace TSMapEditor.Rendering
                 IsLightingChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        private LightingPreviewMode _lightingPreviewState = LightingPreviewMode.NoLighting;
+        private LightingPreviewMode _lightingPreviewState = LightingPreviewMode.Normal;
         public LightingPreviewMode LightingPreviewState
         {
             get => _lightingPreviewState;
@@ -230,6 +231,7 @@ namespace TSMapEditor.Rendering
 
                 _lightingPreviewState = value;
                 RefreshLightingEnabledState();
+                LightingPreviewStateChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
