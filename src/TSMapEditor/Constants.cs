@@ -27,6 +27,7 @@ namespace TSMapEditor
 
         public static string ExpectedClientExecutableName = "DTA.exe";
         public static string GameRegistryInstallPath = "SOFTWARE\\DawnOfTheTiberiumAge";
+        public static bool InstallPathAtHKLM = false;
         public static string OpenFileDialogFilter = "TS maps|*.map|All files|*.*";
 
         public static bool EnableIniInclude = false;
@@ -128,6 +129,7 @@ namespace TSMapEditor
 
             ExpectedClientExecutableName = constantsIni.GetStringValue(ConstantsSectionName, nameof(ExpectedClientExecutableName), ExpectedClientExecutableName);
             GameRegistryInstallPath = constantsIni.GetStringValue(ConstantsSectionName, nameof(GameRegistryInstallPath), GameRegistryInstallPath);
+            InstallPathAtHKLM = constantsIni.GetBooleanValue(ConstantsSectionName, nameof(InstallPathAtHKLM), InstallPathAtHKLM);
             OpenFileDialogFilter = constantsIni.GetStringValue(ConstantsSectionName, nameof(OpenFileDialogFilter), OpenFileDialogFilter);
 
             EnableIniInclude = constantsIni.GetBooleanValue(ConstantsSectionName, nameof(EnableIniInclude), EnableIniInclude);

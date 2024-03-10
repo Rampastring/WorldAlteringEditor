@@ -207,7 +207,16 @@ namespace TSMapEditor.UI
             try
             {
                 RegistryKey key;
-                key = Registry.CurrentUser.OpenSubKey(Constants.GameRegistryInstallPath);
+
+                if (Constants.InstallPathAtHKLM)
+                {
+                    key = Registry.LocalMachine.OpenSubKey(Constants.GameRegistryInstallPath);
+                }
+                else
+                {
+                    key = Registry.CurrentUser.OpenSubKey(Constants.GameRegistryInstallPath);
+                }
+
                 object value = key.GetValue("InstallPath", string.Empty);
                 if (!(value is string valueAsString))
                 {
