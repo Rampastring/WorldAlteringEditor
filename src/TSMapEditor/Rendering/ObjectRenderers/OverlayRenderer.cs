@@ -40,12 +40,14 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                         if (bridge.EastWest.Pieces.Contains(overlayIndex))
                         {
                             drawPoint.Y -= Constants.CellHeight + 1;
+                            heightOffset += Constants.CellHeight + 1;
                             break;
                         }
 
                         if (bridge.NorthSouth.Pieces.Contains(overlayIndex))
                         {
                             drawPoint.Y -= Constants.CellHeight * 2 + 1;
+                            heightOffset += Constants.CellHeight * 2 + 1;
                             break;
                         }
                     }
