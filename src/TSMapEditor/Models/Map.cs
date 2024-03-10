@@ -361,7 +361,8 @@ namespace TSMapEditor.Models
             MapWriter.WriteInfantry(this, LoadedINI);
             MapWriter.WriteBuildings(this, LoadedINI);
 
-            MapWriter.WriteDummyPreview(this, LoadedINI);
+            if (Constants.DefaultPreview)
+                MapWriter.WriteDummyPreview(this, LoadedINI);
 
             string savePath = filePath ?? LoadedINI.FileName;
 

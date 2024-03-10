@@ -615,10 +615,7 @@ namespace TSMapEditor.Initialization
 
         public static void WriteDummyPreview(IMap map, IniFile mapIni)
         {
-            if (!Constants.UseCountries)
-                return;
-
-            // RA2/YR will crash if the map has no preview.
+            // Vanilla (Steam) TS as well as RA2/YR will crash if the map has no preview.
             // And the preview sections need to be the first sections in the INI file.
             // We write a dummy preview to the file if necessary.
             if (!mapIni.SectionExists("Preview") || !mapIni.SectionExists("PreviewPack"))
@@ -660,12 +657,9 @@ namespace TSMapEditor.Initialization
             mapIni.AddSection(section);
             WriteBase64ToSection(GenerateLZOBlocksFromData(buffer), section);
 
-            if (Constants.UseCountries)
-            {
-                // RA2/YR expects these sections to be the first in the map file
-                mapIni.MoveSectionToFirst("PreviewPack");
-                mapIni.MoveSectionToFirst("Preview");
-            }
+            // Original games (TS and YR) expect these sections to be the first in the map file
+            mapIni.MoveSectionToFirst("PreviewPack");
+            mapIni.MoveSectionToFirst("Preview");
         }
 
         /// <summary>
