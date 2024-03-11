@@ -98,8 +98,29 @@ namespace TSMapEditor
             }
         }
 
+        public static int LandTypeToInt(LandType landType)
+        {
+            return landType switch 
+            { 
+                LandType.Clear => 0x0,
+                LandType.Ice => 0x1,
+                LandType.Tunnel => 0x5,
+                LandType.Railroad => 0x6,
+                LandType.Rock => 0x7,
+                LandType.Water => 0x9,
+                LandType.Beach => 0xA,
+                LandType.Road => 0xB,
+                LandType.Rough => 0xE,
+                LandType.Tiberium => 0x0, // ?? can't find any sources on this
+                LandType.Weeds => 0x0, // ?? can't find any sources on this
+                _ => 0x0
+            };
+        }
+
         public static bool IsLandTypeImpassable(int landType, bool considerLandUnitsOnly = false)
         {
+            // TODO make this dependent on SpeedType and Rules.ini values
+
             switch (landType)
             {
                 case 0x1:
@@ -115,6 +136,24 @@ namespace TSMapEditor
                     return true;
                 default:
                     return false;
+            }
+        }
+
+        public static bool IsLandTypeImpassableForNavalUnits(int landType)
+        {
+            // TODO make this dependent on SpeedType and Rules.ini values
+
+            switch (landType)
+            {
+                case 0x1:
+                case 0x2:
+                case 0x3:
+                case 0x4:
+                case 0x9:
+                case 0xA:
+                    return false;
+                default:
+                    return true;
             }
         }
 

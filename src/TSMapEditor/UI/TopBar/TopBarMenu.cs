@@ -45,6 +45,7 @@ namespace TSMapEditor.UI.TopBar
         private PlaceTubeCursorAction placeTubeCursorAction;
         private ToggleIceGrowthCursorAction toggleIceGrowthCursorAction;
         private CheckDistanceCursorAction checkDistanceCursorAction;
+        private CheckDistancePathfindingCursorAction checkDistancePathfindingCursorAction;
         private CalculateTiberiumValueCursorAction calculateTiberiumValueCursorAction;
         private ManageBaseNodesCursorAction manageBaseNodesCursorAction;
         private PlaceVeinholeMonsterCursorAction placeVeinholeMonsterCursorAction;
@@ -59,6 +60,7 @@ namespace TSMapEditor.UI.TopBar
             placeTubeCursorAction = new PlaceTubeCursorAction(mapView);
             toggleIceGrowthCursorAction = new ToggleIceGrowthCursorAction(mapView);
             checkDistanceCursorAction = new CheckDistanceCursorAction(mapView);
+            checkDistancePathfindingCursorAction = new CheckDistancePathfindingCursorAction(mapView);
             calculateTiberiumValueCursorAction = new CalculateTiberiumValueCursorAction(mapView);
             manageBaseNodesCursorAction = new ManageBaseNodesCursorAction(mapView);
             placeVeinholeMonsterCursorAction = new PlaceVeinholeMonsterCursorAction(mapView);
@@ -191,6 +193,7 @@ namespace TSMapEditor.UI.TopBar
             toolsContextMenu.AddItem("Smoothen Ice", SmoothenIce, null, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("Check Distance...", () => mapView.EditorState.CursorAction = checkDistanceCursorAction, null, null, null);
+            toolsContextMenu.AddItem("Check Distance (Pathfinding)...", () => mapView.EditorState.CursorAction = checkDistancePathfindingCursorAction);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("Calculate Credits...", () => mapView.EditorState.CursorAction = calculateTiberiumValueCursorAction, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);

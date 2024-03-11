@@ -13,6 +13,7 @@ namespace TSMapEditor.Models
         public int Upgrades { get; set; } = 1;
         public string PowersUpBuilding { get; set; }
         public bool HasSpotlight { get; set; }
+        public bool FirestormWall { get; set; }
         public bool Turret { get; set; }
         public string TurretAnim { get; set; }
         public bool TurretAnimIsVoxel { get; set; }

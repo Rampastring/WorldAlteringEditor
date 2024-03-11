@@ -109,6 +109,15 @@ namespace TSMapEditor.GameMath
             return (float)Math.Atan2(Y, X);
         }
 
+        /// <summary>
+        /// Calculates and returns this point's tile-based distance to another point.
+        /// </summary>
+        /// <param name="other">The other point.</param>
+        public int DistanceTo(Point2D other)
+        {
+            return Math.Max(Math.Abs(X - other.X), Math.Abs(Y - other.Y));
+        }
+
         public Point2D ScaleBy(double scale) => new Point2D((int)(X * scale), (int)(Y * scale));
 
         public Point2D ScaleBy(float scale) => new Point2D((int)(X * scale), (int)(Y * scale));
