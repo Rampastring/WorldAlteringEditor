@@ -60,9 +60,11 @@ namespace TSMapEditor.UI.CursorActions
             Func<Point2D, Map, Point2D> getCellCenterPoint = Is2DMode ? CellMath.CellCenterPointFromCellCoords : CellMath.CellCenterPointFromCellCoords_3D;
 
             Point2D sourceCenterPoint = getCellCenterPoint(source.Value, CursorActionTarget.Map) - cameraTopLeftPoint;
+            sourceCenterPoint = sourceCenterPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
             Renderer.FillRectangle(GetDrawRectangleForMarker(sourceCenterPoint), sourceColor);
 
             Point2D destinationCenterPoint = getCellCenterPoint(cellCoords, CursorActionTarget.Map) - cameraTopLeftPoint;
+            destinationCenterPoint = destinationCenterPoint.ScaleBy(CursorActionTarget.Camera.ZoomLevel);
             Renderer.FillRectangle(GetDrawRectangleForMarker(destinationCenterPoint), Color.Red);
 
             pathCellCoords.Clear();
