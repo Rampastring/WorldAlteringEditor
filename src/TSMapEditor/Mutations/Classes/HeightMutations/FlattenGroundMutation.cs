@@ -149,9 +149,8 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
         };
 
         // Pre-ramp-placement height fix checks
-        private static readonly TransitionRampInfo[] heightFixers = new[]
+        private static readonly TransitionRampInfo[] heightFixers = new TransitionRampInfo[]
         {
-            new TransitionRampInfo(RampType.None, new() { HCT.Higher, HCT.Higher, HCT.Higher, HCT.Higher, HCT.Equal, HCT.Equal, HCT.Equal, HCT.Equal }, 1),
         };
 
         protected override TransitionRampInfo[] GetTransitionRampInfos() => transitionRampInfos;
