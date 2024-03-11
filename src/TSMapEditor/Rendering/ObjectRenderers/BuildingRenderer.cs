@@ -85,7 +85,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
         private void DrawBibGraphics(Structure gameObject, ShapeImage bibGraphics, int heightOffset, Point2D drawPoint, in CommonDrawParams drawParams, bool affectedByLighting)
         {
-            DrawShapeImage(gameObject, drawParams, bibGraphics, 0, Color.White, false, true, gameObject.GetRemapColor(),
+            DrawShapeImage(gameObject, bibGraphics, 0, Color.White, false, true, gameObject.GetRemapColor(),
                 affectedByLighting, !drawParams.ShapeImage.SubjectToLighting, drawPoint, heightOffset);
         }
 
@@ -123,7 +123,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             int frameCount = drawParams.ShapeImage == null ? 0 : drawParams.ShapeImage.GetFrameCount();
             bool affectedByAmbient = !affectedByLighting;
 
-            DrawShapeImage(gameObject, drawParams, drawParams.ShapeImage,
+            DrawShapeImage(gameObject, drawParams.ShapeImage,
                 gameObject.GetFrameIndex(frameCount),
                 nonRemapColor, false, true, gameObject.GetRemapColor(),
                 affectedByLighting, affectedByAmbient, drawPoint, heightOffset);
@@ -156,21 +156,21 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
                 if (gameObject.Facing is > facingStartDrawAbove and <= facingEndDrawAbove)
                 {
-                    DrawVoxelModel(gameObject, drawParams, drawParams.TurretVoxel,
+                    DrawVoxelModel(gameObject, drawParams.TurretVoxel,
                         gameObject.Facing, RampType.None, nonRemapColor, true, gameObject.GetRemapColor(),
                         affectedByLighting, turretDrawPoint, heightOffset);
 
-                    DrawVoxelModel(gameObject, drawParams, drawParams.BarrelVoxel,
+                    DrawVoxelModel(gameObject, drawParams.BarrelVoxel,
                         gameObject.Facing, RampType.None, nonRemapColor, true, gameObject.GetRemapColor(),
                         affectedByLighting, turretDrawPoint, heightOffset);
                 }
                 else
                 {
-                    DrawVoxelModel(gameObject, drawParams, drawParams.BarrelVoxel,
+                    DrawVoxelModel(gameObject, drawParams.BarrelVoxel,
                         gameObject.Facing, RampType.None, nonRemapColor, true, gameObject.GetRemapColor(),
                         affectedByLighting, turretDrawPoint, heightOffset);
 
-                    DrawVoxelModel(gameObject, drawParams, drawParams.TurretVoxel,
+                    DrawVoxelModel(gameObject, drawParams.TurretVoxel,
                         gameObject.Facing, RampType.None, nonRemapColor, true, gameObject.GetRemapColor(),
                         affectedByLighting, turretDrawPoint, heightOffset);
                 }
@@ -178,7 +178,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             else if (gameObject.ObjectType.Turret && !gameObject.ObjectType.TurretAnimIsVoxel &&
                      gameObject.ObjectType.BarrelAnimIsVoxel)
             {
-                DrawVoxelModel(gameObject, drawParams, drawParams.BarrelVoxel,
+                DrawVoxelModel(gameObject, drawParams.BarrelVoxel,
                     gameObject.Facing, RampType.None, nonRemapColor, true, gameObject.GetRemapColor(),
                     affectedByLighting, drawPoint, heightOffset);
             }

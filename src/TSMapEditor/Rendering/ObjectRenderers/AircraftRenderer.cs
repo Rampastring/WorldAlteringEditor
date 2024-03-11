@@ -25,7 +25,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
         protected override void Render(Aircraft gameObject, int heightOffset, Point2D drawPoint, in CommonDrawParams drawParams)
         {
-            DrawVoxelModel(gameObject, drawParams, drawParams.MainVoxel,
+            DrawVoxelModel(gameObject, drawParams.MainVoxel,
                 gameObject.Facing, RampType.None, Color.White, true, gameObject.GetRemapColor(),
                 Constants.VoxelsAffectedByLighting, drawPoint, heightOffset);
         }

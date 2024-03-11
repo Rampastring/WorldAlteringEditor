@@ -247,13 +247,13 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             int shadowFrameIndex = gameObject.GetShadowFrameIndex(drawParams.ShapeImage.GetFrameCount());
             if (shadowFrameIndex > 0 && shadowFrameIndex < drawParams.ShapeImage.GetFrameCount())
             {
-                DrawShapeImage(gameObject, drawParams, drawParams.ShapeImage, shadowFrameIndex,
+                DrawShapeImage(gameObject, drawParams.ShapeImage, shadowFrameIndex,
                     new Color(0, 0, 0, 128), true, false, Color.White, false, false, drawPoint, heightOffset);
             }
         }
 
-        protected void DrawShapeImage(T gameObject, in CommonDrawParams drawParams, ShapeImage image,
-            int frameIndex, Color color, bool isShadow, bool drawRemap, Color remapColor, bool affectedByLighting, bool affectedByAmbient, Point2D drawPoint, int heightOffset)
+        protected void DrawShapeImage(T gameObject, ShapeImage image, int frameIndex, Color color,
+            bool isShadow, bool drawRemap, Color remapColor, bool affectedByLighting, bool affectedByAmbient, Point2D drawPoint, int heightOffset)
         {
             if (image == null)
                 return;
@@ -303,8 +303,8 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 drawingBounds.X, drawingBounds.Y, heightOffset, image.GetPaletteTexture(), lighting);
         }
 
-        protected void DrawVoxelModel(T gameObject, in CommonDrawParams drawParams, VoxelModel model,
-            byte facing, RampType ramp, Color color, bool drawRemap, Color remapColor, bool affectedByLighting, Point2D drawPoint, int heightOffset)
+        protected void DrawVoxelModel(T gameObject, VoxelModel model, byte facing, RampType ramp,
+            Color color, bool drawRemap, Color remapColor, bool affectedByLighting, Point2D drawPoint, int heightOffset)
         {
             if (model == null)
                 return;

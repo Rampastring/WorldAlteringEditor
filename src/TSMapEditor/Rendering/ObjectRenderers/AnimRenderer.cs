@@ -63,7 +63,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
             DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
 
-            DrawShapeImage(gameObject, drawParams, drawParams.ShapeImage,
+            DrawShapeImage(gameObject, drawParams.ShapeImage,
                 frameIndex, Color.White * alpha, false,
                 gameObject.IsBuildingAnim, gameObject.GetRemapColor() * alpha,
                 affectedByLighting, affectedByAmbient, drawPoint, heightOffset);
@@ -85,7 +85,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
             if (shadowFrameIndex > 0 && shadowFrameIndex < drawParams.ShapeImage.GetFrameCount())
             {
-                DrawShapeImage(gameObject, drawParams, drawParams.ShapeImage, shadowFrameIndex,
+                DrawShapeImage(gameObject, drawParams.ShapeImage, shadowFrameIndex,
                     new Color(0, 0, 0, 128), true, false, Color.White,
                     false, false, drawPoint, heightOffset);
             }

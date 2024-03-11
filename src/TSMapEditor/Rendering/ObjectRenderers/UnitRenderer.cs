@@ -83,7 +83,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             if (!gameObject.ObjectType.NoShadow)
                 DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
 
-            DrawShapeImage(gameObject, drawParams, drawParams.ShapeImage, 
+            DrawShapeImage(gameObject, drawParams.ShapeImage, 
                 gameObject.GetFrameIndex(drawParams.ShapeImage.GetFrameCount()),
                 Color.White, false, true, gameObject.GetRemapColor(),
                 false, true, drawPoint, heightOffset);
@@ -101,7 +101,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 if (frame == null)
                     return;
 
-                DrawShapeImage(gameObject, drawParams, drawParams.ShapeImage,
+                DrawShapeImage(gameObject, drawParams.ShapeImage,
                     turretFrameIndex, Color.White, false, true, gameObject.GetRemapColor(),
                     false, true, drawPoint, heightOffset);
             }
@@ -119,7 +119,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             ISubTileImage subTile = tile.GetSubTile(unitTile.SubTileIndex);
             RampType ramp = subTile.TmpImage.RampType;
 
-            DrawVoxelModel(gameObject, drawParams, model,
+            DrawVoxelModel(gameObject, model,
                 gameObject.Facing, ramp, Color.White, true, gameObject.GetRemapColor(),
                 affectedByLighting, drawPoint, heightOffset);
         }
