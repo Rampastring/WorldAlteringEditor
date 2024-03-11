@@ -879,7 +879,7 @@ namespace TSMapEditor.Models
                 cell.Structures.Add(structure);
             });
 
-            if (structure.ObjectType.ArtConfig.Foundation.Width == 0 && structure.ObjectType.ArtConfig.Foundation.Height == 0)
+            if (structure.ObjectType.ArtConfig.Foundation.FoundationCells.Length == 0)
             {
                 GetTile(structure.Position).Structures.Add(structure);
             }
