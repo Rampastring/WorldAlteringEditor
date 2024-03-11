@@ -337,6 +337,7 @@ namespace TSMapEditor.UI
                     continue;
 
                 palettedDrawEffect.Parameters["PaletteTexture"].SetValue(currentOverlayShape.GetPaletteTexture());
+                palettedDrawEffect.Parameters["Lighting"].SetValue(Vector4.One);
 
                 DrawTexture(frame.Texture, new Rectangle(frame.Location.X + frame.Offset.X,
                     viewY + frame.Location.Y + frame.Offset.Y, frame.Texture.Width, frame.Texture.Height), Color.White);
