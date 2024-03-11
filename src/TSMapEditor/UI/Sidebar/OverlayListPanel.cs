@@ -141,7 +141,7 @@ namespace TSMapEditor.UI.Sidebar
             ObjectTreeView.FindNode(SearchBox.Text, false);
         }
 
-        private Texture2D GetSidebarTextureForOverlay(OverlayType overlayType, RenderTarget2D renderTarget, int defaultFrameNumber = 0)
+        private Texture2D GetSidebarTextureForOverlay(OverlayType overlayType, RenderTarget2D renderTarget, int defaultFrameNumber = 0, bool remap = false)
         {
             Texture2D fullSizeRGBATexture = null;
 
@@ -157,7 +157,10 @@ namespace TSMapEditor.UI.Sidebar
                 {
                     var frame = textures.GetFrame(overlayFrameNumber);
                     if (frame != null)
-                        fullSizeRGBATexture = textures.GetTextureForFrame_RGBA(overlayFrameNumber);
+                    {
+                        fullSizeRGBATexture = remap ? textures.GetRemapTextureForFrame_RGBA(overlayFrameNumber) :
+                            textures.GetTextureForFrame_RGBA(overlayFrameNumber);
+                    }
                 }
             }
 
@@ -199,11 +202,24 @@ namespace TSMapEditor.UI.Sidebar
 
                     var firstEntry = collection.Entries[0];
 
+                    Texture2D remapTexture = null;
+                    Color remapColor = Color.White;
+                    if (firstEntry.OverlayType.Tiberium)
+                    {
+                        remapTexture = GetSidebarTextureForOverlay(firstEntry.OverlayType, renderTarget, firstEntry.Frame, remap: true);
+
+                        int tiberiumIndex = firstEntry.OverlayType.GetTiberiumIndex(Constants.UseCountries);
+                        if (tiberiumIndex > -1)
+                            remapColor = Map.Rules.TiberiumTypes[tiberiumIndex].XNAColor;
+                    }
+
                     collectionsCategory.Nodes.Add(new TreeViewNode()
                     {
                         Text = collection.Name,
                         Tag = collection,
-                        Texture = GetSidebarTextureForOverlay(firstEntry.OverlayType, renderTarget, firstEntry.Frame)
+                        Texture = GetSidebarTextureForOverlay(firstEntry.OverlayType, renderTarget, firstEntry.Frame),
+                        RemapTexture = remapTexture,
+                        RemapColor = remapColor
                     });
                 }
             }
@@ -227,7 +243,7 @@ namespace TSMapEditor.UI.Sidebar
                     {
                         Text = connectedOverlay.UIName,
                         Tag = connectedOverlay,
-                        Texture = GetSidebarTextureForOverlay(firstEntry.OverlayType, renderTarget, firstEntry.FrameIndex)
+                        Texture = GetSidebarTextureForOverlay(firstEntry.OverlayType, renderTarget, firstEntry.FrameIndex),
                     });
                 }
             }
@@ -269,11 +285,24 @@ namespace TSMapEditor.UI.Sidebar
                     }
                 }
 
+                Texture2D remapTexture = null;
+                Color remapColor = Color.White;
+                if (overlayType.Tiberium)
+                {
+                    remapTexture = GetSidebarTextureForOverlay(overlayType, renderTarget, frameNumber, remap: true);
+
+                    int tiberiumIndex = overlayType.GetTiberiumIndex(Constants.UseCountries);
+                    if (tiberiumIndex > -1)
+                        remapColor = Map.Rules.TiberiumTypes[tiberiumIndex].XNAColor;
+                }
+
                 category.Nodes.Add(new TreeViewNode()
                 {
                     Text = overlayType.Name + " (" + overlayType.ININame + ")",
                     Texture = GetSidebarTextureForOverlay(overlayType, renderTarget, frameNumber),
-                    Tag = overlayType
+                    Tag = overlayType,
+                    RemapTexture = remapTexture,
+                    RemapColor = remapColor
                 });
 
                 category.Nodes = category.Nodes.OrderBy(n => n.Text).ToList();
