@@ -106,6 +106,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         protected virtual void DrawObjectReplacementText(T gameObject, in CommonDrawParams drawParams, Point2D drawPoint)
         {
             SetEffectParams_RGBADraw(0.0f, 0.0f, Vector2.Zero, Vector2.Zero, false);
+            SetLighting(Vector4.One);
 
             // If the object is a techno, draw an arrow that displays its facing
             if (gameObject.IsTechno())
