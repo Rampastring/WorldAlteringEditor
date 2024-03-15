@@ -170,6 +170,8 @@ namespace TSMapEditor.Models
 
         public int HeightInPixels => Size.Y * Constants.CellSizeY;
 
+        public int HeightInPixelsWithCellHeight => Size.Y * Constants.CellSizeY + Constants.MapYBaseline;
+
         public string TheaterName { get; set; }
         public ITheater TheaterInstance { get; set; }
         public string LoadedTheaterName => TheaterInstance.Theater.UIName;

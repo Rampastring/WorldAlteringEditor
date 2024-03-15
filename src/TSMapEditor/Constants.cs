@@ -51,6 +51,7 @@ namespace TSMapEditor
         public static int MaxMapHeight;
 
         public const byte MaxMapHeightLevel = 12;
+        public static int MapYBaseline => MaxMapHeightLevel * CellHeight;
 
         public static int MaxWaypoint = 100;
 
