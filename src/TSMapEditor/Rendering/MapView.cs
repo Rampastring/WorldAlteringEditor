@@ -1665,7 +1665,9 @@ namespace TSMapEditor.Rendering
                 return;
             }
 
-            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords_3D(cell.CoordsToPoint(), Map);
+            Point2D cellTopLeftPoint = EditorState.Is2DMode ?
+                CellMath.CellTopLeftPointFromCellCoords(cell.CoordsToPoint(), Map) :
+                CellMath.CellTopLeftPointFromCellCoords_3D(cell.CoordsToPoint(), Map);
 
             DrawTexture(EditorGraphics.ImpassableCellHighlightTexture, cellTopLeftPoint.ToXNAPoint(), Color.White);
         }
@@ -1675,7 +1677,9 @@ namespace TSMapEditor.Rendering
             if (cell.IceGrowth <= 0)
                 return;
 
-            Point2D cellTopLeftPoint = CellMath.CellTopLeftPointFromCellCoords(cell.CoordsToPoint(), Map);
+            Point2D cellTopLeftPoint = EditorState.Is2DMode ?
+                CellMath.CellTopLeftPointFromCellCoords(cell.CoordsToPoint(), Map) :
+                CellMath.CellTopLeftPointFromCellCoords_3D(cell.CoordsToPoint(), Map);
 
             DrawTexture(EditorGraphics.IceGrowthHighlightTexture, cellTopLeftPoint.ToXNAPoint(), Color.White);
         }
