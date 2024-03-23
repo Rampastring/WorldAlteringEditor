@@ -168,7 +168,7 @@ namespace TSMapEditor.Models
                 var scriptSection = iniFile.GetSection(sections[i]);
                 scriptAction.ReadIniSection(scriptSection);
 
-                ScriptActions.Add(scriptAction.Index, scriptAction);
+                ScriptActions.Add(scriptAction.ID, scriptAction);
             }
         }
 
