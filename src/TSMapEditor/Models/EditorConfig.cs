@@ -1,6 +1,7 @@
 using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TSMapEditor.CCEngine;
 using TSMapEditor.UI;
 
@@ -29,6 +30,26 @@ namespace TSMapEditor.Models
         public List<ConnectedOverlayType> ConnectedOverlays { get; } = new List<ConnectedOverlayType>();
         public List<TeamTypeFlag> TeamTypeFlags { get; } = new List<TeamTypeFlag>();
 
+        private static readonly Dictionary<string, (int StartIndex, int Count)> TiberiumDefaults = new()
+        {
+            {
+                "Riparius",
+                (102, 20)
+            },
+            {
+                "Cruentus",
+                (27, 12)
+            },
+            {
+                "Vinifera",
+                (127, 20)
+            },
+            {
+                "Aboreus",
+                (147, 20)
+            }
+        };
+
         public void EarlyInit()
         {
             ReadBrushSizes();
@@ -46,6 +67,7 @@ namespace TSMapEditor.Models
             ReadSmudgeCollections(rules);
             ReadBridges(rules);
             ReadConnectedOverlays(rules);
+            ReadTiberiumOverlays(rules);
         }
 
         private void ReadTheaters()
@@ -191,8 +213,8 @@ namespace TSMapEditor.Models
 
                 if (TriggerEventTypes.ContainsKey(triggerEventType.ID))
                 {
-                    throw new INIConfigException( $"Error while adding Trigger Event {triggerEventType.Name}: " + 
-                                                  $"a Trigger Event with ID {triggerEventType.ID} already exists!");
+                    throw new INIConfigException($"Error while adding Trigger Event {triggerEventType.Name}: " + 
+                                                 $"a Trigger Event with ID {triggerEventType.ID} already exists!");
                 }
 
                 TriggerEventTypes.Add(triggerEventType.ID, triggerEventType);
@@ -265,6 +287,68 @@ namespace TSMapEditor.Models
             {
                 IniSection overlaySection = iniFile.GetSection(connectedOverlay.Name);
                 connectedOverlay.InitializeRelatedOverlays(overlaySection, ConnectedOverlays);
+            }
+        }
+
+        private void ReadTiberiumOverlays(Rules rules)
+        {
+            var iniFile = new IniFile(Environment.CurrentDirectory + "/Config/Tiberiums.ini");
+            const string sectionName = "Tiberiums";
+
+            foreach (var tiberiumType in rules.TiberiumTypes)
+            {
+                tiberiumType.Overlays = new List<OverlayType>();
+                string tibName = tiberiumType.ININame;
+
+                string overlaysString = iniFile.GetStringValue(sectionName, tibName, null);
+
+                if (overlaysString == null)
+                {
+                    if (!TiberiumDefaults.ContainsKey(tibName))
+                        continue;
+
+                    var defaultOverlays = rules.OverlayTypes.Slice(TiberiumDefaults[tibName].StartIndex, TiberiumDefaults[tibName].Count);
+                    tiberiumType.Overlays.AddRange(defaultOverlays);
+                    defaultOverlays.ForEach(ot =>
+                    {
+                        if (ot.TiberiumType == null)
+                        {
+                            ot.TiberiumType = tiberiumType;
+                        }
+                        else
+                        {
+                            throw new INIConfigException(
+                                $"OverlayType {ot.ININame} is already associated with Tiberium {ot.TiberiumType.Index} ({ot.TiberiumType.ININame}), " +
+                                $"but it is also set to be associated with Tiberium {tiberiumType.Index} ({tiberiumType.ININame})!");
+                        }
+                    });
+
+                    continue;
+                }
+
+                var overlayNames = overlaysString.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                var overlays = overlayNames.Select(name => (name, rules.FindOverlayType(name))).ToList();
+
+                if (overlays.Any(ot => ot.Item2 == null))
+                {
+                    throw new INIConfigException($"Tiberium {tibName} has invalid overlay type(s) specified: " +
+                                                 $"{string.Join(", ", overlays.Where(ot => ot.Item2 == null).Select(ot => ot.name))}!");
+                }
+
+                tiberiumType.Overlays.AddRange(overlays.Select(ot => ot.Item2));
+                overlays.ForEach(ot =>
+                {
+                    if (ot.Item2.TiberiumType == null)
+                    {
+                        ot.Item2.TiberiumType = tiberiumType;
+                    }
+                    else
+                    {
+                        throw new INIConfigException(
+                            $"OverlayType {ot.Item2.ININame} is already associated with Tiberium {ot.Item2.TiberiumType.Index} ({ot.Item2.TiberiumType.ININame}), " +
+                            $"but it is also set to be associated with Tiberium {tiberiumType.Index} ({tiberiumType.ININame})!");
+                    }
+                });
             }
         }
 

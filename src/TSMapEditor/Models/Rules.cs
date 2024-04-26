@@ -59,6 +59,7 @@ namespace TSMapEditor.Models
             InitFromTypeSection(iniFile, "Weapons", Weapons);      // TS CnCNet ts-patches + Vinifera
             InitFromTypeSection(iniFile, "WeaponTypes", Weapons);  // YR Ares
             InitFromTypeSection(iniFile, "SuperWeaponTypes", SuperWeaponTypes);
+            InitFromTypeSection(iniFile, "Tiberiums", TiberiumTypes);
 
             if (!isMapIni)
             {
@@ -80,12 +81,17 @@ namespace TSMapEditor.Models
             SuperWeaponTypes.ForEach(sw => initializer.ReadObjectTypePropertiesFromINI(sw, iniFile));
             AnimTypes.ForEach(a => initializer.ReadObjectTypePropertiesFromINI(a, iniFile));
             RulesHouseTypes.ForEach(ht => initializer.ReadObjectTypePropertiesFromINI(ht, iniFile));
+            TiberiumTypes.ForEach(ht => initializer.ReadObjectTypePropertiesFromINI(ht, iniFile));
 
             if (!isMapIni)
                 InitColors(iniFile);
 
-            if (!isMapIni)
-                InitTiberiums(iniFile);
+            TiberiumTypes.ForEach(tt =>
+            {
+                var rulesColor = Colors.Find(c => c.Name == tt.Color);
+                if (rulesColor != null)
+                    tt.XNAColor = rulesColor.XNAColor;
+            });
 
             InitSides(iniFile);
 
@@ -126,30 +132,6 @@ namespace TSMapEditor.Models
                 if (color != null)
                     ht.XNAColor = color.XNAColor;
             });
-        }
-
-        private void InitTiberiums(IniFile iniFile)
-        {
-            var tiberiumsSection = iniFile.GetSection("Tiberiums");
-            if (tiberiumsSection != null)
-            {
-                for (int i = 0; i < tiberiumsSection.Keys.Count; i++)
-                {
-                    var kvp = tiberiumsSection.Keys[i];
-                    var tiberiumType = new TiberiumType(kvp.Value, i);
-
-                    var tiberiumTypeSection = iniFile.GetSection(kvp.Value);
-                    if (tiberiumTypeSection != null)
-                    {
-                        tiberiumType.ReadPropertiesFromIniSection(tiberiumTypeSection);
-
-                        TiberiumTypes.Add(tiberiumType);
-                        var rulesColor = Colors.Find(c => c.Name == tiberiumType.Color);
-                        if (rulesColor != null)
-                            tiberiumType.XNAColor = rulesColor.XNAColor;
-                    }
-                }
-            }
         }
 
         private void InitSides(IniFile iniFile)
