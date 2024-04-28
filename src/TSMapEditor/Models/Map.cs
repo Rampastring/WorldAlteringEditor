@@ -1835,6 +1835,7 @@ namespace TSMapEditor.Models
             // Check for triggers using an object-specific event (like "destroyed" or "damaged") without
             // being linked to any object
             var objectSpecificEventIndexes = new List<int>() {
+                4,  // Discovered by player
                 6,  // Attacked by any house
                 7,  // Destroyed by any house
                 33, // Selected by player
@@ -1847,8 +1848,10 @@ namespace TSMapEditor.Models
                 43, // Quarter health (any source)
                 44, // Attacked by (house)
                 48  // Destroyed by anything
-                /*55 Limpet Attached - need to think how to handle YR*/
             };
+
+            if (!Constants.UseCountries)
+                objectSpecificEventIndexes.Add(55); // Limpet attached - Firestorm only, not in RA2/YR
 
             foreach (var trigger in Triggers)
             {
