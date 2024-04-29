@@ -85,9 +85,9 @@ namespace TSMapEditor.Models
         public int Side { get; set; }
         public bool IsBaseDefense { get; set; }
         public TeamType SecondaryTeam { get; set; }
-        public bool Easy { get; set; }
-        public bool Medium { get; set; }
-        public bool Hard { get; set; }
+        public bool Easy { get; set; } = true;
+        public bool Medium { get; set; } = true;
+        public bool Hard { get; set; } = true;
 
         public AITriggerType Clone(string newUniqueId)
         {
