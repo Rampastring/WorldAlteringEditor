@@ -92,7 +92,7 @@ namespace TSMapEditor.Models
         public AITriggerType Clone(string newUniqueId)
         {
             var clonedAITrigger = (AITriggerType)MemberwiseClone();
-            clonedAITrigger.Name = "Clone of " + Name;
+            clonedAITrigger.Name = Name + " (Clone)";
             clonedAITrigger.ININame = newUniqueId;
             return clonedAITrigger;
         }
