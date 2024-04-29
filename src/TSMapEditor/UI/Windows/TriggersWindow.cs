@@ -88,6 +88,7 @@ namespace TSMapEditor.UI.Windows
         private SelectTechnoTypeWindow selectTechnoTypeWindow;
         private SelectTagWindow selectTagWindow;
         private SelectStringWindow selectStringWindow;
+        private SelectSpeechWindow selectSpeechWindow;
 
         private XNAContextMenu actionContextMenu;
         private XNAContextMenu eventContextMenu;
@@ -262,6 +263,10 @@ namespace TSMapEditor.UI.Windows
             selectStringWindow = new SelectStringWindow(WindowManager, map);
             var stringDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectStringWindow);
             stringDarkeningPanel.Hidden += StringDarkeningPanel_Hidden;
+
+            selectSpeechWindow = new SelectSpeechWindow(WindowManager, map);
+            var speechDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectSpeechWindow);
+            speechDarkeningPanel.Hidden += SpeechDarkeningPanel_Hidden;
 
             eventContextMenu = new XNAContextMenu(WindowManager);
             eventContextMenu.Name = nameof(eventContextMenu);
@@ -933,6 +938,10 @@ namespace TSMapEditor.UI.Windows
                     map.Rules.SuperWeaponTypes.ForEach(sw => ctxActionParameterPresetValues.AddItem(sw.GetDisplayString()));
                     ctxActionParameterPresetValues.Open(GetCursorPoint());
                     break;
+                case TriggerParamType.Speech:
+                    selectSpeechWindow.IsForEvent = false;
+                    selectSpeechWindow.Open(Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1));
+                    break;
                 default:
                     break;
             }
@@ -1028,6 +1037,14 @@ namespace TSMapEditor.UI.Windows
                 return;
 
             AssignParamValue(selectStringWindow.IsForEvent, selectStringWindow.SelectedObject.ID);
+        }
+
+        private void SpeechDarkeningPanel_Hidden(object sender, EventArgs e)
+        {
+            if (selectSpeechWindow.SelectedObject < 0)
+                return;
+
+            AssignParamValue(selectSpeechWindow.IsForEvent, selectSpeechWindow.SelectedObject);
         }
 
         private void AssignParamValue(bool isForEvent, int paramValue)
@@ -1919,6 +1936,14 @@ namespace TSMapEditor.UI.Windows
                         return intValue + " - nonexistent super weapon";
 
                     return intValue + " " + map.Rules.SuperWeaponTypes[intValue].GetDisplayStringWithoutIndex();
+                case TriggerParamType.Speech:
+                    if (!intParseSuccess)
+                        return paramValue;
+
+                    if (!map.EditorConfig.Speeches.ContainsKey(intValue))
+                        return intValue + " - unknown speech";
+
+                    return intValue + " " + map.EditorConfig.Speeches[intValue];
                 case TriggerParamType.Float:
                     if (!intParseSuccess)
                         return paramValue;

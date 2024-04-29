@@ -29,6 +29,7 @@ namespace TSMapEditor.Models
         public List<BridgeType> Bridges { get; } = new List<BridgeType>();
         public List<ConnectedOverlayType> ConnectedOverlays { get; } = new List<ConnectedOverlayType>();
         public List<TeamTypeFlag> TeamTypeFlags { get; } = new List<TeamTypeFlag>();
+        public Dictionary<int, string> Speeches { get; } = new Dictionary<int, string>();
 
         private static readonly Dictionary<string, (int StartIndex, int Count)> TiberiumDefaults = new()
         {
@@ -58,6 +59,7 @@ namespace TSMapEditor.Models
             ReadTriggerActionTypes();
             ReadTheaters();
             ReadTeamTypeFlags();
+            ReadSpeeches();
         }
 
         public void RulesDependentInit(Rules rules)
@@ -368,6 +370,30 @@ namespace TSMapEditor.Models
                 string value = iniFile.GetStringValue(sectionName, key, string.Empty);
                 var teamTypeFlag = new TeamTypeFlag(key, Conversions.BooleanFromString(value, false));
                 TeamTypeFlags.Add(teamTypeFlag);
+            }
+        }
+
+        private void ReadSpeeches()
+        {
+            Speeches.Clear();
+
+            var iniFile = new IniFile(Environment.CurrentDirectory + "/Config/Speeches.ini");
+            const string sectionName = "Speeches";
+
+            var keys = iniFile.GetSectionKeys(sectionName);
+            if (keys == null)
+                return;
+
+            foreach (var key in keys)
+            {
+                int id = Conversions.IntFromString(key, -1);
+                if (id == -1)
+                {
+                    Logger.Log("Invalid speech entry " + key);
+                    continue;
+                }
+
+                Speeches[id] = iniFile.GetStringValue(sectionName, key, string.Empty);
             }
         }
     }
