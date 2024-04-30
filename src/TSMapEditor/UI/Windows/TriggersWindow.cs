@@ -1248,6 +1248,7 @@ namespace TSMapEditor.UI.Windows
 
                 TriggerAction existingAction = editedTrigger.Actions[lbActions.SelectedIndex];
                 existingAction.ActionIndex = selectActionWindow.SelectedObject.ID;
+                SetTriggerActionHardcodedParameters(existingAction);
             }
 
             EditTrigger(editedTrigger);
@@ -1257,6 +1258,18 @@ namespace TSMapEditor.UI.Windows
         {
             var triggerAction = new TriggerAction();
             triggerAction.ActionIndex = triggerActionType.ID;
+            SetTriggerActionHardcodedParameters(triggerAction);
+
+            return triggerAction;
+        }
+
+        private void SetTriggerActionHardcodedParameters(TriggerAction triggerAction)
+        {
+            if (!map.EditorConfig.TriggerActionTypes.TryGetValue(triggerAction.ActionIndex, out var triggerActionType))
+            {
+                Logger.Log($"{nameof(TriggersWindow)}.{nameof(SetTriggerActionHardcodedParameters)}: Unknown action type {triggerAction.ActionIndex}");
+                return;
+            }
 
             for (int i = 0; i < TriggerActionType.MAX_PARAM_COUNT; i++)
             {
@@ -1279,8 +1292,6 @@ namespace TSMapEditor.UI.Windows
                     continue;
                 }
             }
-
-            return triggerAction;
         }
 
         private void BtnAddAction_LeftClick(object sender, EventArgs e)
