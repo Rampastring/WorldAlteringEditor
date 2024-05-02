@@ -983,6 +983,9 @@ namespace TSMapEditor.Rendering
 
         private void DrawObject(GameObject gameObject)
         {
+            if (!EditorState.RenderInvisibleInGameObjects && gameObject.IsInvisibleInGame())
+                return;
+
             switch (gameObject.WhatAmI())
             {
                 case RTTIType.Aircraft:
@@ -1962,6 +1965,8 @@ namespace TSMapEditor.Rendering
 
         private void InstantRenderMinimap()
         {
+            EditorState.RenderInvisibleInGameObjects = false;
+
             // Register ourselves as a minimap user so the minimap texture gets refreshed
             MinimapUsers.Add(this);
 
@@ -1990,6 +1995,8 @@ namespace TSMapEditor.Rendering
             Renderer.EndDraw();
 
             MinimapUsers.Remove(this);
+
+            EditorState.RenderInvisibleInGameObjects = true;
         }
     }
 }
