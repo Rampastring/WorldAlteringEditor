@@ -395,6 +395,8 @@ namespace TSMapEditor.UI
         {
             mapView.MapWideOverlay.LoadMapWideOverlay(GraphicsDevice);
             editorState.MapWideOverlayExists = mapView.MapWideOverlay.HasTexture;
+            if (editorState.MapWideOverlayExists)
+                editorState.DrawMapWideOverlay = true;
         }
 
         private void TopBarMenu_InputFileReloadRequested(object sender, EventArgs e)
