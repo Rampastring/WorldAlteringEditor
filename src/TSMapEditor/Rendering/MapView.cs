@@ -1774,9 +1774,9 @@ namespace TSMapEditor.Rendering
             {
                 MapWideOverlay.Draw(new Rectangle(
                         (int)(-Camera.TopLeftPoint.X * Camera.ZoomLevel),
-                        (int)(-Camera.TopLeftPoint.Y * Camera.ZoomLevel),
+                        (int)((-Camera.TopLeftPoint.Y + Constants.MapYBaseline) * Camera.ZoomLevel),
                         (int)(mapRenderTarget.Width * Camera.ZoomLevel),
-                        (int)(mapRenderTarget.Height * Camera.ZoomLevel)));
+                        (int)((mapRenderTarget.Height - Constants.MapYBaseline) * Camera.ZoomLevel)));
             }
 
             if (IsActive && tileUnderCursor != null && CursorAction != null)
