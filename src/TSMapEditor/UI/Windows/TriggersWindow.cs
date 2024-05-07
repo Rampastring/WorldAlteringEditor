@@ -182,7 +182,7 @@ namespace TSMapEditor.UI.Windows
             ddActions.AddItem(new XNADropDownItem() { Text = "Attach to Objects", Tag = new Action(AttachTagToObjects) });
             ddActions.AddItem(new XNADropDownItem() { Text = "View Attached Objects", Tag = new Action(ShowAttachedObjects) });
 
-            if (!Constants.UseCountries)
+            if (!Constants.IsRA2YR)
             {
                 ddActions.AddItem(new XNADropDownItem() { Text = string.Empty, Selectable = false });
                 ddActions.AddItem(new XNADropDownItem() { Text = "Wrap in EVA disable/enable actions", Tag = new Action(WrapInEVADisableAndEnableActions) });

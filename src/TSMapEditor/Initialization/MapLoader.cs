@@ -1035,9 +1035,9 @@ namespace TSMapEditor.Initialization
 
         public static void ReadHouseTypes(IMap map, IniFile mapIni)
         {
-            Logger.Log("Reading HouseTypes. Using countries: " + Constants.UseCountries);
+            Logger.Log("Reading HouseTypes. Using countries: " + Constants.IsRA2YR);
 
-            var section = mapIni.GetSection(Constants.UseCountries ? "Countries" : "Houses");
+            var section = mapIni.GetSection(Constants.IsRA2YR ? "Countries" : "Houses");
             if (section == null)
                 return;
 
@@ -1048,7 +1048,7 @@ namespace TSMapEditor.Initialization
 
                 // HouseTypes can't be redefined, check if the HouseType already exists.
                 // If it does and we are using countries, still read the HouseType's properties.
-                if (Constants.UseCountries)
+                if (Constants.IsRA2YR)
                 {
                     var existingHouseType = map.FindHouseType(kvp.Value);
                     if (existingHouseType != null)
@@ -1069,7 +1069,7 @@ namespace TSMapEditor.Initialization
                 }
 
                 var houseType = new HouseType(kvp.Value);
-                houseType.Index = id + (Constants.UseCountries ? map.Rules.RulesHouseTypes.Count : 0);
+                houseType.Index = id + (Constants.IsRA2YR ? map.Rules.RulesHouseTypes.Count : 0);
                 id++;
 
                 if (houseTypeSection != null)
@@ -1137,7 +1137,7 @@ namespace TSMapEditor.Initialization
                     house.BaseNodes.Remove(bn);
                 });
 
-                if (Constants.UseCountries)
+                if (Constants.IsRA2YR)
                 {
                     if (house.Country != null)
                         houseType = map.FindHouseType(house.Country);

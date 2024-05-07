@@ -22,7 +22,7 @@ namespace TSMapEditor
         public static bool VoxelsAffectedByLighting = false;
         public static bool NewTheaterGenericBuilding = false;
         public static bool DrawBuildingAnimationShadows = false;
-        public static bool UseCountries = false;
+        public static bool IsRA2YR = false;
         public static bool WarnOfTooManyTriggerActions = true;
         public static bool DefaultPreview = false;
 
@@ -126,7 +126,7 @@ namespace TSMapEditor
             VoxelsAffectedByLighting = constantsIni.GetBooleanValue(ConstantsSectionName, nameof(VoxelsAffectedByLighting), VoxelsAffectedByLighting);
             NewTheaterGenericBuilding = constantsIni.GetBooleanValue(ConstantsSectionName, nameof(NewTheaterGenericBuilding), NewTheaterGenericBuilding);
             DrawBuildingAnimationShadows = constantsIni.GetBooleanValue(ConstantsSectionName, nameof(DrawBuildingAnimationShadows), DrawBuildingAnimationShadows);
-            UseCountries = constantsIni.GetBooleanValue(ConstantsSectionName, nameof(UseCountries), UseCountries);
+            IsRA2YR = constantsIni.GetBooleanValue(ConstantsSectionName, nameof(IsRA2YR), IsRA2YR);
             WarnOfTooManyTriggerActions = constantsIni.GetBooleanValue(ConstantsSectionName, nameof(WarnOfTooManyTriggerActions), WarnOfTooManyTriggerActions);
             DefaultPreview = constantsIni.GetBooleanValue(ConstantsSectionName, nameof(DefaultPreview), DefaultPreview);
 

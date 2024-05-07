@@ -156,7 +156,7 @@ namespace TSMapEditor.UI.TopBar
             viewContextMenu.AddItem(" ", null, () => false, null, null);
             viewContextMenu.AddItem("No Lighting", () => mapView.EditorState.LightingPreviewState = LightingPreviewMode.NoLighting);
             viewContextMenu.AddItem("Normal Lighting", () => mapView.EditorState.LightingPreviewState = LightingPreviewMode.Normal);
-            if (Constants.UseCountries)
+            if (Constants.IsRA2YR)
             {
                 viewContextMenu.AddItem("Lightning Storm Lighting", () => mapView.EditorState.LightingPreviewState = LightingPreviewMode.IonStorm);
                 viewContextMenu.AddItem("Dominator Lighting", () => mapView.EditorState.LightingPreviewState = LightingPreviewMode.Dominator);

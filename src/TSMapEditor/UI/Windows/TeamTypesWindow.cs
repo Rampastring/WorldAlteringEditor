@@ -375,7 +375,7 @@ namespace TSMapEditor.UI.Windows
             tbGroup.Value = editedTeamType.Group;
             tbWaypoint.Value = Helpers.GetWaypointNumberFromAlphabeticalString(editedTeamType.Waypoint);
 
-            if (Constants.UseCountries)
+            if (Constants.IsRA2YR)
             {
                 ddMindControlDecision.SelectedIndex = editedTeamType.MindControlDecision ?? -1;
                 tbTransportWaypoint.Value = Helpers.GetWaypointNumberFromAlphabeticalString(editedTeamType.TransportWaypoint);
@@ -427,7 +427,7 @@ namespace TSMapEditor.UI.Windows
 
         private void TbTransportWaypoint_TextChanged(object sender, EventArgs e)
         {
-            if (Constants.UseCountries)
+            if (Constants.IsRA2YR)
             {
                 editedTeamType.TransportWaypoint = Helpers.WaypointNumberToAlphabeticalString(tbTransportWaypoint.Value);
             }
@@ -466,7 +466,7 @@ namespace TSMapEditor.UI.Windows
 
         private void DdMindControlDecision_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (Constants.UseCountries)
+            if (Constants.IsRA2YR)
             {
                 editedTeamType.MindControlDecision = ddMindControlDecision.SelectedIndex;
             }

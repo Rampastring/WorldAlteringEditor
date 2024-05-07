@@ -120,7 +120,7 @@ namespace TSMapEditor.Models
         public List<HouseType> HouseTypes { get; protected set; } = new List<HouseType>();
         public List<HouseType> GetHouseTypes()
         {
-            if (Constants.UseCountries)
+            if (Constants.IsRA2YR)
             {
                 if (HouseTypes.Count > 0)
                     return Rules.RulesHouseTypes.Concat(HouseTypes).ToList();
@@ -842,7 +842,7 @@ namespace TSMapEditor.Models
             if (HouseTypes.Remove(houseType))
             {
                 for (int i = 0; i < HouseTypes.Count; i++)
-                    HouseTypes[i].Index = i + (Constants.UseCountries ? Rules.RulesHouseTypes.Count : 0);
+                    HouseTypes[i].Index = i + (Constants.IsRA2YR ? Rules.RulesHouseTypes.Count : 0);
 
                 return true;
             }
@@ -1602,7 +1602,7 @@ namespace TSMapEditor.Models
             var house = new House(houseType.ININame, houseType);
             house.XNAColor = houseType.XNAColor;
 
-            if (!Constants.UseCountries)
+            if (!Constants.IsRA2YR)
                 house.ActsLike = houseType.Index;
             else
                 house.Country = houseType.ININame;
@@ -1850,7 +1850,7 @@ namespace TSMapEditor.Models
                 48  // Destroyed by anything
             };
 
-            if (!Constants.UseCountries)
+            if (!Constants.IsRA2YR)
                 objectSpecificEventIndexes.Add(55); // Limpet attached - Firestorm only, not in RA2/YR
 
             foreach (var trigger in Triggers)

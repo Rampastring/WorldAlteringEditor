@@ -63,7 +63,7 @@ namespace TSMapEditor.Models
 
             if (!isMapIni)
             {
-                if (Constants.UseCountries)
+                if (Constants.IsRA2YR)
                     InitFromTypeSection(iniFile, "Countries", RulesHouseTypes);
                 else
                     InitFromTypeSection(iniFile, "Houses", RulesHouseTypes);
