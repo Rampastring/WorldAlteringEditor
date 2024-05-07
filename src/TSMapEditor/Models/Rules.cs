@@ -38,6 +38,7 @@ namespace TSMapEditor.Models
 
         public TutorialLines TutorialLines { get; set; }
         public Themes Themes { get; set; }
+        public EvaSpeeches EvaSpeeches { get; set; }
 
         public double ExtraUnitLight { get; set; }
         public double ExtraInfantryLight { get; set; }

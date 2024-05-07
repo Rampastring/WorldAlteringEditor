@@ -35,11 +35,23 @@ namespace TSMapEditor.UI.Windows
         {
             lbObjectList.Clear();
 
-            foreach (var kvp in map.EditorConfig.Speeches)
+            if (Constants.IsRA2YR)
             {
-                lbObjectList.AddItem(new XNAListBoxItem() { Text = $"{kvp.Key} {kvp.Value}", Tag = kvp.Key });
-                if (kvp.Key == SelectedObject)
-                    lbObjectList.SelectedIndex = lbObjectList.Items.Count - 1;
+                foreach (var evaSpeech in map.Rules.EvaSpeeches.Speeches)
+                {
+                    lbObjectList.AddItem(new XNAListBoxItem() { Text = evaSpeech.ToString(), Tag = evaSpeech.Index });
+                    if (evaSpeech.Index == SelectedObject)
+                        lbObjectList.SelectedIndex = lbObjectList.Items.Count - 1;
+                }
+            }
+            else
+            {
+                foreach (var kvp in map.EditorConfig.Speeches)
+                {
+                    lbObjectList.AddItem(new XNAListBoxItem() { Text = $"{kvp.Key} {kvp.Value}", Tag = kvp.Key });
+                    if (kvp.Key == SelectedObject)
+                        lbObjectList.SelectedIndex = lbObjectList.Items.Count - 1;
+                }
             }
         }
     }

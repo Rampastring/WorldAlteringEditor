@@ -44,6 +44,7 @@ namespace TSMapEditor
         public static string FirestormAIIniPath;
         public static string TutorialIniPath;
         public static string ThemeIniPath;
+        public static string EvaIniPath;
 
         public const int TextureSizeLimit = 16384;
 
@@ -153,6 +154,7 @@ namespace TSMapEditor
             FirestormAIIniPath = constantsIni.GetStringValue(FilePathsSectionName, "AIFS", "INI/AIE.ini");
             TutorialIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Tutorial", "INI/Tutorial.ini");
             ThemeIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Theme", "INI/Theme.ini");
+            EvaIniPath = constantsIni.GetStringValue(FilePathsSectionName, "EVA", "INI/Eva.ini");
 
             InitUIConstants();
         }

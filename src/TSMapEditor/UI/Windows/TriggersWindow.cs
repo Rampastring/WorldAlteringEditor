@@ -1044,7 +1044,14 @@ namespace TSMapEditor.UI.Windows
             if (selectSpeechWindow.SelectedObject < 0)
                 return;
 
-            AssignParamValue(selectSpeechWindow.IsForEvent, selectSpeechWindow.SelectedObject);
+            if (Constants.IsRA2YR)
+            {
+                AssignParamValue(selectSpeechWindow.IsForEvent, map.Rules.EvaSpeeches.Speeches[selectSpeechWindow.SelectedObject].Name);
+            }
+            else
+            {
+                AssignParamValue(selectSpeechWindow.IsForEvent, selectSpeechWindow.SelectedObject);
+            }
         }
 
         private void AssignParamValue(bool isForEvent, int paramValue)
@@ -1948,13 +1955,25 @@ namespace TSMapEditor.UI.Windows
 
                     return intValue + " " + map.Rules.SuperWeaponTypes[intValue].GetDisplayStringWithoutIndex();
                 case TriggerParamType.Speech:
-                    if (!intParseSuccess)
-                        return paramValue;
+                    if (Constants.IsRA2YR)
+                    {
+                        int speechIndex = map.Rules.EvaSpeeches.Speeches.FindIndex(speech => speech.Name == paramValue);
 
-                    if (!map.EditorConfig.Speeches.ContainsKey(intValue))
-                        return intValue + " - unknown speech";
+                        if (speechIndex == -1)
+                            return paramValue + " - unknown speech";
 
-                    return intValue + " " + map.EditorConfig.Speeches[intValue];
+                        return map.Rules.EvaSpeeches.Speeches[speechIndex].Name;
+                    }
+                    else
+                    {
+                        if (!intParseSuccess)
+                            return paramValue;
+
+                        if (!map.EditorConfig.Speeches.ContainsKey(intValue))
+                            return intValue + " - unknown speech";
+
+                        return intValue + " " + map.EditorConfig.Speeches[intValue];
+                    }
                 case TriggerParamType.Float:
                     if (!intParseSuccess)
                         return paramValue;
