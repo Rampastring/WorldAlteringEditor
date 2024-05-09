@@ -96,10 +96,10 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
             theater.ReadConfigINI(gameDirectory, ccFileManager);
 
             foreach (string theaterMIXName in theater.ContentMIXName)
-                ccFileManager.LoadPrimaryMixFile(theaterMIXName);
+                ccFileManager.LoadRequiredMixFile(theaterMIXName);
 
             foreach (string theaterMIXName in theater.OptionalContentMIXName)
-                ccFileManager.LoadSecondaryMixFile(theaterMIXName);
+                ccFileManager.LoadOptionalMixFile(theaterMIXName);
 
             TheaterGraphics theaterGraphics = new TheaterGraphics(windowManager.GraphicsDevice, theater, ccFileManager, LoadedMap.Rules);
             LoadedMap.TheaterInstance = theaterGraphics;
