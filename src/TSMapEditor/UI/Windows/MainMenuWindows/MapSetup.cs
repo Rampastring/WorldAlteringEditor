@@ -39,6 +39,7 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
             var tutorialLines = new TutorialLines(Path.Combine(gameDirectory, Constants.TutorialIniPath), a => windowManager.AddCallback(a, null));
             var themes = new Themes(IniFileEx.FromPathOrMix(Constants.ThemeIniPath, gameDirectory, ccFileManager));
             var evaSpeeches = new EvaSpeeches(IniFileEx.FromPathOrMix(Constants.EvaIniPath, gameDirectory, ccFileManager));
+            var sounds = new Sounds(IniFileEx.FromPathOrMix(Constants.SoundIniPath, gameDirectory, ccFileManager));
 
             Map map = new Map(ccFileManager);
 
@@ -71,7 +72,8 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
 
             map.Rules.TutorialLines = tutorialLines;
             map.Rules.Themes = themes;
-            map.Rules.EvaSpeeches = evaSpeeches;
+            map.Rules.Speeches = evaSpeeches;
+            map.Rules.Sounds = sounds;
 
             Console.WriteLine();
             Console.WriteLine("Map created.");

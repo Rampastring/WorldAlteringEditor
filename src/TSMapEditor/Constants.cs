@@ -45,6 +45,7 @@ namespace TSMapEditor
         public static string TutorialIniPath;
         public static string ThemeIniPath;
         public static string EvaIniPath;
+        public static string SoundIniPath;
 
         public const int TextureSizeLimit = 16384;
 
@@ -155,6 +156,7 @@ namespace TSMapEditor
             TutorialIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Tutorial", "INI/Tutorial.ini");
             ThemeIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Theme", "INI/Theme.ini");
             EvaIniPath = constantsIni.GetStringValue(FilePathsSectionName, "EVA", "INI/Eva.ini");
+            SoundIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Sound", "INI/Sound01.ini");
 
             InitUIConstants();
         }

@@ -89,6 +89,7 @@ namespace TSMapEditor.UI.Windows
         private SelectTagWindow selectTagWindow;
         private SelectStringWindow selectStringWindow;
         private SelectSpeechWindow selectSpeechWindow;
+        private SelectSoundWindow selectSoundWindow;
 
         private XNAContextMenu actionContextMenu;
         private XNAContextMenu eventContextMenu;
@@ -267,6 +268,10 @@ namespace TSMapEditor.UI.Windows
             selectSpeechWindow = new SelectSpeechWindow(WindowManager, map);
             var speechDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectSpeechWindow);
             speechDarkeningPanel.Hidden += SpeechDarkeningPanel_Hidden;
+
+            selectSoundWindow = new SelectSoundWindow(WindowManager, map);
+            var soundDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectSoundWindow);
+            soundDarkeningPanel.Hidden += SoundDarkeningPanel_Hidden;
 
             eventContextMenu = new XNAContextMenu(WindowManager);
             eventContextMenu.Name = nameof(eventContextMenu);
@@ -912,7 +917,7 @@ namespace TSMapEditor.UI.Windows
                     selectTutorialLineWindow.Open(new TutorialLine(Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1), string.Empty));
                     break;
                 case TriggerParamType.Theme:
-                    selectThemeWindow.Open(map.Rules.Themes.GetByIndex(Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1)));
+                    selectThemeWindow.Open(map.Rules.Themes.Get(Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1)));
                     break;
                 case TriggerParamType.Tag:
                     Tag existingTag = map.Tags.Find(tag => tag.ID == triggerAction.Parameters[paramIndex]);
@@ -940,7 +945,17 @@ namespace TSMapEditor.UI.Windows
                     break;
                 case TriggerParamType.Speech:
                     selectSpeechWindow.IsForEvent = false;
-                    selectSpeechWindow.Open(Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1));
+                    EvaSpeech speech = Constants.IsRA2YR
+                        ? map.Rules.Speeches.Get(triggerAction.Parameters[paramIndex])
+                        : map.EditorConfig.Speeches.Get(Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1));
+                    selectSpeechWindow.Open(speech);
+                    break;
+                case TriggerParamType.Sound:
+                    selectSoundWindow.IsForEvent = false;
+                    Sound sound = Constants.IsRA2YR
+                        ? map.Rules.Sounds.Get(triggerAction.Parameters[paramIndex])
+                        : map.Rules.Sounds.Get(Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1));
+                    selectSoundWindow.Open(sound);
                     break;
                 default:
                     break;
@@ -1041,17 +1056,20 @@ namespace TSMapEditor.UI.Windows
 
         private void SpeechDarkeningPanel_Hidden(object sender, EventArgs e)
         {
-            if (selectSpeechWindow.SelectedObject < 0)
+            if (selectSpeechWindow.SelectedObject == null)
                 return;
 
-            if (Constants.IsRA2YR)
-            {
-                AssignParamValue(selectSpeechWindow.IsForEvent, map.Rules.EvaSpeeches.Speeches[selectSpeechWindow.SelectedObject].Name);
-            }
-            else
-            {
-                AssignParamValue(selectSpeechWindow.IsForEvent, selectSpeechWindow.SelectedObject);
-            }
+            var speech = selectSpeechWindow.SelectedObject;
+            AssignParamValue(selectSpeechWindow.IsForEvent, Constants.IsRA2YR ? speech.Name : speech.Index.ToString(CultureInfo.InvariantCulture));
+        }
+
+        private void SoundDarkeningPanel_Hidden(object sender, EventArgs e)
+        {
+            if (selectSoundWindow.SelectedObject == null)
+                return;
+
+            var sound = selectSoundWindow.SelectedObject;
+            AssignParamValue(selectSoundWindow.IsForEvent, Constants.IsRA2YR ? sound.Name : sound.Index.ToString(CultureInfo.InvariantCulture));
         }
 
         private void AssignParamValue(bool isForEvent, int paramValue)
@@ -1934,11 +1952,11 @@ namespace TSMapEditor.UI.Windows
                     if (!intParseSuccess)
                         return paramValue;
 
-                    Theme theme = map.Rules.Themes.GetByIndex(intValue);
+                    Theme theme = map.Rules.Themes.Get(intValue);
                     if (theme == null)
                         return paramValue + " - nonexistent theme";
 
-                    return paramValue + " " + theme.Name;
+                    return theme.ToString();
                 case TriggerParamType.Tag:
                     Tag tag = map.Tags.Find(t => t.ID == paramValue);
 
@@ -1955,24 +1973,52 @@ namespace TSMapEditor.UI.Windows
 
                     return intValue + " " + map.Rules.SuperWeaponTypes[intValue].GetDisplayStringWithoutIndex();
                 case TriggerParamType.Speech:
+                    EvaSpeech speech;
+
                     if (Constants.IsRA2YR)
                     {
-                        int speechIndex = map.Rules.EvaSpeeches.Speeches.FindIndex(speech => speech.Name == paramValue);
+                        speech = map.Rules.Speeches.Get(paramValue);
 
-                        if (speechIndex == -1)
+                        if (speech == null)
                             return paramValue + " - unknown speech";
 
-                        return map.Rules.EvaSpeeches.Speeches[speechIndex].Name;
+                        return speech.Name;
                     }
                     else
                     {
                         if (!intParseSuccess)
                             return paramValue;
 
-                        if (!map.EditorConfig.Speeches.ContainsKey(intValue))
+                        speech = map.EditorConfig.Speeches.Get(intValue);
+
+                        if (speech == null)
                             return intValue + " - unknown speech";
 
-                        return intValue + " " + map.EditorConfig.Speeches[intValue];
+                        return $"{intValue} {speech.Name}";
+                    }
+                case TriggerParamType.Sound:
+                    Sound sound;
+
+                    if (Constants.IsRA2YR)
+                    {
+                        sound = map.Rules.Sounds.Get(paramValue);
+
+                        if (sound == null)
+                            return paramValue + " - unknown sound";
+
+                        return sound.Name;
+                    }
+                    else
+                    {
+                        if (!intParseSuccess)
+                            return paramValue;
+
+                        sound = map.Rules.Sounds.Get(intValue);
+
+                        if (sound == null)
+                            return intValue + " - unknown sound";
+
+                        return $"{intValue} {sound.Name}";
                     }
                 case TriggerParamType.Float:
                     if (!intParseSuccess)

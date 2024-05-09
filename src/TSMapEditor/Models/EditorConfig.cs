@@ -29,7 +29,7 @@ namespace TSMapEditor.Models
         public List<BridgeType> Bridges { get; } = new List<BridgeType>();
         public List<ConnectedOverlayType> ConnectedOverlays { get; } = new List<ConnectedOverlayType>();
         public List<TeamTypeFlag> TeamTypeFlags { get; } = new List<TeamTypeFlag>();
-        public Dictionary<int, string> Speeches { get; } = new Dictionary<int, string>();
+        public EvaSpeeches Speeches { get; private set; }
 
         private static readonly Dictionary<string, (int StartIndex, int Count)> TiberiumDefaults = new()
         {
@@ -375,26 +375,24 @@ namespace TSMapEditor.Models
 
         private void ReadSpeeches()
         {
-            Speeches.Clear();
+            // Don't load speeches from the config if we're in YR mode
+            if (Constants.IsRA2YR)
+                return;
+
+            var speeches = new List<EvaSpeech>();
 
             var iniFile = new IniFile(Environment.CurrentDirectory + "/Config/Speeches.ini");
             const string sectionName = "Speeches";
 
-            var keys = iniFile.GetSectionKeys(sectionName);
-            if (keys == null)
-                return;
-
-            foreach (var key in keys)
+            foreach (var kvp in iniFile.GetSection(sectionName).Keys)
             {
-                int id = Conversions.IntFromString(key, -1);
-                if (id == -1)
-                {
-                    Logger.Log("Invalid speech entry " + key);
+                if (string.IsNullOrEmpty(kvp.Key))
                     continue;
-                }
 
-                Speeches[id] = iniFile.GetStringValue(sectionName, key, string.Empty);
+                speeches.Add(new EvaSpeech(speeches.Count, kvp.Value, string.Empty));
             }
+
+            Speeches = new EvaSpeeches(speeches.ToArray());
         }
     }
 }
