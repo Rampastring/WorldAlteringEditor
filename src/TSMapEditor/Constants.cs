@@ -1,5 +1,6 @@
 ﻿using Rampastring.Tools;
 using System;
+using System.Collections.Generic;
 
 namespace TSMapEditor
 {
@@ -103,6 +104,35 @@ namespace TSMapEditor
         public const string VeinholeMonsterTypeName = "VEINHOLE";
         public const string VeinholeDummyTypeName = "VEINHOLEDUMMY";
 
+        private static Dictionary<string, string> DefaultFilePaths =>
+            IsRA2YR ? YRDefaultFilePaths : TSDefaultFilePaths;
+
+        private static readonly Dictionary<string, string> TSDefaultFilePaths = new()
+        {
+            { "Rules", "rules.ini" },
+            { "Firestorm", "firestrm.ini" },
+            { "Art", "art.ini" },
+            { "ArtFS", "artfs.ini" },
+            { "AI", "ai.ini" },
+            { "AIFS", "aifs.ini" },
+            { "Tutorial", "tutorial.ini" },
+            { "Theme", "theme.ini" },
+            { "EVA", "" }
+        };
+
+        private static readonly Dictionary<string, string> YRDefaultFilePaths = new()
+        {
+            { "Rules", "rulesmd.ini" },
+            { "Firestorm", "" },
+            { "Art", "artmd.ini" },
+            { "ArtFS", "" },
+            { "AI", "aimd.ini" },
+            { "AIFS", "" },
+            { "Tutorial", "" },
+            { "Theme", "thememd.ini" },
+            { "EVA", "evamd.ini" }
+        };
+
         public static void Init()
         {
             const string ConstantsSectionName = "Constants";
@@ -146,15 +176,15 @@ namespace TSMapEditor
             MapPreviewMaxWidth = constantsIni.GetIntValue(ConstantsSectionName, nameof(MapPreviewMaxWidth), MapPreviewMaxWidth);
             MapPreviewMaxHeight = constantsIni.GetIntValue(ConstantsSectionName, nameof(MapPreviewMaxHeight), MapPreviewMaxHeight);
 
-            RulesIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Rules", "INI/Rules.ini");
-            FirestormIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Firestorm", "INI/Enhance.ini");
-            ArtIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Art", "INI/Art.ini");
-            FirestormArtIniPath = constantsIni.GetStringValue(FilePathsSectionName, "ArtFS", "INI/ArtE.ini");
-            AIIniPath = constantsIni.GetStringValue(FilePathsSectionName, "AI", "INI/AI.ini");
-            FirestormAIIniPath = constantsIni.GetStringValue(FilePathsSectionName, "AIFS", "INI/AIE.ini");
-            TutorialIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Tutorial", "INI/Tutorial.ini");
-            ThemeIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Theme", "INI/Theme.ini");
-            EvaIniPath = constantsIni.GetStringValue(FilePathsSectionName, "EVA", "INI/Eva.ini");
+            RulesIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Rules", DefaultFilePaths["Rules"]);
+            FirestormIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Firestorm", DefaultFilePaths["Firestorm"]);
+            ArtIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Art", DefaultFilePaths["Art"]);
+            FirestormArtIniPath = constantsIni.GetStringValue(FilePathsSectionName, "ArtFS", DefaultFilePaths["ArtFS"]);
+            AIIniPath = constantsIni.GetStringValue(FilePathsSectionName, "AI", DefaultFilePaths["AI"]);
+            FirestormAIIniPath = constantsIni.GetStringValue(FilePathsSectionName, "AIFS", DefaultFilePaths["AIFS"]);
+            TutorialIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Tutorial", DefaultFilePaths["Tutorial"]);
+            ThemeIniPath = constantsIni.GetStringValue(FilePathsSectionName, "Theme", DefaultFilePaths["Theme"]);
+            EvaIniPath = constantsIni.GetStringValue(FilePathsSectionName, "EVA", DefaultFilePaths["EVA"]);
 
             InitUIConstants();
         }
