@@ -1838,6 +1838,7 @@ namespace TSMapEditor.Models
                 4,  // Discovered by player
                 6,  // Attacked by any house
                 7,  // Destroyed by any house
+                29, // Destroyed by anything (not infiltrate)
                 33, // Selected by player
                 34, // Comes near waypoint
                 38, // First damaged (combat only)
