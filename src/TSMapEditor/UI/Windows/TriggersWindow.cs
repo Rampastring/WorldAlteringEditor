@@ -192,6 +192,7 @@ namespace TSMapEditor.UI.Windows
             ddActions.AddItem(new XNADropDownItem() { Text = string.Empty, Selectable = false });
             ddActions.AddItem(new XNADropDownItem() { Text = "Re-generate Trigger IDs", Tag = new Action(RegenerateIDs) });
             ddActions.AddItem(new XNADropDownItem() { Text = "Clone for Easier Difficulties", Tag = new Action(CloneForEasierDifficulties) });
+            ddActions.AddItem(new XNADropDownItem() { Text = "Clone (no dependencies)", Tag = new Action(CloneForEasierDifficultiesWithoutDependencies) });
 
             ddActions.SelectedIndex = 0;
             ddActions.SelectedIndexChanged += DdActions_SelectedIndexChanged;
@@ -569,15 +570,56 @@ namespace TSMapEditor.UI.Windows
                 "and their TaskForces are also created for the easier-difficulty triggers." + Environment.NewLine + Environment.NewLine +
                 "No un-do is available. Do you want to continue?", MessageBoxButtons.YesNo);
 
-            messageBox.YesClickedAction = _ => DoCloneForEasierDifficulties();
+            messageBox.YesClickedAction = _ => DoCloneForEasierDifficulties(true);
         }
 
-        private void DoCloneForEasierDifficulties()
+        private void CloneForEasierDifficultiesWithoutDependencies()
+        {
+            if (editedTrigger == null)
+                return;
+
+            var messageBox = EditorMessageBox.Show(WindowManager,
+                "Are you sure?",
+                "Cloning this trigger for easier difficulties will create duplicate instances" + Environment.NewLine +
+                "of this trigger for Medium and Easy difficulties, replacing Hard-mode globals" + Environment.NewLine +
+                "with respective globals of easier difficulties." + Environment.NewLine + Environment.NewLine +
+                "No un-do is available. Do you want to continue?", MessageBoxButtons.YesNo);
+
+            messageBox.YesClickedAction = _ => DoCloneForEasierDifficulties(false);
+        }
+
+        private void DoCloneForEasierDifficulties(bool cloneDependencies)
         {
             var originalTag = map.Tags.Find(t => t.Trigger == editedTrigger);
 
             var mediumDifficultyTrigger = editedTrigger.Clone(map.GetNewUniqueInternalId());
+            mediumDifficultyTrigger.Hard = false;
+            mediumDifficultyTrigger.Normal = true;
+            mediumDifficultyTrigger.Easy = false;
             map.AddTrigger(mediumDifficultyTrigger);
+
+            var easyDifficultyTrigger = editedTrigger.Clone(map.GetNewUniqueInternalId());
+            easyDifficultyTrigger.Hard = false;
+            easyDifficultyTrigger.Normal = false;
+            easyDifficultyTrigger.Easy = true;
+            map.AddTrigger(easyDifficultyTrigger);
+
+            if (editedTrigger.Name.Contains("Hard"))
+            {
+                mediumDifficultyTrigger.Name = editedTrigger.Name.Replace("Hard", "Medium");
+                easyDifficultyTrigger.Name = editedTrigger.Name.Replace("Hard", "Easy");
+            }
+            else if (editedTrigger.Name.StartsWith("H "))
+            {
+                mediumDifficultyTrigger.Name = "M " + editedTrigger.Name[2..];
+                easyDifficultyTrigger.Name = "E " + editedTrigger.Name[2..];
+            }
+            else if (editedTrigger.Name.EndsWith(" H"))
+            {
+                mediumDifficultyTrigger.Name = editedTrigger.Name[..^2] + " M";
+                easyDifficultyTrigger.Name = editedTrigger.Name[..^2] + " E";
+            }
+
             map.Tags.Add(new Tag()
             {
                 ID = map.GetNewUniqueInternalId(),
@@ -586,8 +628,6 @@ namespace TSMapEditor.UI.Windows
                 Repeating = originalTag == null ? 0 : originalTag.Repeating
             });
 
-            var easyDifficultyTrigger = editedTrigger.Clone(map.GetNewUniqueInternalId());
-            map.AddTrigger(easyDifficultyTrigger);
             map.Tags.Add(new Tag()
             {
                 ID = map.GetNewUniqueInternalId(),
@@ -595,18 +635,6 @@ namespace TSMapEditor.UI.Windows
                 Trigger = easyDifficultyTrigger,
                 Repeating = originalTag == null ? 0 : originalTag.Repeating
             });
-
-            mediumDifficultyTrigger.Name = editedTrigger.Name.Replace("Hard", "Medium");
-            if (editedTrigger.Name.StartsWith("H "))
-                mediumDifficultyTrigger.Name = "M " + editedTrigger.Name[2..];
-            else if (editedTrigger.Name.EndsWith(" H"))
-                mediumDifficultyTrigger.Name = editedTrigger.Name[..^2] + " M";
-
-            easyDifficultyTrigger.Name = editedTrigger.Name.Replace("Hard", "Easy");
-            if (editedTrigger.Name.StartsWith("H "))
-                easyDifficultyTrigger.Name = "E " + editedTrigger.Name[2..];
-            else if (editedTrigger.Name.EndsWith(" H"))
-                easyDifficultyTrigger.Name = editedTrigger.Name[..^2] + " E";
 
             int mediumDiffGlobalVariableIndex = map.Rules.GlobalVariables.FindIndex(gv => gv.Name == "Difficulty Medium");
             int easyDiffGlobalVariableIndex = map.Rules.GlobalVariables.FindIndex(gv => gv.Name == "Difficulty Easy");
@@ -649,47 +677,66 @@ namespace TSMapEditor.UI.Windows
                 }
             }
 
-            // Go through used actions. If they refer to any TeamTypes, clone the
-            // TeamTypes and replace the references
-            for (int i = 0; i < editedTrigger.Actions.Count; i++)
+            if (cloneDependencies)
             {
-                TriggerAction action = editedTrigger.Actions[i];
+                // Go through used actions and their parameters.
+                // If they refer to any TeamTypes, clone the TeamTypes and replace the references.
 
-                TriggerActionType triggerActionType = map.EditorConfig.TriggerActionTypes[action.ActionIndex];
+                var clonedTeamTypes = new List<(TeamType Hard, TeamType Medium, TeamType Easy)>();
 
-                for (int j = 0; j < triggerActionType.Parameters.Length; j++)
+                for (int i = 0; i < editedTrigger.Actions.Count; i++)
                 {
-                    var param = triggerActionType.Parameters[j];
+                    TriggerAction action = editedTrigger.Actions[i];
 
-                    if (param != null && param.TriggerParamType == TriggerParamType.TeamType)
+                    TriggerActionType triggerActionType = map.EditorConfig.TriggerActionTypes[action.ActionIndex];
+
+                    for (int j = 0; j < triggerActionType.Parameters.Length; j++)
                     {
-                        TeamType teamType = map.TeamTypes.Find(tt => tt.ININame == action.ParamToString(j));
+                        var param = triggerActionType.Parameters[j];
 
-                        if (teamType != null && teamType.TaskForce != null)
+                        if (param != null && param.TriggerParamType == TriggerParamType.TeamType)
                         {
-                            TaskForce mediumTaskForce = teamType.TaskForce.Clone(map.GetNewUniqueInternalId());
-                            map.AddTaskForce(mediumTaskForce);
+                            TeamType teamType = map.TeamTypes.Find(tt => tt.ININame == action.ParamToString(j));
 
-                            TaskForce easyTaskForce = teamType.TaskForce.Clone(map.GetNewUniqueInternalId());
-                            map.AddTaskForce(easyTaskForce);
+                            if (teamType != null && teamType.TaskForce != null)
+                            {
+                                var existingEntry = clonedTeamTypes.Find(entry => entry.Hard == teamType);
 
-                            mediumTaskForce.Name = teamType.TaskForce.Name.Replace("H ", "M ").Replace(" H", " M").Replace("Hard", "Medium");
-                            easyTaskForce.Name = teamType.TaskForce.Name.Replace("H ", "E ").Replace(" H", " E").Replace("Hard", "Easy");
+                                // Do not clone the same team multiple times if it's used in multiple actions or multiple parameters
+                                if (existingEntry.Hard != null)
+                                {
+                                    mediumDifficultyTrigger.Actions[i].Parameters[j] = existingEntry.Medium.ININame;
+                                    easyDifficultyTrigger.Actions[i].Parameters[j] = existingEntry.Easy.ININame;
+                                }
+                                else
+                                {
+                                    TaskForce mediumTaskForce = teamType.TaskForce.Clone(map.GetNewUniqueInternalId());
+                                    map.AddTaskForce(mediumTaskForce);
 
-                            TeamType mediumTeamType = teamType.Clone(map.GetNewUniqueInternalId());
-                            map.AddTeamType(mediumTeamType);
+                                    TaskForce easyTaskForce = teamType.TaskForce.Clone(map.GetNewUniqueInternalId());
+                                    map.AddTaskForce(easyTaskForce);
 
-                            TeamType easyTeamType = teamType.Clone(map.GetNewUniqueInternalId());
-                            map.AddTeamType(easyTeamType);
+                                    mediumTaskForce.Name = teamType.TaskForce.Name.Replace("H ", "M ").Replace(" H", " M").Replace("Hard", "Medium");
+                                    easyTaskForce.Name = teamType.TaskForce.Name.Replace("H ", "E ").Replace(" H", " E").Replace("Hard", "Easy");
 
-                            mediumTeamType.Name = teamType.Name.Replace("H ", "M ").Replace(" H", " M").Replace("Hard", "Medium");
-                            easyTeamType.Name = teamType.Name.Replace("H ", "E ").Replace(" H", " E").Replace("Hard", "Easy");
+                                    TeamType mediumTeamType = teamType.Clone(map.GetNewUniqueInternalId());
+                                    map.AddTeamType(mediumTeamType);
 
-                            mediumTeamType.TaskForce = mediumTaskForce;
-                            easyTeamType.TaskForce = easyTaskForce;
+                                    TeamType easyTeamType = teamType.Clone(map.GetNewUniqueInternalId());
+                                    map.AddTeamType(easyTeamType);
 
-                            mediumDifficultyTrigger.Actions[i].Parameters[j] = mediumTeamType.ININame;
-                            easyDifficultyTrigger.Actions[i].Parameters[j] = easyTeamType.ININame;
+                                    mediumTeamType.Name = teamType.Name.Replace("H ", "M ").Replace(" H", " M").Replace("Hard", "Medium");
+                                    easyTeamType.Name = teamType.Name.Replace("H ", "E ").Replace(" H", " E").Replace("Hard", "Easy");
+
+                                    mediumTeamType.TaskForce = mediumTaskForce;
+                                    easyTeamType.TaskForce = easyTaskForce;
+
+                                    mediumDifficultyTrigger.Actions[i].Parameters[j] = mediumTeamType.ININame;
+                                    easyDifficultyTrigger.Actions[i].Parameters[j] = easyTeamType.ININame;
+
+                                    clonedTeamTypes.Add(new (teamType, mediumTeamType, easyTeamType));
+                                }
+                            }
                         }
                     }
                 }
