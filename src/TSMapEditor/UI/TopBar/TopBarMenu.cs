@@ -11,8 +11,8 @@ using TSMapEditor.UI.CursorActions;
 using TSMapEditor.UI.Windows;
 using TSMapEditor.Models.Enums;
 using Rampastring.Tools;
-
-
+using System.Diagnostics;
+using System.ComponentModel;
 
 #if WINDOWS
 using System.Windows.Forms;
@@ -84,6 +84,8 @@ namespace TSMapEditor.UI.TopBar
             fileContextMenu.AddItem(" ", null, () => false, null, null);
             fileContextMenu.AddItem("Extract Megamap...", ExtractMegamap);
             fileContextMenu.AddItem("Generate Map Preview...", WriteMapPreview);
+            fileContextMenu.AddItem(" ", null, () => false, null, null, null);
+            fileContextMenu.AddItem("Open With Text Editor", OpenWithTextEditor);
             fileContextMenu.AddItem(" ", null, () => false, null, null);
             fileContextMenu.AddItem("Exit", WindowManager.CloseGame);
 
@@ -310,6 +312,56 @@ namespace TSMapEditor.UI.TopBar
                 "you save the map.", Windows.MessageBoxButtons.YesNo);
 
             messageBox.YesClickedAction = _ => mapView.AddPreviewToMap();
+        }
+
+        private void OpenWithTextEditor()
+        {
+            string textEditorPath = UserSettings.Instance.TextEditorPath;
+
+            if (string.IsNullOrWhiteSpace(textEditorPath) || !File.Exists(textEditorPath))
+            {
+                textEditorPath = GetDefaultTextEditorPath();
+
+                if (textEditorPath == null)
+                {
+                    EditorMessageBox.Show(WindowManager, "No text editor found!", "No valid text editor has been configured and no default choice was found.", Windows.MessageBoxButtons.OK);
+                    return;
+                }
+            }
+
+            try
+            {
+                Process.Start(textEditorPath, map.LoadedINI.FileName);
+            }
+            catch (Exception ex) when (ex is Win32Exception || ex is ObjectDisposedException)
+            {
+                Logger.Log("Failed to launch text editor! Message: " + ex.Message);
+                EditorMessageBox.Show(WindowManager, "Failed to launch text editor",
+                    "An error occurred when trying to open the map file with the text editor." + Environment.NewLine + Environment.NewLine +
+                    "Received error was: " + ex.Message, Windows.MessageBoxButtons.OK);
+            }
+        }
+
+        private string GetDefaultTextEditorPath()
+        {
+            string programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+            string programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
+
+            var pathsToSearch = new[]
+            {
+                Path.Combine(programFiles, "Notepad++", "notepad++.exe"),
+                Path.Combine(programFilesX86, "Notepad++", "notepad++.exe"),
+                Path.Combine(programFiles, "Microsoft VS Code", "vscode.exe"),
+                Path.Combine(Environment.SystemDirectory, "notepad.exe"),
+            };
+
+            foreach (string path in pathsToSearch)
+            {
+                if (File.Exists(path))
+                    return path;
+            }
+
+            return null;
         }
 
         private void ManageBaseNodes_Selected()
