@@ -63,7 +63,7 @@ namespace TSMapEditor.Models
         public TeamType PrimaryTeam { get; set; }
         public string OwnerName { get; set; }
         public int TechLevel { get; set; }
-        public AITriggerConditionType ConditionType { get; set; }
+        public AITriggerConditionType ConditionType { get; set; } = AITriggerConditionType.None;
         public string ConditionObjectString { get; set; }
 
         /// <summary>
@@ -73,9 +73,9 @@ namespace TSMapEditor.Models
         /// </summary>
         public string LoadedComparatorString { get; set; }
         public AITriggerComparator Comparator { get; set; }
-        public double InitialWeight { get; set; }
-        public double MinimumWeight { get; set; }
-        public double MaximumWeight { get; set; }
+        public double InitialWeight { get; set; } = 50.0;
+        public double MinimumWeight { get; set; } = 30.0;
+        public double MaximumWeight { get; set; } = 70.0;
         public bool EnabledInMultiplayer { get; set; }
         public bool Unused { get; set; }
 
