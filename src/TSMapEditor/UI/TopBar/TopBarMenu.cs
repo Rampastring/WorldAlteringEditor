@@ -85,7 +85,7 @@ namespace TSMapEditor.UI.TopBar
             fileContextMenu.AddItem("Extract Megamap...", ExtractMegamap);
             fileContextMenu.AddItem("Generate Map Preview...", WriteMapPreview);
             fileContextMenu.AddItem(" ", null, () => false, null, null, null);
-            fileContextMenu.AddItem("Open With Text Editor", OpenWithTextEditor);
+            fileContextMenu.AddItem("Open With Text Editor", OpenWithTextEditor, () => !string.IsNullOrWhiteSpace(map.LoadedINI.FileName));
             fileContextMenu.AddItem(" ", null, () => false, null, null);
             fileContextMenu.AddItem("Exit", WindowManager.CloseGame);
 
