@@ -1898,7 +1898,13 @@ namespace TSMapEditor.UI.Windows
                         return houses[intValue].XNAColor;
                     }
                     goto case TriggerParamType.Unused;
-
+                case TriggerParamType.TeamType:
+                    var teamType = map.TeamTypes.Find(tt => tt.ININame == paramValue);
+                    if (teamType != null)
+                    {
+                        return Helpers.GetHouseTypeUITextColor(teamType.HouseType);
+                    }
+                    goto case TriggerParamType.Unused;
                 case TriggerParamType.Unused:
                 default:
                     return UISettings.ActiveSettings.AltColor;
