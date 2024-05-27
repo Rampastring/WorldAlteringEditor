@@ -301,6 +301,7 @@ namespace TSMapEditor.UI.Windows
         private void ListHouses()
         {
             ddHouse.Items.Clear();
+            ddHouse.AddItem(Constants.NoneValue1);
             map.GetHouseTypes().ForEach(ht => ddHouse.AddItem(ht.ININame, ht.XNAColor));
         }
 
@@ -368,7 +369,7 @@ namespace TSMapEditor.UI.Windows
 
             tbName.Text = editedTeamType.Name;
             ddVeteranLevel.SelectedIndex = editedTeamType.VeteranLevel - 1;
-            ddHouse.SelectedIndex = ddHouse.Items.FindIndex(i => i.Text == (editedTeamType.HouseType == null ? "" : editedTeamType.HouseType.ININame));
+            ddHouse.SelectedIndex = ddHouse.Items.FindIndex(i => i.Text == (editedTeamType.HouseType == null ? Constants.NoneValue1 : editedTeamType.HouseType.ININame));
             tbPriority.Value = editedTeamType.Priority;
             tbMax.Value = editedTeamType.Max;
             tbTechLevel.Value = editedTeamType.TechLevel;
@@ -455,8 +456,17 @@ namespace TSMapEditor.UI.Windows
 
         private void DdHouse_SelectedIndexChanged(object sender, EventArgs e)
         {
-            editedTeamType.HouseType = map.GetHouseTypes()[ddHouse.SelectedIndex];
-            lbTeamTypes.SelectedItem.TextColor = editedTeamType.HouseType.XNAColor;
+            if (ddHouse.SelectedItem == null || ddHouse.SelectedIndex == 0)
+            {
+                editedTeamType.HouseType = null;
+            }
+            else
+            {
+                // Select with offset of -1 because the first item of ddHouse is <none>
+                editedTeamType.HouseType = map.GetHouseTypes()[ddHouse.SelectedIndex - 1];
+            }
+
+            lbTeamTypes.SelectedItem.TextColor = Helpers.GetHouseTypeUITextColor(editedTeamType.HouseType);
         }
 
         private void DdVeteranLevel_SelectedIndexChanged(object sender, EventArgs e)

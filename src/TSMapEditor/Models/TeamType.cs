@@ -142,10 +142,15 @@ namespace TSMapEditor.Models
 
             if (HouseType != null)
                 iniSection.SetStringValue("House", HouseType.ININame);
+            else
+                iniSection.SetStringValue("House", Constants.NoneValue1);
+
             if (Script != null)
                 iniSection.SetStringValue("Script", Script.ININame);
+
             if (TaskForce != null)
                 iniSection.SetStringValue("TaskForce", TaskForce.ININame);
+
             if (Tag != null)
                 iniSection.SetStringValue("Tag", Tag.ID);
 
