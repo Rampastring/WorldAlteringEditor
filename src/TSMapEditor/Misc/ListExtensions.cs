@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace TSMapEditor.Misc
 {
@@ -22,6 +23,14 @@ namespace TSMapEditor.Misc
                 return default;
 
             return list[index];
+        }
+
+        /// <summary>
+        /// Fetches a random element from the list using the provided Random instance.
+        /// </summary>
+        public static T GetRandomElement<T>(this List<T> list, Random random)
+        {
+            return list[random.Next(0, list.Count)];
         }
     }
 

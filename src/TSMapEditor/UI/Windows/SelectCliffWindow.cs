@@ -1,14 +1,15 @@
 ﻿using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
+using System.Linq;
 using TSMapEditor.Models;
 using TSMapEditor.UI.Controls;
 
 namespace TSMapEditor.UI.Windows
 {
-    public class SelectBridgeWindow : SelectObjectWindow<BridgeType>
+    public class SelectCliffWindow : SelectObjectWindow<CliffType>
     {
-        public SelectBridgeWindow(WindowManager windowManager, Map map) : base(windowManager)
+        public SelectCliffWindow(WindowManager windowManager, Map map) : base(windowManager)
         {
             this.map = map;
         }
@@ -17,7 +18,7 @@ namespace TSMapEditor.UI.Windows
 
         public override void Initialize()
         {
-            Name = nameof(SelectBridgeWindow);
+            Name = nameof(SelectCliffWindow);
             base.Initialize();
         }
 
@@ -29,7 +30,7 @@ namespace TSMapEditor.UI.Windows
                 return;
             }
 
-            SelectedObject = (BridgeType)lbObjectList.SelectedItem.Tag;
+            SelectedObject = (CliffType)lbObjectList.SelectedItem.Tag;
         }
 
         public void Open()
@@ -41,9 +42,10 @@ namespace TSMapEditor.UI.Windows
         {
             lbObjectList.Clear();
 
-            foreach (BridgeType bridge in map.EditorConfig.Bridges)
+            foreach (CliffType cliff in map.EditorConfig.Cliffs.Where(cliff =>
+                         cliff.AllowedTheaters.Exists(theaterName => theaterName.Equals(map.TheaterName, StringComparison.OrdinalIgnoreCase))))
             {
-                lbObjectList.AddItem(new XNAListBoxItem() { Text = bridge.Name, Tag = bridge });
+                lbObjectList.AddItem(new XNAListBoxItem() { Text = cliff.Name, Tag = cliff });
             }
         }
     }
