@@ -1447,7 +1447,13 @@ namespace TSMapEditor.Rendering
 
             TerrainObjectTextures = null;
             BuildingTextures = null;
+            BuildingTurretModels = null;
+            BuildingBarrelModels = null;
             UnitTextures = null;
+            UnitModels = null;
+            UnitTurretModels = null;
+            UnitBarrelModels = null;
+            AircraftModels = null;
             InfantryTextures = null;
             OverlayTextures = null;
             SmudgeTextures = null;
