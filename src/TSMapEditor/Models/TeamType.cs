@@ -30,7 +30,7 @@ namespace TSMapEditor.Models
         public string TransportWaypoint { get; set; }
         public int? MindControlDecision { get; set; }
         public int TechLevel { get; set; }
-        public int VeteranLevel { get; set; }
+        public int VeteranLevel { get; set; } = 1;
 
         [INI(false)]
         public List<string> EnabledTeamTypeFlags { get; private set; } = new List<string>();
