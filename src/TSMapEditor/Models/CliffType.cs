@@ -108,7 +108,7 @@ namespace TSMapEditor.Models
         /// Distance to end node
         /// </summary>
         public float HScore => Vector2.Distance(Destination.ToXNAVector(), ExitCoords.ToXNAVector());
-        public float FScore => GScore * 0.8f + HScore;
+        public float FScore => GScore * 0.7f + HScore;
 
         /// <summary>
         /// Previous node

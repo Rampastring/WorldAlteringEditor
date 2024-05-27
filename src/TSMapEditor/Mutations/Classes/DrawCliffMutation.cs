@@ -1,6 +1,7 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using TSMapEditor.GameMath;
 using TSMapEditor.Misc;
@@ -44,12 +45,12 @@ namespace TSMapEditor.Mutations.Classes
         private readonly List<Point2D> cliffPath;
         private readonly CliffType cliffType;
         private readonly CliffSide startingSide;
-        
+
         private readonly int originLevel;
         private readonly Random random;
 
         private CliffAStarNode lastNode;
-        private const int MaxIterations = 50;
+        private const int MaxTimeInMilliseconds = 10;
 
         public override void Perform()
         {
@@ -84,27 +85,23 @@ namespace TSMapEditor.Mutations.Classes
                 lastNode.Destination = end;
             }
 
-            int iterations = 0;
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             openSet.Enqueue(lastNode, lastNode.FScore);
 
             while (openSet.Count > 0)
             {
                 CliffAStarNode currentNode = openSet.Dequeue();
                 openSet.EnqueueRange(currentNode.GetNextNodes(cliffType.Tiles).Select(node => (node, node.FScore)));
-                
+
                 if (currentNode.HScore < bestDistance)
                 {
                     bestNode = currentNode;
                     bestDistance = currentNode.HScore;
-                    iterations = 0;
-                }
-                else
-                {
-                    iterations++;
+                    stopwatch.Restart();
                 }
 
-
-                if (bestDistance == 0 || iterations > MaxIterations)
+                if (bestDistance == 0 || stopwatch.ElapsedMilliseconds > MaxTimeInMilliseconds)
                     break;
             }
 
