@@ -28,9 +28,13 @@ namespace TSMapEditor.Misc
         /// <summary>
         /// Fetches a random element from the list using the provided Random instance.
         /// </summary>
-        public static T GetRandomElement<T>(this List<T> list, Random random)
+        public static int GetRandomElementIndex<T>(this List<T> list, Random random, int disallowedIndex)
         {
-            return list[random.Next(0, list.Count)];
+            int randomIndex = random.Next(0, list.Count);
+            if (randomIndex == disallowedIndex)
+                randomIndex = (randomIndex + 1) % list.Count;
+
+            return randomIndex;
         }
     }
 

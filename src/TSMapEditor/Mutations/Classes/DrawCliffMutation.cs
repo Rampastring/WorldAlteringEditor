@@ -113,6 +113,9 @@ namespace TSMapEditor.Mutations.Classes
 
         private void PlaceCliffs(CliffAStarNode endNode)
         {
+            CliffTile lastPlacedTile = null;
+            int lastPlacedTileIndex = -1;
+
             var node = endNode;
             while (node != null)
             {
@@ -121,8 +124,25 @@ namespace TSMapEditor.Mutations.Classes
                     var tileSet = MutationTarget.Map.TheaterInstance.Theater.FindTileSet(node.Tile.TileSetName);
                     if (tileSet != null)
                     {
-                        var tileImage = MutationTarget.TheaterGraphics.GetTileGraphics(tileSet.StartTileIndex + node.Tile.IndicesInTileSet.GetRandomElement(random));
+                        int tileIndex;
+
+                        // To avoid visual repetition, do not place the same tile twice consecutively if it can be avoided
+                        if (node.Tile.IndicesInTileSet.Count > 1 && lastPlacedTile == node.Tile)
+                        {
+                            tileIndex = node.Tile.IndicesInTileSet.GetRandomElementIndex(random, lastPlacedTileIndex);
+                        }
+                        else
+                        {
+                            tileIndex = node.Tile.IndicesInTileSet.GetRandomElementIndex(random, -1);
+                        }
+
+                        var tileIndexInSet = node.Tile.IndicesInTileSet[tileIndex];
+                        var tileImage = MutationTarget.TheaterGraphics.GetTileGraphics(tileSet.StartTileIndex + tileIndexInSet);
+
                         PlaceTile(tileImage, new Point2D((int)node.Location.X, (int)node.Location.Y));
+
+                        lastPlacedTileIndex = tileIndex;
+                        lastPlacedTile = node.Tile;
                     }
                     else
                     {
