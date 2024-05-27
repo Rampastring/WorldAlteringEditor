@@ -874,6 +874,11 @@ namespace TSMapEditor.UI.Windows
                     map.Rules.SuperWeaponTypes.ForEach(sw => ctxEventParameterPresetValues.AddItem(sw.GetDisplayString()));
                     ctxEventParameterPresetValues.Open(GetCursorPoint());
                     break;
+                case TriggerParamType.TeamType:
+                    TeamType existingTeamType = map.TeamTypes.Find(tt => tt.ININame == triggerEvent.Parameters[paramIndex]);
+                    selectTeamTypeWindow.IsForEvent = true;
+                    selectTeamTypeWindow.Open(existingTeamType);
+                    break;
                 default:
                     break;
             }
@@ -1173,9 +1178,8 @@ namespace TSMapEditor.UI.Windows
             if (selectTeamTypeWindow.SelectedObject == null)
                 return;
 
-            GetTriggerActionAndParamIndex(out TriggerAction triggerAction, out int paramIndex);
-            triggerAction.Parameters[paramIndex] = selectTeamTypeWindow.SelectedObject.ININame;
-            EditTrigger(editedTrigger);
+            var teamType = selectTeamTypeWindow.SelectedObject;
+            AssignParamValue(selectTeamTypeWindow.IsForEvent, teamType.ININame);
         }
 
         private void GetTriggerActionAndParamIndex(out TriggerAction triggerAction, out int paramIndex)
