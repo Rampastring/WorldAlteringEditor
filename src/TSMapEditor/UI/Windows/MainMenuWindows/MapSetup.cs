@@ -7,6 +7,8 @@ using TSMapEditor.Initialization;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 using TSMapEditor.Extensions;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace TSMapEditor.UI.Windows.MainMenuWindows
 {
@@ -105,6 +107,8 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
 
             TheaterGraphics theaterGraphics = new TheaterGraphics(windowManager.GraphicsDevice, theater, ccFileManager, LoadedMap.Rules);
             LoadedMap.TheaterInstance = theaterGraphics;
+            FillConnectedTileFoundations(theaterGraphics);
+
             MapLoader.PostCheckMap(LoadedMap, theaterGraphics);
 
             EditorGraphics editorGraphics = new EditorGraphics();
@@ -125,6 +129,50 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
             {
                 EditorMessageBox.Show(windowManager, "Errors while loading map",
                     "One or more errors were encountered while loading the map:\r\n\r\n" + errorList, MessageBoxButtons.OK);
+            }
+        }
+
+        /// <summary>
+        /// Automatically fills the foundations of all connected tiles
+        /// for which the foundation has not been specified in the config.
+        /// </summary>
+        private static void FillConnectedTileFoundations(TheaterGraphics theaterGraphics)
+        {
+            foreach (var cliffType in LoadedMap.EditorConfig.Cliffs)
+            {
+                if (!cliffType.AllowedTheaters.Select(at => at.ToUpperInvariant()).Contains(LoadedMap.LoadedTheaterName.ToUpperInvariant()))
+                    break;
+
+                var tiles = cliffType.Tiles;
+                if (tiles.Count == 0)
+                    throw new INIConfigException($"Connected terrain type {cliffType.IniName} has 0 tiles!");
+
+                foreach (var cliffTypeTile in cliffType.Tiles)
+                {
+                    if (cliffTypeTile.IndicesInTileSet.Count == 0)
+                        continue;
+
+                    if (cliffTypeTile.Foundation != null)
+                        continue;
+
+                    cliffTypeTile.Foundation = new HashSet<GameMath.Point2D>();
+
+                    int firstTileIndexWithinSet = cliffTypeTile.IndicesInTileSet[0];
+                    var tileSet = theaterGraphics.Theater.TileSets.Find(ts => ts.SetName == cliffTypeTile.TileSetName);
+                    int totalFirstTileIndex = tileSet.StartTileIndex + firstTileIndexWithinSet;
+
+                    var tile = theaterGraphics.GetTile(totalFirstTileIndex);
+
+                    for (int i = 0; i < tile.SubTileCount; i++)
+                    {
+                        var subTile = tile.GetSubTile(i);
+                        if (subTile == null || subTile.TmpImage == null)
+                            continue;
+
+                        var offset = tile.GetSubTileCoordOffset(i).Value;
+                        cliffTypeTile.Foundation.Add(offset);
+                    }
+                }
             }
         }
     }
