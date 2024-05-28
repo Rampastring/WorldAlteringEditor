@@ -289,6 +289,8 @@ namespace TSMapEditor.Models
 
                 Foundation = foundationString.Split("|").Select(Point2D.FromString).ToHashSet();
             }
+
+            ExtraPriority = -iniSection.GetIntValue("ExtraPriority", 0); // negated because sorting is in ascending order by default, but it's more intuitive to have larger numbers be more important
         }
 
         /// <summary>
@@ -315,6 +317,11 @@ namespace TSMapEditor.Models
         /// Set of all relative cell coordinates this tile occupies
         /// </summary>
         public HashSet<Point2D> Foundation { get; set; }
+
+        /// <summary>
+        /// Extra priority to be used as a secondary key when sorting tiles
+        /// </summary>
+        public int ExtraPriority { get; set; }
 
         public CliffConnectionPoint GetExit(int entryIndex)
         {
