@@ -141,7 +141,7 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
             foreach (var cliffType in LoadedMap.EditorConfig.Cliffs)
             {
                 if (!cliffType.AllowedTheaters.Select(at => at.ToUpperInvariant()).Contains(LoadedMap.LoadedTheaterName.ToUpperInvariant()))
-                    break;
+                    continue;
 
                 var tiles = cliffType.Tiles;
                 if (tiles.Count == 0)
