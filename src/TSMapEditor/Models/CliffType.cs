@@ -248,6 +248,7 @@ namespace TSMapEditor.Models
                 {
                     "front" => CliffSide.Front,
                     "back" => CliffSide.Back,
+                    "" => CliffSide.Front,
                     _ => throw new INIConfigException($"Connected Tile {iniSection.SectionName} has an invalid ConnectionPoint{i}.Side value: {sideString}!")
                 };
 
@@ -344,14 +345,17 @@ namespace TSMapEditor.Models
 
             var allowedTheaters = cliffSection.GetListValue("AllowedTheaters", ',', s => s);
 
-            return new CliffType(iniFile, sectionName, cliffName, allowedTheaters);
+            bool frontOnly = cliffSection.GetBooleanValue("FrontOnly", false);
+
+            return new CliffType(iniFile, sectionName, cliffName, frontOnly, allowedTheaters);
         }
 
-        private CliffType(IniFile iniFile, string iniName, string name, List<string> allowedTheaters)
+        private CliffType(IniFile iniFile, string iniName, string name, bool frontOnly, List<string> allowedTheaters)
         {
             IniName = iniName;
             Name = name;
             AllowedTheaters = allowedTheaters;
+            FrontOnly = frontOnly;
 
             Tiles = new List<CliffTile>();
 
@@ -371,9 +375,10 @@ namespace TSMapEditor.Models
             }
         }
 
-        public string IniName { get; set; }
-        public string Name { get; set; }
+        public string IniName { get; }
+        public string Name { get; }
+        public bool FrontOnly { get; }
         public List<string> AllowedTheaters { get; set; }
-        public List<CliffTile> Tiles { get; set; }
+        public List<CliffTile> Tiles { get; }
     }
 }

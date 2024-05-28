@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
-using TSMapEditor.Models.Enums;
 using TSMapEditor.Mutations.Classes;
 using TSMapEditor.Rendering;
 
@@ -46,7 +45,22 @@ namespace TSMapEditor.UI.CursorActions
 
         public override void DrawPreview(Point2D cellCoords, Point2D cameraTopLeftPoint)
         {
-            const string text = "Click on a cell to place a new vertex.\r\n\r\nENTER to confirm\r\nBackspace to go back one step\r\nTAB to change cliff side\r\nPageUp to raise the cliff, PageDown to lower it\r\nRight-click or ESC to exit";
+            const string mainText = "Click on a cell to place a new vertex.\r\n\r\n" +
+                "ENTER to confirm\r\n" +
+                "Backspace to go back one step\r\n";
+
+            const string tabText = "TAB to toggle between front and back sides\r\n";
+            const string pageUpDownText = "PageUp to raise the cliff, PageDown to lower it\r\n";
+            const string exitText = "Right-click or ESC to exit";
+
+            string text = (Constants.IsFlatWorld, cliffType.FrontOnly) switch
+            {
+                (true, true) => mainText + exitText,
+                (true, false) => mainText + tabText + exitText,
+                (false, true) => mainText + pageUpDownText + exitText,
+                (false, false) => mainText + tabText + pageUpDownText + exitText
+            };
+
             DrawText(cellCoords, cameraTopLeftPoint, 60, -150, text, Color.Yellow);
 
             Func<Point2D, Map, Point2D> getCellCenterPoint = Is2DMode ? CellMath.CellCenterPointFromCellCoords : CellMath.CellCenterPointFromCellCoords_3D;
@@ -92,8 +106,11 @@ namespace TSMapEditor.UI.CursorActions
             }
             else if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.Tab)
             {
-                cliffSide = cliffSide == CliffSide.Front ? CliffSide.Back : CliffSide.Front;
-                RedrawPreview();
+                if (!cliffType.FrontOnly)
+                {
+                    cliffSide = cliffSide == CliffSide.Front ? CliffSide.Back : CliffSide.Front;
+                    RedrawPreview();
+                }
 
                 e.Handled = true;
             }
@@ -108,25 +125,31 @@ namespace TSMapEditor.UI.CursorActions
             }
             else if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.PageUp)
             {
-                if (cliffPath.Count > 0)
+                if (!Constants.IsFlatWorld)
                 {
-                    if (MutationTarget.Map.GetTile(cliffPath[0]).Level + extraHeight + 1 <= Constants.MaxMapHeightLevel)
-                        extraHeight++;
-                }
+                    if (cliffPath.Count > 0)
+                    {
+                        if (MutationTarget.Map.GetTile(cliffPath[0]).Level + extraHeight + 1 <= Constants.MaxMapHeightLevel)
+                            extraHeight++;
+                    }
 
-                RedrawPreview();
+                    RedrawPreview();
+                }
 
                 e.Handled = true;
             }
             else if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.PageDown)
             {
-                if (cliffPath.Count > 0)
+                if (!Constants.IsFlatWorld)
                 {
-                    if (MutationTarget.Map.GetTile(cliffPath[0]).Level + extraHeight - 1 >= 0)
-                        extraHeight--;
-                }
+                    if (cliffPath.Count > 0)
+                    {
+                        if (MutationTarget.Map.GetTile(cliffPath[0]).Level + extraHeight - 1 >= 0)
+                            extraHeight--;
+                    }
 
-                RedrawPreview();
+                    RedrawPreview();
+                }
 
                 e.Handled = true;
             }
