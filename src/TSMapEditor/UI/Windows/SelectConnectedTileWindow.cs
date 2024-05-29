@@ -3,13 +3,12 @@ using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Linq;
 using TSMapEditor.Models;
-using TSMapEditor.UI.Controls;
 
 namespace TSMapEditor.UI.Windows
 {
-    public class SelectCliffWindow : SelectObjectWindow<CliffType>
+    public class SelectConnectedTileWindow : SelectObjectWindow<CliffType>
     {
-        public SelectCliffWindow(WindowManager windowManager, Map map) : base(windowManager)
+        public SelectConnectedTileWindow(WindowManager windowManager, Map map) : base(windowManager)
         {
             this.map = map;
         }
@@ -18,7 +17,7 @@ namespace TSMapEditor.UI.Windows
 
         public override void Initialize()
         {
-            Name = nameof(SelectCliffWindow);
+            Name = nameof(SelectConnectedTileWindow);
             base.Initialize();
         }
 

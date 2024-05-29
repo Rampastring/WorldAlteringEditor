@@ -52,7 +52,7 @@ namespace TSMapEditor.UI.TopBar
         private PlaceVeinholeMonsterCursorAction placeVeinholeMonsterCursorAction;
 
         private SelectBridgeWindow selectBridgeWindow;
-        private SelectCliffWindow selectCliffWindow;
+        private SelectConnectedTileWindow selectConnectedTileWindow;
 
         public override void Initialize()
         {
@@ -71,9 +71,9 @@ namespace TSMapEditor.UI.TopBar
             var selectBridgeDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectBridgeWindow);
             selectBridgeDarkeningPanel.Hidden += SelectBridgeDarkeningPanel_Hidden;
 
-            selectCliffWindow = new SelectCliffWindow(WindowManager, map);
-            var selectCliffDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectCliffWindow);
-            selectCliffDarkeningPanel.Hidden += SelectCliffDarkeningPanel_Hidden;
+            selectConnectedTileWindow = new SelectConnectedTileWindow(WindowManager, map);
+            var selectConnectedTileDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectConnectedTileWindow);
+            selectConnectedTileDarkeningPanel.Hidden += SelectConnectedTileDarkeningPanel_Hidden;
 
             var fileContextMenu = new EditorContextMenu(WindowManager);
             fileContextMenu.Name = nameof(fileContextMenu);
@@ -145,7 +145,7 @@ namespace TSMapEditor.UI.TopBar
                 }
                 else
                 {
-                    editContextMenu.AddItem("Draw Connected Tiles...", () => selectCliffWindow.Open(), null, null, null);
+                    editContextMenu.AddItem("Draw Connected Tiles...", () => selectConnectedTileWindow.Open(), null, null, null);
                 }
             }
 
@@ -430,10 +430,10 @@ namespace TSMapEditor.UI.TopBar
                 mapView.EditorState.CursorAction = new PlaceBridgeCursorAction(mapView, selectBridgeWindow.SelectedObject);
         }
 
-        private void SelectCliffDarkeningPanel_Hidden(object sender, EventArgs e)
+        private void SelectConnectedTileDarkeningPanel_Hidden(object sender, EventArgs e)
         {
-            if (selectCliffWindow.SelectedObject != null)
-                mapView.EditorState.CursorAction = new DrawCliffCursorAction(mapView, selectCliffWindow.SelectedObject);
+            if (selectConnectedTileWindow.SelectedObject != null)
+                mapView.EditorState.CursorAction = new DrawCliffCursorAction(mapView, selectConnectedTileWindow.SelectedObject);
         }
 
         private void Open()
