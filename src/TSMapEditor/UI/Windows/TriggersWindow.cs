@@ -444,6 +444,18 @@ namespace TSMapEditor.UI.Windows
                             throw new NotImplementedException("Unknown RTTI type encountered when listing linked objects for a trigger.");
                     }
                 });
+
+                stringBuilder.Append(Environment.NewLine);
+            }
+
+            var teamTypes = map.TeamTypes.FindAll(tt => tt.Tag == tag);
+            if (teamTypes.Count > 0)
+            {
+                foreach (var teamType in teamTypes)
+                {
+                    stringBuilder.Append($"The trigger is linked to TeamType '{teamType.Name}' ({teamType.ININame}).");
+                    stringBuilder.Append(Environment.NewLine);
+                }
             }
 
             var celltag = map.CellTags.Find(ct => ct.Tag == tag);
