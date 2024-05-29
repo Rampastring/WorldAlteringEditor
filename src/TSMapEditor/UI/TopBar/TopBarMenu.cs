@@ -145,7 +145,7 @@ namespace TSMapEditor.UI.TopBar
                 }
                 else
                 {
-                    editContextMenu.AddItem("Draw Connected Tiles...", () => selectConnectedTileWindow.Open(), null, null, null);
+                    editContextMenu.AddItem("Draw Connected Tiles...", () => selectConnectedTileWindow.Open(), null, null, null, KeyboardCommands.Instance.PlaceConnectedTile.GetKeyDisplayString());
                 }
             }
 
@@ -260,6 +260,7 @@ namespace TSMapEditor.UI.TopBar
             KeyboardCommands.Instance.GenerateTerrain.Triggered += (s, e) => EnterTerrainGenerator();
             KeyboardCommands.Instance.ConfigureTerrainGenerator.Triggered += (s, e) => windowController.TerrainGeneratorConfigWindow.Open();
             KeyboardCommands.Instance.PlaceTunnel.Triggered += (s, e) => mapView.EditorState.CursorAction = placeTubeCursorAction;
+            KeyboardCommands.Instance.PlaceConnectedTile.Triggered += (s, e) => selectConnectedTileWindow.Open();
             KeyboardCommands.Instance.Save.Triggered += (s, e) => SaveMap(); 
         }
 
