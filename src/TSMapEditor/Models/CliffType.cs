@@ -108,7 +108,7 @@ namespace TSMapEditor.Models
         /// Distance to end node
         /// </summary>
         public float HScore => Vector2.Distance(Destination.ToXNAVector(), ExitCoords.ToXNAVector());
-        public float FScore => GScore * 0.7f + HScore;
+        public float FScore => GScore * 0.7f + HScore + (Tile?.DistanceModifier ?? 0);
 
         /// <summary>
         /// Previous node
@@ -292,6 +292,7 @@ namespace TSMapEditor.Models
             }
 
             ExtraPriority = -iniSection.GetIntValue("ExtraPriority", 0); // negated because sorting is in ascending order by default, but it's more intuitive to have larger numbers be more important
+            DistanceModifier = iniSection.GetIntValue("DistanceModifier", 0);
         }
 
         /// <summary>
@@ -323,6 +324,11 @@ namespace TSMapEditor.Models
         /// Extra priority to be used as a secondary key when sorting tiles
         /// </summary>
         public int ExtraPriority { get; set; }
+
+        /// <summary>
+        /// A distance modifier added directly to the FScore. Use with caution!
+        /// </summary>
+        public int DistanceModifier { get; set; }
 
         public CliffConnectionPoint GetExit(int entryIndex)
         {
