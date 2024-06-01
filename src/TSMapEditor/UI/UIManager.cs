@@ -158,7 +158,7 @@ namespace TSMapEditor.UI
             AddChild(topBarMenu);
 
             var editorControlsPanel = new EditorControlsPanel(WindowManager, map, theaterGraphics,
-                map.EditorConfig, editorState, placeTerrainCursorAction, placeWaypointCursorAction, mapView);
+                map.EditorConfig, editorState, windowController, placeTerrainCursorAction, placeWaypointCursorAction, mapView);
             editorControlsPanel.X = topBarMenu.Right;
             AddChild(editorControlsPanel);
 

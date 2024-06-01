@@ -52,7 +52,6 @@ namespace TSMapEditor.UI.TopBar
         private PlaceVeinholeMonsterCursorAction placeVeinholeMonsterCursorAction;
 
         private SelectBridgeWindow selectBridgeWindow;
-        private SelectConnectedTileWindow selectConnectedTileWindow;
 
         public override void Initialize()
         {
@@ -71,9 +70,7 @@ namespace TSMapEditor.UI.TopBar
             var selectBridgeDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectBridgeWindow);
             selectBridgeDarkeningPanel.Hidden += SelectBridgeDarkeningPanel_Hidden;
 
-            selectConnectedTileWindow = new SelectConnectedTileWindow(WindowManager, map);
-            var selectConnectedTileDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectConnectedTileWindow);
-            selectConnectedTileDarkeningPanel.Hidden += SelectConnectedTileDarkeningPanel_Hidden;
+            windowController.SelectConnectedTileWindow.ObjectSelected += SelectConnectedTileWindow_ObjectSelected;
 
             var fileContextMenu = new EditorContextMenu(WindowManager);
             fileContextMenu.Name = nameof(fileContextMenu);
@@ -145,7 +142,7 @@ namespace TSMapEditor.UI.TopBar
                 }
                 else
                 {
-                    editContextMenu.AddItem("Draw Connected Tiles...", () => selectConnectedTileWindow.Open(), null, null, null, KeyboardCommands.Instance.PlaceConnectedTile.GetKeyDisplayString());
+                    editContextMenu.AddItem("Draw Connected Tiles...", () => windowController.SelectConnectedTileWindow.Open(), null, null, null, KeyboardCommands.Instance.PlaceConnectedTile.GetKeyDisplayString());
                 }
             }
 
@@ -260,8 +257,15 @@ namespace TSMapEditor.UI.TopBar
             KeyboardCommands.Instance.GenerateTerrain.Triggered += (s, e) => EnterTerrainGenerator();
             KeyboardCommands.Instance.ConfigureTerrainGenerator.Triggered += (s, e) => windowController.TerrainGeneratorConfigWindow.Open();
             KeyboardCommands.Instance.PlaceTunnel.Triggered += (s, e) => mapView.EditorState.CursorAction = placeTubeCursorAction;
-            KeyboardCommands.Instance.PlaceConnectedTile.Triggered += (s, e) => selectConnectedTileWindow.Open();
-            KeyboardCommands.Instance.Save.Triggered += (s, e) => SaveMap(); 
+            KeyboardCommands.Instance.PlaceConnectedTile.Triggered += (s, e) => windowController.SelectConnectedTileWindow.Open();
+            KeyboardCommands.Instance.Save.Triggered += (s, e) => SaveMap();
+
+            windowController.TerrainGeneratorConfigWindow.ConfigApplied += TerrainGeneratorConfigWindow_ConfigApplied;
+        }
+
+        private void TerrainGeneratorConfigWindow_ConfigApplied(object sender, EventArgs e)
+        {
+            EnterTerrainGenerator();
         }
 
         private void SaveMap()
@@ -415,9 +419,9 @@ namespace TSMapEditor.UI.TopBar
                 return;
             }
 
-            var generateForestCursorAction = new GenerateTerrainCursorAction(mapView);
-            generateForestCursorAction.TerrainGeneratorConfiguration = windowController.TerrainGeneratorConfigWindow.TerrainGeneratorConfig;
-            mapView.CursorAction = generateForestCursorAction;
+            var generateTerrainCursorAction = new GenerateTerrainCursorAction(mapView);
+            generateTerrainCursorAction.TerrainGeneratorConfiguration = windowController.TerrainGeneratorConfigWindow.TerrainGeneratorConfig;
+            mapView.CursorAction = generateTerrainCursorAction;
         }
 
         private void SelectBridge()
@@ -431,10 +435,9 @@ namespace TSMapEditor.UI.TopBar
                 mapView.EditorState.CursorAction = new PlaceBridgeCursorAction(mapView, selectBridgeWindow.SelectedObject);
         }
 
-        private void SelectConnectedTileDarkeningPanel_Hidden(object sender, EventArgs e)
+        private void SelectConnectedTileWindow_ObjectSelected(object sender, EventArgs e)
         {
-            if (selectConnectedTileWindow.SelectedObject != null)
-                mapView.EditorState.CursorAction = new DrawCliffCursorAction(mapView, selectConnectedTileWindow.SelectedObject);
+            mapView.EditorState.CursorAction = new DrawCliffCursorAction(mapView, windowController.SelectConnectedTileWindow.SelectedObject);
         }
 
         private void Open()
