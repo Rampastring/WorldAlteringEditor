@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Rampastring.Tools;
 using Rampastring.XNAUI;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using TSMapEditor.GameMath;
@@ -214,6 +215,19 @@ namespace TSMapEditor
         };
 
         public static Point2D VisualDirectionToPoint(Direction direction) => visualDirectionToPointTable[(int)direction];
+
+        public static List<Direction> GetDirectionsInMask(byte mask)
+        {
+            List<Direction> directions = new List<Direction>();
+
+            for (int direction = 0; direction < (int)Direction.Count; direction++)
+            {
+                if ((mask & (byte)(0b10000000 >> direction)) > 0)
+                    directions.Add((Direction)direction);
+            }
+
+            return directions;
+        }
 
         /// <summary>
         /// Creates and returns a new UI texture.
