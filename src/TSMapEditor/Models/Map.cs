@@ -99,10 +99,15 @@ namespace TSMapEditor.Models
 
         /// <summary>
         /// The list of standard house types loaded from EditorRules.ini, or Rules.ini as a fallback.
-        /// Relevant when the map itself has no house types specified.
+        /// Relevant only when the map itself has no house types specified.
+        ///
         /// New house types might be added to this list if the map has
         /// objects whose owner does not exist in the map's list of house types
-        /// or in the Rules.ini standard house type list.
+        /// or in the Rules.ini house type list.
+        ///
+        /// In Yuri's Revenge mode, this only contains "bonus house types" defined in EditorRules.ini
+        /// that do not exist in Rules. In YR, this list must be appended into the Rules house type
+        /// list for most use cases (if the map itself has no houses defined; see <see cref="HouseTypes"/>).
         /// </summary>
         public List<HouseType> StandardHouseTypes { get; set; }
         public List<House> StandardHouses { get; set; }
@@ -125,7 +130,7 @@ namespace TSMapEditor.Models
                 if (HouseTypes.Count > 0)
                     return Rules.RulesHouseTypes.Concat(HouseTypes).ToList();
                 else
-                    return StandardHouseTypes;
+                    return Rules.RulesHouseTypes.Concat(StandardHouseTypes).ToList();
             }
             else
             {
@@ -1594,7 +1599,14 @@ namespace TSMapEditor.Models
             if (StandardHouseTypes.Count == 0 && firestormIni != null)
                 StandardHouseTypes = Rules.GetStandardHouseTypes(firestormIni);
 
-            StandardHouses = StandardHouseTypes.Select(ht => HouseFromHouseType(ht)).ToList();
+            if (Constants.IsRA2YR)
+            {
+                StandardHouses = Rules.RulesHouseTypes.Concat(StandardHouseTypes).Select(ht => HouseFromHouseType(ht)).ToList();
+            }
+            else
+            {
+                StandardHouses = StandardHouseTypes.Select(ht => HouseFromHouseType(ht)).ToList();
+            }
         }
 
         public House HouseFromHouseType(HouseType houseType)
