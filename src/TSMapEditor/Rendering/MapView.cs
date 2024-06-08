@@ -332,6 +332,8 @@ namespace TSMapEditor.Rendering
             var mmw = new MegamapWindow(WindowManager, this, false);
             mmw.Width = WindowManager.RenderResolutionX;
             mmw.Height = WindowManager.RenderResolutionY;
+            mmw.DrawOrder = int.MaxValue;
+            mmw.UpdateOrder = int.MaxValue;
             WindowManager.AddAndInitializeControl(mmw);
             InvalidateMapForMinimap();
         }
