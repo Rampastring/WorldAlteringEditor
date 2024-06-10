@@ -358,7 +358,7 @@ namespace TSMapEditor.UI.TopBar
 
             try
             {
-                Process.Start(textEditorPath, map.LoadedINI.FileName);
+                Process.Start(textEditorPath, "\"" + map.LoadedINI.FileName + "\"");
             }
             catch (Exception ex) when (ex is Win32Exception || ex is ObjectDisposedException)
             {
