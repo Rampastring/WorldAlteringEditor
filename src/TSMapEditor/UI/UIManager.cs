@@ -335,6 +335,9 @@ namespace TSMapEditor.UI
 
         private void SetNotificationManagerSizeAndPosition()
         {
+            if (notificationManager == null)
+                return;
+
             notificationManager.X = editorSidebar.X + Constants.UIEmptySideSpace;
             notificationManager.Width = WindowManager.RenderResolutionX - (notificationManager.X * 2);
             notificationManager.Y = 100;
