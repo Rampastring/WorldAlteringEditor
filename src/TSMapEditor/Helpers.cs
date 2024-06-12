@@ -312,8 +312,7 @@ namespace TSMapEditor
 
         public static Point2D ScreenCoordsFromWorldLeptons(Vector2 coords)
         {
-            const int cellSideInLeptons = 256;
-            coords /= cellSideInLeptons;
+            coords /= Constants.CellSizeInLeptons;
             int screenX = Convert.ToInt32((coords.X - coords.Y) * Constants.CellSizeX / 2);
             int screenY = Convert.ToInt32((coords.X + coords.Y) * Constants.CellSizeY / 2);
             return new Point2D(screenX, screenY);

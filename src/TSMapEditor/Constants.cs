@@ -9,6 +9,7 @@ namespace TSMapEditor
 
         public static int CellSizeX = 48;
         public static int CellSizeY = 24;
+        public const int CellSizeInLeptons = 256;
         public static int CellHeight => CellSizeY / 2;
         public static int TileColorBufferSize = 576;
 
