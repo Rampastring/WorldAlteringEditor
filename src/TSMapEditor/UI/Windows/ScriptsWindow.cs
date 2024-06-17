@@ -477,6 +477,7 @@ namespace TSMapEditor.UI.Windows
         {
             if (lbScriptTypes.SelectedItem == null)
             {
+                lbScriptTypes.SelectedIndex = -1;
                 EditScript(null);
                 return;
             }

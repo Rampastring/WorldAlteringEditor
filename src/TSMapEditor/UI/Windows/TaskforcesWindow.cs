@@ -328,6 +328,7 @@ namespace TSMapEditor.UI.Windows
             var selectedItem = lbTaskForces.SelectedItem;
             if (selectedItem == null)
             {
+                lbTaskForces.SelectedIndex = -1;
                 EditTaskForce(null);
                 return;
             }
