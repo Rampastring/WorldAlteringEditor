@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Rampastring.Tools;
+using System;
 using System.IO;
 using System.Reflection;
 using TSMapEditor.Models;
@@ -18,6 +19,8 @@ namespace TSMapEditor.Scripts
             if (scriptClassInstance == null || performMethod == null || getSuccessMessageMethod == null)
                 throw new InvalidOperationException("Script not properly compiled!");
 
+            Logger.Log("Running script from " + scriptPath);
+
             try
             {
                 performMethod.Invoke(scriptClassInstance, new object[] { map });
@@ -25,7 +28,19 @@ namespace TSMapEditor.Scripts
             }
             catch (Exception ex) // rare case where catching Exception is OK, we cannot know what the script can throw
             {
-                return "An error occurred while running the script. Returned error message: " + Environment.NewLine + Environment.NewLine + ex.Message;
+                string errorMessage = ex.Message;
+
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                    errorMessage += Environment.NewLine + Environment.NewLine + 
+                        "Inner exception message: " + ex.Message + Environment.NewLine + 
+                        "Stack trace: " + ex.StackTrace;
+                }
+
+                Logger.Log("Exception while running script. Returned exception message: " + errorMessage);
+
+                return "An error occurred while running the script. Returned error message: " + Environment.NewLine + Environment.NewLine + errorMessage;
             }
         }
 
