@@ -158,7 +158,7 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
                     cliffTypeTile.Foundation = new HashSet<GameMath.Point2D>();
 
                     int firstTileIndexWithinSet = cliffTypeTile.IndicesInTileSet[0];
-                    var tileSet = theaterGraphics.Theater.TileSets.Find(ts => ts.SetName == cliffTypeTile.TileSetName);
+                    var tileSet = theaterGraphics.Theater.TileSets.Find(ts => ts.SetName == cliffTypeTile.TileSetName && ts.AllowToPlace);
                     if (tileSet == null)
                     {
                         throw new INIConfigException($"Unable to find TileSet \"{cliffTypeTile.TileSetName}\" " +

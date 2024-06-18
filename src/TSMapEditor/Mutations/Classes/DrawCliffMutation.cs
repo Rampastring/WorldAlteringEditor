@@ -118,7 +118,7 @@ namespace TSMapEditor.Mutations.Classes
             {
                 if (node.Tile != null)
                 {
-                    var tileSet = MutationTarget.Map.TheaterInstance.Theater.FindTileSet(node.Tile.TileSetName);
+                    var tileSet = MutationTarget.Map.TheaterInstance.Theater.TileSets.Find(ts => ts.SetName == node.Tile.TileSetName && ts.AllowToPlace);
                     if (tileSet != null)
                     {
                         int tileIndex;
