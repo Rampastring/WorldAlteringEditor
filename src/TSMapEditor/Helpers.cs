@@ -536,6 +536,12 @@ namespace TSMapEditor
                     continue;
                 }
 
+                if (cell.Level != targetTile.Level)
+                {
+                    tilesToSkip.Add(coords.GetHashCode());
+                    continue;
+                }
+
                 tileGraphics = theaterGraphics.GetTileGraphics(cell.TileIndex);
                 if (tileGraphics.TileSetId != tileSetId)
                 {
