@@ -116,6 +116,7 @@ namespace TSMapEditor.Mutations.Classes
                     {
                         mapTile.ChangeTileIndex(tile.TileID, (byte)i);
                         mapTile.Level = (byte)Math.Min(originLevel + image.TmpImage.Height, Constants.MaxMapHeightLevel);
+                        mapTile.RefreshLighting(Map.Lighting, MutationTarget.LightingPreviewState);
                     }
                 }
             });
@@ -309,6 +310,7 @@ namespace TSMapEditor.Mutations.Classes
                 {
                     mapCell.ChangeTileIndex(originalTerrainData.TileIndex, originalTerrainData.SubTileIndex);
                     mapCell.Level = originalTerrainData.Level;
+                    mapCell.RefreshLighting(Map.Lighting, MutationTarget.LightingPreviewState);
                 }
             }
 

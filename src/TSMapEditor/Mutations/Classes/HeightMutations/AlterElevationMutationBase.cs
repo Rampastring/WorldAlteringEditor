@@ -92,6 +92,8 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
 
             ApplyRamps();
 
+            RefreshLighting();
+
             MutationTarget.InvalidateMap();
         }
 
@@ -118,6 +120,16 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
 
         protected abstract void ApplyRamps();
 
+        private void RefreshLighting()
+        {
+            for (int i = 0; i < totalProcessedCells.Count; i++)
+            {
+                var cellCoords = totalProcessedCells[i];
+                var cell = Map.GetTile(cellCoords);
+                cell.RefreshLighting(Map.Lighting, MutationTarget.LightingPreviewState);
+            }
+        }
+
         public override void Undo()
         {
             foreach (var entry in undoData)
@@ -125,6 +137,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
                 var cell = Map.GetTile(entry.CellCoords);
                 cell.ChangeTileIndex(entry.TileIndex, (byte)entry.SubTileIndex);
                 cell.Level = (byte)entry.HeightLevel;
+                cell.RefreshLighting(Map.Lighting, MutationTarget.LightingPreviewState);
             }
 
             MutationTarget.InvalidateMap();
