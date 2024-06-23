@@ -19,8 +19,9 @@ namespace TSMapEditor.UI.CursorActions.HeightActions
             base.LeftClick(cellCoords);
 
             Point2D targetCellCoords = cellCoords - new Point2D(CursorActionTarget.BrushSize.Width / 2, CursorActionTarget.BrushSize.Height / 2);
+            bool applyOnArea = KeyboardCommands.Instance.FillTerrain.AreKeysOrModifiersDown(CursorActionTarget.WindowManager.Keyboard);
 
-            var mutation = new RaiseCellsMutation(CursorActionTarget.MutationTarget, targetCellCoords, CursorActionTarget.BrushSize);
+            var mutation = new RaiseCellsMutation(CursorActionTarget.MutationTarget, targetCellCoords, CursorActionTarget.BrushSize, applyOnArea);
             CursorActionTarget.MutationManager.PerformMutation(mutation);
         }
     }
