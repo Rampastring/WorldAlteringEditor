@@ -1,10 +1,7 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using Rampastring.XNAUI;
+﻿using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Windows.Forms;
 using TSMapEditor.GameMath;
 using TSMapEditor.Settings;

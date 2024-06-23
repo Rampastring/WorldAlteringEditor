@@ -9,7 +9,6 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using TSMapEditor.GameMath;
-using TSMapEditor.Initialization;
 using TSMapEditor.Misc;
 using TSMapEditor.Models;
 using TSMapEditor.Models.Enums;

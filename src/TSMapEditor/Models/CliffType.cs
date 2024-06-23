@@ -6,7 +6,6 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using TSMapEditor.GameMath;
-using TSMapEditor.UI;
 
 namespace TSMapEditor.Models
 {

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using SharpDX.Direct2D1.Effects;
 using TSMapEditor.GameMath;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI;

@@ -2,7 +2,6 @@ using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
 using TSMapEditor.GameMath;
-using TSMapEditor.UI;
 
 namespace TSMapEditor.Models.ArtConfig
 {

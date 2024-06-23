@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
-using TSMapEditor.Models.Enums;
 using TSMapEditor.Rendering;
 
 namespace TSMapEditor.Mutations.Classes

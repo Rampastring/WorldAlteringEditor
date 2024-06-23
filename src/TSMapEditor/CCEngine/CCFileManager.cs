@@ -2,7 +2,6 @@ using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using TSMapEditor.UI;
 
 namespace TSMapEditor.CCEngine
 {

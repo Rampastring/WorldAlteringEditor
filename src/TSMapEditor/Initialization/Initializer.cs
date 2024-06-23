@@ -5,7 +5,6 @@ using System.Globalization;
 using TSMapEditor.Models;
 using TSMapEditor.Models.ArtConfig;
 using TSMapEditor.Models.Enums;
-using TSMapEditor.UI;
 
 namespace TSMapEditor.Initialization
 {

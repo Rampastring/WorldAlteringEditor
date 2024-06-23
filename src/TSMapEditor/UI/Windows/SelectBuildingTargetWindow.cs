@@ -3,7 +3,6 @@ using Rampastring.XNAUI;
 using System;
 using TSMapEditor.Models;
 using TSMapEditor.CCEngine;
-using Microsoft.Xna.Framework;
 
 namespace TSMapEditor.UI.Windows
 {

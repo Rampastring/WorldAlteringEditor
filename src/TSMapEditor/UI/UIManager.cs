@@ -15,7 +15,6 @@ using TSMapEditor.UI.Sidebar;
 using TSMapEditor.UI.TopBar;
 using TSMapEditor.UI.Windows;
 using TSMapEditor.UI.Windows.MainMenuWindows;
-using TSMapEditor.UI.Windows.TerrainGenerator;
 
 namespace TSMapEditor.UI
 {

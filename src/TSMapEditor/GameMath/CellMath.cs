@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using System;
 using TSMapEditor.Models;
 
 namespace TSMapEditor.GameMath

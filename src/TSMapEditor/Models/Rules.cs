@@ -7,7 +7,6 @@ using System.Linq;
 using TSMapEditor.Extensions;
 using TSMapEditor.Initialization;
 using TSMapEditor.Models.ArtConfig;
-using TSMapEditor.UI;
 
 namespace TSMapEditor.Models
 {

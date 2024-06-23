@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using TSMapEditor.Models;
-using TSMapEditor.UI;
 using TSMapEditor.Extensions;
 using System.Linq;
 

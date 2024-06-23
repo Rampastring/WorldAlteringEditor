@@ -1,4 +1,3 @@
-using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,7 +6,6 @@ using TSMapEditor.GameMath;
 using TSMapEditor.Misc;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
-using TSMapEditor.UI;
 
 namespace TSMapEditor.Mutations.Classes
 {

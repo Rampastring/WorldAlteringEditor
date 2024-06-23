@@ -3,7 +3,6 @@ using Rampastring.Tools;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
-using TSMapEditor.Settings;
 
 namespace TSMapEditor.UI.Controls
 {

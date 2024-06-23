@@ -1,7 +1,6 @@
 ﻿using Rampastring.Tools;
 using System;
 using System.Collections.Generic;
-using TSMapEditor.Initialization;
 using TSMapEditor.Models;
 
 namespace TSMapEditor.Extensions
