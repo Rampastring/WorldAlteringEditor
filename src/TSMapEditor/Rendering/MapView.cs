@@ -120,7 +120,7 @@ namespace TSMapEditor.Rendering
         public BrushSize BrushSize { get => EditorState.BrushSize; set => EditorState.BrushSize = value; }
         public bool Is2DMode => EditorState.Is2DMode;
         public DeletionMode DeletionMode => EditorState.DeletionMode;
-        public LightingPreviewMode LightingPreviewState => EditorState.LightingPreviewState;
+        public LightingPreviewMode LightingPreviewState => EditorState.IsLighting ? LightingPreviewMode.NoLighting : EditorState.LightingPreviewState;
         public Randomizer Randomizer => EditorState.Randomizer;
         public bool AutoLATEnabled => EditorState.AutoLATEnabled;
         public bool OnlyPaintOnClearGround => EditorState.OnlyPaintOnClearGround;

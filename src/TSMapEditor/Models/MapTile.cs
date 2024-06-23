@@ -58,6 +58,12 @@ namespace TSMapEditor.Models
 
         public void RefreshLighting(Lighting lighting, LightingPreviewMode lightingPreviewMode)
         {
+            if (lightingPreviewMode == LightingPreviewMode.NoLighting)
+            {
+                CellLighting = new MapColor(1.0, 1.0, 1.0);
+                return;
+            }
+
             double globalAmbient = lighting.GetAmbientComponent(lightingPreviewMode);
             double globalLevel = lighting.GetLevelComponent(lightingPreviewMode);
             double globalGround = lighting.GetGroundComponent(lightingPreviewMode);
