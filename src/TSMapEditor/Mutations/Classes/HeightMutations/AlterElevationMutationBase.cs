@@ -126,7 +126,7 @@ namespace TSMapEditor.Mutations.Classes.HeightMutations
             {
                 var cellCoords = totalProcessedCells[i];
                 var cell = Map.GetTile(cellCoords);
-                cell.RefreshLighting(Map.Lighting, MutationTarget.LightingPreviewState);
+                cell?.RefreshLighting(Map.Lighting, MutationTarget.LightingPreviewState);
             }
         }
 
