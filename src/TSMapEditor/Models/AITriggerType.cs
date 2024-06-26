@@ -47,7 +47,7 @@ namespace TSMapEditor.Models
         }
     }
 
-    public class AITriggerType
+    public class AITriggerType : IIDContainer
     {
         // [AITriggerTypes]
         // ID=Name,Team1,OwnerHouse,TechLevel,ConditionType,ConditionObject,Comparator,StartingWeight,MinimumWeight,MaximumWeight,IsForSkirmish,unused,Side,IsBaseDefense,Team2,EnabledInE,EnabledInM,EnabledInH
@@ -58,6 +58,9 @@ namespace TSMapEditor.Models
         }
 
         public string ININame { get; private set; }
+
+        public string GetInternalID() => ININame;
+        public void SetInternalID(string internalID) => ININame = internalID;
 
         public string Name { get; set; }
         public TeamType PrimaryTeam { get; set; }

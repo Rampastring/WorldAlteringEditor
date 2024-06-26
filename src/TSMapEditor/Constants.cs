@@ -5,7 +5,7 @@ namespace TSMapEditor
 {
     public static class Constants
     {
-        public const string ReleaseVersion = "1.1.3";
+        public const string ReleaseVersion = "1.1.4";
 
         public static int CellSizeX = 48;
         public static int CellSizeY = 24;

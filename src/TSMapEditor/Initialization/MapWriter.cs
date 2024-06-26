@@ -209,27 +209,29 @@ namespace TSMapEditor.Initialization
             map.Waypoints.ForEach(w => w.WriteToIniFile(mapIni));
         }
 
-        public static void WriteTaskForces(IMap map, IniFile mapIni)
+        public static void WriteTaskForces(IMap map, IniFile mapIni) => WriteTaskForces(map.TaskForces, mapIni);
+
+        public static void WriteTaskForces(List<TaskForce> taskForces, IniFile iniFile)
         {
             const string sectionName = "TaskForces";
-            mapIni.RemoveSection(sectionName);
+            iniFile.RemoveSection(sectionName);
 
-            if (map.TaskForces.Count == 0)
+            if (taskForces.Count == 0)
                 return;
 
             var taskForcesSection = new IniSection(sectionName);
-            mapIni.AddSection(taskForcesSection);
+            iniFile.AddSection(taskForcesSection);
 
-            for (int i = 0; i < map.TaskForces.Count; i++)
+            for (int i = 0; i < taskForces.Count; i++)
             {
-                TaskForce taskForce = map.TaskForces[i];
+                TaskForce taskForce = taskForces[i];
 
                 taskForcesSection.SetStringValue(i.ToString(), taskForce.ININame);
 
-                mapIni.RemoveSection(taskForce.ININame);
+                iniFile.RemoveSection(taskForce.ININame);
 
                 var taskForceSection = new IniSection(taskForce.ININame);
-                mapIni.AddSection(taskForceSection);
+                iniFile.AddSection(taskForceSection);
                 taskForce.Write(taskForceSection);
             }
         }
@@ -278,80 +280,87 @@ namespace TSMapEditor.Initialization
             }
         }
 
-        public static void WriteScripts(IMap map, IniFile mapIni)
+        public static void WriteScripts(IMap map, IniFile mapIni) => WriteScripts(map.Scripts, mapIni);
+
+        public static void WriteScripts(List<Script> scripts, IniFile iniFile)
         {
             const string sectionName = "ScriptTypes";
-            mapIni.RemoveSection(sectionName);
+            iniFile.RemoveSection(sectionName);
 
-            if (map.Scripts.Count == 0)
+            if (scripts.Count == 0)
                 return;
 
             var scriptTypesSection = new IniSection(sectionName);
-            mapIni.AddSection(scriptTypesSection);
-            for (int i = 0; i < map.Scripts.Count; i++)
+            iniFile.AddSection(scriptTypesSection);
+            for (int i = 0; i < scripts.Count; i++)
             {
-                Script script = map.Scripts[i];
+                Script script = scripts[i];
                 scriptTypesSection.SetStringValue(i.ToString(), script.ININame);
 
-                mapIni.RemoveSection(script.ININame);
+                iniFile.RemoveSection(script.ININame);
                 var scriptSection = new IniSection(script.ININame);
-                mapIni.AddSection(scriptSection);
+                iniFile.AddSection(scriptSection);
                 script.WriteToIniSection(scriptSection);
             }
         }
 
         public static void WriteTeamTypes(IMap map, IniFile mapIni, List<TeamTypeFlag> teamTypeFlags)
+            => WriteTeamTypes(map.TeamTypes, mapIni, teamTypeFlags);
+
+        public static void WriteTeamTypes(List<TeamType> teamTypes, IniFile iniFile, List<TeamTypeFlag> teamTypeFlags)
         {
             const string sectionName = "TeamTypes";
-            mapIni.RemoveSection(sectionName);
+            iniFile.RemoveSection(sectionName);
 
-            if (map.TeamTypes.Count == 0)
+            if (teamTypes.Count == 0)
                 return;
 
             var teamTypesSection = new IniSection(sectionName);
-            mapIni.AddSection(teamTypesSection);
-            for (int i = 0; i < map.TeamTypes.Count; i++)
+            iniFile.AddSection(teamTypesSection);
+            for (int i = 0; i < teamTypes.Count; i++)
             {
-                TeamType teamType = map.TeamTypes[i];
+                TeamType teamType = teamTypes[i];
                 teamTypesSection.SetStringValue(i.ToString(), teamType.ININame);
 
-                mapIni.RemoveSection(teamType.ININame);
+                iniFile.RemoveSection(teamType.ININame);
                 var teamTypeSection = new IniSection(teamType.ININame);
-                mapIni.AddSection(teamTypeSection);
+                iniFile.AddSection(teamTypeSection);
                 teamType.WriteToIniSection(teamTypeSection, teamTypeFlags);
             }
         }
 
-        public static void WriteAITriggerTypes(IMap map, IniFile mapIni)
+        public static void WriteAITriggerTypes(IMap map, IniFile mapIni) => WriteAITriggerTypes(map.AITriggerTypes, mapIni);
+
+        public static void WriteAITriggerTypes(List<AITriggerType> aiTriggerTypes, IniFile iniFile)
         {
             const string sectionName = "AITriggerTypes";
-            mapIni.RemoveSection(sectionName);
+            iniFile.RemoveSection(sectionName);
 
-            if (map.AITriggerTypes.Count == 0)
+            if (aiTriggerTypes.Count == 0)
                 return;
 
             var aiTriggerTypesSection = new IniSection(sectionName);
-            mapIni.AddSection(aiTriggerTypesSection);
-            for (int i = 0; i < map.AITriggerTypes.Count; i++)
+            iniFile.AddSection(aiTriggerTypesSection);
+            for (int i = 0; i < aiTriggerTypes.Count; i++)
             {
-                AITriggerType aiTriggerType = map.AITriggerTypes[i];
+                AITriggerType aiTriggerType = aiTriggerTypes[i];
                 aiTriggerType.WriteToIniSection(aiTriggerTypesSection);
             }
 
             const string enablesSectionName = "AITriggerTypesEnable";
-            var enablesSection = mapIni.GetSection(enablesSectionName);
+            var enablesSection = iniFile.GetSection(enablesSectionName);
             if (enablesSection == null)
             {
                 enablesSection = new IniSection(enablesSectionName);
-                mapIni.AddSection(enablesSection);
+                iniFile.AddSection(enablesSection);
             }
 
             // Enable local AI triggers that haven't been enabled or disabled
             // by the user yet
-            for (int i = 0; i < map.AITriggerTypes.Count; i++)
+            for (int i = 0; i < aiTriggerTypes.Count; i++)
             {
-                if (!enablesSection.KeyExists(map.AITriggerTypes[i].ININame))
-                    enablesSection.SetStringValue(map.AITriggerTypes[i].ININame, "yes");
+                if (!enablesSection.KeyExists(aiTriggerTypes[i].ININame))
+                    enablesSection.SetStringValue(aiTriggerTypes[i].ININame, "yes");
             }
         }
 
