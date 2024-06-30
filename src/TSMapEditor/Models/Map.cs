@@ -58,7 +58,7 @@ namespace TSMapEditor.Models
                     return true;
                 }
 
-                LoadedINI = new IniFileEx(LoadedINI.FileName, ccFileManager);
+                LoadedINI = new IniFileEx(LoadedINI.FileName, editorComponentManager.Get<CCFileManager>());
 
                 ReloadSections();
 
@@ -185,27 +185,22 @@ namespace TSMapEditor.Models
 
         private readonly Initializer initializer;
 
-        private readonly CCFileManager ccFileManager;
+        private readonly IEditorComponentManager editorComponentManager;
 
-        public Map()
-        {
-            InitCells();
-
-            initializer = new Initializer(this);
-        }
-
-        public Map(CCFileManager ccFileManager)
+        public Map(IEditorComponentManager editorComponentManager)
         {
             InitCells();
 
             initializer = new Initializer(this);
 
-            this.ccFileManager = ccFileManager;
+            this.editorComponentManager = editorComponentManager;
+            editorComponentManager.RegisterSessionComponent<IMap>(this);
+            editorComponentManager.RegisterSessionComponent<Map>(this);
         }
 
         private void InitEditorConfig()
         {
-            EditorConfig = new EditorConfig();
+            EditorConfig = new EditorConfig(editorComponentManager);
             EditorConfig.EarlyInit();
         }
 
@@ -217,7 +212,7 @@ namespace TSMapEditor.Models
             InitEditorConfig();
             InitializeRules(gameConfigINIFiles);
             LoadedINI = new IniFileEx();
-            var baseMap = new IniFileEx(Environment.CurrentDirectory + "/Config/BaseMap.ini", ccFileManager);
+            var baseMap = new IniFileEx(Environment.CurrentDirectory + "/Config/BaseMap.ini", editorComponentManager.Get<CCFileManager>());
             baseMap.FileName = string.Empty;
             baseMap.SetStringValue("Map", "Theater", theaterName);
             baseMap.SetStringValue("Map", "Size", $"0,0,{size.X},{size.Y}");
@@ -233,7 +228,7 @@ namespace TSMapEditor.Models
 
             LoadedINI = mapIni ?? throw new ArgumentNullException(nameof(mapIni));
             Rules.InitFromINI(mapIni, initializer, true);
-            EditorConfig.RulesDependentInit(Rules);
+            EditorConfig.RulesDependentInit();
 
             PostInitializeRules_ReinitializeArt(gameConfigINIFiles.ArtIni, gameConfigINIFiles.ArtFSIni);
             Rules.SolveDependencies();
@@ -271,7 +266,7 @@ namespace TSMapEditor.Models
 
             Lighting.ReadFromIniFile(mapIni);
 
-            StringTable = new(ccFileManager.CsfFiles);
+            StringTable = new(editorComponentManager.Get<CCFileManager>().CsfFiles);
         }
 
         private void CreateGraphicalNodesFromBaseNodes()
@@ -1462,7 +1457,7 @@ namespace TSMapEditor.Models
             if (gameConfigINIFiles == null)
                 throw new ArgumentNullException(nameof(gameConfigINIFiles));
 
-            Rules = new Rules();
+            Rules = new Rules(editorComponentManager);
             Rules.InitFromINI(gameConfigINIFiles.RulesIni, initializer);
 
             Rules.InitArt(gameConfigINIFiles.ArtIni, initializer);

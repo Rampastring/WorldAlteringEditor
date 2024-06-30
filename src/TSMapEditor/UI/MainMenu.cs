@@ -9,6 +9,8 @@ using TSMapEditor.UI.Controls;
 using TSMapEditor.UI.Windows;
 using TSMapEditor.UI.Windows.MainMenuWindows;
 using MessageBoxButtons = TSMapEditor.UI.Windows.MessageBoxButtons;
+using TSMapEditor.Initialization;
+
 
 #if WINDOWS
 using System.Windows.Forms;
@@ -22,9 +24,12 @@ namespace TSMapEditor.UI
         private const string DirectoryPrefix = "<DIR> ";
         private const int BrowseButtonWidth = 70;
 
-        public MainMenu(WindowManager windowManager) : base(windowManager)
+        public MainMenu(IEditorComponentManager editorComponentManager) : base(editorComponentManager.Get<WindowManager>())
         {
+            this.editorComponentManager = editorComponentManager;
         }
+
+        private readonly IEditorComponentManager editorComponentManager;
 
         private string gameDirectory;
 
@@ -210,11 +215,11 @@ namespace TSMapEditor.UI
 
         private void CreateMapWindow_OnCreateNewMap(object sender, CreateNewMapEventArgs e)
         {
-            string error = MapSetup.InitializeMap(gameDirectory, true, null, e, WindowManager);
+            string error = MapSetup.InitializeMap(gameDirectory, true, null, e, editorComponentManager);
             if (!string.IsNullOrWhiteSpace(error))
                 throw new InvalidOperationException("Failed to create new map! Returned error message: " + error);
 
-            MapSetup.LoadTheaterGraphics(WindowManager, gameDirectory);
+            MapSetup.LoadTheaterGraphics(editorComponentManager, gameDirectory);
             ((CreateNewMapWindow)sender).OnCreateNewMap -= CreateMapWindow_OnCreateNewMap;
         }
 
@@ -295,12 +300,6 @@ namespace TSMapEditor.UI
             bool borderless = UserSettings.Instance.Borderless.GetValue();
             if (fullscreenWindowed && !borderless)
                 throw new InvalidOperationException("Borderless= cannot be set to false if FullscreenWindowed= is enabled.");
-
-            var gameForm = (System.Windows.Forms.Form)System.Windows.Forms.Form.FromHandle(Game.Window.Handle);
-
-            double renderScale = UserSettings.Instance.RenderScale.GetValue();
-
-
 
             WindowManager.CenterControlOnScreen(this);
 
@@ -388,7 +387,7 @@ namespace TSMapEditor.UI
 
         private void LoadMap(string mapPath)
         {
-            string error = MapSetup.InitializeMap(gameDirectory, false, mapPath, null, WindowManager);
+            string error = MapSetup.InitializeMap(gameDirectory, false, mapPath, null, editorComponentManager);
 
             if (error == null)
             {
@@ -408,7 +407,7 @@ namespace TSMapEditor.UI
 
         private void LoadTheater()
         {
-            MapSetup.LoadTheaterGraphics(WindowManager, gameDirectory);
+            MapSetup.LoadTheaterGraphics(editorComponentManager, gameDirectory);
             WindowManager.RemoveControl(this);
         }
     }

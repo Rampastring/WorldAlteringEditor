@@ -4,6 +4,7 @@ using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Linq;
 using TSMapEditor.CCEngine;
+using TSMapEditor.Initialization;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI.Controls;
@@ -16,13 +17,11 @@ namespace TSMapEditor.UI
         private const int TileSetListWidth = 180;
         private const int ResizeDragThreshold = 30;
 
-        public TileSelector(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics,
-            PlaceTerrainCursorAction placeTerrainCursorAction, EditorState editorState) : base(windowManager)
+        public TileSelector(IEditorComponentManager editorComponentManager,
+            PlaceTerrainCursorAction placeTerrainCursorAction) : base(editorComponentManager.Get<WindowManager>())
         {
-            this.map = map;
-            this.theaterGraphics = theaterGraphics;
+            this.editorComponentManager = editorComponentManager;
             this.placeTerrainCursorAction = placeTerrainCursorAction;
-            this.editorState = editorState;
         }
 
         protected override void OnClientRectangleUpdated()
@@ -38,10 +37,12 @@ namespace TSMapEditor.UI
             base.OnClientRectangleUpdated();
         }
 
-        private readonly Map map;
-        private readonly TheaterGraphics theaterGraphics;
-        private readonly PlaceTerrainCursorAction placeTerrainCursorAction;
-        private readonly EditorState editorState;
+        private readonly IEditorComponentManager editorComponentManager;
+
+        private Map map;
+        private TheaterGraphics theaterGraphics;
+        private PlaceTerrainCursorAction placeTerrainCursorAction;
+        private EditorState editorState;
 
         public TileDisplay TileDisplay { get; private set; }
 
@@ -53,6 +54,10 @@ namespace TSMapEditor.UI
 
         public override void Initialize()
         {
+            this.map = editorComponentManager.Get<Map>();
+            this.theaterGraphics = editorComponentManager.Get<TheaterGraphics>();
+            this.editorState = editorComponentManager.Get<EditorState>();
+
             Name = nameof(TileSelector);
 
             tbSearch = new EditorSuggestionTextBox(WindowManager);

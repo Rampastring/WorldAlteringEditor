@@ -31,19 +31,22 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
         /// <param name="newMapSize">The size of the map, if creating a new map.</param>
         /// <param name="windowManager">The XNAUI window manager.</param>
         /// <returns>Null of loading the map was successful, otherwise an error message.</returns>
-        public static string InitializeMap(string gameDirectory, bool createNew, string existingMapPath, CreateNewMapEventArgs newMapParameters, WindowManager windowManager)
+        public static string InitializeMap(string gameDirectory, bool createNew, string existingMapPath, CreateNewMapEventArgs newMapParameters, IEditorComponentManager editorComponentManager)
         {
             ccFileManager = new() { GameDirectory = gameDirectory };
             ccFileManager.ReadConfig();
+            editorComponentManager.RegisterSessionComponent(ccFileManager);
 
             var gameConfigIniFiles = new GameConfigINIFiles(gameDirectory, ccFileManager);
+
+            var windowManager = editorComponentManager.Get<WindowManager>();
 
             var tutorialLines = new TutorialLines(Path.Combine(gameDirectory, Constants.TutorialIniPath), a => windowManager.AddCallback(a, null));
             var themes = new Themes(IniFileEx.FromPathOrMix(Constants.ThemeIniPath, gameDirectory, ccFileManager));
             var evaSpeeches = new EvaSpeeches(IniFileEx.FromPathOrMix(Constants.EvaIniPath, gameDirectory, ccFileManager));
             var sounds = new Sounds(IniFileEx.FromPathOrMix(Constants.SoundIniPath, gameDirectory, ccFileManager));
 
-            Map map = new Map(ccFileManager);
+            Map map = new Map(editorComponentManager);
 
             if (createNew)
             {
@@ -90,8 +93,10 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
         /// </summary>
         /// <param name="windowManager">The window manager.</param>
         /// <param name="gameDirectory">The path to the game directory.</param>
-        public static void LoadTheaterGraphics(WindowManager windowManager, string gameDirectory)
+        public static void LoadTheaterGraphics(IEditorComponentManager editorComponentManager, string gameDirectory)
         {
+            var windowManager = editorComponentManager.Get<WindowManager>();
+
             Theater theater = LoadedMap.EditorConfig.Theaters.Find(t => t.UIName.Equals(LoadedMap.TheaterName, StringComparison.InvariantCultureIgnoreCase));
             if (theater == null)
             {
@@ -99,21 +104,23 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
             }
             theater.ReadConfigINI(gameDirectory, ccFileManager);
 
+            editorComponentManager.RegisterSessionComponent(theater);
+
             foreach (string theaterMIXName in theater.ContentMIXName)
                 ccFileManager.LoadRequiredMixFile(theaterMIXName);
 
             foreach (string theaterMIXName in theater.OptionalContentMIXName)
                 ccFileManager.LoadOptionalMixFile(theaterMIXName);
 
-            TheaterGraphics theaterGraphics = new TheaterGraphics(windowManager.GraphicsDevice, theater, ccFileManager, LoadedMap.Rules);
+            TheaterGraphics theaterGraphics = new TheaterGraphics(editorComponentManager);
             LoadedMap.TheaterInstance = theaterGraphics;
             FillConnectedTileFoundations(theaterGraphics);
 
             MapLoader.PostCheckMap(LoadedMap, theaterGraphics);
 
-            EditorGraphics editorGraphics = new EditorGraphics();
+            EditorGraphics editorGraphics = new EditorGraphics(editorComponentManager);
 
-            var uiManager = new UIManager(windowManager, LoadedMap, theaterGraphics, editorGraphics);
+            var uiManager = new UIManager(editorComponentManager);
             windowManager.AddAndInitializeControl(uiManager);
 
             const int margin = 60;

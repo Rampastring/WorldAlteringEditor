@@ -12,6 +12,11 @@ namespace TSMapEditor.Models
 {
     public class Rules
     {
+        public Rules(IEditorComponentManager editorComponentManager)
+        {
+            editorComponentManager.RegisterSessionComponent(this);
+        }
+
         public List<UnitType> UnitTypes = new List<UnitType>();
         public List<InfantryType> InfantryTypes = new List<InfantryType>();
         public List<BuildingType> BuildingTypes = new List<BuildingType>();

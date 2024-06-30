@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TSMapEditor.CCEngine;
+using TSMapEditor.Initialization;
 using TSMapEditor.UI;
 
 namespace TSMapEditor.Models
@@ -12,11 +13,15 @@ namespace TSMapEditor.Models
     /// </summary>
     public class EditorConfig
     {
-        public EditorConfig() 
+        public EditorConfig(IEditorComponentManager editorComponentManager) 
         {
             EditorRulesIni = new IniFile(Environment.CurrentDirectory + "/Config/EditorRules.ini");
+            this.editorComponentManager = editorComponentManager;
+            editorComponentManager.RegisterSessionComponent(this);
         }
-        
+     
+        private readonly IEditorComponentManager editorComponentManager;
+
         public IniFile EditorRulesIni { get; }
         public List<OverlayCollection> OverlayCollections { get; } = new List<OverlayCollection>();
         public List<TerrainObjectCollection> TerrainObjectCollections { get; } = new List<TerrainObjectCollection>();
@@ -64,8 +69,10 @@ namespace TSMapEditor.Models
             ReadCliffs();
         }
 
-        public void RulesDependentInit(Rules rules)
+        public void RulesDependentInit()
         {
+            var rules = editorComponentManager.Get<Rules>();
+
             ReadOverlayCollections(rules);
             ReadTerrainObjectCollections(rules);
             ReadSmudgeCollections(rules);

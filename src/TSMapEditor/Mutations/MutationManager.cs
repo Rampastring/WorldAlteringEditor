@@ -1,12 +1,18 @@
 ﻿using System.Collections.Generic;
+using TSMapEditor.Initialization;
 
 namespace TSMapEditor.Mutations
 {
     /// <summary>
     /// The Undo / Redo system.
     /// </summary>
-    public class MutationManager
+    public class MutationManager : EditorComponent
     {
+        public MutationManager(IEditorComponentManager componentManager) : base(componentManager)
+        {
+            componentManager.RegisterSessionComponent(this);
+        }
+
         public List<Mutation> UndoList { get; } = new List<Mutation>();
         public List<Mutation> RedoList { get; } = new List<Mutation>();
 

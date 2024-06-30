@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Rampastring.Tools;
+using Rampastring.XNAUI;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -9,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
+using TSMapEditor.Initialization;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering.ObjectRenderers;
 using TSMapEditor.Settings;
@@ -399,13 +401,17 @@ namespace TSMapEditor.Rendering
         private const string TURRET_FILE_SUFFIX = "TUR";
         private const string BARREL_FILE_SUFFIX = "BARL";
 
-        public TheaterGraphics(GraphicsDevice graphicsDevice, Theater theater, CCFileManager fileManager, Rules rules)
+        public TheaterGraphics(IEditorComponentManager editorComponentManager)
         {
-            this.graphicsDevice = graphicsDevice;
-            Theater = theater;
-            this.fileManager = fileManager;
+            editorComponentManager.RegisterSessionComponent<TheaterGraphics>(this);
+            editorComponentManager.RegisterSessionComponent<ITheater>(this);
 
-            theaterPalette = GetPaletteOrFail(theater.TerrainPaletteName, false);
+            this.graphicsDevice = editorComponentManager.Get<WindowManager>().GraphicsDevice;
+            Theater = editorComponentManager.Get<Theater>(); ;
+            this.fileManager = editorComponentManager.Get<CCFileManager>();
+            var rules = editorComponentManager.Get<Rules>();
+
+            theaterPalette = GetPaletteOrFail(Theater.TerrainPaletteName, false);
             unitPalette = GetPaletteOrFail(Theater.UnitPaletteName, true);
             animPalette = GetPaletteOrFail("anim.pal", true);
             tiberiumPalette = string.IsNullOrEmpty(Theater.TiberiumPaletteName) ? theaterPalette : GetPaletteOrFail(Theater.TiberiumPaletteName, false);

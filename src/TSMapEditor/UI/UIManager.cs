@@ -3,6 +3,7 @@ using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Linq;
+using TSMapEditor.Initialization;
 using TSMapEditor.Misc;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations;
@@ -38,16 +39,20 @@ namespace TSMapEditor.UI
 
     class UIManager : XNAControl, IWindowParentControl
     {
-        public UIManager(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics,
-            EditorGraphics editorGraphics) : base(windowManager)
+        public UIManager(IEditorComponentManager editorComponentManager) : base(editorComponentManager.Get<WindowManager>())
         {
             DrawMode = ControlDrawMode.UNIQUE_RENDER_TARGET;
-            this.map = map;
-            this.theaterGraphics = theaterGraphics;
-            this.editorGraphics = editorGraphics;
+
+            editorComponentManager.RegisterSessionComponent<IWindowParentControl>(this);
+            this.editorComponentManager = editorComponentManager;
+            this.map = editorComponentManager.Get<Map>();
+            this.theaterGraphics = editorComponentManager.Get<TheaterGraphics>();
+            this.editorGraphics = editorComponentManager.Get<EditorGraphics>();
         }
 
         public event EventHandler RenderResolutionChanged;
+
+        private readonly IEditorComponentManager editorComponentManager;
 
         private static bool InitialDisplayModeSet = false;
 
@@ -103,10 +108,10 @@ namespace TSMapEditor.UI
             // Keyboard must be initialized before any other controls so it's properly usable
             InitKeyboard();
 
-            windowController = new WindowController();
-            editorState = new EditorState();
+            windowController = new WindowController(editorComponentManager);
+            editorState = new EditorState(editorComponentManager);
             editorState.BrushSize = map.EditorConfig.BrushSizes[0];
-            mutationManager = new MutationManager();
+            mutationManager = new MutationManager(editorComponentManager);
 
             InitMapView();
 
@@ -117,13 +122,13 @@ namespace TSMapEditor.UI
 
             overlayPlacementAction = new OverlayPlacementAction(mapView);
 
-            editorSidebar = new EditorSidebar(WindowManager, editorState, map, theaterGraphics, mapView, overlayPlacementAction);
+            editorSidebar = new EditorSidebar(editorComponentManager, overlayPlacementAction);
             editorSidebar.Width = UserSettings.Instance.SidebarWidth.GetValue();
             editorSidebar.Y = Constants.UITopBarMenuHeight;
             editorSidebar.Height = WindowManager.RenderResolutionY - editorSidebar.Y;
             AddChild(editorSidebar);
 
-            tileSelector = new TileSelector(WindowManager, map, theaterGraphics, placeTerrainCursorAction, editorState);
+            tileSelector = new TileSelector(editorComponentManager, placeTerrainCursorAction);
             tileSelector.X = editorSidebar.Right;
             tileSelector.Width = WindowManager.RenderResolutionX - tileSelector.X;
             tileSelector.Height = 300;
@@ -148,7 +153,7 @@ namespace TSMapEditor.UI
             mapView.TileInfoDisplay = tileInfoDisplay;
 
             InitNotificationManager();
-            windowController.Initialize(this, map, editorState, mapView);
+            windowController.Initialize();
 
             topBarMenu = new TopBarMenu(WindowManager, mutationManager, mapView, map, windowController);
             topBarMenu.Width = editorSidebar.Width;
@@ -322,7 +327,8 @@ namespace TSMapEditor.UI
 
         private void InitMapView()
         {
-            mapView = new MapView(WindowManager, map, theaterGraphics, editorGraphics, editorState, mutationManager, windowController);
+            mapView = new MapView(editorComponentManager);
+            mapView.ResolveDependencies();
             AddChild(mapView);
         }
 
@@ -437,7 +443,7 @@ namespace TSMapEditor.UI
             string error = MapSetup.InitializeMap(UserSettings.Instance.GameDirectory, createNew,
                 loadMapFilePath,
                 createNew ? newMapInfo : null,
-                WindowManager);
+                editorComponentManager);
 
             if (error != null)
             {
@@ -459,7 +465,7 @@ namespace TSMapEditor.UI
             ClearResources();
             WindowManager.RemoveControl(this);
 
-            MapSetup.LoadTheaterGraphics(WindowManager, UserSettings.Instance.GameDirectory);
+            MapSetup.LoadTheaterGraphics(editorComponentManager, UserSettings.Instance.GameDirectory);
         }
 
         private void ClearResources()

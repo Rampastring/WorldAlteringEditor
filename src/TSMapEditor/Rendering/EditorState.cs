@@ -1,5 +1,6 @@
 ﻿using System;
 using TSMapEditor.GameMath;
+using TSMapEditor.Initialization;
 using TSMapEditor.Misc;
 using TSMapEditor.Models;
 using TSMapEditor.Models.Enums;
@@ -11,7 +12,7 @@ namespace TSMapEditor.Rendering
     /// <summary>
     /// Contains run-time settings related to the state of the editor.
     /// </summary>
-    public class EditorState
+    public class EditorState : EditorComponent
     {
         public event EventHandler CursorActionChanged;
         public event EventHandler ObjectOwnerChanged;
@@ -27,6 +28,11 @@ namespace TSMapEditor.Rendering
         public event EventHandler RenderedObjectsChanged;
         public event EventHandler LightingPreviewStateChanged;
         public event EventHandler IsLightingChanged;
+
+        public EditorState(IEditorComponentManager componentManager) : base(componentManager)
+        {
+            componentManager.RegisterSessionComponent(this);
+        }
 
         private CursorAction _cursorAction;
         public CursorAction CursorAction
@@ -238,6 +244,7 @@ namespace TSMapEditor.Rendering
         public DeletionMode DeletionMode { get; set; } = DeletionMode.All;
 
         private RenderObjectFlags _renderObjectFlags = RenderObjectFlags.All;
+
         public RenderObjectFlags RenderObjectFlags 
         {
             get => _renderObjectFlags;

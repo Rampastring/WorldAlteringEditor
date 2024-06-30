@@ -1,12 +1,13 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using Rampastring.XNAUI;
+using TSMapEditor.Initialization;
 
 namespace TSMapEditor.Rendering
 {
     /// <summary>
     /// Editor-only assets.
     /// </summary>
-    public class EditorGraphics
+    public class EditorGraphics : EditorComponent
     {
         public Texture2D GenericTileTexture { get; private set; }
         public Texture2D GenericTileWithBorderTexture { get; private set; }
@@ -16,7 +17,13 @@ namespace TSMapEditor.Rendering
         public Texture2D IceGrowthHighlightTexture { get; private set; }
         public Texture2D RangeIndicatorTexture { get; private set; }
 
-        public EditorGraphics()
+        public EditorGraphics(IEditorComponentManager editorComponentManager) : base(editorComponentManager)
+        {
+            editorComponentManager.RegisterSessionComponent(this);
+            LoadGraphics();
+        }
+
+        private void LoadGraphics()
         {
             GenericTileTexture = AssetLoader.LoadTextureUncached("generictile.png");
             GenericTileWithBorderTexture = AssetLoader.LoadTextureUncached("generictilewithborder.png");

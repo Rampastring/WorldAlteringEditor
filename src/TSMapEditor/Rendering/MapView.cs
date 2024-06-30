@@ -9,6 +9,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using TSMapEditor.GameMath;
+using TSMapEditor.Initialization;
 using TSMapEditor.Misc;
 using TSMapEditor.Models;
 using TSMapEditor.Models.Enums;
@@ -93,15 +94,26 @@ namespace TSMapEditor.Rendering
             new Color(194, 198, 255)
         };
 
-        public MapView(WindowManager windowManager, Map map, TheaterGraphics theaterGraphics, EditorGraphics editorGraphics,
-            EditorState editorState, MutationManager mutationManager, WindowController windowController) : base(windowManager)
+        public MapView(IEditorComponentManager componentManager) : base(componentManager.Get<WindowManager>())
         {
-            EditorState = editorState;
-            Map = map;
-            TheaterGraphics = theaterGraphics;
-            EditorGraphics = editorGraphics;
-            MutationManager = mutationManager;
-            this.windowController = windowController;
+            this.componentManager = componentManager;
+
+            componentManager.RegisterSessionComponent<MapView>(this);
+            componentManager.RegisterSessionComponent<ICursorActionTarget>(this);
+            componentManager.RegisterSessionComponent<IMutationTarget>(this);
+            componentManager.RegisterSessionComponent<IMapView>(this);
+        }
+
+        private readonly IEditorComponentManager componentManager;
+
+        public void ResolveDependencies()
+        {
+            EditorState = componentManager.Get<EditorState>();
+            Map = componentManager.Get<Map>();
+            TheaterGraphics = componentManager.Get<TheaterGraphics>();
+            EditorGraphics = componentManager.Get<EditorGraphics>();
+            MutationManager = componentManager.Get<MutationManager>();
+            this.windowController = componentManager.Get<WindowController>();
 
             Camera = new Camera(WindowManager, Map);
             Camera.CameraUpdated += (s, e) => cameraMoved = true;

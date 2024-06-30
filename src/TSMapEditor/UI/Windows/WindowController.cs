@@ -3,6 +3,7 @@ using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using TSMapEditor.Initialization;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI.Controls;
@@ -26,14 +27,22 @@ namespace TSMapEditor.UI.Windows
         void SetAutoUpdateChildOrder(bool value);
     }
 
-    public class WindowController
+    public class WindowController : EditorComponent
     {
         public const int ChildWindowOrderValue = 10000;
 
-        private List<EditorWindow> Windows { get; } = new List<EditorWindow>();
+        public WindowController(IEditorComponentManager componentManager) : base(componentManager)
+        {
+            this.editorComponentManager = componentManager;
+            componentManager.RegisterSessionComponent(this);
+        }
+
+        private readonly IEditorComponentManager editorComponentManager;
 
         public event EventHandler Initialized;
         public event EventHandler RenderResolutionChanged;
+
+        private List<EditorWindow> Windows { get; } = new List<EditorWindow>();
 
         public BasicSectionConfigWindow BasicSectionConfigWindow { get; private set; }
         public TaskforcesWindow TaskForcesWindow { get; private set; }
@@ -102,8 +111,15 @@ namespace TSMapEditor.UI.Windows
             }
         }
 
-        public void Initialize(IWindowParentControl windowParentControl, Map map, EditorState editorState, ICursorActionTarget cursorActionTarget)
+        public void Initialize()
         {
+            var windowParentControl = editorComponentManager.Get<IWindowParentControl>();
+            this.windowParentControl = windowParentControl;
+
+            var map = editorComponentManager.Get<Map>();
+            var editorState = editorComponentManager.Get<EditorState>();
+            var cursorActionTarget = editorComponentManager.Get<ICursorActionTarget>();
+
             BasicSectionConfigWindow = new BasicSectionConfigWindow(windowParentControl.WindowManager, map);
             Windows.Add(BasicSectionConfigWindow);
 
@@ -228,8 +244,6 @@ namespace TSMapEditor.UI.Windows
                 window.Disable();
                 window.CenterOnParent();
             }
-
-            this.windowParentControl = windowParentControl;
 
             Initialized?.Invoke(this, EventArgs.Empty);
 

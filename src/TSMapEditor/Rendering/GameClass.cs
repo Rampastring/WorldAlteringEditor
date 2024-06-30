@@ -8,6 +8,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using TSMapEditor.CCEngine;
+using TSMapEditor.Initialization;
 using TSMapEditor.Settings;
 using TSMapEditor.UI;
 
@@ -104,6 +105,7 @@ namespace TSMapEditor.Rendering
         }
 
         private WindowManager windowManager;
+        private IEditorComponentManager editorComponentManager;
 
         private bool wasActiveOnPreviousFrame;
 
@@ -119,8 +121,12 @@ namespace TSMapEditor.Rendering
             AssetLoader.Initialize(GraphicsDevice, Content);
             AssetLoader.AssetSearchPaths.Add(Environment.CurrentDirectory + DSC + "Content" + DSC);
 
+            editorComponentManager = new EditorComponentManager();
+
             windowManager = new WindowManager(this, graphics);
             windowManager.Initialize(Content, Environment.CurrentDirectory + DSC + "Content" + DSC);
+
+            editorComponentManager.RegisterPermanentComponent(windowManager);
 
             new Parser(windowManager);
 
@@ -157,7 +163,7 @@ namespace TSMapEditor.Rendering
 
         private void InitMainMenu()
         {
-            var mainMenu = new MainMenu(windowManager);
+            var mainMenu = new MainMenu(editorComponentManager);
             windowManager.AddAndInitializeControl(mainMenu);
             windowManager.CenterControlOnScreen(mainMenu);
         }

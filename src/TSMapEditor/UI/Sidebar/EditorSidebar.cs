@@ -2,6 +2,7 @@
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
+using TSMapEditor.Initialization;
 using TSMapEditor.Models;
 using TSMapEditor.Rendering;
 using TSMapEditor.UI.CursorActions;
@@ -10,20 +11,15 @@ namespace TSMapEditor.UI.Sidebar
 {
     public class EditorSidebar : EditorPanel
     {
-        public EditorSidebar(WindowManager windowManager, EditorState editorState, Map map,
-            TheaterGraphics theaterGraphics, ICursorActionTarget cursorActionTarget,
-            OverlayPlacementAction overlayPlacementAction) : base(windowManager)
+        public EditorSidebar(IEditorComponentManager editorComponentManager,
+            OverlayPlacementAction overlayPlacementAction) : base(editorComponentManager.Get<WindowManager>())
         {
-            this.editorState = editorState;
-            this.map = map;
-            this.theaterGraphics = theaterGraphics;
-            this.cursorActionTarget = cursorActionTarget;
+            this.editorComponentManager = editorComponentManager;
             this.overlayPlacementAction = overlayPlacementAction;
         }
 
-        private EditorState editorState;
-        private Map map;
-        private TheaterGraphics theaterGraphics;
+        private readonly IEditorComponentManager editorComponentManager;
+
         private OverlayPlacementAction overlayPlacementAction;
 
         private XNAListBox lbSelection;
@@ -31,10 +27,13 @@ namespace TSMapEditor.UI.Sidebar
         private XNAPanel[] modePanels;
         private XNAPanel activePanel;
 
-        private ICursorActionTarget cursorActionTarget;
-
         public override void Initialize()
         {
+            var editorState = editorComponentManager.Get<EditorState>();
+            var map = editorComponentManager.Get<Map>();
+            var theaterGraphics = editorComponentManager.Get<TheaterGraphics>();
+            var cursorActionTarget = editorComponentManager.Get<ICursorActionTarget>();
+
             Name = nameof(EditorSidebar);
 
             lbSelection = new XNAListBox(WindowManager);
@@ -184,16 +183,11 @@ namespace TSMapEditor.UI.Sidebar
             lbSelection.Kill();
             lbSelection = null;
 
-            editorState = null;
-            map = null;
-            theaterGraphics = null;
             overlayPlacementAction = null;
 
             Array.ForEach(modePanels, panel => panel.Kill());
             modePanels = null;
             activePanel = null;
-
-            cursorActionTarget = null;
 
             WindowManager.RenderResolutionChanged -= WindowManager_RenderResolutionChanged;
 

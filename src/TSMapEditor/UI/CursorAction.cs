@@ -12,7 +12,8 @@ namespace TSMapEditor.UI
     {
         public CursorAction(ICursorActionTarget cursorActionTarget)
         {
-            CursorActionTarget = cursorActionTarget;
+            CursorActionTarget = cursorActionTarget ??
+                throw new ArgumentNullException(nameof(cursorActionTarget));
         }
 
         /// <summary>
