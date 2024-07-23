@@ -383,6 +383,12 @@ namespace TSMapEditor.UI.Windows
 
         private void SetParameterEntryText(ScriptActionEntry scriptActionEntry, ScriptAction action)
         {
+            if (action == null)
+            {
+                tbParameterValue.Value = scriptActionEntry.Argument;
+                return;
+            }
+
             if (action.ParamType == TriggerParamType.BuildingWithProperty)
             {
                 tbParameterValue.Text = GetBuildingWithPropertyText(scriptActionEntry.Argument);
@@ -434,6 +440,11 @@ namespace TSMapEditor.UI.Windows
         private void FillPresetContextMenu(ScriptActionEntry entry, ScriptAction action)
         {
             btnEditorPresetValues.ContextMenu.ClearItems();
+
+            if (action == null)
+            {
+                return;
+            }
 
             action.PresetOptions.ForEach(p => btnEditorPresetValues.ContextMenu.AddItem(new XNAContextMenuItem() { Text = p.GetOptionText() }));
 
@@ -564,10 +575,9 @@ namespace TSMapEditor.UI.Windows
         private string GetActionDescriptionFromIndex(int index)
         {
             ScriptAction action = GetScriptAction(index);
-            if (action == null)
-                return string.Empty;
+            string description = action == null ? "Unknown script action. It has most likely been added with another editor." : action.Description;
 
-            return Renderer.FixText(action.Description,
+            return Renderer.FixText(description,
                 lblActionDescriptionValue.FontIndex,
                 lblActionDescriptionValue.Parent.Width - lblActionDescriptionValue.X * 2).Text;
         }
