@@ -1703,11 +1703,19 @@ namespace TSMapEditor.UI.Windows
             TriggerAction triggerAction = editedTrigger.Actions[lbActions.SelectedIndex];
             int paramNumber = (int)lbActionParameters.SelectedItem.Tag;
             var triggerActionType = GetTriggerActionType(triggerAction.ActionIndex);
-            var triggerActionParam = triggerActionType.Parameters[paramNumber];
-            var triggerParamType = triggerActionParam.TriggerParamType;
+            if (triggerActionType != null)
+            {
+                var triggerActionParam = triggerActionType.Parameters[paramNumber];
+                var triggerParamType = triggerActionParam.TriggerParamType;
 
-            tbActionParameterValue.Text = GetParamValueText(triggerAction.Parameters[paramNumber], triggerParamType, triggerActionParam.PresetOptions);
-            tbActionParameterValue.TextColor = GetParamValueColor(triggerAction.Parameters[paramNumber], triggerParamType);
+                tbActionParameterValue.Text = GetParamValueText(triggerAction.Parameters[paramNumber], triggerParamType, triggerActionParam.PresetOptions);
+                tbActionParameterValue.TextColor = GetParamValueColor(triggerAction.Parameters[paramNumber], triggerParamType);
+            }
+            else
+            {
+                tbActionParameterValue.Text = triggerAction.Parameters[paramNumber];
+                tbActionParameterValue.TextColor = UISettings.ActiveSettings.AltColor;
+            }
 
             tbActionParameterValue.TextChanged += TbActionParameterValue_TextChanged;
         }
@@ -1830,10 +1838,19 @@ namespace TSMapEditor.UI.Windows
             TriggerCondition triggerCondition = editedTrigger.Conditions[lbEvents.SelectedIndex];
             int paramNumber = (int)lbEventParameters.SelectedItem.Tag;
             var triggerEventType = GetTriggerEventType(editedTrigger.Conditions[lbEvents.SelectedIndex].ConditionIndex);
-            var triggerParamType = triggerEventType.Parameters[paramNumber]?.TriggerParamType ?? TriggerParamType.Unknown;
 
-            tbEventParameterValue.Text = GetParamValueText(triggerCondition.Parameters[paramNumber], triggerParamType, null);
-            tbEventParameterValue.TextColor = GetParamValueColor(triggerCondition.Parameters[paramNumber], triggerParamType);
+            if (triggerEventType != null)
+            {
+                var triggerParamType = triggerEventType.Parameters[paramNumber]?.TriggerParamType ?? TriggerParamType.Unknown;
+
+                tbEventParameterValue.Text = GetParamValueText(triggerCondition.Parameters[paramNumber], triggerParamType, null);
+                tbEventParameterValue.TextColor = GetParamValueColor(triggerCondition.Parameters[paramNumber], triggerParamType);
+            }
+            else
+            {
+                tbEventParameterValue.Text = triggerCondition.Parameters[paramNumber];
+                tbEventParameterValue.TextColor = UISettings.ActiveSettings.AltColor;
+            }
 
             tbEventParameterValue.TextChanged += TbEventParameterValue_TextChanged;
         }
