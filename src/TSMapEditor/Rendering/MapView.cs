@@ -1045,6 +1045,8 @@ namespace TSMapEditor.Rendering
             // buildingRenderer.Draw(graphicalBaseNode.Structure, true);
             // return;
 
+            int baseNodeIndex = graphicalBaseNode.Owner.BaseNodes.FindIndex(bn => bn == graphicalBaseNode.BaseNode);
+            Color baseNodeIndexColor = Color.White * 0.7f;
 
             Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords_3D(graphicalBaseNode.BaseNode.Position, Map);
 
@@ -1065,7 +1067,10 @@ namespace TSMapEditor.Rendering
 
             if ((graphics == null || graphics.GetFrame(frameIndex) == null) && (bibGraphics == null || bibGraphics.GetFrame(0) == null))
             {
-                DrawStringWithShadow(iniName, 1, drawPoint.ToXNAVector(), replacementColor, 1.0f);
+                DrawStringWithShadow(iniName, Constants.UIBoldFont, drawPoint.ToXNAVector(), replacementColor, 1.0f);
+
+                DrawStringWithShadow("#" + baseNodeIndex, Constants.UIBoldFont, drawPoint.ToXNAVector() + new Vector2(0f, 20f), baseNodeIndexColor);
+
                 return;
             }
 
@@ -1112,7 +1117,10 @@ namespace TSMapEditor.Rendering
 
             var frame = graphics.GetFrame(frameIndex);
             if (frame == null)
+            {
+                DrawStringWithShadow("#" + baseNodeIndex, Constants.UIBoldFont, drawPoint.ToXNAVector(), baseNodeIndexColor);
                 return;
+            }
 
             texture = frame.Texture;
 
@@ -1133,6 +1141,8 @@ namespace TSMapEditor.Rendering
                 palettedColorDrawEffect.Parameters["UseRemap"].SetValue(true);
                 DrawTexture(graphics.GetRemapFrame(frameIndex).Texture, drawRectangle, remapColor);
             }
+
+            DrawStringWithShadow("#" + baseNodeIndex, Constants.UIBoldFont, drawPoint.ToXNAVector(), baseNodeIndexColor);
         }
 
         private void DrawWaypoint(Waypoint waypoint)
