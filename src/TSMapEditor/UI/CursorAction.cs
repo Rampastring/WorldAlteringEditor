@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Rampastring.XNAUI;
+using Rampastring.XNAUI.Input;
 using System;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
@@ -60,6 +61,8 @@ namespace TSMapEditor.UI
 
         protected bool Is2DMode => CursorActionTarget.Is2DMode;
 
+        protected RKeyboard Keyboard => CursorActionTarget.WindowManager.Keyboard;
+
         protected void PerformMutation(Mutation mutation) => CursorActionTarget.MutationManager.PerformMutation(mutation);
 
         /// <summary>
@@ -71,7 +74,8 @@ namespace TSMapEditor.UI
         /// Called when a keyboard key is pressed while the cursor action is active.
         /// </summary>
         /// <param name="e">The key press event from the XNAUI library.</param>
-        public virtual void OnKeyPressed(Rampastring.XNAUI.Input.KeyPressEventArgs e) { }
+        /// <param name="cellCoords">Coordinates of the cell under the cursor.</param>
+        public virtual void OnKeyPressed(Rampastring.XNAUI.Input.KeyPressEventArgs e, Point2D cellCoords) { }
 
         /// <summary>
         /// Called prior to drawing the map.

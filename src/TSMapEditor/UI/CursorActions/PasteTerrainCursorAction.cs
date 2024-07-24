@@ -57,7 +57,7 @@ namespace TSMapEditor.UI.CursorActions
         private int originLevelOffset;
 
 
-        public override void OnKeyPressed(KeyPressEventArgs e)
+        public override void OnKeyPressed(KeyPressEventArgs e, Point2D cellCoords)
         {
             if (Constants.IsFlatWorld)
                 return;

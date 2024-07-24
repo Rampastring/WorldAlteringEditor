@@ -95,7 +95,7 @@ namespace TSMapEditor.UI.CursorActions
             Renderer.DrawStringWithShadow(text, Constants.UIBoldFont, textPosition, Color.Yellow);
         }
 
-        public override void OnKeyPressed(KeyPressEventArgs e)
+        public override void OnKeyPressed(KeyPressEventArgs e, Point2D cellCoords)
         {
             if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.Escape)
             {

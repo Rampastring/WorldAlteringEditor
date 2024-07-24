@@ -1536,7 +1536,7 @@ namespace TSMapEditor.Rendering
 
             if (!e.Handled && CursorAction != null && CursorAction.HandlesKeyboardInput)
             {
-                CursorAction.OnKeyPressed(e);
+                CursorAction.OnKeyPressed(e, tileUnderCursor == null ? Point2D.NegativeOne : tileUnderCursor.CoordsToPoint());
             }
         }
 

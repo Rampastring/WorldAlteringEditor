@@ -64,7 +64,7 @@ namespace TSMapEditor.UI.CursorActions
             source = null;
         }
 
-        public override void OnKeyPressed(KeyPressEventArgs e)
+        public override void OnKeyPressed(KeyPressEventArgs e, Point2D cellCoords)
         {
             if (e.PressedKey == Microsoft.Xna.Framework.Input.Keys.Escape)
             {
@@ -97,7 +97,7 @@ namespace TSMapEditor.UI.CursorActions
                 e.Handled = true;
             }
 
-            base.OnKeyPressed(e);
+            base.OnKeyPressed(e, cellCoords);
         }
 
         public override void DrawPreview(Point2D cellCoords, Point2D cameraTopLeftPoint)
