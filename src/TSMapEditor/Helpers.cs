@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Text;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Models.Enums;
@@ -174,17 +175,21 @@ namespace TSMapEditor
             if (string.IsNullOrEmpty(str))
                 return -1;
 
-            if (str.Length < 1 || str.Length > 2 ||
-                str[0] < 'A' || str[0] > 'Z' || (str.Length == 2 && (str[1] < 'A' || str[1] > 'Z')))
-                throw new InvalidOperationException("Waypoint values are only valid between A and ZZ. Invalid value: " + str);
+            const int charCount = 26;
+            str = str.ToUpperInvariant();
 
-            if (str.Length == 1)
-                return str[0] - 'A';
+            int n = 0;
+            for (int i = str.Length - 1, j = 1; i >= 0; i--, j *= charCount)
+            {
+                int c = str[i];
 
-            const int CharCount = 26;
+                if (c is < 'A' or > 'Z')
+                    throw new InvalidOperationException("Waypoints may only contain characters A through Z, invalid input: " + str); ;
 
-            int multiplier = (str[0] - 'A' + 1);
-            return (multiplier * CharCount) + (str[1] - 'A');
+                n += (c - 64) * j;
+            }
+
+            return (n - 1);
         }
 
         public static string WaypointNumberToAlphabeticalString(int waypointNumber)
@@ -192,20 +197,18 @@ namespace TSMapEditor
             if (waypointNumber < 0)
                 return string.Empty;
 
-            const int WAYPOINT_MAX = 701;
+            waypointNumber++;
+            StringBuilder sb = new StringBuilder();
 
-            if (waypointNumber > WAYPOINT_MAX)
-                return "A"; // matches 0
+            while (waypointNumber > 0)
+            {
+                int m = waypointNumber % 26;
+                if (m == 0) m = 26;
+                sb.Insert(0, (char)(m + '@')); // '@' = 'A' - 1
+                waypointNumber = (waypointNumber - m) / 26;
+            }
 
-            const int CharCount = 26;
-
-            int firstLetterValue = (waypointNumber / CharCount);
-            int secondLetterValue = waypointNumber % CharCount;
-
-            if (firstLetterValue == 0)
-                return ((char)('A' + secondLetterValue)).ToString();
-
-            return ((char)('A' + (firstLetterValue - 1))).ToString() + ((char)('A' + secondLetterValue)).ToString();
+            return sb.ToString();
         }
 
         private static Point2D[] visualDirectionToPointTable = new Point2D[]
