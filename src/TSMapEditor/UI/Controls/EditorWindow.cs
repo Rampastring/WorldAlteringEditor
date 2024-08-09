@@ -88,6 +88,7 @@ namespace TSMapEditor.UI.Controls
             AlphaRate = AppearingRate;
             Alpha = 0f;
             Enable();
+            IsDragged = false;
 
             ConstrainPosition();
 
@@ -118,6 +119,17 @@ namespace TSMapEditor.UI.Controls
             if (Alpha <= 0f && AlphaRate < 0.0f)
                 Disable();
 
+            if (IsDragged)
+            {
+                Point newCursorPoint = GetCursorPoint();
+                X = X + (newCursorPoint.X - lastCursorPoint.X) * Scaling;
+                Y = Y + (newCursorPoint.Y - lastCursorPoint.Y) * Scaling;
+
+                ConstrainPosition();
+                lastCursorPoint = GetCursorPoint();
+                IsDragged = Cursor.LeftDown;
+            }
+
             if (IsActive && CanBeMoved &&
                 !(WindowManager.SelectedControl is XNAScrollBar) &&
                 !(WindowManager.SelectedControl is XNATrackbar))
@@ -128,25 +140,6 @@ namespace TSMapEditor.UI.Controls
                     IsDragged = true;
                     lastCursorPoint = GetCursorPoint();
                 }
-                else
-                {
-                    IsDragged = IsDragged && Cursor.LeftDown;
-
-                    if (IsDragged)
-                    {
-                        Point newCursorPoint = GetCursorPoint();
-                        X = X + (newCursorPoint.X - lastCursorPoint.X) * Scaling;
-                        Y = Y + (newCursorPoint.Y - lastCursorPoint.Y) * Scaling;
-
-                        ConstrainPosition();
-                    }
-
-                    lastCursorPoint = GetCursorPoint();
-                }
-            }
-            else
-            {
-                IsDragged = false;
             }
         }
     }
