@@ -28,6 +28,7 @@ namespace TSMapEditor.Models
         public List<GlobalVariable> GlobalVariables = new List<GlobalVariable>();
         public List<Weapon> Weapons = new List<Weapon>();
         public List<SuperWeaponType> SuperWeaponTypes = new List<SuperWeaponType>();
+        public List<ParticleSystemType> ParticleSystemTypes = new List<ParticleSystemType>();
 
         public List<TaskForce> TaskForces = new List<TaskForce>();
         public List<Script> Scripts = new List<Script>();
@@ -60,6 +61,7 @@ namespace TSMapEditor.Models
             InitFromTypeSection(iniFile, "Weapons", Weapons);      // TS CnCNet ts-patches + Vinifera
             InitFromTypeSection(iniFile, "WeaponTypes", Weapons);  // YR Ares
             InitFromTypeSection(iniFile, "SuperWeaponTypes", SuperWeaponTypes);
+            InitFromTypeSection(iniFile, "ParticleSystems", ParticleSystemTypes);
             InitFromTypeSection(iniFile, "Tiberiums", TiberiumTypes);
 
             if (!isMapIni)
@@ -80,6 +82,7 @@ namespace TSMapEditor.Models
             SmudgeTypes.ForEach(ot => initializer.ReadObjectTypePropertiesFromINI(ot, iniFile));
             Weapons.ForEach(w => initializer.ReadObjectTypePropertiesFromINI(w, iniFile));
             SuperWeaponTypes.ForEach(sw => initializer.ReadObjectTypePropertiesFromINI(sw, iniFile));
+            ParticleSystemTypes.ForEach(ps => initializer.ReadObjectTypePropertiesFromINI(ps, iniFile));
             AnimTypes.ForEach(a => initializer.ReadObjectTypePropertiesFromINI(a, iniFile));
             RulesHouseTypes.ForEach(ht => initializer.ReadObjectTypePropertiesFromINI(ht, iniFile));
             TiberiumTypes.ForEach(ht => initializer.ReadObjectTypePropertiesFromINI(ht, iniFile));

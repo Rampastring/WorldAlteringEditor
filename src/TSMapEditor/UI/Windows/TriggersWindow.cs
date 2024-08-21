@@ -91,6 +91,7 @@ namespace TSMapEditor.UI.Windows
         private SelectStringWindow selectStringWindow;
         private SelectSpeechWindow selectSpeechWindow;
         private SelectSoundWindow selectSoundWindow;
+        private SelectParticleSystemTypeWindow selectParticleSystemTypeWindow;
 
         private XNAContextMenu actionContextMenu;
         private XNAContextMenu eventContextMenu;
@@ -274,6 +275,10 @@ namespace TSMapEditor.UI.Windows
             selectSoundWindow = new SelectSoundWindow(WindowManager, map);
             var soundDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectSoundWindow);
             soundDarkeningPanel.Hidden += SoundDarkeningPanel_Hidden;
+
+            selectParticleSystemTypeWindow = new SelectParticleSystemTypeWindow(WindowManager, map);
+            var particleSystemTypeDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectParticleSystemTypeWindow);
+            particleSystemTypeDarkeningPanel.Hidden += ParticleSystemTypeDarkeningPanel_Hidden;
 
             eventContextMenu = new XNAContextMenu(WindowManager);
             eventContextMenu.Name = nameof(eventContextMenu);
@@ -1006,6 +1011,11 @@ namespace TSMapEditor.UI.Windows
                     map.Rules.SuperWeaponTypes.ForEach(sw => ctxActionParameterPresetValues.AddItem(sw.GetDisplayString()));
                     ctxActionParameterPresetValues.Open(GetCursorPoint());
                     break;
+                case TriggerParamType.ParticleSystem:
+                    ParticleSystemType existingParticleSystemType = map.Rules.ParticleSystemTypes.Find(pst => pst.Index == Conversions.IntFromString(triggerAction.Parameters[paramIndex], -1));
+                    selectParticleSystemTypeWindow.IsForEvent = false;
+                    selectParticleSystemTypeWindow.Open(existingParticleSystemType);
+                    break;
                 case TriggerParamType.Speech:
                     selectSpeechWindow.IsForEvent = false;
                     EvaSpeech speech = Constants.IsRA2YR
@@ -1133,6 +1143,14 @@ namespace TSMapEditor.UI.Windows
 
             var sound = selectSoundWindow.SelectedObject;
             AssignParamValue(selectSoundWindow.IsForEvent, Constants.IsRA2YR ? sound.Name : sound.Index.ToString(CultureInfo.InvariantCulture));
+        }
+
+        private void ParticleSystemTypeDarkeningPanel_Hidden(object sender, EventArgs e)
+        {
+            if (selectParticleSystemTypeWindow.SelectedObject == null)
+                return;
+
+            AssignParamValue(selectParticleSystemTypeWindow.IsForEvent, selectParticleSystemTypeWindow.SelectedObject.Index);
         }
 
         private void AssignParamValue(bool isForEvent, int paramValue)
@@ -2060,6 +2078,14 @@ namespace TSMapEditor.UI.Windows
                         return intValue + " - nonexistent super weapon";
 
                     return intValue + " " + map.Rules.SuperWeaponTypes[intValue].GetDisplayStringWithoutIndex();
+                case TriggerParamType.ParticleSystem:
+                    if (!intParseSuccess)
+                        return paramValue;
+
+                    if (intValue >= map.Rules.ParticleSystemTypes.Count)
+                        return intValue + " - nonexistent particle system";
+
+                    return intValue + " " + map.Rules.ParticleSystemTypes[intValue].ININame;
                 case TriggerParamType.Speech:
                     EvaSpeech speech;
 

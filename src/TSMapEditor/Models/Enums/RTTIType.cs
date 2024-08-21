@@ -39,6 +39,7 @@
         TeamType,
         Waypoint,
         CellTag,
-        SuperWeaponType
+        SuperWeaponType,
+        ParticleSystemType
     }
 }
