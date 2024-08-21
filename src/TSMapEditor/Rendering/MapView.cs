@@ -1333,6 +1333,30 @@ namespace TSMapEditor.Rendering
                 }
             }
 
+            // Attempt dragging or rotating an object
+            if (CursorAction == null && tileUnderCursor != null && Cursor.LeftPressedDown && !isDraggingObject && !isRotatingObject)
+            {
+                var cellObject = tileUnderCursor.GetObject();
+
+                if (cellObject != null)
+                {
+                    draggedOrRotatedObject = tileUnderCursor.GetObject();
+
+                    if (draggedOrRotatedObject != null)
+                    {
+                        if (KeyboardCommands.Instance.RotateUnit.AreKeysDown(Keyboard))
+                            isRotatingObject = true;
+                        else
+                            isDraggingObject = true;
+                    }
+                }
+                else if (tileUnderCursor.Waypoints.Count > 0)
+                {
+                    draggedOrRotatedObject = tileUnderCursor.Waypoints[0];
+                    isDraggingObject = true;
+                }
+            }
+
             if (isRightClickScrolling)
             {
                 if (Cursor.RightDown)
@@ -1373,30 +1397,7 @@ namespace TSMapEditor.Rendering
                 }
                 else
                 {
-                    CursorAction.LeftUpOnMouseMove(tileUnderCursor == null ? new Point2D(-1, -1) : tileUnderCursor.CoordsToPoint());
-                }
-            }
-
-            if (CursorAction == null && tileUnderCursor != null && Cursor.LeftDown && !isDraggingObject && !isRotatingObject)
-            {
-                var cellObject = tileUnderCursor.GetObject();
-
-                if (cellObject != null)
-                {
-                    draggedOrRotatedObject = tileUnderCursor.GetObject();
-
-                    if (draggedOrRotatedObject != null)
-                    {
-                        if (KeyboardCommands.Instance.RotateUnit.AreKeysDown(Keyboard))
-                            isRotatingObject = true;
-                        else
-                            isDraggingObject = true;
-                    }
-                }
-                else if (tileUnderCursor.Waypoints.Count > 0)
-                {
-                    draggedOrRotatedObject = tileUnderCursor.Waypoints[0];
-                    isDraggingObject = true;
+                    CursorAction.LeftUpOnMouseMove(tileUnderCursor == null ? Point2D.NegativeOne : tileUnderCursor.CoordsToPoint());
                 }
             }
 
