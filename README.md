@@ -1,3 +1,7 @@
+[![Donate on Ko-Fi](https://img.shields.io/badge/Donate-KoFi-green.svg)](https://ko-fi.com/rampastring)
+[![Donate on Patreon](https://img.shields.io/badge/Donate-Patreon-red.svg)](https://www.patreon.com/rampastring)
+[![GitHub Releases](https://img.shields.io/github/downloads/Rampastring/WorldAlteringEditor/total.svg)](https://github.com/Rampastring/WorldAlteringEditor/releases)
+
 # C&C World-Altering Editor (WAE)
 
 Modern open-source map and scenario editor for
