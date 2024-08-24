@@ -3,6 +3,7 @@ using Rampastring.Tools;
 using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
+using System.Linq;
 
 namespace TSMapEditor.UI.Controls
 {
@@ -130,11 +131,26 @@ namespace TSMapEditor.UI.Controls
                 IsDragged = Cursor.LeftDown;
             }
 
-            if (IsActive && CanBeMoved &&
-                !(WindowManager.SelectedControl is XNAScrollBar) &&
-                !(WindowManager.SelectedControl is XNATrackbar))
+            if (IsActive && CanBeMoved && Cursor.LeftPressedDown)
             {
-                if (Cursor.LeftPressedDown)
+                var activeChild = Children.FirstOrDefault(c => c.IsActive);
+
+                if (activeChild != null)
+                {
+                    // Find the last active child from the control hierarchy
+                    while (true)
+                    {
+                        var childOfChild = activeChild.Children.FirstOrDefault(c => c.IsActive);
+                        if (childOfChild == null)
+                            break;
+
+                        activeChild = childOfChild;
+                    }
+                }
+
+                // Only allow moving window if the active child is not a control that is used by dragging
+                // TODO this could be made more object-oriented with a property at XNAControl level
+                if (activeChild == null || !(activeChild is XNAPanel || activeChild is XNAScrollBar || activeChild is XNATrackbar))
                 {
                     InteractedWith?.Invoke(this, EventArgs.Empty);
                     IsDragged = true;
