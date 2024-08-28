@@ -180,7 +180,7 @@ namespace TSMapEditor.Mutations.Classes
             if (mapCell == null)
                 return;
 
-            if (MutationTarget.Map.TheaterInstance.Theater.TryGetTileSetById(bridgeType.TileSetIndex).ContainsTile(mapCell.TileIndex) && mapCell.Level == startingHeight)
+            if (mapCell.Level == startingHeight)
                 return;
 
             if (mapCell.Overlay == null || mapCell.Overlay.OverlayType == null)

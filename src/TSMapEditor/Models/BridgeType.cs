@@ -84,9 +84,6 @@ namespace TSMapEditor.Models
 
             NorthSouth = new BridgeConfig(iniSection, BridgeDirection.NorthSouth, this, rules);
             EastWest = new BridgeConfig(iniSection, BridgeDirection.EastWest, this, rules);
-
-            if (Kind == BridgeKind.High)
-                TileSetIndex = iniSection.GetIntValue("TileSet", -1);
         }
 
         public string Name;
@@ -94,6 +91,5 @@ namespace TSMapEditor.Models
 
         public BridgeConfig NorthSouth;
         public BridgeConfig EastWest;
-        public int TileSetIndex;
     }
 }
