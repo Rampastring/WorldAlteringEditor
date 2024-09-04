@@ -38,7 +38,7 @@ namespace TSMapEditor.Rendering
                 {
                     if (_cursorAction != null)
                     {
-                        _cursorAction.OnActionExit();
+                        _cursorAction.OnExit();
                         _cursorAction.OnExitingAction -= CursorAction_OnExitingAction;
                     }
 

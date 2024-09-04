@@ -28,7 +28,11 @@ namespace TSMapEditor.UI
         /// </summary>
         public event EventHandler OnExitingAction;
 
-        public void OnActionExit() => ActionExited?.Invoke(this, EventArgs.Empty);
+        public void OnExit()
+        {
+            OnActionExit();
+            ActionExited?.Invoke(this, EventArgs.Empty);
+        }
 
         public void ExitAction() => OnExitingAction?.Invoke(this, EventArgs.Empty);
 
@@ -69,6 +73,8 @@ namespace TSMapEditor.UI
         /// Called when the action is activated (when it becomes the cursor action that the user is using).
         /// </summary>
         public virtual void OnActionEnter() { }
+
+        public virtual void OnActionExit() { }
 
         /// <summary>
         /// Called when a keyboard key is pressed while the cursor action is active.
