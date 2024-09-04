@@ -84,6 +84,11 @@ namespace TSMapEditor.UI.CursorActions
 
         public override void PostMapDraw(Point2D cellCoords)
         {
+            ClearPreview();
+        }
+
+        private void ClearPreview()
+        {
             // Clear preview data
             for (int i = 0; i < previewTiles.Count; i++)
             {
@@ -91,6 +96,7 @@ namespace TSMapEditor.UI.CursorActions
             }
 
             previewTiles.Clear();
+            CursorActionTarget.InvalidateMap();
         }
 
         private void ApplyPreviewForCells(Point2D cellCoords)
