@@ -314,6 +314,13 @@ namespace TSMapEditor.UI
                     return GetControl(parameters[0]).Bottom;
                 case "getRight":
                     return GetControl(parameters[0]).Right;
+                case "isGreater":
+                    if (parameters.Count != 2)
+                        throw new INIConfigException($"Incorrect number of parameters for function {functionName} in expression {Input}");
+
+                    int value = GetExprValueWithContextSave(parameters[0], parsingControl);
+                    int value2 = GetExprValueWithContextSave(parameters[1], parsingControl);
+                    return value > value2 ? 1 : 0;
                 case "max":
                     int largest = GetExprValueWithContextSave(parameters[0], parsingControl);
                     for (int i = 1; i < parameters.Count; i++)
