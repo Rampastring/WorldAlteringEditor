@@ -1249,7 +1249,7 @@ namespace TSMapEditor.Models
             }
         }
 
-        public void DoForRectangle(int startX, int startY, int endX, int endY, Action<MapTile> action, bool callForNullTiles)
+        public void DoForRectangle(int startX, int startY, int endX, int endY, Action<MapTile> action)
         {
             for (int y = startY; y <= endY; y++)
             {
@@ -1257,11 +1257,39 @@ namespace TSMapEditor.Models
                 {
                     MapTile tile = GetTile(x, y);
 
-                    if (tile == null && !callForNullTiles)
+                    if (tile == null)
                         continue;
 
                     action(tile);
                 }
+            }
+        }
+
+        public void DoForRectangleBorder(int startX, int startY, int endX, int endY, Action<MapTile> action)
+        {
+            // Top and bottom rows
+            for (int x = startX; x <= endX; x++)
+            {
+                MapTile topCell = GetTile(x, startY);
+                if (topCell != null)
+                    action(topCell);
+
+                MapTile bottomCell = GetTile(x, endY);
+                if (bottomCell != null)
+                    action(bottomCell);
+            }
+
+            // Left and right rows
+            // We can ignore the corners here because the loop for top and bottom rows already handled them
+            for (int y = startY + 1; y <= endY - 1; y++)
+            {
+                MapTile leftCell = GetTile(startX, y);
+                if (leftCell != null)
+                    action(leftCell);
+
+                MapTile rightCell = GetTile(endX, y);
+                if (rightCell != null)
+                    action(rightCell);
             }
         }
 

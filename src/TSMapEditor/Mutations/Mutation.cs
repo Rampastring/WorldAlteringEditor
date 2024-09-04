@@ -94,7 +94,7 @@ namespace TSMapEditor.Mutations
 
             // Don't auto-lat ground that is a base for our placed ground type
             if ((baseTileSet != null && tileSetIndex == baseTileSet.Index) ||
-            (altBaseTileSet != null && tileSetIndex == altBaseTileSet.Index))
+                (altBaseTileSet != null && tileSetIndex == altBaseTileSet.Index))
                 return tileIndex;
 
             // Look at the surrounding tiles to figure out the base tile set ID we should use
@@ -116,12 +116,12 @@ namespace TSMapEditor.Mutations
 
                     if (otherLatGround == null)
                     {
-                        if (otherTileSetId == 0 || latGrounds.Exists(lg => lg.BaseTileSet.Index == otherTileSetId))
+                        if (otherTileSetId == 0 || latGrounds.Exists(lg => lg.BaseTileSet.Index == otherTileSetId && lg.GroundTileSet.Index == tileSetIndex))
                         {
                             baseTileSetId = otherTileSetId;
                             break;
                         }
-                        else if (otherTileSetId != 0 && !latGrounds.Exists(lg => lg.BaseTileSet.Index == otherTileSetId))
+                        else /*if (otherTileSetId != 0 && !latGrounds.Exists(lg => lg.BaseTileSet.Index == otherTileSetId))*/
                         {
                             baseTileSetId = 0;
                             continue;
@@ -224,11 +224,22 @@ namespace TSMapEditor.Mutations
             totalWidth++;
             totalHeight++;
 
-            for (int y = -1; y <= totalHeight; y++)
+            ApplyAutoLATForTileSetPlacement(tile.TileSetId,
+                targetCellCoords.X - 1,
+                targetCellCoords.Y - 1,
+                targetCellCoords.X + totalWidth,
+                targetCellCoords.Y + totalHeight);
+        }
+
+        protected void ApplyAutoLATForTileSetPlacement(int tileSetIndex, int minX, int minY, int maxX, int maxY)
+        {
+            (var baseTileSet, var altBaseTileSet) = GetBaseTileSetsForTileSet(Map.TheaterInstance, tileSetIndex);
+
+            for (int y = minY; y <= maxY; y++)
             {
-                for (int x = -1; x <= totalWidth; x++)
+                for (int x = minX; x <= maxX; x++)
                 {
-                    var cellCoords = targetCellCoords + new Point2D(x, y);
+                    Point2D cellCoords = new Point2D(x, y);
                     int tileIndex = GetAutoLATTileIndexForCell(Map, cellCoords, baseTileSet, altBaseTileSet, false);
 
                     if (tileIndex > -1)

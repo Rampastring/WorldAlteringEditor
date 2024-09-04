@@ -1,5 +1,6 @@
 ﻿using Rampastring.XNAUI.Input;
 using System;
+using System.Collections.Generic;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations;
@@ -30,6 +31,8 @@ namespace TSMapEditor.UI.CursorActions
         }
 
         private int heightOffset;
+
+        private List<MapTile> previewTiles = new List<MapTile>();
 
         public override void OnActionEnter()
         {
@@ -76,16 +79,21 @@ namespace TSMapEditor.UI.CursorActions
         public override void PreMapDraw(Point2D cellCoords)
         {
             // Assign preview data
-            ApplyPreviewForCells(cellCoords, false);
+            ApplyPreviewForCells(cellCoords);
         }
 
         public override void PostMapDraw(Point2D cellCoords)
         {
             // Clear preview data
-            ApplyPreviewForCells(cellCoords, true);
+            for (int i = 0; i < previewTiles.Count; i++)
+            {
+                previewTiles[i].PreviewTileImage = null;
+            }
+
+            previewTiles.Clear();
         }
 
-        private void ApplyPreviewForCells(Point2D cellCoords, bool clearPreview)
+        private void ApplyPreviewForCells(Point2D cellCoords)
         {
             if (Tile == null)
                 return;
@@ -149,7 +157,8 @@ namespace TSMapEditor.UI.CursorActions
                     {
                         mapTile.PreviewSubTileIndex = i;
                         mapTile.PreviewLevel = Math.Min(originLevel + image.TmpImage.Height, Constants.MaxMapHeightLevel);
-                        mapTile.PreviewTileImage = clearPreview ? null : Tile;
+                        mapTile.PreviewTileImage = Tile;
+                        previewTiles.Add(mapTile);
                     }
                 }
             });
@@ -158,50 +167,31 @@ namespace TSMapEditor.UI.CursorActions
             {
                 int totalWidth = Tile.Width * brush.Width;
                 int totalHeight = Tile.Height * brush.Height;
-                totalWidth++;
-                totalHeight++;
 
-                if (clearPreview)
+                // Get potential base tilesets of the placed LAT (if we're placing LAT)
+                // This allows placing certain LATs on top of other LATs (example: snowy dirt on snow, when snow is also placed on grass)
+                (var baseTileSet, var altBaseTileSet) = Mutation.GetBaseTileSetsForTileSet(Map.TheaterInstance, Tile.TileSetId);
+
+                // Apply AutoLat to "outer rectangle" - 1 cell outside our placement area
+                Map.DoForRectangleBorder(adjustedCellCoords.X - 1, adjustedCellCoords.Y - 1, adjustedCellCoords.X + totalWidth, adjustedCellCoords.Y + totalHeight, cell =>
                 {
-                    // TODO technically this is only necessary for the cells on the rectangle's borders
-                    for (int y = -1; y < totalHeight; y++)
+                    int autoLatTileIndex = Mutation.GetAutoLATTileIndexForCell(Map, cell.CoordsToPoint(), baseTileSet, altBaseTileSet, true);
+                    if (autoLatTileIndex > -1)
                     {
-                        for (int x = -1; x < totalWidth; x++)
-                        {
-                            Point2D autoLATCellCoords = adjustedCellCoords + new Point2D(x, y);
-                            var mapTile = CursorActionTarget.Map.GetTile(autoLATCellCoords);
-
-                            if (mapTile == null)
-                                continue;
-
-                            mapTile.PreviewTileImage = null;
-                        }
+                        cell.PreviewTileImage = CursorActionTarget.TheaterGraphics.GetTileGraphics(autoLatTileIndex, 0);
+                        previewTiles.Add(cell);
                     }
-                }
-                else
+                });
+
+                // Apply AutoLat to "inner rectangle" - on the outer edge inside our placement area
+                Map.DoForRectangleBorder(adjustedCellCoords.X, adjustedCellCoords.Y, adjustedCellCoords.X + totalWidth - 1, adjustedCellCoords.Y + totalHeight - 1, cell =>
                 {
-                    // Get potential base tilesets of the placed LAT (if we're placing LAT)
-                    // This allows placing certain LATs on top of other LATs (example: snowy dirt on snow, when snow is also placed on grass)
-                    (var baseTileSet, var altBaseTileSet) = Mutation.GetBaseTileSetsForTileSet(Map.TheaterInstance, Tile.TileSetId);
-
-                    for (int y = -1; y < totalHeight; y++)
+                    int autoLatTileIndex = Mutation.GetAutoLATTileIndexForCell(Map, cell.CoordsToPoint(), baseTileSet, altBaseTileSet, true);
+                    if (autoLatTileIndex > -1)
                     {
-                        for (int x = -1; x < totalWidth; x++)
-                        {
-                            Point2D autoLATCellCoords = adjustedCellCoords + new Point2D(x, y);
-                            var mapTile = CursorActionTarget.Map.GetTile(autoLATCellCoords);
-
-                            if (mapTile == null)
-                                continue;
-
-                            int autoLatTileIndex = Mutation.GetAutoLATTileIndexForCell(Map, autoLATCellCoords, baseTileSet, altBaseTileSet, true);
-                            if (autoLatTileIndex > -1)
-                            {
-                                mapTile.PreviewTileImage = CursorActionTarget.TheaterGraphics.GetTileGraphics(autoLatTileIndex, 0);
-                            }
-                        }
+                        cell.PreviewTileImage = CursorActionTarget.TheaterGraphics.GetTileGraphics(autoLatTileIndex, 0);
                     }
-                }
+                });
             }
 
             CursorActionTarget.AddRefreshPoint(adjustedCellCoords, Math.Max(Tile.Width, Tile.Height) * Math.Max(brush.Width, brush.Height) + 1);

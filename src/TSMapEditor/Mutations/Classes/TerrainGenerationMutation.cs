@@ -590,7 +590,17 @@ namespace TSMapEditor.Mutations.Classes
             maxY++;
             minX--;
             maxX++;
-            ApplyGenericAutoLAT(minX, minY, maxX, maxY);
+
+            // Did we place a LAT ground?
+            var latTileSet = terrainGeneratorConfiguration.TileGroups.Select(tg => tg.TileSet).First(ts => Map.TheaterInstance.Theater.LATGrounds.Exists(lg => lg.GroundTileSet == ts));
+            if (latTileSet != null)
+            {
+                ApplyAutoLATForTileSetPlacement(latTileSet.Index, minX, minY, maxX, maxY);
+            }
+            else
+            {
+                ApplyGenericAutoLAT(minX, minY, maxX, maxY);
+            }
         }
 
         private void PlaceTerrainTileAt(ITileImage tile, Point2D cellCoords)

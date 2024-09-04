@@ -52,7 +52,7 @@ namespace TSMapEditor.UI.CursorActions
                 {
                     if (cell.Level < lowestHeight)
                         lowestHeight = cell.Level;
-                }, false);
+                });
             }
 
             for (int y = startY; y <= endY; y++)

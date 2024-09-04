@@ -32,7 +32,7 @@ namespace TSMapEditor.UI.CursorActions
                 Map.DoForRectangle(cellCoords.X - 1, cellCoords.Y - 1, cellCoords.X + 1, cellCoords.Y + 1, t =>
                 {
                     isMorphable = isMorphable && Map.TheaterInstance.Theater.TileSets[Map.TheaterInstance.GetTileSetId(t.TileIndex)].Morphable;
-                }, false);
+                });
 
                 if (!isMorphable)
                     return;
