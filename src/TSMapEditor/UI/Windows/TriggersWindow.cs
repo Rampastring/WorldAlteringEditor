@@ -1954,6 +1954,12 @@ namespace TSMapEditor.UI.Windows
                         return Helpers.GetHouseTypeUITextColor(teamType.HouseType);
                     }
                     goto case TriggerParamType.Unused;
+                case TriggerParamType.Trigger:
+                    Trigger trigger = map.Triggers.Find(t => t.ID == paramValue);
+                    if (trigger == null || trigger.EditorColor == null)
+                        goto case TriggerParamType.Unused;
+
+                    return trigger.XNAColor;
                 case TriggerParamType.Unused:
                 default:
                     return UISettings.ActiveSettings.AltColor;
