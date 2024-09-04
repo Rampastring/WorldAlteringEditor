@@ -406,8 +406,9 @@ namespace TSMapEditor.Initialization
                 {
                     var tile = map.GetTile(building.Position + offset);
                     tile.Structures.Add(building);
-                    building.LightTiles(map.Tiles);
                 });
+
+                building.LightTiles(map.Tiles);
             }
 
             map.Structures.ForEach(s => s.UpdatePowerUpAnims());
