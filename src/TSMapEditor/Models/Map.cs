@@ -1286,11 +1286,11 @@ namespace TSMapEditor.Models
 
         public void SortWaypoints() => Waypoints = Waypoints.OrderBy(wp => wp.Identifier).ToList();
 
-        public int GetAutoLATIndex(MapTile mapTile, int baseLATTileSetIndex, int transitionLATTileSetIndex, Func<TileSet, bool> miscChecker)
+        public int GetAutoLATIndex(MapTile mapTile, int baseLATTileSetIndex, int transitionLATTileSetIndex, bool usePreview, Func<TileSet, bool> miscChecker)
         {
             foreach (var autoLatData in AutoLATType.AutoLATData)
             {
-                if (TransitionArrayDataMatches(autoLatData.TransitionMatchArray, mapTile, baseLATTileSetIndex, transitionLATTileSetIndex, miscChecker))
+                if (TransitionArrayDataMatches(autoLatData.TransitionMatchArray, mapTile, baseLATTileSetIndex, transitionLATTileSetIndex, usePreview, miscChecker))
                 {
                     return autoLatData.TransitionTypeIndex;
                 }
@@ -1345,7 +1345,7 @@ namespace TSMapEditor.Models
         /// Checks if specific transition data matches for a tile.
         /// If it does, then the tile should use the LAT transition index related to the data.
         /// </summary>
-        private bool TransitionArrayDataMatches(int[] transitionData, MapTile mapTile, int desiredTileSetId1, int desiredTileSetId2, Func<TileSet, bool> miscChecker)
+        private bool TransitionArrayDataMatches(int[] transitionData, MapTile mapTile, int desiredTileSetId1, int desiredTileSetId2, bool usePreview, Func<TileSet, bool> miscChecker)
         {
             var nearbyTiles = new NearbyTileData[]
             {
@@ -1359,7 +1359,7 @@ namespace TSMapEditor.Models
             foreach (var nearbyTile in nearbyTiles)
             {
                 if (!TileSetMatchesExpected(mapTile.X + nearbyTile.XOffset, mapTile.Y + nearbyTile.YOffset,
-                    transitionData, nearbyTile.DirectionIndex, desiredTileSetId1, desiredTileSetId2, miscChecker))
+                    transitionData, nearbyTile.DirectionIndex, desiredTileSetId1, desiredTileSetId2, usePreview, miscChecker))
                 {
                     return false;
                 }
@@ -1368,7 +1368,7 @@ namespace TSMapEditor.Models
             return true;
         }
 
-        private bool TileSetMatchesExpected(int x, int y, int[] transitionData, int transitionDataIndex, int desiredTileSetId1, int desiredTileSetId2, Func<TileSet, bool> miscChecker)
+        private bool TileSetMatchesExpected(int x, int y, int[] transitionData, int transitionDataIndex, int desiredTileSetId1, int desiredTileSetId2, bool usePreview, Func<TileSet, bool> miscChecker)
         {
             var tile = GetTile(x, y);
 
@@ -1377,7 +1377,8 @@ namespace TSMapEditor.Models
 
             bool shouldMatch = transitionData[transitionDataIndex] > 0;
 
-            int tileSetId = TheaterInstance.GetTileSetId(tile.TileIndex);
+            int tileIndex = (usePreview && tile.PreviewTileImage != null) ? tile.PreviewTileImage.TileID : tile.TileIndex;
+            int tileSetId = TheaterInstance.GetTileSetId(tileIndex);
             var tileSet = TheaterInstance.Theater.TileSets[tileSetId];
             if (shouldMatch && (tileSetId != desiredTileSetId1 && tileSetId != desiredTileSetId2 && (miscChecker == null || !miscChecker(tileSet))))
                 return false;
