@@ -592,7 +592,7 @@ namespace TSMapEditor.Mutations.Classes
             maxX++;
 
             // Did we place a LAT ground?
-            var latTileSet = terrainGeneratorConfiguration.TileGroups.Select(tg => tg.TileSet).First(ts => Map.TheaterInstance.Theater.LATGrounds.Exists(lg => lg.GroundTileSet == ts));
+            var latTileSet = terrainGeneratorConfiguration.TileGroups.Select(tg => tg.TileSet).FirstOrDefault(ts => Map.TheaterInstance.Theater.LATGrounds.Exists(lg => lg.GroundTileSet == ts));
             if (latTileSet != null)
             {
                 ApplyAutoLATForTileSetPlacement(latTileSet.Index, minX, minY, maxX, maxY);
