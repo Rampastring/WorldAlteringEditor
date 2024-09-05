@@ -544,6 +544,9 @@ namespace TSMapEditor.Models
         /// objects should be moved to the south.</param>
         public void Resize(Point2D newSize, int eastShift, int southShift)
         {
+            // Remove lighting
+            Structures.ForEach(s => s.ClearLitTiles());
+
             // Copy current cell list to preserve it
             MapTile[][] cells = Tiles;
 
@@ -618,6 +621,9 @@ namespace TSMapEditor.Models
                 house.BaseNodes.AddRange(nodesWithinMap);
                 house.BaseNodes.ForEach(bn => RegisterBaseNode(house, bn));
             }
+
+            // Apply lighting
+            Structures.ForEach(s => s.LightTiles(Tiles));
 
             // We're done!
             MapResized?.Invoke(this, EventArgs.Empty);
@@ -1349,7 +1355,6 @@ namespace TSMapEditor.Models
 
                 affectedTiles.ForEach(cell => cell.RefreshLighting(Lighting, lightingPreviewMode));
             }
-            
         }
 
         /// <summary>

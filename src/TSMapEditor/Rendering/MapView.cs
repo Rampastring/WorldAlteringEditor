@@ -374,6 +374,7 @@ namespace TSMapEditor.Rendering
             RefreshRenderTargets();
 
             windowController.MinimapWindow.MegamapTexture = mapRenderTarget;
+            Map.RefreshCellLighting(EditorState.LightingPreviewState, null);
 
             // And then re-draw the whole map
             InvalidateMap();
