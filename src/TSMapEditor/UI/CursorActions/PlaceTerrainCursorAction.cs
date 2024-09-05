@@ -93,6 +93,7 @@ namespace TSMapEditor.UI.CursorActions
             for (int i = 0; i < previewTiles.Count; i++)
             {
                 previewTiles[i].PreviewTileImage = null;
+                previewTiles[i].PreviewLevel = -1;
             }
 
             previewTiles.Clear();
@@ -185,6 +186,7 @@ namespace TSMapEditor.UI.CursorActions
                     if (autoLatTileIndex > -1)
                     {
                         cell.PreviewTileImage = CursorActionTarget.TheaterGraphics.GetTileGraphics(autoLatTileIndex, 0);
+                        cell.PreviewLevel = cell.Level;
                         previewTiles.Add(cell);
                     }
                 });
@@ -196,6 +198,8 @@ namespace TSMapEditor.UI.CursorActions
                     if (autoLatTileIndex > -1)
                     {
                         cell.PreviewTileImage = CursorActionTarget.TheaterGraphics.GetTileGraphics(autoLatTileIndex, 0);
+                        if (cell.PreviewLevel < 0)
+                            cell.PreviewLevel = cell.Level;
                     }
                 });
             }
