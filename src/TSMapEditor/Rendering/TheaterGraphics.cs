@@ -638,9 +638,12 @@ namespace TSMapEditor.Rendering
             {
                 var buildingType = buildingTypes[i];
 
-                string shpFileName = string.IsNullOrWhiteSpace(buildingType.Image) ? buildingType.ArtConfig.Image : buildingType.Image;
-
-                if (string.IsNullOrEmpty(shpFileName))
+                string shpFileName;
+                if (!string.IsNullOrWhiteSpace(buildingType.ArtConfig.Image))
+                    shpFileName = buildingType.ArtConfig.Image;
+                else if (!string.IsNullOrWhiteSpace(buildingType.Image))
+                    shpFileName = buildingType.Image;
+                else
                     shpFileName = buildingType.ININame;
 
                 if (buildingType.ArtConfig.Theater)
