@@ -285,13 +285,17 @@ namespace TSMapEditor.Initialization
         public static void WriteScripts(List<Script> scripts, IniFile iniFile)
         {
             const string sectionName = "ScriptTypes";
+            const string editorSectionName = "EditorScriptInfo";
+
             iniFile.RemoveSection(sectionName);
+            iniFile.RemoveSection(editorSectionName);            
 
             if (scripts.Count == 0)
                 return;
 
             var scriptTypesSection = new IniSection(sectionName);
-            iniFile.AddSection(scriptTypesSection);
+            iniFile.AddSection(scriptTypesSection);            
+
             for (int i = 0; i < scripts.Count; i++)
             {
                 Script script = scripts[i];
@@ -301,6 +305,7 @@ namespace TSMapEditor.Initialization
                 var scriptSection = new IniSection(script.ININame);
                 iniFile.AddSection(scriptSection);
                 script.WriteToIniSection(scriptSection);
+                script.WriteEditorProperties(iniFile);
             }
         }
 
@@ -310,7 +315,10 @@ namespace TSMapEditor.Initialization
         public static void WriteTeamTypes(List<TeamType> teamTypes, IniFile iniFile, List<TeamTypeFlag> teamTypeFlags)
         {
             const string sectionName = "TeamTypes";
+            const string editorSectionName = "EditorTeamTypeInfo";
+
             iniFile.RemoveSection(sectionName);
+            iniFile.RemoveSection(editorSectionName);
 
             if (teamTypes.Count == 0)
                 return;
@@ -326,6 +334,7 @@ namespace TSMapEditor.Initialization
                 var teamTypeSection = new IniSection(teamType.ININame);
                 iniFile.AddSection(teamTypeSection);
                 teamType.WriteToIniSection(teamTypeSection, teamTypeFlags);
+                teamType.WriteEditorProperties(iniFile);
             }
         }
 
