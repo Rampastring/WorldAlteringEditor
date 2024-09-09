@@ -557,16 +557,8 @@ namespace TSMapEditor.Models
                 return totalCellList.Concat(nonNullValues).ToList();
             });
 
-            // Handle east-shift
-            // We can shift a cell one point towards the east by 
-            // adding 1 to its X coordinate and subtracting 1 from its Y coordinate
-            allCellsInList.ForEach(mapCell => { mapCell.ShiftPosition(eastShift, -eastShift); });
-
-            // Handle south-shift
-            // We can shift a cell one point towards the south by 
-            // adding 1 to both its X and Y coordinates
-            allCellsInList.ForEach(mapCell => { mapCell.ShiftPosition(southShift, southShift); });
-
+            // Shift all cells
+            allCellsInList.ForEach(mapCell => { mapCell.ShiftPosition(eastShift, southShift); });
 
             // Then the "fun" part. Shift every object, waypoint, celltag etc. similarly!
             ShiftObjectsInList(Aircraft, eastShift, southShift);
@@ -636,14 +628,8 @@ namespace TSMapEditor.Models
 
         private void ShiftObject(IPositioned movableObject, int eastShift, int southShift)
         {
-            int x = movableObject.Position.X;
-            int y = movableObject.Position.Y;
-
-            x += eastShift;
-            y -= eastShift;
-
-            x += southShift;
-            y += southShift;
+            int x = movableObject.Position.X + eastShift;
+            int y = movableObject.Position.Y + southShift;
 
             movableObject.Position = new Point2D(x, y);
         }
