@@ -149,6 +149,21 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
 
                 foreach (var cliffTypeTile in cliffType.Tiles)
                 {
+                    var tileSet = theaterGraphics.Theater.TileSets.Find(ts => ts.SetName == cliffTypeTile.TileSetName && ts.AllowToPlace);
+
+                    if (tileSet == null)
+                    {
+                        string errorMessage = $"Unable to find TileSet \"{cliffTypeTile.TileSetName}\" " +
+                            $"for connected terrain type \"{cliffType.IniName}\", tile index {cliffTypeTile.Index}";
+#if DEBUG
+                        throw new INIConfigException(errorMessage);
+#else
+                        Logger.Log("WARNING: " + errorMessage + ". Disabling the connected terrain type.");
+                        cliffType.IsLegal = false;
+                        break;
+#endif
+                    }
+
                     if (cliffTypeTile.IndicesInTileSet.Count == 0)
                         continue;
 
@@ -158,12 +173,6 @@ namespace TSMapEditor.UI.Windows.MainMenuWindows
                     cliffTypeTile.Foundation = new HashSet<GameMath.Point2D>();
 
                     int firstTileIndexWithinSet = cliffTypeTile.IndicesInTileSet[0];
-                    var tileSet = theaterGraphics.Theater.TileSets.Find(ts => ts.SetName == cliffTypeTile.TileSetName && ts.AllowToPlace);
-                    if (tileSet == null)
-                    {
-                        throw new INIConfigException($"Unable to find TileSet \"{cliffTypeTile.TileSetName}\" " +
-                            $"for connected terrain type \"{cliffType.IniName}\", tile index {cliffTypeTile.Index}");
-                    }
 
                     int totalFirstTileIndex = tileSet.StartTileIndex + firstTileIndexWithinSet;
 

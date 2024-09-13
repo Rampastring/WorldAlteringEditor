@@ -44,7 +44,8 @@ namespace TSMapEditor.UI.Windows
             foreach (CliffType cliff in map.EditorConfig.Cliffs.Where(cliff =>
                          cliff.AllowedTheaters.Exists(theaterName => theaterName.Equals(map.TheaterName, StringComparison.OrdinalIgnoreCase))))
             {
-                lbObjectList.AddItem(new XNAListBoxItem() { Text = cliff.Name, Tag = cliff });
+                if (cliff.IsLegal)
+                    lbObjectList.AddItem(new XNAListBoxItem() { Text = cliff.Name, Tag = cliff });
             }
         }
     }
