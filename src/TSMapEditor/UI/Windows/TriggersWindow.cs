@@ -1643,7 +1643,7 @@ namespace TSMapEditor.UI.Windows
             }
 
             tbName.Text = editedTrigger.Name;
-            ddHouseType.SelectedIndex = map.GetHouses().FindIndex(h => h.ININame == trigger.HouseType);
+            ddHouseType.SelectedIndex = map.GetHouseTypes().FindIndex(h => h.ININame == trigger.HouseType);
             ddType.SelectedIndex = tag == null ? 3 : tag.Repeating;
             selAttachedTrigger.Text = editedTrigger.LinkedTrigger == null ? Constants.NoneValue1 : editedTrigger.LinkedTrigger.Name;
             selAttachedTrigger.Tag = editedTrigger.LinkedTrigger;
