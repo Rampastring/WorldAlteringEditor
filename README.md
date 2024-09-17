@@ -3,6 +3,7 @@
 [![GitHub Releases](https://img.shields.io/github/downloads/Rampastring/WorldAlteringEditor/total.svg)](https://github.com/Rampastring/WorldAlteringEditor/releases)
 
 # C&C World-Altering Editor (WAE)
+**English** · [简体中文](./README-zhCN.md)
 
 Modern open-source map and scenario editor for
 
