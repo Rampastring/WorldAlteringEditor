@@ -237,11 +237,11 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         protected virtual float GetDepth(T gameObject, Texture2D texture)
         {
             var tile = Map.GetTile(gameObject.Position);
-            int textureHeightInCells = texture.Height / Constants.CellHeight;
-            if (textureHeightInCells == 0)
-                textureHeightInCells++;
+            // int textureHeightInCells = texture.Height / Constants.CellHeight;
+            // if (textureHeightInCells == 0)
+            //     textureHeightInCells++;
 
-            return (tile.Level + textureHeightInCells) * Constants.DepthRenderStep;
+            return (tile.Level + 1) * Constants.DepthRenderStep;
         }
 
         protected void DrawShapeImage(T gameObject, ShapeImage image, int frameIndex, Color color,

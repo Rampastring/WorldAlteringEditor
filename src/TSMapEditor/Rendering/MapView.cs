@@ -552,7 +552,7 @@ namespace TSMapEditor.Rendering
                         ReferenceStencil = 1,
                         DepthBufferEnable = true,
                         DepthBufferWriteEnable = false,
-                        DepthBufferFunction = CompareFunction.GreaterEqual,
+                        DepthBufferFunction = CompareFunction.Greater,
                     };
                 }
 
