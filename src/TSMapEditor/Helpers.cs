@@ -587,6 +587,26 @@ namespace TSMapEditor
         }
 
         /// <summary>
+        /// Converts a name that includes a difficulty to instead have a different difficulty.
+        /// Useful for cloning purposes of any type of object named by users to additional difficulty levels.
+        /// </summary>
+        /// <param name="name">Original name to convert.</param>
+        /// <param name="fromDifficulty">Current difficulty to convert the name from (replace).</param>
+        /// <param name="toDifficulty">New difficulty to convert the name to (replace).</param>
+        /// <returns>New name after it was converted to the desired difficulty.</returns>
+        public static string ConvertNameToNewDifficulty(string name, Difficulty fromDifficulty, Difficulty toDifficulty)
+        {
+            string fromDifficultyString = fromDifficulty.ToString();
+            string toDifficultyString = toDifficulty.ToString();
+
+            string newName = name.Replace(fromDifficultyString, toDifficultyString);
+            newName = newName.Replace($" {fromDifficultyString[0]}", $" {toDifficultyString[0]}");
+            newName = newName.Replace($"{fromDifficultyString[0]} ", $"{toDifficultyString[0]} ");
+
+            return newName;
+        }
+
+        /// <summary>
         /// Generates outline edges for a foundation of cells
         /// </summary>
         /// <param name="maxWidth">Maximum possible length of a horizontal edge in cells.</param>
