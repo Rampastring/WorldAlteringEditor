@@ -42,8 +42,8 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                     break;
             }
 
-            if (!gameObject.ObjectType.NoShadow)
-                DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
+            // if (!gameObject.ObjectType.NoShadow)
+            //     DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
 
             DrawShapeImage(gameObject, drawParams.ShapeImage, 
                 gameObject.GetFrameIndex(drawParams.ShapeImage.GetFrameCount()), 

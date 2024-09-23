@@ -49,6 +49,8 @@ namespace TSMapEditor.Models
 
         public virtual bool IsInvisibleInGame() => false;
 
+        public virtual bool HasShadow() => false;
+
         public virtual Color GetRemapColor() => Color.White;
     }
 }

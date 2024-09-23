@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 
@@ -19,6 +20,12 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 IniName = gameObject.OverlayType.ININame,
                 ShapeImage = TheaterGraphics.OverlayTextures[gameObject.OverlayType.Index]
             };
+        }
+
+        protected override float GetDepth(Overlay gameObject, Texture2D texture)
+        {
+            // Overlay belong to the same layer with tiles themselves
+            return base.GetDepth(gameObject, texture) - Constants.DepthRenderStep;
         }
 
         protected override void Render(Overlay gameObject, int heightOffset, Point2D drawPoint, in CommonDrawParams drawParams)
@@ -55,7 +62,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             bool affectedByLighting = drawParams.ShapeImage.SubjectToLighting;
             bool affectedByAmbient = !gameObject.OverlayType.Tiberium && !affectedByLighting;
 
-            DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
+            // DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
             DrawShapeImage(gameObject, drawParams.ShapeImage, gameObject.FrameIndex, Color.White,
                 false, true, remapColor, affectedByLighting, affectedByAmbient, drawPoint, heightOffset);
         }

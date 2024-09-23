@@ -26,11 +26,6 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
         protected abstract Color ReplacementColor { get; }
 
-        public void UpdateDepthRenderTarget(RenderTarget2D depthRenderTarget)
-        {
-            RenderDependencies.DepthRenderTarget = depthRenderTarget;
-        }
-
         /// <summary>
         /// The entry point for rendering an object.
         ///
@@ -40,7 +35,8 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         /// </summary>
         /// <param name="gameObject">The game object to render.</param>
         /// <param name="checkInCamera">Whether the object's presence within the camera should be checked.</param>
-        public void Draw(T gameObject, bool checkInCamera)
+        /// <param name="drawShadow">Whether a shadow should also be drawn for this object.</param>
+        public void Draw(T gameObject, bool checkInCamera, bool drawShadow)
         {
             Point2D drawPointWithoutCellHeight = CellMath.CellTopLeftPointFromCellCoords(gameObject.Position, RenderDependencies.Map);
 
@@ -57,6 +53,14 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             // If the object is not in view, skip
             if (checkInCamera && !IsObjectInCamera(drawingBounds))
                 return;
+
+            if (drawShadow)
+            {
+                if (gameObject.HasShadow())
+                    DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
+
+                return;
+            }
 
             if (frame == null && ShouldRenderReplacementText(gameObject))
             {
@@ -105,8 +109,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         /// <param name="drawPoint">The draw point of the object, with cell height taken into account.</param>
         protected virtual void DrawObjectReplacementText(T gameObject, in CommonDrawParams drawParams, Point2D drawPoint)
         {
-            SetEffectParams_RGBADraw(0.0f, 0.0f, Vector2.Zero, Vector2.Zero, false);
-            SetLighting(Vector4.One);
+            SetEffectParams_RGBADraw(false);
 
             // If the object is a techno, draw an arrow that displays its facing
             if (gameObject.IsTechno())
@@ -197,32 +200,16 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 finalDrawPointX + frame?.Texture.Width ?? 0, finalDrawPointY + frame?.Texture.Height ?? 0);
         }
 
-        protected void SetEffectParams_PalettedDraw(float bottomDepth, float topDepth,
-            Vector2 worldTextureCoordinates, Vector2 spriteSizeToWorldSizeRatio, bool isShadow,
-            Texture2D paletteTexture)
-            => SetEffectParams(RenderDependencies.PalettedColorDrawEffect, bottomDepth, topDepth,
-                worldTextureCoordinates, spriteSizeToWorldSizeRatio, RenderDependencies.DepthRenderTarget, isShadow, paletteTexture, true);
+        protected void SetEffectParams_PalettedDraw(bool isShadow, Texture2D paletteTexture)
+            => SetEffectParams(RenderDependencies.PalettedColorDrawEffect, isShadow, paletteTexture, true);
 
-        protected void SetEffectParams_RGBADraw(float bottomDepth, float topDepth,
-            Vector2 worldTextureCoordinates, Vector2 spriteSizeToWorldSizeRatio, bool isShadow)
-            => SetEffectParams(RenderDependencies.PalettedColorDrawEffect, bottomDepth, topDepth,
-                worldTextureCoordinates, spriteSizeToWorldSizeRatio, RenderDependencies.DepthRenderTarget, isShadow, null, false);
+        protected void SetEffectParams_RGBADraw(bool isShadow)
+            => SetEffectParams(RenderDependencies.PalettedColorDrawEffect, isShadow, null, false);
 
-        protected void SetEffectParams(Effect effect, float bottomDepth, float topDepth,
-            Vector2 worldTextureCoordinates, Vector2 spriteSizeToWorldSizeRatio, Texture2D depthTexture, bool isShadow, Texture2D paletteTexture, bool usePalette)
+        protected void SetEffectParams(Effect effect, bool isShadow, Texture2D paletteTexture, bool usePalette)
         {
-            effect.Parameters["SpriteDepthBottom"].SetValue(bottomDepth);
-            effect.Parameters["SpriteDepthTop"].SetValue(topDepth);
-            effect.Parameters["WorldTextureCoordinates"].SetValue(worldTextureCoordinates);
-            effect.Parameters["SpriteSizeToWorldSizeRatio"].SetValue(spriteSizeToWorldSizeRatio);
             effect.Parameters["IsShadow"].SetValue(isShadow);
             RenderDependencies.GraphicsDevice.SamplerStates[1] = SamplerState.LinearClamp;
-
-            if (depthTexture != null)
-            {
-                effect.Parameters["DepthTexture"].SetValue(depthTexture);
-                RenderDependencies.GraphicsDevice.Textures[1] = depthTexture;
-            }
 
             if (paletteTexture != null)
             {
@@ -232,11 +219,6 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
             effect.Parameters["UsePalette"].SetValue(usePalette);
             RenderDependencies.PalettedColorDrawEffect.Parameters["UseRemap"].SetValue(false); // Disable remap by default
-        }
-
-        protected void SetLighting(Vector4 lighting)
-        {
-            RenderDependencies.PalettedColorDrawEffect.Parameters["Lighting"].SetValue(lighting);
         }
 
         protected virtual void DrawShadow(T gameObject, in CommonDrawParams drawParams, Point2D drawPoint, int heightOffset)
@@ -250,6 +232,16 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 DrawShapeImage(gameObject, drawParams.ShapeImage, shadowFrameIndex,
                     new Color(0, 0, 0, 128), true, false, Color.White, false, false, drawPoint, heightOffset);
             }
+        }
+
+        protected virtual float GetDepth(T gameObject, Texture2D texture)
+        {
+            var tile = Map.GetTile(gameObject.Position);
+            int textureHeightInCells = texture.Height / Constants.CellHeight;
+            if (textureHeightInCells == 0)
+                textureHeightInCells++;
+
+            return (tile.Level + textureHeightInCells) * Constants.DepthRenderStep;
         }
 
         protected void DrawShapeImage(T gameObject, ShapeImage image, int frameIndex, Color color,
@@ -299,8 +291,10 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 }
             }
 
+            float depth = GetDepth(gameObject, frame.Texture);
+
             RenderFrame(frame, remapFrame, color, drawRemap, remapColor, isShadow,
-                drawingBounds.X, drawingBounds.Y, heightOffset, image.GetPaletteTexture(), lighting);
+                drawingBounds.X, drawingBounds.Y, image.GetPaletteTexture(), lighting, depth);
         }
 
         protected void DrawVoxelModel(T gameObject, VoxelModel model, byte facing, RampType ramp,
@@ -312,6 +306,8 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             PositionedTexture frame = model.GetFrame(facing, ramp, false);
             if (frame == null || frame.Texture == null)
                 return;
+
+            float depth = GetDepth(gameObject, frame.Texture);
 
             PositionedTexture remapFrame = null;
             if (drawRemap)
@@ -351,25 +347,32 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             Rectangle drawingBounds = GetTextureDrawCoords(gameObject, frame, drawPoint);
 
             RenderFrame(frame, remapFrame, color, drawRemap, remapColor, false,
-                drawingBounds.X, drawingBounds.Y, heightOffset, null, lighting);
+                drawingBounds.X, drawingBounds.Y, null, lighting, depth);
         }
 
         private void RenderFrame(PositionedTexture frame, PositionedTexture remapFrame, Color color, bool drawRemap, Color remapColor,
-            bool isShadow,
-            int finalDrawPointX, int finalDrawPointY, int heightOffset, Texture2D paletteTexture, Vector4 lightingColor)
+            bool isShadow, int finalDrawPointX, int finalDrawPointY, Texture2D paletteTexture, Vector4 lightingColor, float depth)
         {
             Texture2D texture = frame.Texture;
 
-            ApplyShaderEffectValues(texture, new Point2D(finalDrawPointX, finalDrawPointY), heightOffset, isShadow, paletteTexture);
+            ApplyShaderEffectValues(isShadow, paletteTexture);
 
-            SetLighting(lightingColor);
+            color = new Color((color.R / 255.0f) * lightingColor.X / 2f,
+                (color.B / 255.0f) * lightingColor.Y / 2f,
+                (color.B / 255.0f) * lightingColor.Z / 2f, depth);
 
             Renderer.DrawTexture(texture, 
                 new Rectangle(finalDrawPointX, finalDrawPointY, texture.Width, texture.Height),
-                null, color, 0f, Vector2.Zero, SpriteEffects.None, 0f);
+                null, color, 0f, Vector2.Zero, SpriteEffects.None, depth);
 
             if (drawRemap && remapFrame != null)
             {
+                remapColor = new Color(
+                    (remapColor.R / 255.0f),
+                    (remapColor.G / 255.0f),
+                    (remapColor.B / 255.0f),
+                    depth);
+
                 RenderDependencies.PalettedColorDrawEffect.Parameters["UseRemap"].SetValue(true);
 
                 Renderer.DrawTexture(remapFrame.Texture,
@@ -383,22 +386,12 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             }
         }
 
-        private void ApplyShaderEffectValues(Texture2D texture, Point2D finalDrawPoint, int heightOffset, bool isShadow, Texture2D paletteTexture)
+        private void ApplyShaderEffectValues(bool isShadow, Texture2D paletteTexture)
         {
-            int depthOffset = Constants.CellSizeY;
-
-            float depthTop = (finalDrawPoint.Y + heightOffset + depthOffset) / (float)Map.HeightInPixelsWithCellHeight;
-            float depthBottom = (finalDrawPoint.Y + heightOffset + texture.Height + depthOffset) / (float)Map.HeightInPixelsWithCellHeight;
-            depthTop = 1.0f - depthTop;
-            depthBottom = 1.0f - depthBottom;
-
-            Vector2 worldTextureCoordinates = new Vector2(finalDrawPoint.X / (float)Map.WidthInPixels, finalDrawPoint.Y / (float)Map.HeightInPixelsWithCellHeight);
-            Vector2 spriteSizeToWorldSizeRatio = new Vector2(texture.Width / (float)Map.WidthInPixels, texture.Height / (float)Map.HeightInPixelsWithCellHeight);
-
             if (paletteTexture == null)
-                SetEffectParams_RGBADraw(depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, isShadow);
+                SetEffectParams_RGBADraw(isShadow);
             else
-                SetEffectParams_PalettedDraw(depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, isShadow, paletteTexture);
+                SetEffectParams_PalettedDraw(isShadow, paletteTexture);
         }
 
         protected void DrawLine(Vector2 start, Vector2 end, Color color, int thickness = 1, float depth = 0f)

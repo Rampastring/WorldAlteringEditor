@@ -302,6 +302,8 @@ namespace TSMapEditor.Models
             return frameCount / 2;
         }
 
+        public override bool HasShadow() => !ObjectType.NoShadow;
+
         public override bool Remapable() => ObjectType.ArtConfig.Remapable;
 
         public override Color GetRemapColor() => IsBaseNodeDummy ? base.GetRemapColor() * 0.25f : base.GetRemapColor();

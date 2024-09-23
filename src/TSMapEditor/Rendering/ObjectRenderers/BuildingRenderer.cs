@@ -37,8 +37,14 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             if (cell != null && !RenderDependencies.EditorState.Is2DMode)
                 heightOffset = cell.Level * Constants.CellHeight;
 
-            SetLighting(cell.CellLighting.ToXNAVector4Ambient());
-            SetEffectParams_RGBADraw(0.0f, 0.0f, Vector2.Zero, Vector2.Zero, false);
+            float depth = cell.Level * Constants.DepthRenderStep;
+
+            foundationLineColor = new Color((foundationLineColor.R / 255.0f) * (float)cell.CellLighting.R,
+                (foundationLineColor.G / 255.0f) * (float)cell.CellLighting.G,
+                (foundationLineColor.B / 255.0f) * (float)cell.CellLighting.B,
+                depth);
+
+            SetEffectParams_RGBADraw(false);
 
             foreach (var edge in gameObject.ObjectType.ArtConfig.Foundation.Edges)
             {
@@ -115,11 +121,11 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
             // The building itself has an offset of 0, so first draw all anims with sort values < 0
             foreach (var anim in animsList.Where(a => a.BuildingAnimDrawConfig.SortValue < 0))
-                buildingAnimRenderer.Draw(anim, false);
+                buildingAnimRenderer.Draw(anim, false, false);
 
             // Then the building itself
-            if (!gameObject.ObjectType.NoShadow)
-                DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
+            // if (!gameObject.ObjectType.NoShadow && drawShadow)
+            //     DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
 
             int frameCount = drawParams.ShapeImage == null ? 0 : drawParams.ShapeImage.GetFrameCount();
             bool affectedByAmbient = !affectedByLighting;
@@ -131,7 +137,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
             // Then draw all anims with sort values >= 0
             foreach (var anim in animsList.Where(a => a.BuildingAnimDrawConfig.SortValue >= 0))
-                buildingAnimRenderer.Draw(anim, false);
+                buildingAnimRenderer.Draw(anim, false, false);
 
             DrawVoxelTurret(gameObject, heightOffset, drawPoint, drawParams, nonRemapColor, affectedByLighting);
 

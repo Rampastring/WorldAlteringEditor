@@ -30,5 +30,7 @@ namespace TSMapEditor.Models
 
             return TerrainType.YDrawFudge;
         }
+
+        public override bool HasShadow() => true;
     }
 }

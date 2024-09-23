@@ -15,7 +15,6 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         public Camera Camera;
         public Func<int> GetCameraRightXCoord;
         public Func<int> GetCameraBottomYCoord;
-        public RenderTarget2D DepthRenderTarget;
 
 
         public RenderDependencies(Map map, 
@@ -26,8 +25,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             Effect palettedColorDrawEffect,
             Camera camera,
             Func<int> getCameraRightXCoord,
-            Func<int> getCameraBottomYCoord,
-            RenderTarget2D depthRenderTarget)
+            Func<int> getCameraBottomYCoord)
         {
             Map = map;
             TheaterGraphics = theaterGraphics;
@@ -38,7 +36,6 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             Camera = camera;
             GetCameraRightXCoord = getCameraRightXCoord;
             GetCameraBottomYCoord = getCameraBottomYCoord;
-            DepthRenderTarget = depthRenderTarget;
         }
     }
 }

@@ -22,6 +22,7 @@ namespace TSMapEditor.Settings
             settings = new IINILoadable[]
             {
                 TargetFPS,
+                GraphicsLevel,
                 ResolutionWidth,
                 ResolutionHeight,
                 RenderScale,
@@ -70,6 +71,7 @@ namespace TSMapEditor.Settings
         private readonly IINILoadable[] settings;
 
         public IntSetting TargetFPS = new IntSetting(Display, "TargetFPS", 240);
+        public IntSetting GraphicsLevel = new IntSetting(Display, nameof(GraphicsLevel), 1);
         public IntSetting ResolutionWidth = new IntSetting(Display, "ResolutionWidth", -1);
         public IntSetting ResolutionHeight = new IntSetting(Display, "ResolutionHeight", -1);
         public DoubleSetting RenderScale = new DoubleSetting(Display, "RenderScale", 1.0);

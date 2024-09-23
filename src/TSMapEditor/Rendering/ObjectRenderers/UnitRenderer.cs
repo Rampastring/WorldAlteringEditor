@@ -77,11 +77,10 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             }
         }
 
-        private void RenderMainShape(Unit gameObject, int heightOffset, Point2D drawPoint,
-            CommonDrawParams drawParams)
+        private void RenderMainShape(Unit gameObject, int heightOffset, Point2D drawPoint, CommonDrawParams drawParams)
         {
-            if (!gameObject.ObjectType.NoShadow)
-                DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
+            // if (!gameObject.ObjectType.NoShadow)
+            //     DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
 
             DrawShapeImage(gameObject, drawParams.ShapeImage, 
                 gameObject.GetFrameIndex(drawParams.ShapeImage.GetFrameCount()),

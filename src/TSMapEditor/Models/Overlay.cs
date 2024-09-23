@@ -18,6 +18,8 @@
             return 100;
         }
 
+        public override bool HasShadow() => true;
+
         public override bool IsInvisibleInGame() => OverlayType.InvisibleInGame;
 
         public override int GetYDrawOffset()

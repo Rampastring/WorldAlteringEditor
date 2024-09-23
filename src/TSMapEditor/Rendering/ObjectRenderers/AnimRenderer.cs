@@ -61,8 +61,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             bool affectedByLighting = RenderDependencies.EditorState.IsLighting;
             bool affectedByAmbient = !drawParams.ShapeImage.SubjectToLighting;
 
-            DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
-
+            // DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
             DrawShapeImage(gameObject, drawParams.ShapeImage,
                 frameIndex, Color.White * alpha, false,
                 gameObject.IsBuildingAnim, gameObject.GetRemapColor() * alpha,

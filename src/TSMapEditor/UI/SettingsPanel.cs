@@ -78,6 +78,7 @@ namespace TSMapEditor.UI
         private XNADropDown ddTheme;
         private XNADropDown ddScrollRate;
         private XNACheckBox chkUseBoldFont;
+        private XNACheckBox chkDrawShadows;
         private EditorTextBox tbTextEditorPath;
 
         public override void Initialize()
@@ -170,11 +171,18 @@ namespace TSMapEditor.UI
             chkUseBoldFont.Text = "Use Bold Font";
             AddChild(chkUseBoldFont);
 
+            chkDrawShadows = new XNACheckBox(WindowManager);
+            chkDrawShadows.Name = nameof(chkDrawShadows);
+            chkDrawShadows.X = Constants.UIEmptySideSpace;
+            chkDrawShadows.Y = chkUseBoldFont.Bottom + Constants.UIVerticalSpacing;
+            chkDrawShadows.Text = "Draw Shadows (disable on slow PCs)";
+            AddChild(chkDrawShadows);
+
             var lblTextEditorPath = new XNALabel(WindowManager);
             lblTextEditorPath.Name = nameof(lblTextEditorPath);
             lblTextEditorPath.Text = "Text Editor Path:";
             lblTextEditorPath.X = Constants.UIEmptySideSpace;
-            lblTextEditorPath.Y = chkUseBoldFont.Bottom + Constants.UIVerticalSpacing * 2;
+            lblTextEditorPath.Y = chkDrawShadows.Bottom + Constants.UIVerticalSpacing * 2;
             AddChild(lblTextEditorPath);
 
             tbTextEditorPath = new EditorTextBox(WindowManager);
@@ -204,6 +212,7 @@ namespace TSMapEditor.UI
 
             chkBorderless.Checked = userSettings.Borderless;
             chkUseBoldFont.Checked = userSettings.UseBoldFont;
+            chkDrawShadows.Checked = userSettings.GraphicsLevel > 0;
 
             tbTextEditorPath.Text = userSettings.TextEditorPath;
         }
@@ -213,6 +222,7 @@ namespace TSMapEditor.UI
             var userSettings = UserSettings.Instance;
 
             userSettings.UseBoldFont.UserDefinedValue = chkUseBoldFont.Checked;
+            userSettings.GraphicsLevel.UserDefinedValue = chkDrawShadows.Checked ? 1 : 0;
 
             userSettings.Theme.UserDefinedValue = ddTheme.SelectedItem.Text;
             if (ddScrollRate.SelectedItem != null)

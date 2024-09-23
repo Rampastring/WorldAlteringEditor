@@ -95,6 +95,7 @@ namespace TSMapEditor
         public const string NoneValue2 = "None";
 
         public const float RemapBrightenFactor = 1.25f;
+        public const float DepthRenderStep = 1 / 32f;
 
         public const bool DrawShadows = true;
 

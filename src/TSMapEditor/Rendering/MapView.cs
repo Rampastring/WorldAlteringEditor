@@ -150,11 +150,7 @@ namespace TSMapEditor.Rendering
             set => EditorState.CursorAction = value;
         }
 
-        private RenderTarget2D mapRenderTarget;                      // Render target for terrain
-        private RenderTarget2D depthRenderTarget;                    // Depth buffer
-        private RenderTarget2D depthRenderTargetCopy;                // Copy of depth buffer so it can be sampled while rendering depth
-        private RenderTarget2D objectRenderTarget;                   // Object render target
-        private RenderTarget2D shadowRenderTarget;                   // Currently unused
+        private RenderTarget2D mapRenderTarget;                      // Render target for terrain and objects
         private RenderTarget2D transparencyRenderTarget;             // Render target for map UI elements (celltags etc.) that are only refreshed if something in the map changes (due to performance reasons)
         private RenderTarget2D transparencyPerFrameRenderTarget;     // Render target for map UI elements that are redrawn each frame
         private RenderTarget2D compositeRenderTarget;                // Render target where all the above is combined
@@ -204,6 +200,11 @@ namespace TSMapEditor.Rendering
 
         private Rectangle mapRenderSourceRectangle;
         private Rectangle mapRenderDestinationRectangle;
+
+        private DepthStencilState depthRenderStencilState;
+        private DepthStencilState shadowRenderStencilState;
+
+        private bool isDrawingShadows;
 
         public void AddRefreshPoint(Point2D point, int size = 1)
         {
@@ -414,43 +415,29 @@ namespace TSMapEditor.Rendering
         private void ClearRenderTargets()
         {
             mapRenderTarget?.Dispose();
-            depthRenderTarget?.Dispose();
-            depthRenderTargetCopy?.Dispose();
-            objectRenderTarget?.Dispose();
-            // shadowRenderTarget?.Dispose();
             transparencyRenderTarget?.Dispose();
             transparencyPerFrameRenderTarget?.Dispose();
             compositeRenderTarget?.Dispose();
             minimapRenderTarget?.Dispose();
+
+            depthRenderStencilState?.Dispose();
+            shadowRenderStencilState?.Dispose();
         }
 
         private void RefreshRenderTargets()
         {
             ClearRenderTargets();
 
-            mapRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color, DepthFormat.Depth16);
-            depthRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Single);
-            depthRenderTargetCopy = CreateFullMapRenderTarget(SurfaceFormat.Single);
-            objectRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
-            // shadowRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Alpha8);
+            mapRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
             transparencyRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
             transparencyPerFrameRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
             compositeRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
             minimapRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
-
-            aircraftRenderer?.UpdateDepthRenderTarget(depthRenderTarget);
-            animRenderer?.UpdateDepthRenderTarget(depthRenderTarget);
-            buildingRenderer?.UpdateDepthRenderTarget(depthRenderTarget);
-            infantryRenderer?.UpdateDepthRenderTarget(depthRenderTarget);
-            overlayRenderer?.UpdateDepthRenderTarget(depthRenderTarget);
-            smudgeRenderer?.UpdateDepthRenderTarget(depthRenderTarget);
-            terrainRenderer?.UpdateDepthRenderTarget(depthRenderTarget);
-            unitRenderer?.UpdateDepthRenderTarget(depthRenderTarget);
         }
 
         private RenderDependencies CreateRenderDependencies()
         {
-            return new RenderDependencies(Map, TheaterGraphics, EditorState, GraphicsDevice, colorDrawEffect, palettedColorDrawEffect, Camera, GetCameraRightXCoord, GetCameraBottomYCoord, depthRenderTarget);
+            return new RenderDependencies(Map, TheaterGraphics, EditorState, GraphicsDevice, colorDrawEffect, palettedColorDrawEffect, Camera, GetCameraRightXCoord, GetCameraBottomYCoord);
         }
 
         private void InitRenderers()
@@ -512,49 +499,70 @@ namespace TSMapEditor.Rendering
             smudgesToRender.Clear();
             gameObjectsToRender.Clear();
 
+            Renderer.PushRenderTarget(mapRenderTarget);
+
             if (mapInvalidated)
             {
-                GraphicsDevice.SetRenderTarget(depthRenderTarget);
-                GraphicsDevice.Clear(Color.White);
-                GraphicsDevice.SetRenderTarget(depthRenderTargetCopy);
-                GraphicsDevice.Clear(Color.White);
                 GraphicsDevice.SetRenderTarget(mapRenderTarget);
-                GraphicsDevice.Clear(Color.Black);
+                GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer | ClearOptions.Stencil, Color.Black, 0f, 0);
             }
 
-            // First render depth
-            Renderer.PushRenderTarget(depthRenderTarget);
-            isRenderingDepth = true;
-            Renderer.PushSettings(new SpriteBatchSettings(SpriteSortMode.Immediate, BlendState.Opaque, null, null, null, depthApplyEffect));
-            DoForVisibleCells(DrawTerrainTile);
-            Renderer.PopSettings();
-            isRenderingDepth = false;
+            if (depthRenderStencilState == null)
+            {
+                depthRenderStencilState = new DepthStencilState()
+                {
+                    StencilEnable = true,
+                    StencilPass = StencilOperation.Replace,
+                    StencilFunction = CompareFunction.Always,
+                    ReferenceStencil = 0,
+                    DepthBufferEnable = true,
+                    DepthBufferWriteEnable = true,
+                    DepthBufferFunction = CompareFunction.GreaterEqual,
+                };
+            }
 
-            Renderer.PopRenderTarget();
+            // Draw terrain tiles in batched mode for performance if we can.
+            // In Marble Madness mode we currently need to mix and match paletted and non-paletted graphics, so there's no avoiding immediate mode.
+            SpriteSortMode spriteSortMode = EditorState.IsMarbleMadness ? SpriteSortMode.Immediate : SpriteSortMode.Deferred;
 
-            // Copy rendered depth so we are able to sample the depth buffer when rendering depth on later frames
-            Renderer.PushRenderTarget(depthRenderTargetCopy, new SpriteBatchSettings(SpriteSortMode.Immediate, BlendState.Opaque, null, null, null, null));
-            Renderer.DrawTexture(depthRenderTarget, new Rectangle(0, 0, depthRenderTargetCopy.Width, depthRenderTargetCopy.Height), Color.White);
-            Renderer.PopRenderTarget();
-
-            // Then render color
-            Renderer.PushRenderTarget(mapRenderTarget);
-            // GraphicsDevice.Clear(Color.Black);
-
-            var palettedColorDrawSettings = new SpriteBatchSettings(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, palettedColorDrawEffect);
+            var palettedColorDrawSettings = new SpriteBatchSettings(spriteSortMode, BlendState.Opaque, null, depthRenderStencilState, null, palettedColorDrawEffect);
             Renderer.PushSettings(palettedColorDrawSettings);
             DoForVisibleCells(DrawTerrainTileAndRegisterObjects);
             Renderer.PopSettings();
 
-            var colorDrawSettings = new SpriteBatchSettings(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, palettedColorDrawEffect);
+            // Unfortunately, object drawing is way too complex with variable shader settings used depending on each object, and so it can't be batched.
+            var colorDrawSettings = new SpriteBatchSettings(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, depthRenderStencilState, null, palettedColorDrawEffect);
             Renderer.PushSettings(colorDrawSettings);
-            Renderer.PushRenderTarget(objectRenderTarget, colorDrawSettings);
-            GraphicsDevice.Clear(Color.Transparent);
             DrawSmudges();
             DrawObjects();
-            Renderer.PopRenderTarget();
-
             Renderer.PopSettings();
+
+            // Render shadows. We use the stencil buffer to avoid drawing them multiple times on the same scene.
+            // Reserved for higher graphics modes due to the required extra processing.
+            if (UserSettings.Instance.GraphicsLevel > 0)
+            {
+                if (shadowRenderStencilState == null)
+                {
+                    shadowRenderStencilState = new DepthStencilState()
+                    {
+                        StencilEnable = true,
+                        StencilPass = StencilOperation.Replace,
+                        StencilFail = StencilOperation.Keep,
+                        StencilFunction = CompareFunction.Greater,
+                        ReferenceStencil = 1,
+                        DepthBufferEnable = true,
+                        DepthBufferWriteEnable = false,
+                        DepthBufferFunction = CompareFunction.GreaterEqual,
+                    };
+                }
+
+                var shadowDrawSettings = new SpriteBatchSettings(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, shadowRenderStencilState, null, palettedColorDrawEffect);
+                Renderer.PushSettings(shadowDrawSettings);
+                isDrawingShadows = true;
+                gameObjectsToRender.ForEach(DrawObject);
+                isDrawingShadows = false;
+                Renderer.PopSettings();
+            }
 
             // Then draw on-map UI elements
             DrawMapUIElements();
@@ -594,40 +602,8 @@ namespace TSMapEditor.Rendering
             Renderer.PopRenderTarget();
         }
 
-        private void SetCommonEffectParams(Effect effect, float bottomDepth, float topDepth,
-            Vector2 worldTextureCoordinates, Vector2 spriteSizeToWorldSizeRatio)
+        private void SetPaletteEffectParams(Effect effect, Texture2D paletteTexture, bool usePalette, Vector4 lighting)
         {
-            effect.Parameters["SpriteDepthBottom"].SetValue(bottomDepth);
-            effect.Parameters["SpriteDepthTop"].SetValue(topDepth);
-            effect.Parameters["WorldTextureCoordinates"].SetValue(worldTextureCoordinates);
-            effect.Parameters["SpriteSizeToWorldSizeRatio"].SetValue(spriteSizeToWorldSizeRatio);
-            GraphicsDevice.SamplerStates[1] = SamplerState.LinearClamp;
-        }
-
-        private void SetDepthEffectParams(Effect effect, float bottomDepth, float topDepth,
-            Vector2 worldTextureCoordinates, Vector2 spriteSizeToWorldSizeRatio, Texture2D depthTexture)
-        {
-            SetCommonEffectParams(effect, bottomDepth, topDepth, worldTextureCoordinates, spriteSizeToWorldSizeRatio);
-
-            if (depthTexture != null)
-            {
-                effect.Parameters["DepthTexture"].SetValue(depthTexture);
-                GraphicsDevice.Textures[1] = depthTexture;
-            }
-        }
-
-        private void SetPaletteEffectParams(Effect effect, float bottomDepth, float topDepth,
-            Vector2 worldTextureCoordinates, Vector2 spriteSizeToWorldSizeRatio, Texture2D depthTexture, Texture2D paletteTexture, bool usePalette,
-            Vector4 lighting)
-        {
-            SetCommonEffectParams(effect, bottomDepth, topDepth, worldTextureCoordinates, spriteSizeToWorldSizeRatio);
-
-            if (depthTexture != null)
-            {
-                effect.Parameters["DepthTexture"].SetValue(depthTexture);
-                GraphicsDevice.Textures[1] = depthTexture;
-            }
-
             if (paletteTexture != null)
             {
                 effect.Parameters["PaletteTexture"].SetValue(paletteTexture);
@@ -637,7 +613,6 @@ namespace TSMapEditor.Rendering
             effect.Parameters["IsShadow"].SetValue(false);
             effect.Parameters["UsePalette"].SetValue(usePalette);
             effect.Parameters["UseRemap"].SetValue(false);
-            effect.Parameters["Lighting"].SetValue(lighting);
         }
 
         private void DoForVisibleCells(Action<MapTile> action)
@@ -831,8 +806,6 @@ namespace TSMapEditor.Rendering
             if (!isRenderingDepth)
                 tile.LastRefreshIndex = refreshIndex;
 
-            int originalDrawPointY = drawPoint.Y;
-
             if (!EditorState.Is2DMode)
                 drawPoint -= new Point2D(0, (Constants.CellSizeY / 2) * level);
 
@@ -844,21 +817,17 @@ namespace TSMapEditor.Rendering
 
             Vector4 lightingColor = new Vector4((float)tile.CellLighting.R, (float)tile.CellLighting.G, (float)tile.CellLighting.B, 1.0f);
 
-            float depthTop = 0f;
-            float depthBottom = 0f;
-
             if (tmpImage.Texture != null)
             {
-                depthTop = originalDrawPointY / (float)Map.HeightInPixelsWithCellHeight;
-                depthBottom = (originalDrawPointY + tmpImage.Texture.Height) / (float)Map.HeightInPixelsWithCellHeight;
-                depthTop = 1.0f - depthTop;
-                depthBottom = 1.0f - depthBottom;
-
-                Vector2 worldTextureCoordinates = new Vector2(drawPoint.X / (float)Map.WidthInPixels, drawPoint.Y / (float)Map.HeightInPixelsWithCellHeight);
-                Vector2 spriteSizeToWorldSizeRatio = new Vector2(Constants.CellSizeX / (float)Map.WidthInPixels, Constants.CellSizeY / (float)Map.HeightInPixelsWithCellHeight);
+                float depth = level * Constants.DepthRenderStep;
 
                 var textureToDraw = tmpImage.Texture;
-                Color color = Color.White;
+
+                // Divide the color by 2f. This is done because unlike map lighting which can exceed 1.0 and go up to 2.0,
+                // the Color instance values are capped at 1.0.
+                // We lose a bit of precision from doing this, but we'll have to accept that.
+                Color color = new Color(lightingColor.X / 2f, lightingColor.Y / 2f, lightingColor.Z / 2f, depth);
+
                 bool usePalette = true;
 
                 // Replace terrain lacking MM graphics with colored cells to denote height if we are in marble madness mode
@@ -872,31 +841,24 @@ namespace TSMapEditor.Rendering
                     usePalette = false;
                 }
 
-                if (isRenderingDepth)
-                    SetDepthEffectParams(depthApplyEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTargetCopy);
-                else
-                    SetPaletteEffectParams(palettedColorDrawEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTarget, tmpImage.GetPaletteTexture(), usePalette, lightingColor);
+                SetPaletteEffectParams(palettedColorDrawEffect, tmpImage.GetPaletteTexture(), usePalette, lightingColor);
 
                 DrawTexture(textureToDraw, new Rectangle(drawPoint.X, drawPoint.Y,
-                    Constants.CellSizeX, Constants.CellSizeY), null, color, 0f, Vector2.Zero, SpriteEffects.None, 0f);
+                    Constants.CellSizeX, Constants.CellSizeY), null, color, 0f, Vector2.Zero, SpriteEffects.None, depth);
             }
 
             if (tmpImage.ExtraTexture != null && !EditorState.Is2DMode)
             {
-                // Most extra graphics are drawn above the regular terrain, this gives
-                // us a kind-of smooth depth transition for them
-                depthBottom = depthTop;
-
                 int exDrawPointX = drawPoint.X + tmpImage.TmpImage.XExtra - tmpImage.TmpImage.X;
                 int exDrawPointY = drawPoint.Y + tmpImage.TmpImage.YExtra - tmpImage.TmpImage.Y;
 
-                Vector2 worldTextureCoordinates = new Vector2(exDrawPointX / (float)Map.WidthInPixels, exDrawPointY / (float)Map.HeightInPixelsWithCellHeight);
-                Vector2 spriteSizeToWorldSizeRatio = new Vector2(tmpImage.ExtraTexture.Width / (float)Map.WidthInPixels, tmpImage.ExtraTexture.Height / (float)Map.HeightInPixelsWithCellHeight);
+                // Reduce base sub-tile height from depth. This allows
+                // objects like buildings and trees to be drawn over cliff sides.
+                float depth = (level - tmpImage.TmpImage.Height) * Constants.DepthRenderStep;
 
-                if (isRenderingDepth)
-                    SetDepthEffectParams(depthApplyEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTargetCopy);
-                else
-                    SetPaletteEffectParams(palettedColorDrawEffect, depthBottom, depthTop, worldTextureCoordinates, spriteSizeToWorldSizeRatio, depthRenderTarget, tmpImage.GetPaletteTexture(), true, lightingColor);
+                Color color = new Color(lightingColor.X / 2f, lightingColor.Y / 2f, lightingColor.Z / 2f, depth);
+
+                SetPaletteEffectParams(palettedColorDrawEffect, tmpImage.GetPaletteTexture(), true, lightingColor);
 
                 var exDrawRectangle = new Rectangle(exDrawPointX,
                     exDrawPointY,
@@ -906,9 +868,9 @@ namespace TSMapEditor.Rendering
                 DrawTexture(tmpImage.ExtraTexture,
                     exDrawRectangle,
                     null,
-                    Color.White,
+                    color,
                     0f,
-                    Vector2.Zero, SpriteEffects.None, 0f);
+                    Vector2.Zero, SpriteEffects.None, depth);
 
                 var cameraRectangle = GetCameraRectangle();
 
@@ -990,31 +952,33 @@ namespace TSMapEditor.Rendering
             if (!EditorState.RenderInvisibleInGameObjects && gameObject.IsInvisibleInGame())
                 return;
 
+            bool drawShadow = isDrawingShadows;
+
             switch (gameObject.WhatAmI())
             {
                 case RTTIType.Aircraft:
-                    aircraftRenderer.Draw(gameObject as Aircraft, !minimapNeedsRefresh);
+                    aircraftRenderer.Draw(gameObject as Aircraft, !minimapNeedsRefresh, drawShadow);
                     return;
                 case RTTIType.Anim:
-                    animRenderer.Draw(gameObject as Animation, !minimapNeedsRefresh);
+                    animRenderer.Draw(gameObject as Animation, !minimapNeedsRefresh, drawShadow);
                     return;
                 case RTTIType.Building:
-                    buildingRenderer.Draw(gameObject as Structure, !minimapNeedsRefresh);
+                    buildingRenderer.Draw(gameObject as Structure, !minimapNeedsRefresh, drawShadow);
                     return;
                 case RTTIType.Infantry:
-                    infantryRenderer.Draw(gameObject as Infantry, !minimapNeedsRefresh);
+                    infantryRenderer.Draw(gameObject as Infantry, !minimapNeedsRefresh, drawShadow);
                     return;
                 case RTTIType.Overlay:
-                    overlayRenderer.Draw(gameObject as Overlay, !minimapNeedsRefresh);
+                    overlayRenderer.Draw(gameObject as Overlay, !minimapNeedsRefresh, drawShadow);
                     return;
                 case RTTIType.Smudge:
-                    smudgeRenderer.Draw(gameObject as Smudge, !minimapNeedsRefresh);
+                    smudgeRenderer.Draw(gameObject as Smudge, !minimapNeedsRefresh, drawShadow);
                     return;
                 case RTTIType.Terrain:
-                    terrainRenderer.Draw(gameObject as TerrainObject, !minimapNeedsRefresh);
+                    terrainRenderer.Draw(gameObject as TerrainObject, !minimapNeedsRefresh, drawShadow);
                     return;
                 case RTTIType.Unit:
-                    unitRenderer.Draw(gameObject as Unit, !minimapNeedsRefresh);
+                    unitRenderer.Draw(gameObject as Unit, !minimapNeedsRefresh, drawShadow);
                     return;
                 default:
                     throw new NotImplementedException("No renderer implemented for type " + gameObject.WhatAmI());
@@ -1025,7 +989,7 @@ namespace TSMapEditor.Rendering
         {
             Renderer.PushSettings(new SpriteBatchSettings(SpriteSortMode.Immediate, BlendState.NonPremultiplied, null, null, null, palettedColorDrawEffect));
             var lightingColor = new Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-            SetPaletteEffectParams(palettedColorDrawEffect, 1.0f, 1.0f, Vector2.Zero, Vector2.Zero, null, null, true, lightingColor);
+            SetPaletteEffectParams(palettedColorDrawEffect, null, true, lightingColor);
             Map.GraphicalBaseNodes.ForEach(DrawBaseNode);
             Renderer.PopSettings();
         }
@@ -1093,7 +1057,6 @@ namespace TSMapEditor.Rendering
 
                     palettedColorDrawEffect.Parameters["UseRemap"].SetValue(false);
                     palettedColorDrawEffect.Parameters["PaletteTexture"].SetValue(bibGraphics.GetPaletteTexture());
-                    palettedColorDrawEffect.Parameters["Lighting"].SetValue(lighting);
 
                     DrawTexture(texture, new Rectangle(
                         bibFinalDrawPointX, bibFinalDrawPointY,
@@ -1133,7 +1096,6 @@ namespace TSMapEditor.Rendering
 
             palettedColorDrawEffect.Parameters["UseRemap"].SetValue(false);
             palettedColorDrawEffect.Parameters["PaletteTexture"].SetValue(graphics.GetPaletteTexture());
-            palettedColorDrawEffect.Parameters["Lighting"].SetValue(lighting);
 
             DrawTexture(texture, drawRectangle, nonRemapBaseNodeShade);
 
@@ -1501,7 +1463,7 @@ namespace TSMapEditor.Rendering
                         DeleteObjectFromCell(tileUnderCursor.CoordsToPoint());
                 }
             }
-            
+
             base.Update(gameTime);
         }
 
@@ -1894,7 +1856,14 @@ namespace TSMapEditor.Rendering
 
         private void DrawWorld()
         {
-            Renderer.PushRenderTarget(compositeRenderTarget, new SpriteBatchSettings(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null));
+            var dss = new DepthStencilState()
+            {
+                DepthBufferEnable = true,
+                DepthBufferWriteEnable = true,
+                DepthBufferFunction = CompareFunction.GreaterEqual,
+            };
+
+            Renderer.PushRenderTarget(compositeRenderTarget, new SpriteBatchSettings(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, dss, null, null));
 
             GraphicsDevice.Clear(Color.Black);
 
@@ -1905,18 +1874,6 @@ namespace TSMapEditor.Rendering
                 sourceRectangle,
                 destinationRectangle,
                 Color.White);
-
-            DrawTexture(objectRenderTarget,
-                sourceRectangle,
-                destinationRectangle,
-                Color.White);
-
-            if (debugRenderDepthBuffer)
-            {
-                DrawTexture(depthRenderTarget,
-                    sourceRectangle, destinationRectangle,
-                    Color.White);
-            }
 
             DrawTexture(transparencyRenderTarget,
                 sourceRectangle,
