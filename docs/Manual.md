@@ -18,6 +18,12 @@ To paint water, select the Water TileSet from the TileSet selector in the bottom
 
 Once you are done detailing the map, you can run *Tools -> Run Script... -> Smoothen Water.cs*. The script will randomize all the water tiles on the map.
 
+### Placing terrain at the southern edge of the map
+
+Normally, terrain tiles are placed above the cursor. This can make placing terrain tiles at the southern edge of the map inconvenient. In this situation, you can hold Alt to place the tile below the cursor instead of above the cursor.
+
+![Downwards placement](https://github.com/Rampastring/WorldAlteringEditor/raw/master/docs/images/downwardsplacement.png "Downwards placement")
+
 ## Copy and paste
 
 Like in most programs, Ctrl+C and Ctrl+V keys enable regular rectangular copy and paste features. They can also be accessed from the Edit menu.
@@ -27,3 +33,45 @@ Alt+C activates a tool for copying a custom-shaped area.
 ### Copying more than just terrain
 
 Sometimes you might want to copy more than just terrain: buildings, units, trees, overlay etc. You can select what map elements are copied from *Edit -> Configure Copied Objects*.
+
+![Configure Copied Objects](https://github.com/Rampastring/WorldAlteringEditor/raw/master/docs/images/configurecopiedobjects.png "Configure Copied Objects")
+
+## Objects
+
+### Rotating units
+
+To rotate a unit, hover over it with the mouse cursor. Then **press and hold** the *Rotate Unit* key (default: A) on your keyboard, and drag the unit with the mouse to the direction that you want the unit to face.
+
+![Rotate unit](https://github.com/Rampastring/WorldAlteringEditor/raw/master/docs/images/rotateunit.png "Rotate unit")
+
+### Deleting objects
+
+The fastest way to delete an object is to hover over it with the mouse cursor and press the Delete key on your keyboard.
+
+An alternative way is pressing the *Deletion Mode* button at the top bar. It activates a deletion cursor that you can use to delete objects by clicking on them on the map.
+
+![Deletion mode](https://raw.githubusercontent.com/Rampastring/WorldAlteringEditor/refs/heads/master/src/TSMapEditor/Content/ToolIcons/deletionmode.png "Deletion Mode")
+
+### Overlapping objects
+
+By default, WAE prevents you from overlapping objects (placing multiple units or buildings on the same cell) to make it harder to do accidentally. This is especially important for Tiberian Sun as the game can crash if multiple buildings overlap - a common mistake in fan-made maps.
+
+If you intentionally want to overlap objects, hold Alt while placing or moving an object and WAE allows you to overlap them.
+
+### Cloning objects
+
+To quickly clone an object, with all of its properties (Attached Tag, HP, Facing etc.), hold Shift and drag the object with the mouse. When you release the left mouse button, WAE creates a clone of the object in the position.
+
+![Clone object](https://github.com/Rampastring/WorldAlteringEditor/raw/master/docs/images/cloneobject.png "Clone object")
+
+## Zooming
+
+You can zoom in and out with the scroll wheel.
+
+If you want to reset to the default zoom level, press `Ctrl + 0` on your keyboard. Just like in your web browser.
+
+## Fullscreen mode
+
+You can toggle fullscreen mode on or off by pressing F11, regardless of whether you launched WAE in fullscreen or windowed mode.
+
+If you have a multi-monitor setup, when maximized with F11, WAE fills the monitor that its window happened to be on at the time of pressing F11.
