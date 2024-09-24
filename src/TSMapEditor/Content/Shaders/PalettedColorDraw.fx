@@ -102,7 +102,9 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
         }
         else
         {
-            output.color = float4(tex.r * input.Color.r, tex.g * input.Color.g, tex.b * input.Color.b, tex.a) * Opacity;
+            output.color = float4(tex.r * input.Color.r * 2.0,
+                tex.g * input.Color.g * 2.0,
+                tex.b * input.Color.b * 2.0, tex.a) * Opacity;
         }
     }
 
