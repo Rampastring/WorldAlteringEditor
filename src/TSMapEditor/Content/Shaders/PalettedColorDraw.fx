@@ -16,21 +16,11 @@
 bool IsShadow;
 bool UsePalette;
 bool UseRemap;
+float Opacity;
 
 sampler2D SpriteTextureSampler : register(s0)
 {
     Texture = (SpriteTexture); // this is set by spritebatch
-    MipFilter = Point;
-    MinFilter = Point;
-    MagFilter = Point;
-};
-
-Texture2D DepthTexture;
-sampler2D DepthTextureSampler
-{
-    Texture = <DepthTexture>; // passed in
-    AddressU = clamp;
-    AddressV = clamp;
     MipFilter = Point;
     MinFilter = Point;
     MagFilter = Point;
@@ -74,10 +64,10 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
     // The depth value is actually passed in as the Alpha value of the input color.
     // This is because when doing batched rendering, shader parameters cannot be changed
     // within one batch, meaning we cannot introduce a shader parameter for depth
-    // without sacrificing performance
+    // without sacrificing performance. And we need a unique depth value for each sprite.
     output.depth = input.Color.a;
 
-    if (tex.a > 0 && IsShadow)
+    if (IsShadow)
     {
         output.color = float4(0, 0, 0, 0.5);
     }
@@ -96,7 +86,7 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
                 // Brigthen it up a bit
                 brightness = brightness * 1.25;
 
-                output.color = float4(brightness * input.Color.r, brightness * input.Color.g, brightness * input.Color.b, paletteColor.a);
+                output.color = float4(brightness * input.Color.r, brightness * input.Color.g, brightness * input.Color.b, paletteColor.a) * Opacity;
             }
             else
             {
@@ -107,12 +97,12 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
                 output.color = float4(paletteColor.r * input.Color.r * 2.0,
                     paletteColor.g * input.Color.g * 2.0,
                     paletteColor.b * input.Color.b * 2.0,
-                    paletteColor.a);
+                    paletteColor.a) * Opacity;
             }
         }
         else
         {
-            output.color = float4(tex.r * input.Color.r, tex.g * input.Color.g, tex.b * input.Color.b, tex.a);
+            output.color = float4(tex.r * input.Color.r, tex.g * input.Color.g, tex.b * input.Color.b, tex.a) * Opacity;
         }
     }
 

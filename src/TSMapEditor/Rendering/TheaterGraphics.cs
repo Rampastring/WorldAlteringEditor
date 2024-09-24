@@ -405,10 +405,10 @@ namespace TSMapEditor.Rendering
             Theater = theater;
             this.fileManager = fileManager;
 
-            theaterPalette = GetPaletteOrFail(theater.TerrainPaletteName, false);
+            TheaterPalette = GetPaletteOrFail(theater.TerrainPaletteName, false);
             unitPalette = GetPaletteOrFail(Theater.UnitPaletteName, true);
             animPalette = GetPaletteOrFail("anim.pal", true);
-            tiberiumPalette = string.IsNullOrEmpty(Theater.TiberiumPaletteName) ? theaterPalette : GetPaletteOrFail(Theater.TiberiumPaletteName, false);
+            tiberiumPalette = string.IsNullOrEmpty(Theater.TiberiumPaletteName) ? TheaterPalette : GetPaletteOrFail(Theater.TiberiumPaletteName, false);
             vplFile = GetVplFile();
 
             if (UserSettings.Instance.MultithreadedTextureLoading)
@@ -537,7 +537,7 @@ namespace TSMapEditor.Rendering
                         var tmpImages = new List<MGTMPImage>();
                         for (int img = 0; img < tmpFile.ImageCount; img++)
                         {
-                            tmpImages.Add(new MGTMPImage(graphicsDevice, tmpFile.GetImage(img), theaterPalette, tsId));
+                            tmpImages.Add(new MGTMPImage(graphicsDevice, tmpFile.GetImage(img), TheaterPalette, tsId));
                         }
                         tileGraphics.Add(new TileImage(tmpFile.CellsX, tmpFile.CellsY, tsId, i, currentTileIndex, tmpImages.ToArray()));
                     }
@@ -620,7 +620,7 @@ namespace TSMapEditor.Rendering
                     var shpFile = new ShpFile(shpFileName);
                     shpFile.ParseFromBuffer(data);
                     TerrainObjectTextures[i] = new ShapeImage(graphicsDevice, shpFile, data,
-                        terrainTypes[i].SpawnsTiberium ? unitPalette : theaterPalette, subjectToLighting);
+                        terrainTypes[i].SpawnsTiberium ? unitPalette : TheaterPalette, subjectToLighting);
                 }
             }
 
@@ -688,7 +688,7 @@ namespace TSMapEditor.Rendering
                 }
 
                 // Palette override in RA2/YR
-                XNAPalette palette = buildingType.ArtConfig.TerrainPalette ? theaterPalette : unitPalette;
+                XNAPalette palette = buildingType.ArtConfig.TerrainPalette ? TheaterPalette : unitPalette;
                 if (!string.IsNullOrWhiteSpace(buildingType.ArtConfig.Palette))
                     palette = GetPaletteOrDefault(buildingType.ArtConfig.Palette + Theater.FileExtension[1..] + ".pal", palette, !buildingType.ArtConfig.TerrainPalette);
 
@@ -787,7 +787,7 @@ namespace TSMapEditor.Rendering
                 var vxlFile = new VxlFile(vxlData, turretModelName);
                 var hvaFile = new HvaFile(hvaData, turretModelName);
 
-                XNAPalette palette = buildingType.ArtConfig.TerrainPalette ? theaterPalette : unitPalette;
+                XNAPalette palette = buildingType.ArtConfig.TerrainPalette ? TheaterPalette : unitPalette;
                 if (!string.IsNullOrWhiteSpace(buildingType.ArtConfig.Palette))
                     palette = GetPaletteOrFail(buildingType.ArtConfig.Palette + Theater.FileExtension[1..] + ".pal", !buildingType.ArtConfig.TerrainPalette);
 
@@ -843,7 +843,7 @@ namespace TSMapEditor.Rendering
                 var vxlFile = new VxlFile(vxlData, barrelModelName);
                 var hvaFile = new HvaFile(hvaData, barrelModelName);
 
-                XNAPalette palette = buildingType.ArtConfig.TerrainPalette ? theaterPalette : unitPalette;
+                XNAPalette palette = buildingType.ArtConfig.TerrainPalette ? TheaterPalette : unitPalette;
                 if (!string.IsNullOrWhiteSpace(buildingType.ArtConfig.Palette))
                     palette = GetPaletteOrFail(buildingType.ArtConfig.Palette + Theater.FileExtension[1..] + ".pal", !buildingType.ArtConfig.TerrainPalette);
 
@@ -914,7 +914,7 @@ namespace TSMapEditor.Rendering
 
                 if (parentBuildingType != null && parentBuildingType.ArtConfig.TerrainPalette)
                 {
-                    palette = theaterPalette;
+                    palette = TheaterPalette;
                 }
                 else if (useBuildingPalette && !string.IsNullOrWhiteSpace(parentBuildingType.ArtConfig.Palette))
                 {
@@ -1296,7 +1296,7 @@ namespace TSMapEditor.Rendering
 
                     var shpFile = new ShpFile(loadedShpName);
                     shpFile.ParseFromBuffer(shpData);
-                    XNAPalette palette = theaterPalette;
+                    XNAPalette palette = TheaterPalette;
                     
                     if (overlayType.Wall || overlayType.IsVeinholeMonster)
                         palette = unitPalette;
@@ -1338,7 +1338,7 @@ namespace TSMapEditor.Rendering
 
                 var shpFile = new ShpFile(finalShpName);
                 shpFile.ParseFromBuffer(shpData);
-                XNAPalette palette = theaterPalette;
+                XNAPalette palette = TheaterPalette;
                 SmudgeTextures[i] = new ShapeImage(graphicsDevice, shpFile, shpData, palette, true);
             }
 
@@ -1366,7 +1366,7 @@ namespace TSMapEditor.Rendering
 
         private CCFileManager fileManager;
 
-        private readonly XNAPalette theaterPalette;
+        public readonly XNAPalette TheaterPalette;
         private readonly XNAPalette unitPalette;
         private readonly XNAPalette tiberiumPalette;
         private readonly XNAPalette animPalette;

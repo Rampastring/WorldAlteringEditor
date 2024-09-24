@@ -525,6 +525,7 @@ namespace TSMapEditor.Rendering
             // In Marble Madness mode we currently need to mix and match paletted and non-paletted graphics, so there's no avoiding immediate mode.
             SpriteSortMode spriteSortMode = EditorState.IsMarbleMadness ? SpriteSortMode.Immediate : SpriteSortMode.Deferred;
 
+            SetPaletteEffectParams(palettedColorDrawEffect, TheaterGraphics.TheaterPalette.GetTexture(), true, false, 1.0f);
             var palettedColorDrawSettings = new SpriteBatchSettings(spriteSortMode, BlendState.Opaque, null, depthRenderStencilState, null, palettedColorDrawEffect);
             Renderer.PushSettings(palettedColorDrawSettings);
             DoForVisibleCells(DrawTerrainTileAndRegisterObjects);
@@ -602,7 +603,7 @@ namespace TSMapEditor.Rendering
             Renderer.PopRenderTarget();
         }
 
-        private void SetPaletteEffectParams(Effect effect, Texture2D paletteTexture, bool usePalette, Vector4 lighting)
+        private void SetPaletteEffectParams(Effect effect, Texture2D paletteTexture, bool usePalette, bool useRemap, float opacity)
         {
             if (paletteTexture != null)
             {
@@ -612,7 +613,8 @@ namespace TSMapEditor.Rendering
 
             effect.Parameters["IsShadow"].SetValue(false);
             effect.Parameters["UsePalette"].SetValue(usePalette);
-            effect.Parameters["UseRemap"].SetValue(false);
+            effect.Parameters["UseRemap"].SetValue(useRemap);
+            effect.Parameters["Opacity"].SetValue(opacity);
         }
 
         private void DoForVisibleCells(Action<MapTile> action)
@@ -828,8 +830,6 @@ namespace TSMapEditor.Rendering
                 // We lose a bit of precision from doing this, but we'll have to accept that.
                 Color color = new Color(lightingColor.X / 2f, lightingColor.Y / 2f, lightingColor.Z / 2f, depth);
 
-                bool usePalette = true;
-
                 // Replace terrain lacking MM graphics with colored cells to denote height if we are in marble madness mode
                 if (!Constants.IsFlatWorld &&
                     EditorState.IsMarbleMadness &&
@@ -838,10 +838,8 @@ namespace TSMapEditor.Rendering
                     textureToDraw = EditorGraphics.GenericTileWithBorderTexture;
                     color = MarbleMadnessTileHeightLevelColors[level];
                     palettedColorDrawEffect.Parameters["UsePalette"].SetValue(false);
-                    usePalette = false;
+                    SetPaletteEffectParams(palettedColorDrawEffect, tmpImage.GetPaletteTexture(), false, false, depth);
                 }
-
-                SetPaletteEffectParams(palettedColorDrawEffect, tmpImage.GetPaletteTexture(), usePalette, lightingColor);
 
                 DrawTexture(textureToDraw, new Rectangle(drawPoint.X, drawPoint.Y,
                     Constants.CellSizeX, Constants.CellSizeY), null, color, 0f, Vector2.Zero, SpriteEffects.None, depth);
@@ -858,7 +856,8 @@ namespace TSMapEditor.Rendering
 
                 Color color = new Color(lightingColor.X / 2f, lightingColor.Y / 2f, lightingColor.Z / 2f, depth);
 
-                SetPaletteEffectParams(palettedColorDrawEffect, tmpImage.GetPaletteTexture(), true, lightingColor);
+                if (EditorState.IsMarbleMadness)
+                    SetPaletteEffectParams(palettedColorDrawEffect, tmpImage.GetPaletteTexture(), true, false, 1.0f);
 
                 var exDrawRectangle = new Rectangle(exDrawPointX,
                     exDrawPointY,
@@ -987,14 +986,15 @@ namespace TSMapEditor.Rendering
 
         private void DrawBaseNodes()
         {
-            Renderer.PushSettings(new SpriteBatchSettings(SpriteSortMode.Immediate, BlendState.NonPremultiplied, null, null, null, palettedColorDrawEffect));
-            var lightingColor = new Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-            SetPaletteEffectParams(palettedColorDrawEffect, null, true, lightingColor);
-            Map.GraphicalBaseNodes.ForEach(DrawBaseNode);
+            Renderer.PushSettings(new SpriteBatchSettings(SpriteSortMode.Immediate, BlendState.Opaque, null, null, null, palettedColorDrawEffect));
+            foreach (var baseNode in Map.GraphicalBaseNodes)
+            {
+                DrawBaseNode(baseNode, true);
+            }
             Renderer.PopSettings();
         }
 
-        private void DrawBaseNode(GraphicalBaseNode graphicalBaseNode)
+        private void DrawBaseNode(GraphicalBaseNode graphicalBaseNode, bool drawGraphics)
         {
             // TODO this approach would give us much simpler code,
             // but for some reason it causes artifacts in terrain outside of the camera
@@ -1023,19 +1023,14 @@ namespace TSMapEditor.Rendering
 
             const float opacity = 0.25f;
 
-            remapColor *= opacity;
-
-            Color nonRemapBaseNodeShade = new Color(opacity, opacity, opacity * 2.0f, opacity * 2.0f);
-
             int yDrawOffset = Constants.CellSizeY / -2;
             int frameIndex = 0;
 
             if ((graphics == null || graphics.GetFrame(frameIndex) == null) && (bibGraphics == null || bibGraphics.GetFrame(0) == null))
             {
+                SetPaletteEffectParams(palettedColorDrawEffect, null, false, false, 1.0f);
                 DrawStringWithShadow(iniName, Constants.UIBoldFont, drawPoint.ToXNAVector(), replacementColor, 1.0f);
-
                 DrawStringWithShadow("#" + baseNodeIndex, Constants.UIBoldFont, drawPoint.ToXNAVector() + new Vector2(0f, 20f), baseNodeIndexColor);
-
                 return;
             }
 
@@ -1055,18 +1050,16 @@ namespace TSMapEditor.Rendering
                     int bibFinalDrawPointX = drawPoint.X - bibFrame.ShapeWidth / 2 + bibFrame.OffsetX + Constants.CellSizeX / 2;
                     int bibFinalDrawPointY = drawPoint.Y - bibFrame.ShapeHeight / 2 + bibFrame.OffsetY + Constants.CellSizeY / 2 + yDrawOffset;
 
-                    palettedColorDrawEffect.Parameters["UseRemap"].SetValue(false);
-                    palettedColorDrawEffect.Parameters["PaletteTexture"].SetValue(bibGraphics.GetPaletteTexture());
+                    SetPaletteEffectParams(palettedColorDrawEffect, bibGraphics.GetPaletteTexture(), true, true, opacity);
 
                     DrawTexture(texture, new Rectangle(
                         bibFinalDrawPointX, bibFinalDrawPointY,
                         texture.Width, texture.Height),
-                        null, nonRemapBaseNodeShade,
+                        null, remapColor,
                         0f, Vector2.Zero, SpriteEffects.None, 0f);
 
                     if (bibGraphics.HasRemapFrames())
                     {
-                        palettedColorDrawEffect.Parameters["UseRemap"].SetValue(true);
                         DrawTexture(bibGraphics.GetRemapFrame(0).Texture,
                             new Rectangle(bibFinalDrawPointX, bibFinalDrawPointY, texture.Width, texture.Height),
                             null,
@@ -1082,6 +1075,7 @@ namespace TSMapEditor.Rendering
             var frame = graphics.GetFrame(frameIndex);
             if (frame == null)
             {
+                SetPaletteEffectParams(palettedColorDrawEffect, null, false, false, 1.0f);
                 DrawStringWithShadow("#" + baseNodeIndex, Constants.UIBoldFont, drawPoint.ToXNAVector(), baseNodeIndexColor);
                 return;
             }
@@ -1094,17 +1088,16 @@ namespace TSMapEditor.Rendering
             int height = texture.Height;
             Rectangle drawRectangle = new Rectangle(x, y, width, height);
 
-            palettedColorDrawEffect.Parameters["UseRemap"].SetValue(false);
-            palettedColorDrawEffect.Parameters["PaletteTexture"].SetValue(graphics.GetPaletteTexture());
+            SetPaletteEffectParams(palettedColorDrawEffect, graphics.GetPaletteTexture(), true, true, opacity);
 
-            DrawTexture(texture, drawRectangle, nonRemapBaseNodeShade);
+            DrawTexture(texture, drawRectangle, remapColor);
 
             if (graphics.HasRemapFrames())
             {
-                palettedColorDrawEffect.Parameters["UseRemap"].SetValue(true);
                 DrawTexture(graphics.GetRemapFrame(frameIndex).Texture, drawRectangle, remapColor);
             }
 
+            SetPaletteEffectParams(palettedColorDrawEffect, null, false, false, 1.0f);
             DrawStringWithShadow("#" + baseNodeIndex, Constants.UIBoldFont, drawPoint.ToXNAVector(), baseNodeIndexColor);
         }
 
