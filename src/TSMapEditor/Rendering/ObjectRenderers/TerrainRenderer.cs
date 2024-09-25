@@ -21,13 +21,13 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             };
         }
 
-        protected override void Render(TerrainObject gameObject, int heightOffset, Point2D drawPoint, in CommonDrawParams drawParams)
+        protected override void Render(TerrainObject gameObject, Point2D drawPoint, in CommonDrawParams drawParams)
         {
             bool affectedByLighting = RenderDependencies.EditorState.IsLighting;
 
-            // DrawShadow(gameObject, drawParams, drawPoint, heightOffset);
+            DrawShadowDirect(gameObject);
             DrawShapeImage(gameObject, drawParams.ShapeImage, 0,
-                Color.White, false, false, Color.White, affectedByLighting, !drawParams.ShapeImage.SubjectToLighting, drawPoint, heightOffset);
+                Color.White, false, Color.White, affectedByLighting, !drawParams.ShapeImage.SubjectToLighting, drawPoint);
         }
     }
 }

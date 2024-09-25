@@ -19,6 +19,12 @@
 /processorParam:DebugMode=Debug
 /build:Shaders/ColorDraw.fx
 
+#begin Shaders/CombineWithDepth.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Debug
+/build:Shaders/CombineWithDepth.fx
+
 #begin Shaders/DepthApply.fx
 /importer:EffectImporter
 /processor:EffectProcessor

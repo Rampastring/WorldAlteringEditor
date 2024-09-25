@@ -5,7 +5,7 @@ namespace TSMapEditor
 {
     public static class Constants
     {
-        public const string ReleaseVersion = "1.2.0";
+        public const string ReleaseVersion = "1.2.1";
 
         public static int CellSizeX = 48;
         public static int CellSizeY = 24;
@@ -95,7 +95,8 @@ namespace TSMapEditor
         public const string NoneValue2 = "None";
 
         public const float RemapBrightenFactor = 1.25f;
-        public const float DepthRenderStep = 1 / 32f;
+        public const float DownwardsDepthRenderSpace = 0.3f;
+        public static readonly float DepthRenderStep = 0.5f / MaxMapHeightLevel;
 
         public const bool DrawShadows = true;
 
