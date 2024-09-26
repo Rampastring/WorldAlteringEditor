@@ -25,7 +25,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         {
             if (gameObject.OverlayType.HighBridgeDirection == BridgeDirection.None)
             {
-                return base.GetDepth(gameObject, referenceDrawPointY) - (Constants.DepthRenderStep / 3f);
+                return base.GetDepth(gameObject, referenceDrawPointY) - Constants.DepthEpsilon;
             }
 
             var tile = Map.GetTile(gameObject.Position);
@@ -37,8 +37,6 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             Color remapColor = Color.White;
             if (gameObject.OverlayType.TiberiumType != null)
                 remapColor = gameObject.OverlayType.TiberiumType.XNAColor;
-
-            int overlayIndex = gameObject.OverlayType.Index;
 
             if (!RenderDependencies.EditorState.Is2DMode && gameObject.OverlayType.HighBridgeDirection != BridgeDirection.None)
             {

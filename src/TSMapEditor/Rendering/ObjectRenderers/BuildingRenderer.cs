@@ -129,6 +129,23 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
             Color nonRemapColor = gameObject.IsBaseNodeDummy ? new Color(150, 150, 255) * 0.5f : Color.White;
 
+            int frameCount = drawParams.ShapeImage == null ? 0 : drawParams.ShapeImage.GetFrameCount();
+            int frameIndex = gameObject.GetFrameIndex(frameCount);
+
+            // We need to calculate depth earlier so it can also be used for the building's animations
+            // Animations are typically higher than the building itself, but they still need a greater z-value,
+            // which isn't achieved by default because z grows downwards
+            float depthOverride = -1f;
+            if (drawParams.ShapeImage != null)
+            {
+                var frame = drawParams.ShapeImage.GetFrame(frameIndex);
+                if (frame != null && frame.Texture != null)
+                {
+                    var textureDrawCoords = GetTextureDrawCoords(gameObject, frame, drawPoint);
+                    depthOverride = GetDepth(gameObject, textureDrawCoords.Bottom);
+                }
+            }
+
             // Form the anims list
             var animsList = gameObject.Anims.ToList();
             animsList.AddRange(gameObject.PowerUpAnims);
@@ -141,25 +158,30 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
             // The building itself has an offset of 0, so first draw all anims with sort values < 0
             foreach (var anim in animsList.Where(a => a.BuildingAnimDrawConfig.SortValue < 0))
+            {
+                buildingAnimRenderer.BuildingAnimDepth = depthOverride - Constants.DepthEpsilon;
                 buildingAnimRenderer.Draw(anim, false);
+            }
 
             // Then the building itself
             if (!gameObject.ObjectType.NoShadow)
                 DrawShadowDirect(gameObject);
 
-            int frameCount = drawParams.ShapeImage == null ? 0 : drawParams.ShapeImage.GetFrameCount();
             bool affectedByAmbient = !affectedByLighting;
 
             DrawShapeImage(gameObject, drawParams.ShapeImage,
                 gameObject.GetFrameIndex(frameCount),
                 nonRemapColor, true, gameObject.GetRemapColor(),
-                affectedByLighting, affectedByAmbient, drawPoint);
+                affectedByLighting, affectedByAmbient, drawPoint, depthOverride);
 
             // Then draw all anims with sort values >= 0
             foreach (var anim in animsList.Where(a => a.BuildingAnimDrawConfig.SortValue >= 0))
+            {
+                buildingAnimRenderer.BuildingAnimDepth = depthOverride + Constants.DepthEpsilon;
                 buildingAnimRenderer.Draw(anim, false);
+            }
 
-            DrawVoxelTurret(gameObject, drawPoint, drawParams, nonRemapColor, affectedByLighting);
+            DrawVoxelTurret(gameObject, drawPoint, drawParams, nonRemapColor, affectedByLighting, depthOverride);
 
             if (gameObject.ObjectType.HasSpotlight)
             {
@@ -171,7 +193,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             }
         }
 
-        private void DrawVoxelTurret(Structure gameObject, Point2D drawPoint, in CommonDrawParams drawParams, Color nonRemapColor, bool affectedByLighting)
+        private void DrawVoxelTurret(Structure gameObject, Point2D drawPoint, in CommonDrawParams drawParams, Color nonRemapColor, bool affectedByLighting, float depthOverride)
         {
             if (gameObject.ObjectType.Turret && gameObject.ObjectType.TurretAnimIsVoxel)
             {
@@ -185,21 +207,21 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 {
                     DrawVoxelModel(gameObject, drawParams.TurretVoxel,
                         gameObject.Facing, RampType.None, nonRemapColor, true, gameObject.GetRemapColor(),
-                        affectedByLighting, turretDrawPoint);
+                        affectedByLighting, turretDrawPoint, depthOverride + Constants.DepthEpsilon);
 
                     DrawVoxelModel(gameObject, drawParams.BarrelVoxel,
                         gameObject.Facing, RampType.None, nonRemapColor, true, gameObject.GetRemapColor(),
-                        affectedByLighting, turretDrawPoint);
+                        affectedByLighting, turretDrawPoint, depthOverride + (Constants.DepthEpsilon * 2));
                 }
                 else
                 {
                     DrawVoxelModel(gameObject, drawParams.BarrelVoxel,
                         gameObject.Facing, RampType.None, nonRemapColor, true, gameObject.GetRemapColor(),
-                        affectedByLighting, turretDrawPoint);
+                        affectedByLighting, turretDrawPoint, depthOverride - Constants.DepthEpsilon);
 
                     DrawVoxelModel(gameObject, drawParams.TurretVoxel,
                         gameObject.Facing, RampType.None, nonRemapColor, true, gameObject.GetRemapColor(),
-                        affectedByLighting, turretDrawPoint);
+                        affectedByLighting, turretDrawPoint, depthOverride + Constants.DepthEpsilon); // Turret is always drawn above building
                 }
             }
             else if (gameObject.ObjectType.Turret && !gameObject.ObjectType.TurretAnimIsVoxel &&
@@ -207,7 +229,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             {
                 DrawVoxelModel(gameObject, drawParams.BarrelVoxel,
                     gameObject.Facing, RampType.None, nonRemapColor, true, gameObject.GetRemapColor(),
-                    affectedByLighting, drawPoint);
+                    affectedByLighting, drawPoint, depthOverride + Constants.DepthEpsilon);
             }
         }
 

@@ -10,6 +10,8 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         {
         }
 
+        public float BuildingAnimDepth { get; set; }
+
         protected override Color ReplacementColor => Color.Orange;
 
         protected override CommonDrawParams GetDrawParams(Animation gameObject)
@@ -61,11 +63,17 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             bool affectedByLighting = RenderDependencies.EditorState.IsLighting;
             bool affectedByAmbient = !drawParams.ShapeImage.SubjectToLighting;
 
+            float depthOverride = -1;
+            if (gameObject.IsBuildingAnim)
+            {
+                depthOverride = BuildingAnimDepth;
+            }
+
             DrawShadowDirect(gameObject);
             DrawShapeImage(gameObject, drawParams.ShapeImage,
                 frameIndex, Color.White * alpha,
                 gameObject.IsBuildingAnim, gameObject.GetRemapColor() * alpha,
-                affectedByLighting, affectedByAmbient, drawPoint);
+                affectedByLighting, affectedByAmbient, drawPoint, depthOverride);
         }
 
         public override void DrawShadowDirect(Animation gameObject)

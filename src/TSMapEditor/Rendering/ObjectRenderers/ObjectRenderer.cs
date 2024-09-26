@@ -1,7 +1,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Rampastring.XNAUI;
-using SharpDX.Mathematics.Interop;
 using System;
 using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
@@ -302,7 +301,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         }
 
         protected void DrawShapeImage(T gameObject, ShapeImage image, int frameIndex, Color color,
-            bool drawRemap, Color remapColor, bool affectedByLighting, bool affectedByAmbient, Point2D drawPoint)
+            bool drawRemap, Color remapColor, bool affectedByLighting, bool affectedByAmbient, Point2D drawPoint, float depthOverride = -1f)
         {
             if (image == null)
                 return;
@@ -348,14 +347,14 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 }
             }
 
-            float depth = GetDepth(gameObject, drawPoint.Y);
+            float depth = depthOverride >= 0f ? depthOverride : GetDepth(gameObject, drawingBounds.Bottom);
 
             RenderFrame(frame, remapFrame, color, drawRemap, remapColor,
                 drawingBounds, image.GetPaletteTexture(), lighting, depth);
         }
 
         protected void DrawVoxelModel(T gameObject, VoxelModel model, byte facing, RampType ramp,
-            Color color, bool drawRemap, Color remapColor, bool affectedByLighting, Point2D drawPoint)
+            Color color, bool drawRemap, Color remapColor, bool affectedByLighting, Point2D drawPoint, float depthOverride = -1f)
         {
             if (model == null)
                 return;
@@ -394,7 +393,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 }
             }
 
-            float depth = GetDepth(gameObject, drawPoint.Y + frame.Texture.Height);
+            float depth = depthOverride >= 0f ? depthOverride : GetDepth(gameObject, drawPoint.Y + frame.Texture.Height);
 
             remapColor = ScaleColorToAmbient(remapColor, mapCell.CellLighting);
 

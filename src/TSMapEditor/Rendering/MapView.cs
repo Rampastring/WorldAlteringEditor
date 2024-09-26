@@ -784,6 +784,8 @@ namespace TSMapEditor.Rendering
                 drawY -= (Constants.CellSizeY / 2) * level;
 
             float depth = ((drawPoint.Y / (float)mapRenderTarget.Height) * Constants.DownwardsDepthRenderSpace) + (level * Constants.DepthRenderStep);
+            if (depth > 1.0f)
+                depth = 1.0f;
 
             // Divide the color by 2f. This is done because unlike map lighting which can exceed 1.0 and go up to 2.0,
             // the Color instance values are capped at 1.0.
@@ -970,7 +972,7 @@ namespace TSMapEditor.Rendering
                 bool isRemap = kvp.Key.Item2;
 
                 SetPaletteEffectParams(palettedColorDrawEffect, paletteTexture, true, isRemap, 1.0f, false);
-                Renderer.PushSettings(new SpriteBatchSettings(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, depthRenderStencilState, null, palettedColorDrawEffect));
+                Renderer.PushSettings(new SpriteBatchSettings(SpriteSortMode.Deferred, BlendState.Opaque, null, depthRenderStencilState, null, palettedColorDrawEffect));
 
                 for (int i = 0; i < kvp.Value.Count; i++)
                 {
