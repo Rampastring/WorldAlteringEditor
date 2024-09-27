@@ -282,11 +282,11 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             if (frame == null)
                 return;
 
-            float depth = GetDepth(gameObject, drawPoint.Y);
-
             Texture2D texture = frame.Texture;
 
             Rectangle drawingBounds = GetTextureDrawCoords(gameObject, frame, drawPoint);
+
+            float depth = GetDepth(gameObject, drawingBounds.Bottom);
 
             RenderDependencies.ObjectSpriteRecord.AddGraphicsEntry(new ObjectSpriteEntry(null, texture, drawingBounds, Color.White, false, true, depth));
 
@@ -297,11 +297,16 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         protected virtual float GetDepth(T gameObject, int referenceDrawPointY)
         {
             var tile = Map.GetTile(gameObject.Position);
-            return (((float)referenceDrawPointY / RenderDependencies.Map.HeightInPixelsWithCellHeight) * Constants.DownwardsDepthRenderSpace) + ((tile.Level + 2) * Constants.DepthRenderStep);
+
+            referenceDrawPointY += tile.Level * Constants.CellHeight;
+
+            return (float)(((referenceDrawPointY / (double)RenderDependencies.Map.HeightInPixelsWithCellHeight) * Constants.DownwardsDepthRenderSpace) +
+                (tile.Level * Constants.DepthRenderStep));
         }
 
         protected void DrawShapeImage(T gameObject, ShapeImage image, int frameIndex, Color color,
-            bool drawRemap, Color remapColor, bool affectedByLighting, bool affectedByAmbient, Point2D drawPoint, float depthOverride = -1f)
+            bool drawRemap, Color remapColor, bool affectedByLighting, bool affectedByAmbient, Point2D drawPoint,
+            float depthOverride = -1f, float alphaValue = 0f)
         {
             if (image == null)
                 return;
@@ -350,7 +355,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             float depth = depthOverride >= 0f ? depthOverride : GetDepth(gameObject, drawingBounds.Bottom);
 
             RenderFrame(frame, remapFrame, color, drawRemap, remapColor,
-                drawingBounds, image.GetPaletteTexture(), lighting, depth);
+                drawingBounds, image.GetPaletteTexture(), lighting, depth, alphaValue);
         }
 
         protected void DrawVoxelModel(T gameObject, VoxelModel model, byte facing, RampType ramp,
@@ -404,7 +409,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         }
 
         private void RenderFrame(PositionedTexture frame, PositionedTexture remapFrame, Color color, bool drawRemap, Color remapColor,
-            Rectangle drawingBounds, Texture2D paletteTexture, Vector4 lightingColor, float depth)
+            Rectangle drawingBounds, Texture2D paletteTexture, Vector4 lightingColor, float depth, float alphaValue = 0f)
         {
             Texture2D texture = frame.Texture;
 
@@ -413,7 +418,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
             color = new Color((color.R / 255.0f) * lightingColor.X / 2f,
                 (color.B / 255.0f) * lightingColor.Y / 2f,
-                (color.B / 255.0f) * lightingColor.Z / 2f, depth);
+                (color.B / 255.0f) * lightingColor.Z / 2f, alphaValue);
 
             RenderDependencies.ObjectSpriteRecord.AddGraphicsEntry(new ObjectSpriteEntry(paletteTexture, texture, drawingBounds, color, false, false, depth));
 
@@ -426,7 +431,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                     (remapColor.R / 255.0f),
                     (remapColor.G / 255.0f),
                     (remapColor.B / 255.0f),
-                    depth);
+                    alphaValue);
 
                 // RenderDependencies.PalettedColorDrawEffect.Parameters["UseRemap"].SetValue(true);
                 RenderDependencies.ObjectSpriteRecord.AddGraphicsEntry(new ObjectSpriteEntry(paletteTexture, remapFrame.Texture, drawingBounds, remapColor, true, false, depth));

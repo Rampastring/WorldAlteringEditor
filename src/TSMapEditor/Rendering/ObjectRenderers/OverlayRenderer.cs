@@ -25,7 +25,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         {
             if (gameObject.OverlayType.HighBridgeDirection == BridgeDirection.None)
             {
-                return base.GetDepth(gameObject, referenceDrawPointY) - Constants.DepthEpsilon;
+                return base.GetDepth(gameObject, referenceDrawPointY) + Constants.DepthEpsilon;
             }
 
             var tile = Map.GetTile(gameObject.Position);

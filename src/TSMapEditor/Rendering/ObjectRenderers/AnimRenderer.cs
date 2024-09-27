@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using System;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 
@@ -69,11 +70,26 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 depthOverride = BuildingAnimDepth;
             }
 
+            float depthIncrease = -1f;
+            if (drawParams.ShapeImage != null)
+            {
+                var frame = drawParams.ShapeImage.GetFrame(0);
+                if (frame != null && frame.Texture != null)
+                {
+                    var textureDrawCoords = GetTextureDrawCoords(gameObject, frame, drawPoint);
+                    depthIncrease = (frame.Texture.Height / Constants.CellHeight) * Constants.DepthRenderStep;
+                    if (depthOverride == -1f)
+                    {
+                        depthOverride = GetDepth(gameObject, textureDrawCoords.Bottom);
+                    }
+                }
+            }
+
             DrawShadowDirect(gameObject);
             DrawShapeImage(gameObject, drawParams.ShapeImage,
                 frameIndex, Color.White * alpha,
                 gameObject.IsBuildingAnim, gameObject.GetRemapColor() * alpha,
-                affectedByLighting, affectedByAmbient, drawPoint, depthOverride);
+                affectedByLighting, affectedByAmbient, drawPoint, depthOverride + depthIncrease);
         }
 
         public override void DrawShadowDirect(Animation gameObject)

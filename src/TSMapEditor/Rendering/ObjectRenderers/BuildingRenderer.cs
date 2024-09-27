@@ -70,7 +70,12 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         private float GetFoundationLineDepth(Structure gameObject, Point2D startPoint, Point2D endPoint)
         {
             Point2D lowerPoint = startPoint.Y > endPoint.Y ? startPoint : endPoint;
-            return base.GetDepth(gameObject, lowerPoint.Y) - (Constants.DepthRenderStep);
+            // return GetDepth(gameObject, lowerPoint.Y);
+
+            var cell = Map.GetTile(gameObject.Position);
+            float depthFromCellHeight = cell != null ? cell.Level * Constants.DepthRenderStep : 0f;
+            float result = ((lowerPoint.Y / (float)RenderDependencies.Map.HeightInPixelsWithCellHeight) * Constants.DownwardsDepthRenderSpace) + (depthFromCellHeight + Constants.DepthEpsilon);
+            return result;
         }
 
         protected override CommonDrawParams GetDrawParams(Structure gameObject)
@@ -106,7 +111,8 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         {
             // The 100.0 divisor is just an arbitrary number here. It appeared to give me the best result on SOV01UMD.MAP.
             // Before we implement a shader-based replacement for BUILDINGZ.SHP, we probably can't do better.
-            return base.GetDepth(gameObject, referenceDrawPointY) + ((gameObject.ObjectType.ArtConfig.Height * Constants.DepthRenderStep) / 100.0f);
+            // return base.GetDepth(gameObject, referenceDrawPointY) + ((gameObject.ObjectType.ArtConfig.Height * Constants.DepthRenderStep) / 100.0f) + Constants.DepthEpsilon;
+            return base.GetDepth(gameObject, referenceDrawPointY) + Constants.DepthEpsilon;
         }
 
         private void DrawBibGraphics(Structure gameObject, ShapeImage bibGraphics, Point2D drawPoint, in CommonDrawParams drawParams, bool affectedByLighting)

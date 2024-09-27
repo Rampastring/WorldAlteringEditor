@@ -21,6 +21,8 @@ float Opacity;
 sampler2D SpriteTextureSampler : register(s0)
 {
     Texture = (SpriteTexture); // this is set by spritebatch
+    AddressU = clamp;
+    AddressV = clamp;
     MipFilter = Point;
     MinFilter = Point;
     MagFilter = Point;
@@ -51,6 +53,7 @@ struct PixelShaderOutput
     float depthEmbedded : SV_Depth;
 };
 
+
 PixelShaderOutput MainPS(VertexShaderOutput input)
 {
     PixelShaderOutput output = (PixelShaderOutput) 0;
@@ -62,12 +65,8 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
     // Discard transparent areas
     clip(tex.a == 0.0f ? -1 : 1);
 
-    // The depth value is actually passed in as the Alpha value of the input color.
-    // This is because when doing batched rendering, shader parameters cannot be changed
-    // within one batch, meaning we cannot introduce a shader parameter for depth
-    // without sacrificing performance. And we need a unique depth value for each sprite.
-    output.depthTarget = input.Color.a;
-    output.depthEmbedded = input.Color.a;
+    output.depthTarget = input.Position.z;
+    output.depthEmbedded = input.Position.z;
 
     if (IsShadow)
     {

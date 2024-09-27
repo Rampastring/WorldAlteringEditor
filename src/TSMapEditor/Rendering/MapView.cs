@@ -246,6 +246,7 @@ namespace TSMapEditor.Rendering
             EditorState.MapWideOverlayExists = MapWideOverlay.HasTexture;
 
             RefreshRenderTargets();
+            CreateDepthStencilStates();
 
             scrollRate = UserSettings.Instance.ScrollRate;
 
@@ -313,6 +314,9 @@ namespace TSMapEditor.Rendering
             TheaterGraphics = null;
             MutationManager = null;
             MapWideOverlay.Clear();
+
+            depthRenderStencilState?.Dispose();
+            shadowRenderStencilState?.Dispose();
 
             windowController.RenderResolutionChanged -= WindowController_RenderResolutionChanged;
             windowController = null;
@@ -424,9 +428,6 @@ namespace TSMapEditor.Rendering
             transparencyPerFrameRenderTarget?.Dispose();
             compositeRenderTarget?.Dispose();
             minimapRenderTarget?.Dispose();
-
-            depthRenderStencilState?.Dispose();
-            shadowRenderStencilState?.Dispose();
         }
 
         private void RefreshRenderTargets()
@@ -435,12 +436,40 @@ namespace TSMapEditor.Rendering
 
             mapRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color, DepthFormat.Depth24);
             mapDepthRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Single);
-            objectsRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color, DepthFormat.Depth24);
+            objectsRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
             objectsDepthRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Single);
             transparencyRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
             transparencyPerFrameRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
             compositeRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
             minimapRenderTarget = CreateFullMapRenderTarget(SurfaceFormat.Color);
+        }
+
+        private void CreateDepthStencilStates()
+        {
+            if (depthRenderStencilState == null)
+            {
+                depthRenderStencilState = new DepthStencilState()
+                {
+                    DepthBufferEnable = true,
+                    DepthBufferWriteEnable = true,
+                    DepthBufferFunction = CompareFunction.GreaterEqual,
+                };
+            }
+
+            if (shadowRenderStencilState == null)
+            {
+                shadowRenderStencilState = new DepthStencilState()
+                {
+                    DepthBufferEnable = true,
+                    DepthBufferWriteEnable = true,
+                    DepthBufferFunction = CompareFunction.GreaterEqual,
+                    StencilEnable = true,
+                    StencilFail = StencilOperation.Keep,
+                    StencilPass = StencilOperation.Replace,
+                    StencilFunction = CompareFunction.Greater,
+                    ReferenceStencil = 1
+                };
+            }
         }
 
         private RenderDependencies CreateRenderDependencies()
@@ -517,16 +546,6 @@ namespace TSMapEditor.Rendering
                 objectSpriteRecord.Clear();
             }
 
-            if (depthRenderStencilState == null)
-            {
-                depthRenderStencilState = new DepthStencilState()
-                {
-                    DepthBufferEnable = true,
-                    DepthBufferWriteEnable = true,
-                    DepthBufferFunction = CompareFunction.GreaterEqual,
-                };
-            }
-
             // Draw terrain tiles in batched mode for performance if we can.
             // In Marble Madness mode we currently need to mix and match paletted and non-paletted graphics, so there's no avoiding immediate mode.
             SpriteSortMode spriteSortMode = EditorState.IsMarbleMadness ? SpriteSortMode.Immediate : SpriteSortMode.Deferred;
@@ -541,7 +560,7 @@ namespace TSMapEditor.Rendering
             GraphicsDevice.SetRenderTargets(objectsRenderTarget, objectsDepthRenderTarget);
 
             if (mapInvalidated)
-                GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer, Color.Transparent, 0f, 0);
+                GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer | ClearOptions.Stencil, Color.Transparent, 0f, 0);
 
             DrawSmudges();
             DrawGameObjects();
@@ -783,9 +802,11 @@ namespace TSMapEditor.Rendering
             if (!EditorState.Is2DMode)
                 drawY -= (Constants.CellSizeY / 2) * level;
 
-            float depth = ((drawPoint.Y / (float)mapRenderTarget.Height) * Constants.DownwardsDepthRenderSpace) + (level * Constants.DepthRenderStep);
-            if (depth > 1.0f)
-                depth = 1.0f;
+            double doubleDepth = ((drawPoint.Y / (double)Map.HeightInPixelsWithCellHeight) * Constants.DownwardsDepthRenderSpace) + (level * Constants.DepthRenderStep);
+            if (doubleDepth > 1.0f)
+                doubleDepth = 1.0f;
+
+            float depth = (float)doubleDepth;
 
             // Divide the color by 2f. This is done because unlike map lighting which can exceed 1.0 and go up to 2.0,
             // the Color instance values are capped at 1.0.
@@ -1000,7 +1021,7 @@ namespace TSMapEditor.Rendering
             if (objectSpriteRecord.ShadowEntries.Count > 0)
             {
                 SetPaletteEffectParams(palettedColorDrawEffect, null, false, false, 1.0f, true);
-                Renderer.PushSettings(new SpriteBatchSettings(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, depthRenderStencilState, null, palettedColorDrawEffect));
+                Renderer.PushSettings(new SpriteBatchSettings(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, shadowRenderStencilState, null, palettedColorDrawEffect));
 
                 for (int i = 0; i < objectSpriteRecord.ShadowEntries.Count; i++)
                 {

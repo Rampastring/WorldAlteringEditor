@@ -15,6 +15,8 @@
 sampler2D SpriteTextureSampler : register(s0)
 {
     Texture = (SpriteTexture); // this is set by spritebatch
+    AddressU = clamp;
+    AddressV = clamp;
     MipFilter = Point;
     MinFilter = Point;
     MagFilter = Point;
