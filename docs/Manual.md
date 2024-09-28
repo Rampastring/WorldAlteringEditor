@@ -26,7 +26,7 @@ Once you are done detailing the map, you can run *Tools -> Run Script... -> Smoo
 
 Normally, terrain tiles are placed above the cursor. This can make placing terrain tiles at the southern edge of the map inconvenient. In this situation, you can hold Alt to place the tile below the cursor instead of above the cursor.
 
-![Downwards placement](https://github.com/Rampastring/WorldAlteringEditor/raw/master/docs/images/downwardsplacement.png "Downwards placement")
+![Downwards placement](images/downwardsplacement.png "Downwards placement")
 
 ## Copy and paste
 
@@ -38,7 +38,7 @@ Alt+C activates a tool for copying a custom-shaped area.
 
 Sometimes you might want to copy more than just terrain: buildings, units, trees, overlay etc. You can select what map elements are copied from *Edit -> Configure Copied Objects*.
 
-![Configure Copied Objects](https://github.com/Rampastring/WorldAlteringEditor/raw/master/docs/images/configurecopiedobjects.png "Configure Copied Objects")
+![Configure Copied Objects](images/configurecopiedobjects.png "Configure Copied Objects")
 
 ## Objects
 
@@ -46,7 +46,7 @@ Sometimes you might want to copy more than just terrain: buildings, units, trees
 
 To rotate a unit, hover over it with the mouse cursor. Then **press and hold** the *Rotate Unit* key (default: A) on your keyboard, and drag the unit with the mouse to the direction that you want the unit to face.
 
-![Rotate unit](https://github.com/Rampastring/WorldAlteringEditor/raw/master/docs/images/rotateunit.png "Rotate unit")
+![Rotate unit](images/rotateunit.png "Rotate unit")
 
 ### Deleting objects
 
@@ -66,7 +66,7 @@ If you intentionally want to overlap objects, hold Alt while placing or moving a
 
 To quickly clone an object, with all of its properties (Attached Tag, HP, Facing etc.), hold Shift and drag the object with the mouse. When you release the left mouse button, WAE creates a clone of the object in the position.
 
-![Clone object](https://github.com/Rampastring/WorldAlteringEditor/raw/master/docs/images/cloneobject.png "Clone object")
+![Clone object](images/cloneobject.png "Clone object")
 
 ## Zooming
 
