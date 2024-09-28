@@ -60,7 +60,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             {
                 DrawText(gameObject, false);
             }
-            else if (frame != null)
+            else
             {
                 Render(gameObject, drawPoint, drawParams);   
             }
