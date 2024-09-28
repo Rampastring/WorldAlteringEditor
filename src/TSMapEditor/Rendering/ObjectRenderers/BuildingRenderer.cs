@@ -49,7 +49,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             foundationLineColor = new Color((foundationLineColor.R / 255.0f) * (float)cell.CellLighting.R / 2.0f,
                 (foundationLineColor.G / 255.0f) * (float)cell.CellLighting.G / 2.0f,
                 (foundationLineColor.B / 255.0f) * (float)cell.CellLighting.B / 2.0f,
-                1.0f);
+                0f);
 
             foreach (var edge in gameObject.ObjectType.ArtConfig.Foundation.Edges)
             {
@@ -69,12 +69,11 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
         private float GetFoundationLineDepth(Structure gameObject, Point2D startPoint, Point2D endPoint)
         {
-            Point2D lowerPoint = startPoint.Y > endPoint.Y ? startPoint : endPoint;
-            // return GetDepth(gameObject, lowerPoint.Y);
+            float centerPoint = (startPoint.Y + endPoint.Y) / 2.0f;
 
             var cell = Map.GetTile(gameObject.Position);
             float depthFromCellHeight = cell != null ? cell.Level * Constants.DepthRenderStep : 0f;
-            float result = ((lowerPoint.Y / (float)RenderDependencies.Map.HeightInPixelsWithCellHeight) * Constants.DownwardsDepthRenderSpace) + (depthFromCellHeight + Constants.DepthEpsilon);
+            float result = ((centerPoint / (float)RenderDependencies.Map.HeightInPixelsWithCellHeight) * Constants.DownwardsDepthRenderSpace) + (depthFromCellHeight + Constants.DepthEpsilon);
             return result;
         }
 

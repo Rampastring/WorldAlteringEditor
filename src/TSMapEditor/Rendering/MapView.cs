@@ -980,7 +980,7 @@ namespace TSMapEditor.Rendering
                 {
                     var lineEntry = objectSpriteRecord.LineEntries[i];
                     Renderer.DrawLine(lineEntry.Source, lineEntry.Destination,
-                        new Color(lineEntry.Color.R / 255.0f, lineEntry.Color.G / 255.0f, lineEntry.Color.B / 255.0f, lineEntry.Depth),
+                        new Color(lineEntry.Color.R / 255.0f, lineEntry.Color.G / 255.0f, lineEntry.Color.B / 255.0f, 0),
                         lineEntry.Thickness, lineEntry.Depth);
                 }
 
@@ -1028,7 +1028,7 @@ namespace TSMapEditor.Rendering
                     var spriteEntry = objectSpriteRecord.ShadowEntries[i];
 
                     // It doesn't really matter what we give as color to the shadow
-                    Renderer.DrawTexture(spriteEntry.Texture, spriteEntry.DrawingBounds, null, new Color(1.0f, 1.0f, 1.0f, spriteEntry.Depth), 0f, Vector2.Zero, SpriteEffects.None, spriteEntry.Depth);
+                    Renderer.DrawTexture(spriteEntry.Texture, spriteEntry.DrawingBounds, null, new Color(1.0f, 1.0f, 1.0f, 0), 0f, Vector2.Zero, SpriteEffects.None, spriteEntry.Depth);
                 }
 
                 Renderer.PopSettings();
