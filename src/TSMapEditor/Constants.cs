@@ -1,5 +1,6 @@
 ﻿using Rampastring.Tools;
 using System;
+using TSMapEditor.GameMath;
 
 namespace TSMapEditor
 {

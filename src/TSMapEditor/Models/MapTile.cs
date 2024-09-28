@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Xna.Framework;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models.Enums;
 using TSMapEditor.Models.MapFormat;
@@ -196,6 +198,29 @@ namespace TSMapEditor.Models
             {
                 action(waypoint);
             }
+        }       
+
+        public SubCell GetSubCellClosestToPosition(Point2D position, bool onlyOccupiedCells)
+        {
+            SubCell closestSubcell = SubCell.None;
+            float shortestDistance = float.MaxValue;
+            for (int i = 0; i < SubCellCount; i++)
+            {
+                SubCell subCell = (SubCell)i;
+
+                if (onlyOccupiedCells && GetInfantryFromSubCellSpot(subCell) == null)
+                    continue;
+
+                var subCellCoords = GetTileCenter() + CellMath.GetSubCellOffset(subCell);
+                var distanceToSubCell = Vector2.Distance(position.ToXNAVector(), subCellCoords.ToXNAVector());
+                if (distanceToSubCell < shortestDistance)
+                {
+                    closestSubcell = subCell;
+                    shortestDistance = distanceToSubCell;
+                }
+            }
+
+            return closestSubcell;
         }
 
         public SubCell GetFreeSubCellSpot()
@@ -254,7 +279,7 @@ namespace TSMapEditor.Models
             return Array.Find(Infantry, inf => inf != null && predicate(inf));
         }
 
-        public TechnoBase GetTechno()
+        public TechnoBase GetTechno(Point2D? position = null)
         {
             if (Structures.Count > 0)
                 return Structures[0];
@@ -265,12 +290,23 @@ namespace TSMapEditor.Models
             if (Aircraft.Count > 0)
                 return Aircraft[0];
 
-            return Array.Find(Infantry, inf => inf != null);
-        }
+            if (position != null)
+            {
+                var closestSubcell = GetSubCellClosestToPosition((Point2D)position, true);
+                if (closestSubcell == SubCell.None)
+                    return null;
 
-        public GameObject GetObject()
+                return GetInfantryFromSubCellSpot(closestSubcell);                
+            }
+            else
+            {
+                return GetFirstInfantry();
+            }            
+        }        
+
+        public GameObject GetObject(Point2D? position = null)
         {
-            GameObject obj = GetTechno();
+            GameObject obj = GetTechno(position);
             if (obj != null)
                 return obj;
 
@@ -356,5 +392,7 @@ namespace TSMapEditor.Models
         }
 
         public Point2D CoordsToPoint() => new Point2D(X, Y);
+
+        public Point2D GetTileCenter() => new Point2D(Constants.CellSizeX / 2, Constants.CellSizeY / 2);
     }
 }

@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
-using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
 using TSMapEditor.Misc;
 using TSMapEditor.Models;
@@ -358,16 +357,17 @@ namespace TSMapEditor.Rendering
             if (tileUnderCursor == null)
                 return;
 
-            var firstObject = tileUnderCursor.GetObject() as TechnoBase;
-            if (firstObject == null)
+            var tilePosition = GetRelativeTilePositionFromCursorPosition(tileUnderCursor);
+            var selectedObject = tileUnderCursor.GetObject(tilePosition) as TechnoBase;
+            if (selectedObject == null)
                 return;
 
             const int step = 32;
 
-            if (firstObject.Facing + step > byte.MaxValue)
-                firstObject.Facing = (byte)(firstObject.Facing + step - byte.MaxValue);
+            if (selectedObject.Facing + step > byte.MaxValue)
+                selectedObject.Facing = (byte)(selectedObject.Facing + step - byte.MaxValue);
             else
-                firstObject.Facing += step;
+                selectedObject.Facing += step;
 
             AddRefreshPoint(tileUnderCursor.CoordsToPoint());
         }
@@ -1357,19 +1357,17 @@ namespace TSMapEditor.Rendering
             // Attempt dragging or rotating an object
             if (CursorAction == null && tileUnderCursor != null && Cursor.LeftPressedDown && !isDraggingObject && !isRotatingObject)
             {
-                var cellObject = tileUnderCursor.GetObject();
+                var tilePosition = GetRelativeTilePositionFromCursorPosition(tileUnderCursor);
+                var cellObject = tileUnderCursor.GetObject(tilePosition);
 
                 if (cellObject != null)
                 {
-                    draggedOrRotatedObject = tileUnderCursor.GetObject();
-
-                    if (draggedOrRotatedObject != null)
-                    {
-                        if (KeyboardCommands.Instance.RotateUnit.AreKeysDown(Keyboard))
-                            isRotatingObject = true;
-                        else
-                            isDraggingObject = true;
-                    }
+                    draggedOrRotatedObject = cellObject;
+                    
+                    if (KeyboardCommands.Instance.RotateUnit.AreKeysDown(Keyboard))
+                        isRotatingObject = true;
+                    else
+                        isDraggingObject = true;                    
                 }
                 else if (tileUnderCursor.Waypoints.Count > 0)
                 {
@@ -1469,9 +1467,14 @@ namespace TSMapEditor.Rendering
                 if (tileUnderCursor.Aircraft.Count > 0)
                     windowController.AircraftOptionsWindow.Open(tileUnderCursor.Aircraft[0]);
 
-                Infantry infantry = tileUnderCursor.GetFirstInfantry();
-                if (infantry != null)
-                    windowController.InfantryOptionsWindow.Open(infantry);
+                var tilePosition = GetRelativeTilePositionFromCursorPosition(tileUnderCursor); 
+                var closestOccupiedSubCell = tileUnderCursor.GetSubCellClosestToPosition(tilePosition, true);
+                if (closestOccupiedSubCell != SubCell.None)
+                {
+                    Infantry infantry = tileUnderCursor.GetInfantryFromSubCellSpot(closestOccupiedSubCell);
+                    if (infantry != null)
+                        windowController.InfantryOptionsWindow.Open(infantry);
+                }
             }
         }
 
@@ -1513,7 +1516,8 @@ namespace TSMapEditor.Rendering
 
             if (IsActive && tileUnderCursor != null)
             {
-                TechnoUnderCursor = tileUnderCursor.GetTechno();
+                var tilePosition = GetRelativeTilePositionFromCursorPosition(tileUnderCursor);
+                TechnoUnderCursor = tileUnderCursor.GetTechno(tilePosition);
 
                 if (KeyboardCommands.Instance.DeleteObject.AreKeysDown(Keyboard))
                 {
@@ -1584,6 +1588,10 @@ namespace TSMapEditor.Rendering
 
             if (isDraggingObject)
             {
+                var startCell = Map.GetTile(draggedOrRotatedObject.Position);
+                if (startCell == tileUnderCursor)
+                    return;
+
                 bool isCloning = KeyboardCommands.Instance.CloneObject.AreKeysOrModifiersDown(Keyboard);
                 bool overlapObjects = KeyboardCommands.Instance.OverlapObjects.AreKeysOrModifiersDown(Keyboard);
 
@@ -1596,10 +1604,14 @@ namespace TSMapEditor.Rendering
                                                  -Camera.TopLeftPoint.Y + Constants.CellSizeY / 2);
 
                 Point2D startDrawPoint = CellMath.CellTopLeftPointFromCellCoords(draggedOrRotatedObject.Position, Map) + cameraAndCellCenterOffset;
-
-                var startCell = Map.GetTile(draggedOrRotatedObject.Position);
+                
                 if (startCell != null)
-                    startDrawPoint -= new Point2D(0, Map.GetTile(draggedOrRotatedObject.Position).Level * Constants.CellHeight);
+                {
+                    startDrawPoint -= new Point2D(0, startCell.Level * Constants.CellHeight);
+
+                    if (draggedOrRotatedObject.WhatAmI() == RTTIType.Infantry)
+                        startDrawPoint += CellMath.GetSubCellOffset(((Infantry)draggedOrRotatedObject).SubCell) - new Point2D(0, Constants.CellHeight / 2);
+                }
 
                 Point2D endDrawPoint = CellMath.CellTopLeftPointFromCellCoords(tileUnderCursor.CoordsToPoint(), Map) + cameraAndCellCenterOffset;
 
@@ -1612,16 +1624,24 @@ namespace TSMapEditor.Rendering
             }
             else if (isRotatingObject)
             {
+                var startCell = Map.GetTile(draggedOrRotatedObject.Position);
+                if (startCell == tileUnderCursor)
+                    return;
+
                 Color lineColor = Color.Yellow;
 
                 Point2D cameraAndCellCenterOffset = new Point2D(-Camera.TopLeftPoint.X + Constants.CellSizeX / 2,
                                                  -Camera.TopLeftPoint.Y + Constants.CellSizeY / 2);
 
                 Point2D startDrawPoint = CellMath.CellTopLeftPointFromCellCoords(draggedOrRotatedObject.Position, Map) + cameraAndCellCenterOffset;
-
-                var startCell = Map.GetTile(draggedOrRotatedObject.Position);
+                
                 if (startCell != null)
+                {
                     startDrawPoint -= new Point2D(0, Map.GetTile(draggedOrRotatedObject.Position).Level * Constants.CellHeight);
+
+                    if (draggedOrRotatedObject.WhatAmI() == RTTIType.Infantry)
+                        startDrawPoint += CellMath.GetSubCellOffset(((Infantry)draggedOrRotatedObject).SubCell) - new Point2D(0, Constants.CellHeight / 2);
+                }
 
                 Point2D endDrawPoint = CellMath.CellTopLeftPointFromCellCoords(tileUnderCursor.CoordsToPoint(), Map) + cameraAndCellCenterOffset;
 
@@ -2043,6 +2063,15 @@ namespace TSMapEditor.Rendering
             MinimapUsers.Remove(this);
 
             EditorState.RenderInvisibleInGameObjects = true;
+        }
+
+        private Point2D GetRelativeTilePositionFromCursorPosition(MapTile tile)
+        {
+            var cellTopLeft = Constants.IsFlatWorld && EditorState.Is2DMode ?
+                CellMath.CellTopLeftPointFromCellCoords_NoBaseline(tile.CoordsToPoint(), Map) :
+                CellMath.CellTopLeftPointFromCellCoords_3D_NoBaseline(tile.CoordsToPoint(), Map);
+
+            return GetCursorMapPoint() - cellTopLeft;
         }
     }
 }
