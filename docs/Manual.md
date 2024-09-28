@@ -12,7 +12,11 @@ To paint terrain, select a tile from either the top bar or from the TileSet sele
 
 ### Painting water
 
-To paint water, select the Water TileSet from the TileSet selector in the bottom of the screen. Then select the 1x1 sized tile and paint. You can increase the brush size to cover larger areas, or use the fill functionality mentioned above.
+To paint water, select the Water TileSet from the TileSet selector in the bottom of the screen. Then a tile and paint. You can increase the brush size to cover larger areas, or use the fill functionality mentioned above.
+
+Note that the fill functonality only works with 1x1 sized tiles.
+
+![Water selection](images/waterselection.png "Water selection")
 
 ### But my water looks all samey if I only use the 1x1 tile?
 
@@ -75,3 +79,9 @@ If you want to reset to the default zoom level, press `Ctrl + 0` on your keyboar
 You can toggle fullscreen mode on or off by pressing F11, regardless of whether you launched WAE in fullscreen or windowed mode.
 
 If you have a multi-monitor setup, when maximized with F11, WAE fills the monitor that its window happened to be on at the time of pressing F11.
+
+## Auto-save
+
+WAE automatically saves a backup of your map every few minutes to prevent data loss in case of crash of the system or editor.
+
+**Auto-save does not overwrite your open map file**, but instead the save is written as `autosave.map` inside WAE's directory. If you encounter a crash or other issues that would cause work to be lost, you can find the `autosave.map` file from WAE's directory, copy it and continue your work from it.
