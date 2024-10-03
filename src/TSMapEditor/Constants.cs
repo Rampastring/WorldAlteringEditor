@@ -1,12 +1,11 @@
 ﻿using Rampastring.Tools;
 using System;
-using TSMapEditor.GameMath;
 
 namespace TSMapEditor
 {
     public static class Constants
     {
-        public const string ReleaseVersion = "1.2.4";
+        public const string ReleaseVersion = "1.2.5";
 
         public static int CellSizeX = 48;
         public static int CellSizeY = 24;

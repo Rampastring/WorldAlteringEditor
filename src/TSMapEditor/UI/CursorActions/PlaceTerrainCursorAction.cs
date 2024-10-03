@@ -32,11 +32,17 @@ namespace TSMapEditor.UI.CursorActions
 
         private int heightOffset;
 
-        private List<MapTile> previewTiles = new List<MapTile>();
+        private HashSet<MapTile> previewTiles = new HashSet<MapTile>();
 
         public override void OnActionEnter()
         {
             heightOffset = 0;
+        }
+
+        public override void OnActionExit()
+        {
+            ClearPreview();
+            base.OnActionExit();
         }
 
         public override void OnKeyPressed(KeyPressEventArgs e, Point2D cellCoords)
@@ -90,10 +96,10 @@ namespace TSMapEditor.UI.CursorActions
         private void ClearPreview()
         {
             // Clear preview data
-            for (int i = 0; i < previewTiles.Count; i++)
+            foreach (var cell in previewTiles)
             {
-                previewTiles[i].PreviewTileImage = null;
-                previewTiles[i].PreviewLevel = -1;
+                cell.PreviewTileImage = null;
+                cell.PreviewLevel = -1;
             }
 
             previewTiles.Clear();
@@ -172,36 +178,37 @@ namespace TSMapEditor.UI.CursorActions
 
             if (CursorActionTarget.AutoLATEnabled)
             {
-                int totalWidth = Tile.Width * brush.Width;
-                int totalHeight = Tile.Height * brush.Height;
-
                 // Get potential base tilesets of the placed LAT (if we're placing LAT)
                 // This allows placing certain LATs on top of other LATs (example: snowy dirt on snow, when snow is also placed on grass)
                 (var baseTileSet, var altBaseTileSet) = Mutation.GetBaseTileSetsForTileSet(Map.TheaterInstance, Tile.TileSetId);
 
-                // Apply AutoLat to "outer rectangle" - 1 cell outside our placement area
-                Map.DoForRectangleBorder(adjustedCellCoords.X - 1, adjustedCellCoords.Y - 1, adjustedCellCoords.X + totalWidth, adjustedCellCoords.Y + totalHeight, cell =>
-                {
-                    int autoLatTileIndex = Mutation.GetAutoLATTileIndexForCell(Map, cell.CoordsToPoint(), baseTileSet, altBaseTileSet, true);
-                    if (autoLatTileIndex > -1)
-                    {
-                        cell.PreviewTileImage = CursorActionTarget.TheaterGraphics.GetTileGraphics(autoLatTileIndex, 0);
-                        cell.PreviewLevel = cell.Level;
-                        previewTiles.Add(cell);
-                    }
-                });
+                // Calculate total area to apply Auto-LAT into
+                int totalWidth = (Tile.Width * brush.Width) + 1;
+                int totalHeight = (Tile.Height * brush.Height) + 1;
 
-                // Apply AutoLat to "inner rectangle" - on the outer edge inside our placement area
-                Map.DoForRectangleBorder(adjustedCellCoords.X, adjustedCellCoords.Y, adjustedCellCoords.X + totalWidth - 1, adjustedCellCoords.Y + totalHeight - 1, cell =>
+                for (int y = -1; y < totalHeight * brush.Height; y++)
                 {
-                    int autoLatTileIndex = Mutation.GetAutoLATTileIndexForCell(Map, cell.CoordsToPoint(), baseTileSet, altBaseTileSet, true);
-                    if (autoLatTileIndex > -1)
+                    for (int x = -1; x < totalWidth * brush.Width; x++)
                     {
-                        cell.PreviewTileImage = CursorActionTarget.TheaterGraphics.GetTileGraphics(autoLatTileIndex, 0);
-                        if (cell.PreviewLevel < 0)
-                            cell.PreviewLevel = cell.Level;
+                        int cx = adjustedCellCoords.X + x;
+                        int cy = adjustedCellCoords.Y + y;
+
+                        var cell = Map.GetTile(cx, cy);
+                        if (cell == null || previewTiles.Contains(cell))
+                            continue;
+
+                        int autoLatTileIndex = Mutation.GetAutoLATTileIndexForCell(Map, cell.CoordsToPoint(), baseTileSet, altBaseTileSet, true);
+
+                        if (autoLatTileIndex > -1)
+                        {
+                            cell.PreviewTileImage = CursorActionTarget.TheaterGraphics.GetTileGraphics(autoLatTileIndex, 0);
+                            cell.PreviewSubTileIndex = 0;
+                            if (cell.PreviewLevel < 0)
+                                cell.PreviewLevel = cell.Level;
+                            previewTiles.Add(cell);
+                        }
                     }
-                });
+                }
             }
 
             CursorActionTarget.AddRefreshPoint(adjustedCellCoords, Math.Max(Tile.Width, Tile.Height) * Math.Max(brush.Width, brush.Height) + 1);
