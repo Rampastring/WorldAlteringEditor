@@ -623,6 +623,33 @@ namespace TSMapEditor.UI.Windows
             messageBox.YesClickedAction = _ => DoCloneForEasierDifficulties(false);
         }
 
+        private TeamType FindOrCloneTeamTypeForDifficulty(TeamType hardTeamType, Difficulty targetDifficulty)
+        {
+            string targetDiffTeamTypeName = Helpers.ConvertNameToNewDifficulty(hardTeamType.Name, Difficulty.Hard, targetDifficulty);
+            TeamType targetDiffTeamType = map.TeamTypes.Find(tt => tt.Name == targetDiffTeamTypeName);
+
+            // Only create new TeamType and TaskForce if they weren't already found
+            if (targetDiffTeamType == null)
+            {
+                string targetDiffTaskForceName = Helpers.ConvertNameToNewDifficulty(hardTeamType.TaskForce.Name, Difficulty.Hard, targetDifficulty);
+                TaskForce targetDiffTaskForce = map.TaskForces.Find(tt => tt.Name == targetDiffTaskForceName);
+
+                if (targetDiffTaskForce == null)
+                {
+                    targetDiffTaskForce = hardTeamType.TaskForce.Clone(map.GetNewUniqueInternalId());
+                    targetDiffTaskForce.Name = targetDiffTaskForceName;
+                    map.AddTaskForce(targetDiffTaskForce);
+                }
+
+                targetDiffTeamType = hardTeamType.Clone(map.GetNewUniqueInternalId());
+                targetDiffTeamType.Name = targetDiffTeamTypeName;
+                targetDiffTeamType.TaskForce = targetDiffTaskForce;
+                map.AddTeamType(targetDiffTeamType);
+            }
+
+            return targetDiffTeamType;
+        }
+
         private void DoCloneForEasierDifficulties(bool cloneDependencies)
         {
             var originalTag = map.Tags.Find(t => t.Trigger == editedTrigger);
@@ -717,8 +744,6 @@ namespace TSMapEditor.UI.Windows
                 // Go through used actions and their parameters.
                 // If they refer to any TeamTypes, clone the TeamTypes and replace the references.
 
-                var clonedTeamTypes = new List<(TeamType Hard, TeamType Medium, TeamType Easy)>();
-
                 for (int i = 0; i < editedTrigger.Actions.Count; i++)
                 {
                     TriggerAction action = editedTrigger.Actions[i];
@@ -735,42 +760,11 @@ namespace TSMapEditor.UI.Windows
 
                             if (teamType != null && teamType.TaskForce != null)
                             {
-                                var existingEntry = clonedTeamTypes.Find(entry => entry.Hard == teamType);
+                                TeamType mediumTeamType = FindOrCloneTeamTypeForDifficulty(teamType, Difficulty.Medium);
+                                TeamType easyTeamType = FindOrCloneTeamTypeForDifficulty(teamType, Difficulty.Easy);
 
-                                // Do not clone the same team multiple times if it's used in multiple actions or multiple parameters
-                                if (existingEntry.Hard != null)
-                                {
-                                    mediumDifficultyTrigger.Actions[i].Parameters[j] = existingEntry.Medium.ININame;
-                                    easyDifficultyTrigger.Actions[i].Parameters[j] = existingEntry.Easy.ININame;
-                                }
-                                else
-                                {
-                                    TaskForce mediumTaskForce = teamType.TaskForce.Clone(map.GetNewUniqueInternalId());
-                                    map.AddTaskForce(mediumTaskForce);
-
-                                    TaskForce easyTaskForce = teamType.TaskForce.Clone(map.GetNewUniqueInternalId());
-                                    map.AddTaskForce(easyTaskForce);
-
-                                    mediumTaskForce.Name = teamType.TaskForce.Name.Replace("H ", "M ").Replace(" H", " M").Replace("Hard", "Medium");
-                                    easyTaskForce.Name = teamType.TaskForce.Name.Replace("H ", "E ").Replace(" H", " E").Replace("Hard", "Easy");
-
-                                    TeamType mediumTeamType = teamType.Clone(map.GetNewUniqueInternalId());
-                                    map.AddTeamType(mediumTeamType);
-
-                                    TeamType easyTeamType = teamType.Clone(map.GetNewUniqueInternalId());
-                                    map.AddTeamType(easyTeamType);
-
-                                    mediumTeamType.Name = teamType.Name.Replace("H ", "M ").Replace(" H", " M").Replace("Hard", "Medium");
-                                    easyTeamType.Name = teamType.Name.Replace("H ", "E ").Replace(" H", " E").Replace("Hard", "Easy");
-
-                                    mediumTeamType.TaskForce = mediumTaskForce;
-                                    easyTeamType.TaskForce = easyTaskForce;
-
-                                    mediumDifficultyTrigger.Actions[i].Parameters[j] = mediumTeamType.ININame;
-                                    easyDifficultyTrigger.Actions[i].Parameters[j] = easyTeamType.ININame;
-
-                                    clonedTeamTypes.Add(new (teamType, mediumTeamType, easyTeamType));
-                                }
+                                mediumDifficultyTrigger.Actions[i].Parameters[j] = mediumTeamType.ININame;
+                                easyDifficultyTrigger.Actions[i].Parameters[j] = easyTeamType.ININame;
                             }
                         }
                     }
