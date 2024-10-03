@@ -21,6 +21,11 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             };
         }
 
+        protected override float GetDepth(Infantry gameObject, int referenceDrawPointY)
+        {
+            return base.GetDepth(gameObject, referenceDrawPointY) + (Constants.DepthEpsilon * 2);
+        }
+
         public override Point2D GetDrawPoint(Infantry gameObject)
         {
             Point2D drawPoint = base.GetDrawPoint(gameObject);

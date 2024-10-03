@@ -22,6 +22,11 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             };
         }
 
+        protected override float GetDepth(Aircraft gameObject, int referenceDrawPointY)
+        {
+            return base.GetDepth(gameObject, referenceDrawPointY) + (Constants.DepthEpsilon * 2);
+        }
+
         protected override void Render(Aircraft gameObject, Point2D drawPoint, in CommonDrawParams drawParams)
         {
             DrawVoxelModel(gameObject, drawParams.MainVoxel,

@@ -111,7 +111,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             // The 100.0 divisor is just an arbitrary number here. It appeared to give me the best result on SOV01UMD.MAP.
             // Before we implement a shader-based replacement for BUILDINGZ.SHP, we probably can't do better.
             // return base.GetDepth(gameObject, referenceDrawPointY) + ((gameObject.ObjectType.ArtConfig.Height * Constants.DepthRenderStep) / 100.0f) + Constants.DepthEpsilon;
-            return base.GetDepth(gameObject, referenceDrawPointY) + Constants.DepthEpsilon;
+            return base.GetDepth(gameObject, referenceDrawPointY) + (Constants.DepthEpsilon * 2);
         }
 
         private void DrawBibGraphics(Structure gameObject, ShapeImage bibGraphics, Point2D drawPoint, in CommonDrawParams drawParams, bool affectedByLighting)

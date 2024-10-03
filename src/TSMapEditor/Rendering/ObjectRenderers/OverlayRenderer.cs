@@ -25,6 +25,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         {
             if (gameObject.OverlayType.HighBridgeDirection == BridgeDirection.None)
             {
+                // Draw overlays above smudges
                 return base.GetDepth(gameObject, referenceDrawPointY) + Constants.DepthEpsilon;
             }
 

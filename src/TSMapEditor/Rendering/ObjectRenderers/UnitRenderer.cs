@@ -26,6 +26,11 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             };
         }
 
+        protected override float GetDepth(Unit gameObject, int referenceDrawPointY)
+        {
+            return base.GetDepth(gameObject, referenceDrawPointY) + (Constants.DepthEpsilon * 2);
+        }
+
         protected override void Render(Unit gameObject, Point2D drawPoint, in CommonDrawParams drawParams)
         {
             bool affectedByLighting = RenderDependencies.EditorState.IsLighting;

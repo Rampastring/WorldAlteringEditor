@@ -23,7 +23,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
 
         protected override float GetDepth(TerrainObject gameObject, int referenceDrawPointY)
         {
-            return base.GetDepth(gameObject, referenceDrawPointY) + (Constants.DepthEpsilon * 2);
+            return base.GetDepth(gameObject, referenceDrawPointY) + (Constants.DepthEpsilon * 3);
         }
 
         protected override void Render(TerrainObject gameObject, Point2D drawPoint, in CommonDrawParams drawParams)
