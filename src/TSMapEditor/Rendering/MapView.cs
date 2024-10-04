@@ -182,6 +182,7 @@ namespace TSMapEditor.Rendering
         private Point rightClickScrollInitPos = new Point(-1, -1);
 
         private Point lastClickedPoint;
+        private Point pressedDownPoint;
 
         private List<GameObject> gameObjectsToRender = new List<GameObject>(); 
         private List<Smudge> smudgesToRender = new List<Smudge>();
@@ -1354,8 +1355,21 @@ namespace TSMapEditor.Rendering
                 }
             }
 
+            var cursorPoint = GetCursorPoint();
+
+            // Record cursor position when the cursor was pressed down on an object.
+            // This makes it possible to avoid drag-moving large buildings when the user just clicks on a cell at the bottom of their foundation.
+            if (Cursor.LeftPressedDown)
+            {
+                pressedDownPoint = cursorPoint;
+            }
+            else if (!Cursor.LeftDown)
+            {
+                pressedDownPoint = new Point(-1, -1);
+            }
+
             // Attempt dragging or rotating an object
-            if (CursorAction == null && tileUnderCursor != null && Cursor.LeftPressedDown && !isDraggingObject && !isRotatingObject)
+            if (CursorAction == null && tileUnderCursor != null && Cursor.LeftDown && !isDraggingObject && !isRotatingObject && cursorPoint != pressedDownPoint)
             {
                 var tilePosition = GetRelativeTilePositionFromCursorPosition(tileUnderCursor);
                 var cellObject = tileUnderCursor.GetObject(tilePosition);
@@ -1367,7 +1381,7 @@ namespace TSMapEditor.Rendering
                     if (KeyboardCommands.Instance.RotateUnit.AreKeysDown(Keyboard))
                         isRotatingObject = true;
                     else
-                        isDraggingObject = true;                    
+                        isDraggingObject = true;
                 }
                 else if (tileUnderCursor.Waypoints.Count > 0)
                 {
@@ -1388,6 +1402,8 @@ namespace TSMapEditor.Rendering
                         Camera.FloatTopLeftPoint.Y + result.Y * rightClickScrollRate);
                 }
             }
+
+            pressedDownPoint = GetCursorPoint();
 
             base.OnMouseOnControl();
         }
