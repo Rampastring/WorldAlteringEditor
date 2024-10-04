@@ -38,7 +38,7 @@ namespace TSMapEditor.Models.ArtConfig
                     throw new InvalidOperationException("Invalid custom Foundation specified in Art.ini section " + iniSection.SectionName);
 
                 CellsFromINI(iniSection);
-                Helpers.CreateEdges(Width, Height, FoundationCells);
+                Edges = Helpers.CreateEdges(Width, Height, FoundationCells);
             }
             else
             {
