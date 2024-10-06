@@ -1287,10 +1287,21 @@ namespace TSMapEditor.Rendering
 
             int zoomedHeight = (int)(height * Camera.ZoomLevel);
 
-            Color heightBarColor = Color.Black * 0.25f;
-            Renderer.FillRectangle(new Rectangle((int)cellLeftPoint.X, (int)cellLeftPoint.Y, 1, zoomedHeight), heightBarColor);
-            Renderer.FillRectangle(new Rectangle((int)cellBottomPoint.X, (int)cellBottomPoint.Y, 1, zoomedHeight), heightBarColor);
-            Renderer.FillRectangle(new Rectangle((int)cellRightPoint.X, (int)cellRightPoint.Y, 1, zoomedHeight), heightBarColor);
+            Color heightBarColor = new Color(16, 16, 16, (int)byte.MaxValue) * 0.75f;
+            const int baseHeightLineSpaceAtBeginningOfStep = 6;
+            int heightLineSpaceAtBeginningOfStep = Camera.ScaleIntWithZoom(baseHeightLineSpaceAtBeginningOfStep);
+            int heightBarStep = Camera.ScaleIntWithZoom(Constants.CellHeight - baseHeightLineSpaceAtBeginningOfStep);
+            const int heightBarWidth = 2;
+
+            int y = 0;
+            while (y < zoomedHeight - heightBarStep)
+            {
+                y += heightLineSpaceAtBeginningOfStep;
+                Renderer.FillRectangle(new Rectangle((int)cellLeftPoint.X - 1, (int)cellLeftPoint.Y + y, heightBarWidth, heightBarStep), heightBarColor);
+                Renderer.FillRectangle(new Rectangle((int)cellBottomPoint.X - 1, (int)cellBottomPoint.Y + y, heightBarWidth, heightBarStep), heightBarColor);
+                Renderer.FillRectangle(new Rectangle((int)cellRightPoint.X - 1, (int)cellRightPoint.Y + y, heightBarWidth, heightBarStep), heightBarColor);
+                y += heightBarStep;
+            }
         }
 
         private void DrawImpassableHighlight(MapTile cell)
