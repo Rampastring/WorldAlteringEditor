@@ -71,18 +71,18 @@ namespace TSMapEditor.Models
                 _position = value;
 
                 foreach (var anim in Anims)
-                    anim.Position = value;
+                    anim.Position = GetSouthernmostFoundationCell();
 
                 foreach (var powerUpAnim in PowerUpAnims)
                 {
                     if (powerUpAnim != null)
                     {
-                        powerUpAnim.Position = value;
+                        powerUpAnim.Position = GetSouthernmostFoundationCell();
                     }
                 }
 
                 if (TurretAnim != null)
-                    TurretAnim.Position = value;
+                    TurretAnim.Position = GetSouthernmostFoundationCell();
             }
         }
 
@@ -300,6 +300,15 @@ namespace TSMapEditor.Models
                 return frameCount / 2 + 1;
 
             return frameCount / 2;
+        }
+
+        public Point2D GetSouthernmostFoundationCell()
+        {
+            var foundation = ObjectType.ArtConfig.Foundation;
+            if (foundation.Width == 0 || foundation.Height == 0)
+                return Position;
+
+            return Position + new Point2D(foundation.Width - 1, foundation.Height - 1);
         }
 
         public override bool HasShadow() => !ObjectType.NoShadow;

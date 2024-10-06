@@ -13,14 +13,18 @@
 // Can render objects in either paletted or RGBA mode,
 // takes depth into account, and can also draw shadows.
 
+float WorldTextureHeight;
+bool ComplexDepth;
+bool IncreaseDepthUpwards;
 bool IsShadow;
 bool UsePalette;
 bool UseRemap;
 float Opacity;
 
-sampler2D SpriteTextureSampler : register(s0)
+Texture2D MainTexture;
+SamplerState MainSampler
 {
-    Texture = (SpriteTexture); // this is set by spritebatch
+    Texture = <MainTexture>;
     AddressU = clamp;
     AddressV = clamp;
     MipFilter = Point;
@@ -29,9 +33,9 @@ sampler2D SpriteTextureSampler : register(s0)
 };
 
 Texture2D PaletteTexture;
-sampler2D PaletteTextureSampler
+SamplerState PaletteSampler
 {
-    Texture = <PaletteTexture>; // passed in
+    Texture = <PaletteTexture>;
     AddressU = clamp;
     AddressV = clamp;
     MipFilter = Point;
@@ -58,26 +62,57 @@ PixelShaderOutput MainPS(VertexShaderOutput input)
 {
     PixelShaderOutput output = (PixelShaderOutput) 0;
 
+    uint width;
+    uint height;
+    MainTexture.GetDimensions(width, height);
+
     // We need to read from the main texture first,
     // otherwise the output will be black!
-    float4 tex = tex2D(SpriteTextureSampler, input.TextureCoordinates);
+    float4 tex = MainTexture.Sample(MainSampler, input.TextureCoordinates);
 
     // Discard transparent areas
     clip(tex.a == 0.0f ? -1 : 1);
 
-    output.depthTarget = input.Position.z;
-    output.depthEmbedded = input.Position.z;
+    float depthMultiplier = 0.75;
+
+    float distanceFromTop = input.TextureCoordinates.y * height;
+    float distanceFromBottom = height - distanceFromTop;
+
+    float totalDepth;
 
     if (IsShadow)
     {
         output.color = float4(0, 0, 0, 0.5);
+
+        totalDepth = input.Position.z;
+
+        output.depthTarget = totalDepth;
+        output.depthEmbedded = totalDepth;
     }
     else
     {
+        if (ComplexDepth)
+        {
+            float centralX = width * input.Color.a;
+            float dx = abs((width * input.TextureCoordinates.x) - centralX);
+            totalDepth = input.Position.z + (((distanceFromBottom - dx) / WorldTextureHeight) * depthMultiplier);
+        }
+        else if (IncreaseDepthUpwards)
+        {
+            totalDepth = input.Position.z + ((distanceFromBottom / WorldTextureHeight) * depthMultiplier);
+        }
+        else
+        {
+            totalDepth = input.Position.z;
+        }
+
+        output.depthTarget = totalDepth;
+        output.depthEmbedded = totalDepth;
+
         if (UsePalette)
         {
             // Get color from palette
-            float4 paletteColor = tex2D(PaletteTextureSampler, float2(tex.a, 0.5));
+            float4 paletteColor = PaletteTexture.Sample(PaletteSampler, float2(tex.a, 0.5));
 
             // We need to convert the grayscale into remap
             if (UseRemap)

@@ -51,7 +51,9 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 }
             }
 
-            float depth = GetDepth(gameObject, drawPoint.Y);
+            Point2D southernmostCellCoords = gameObject.Position + new Point2D(gameObject.SmudgeType.Width - 1, gameObject.SmudgeType.Height - 1);
+
+            float depth = CellMath.GetDepthForCell(southernmostCellCoords, Map) + GetDepthAddition(gameObject);
 
             Texture2D texture = frame.Texture;
 

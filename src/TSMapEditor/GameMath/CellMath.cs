@@ -224,5 +224,18 @@ namespace TSMapEditor.GameMath
                     return Point2D.Zero;
             }
         }
+
+        public static float GetDepthForCell(Point2D cellCoords, Map map)
+        {
+            int height = 0;
+            var tile = map.GetTile(cellCoords);
+            if (tile != null)
+            {
+                height = tile.Level;
+            }
+
+            return ((CellTopLeftPointFromCellCoords(tile.CoordsToPoint(), map).Y + Constants.CellSizeY) / (float)map.HeightInPixelsWithCellHeight) * Constants.DownwardsDepthRenderSpace +
+                (height * Constants.DepthRenderStep);
+        }
     }
 }

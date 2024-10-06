@@ -11,7 +11,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         {
         }
 
-        public float BuildingAnimDepth { get; set; }
+        public float BuildingAnimDepthAddition { get; set; }
 
         protected override Color ReplacementColor => Color.Orange;
 
@@ -28,6 +28,29 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         {
             // Never draw this for animations
             return false;
+        }
+
+        public override Point2D GetDrawPoint(Animation gameObject)
+        {
+            Point2D position = gameObject.Position;
+
+            if (gameObject.IsBuildingAnim && gameObject.ParentBuilding != null)
+            {
+                position = gameObject.ParentBuilding.Position;
+            }
+
+            Point2D drawPointWithoutCellHeight = CellMath.CellTopLeftPointFromCellCoords(position, RenderDependencies.Map);
+
+            var mapCell = RenderDependencies.Map.GetTile(position);
+            int heightOffset = RenderDependencies.EditorState.Is2DMode ? 0 : mapCell.Level * Constants.CellHeight;
+            Point2D drawPoint = new Point2D(drawPointWithoutCellHeight.X, drawPointWithoutCellHeight.Y - heightOffset);
+
+            return drawPoint;
+        }
+
+        protected override float GetDepthAddition(Animation gameObject)
+        {
+            return Constants.DepthEpsilon * ObjectDepthAdjustments.Animation;
         }
 
         protected override void Render(Animation gameObject, Point2D drawPoint, in CommonDrawParams drawParams)
@@ -50,49 +73,38 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             // this will need some investigating into
             switch (gameObject.AnimType.ArtConfig.Translucency)
             {
-                case 75:
-                    alpha = 0.1f;
+                case 0:
                     break;
-                case 50:
-                    alpha = 0.2f;
-                    break;
-                case 25:
-                    alpha = 0.5f;
-                    break;
+                default:
+                    return; // TODO Renderer does not currently support transparency for anims
+                // case 75:
+                //     alpha = 0.1f;
+                //     break;
+                // case 50:
+                //     alpha = 0.2f;
+                //     break;
+                // case 25:
+                //     alpha = 0.5f;
+                //     break;
             }
 
             bool affectedByLighting = RenderDependencies.EditorState.IsLighting;
             bool affectedByAmbient = !drawParams.ShapeImage.SubjectToLighting;
 
-            float depthOverride = -1;
+            float depthAddition = 0f;
             if (gameObject.IsBuildingAnim)
             {
-                depthOverride = BuildingAnimDepth;
+                depthAddition = BuildingAnimDepthAddition;
             }
 
-            float depthIncrease = -1f;
-            if (drawParams.ShapeImage != null)
-            {
-                var frame = drawParams.ShapeImage.GetFrame(0);
-                if (frame != null && frame.Texture != null)
-                {
-                    var textureDrawCoords = GetTextureDrawCoords(gameObject, frame, drawPoint);
-                    depthIncrease = (frame.Texture.Height / Constants.CellHeight) * Constants.DepthRenderStep;
-                    if (depthOverride == -1f)
-                    {
-                        depthOverride = GetDepth(gameObject, textureDrawCoords.Bottom);
-                    }
-                }
-            }
-
-            DrawShadowDirect(gameObject);
+            DrawShadow(gameObject);
             DrawShapeImage(gameObject, drawParams.ShapeImage,
                 frameIndex, Color.White * alpha,
                 gameObject.IsBuildingAnim, gameObject.GetRemapColor() * alpha,
-                affectedByLighting, affectedByAmbient, drawPoint, depthOverride + depthIncrease);
+                affectedByLighting, affectedByAmbient, drawPoint, depthAddition);
         }
 
-        public override void DrawShadowDirect(Animation gameObject)
+        public override void DrawShadow(Animation gameObject)
         {
             if (!Constants.DrawBuildingAnimationShadows && gameObject.IsBuildingAnim)
                 return;
@@ -115,9 +127,8 @@ namespace TSMapEditor.Rendering.ObjectRenderers
                 if (frame != null && frame.Texture != null)
                 {
                     Rectangle drawingBounds = GetTextureDrawCoords(gameObject, frame, drawPoint);
-                    float depth = GetDepth(gameObject, drawPoint.Y + drawingBounds.Height);
 
-                    RenderDependencies.ObjectSpriteRecord.AddGraphicsEntry(new ObjectSpriteEntry(null, frame.Texture, drawingBounds, Color.White, false, true, depth));
+                    RenderDependencies.ObjectSpriteRecord.AddGraphicsEntry(new ObjectSpriteEntry(null, frame.Texture, drawingBounds, Color.White, false, true, GetDepthAddition(gameObject)));
                 }
             }
         }

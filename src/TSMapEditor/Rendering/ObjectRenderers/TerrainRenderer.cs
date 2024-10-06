@@ -21,9 +21,9 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             };
         }
 
-        protected override float GetDepth(TerrainObject gameObject, int referenceDrawPointY)
+        protected override float GetDepthAddition(TerrainObject gameObject)
         {
-            return base.GetDepth(gameObject, referenceDrawPointY) + (Constants.DepthEpsilon * 3);
+            return Constants.DepthEpsilon * ObjectDepthAdjustments.Terrain;
         }
 
         protected override void Render(TerrainObject gameObject, Point2D drawPoint, in CommonDrawParams drawParams)
@@ -43,7 +43,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             //    }
             //}
 
-            DrawShadowDirect(gameObject);
+            DrawShadow(gameObject);
             DrawShapeImage(gameObject, drawParams.ShapeImage, 0,
                 Color.White, false, Color.White, affectedByLighting, !drawParams.ShapeImage.SubjectToLighting, drawPoint);
         }

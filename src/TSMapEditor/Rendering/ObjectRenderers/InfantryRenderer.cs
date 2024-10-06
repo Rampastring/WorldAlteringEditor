@@ -21,9 +21,9 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             };
         }
 
-        protected override float GetDepth(Infantry gameObject, int referenceDrawPointY)
+        protected override float GetDepthAddition(Infantry gameObject)
         {
-            return base.GetDepth(gameObject, referenceDrawPointY) + (Constants.DepthEpsilon * 2);
+            return Constants.DepthEpsilon * ObjectDepthAdjustments.Infantry;
         }
 
         public override Point2D GetDrawPoint(Infantry gameObject)
@@ -37,7 +37,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
         protected override void Render(Infantry gameObject, Point2D drawPoint, in CommonDrawParams drawParams)
         {
             if (!gameObject.ObjectType.NoShadow)
-                DrawShadowDirect(gameObject);
+                DrawShadow(gameObject);
 
             DrawShapeImage(gameObject, drawParams.ShapeImage, 
                 gameObject.GetFrameIndex(drawParams.ShapeImage.GetFrameCount()), 

@@ -21,16 +21,18 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             };
         }
 
-        protected override float GetDepth(Overlay gameObject, int referenceDrawPointY)
+        protected override float GetDepthAddition(Overlay gameObject)
         {
             if (gameObject.OverlayType.HighBridgeDirection == BridgeDirection.None)
             {
                 // Draw overlays above smudges
-                return base.GetDepth(gameObject, referenceDrawPointY) + Constants.DepthEpsilon;
+                return Constants.DepthEpsilon * ObjectDepthAdjustments.Overlay;
             }
 
+            const int bridgeHeight = 4;
+
             var tile = Map.GetTile(gameObject.Position);
-            return (((float)referenceDrawPointY / RenderDependencies.Map.HeightInPixelsWithCellHeight) * Constants.DownwardsDepthRenderSpace) + ((tile.Level + 4) * Constants.DepthRenderStep);
+            return (Constants.DepthEpsilon * ObjectDepthAdjustments.Overlay) + ((tile.Level + bridgeHeight) * Constants.CellHeight / (float)Map.HeightInPixelsWithCellHeight);
         }
 
         protected override void Render(Overlay gameObject, Point2D drawPoint, in CommonDrawParams drawParams)
@@ -54,7 +56,7 @@ namespace TSMapEditor.Rendering.ObjectRenderers
             bool affectedByLighting = drawParams.ShapeImage.SubjectToLighting;
             bool affectedByAmbient = !gameObject.OverlayType.Tiberium && !affectedByLighting;
 
-            DrawShadowDirect(gameObject);
+            DrawShadow(gameObject);
             DrawShapeImage(gameObject, drawParams.ShapeImage, gameObject.FrameIndex, Color.White,
                 true, remapColor, affectedByLighting, affectedByAmbient, drawPoint);
         }

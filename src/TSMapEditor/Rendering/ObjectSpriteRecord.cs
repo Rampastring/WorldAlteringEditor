@@ -143,7 +143,7 @@ namespace TSMapEditor.Rendering
 
         public void AddLineEntry(LineEntry lineEntry) => LineEntries.Add(lineEntry);
 
-        public void Clear()
+        public void Clear(bool noShadow)
         {
             foreach (var list in SpriteEntries.Values)
             {
@@ -152,7 +152,8 @@ namespace TSMapEditor.Rendering
 
             NonPalettedSpriteEntries.Clear();
 
-            ShadowEntries.Clear();
+            if (!noShadow)
+                ShadowEntries.Clear();
 
             TextEntries.Clear();
 
