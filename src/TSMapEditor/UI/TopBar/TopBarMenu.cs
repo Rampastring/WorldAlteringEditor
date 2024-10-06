@@ -4,7 +4,6 @@ using System.Linq;
 using Rampastring.XNAUI;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations;
-using TSMapEditor.Rendering;
 using TSMapEditor.Scripts;
 using TSMapEditor.Settings;
 using TSMapEditor.UI.Controls;
@@ -23,10 +22,10 @@ namespace TSMapEditor.UI.TopBar
 {
     class TopBarMenu : EditorPanel
     {
-        public TopBarMenu(WindowManager windowManager, MutationManager mutationManager, MapView mapView, Map map, WindowController windowController) : base(windowManager)
+        public TopBarMenu(WindowManager windowManager, MutationManager mutationManager, MapUI mapUI, Map map, WindowController windowController) : base(windowManager)
         {
             this.mutationManager = mutationManager;
-            this.mapView = mapView;
+            this.mapUI = mapUI;
             this.map = map;
             this.windowController = windowController;
         }
@@ -36,7 +35,7 @@ namespace TSMapEditor.UI.TopBar
         public event EventHandler MapWideOverlayLoadRequested;
 
         private readonly MutationManager mutationManager;
-        private readonly MapView mapView;
+        private readonly MapUI mapUI;
         private readonly Map map;
         private readonly WindowController windowController;
 
@@ -57,14 +56,14 @@ namespace TSMapEditor.UI.TopBar
         {
             Name = nameof(TopBarMenu);
 
-            deleteTunnelCursorAction = new DeleteTubeCursorAction(mapView);
-            placeTubeCursorAction = new PlaceTubeCursorAction(mapView);
-            toggleIceGrowthCursorAction = new ToggleIceGrowthCursorAction(mapView);
-            checkDistanceCursorAction = new CheckDistanceCursorAction(mapView);
-            checkDistancePathfindingCursorAction = new CheckDistancePathfindingCursorAction(mapView);
-            calculateTiberiumValueCursorAction = new CalculateTiberiumValueCursorAction(mapView);
-            manageBaseNodesCursorAction = new ManageBaseNodesCursorAction(mapView);
-            placeVeinholeMonsterCursorAction = new PlaceVeinholeMonsterCursorAction(mapView);
+            deleteTunnelCursorAction = new DeleteTubeCursorAction(mapUI);
+            placeTubeCursorAction = new PlaceTubeCursorAction(mapUI);
+            toggleIceGrowthCursorAction = new ToggleIceGrowthCursorAction(mapUI);
+            checkDistanceCursorAction = new CheckDistanceCursorAction(mapUI);
+            checkDistancePathfindingCursorAction = new CheckDistancePathfindingCursorAction(mapUI);
+            calculateTiberiumValueCursorAction = new CalculateTiberiumValueCursorAction(mapUI);
+            manageBaseNodesCursorAction = new ManageBaseNodesCursorAction(mapUI);
+            placeVeinholeMonsterCursorAction = new PlaceVeinholeMonsterCursorAction(mapUI);
 
             selectBridgeWindow = new SelectBridgeWindow(WindowManager, map);
             var selectBridgeDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectBridgeWindow);
@@ -112,8 +111,8 @@ namespace TSMapEditor.UI.TopBar
             editContextMenu.AddItem(" ", null, () => false, null, null);
             editContextMenu.AddItem("Lighting", () => windowController.LightingSettingsWindow.Open(), null, null, null);
             editContextMenu.AddItem(" ", null, () => false, null, null);
-            editContextMenu.AddItem("Place Tunnel", () => mapView.EditorState.CursorAction = placeTubeCursorAction, null, null, null, KeyboardCommands.Instance.PlaceTunnel.GetKeyDisplayString());
-            editContextMenu.AddItem("Delete Tunnel", () => mapView.EditorState.CursorAction = deleteTunnelCursorAction, null, null, null);
+            editContextMenu.AddItem("Place Tunnel", () => mapUI.EditorState.CursorAction = placeTubeCursorAction, null, null, null, KeyboardCommands.Instance.PlaceTunnel.GetKeyDisplayString());
+            editContextMenu.AddItem("Delete Tunnel", () => mapUI.EditorState.CursorAction = deleteTunnelCursorAction, null, null, null);
             editContextMenu.AddItem(" ", null, () => false, null, null);
 
             int bridgeCount = map.EditorConfig.Bridges.Count;
@@ -122,8 +121,8 @@ namespace TSMapEditor.UI.TopBar
                 var bridges = map.EditorConfig.Bridges;
                 if (bridgeCount == 1 && bridges[0].Kind == BridgeKind.Low)
                 {
-                    editContextMenu.AddItem("Draw Low Bridge", () => mapView.EditorState.CursorAction =
-                        new PlaceBridgeCursorAction(mapView, bridges[0]), null, null, null);
+                    editContextMenu.AddItem("Draw Low Bridge", () => mapUI.EditorState.CursorAction =
+                        new PlaceBridgeCursorAction(mapUI, bridges[0]), null, null, null);
                 }
                 else
                 {
@@ -138,8 +137,8 @@ namespace TSMapEditor.UI.TopBar
             {
                 if (cliffCount == 1)
                 {
-                    editContextMenu.AddItem("Draw Connected Tiles", () => mapView.EditorState.CursorAction =
-                        new DrawCliffCursorAction(mapView, theaterMatchingCliffs[0]), null, null, null);
+                    editContextMenu.AddItem("Draw Connected Tiles", () => mapUI.EditorState.CursorAction =
+                        new DrawCliffCursorAction(mapUI, theaterMatchingCliffs[0]), null, null, null);
                 }
                 else
                 {
@@ -147,15 +146,15 @@ namespace TSMapEditor.UI.TopBar
                 }
             }
 
-            editContextMenu.AddItem("Toggle IceGrowth", () => { mapView.EditorState.CursorAction = toggleIceGrowthCursorAction; toggleIceGrowthCursorAction.ToggleIceGrowth = true; mapView.EditorState.HighlightIceGrowth = true; }, null, null, null);
-            editContextMenu.AddItem("Clear IceGrowth", () => { mapView.EditorState.CursorAction = toggleIceGrowthCursorAction; toggleIceGrowthCursorAction.ToggleIceGrowth = false; mapView.EditorState.HighlightIceGrowth = true; }, null, null, null);
+            editContextMenu.AddItem("Toggle IceGrowth", () => { mapUI.EditorState.CursorAction = toggleIceGrowthCursorAction; toggleIceGrowthCursorAction.ToggleIceGrowth = true; mapUI.EditorState.HighlightIceGrowth = true; }, null, null, null);
+            editContextMenu.AddItem("Clear IceGrowth", () => { mapUI.EditorState.CursorAction = toggleIceGrowthCursorAction; toggleIceGrowthCursorAction.ToggleIceGrowth = false; mapUI.EditorState.HighlightIceGrowth = true; }, null, null, null);
             editContextMenu.AddItem(" ", null, () => false, null, null);
             editContextMenu.AddItem("Manage Base Nodes", ManageBaseNodes_Selected, null, null, null);
 
             if (map.Rules.OverlayTypes.Exists(ot => ot.ININame == Constants.VeinholeMonsterTypeName) && map.Rules.OverlayTypes.Exists(ot => ot.ININame == Constants.VeinholeDummyTypeName))
             {
                 editContextMenu.AddItem(" ", null, () => false, null, null);
-                editContextMenu.AddItem("Place Veinhole Monster", () => mapView.EditorState.CursorAction = placeVeinholeMonsterCursorAction, null, null, null, null);
+                editContextMenu.AddItem("Place Veinhole Monster", () => mapUI.EditorState.CursorAction = placeVeinholeMonsterCursorAction, null, null, null, null);
             }
 
             var editButton = new MenuButton(WindowManager, editContextMenu);
@@ -168,24 +167,24 @@ namespace TSMapEditor.UI.TopBar
             viewContextMenu.Name = nameof(viewContextMenu);
             viewContextMenu.AddItem("Configure Rendered Objects...", () => windowController.RenderedObjectsConfigurationWindow.Open());
             viewContextMenu.AddItem(" ", null, () => false, null, null);
-            viewContextMenu.AddItem("Toggle Impassable Cells", () => mapView.EditorState.HighlightImpassableCells = !mapView.EditorState.HighlightImpassableCells, null, null, null);
-            viewContextMenu.AddItem("Toggle IceGrowth Preview", () => mapView.EditorState.HighlightIceGrowth = !mapView.EditorState.HighlightIceGrowth, null, null, null);
+            viewContextMenu.AddItem("Toggle Impassable Cells", () => mapUI.EditorState.HighlightImpassableCells = !mapUI.EditorState.HighlightImpassableCells, null, null, null);
+            viewContextMenu.AddItem("Toggle IceGrowth Preview", () => mapUI.EditorState.HighlightIceGrowth = !mapUI.EditorState.HighlightIceGrowth, null, null, null);
             viewContextMenu.AddItem(" ", null, () => false, null, null);
             viewContextMenu.AddItem("View Minimap", () => windowController.MinimapWindow.Open());
             viewContextMenu.AddItem(" ", null, () => false, null, null);
             viewContextMenu.AddItem("Find Waypoint...", () => windowController.FindWaypointWindow.Open());
-            viewContextMenu.AddItem("Center of Map", () => mapView.Camera.CenterOnMapCenterCell());
+            viewContextMenu.AddItem("Center of Map", () => mapUI.Camera.CenterOnMapCenterCell());
             viewContextMenu.AddItem(" ", null, () => false, null, null);
-            viewContextMenu.AddItem("No Lighting", () => mapView.EditorState.LightingPreviewState = LightingPreviewMode.NoLighting);
-            viewContextMenu.AddItem("Normal Lighting", () => mapView.EditorState.LightingPreviewState = LightingPreviewMode.Normal);
+            viewContextMenu.AddItem("No Lighting", () => mapUI.EditorState.LightingPreviewState = LightingPreviewMode.NoLighting);
+            viewContextMenu.AddItem("Normal Lighting", () => mapUI.EditorState.LightingPreviewState = LightingPreviewMode.Normal);
             if (Constants.IsRA2YR)
             {
-                viewContextMenu.AddItem("Lightning Storm Lighting", () => mapView.EditorState.LightingPreviewState = LightingPreviewMode.IonStorm);
-                viewContextMenu.AddItem("Dominator Lighting", () => mapView.EditorState.LightingPreviewState = LightingPreviewMode.Dominator);
+                viewContextMenu.AddItem("Lightning Storm Lighting", () => mapUI.EditorState.LightingPreviewState = LightingPreviewMode.IonStorm);
+                viewContextMenu.AddItem("Dominator Lighting", () => mapUI.EditorState.LightingPreviewState = LightingPreviewMode.Dominator);
             }
             else
             {
-                viewContextMenu.AddItem("Ion Storm Lighting", () => mapView.EditorState.LightingPreviewState = LightingPreviewMode.IonStorm);
+                viewContextMenu.AddItem("Ion Storm Lighting", () => mapUI.EditorState.LightingPreviewState = LightingPreviewMode.IonStorm);
             }
             viewContextMenu.AddItem(" ", null, () => false, null, null);
             viewContextMenu.AddItem("Toggle Fullscreen Mode", () => KeyboardCommands.Instance.ToggleFullscreen.DoTrigger());
@@ -214,10 +213,10 @@ namespace TSMapEditor.UI.TopBar
             toolsContextMenu.AddItem(" ", null, () => false, () => !Constants.IsFlatWorld, null);
             toolsContextMenu.AddItem("Smoothen Ice", SmoothenIce, null, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
-            toolsContextMenu.AddItem("Check Distance...", () => mapView.EditorState.CursorAction = checkDistanceCursorAction, null, null, null);
-            toolsContextMenu.AddItem("Check Distance (Pathfinding)...", () => mapView.EditorState.CursorAction = checkDistancePathfindingCursorAction);
+            toolsContextMenu.AddItem("Check Distance...", () => mapUI.EditorState.CursorAction = checkDistanceCursorAction, null, null, null);
+            toolsContextMenu.AddItem("Check Distance (Pathfinding)...", () => mapUI.EditorState.CursorAction = checkDistancePathfindingCursorAction);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
-            toolsContextMenu.AddItem("Calculate Credits...", () => mapView.EditorState.CursorAction = calculateTiberiumValueCursorAction, null, null, null);
+            toolsContextMenu.AddItem("Calculate Credits...", () => mapUI.EditorState.CursorAction = calculateTiberiumValueCursorAction, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
             toolsContextMenu.AddItem("Load Map-Wide Overlay...", () => MapWideOverlayLoadRequested?.Invoke(this, EventArgs.Empty), null, null, null, null);
             toolsContextMenu.AddItem(" ", null, () => false, null, null);
@@ -257,7 +256,7 @@ namespace TSMapEditor.UI.TopBar
             KeyboardCommands.Instance.ConfigureCopiedObjects.Triggered += (s, e) => windowController.CopiedEntryTypesWindow.Open();
             KeyboardCommands.Instance.GenerateTerrain.Triggered += (s, e) => EnterTerrainGenerator();
             KeyboardCommands.Instance.ConfigureTerrainGenerator.Triggered += (s, e) => windowController.TerrainGeneratorConfigWindow.Open();
-            KeyboardCommands.Instance.PlaceTunnel.Triggered += (s, e) => mapView.EditorState.CursorAction = placeTubeCursorAction;
+            KeyboardCommands.Instance.PlaceTunnel.Triggered += (s, e) => mapUI.EditorState.CursorAction = placeTubeCursorAction;
             KeyboardCommands.Instance.PlaceConnectedTile.Triggered += (s, e) => windowController.SelectConnectedTileWindow.Open();
             KeyboardCommands.Instance.Save.Triggered += (s, e) => SaveMap();
 
@@ -319,11 +318,11 @@ namespace TSMapEditor.UI.TopBar
 
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    mapView.ExtractMegamapTo(saveFileDialog.FileName);
+                    mapUI.ExtractMegamapTo(saveFileDialog.FileName);
                 }
             }
 #else
-            mapView.ExtractMegamapTo(Path.Combine(Environment.CurrentDirectory, "megamap.png"));
+            mapUI.ExtractMegamapTo(Path.Combine(Environment.CurrentDirectory, "megamap.png"));
 #endif
         }
 
@@ -339,7 +338,7 @@ namespace TSMapEditor.UI.TopBar
                 "Note: The preview won't be actually written to the map before" + Environment.NewLine + 
                 "you save the map.", Windows.MessageBoxButtons.YesNo);
 
-            messageBox.YesClickedAction = _ => mapView.AddPreviewToMap();
+            messageBox.YesClickedAction = _ => mapUI.AddPreviewToMap();
         }
 
         private void OpenWithTextEditor()
@@ -403,13 +402,13 @@ namespace TSMapEditor.UI.TopBar
                 return;
             }
 
-            mapView.EditorState.CursorAction = manageBaseNodesCursorAction;
+            mapUI.EditorState.CursorAction = manageBaseNodesCursorAction;
         }
 
         private void SmoothenIce()
         {
             new SmoothenIceScript().Perform(map);
-            mapView.InvalidateMap();
+            mapUI.InvalidateMap();
         }
 
         private void EnterTerrainGenerator()
@@ -420,9 +419,9 @@ namespace TSMapEditor.UI.TopBar
                 return;
             }
 
-            var generateTerrainCursorAction = new GenerateTerrainCursorAction(mapView);
+            var generateTerrainCursorAction = new GenerateTerrainCursorAction(mapUI);
             generateTerrainCursorAction.TerrainGeneratorConfiguration = windowController.TerrainGeneratorConfigWindow.TerrainGeneratorConfig;
-            mapView.CursorAction = generateTerrainCursorAction;
+            mapUI.CursorAction = generateTerrainCursorAction;
         }
 
         private void SelectBridge()
@@ -433,12 +432,12 @@ namespace TSMapEditor.UI.TopBar
         private void SelectBridgeDarkeningPanel_Hidden(object sender, EventArgs e)
         {
             if (selectBridgeWindow.SelectedObject != null)
-                mapView.EditorState.CursorAction = new PlaceBridgeCursorAction(mapView, selectBridgeWindow.SelectedObject);
+                mapUI.EditorState.CursorAction = new PlaceBridgeCursorAction(mapUI, selectBridgeWindow.SelectedObject);
         }
 
         private void SelectConnectedTileWindow_ObjectSelected(object sender, EventArgs e)
         {
-            mapView.EditorState.CursorAction = new DrawCliffCursorAction(mapView, windowController.SelectConnectedTileWindow.SelectedObject);
+            mapUI.EditorState.CursorAction = new DrawCliffCursorAction(mapUI, windowController.SelectConnectedTileWindow.SelectedObject);
         }
 
         private void Open()

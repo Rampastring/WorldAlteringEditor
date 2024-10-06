@@ -2,7 +2,6 @@
 using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
-using TSMapEditor.Rendering;
 using TSMapEditor.UI;
 using HCT = TSMapEditor.Mutations.Classes.HeightMutations.HeightComparisonType;
 

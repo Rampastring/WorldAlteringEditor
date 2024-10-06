@@ -3,7 +3,6 @@ using Rampastring.XNAUI;
 using System;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
-using TSMapEditor.Rendering;
 
 namespace TSMapEditor.UI.CursorActions
 {

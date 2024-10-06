@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations.Classes.HeightMutations;
-using TSMapEditor.Rendering;
+using TSMapEditor.UI;
 
 namespace TSMapEditor.Mutations.Classes
 {
     public class PlaceVeinholeMonsterMutation : FSLowerGroundMutation
     {
-        public PlaceVeinholeMonsterMutation(IMutationTarget mutationTarget, Point2D cellCoords) : base(mutationTarget, cellCoords, mutationTarget.Map.EditorConfig.BrushSizes.Find(bs => bs.Width == 3 && bs.Height == 3))
+        public PlaceVeinholeMonsterMutation(IMutationTarget mutationTarget, Point2D cellCoords) : 
+            base(mutationTarget, cellCoords, mutationTarget.Map.EditorConfig.BrushSizes.Find(bs => bs.Width == 3 && bs.Height == 3))
         {
             this.cellCoords = cellCoords;
         }

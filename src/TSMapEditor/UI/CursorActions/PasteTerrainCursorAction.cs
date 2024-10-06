@@ -5,7 +5,6 @@ using Rampastring.XNAUI.Input;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
 using TSMapEditor.Mutations.Classes;
-using TSMapEditor.Rendering;
 using Rampastring.XNAUI;
 using Microsoft.Xna.Framework;
 using System.Linq;

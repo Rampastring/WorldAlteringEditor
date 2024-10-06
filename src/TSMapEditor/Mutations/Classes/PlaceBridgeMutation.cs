@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models;
-using TSMapEditor.Rendering;
+using TSMapEditor.UI;
 
 namespace TSMapEditor.Mutations.Classes
 {

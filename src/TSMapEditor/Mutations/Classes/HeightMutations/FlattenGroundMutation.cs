@@ -3,7 +3,6 @@ using System;
 using TSMapEditor.CCEngine;
 using TSMapEditor.GameMath;
 using TSMapEditor.Models.Enums;
-using TSMapEditor.Rendering;
 using TSMapEditor.UI;
 using System.Linq;
 using HCT = TSMapEditor.Mutations.Classes.HeightMutations.HeightComparisonType;
