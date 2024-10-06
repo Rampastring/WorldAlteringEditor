@@ -1140,6 +1140,14 @@ namespace TSMapEditor.Rendering
 
             Point2D drawPoint = CellMath.CellTopLeftPointFromCellCoords_3D(graphicalBaseNode.BaseNode.Position, Map);
 
+            // Base nodes can be large, let's increase the level of padding for them.
+            int padding = Constants.RenderPixelPadding * 2;
+            if (Camera.TopLeftPoint.X > drawPoint.X + padding || Camera.TopLeftPoint.Y > drawPoint.Y + padding ||
+                GetCameraRightXCoord() < drawPoint.X - padding || GetCameraBottomYCoord() < drawPoint.Y - padding)
+            {
+                return;
+            }
+
             ShapeImage bibGraphics = TheaterGraphics.BuildingBibTextures[graphicalBaseNode.BuildingType.Index];
             ShapeImage graphics = TheaterGraphics.BuildingTextures[graphicalBaseNode.BuildingType.Index];
             Color replacementColor = Color.DarkBlue;
