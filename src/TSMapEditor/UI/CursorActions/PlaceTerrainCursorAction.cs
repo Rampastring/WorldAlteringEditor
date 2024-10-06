@@ -186,15 +186,15 @@ namespace TSMapEditor.UI.CursorActions
                 int totalWidth = (Tile.Width * brush.Width) + 1;
                 int totalHeight = (Tile.Height * brush.Height) + 1;
 
-                for (int y = -1; y < totalHeight * brush.Height; y++)
+                for (int y = -1; y < totalHeight; y++)
                 {
-                    for (int x = -1; x < totalWidth * brush.Width; x++)
+                    for (int x = -1; x < totalWidth; x++)
                     {
                         int cx = adjustedCellCoords.X + x;
                         int cy = adjustedCellCoords.Y + y;
 
                         var cell = Map.GetTile(cx, cy);
-                        if (cell == null || previewTiles.Contains(cell))
+                        if (cell == null)
                             continue;
 
                         int autoLatTileIndex = Mutation.GetAutoLATTileIndexForCell(Map, cell.CoordsToPoint(), baseTileSet, altBaseTileSet, true);
