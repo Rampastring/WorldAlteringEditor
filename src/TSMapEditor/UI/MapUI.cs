@@ -357,19 +357,6 @@ namespace TSMapEditor.UI
             lastTileUnderCursor = null;
         }
 
-        public Rectangle GetMapLocalViewRectangle()
-        {
-            const int InitialHeight = 3; // TS engine assumes that the first cell is at a height of 2
-            const double HeightAddition = 4.5; // TS engine adds 4.5 to specified map height <3
-
-            int x = (int)(Map.LocalSize.X * Constants.CellSizeX);
-            int y = (int)(Map.LocalSize.Y - InitialHeight) * Constants.CellSizeY + Constants.MapYBaseline;
-            int width = (int)(Map.LocalSize.Width * Constants.CellSizeX);
-            int height = (int)(Map.LocalSize.Height + HeightAddition) * Constants.CellSizeY;
-
-            return new Rectangle(x, y, width, height);
-        }
-
         public override void OnMouseScrolled()
         {
             if (Cursor.ScrollWheelValue > 0)
