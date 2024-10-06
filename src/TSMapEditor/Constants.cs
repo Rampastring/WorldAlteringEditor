@@ -5,7 +5,7 @@ namespace TSMapEditor
 {
     public static class Constants
     {
-        public const string ReleaseVersion = "1.2.5";
+        public const string ReleaseVersion = "1.3.0";
 
         public static int CellSizeX = 48;
         public static int CellSizeY = 24;
@@ -103,7 +103,7 @@ namespace TSMapEditor
         public const float DownwardsDepthRenderSpace = 0.75f;
 
         // How much of the depth scale (0.0 to 1.0) is reserved for depth increasing as we go up the map height levels.
-        public static readonly float DepthRenderStep = DepthEpsilon;
+        public static readonly float DepthRenderStep = DepthEpsilon * 2;
 
         public const string ClipboardMapDataFormatValue = "ScenarioEditorCopiedMapData";
         public const string UserDataFolder = "UserData";
