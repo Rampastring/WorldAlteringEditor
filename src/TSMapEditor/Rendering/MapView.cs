@@ -1234,6 +1234,15 @@ namespace TSMapEditor.Rendering
             if (cell != null && !EditorState.Is2DMode)
                 drawPoint -= new Point2D(0, cell.Level * Constants.CellHeight);
 
+            if (Camera.TopLeftPoint.X > drawPoint.X + EditorGraphics.TileBorderTexture.Width ||
+                Camera.TopLeftPoint.Y > drawPoint.Y + EditorGraphics.TileBorderTexture.Height ||
+                GetCameraRightXCoord() < drawPoint.X ||
+                GetCameraBottomYCoord() < drawPoint.Y)
+            {
+                // This waypoint is outside the camera
+                return;
+            }
+
             Color waypointColor = string.IsNullOrEmpty(waypoint.EditorColor) ? Color.Fuchsia : waypoint.XNAColor;
 
             DrawTexture(EditorGraphics.GenericTileTexture, drawPoint.ToXNAPoint(), new Color(0, 0, 0, 128));
