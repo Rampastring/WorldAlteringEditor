@@ -1864,7 +1864,7 @@ namespace TSMapEditor.Models
                     {
                         if (triggerActionType.Parameters[i].TriggerParamType == TriggerParamType.TeamType)
                         {
-                            if (!TeamTypes.Exists(tt => tt.ININame == action.Parameters[i]))
+                            if (!TeamTypes.Exists(tt => tt.ININame == action.Parameters[i]) && !Rules.TeamTypes.Exists(tt => tt.ININame == action.Parameters[i]))
                             {
                                 issueList.Add($"Trigger '{trigger.Name}' has a nonexistent TeamType specified as a parameter for one or more of its actions.");
                                 break;
@@ -1872,6 +1872,39 @@ namespace TSMapEditor.Models
                         }
                     }
                 }
+            }
+
+            var houseTypes = GetHouseTypes();
+
+            // Check for invalid HouseType parameter values in triggers
+            foreach (var trigger in Triggers)
+            {
+                foreach (var action in trigger.Actions)
+                {
+                    if (!EditorConfig.TriggerActionTypes.TryGetValue(action.ActionIndex, out var triggerActionType))
+                        continue;
+
+                    for (int i = 0; i < triggerActionType.Parameters.Length; i++)
+                    {
+                        if (triggerActionType.Parameters[i].TriggerParamType == TriggerParamType.HouseType)
+                        {
+                            int paramAsInt = Conversions.IntFromString(action.Parameters[i], -1);
+
+                            if (!houseTypes.Exists(ht => ht.Index == paramAsInt))
+                            {
+                                issueList.Add($"Trigger '{trigger.Name}' has a nonexistent HouseType specified as a parameter for one or more of its actions.");
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Check for triggers having invalid owners
+            foreach (var trigger in Triggers)
+            {
+                if (!houseTypes.Exists(ht => trigger.HouseType == ht.ININame))
+                    issueList.Add($"Trigger '{trigger.Name}' has a nonexistent HouseType '{trigger.HouseType}' specified as its owner.");
             }
 
             // Check for triggers having too many actions. This can cause a crash because the game's buffer for parsing trigger actions
