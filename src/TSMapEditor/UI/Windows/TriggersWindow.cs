@@ -106,7 +106,6 @@ namespace TSMapEditor.UI.Windows
 
         private XNAContextMenu actionContextMenu;
         private XNAContextMenu eventContextMenu;
-        private XNAContextMenu triggerListContextMenu;
 
         private Trigger editedTrigger;
 
@@ -299,7 +298,7 @@ namespace TSMapEditor.UI.Windows
             var particleSystemTypeDarkeningPanel = DarkeningPanel.InitializeAndAddToParentControlWithChild(WindowManager, Parent, selectParticleSystemTypeWindow);
             particleSystemTypeDarkeningPanel.Hidden += ParticleSystemTypeDarkeningPanel_Hidden;
 
-            eventContextMenu = new XNAContextMenu(WindowManager);
+            eventContextMenu = new EditorContextMenu(WindowManager);
             eventContextMenu.Name = nameof(eventContextMenu);
             eventContextMenu.Width = lbEvents.Width;
             eventContextMenu.AddItem("Move Up", EventContextMenu_MoveUp, () => editedTrigger != null && lbEvents.SelectedItem != null && lbEvents.SelectedIndex > 0);
@@ -311,7 +310,7 @@ namespace TSMapEditor.UI.Windows
             lbEvents.AllowRightClickUnselect = false;
             lbEvents.RightClick += (s, e) => { if (editedTrigger != null) { lbEvents.OnMouseLeftDown(); eventContextMenu.Open(GetCursorPoint()); } };
 
-            actionContextMenu = new XNAContextMenu(WindowManager);
+            actionContextMenu = new EditorContextMenu(WindowManager);
             actionContextMenu.Name = nameof(actionContextMenu);
             actionContextMenu.Width = lbActions.Width;
             actionContextMenu.AddItem("Move Up", ActionContextMenu_MoveUp, () => editedTrigger != null && lbActions.SelectedItem != null && lbActions.SelectedIndex > 0);
@@ -323,17 +322,18 @@ namespace TSMapEditor.UI.Windows
             lbActions.AllowRightClickUnselect = false;
             lbActions.RightClick += (s, e) => { if (editedTrigger != null) { lbActions.OnMouseLeftDown(); actionContextMenu.Open(GetCursorPoint()); } };
 
-            triggerListContextMenu = new XNAContextMenu(WindowManager);
-            triggerListContextMenu.Name = nameof(triggerListContextMenu);
-            triggerListContextMenu.Width = lbTriggers.Width;
-            triggerListContextMenu.AddItem("Sort by ID", () => TriggerSortMode = TriggerSortMode.ID);
-            triggerListContextMenu.AddItem("Sort by Name", () => TriggerSortMode = TriggerSortMode.Name);
-            triggerListContextMenu.AddItem("Sort by Color", () => TriggerSortMode = TriggerSortMode.Color);
-            triggerListContextMenu.AddItem("Sort by Color, then by Name", () => TriggerSortMode = TriggerSortMode.ColorThenName);
-            AddChild(triggerListContextMenu);
+            var sortContextMenu = new EditorContextMenu(WindowManager);
+            sortContextMenu.Name = nameof(sortContextMenu);
+            sortContextMenu.Width = lbTriggers.Width;
+            sortContextMenu.AddItem("Sort by ID", () => TriggerSortMode = TriggerSortMode.ID);
+            sortContextMenu.AddItem("Sort by Name", () => TriggerSortMode = TriggerSortMode.Name);
+            sortContextMenu.AddItem("Sort by Color", () => TriggerSortMode = TriggerSortMode.Color);
+            sortContextMenu.AddItem("Sort by Color, then by Name", () => TriggerSortMode = TriggerSortMode.ColorThenName);
+            AddChild(sortContextMenu);
 
-            lbTriggers.AllowRightClickUnselect = false;
-            lbTriggers.RightClick += (s, e) => triggerListContextMenu.Open(GetCursorPoint());
+            FindChild<EditorButton>("btnSortOptions").LeftClick += (s, e) => sortContextMenu.Open(GetCursorPoint());
+
+            lbTriggers.AllowRightClickUnselect = true;
             lbTriggers.SelectedIndexChanged += LbTriggers_SelectedIndexChanged;
         }
 
@@ -1602,6 +1602,7 @@ namespace TSMapEditor.UI.Windows
                 ddHouseType.SelectedIndex = -1;
                 ddType.SelectedIndex = -1;
                 selAttachedTrigger.Text = string.Empty;
+                chkDisabled.Checked = false;
 
                 lbEvents.Clear();
                 selEventType.Text = string.Empty;

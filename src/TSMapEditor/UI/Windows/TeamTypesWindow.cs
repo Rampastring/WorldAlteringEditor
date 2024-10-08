@@ -3,7 +3,9 @@ using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using TSMapEditor.Models;
+using TSMapEditor.Models.Enums;
 using TSMapEditor.UI.Controls;
 
 namespace TSMapEditor.UI.Windows
@@ -175,17 +177,30 @@ namespace TSMapEditor.UI.Windows
 
             selTag.LeftClick += (s, e) => { if (editedTeamType != null) selectTagWindow.Open(editedTeamType.Tag); };
 
-            var teamTypesContextMenu = new XNAContextMenu(WindowManager);
-            teamTypesContextMenu.Name = nameof(teamTypesContextMenu);
-            teamTypesContextMenu.Width = lbTeamTypes.Width;
-            teamTypesContextMenu.AddItem("Sort by ID", () => TeamTypeSortMode = TeamTypeSortMode.ID);
-            teamTypesContextMenu.AddItem("Sort by Name", () => TeamTypeSortMode = TeamTypeSortMode.Name);
-            teamTypesContextMenu.AddItem("Sort by Color", () => TeamTypeSortMode = TeamTypeSortMode.Color);
-            teamTypesContextMenu.AddItem("Sort by Color, then by Name", () => TeamTypeSortMode = TeamTypeSortMode.ColorThenName);            
-            AddChild(teamTypesContextMenu);
+            var sortContextMenu = new EditorContextMenu(WindowManager);
+            sortContextMenu.Name = nameof(sortContextMenu);
+            sortContextMenu.Width = lbTeamTypes.Width;
+            sortContextMenu.AddItem("Sort by ID", () => TeamTypeSortMode = TeamTypeSortMode.ID);
+            sortContextMenu.AddItem("Sort by Name", () => TeamTypeSortMode = TeamTypeSortMode.Name);
+            sortContextMenu.AddItem("Sort by Color", () => TeamTypeSortMode = TeamTypeSortMode.Color);
+            sortContextMenu.AddItem("Sort by Color, then by Name", () => TeamTypeSortMode = TeamTypeSortMode.ColorThenName);
+            AddChild(sortContextMenu);
+
+            FindChild<EditorButton>("btnSortOptions").LeftClick += (s, e) => sortContextMenu.Open(GetCursorPoint());
+
+            var teamTypeContextMenu = new EditorContextMenu(WindowManager);
+            teamTypeContextMenu.Name = nameof(teamTypeContextMenu);
+            teamTypeContextMenu.Width = lbTeamTypes.Width;
+            teamTypeContextMenu.AddItem("View References", ShowTeamTypeReferences);
+            AddChild(teamTypeContextMenu);
 
             lbTeamTypes.AllowRightClickUnselect = false;
-            lbTeamTypes.RightClick += (s, e) => teamTypesContextMenu.Open(GetCursorPoint());
+            lbTeamTypes.RightClick += (s, e) =>
+            {
+                lbTeamTypes.SelectedIndex = lbTeamTypes.HoveredIndex;
+                if (editedTeamType != null)
+                    teamTypeContextMenu.Open(GetCursorPoint());
+            };
         }
 
         private void OpenTaskForce()
@@ -224,6 +239,92 @@ namespace TSMapEditor.UI.Windows
 
             action(window);
             EditTeamType(editedTeamType);
+        }
+
+        private void ShowTeamTypeReferences()
+        {
+            if (editedTeamType == null)
+                return;
+
+            var stringBuilder = new StringBuilder();
+
+            foreach (var trigger in map.Triggers)
+            {
+                int refActionCount = 0;
+
+                foreach (var action in trigger.Actions)
+                {
+                    if (!map.EditorConfig.TriggerActionTypes.TryGetValue(action.ActionIndex, out var triggerActionType))
+                        continue;
+
+                    for (int i = 0; i < triggerActionType.Parameters.Length; i++)
+                    {
+                        if (triggerActionType.Parameters[i].TriggerParamType == TriggerParamType.TeamType
+                            && action.Parameters[i] == editedTeamType.ININame)
+                        {
+                            refActionCount++;
+                        }
+                    }
+                }
+
+                int refConditionCount = 0;
+
+                foreach (var condition in trigger.Conditions)
+                {
+                    if (!map.EditorConfig.TriggerEventTypes.TryGetValue(condition.ConditionIndex, out var triggerEventType))
+                        continue;
+
+                    for (int i = 0; i < triggerEventType.Parameters.Length; i++)
+                    {
+                        if (triggerEventType.Parameters[i].TriggerParamType == TriggerParamType.TeamType
+                            && condition.Parameters[i] == editedTeamType.ININame)
+                        {
+                            refConditionCount++;
+                        }
+                    }
+                }
+
+                if (refActionCount > 0)
+                {
+                    stringBuilder.AppendLine($"- Trigger \"{trigger.Name}\" ({trigger.ID}) in {refActionCount} action parameter(s)");
+                }
+
+                if (refConditionCount > 0)
+                {
+                    stringBuilder.AppendLine($"- Trigger \"{trigger.Name}\" ({trigger.ID}) in {refConditionCount} event parameter(s)");
+                }
+            }
+
+            foreach (var aiTrigger in map.AITriggerTypes)
+            {
+                if (aiTrigger.PrimaryTeam == editedTeamType)
+                {
+                    stringBuilder.AppendLine($"- Local AITrigger \"{aiTrigger.Name}\" ({aiTrigger.ININame}) as primary team");
+                }
+
+                if (aiTrigger.SecondaryTeam == editedTeamType)
+                {
+                    stringBuilder.AppendLine($"- Local AITrigger \"{aiTrigger.Name}\" ({aiTrigger.ININame}) as secondary team");
+                }
+            }
+
+            var globalTeamType = map.Rules.TeamTypes.Find(tt => tt.ININame == editedTeamType.ININame);
+            if (globalTeamType != null)
+            {
+                stringBuilder.AppendLine($"- This TeamType overrides a global TeamType {globalTeamType.ININame}. As such, it maybe be used by global AI Triggers.");
+            }
+
+            if (stringBuilder.Length == 0)
+            {
+                EditorMessageBox.Show(WindowManager, "No references found",
+                    $"The selected TeamType \"{editedTeamType.Name}\" ({editedTeamType.ININame}) is not used by any Triggers or AITriggers.", MessageBoxButtons.OK);
+            }
+            else
+            {
+                EditorMessageBox.Show(WindowManager, "TeamType References",
+                    $"The selected TeamType \"{editedTeamType.Name}\" ({editedTeamType.ININame}) is used by the following scripting elements:" + Environment.NewLine + Environment.NewLine +
+                    stringBuilder.ToString(), MessageBoxButtons.OK);
+            }
         }
 
         private void BtnNewTeamType_LeftClick(object sender, EventArgs e)
