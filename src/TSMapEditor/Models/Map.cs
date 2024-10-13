@@ -1454,18 +1454,20 @@ namespace TSMapEditor.Models
             var teamtypes = TeamTypes.FindAll(filter);
             var tags = Tags.FindAll(filter);
             var triggers = Triggers.FindAll(filter);
+            var aiTriggers = AITriggerTypes.FindAll(filter);
 
             scriptElements.AddRange(tfs);
             scriptElements.AddRange(scripts);
             scriptElements.AddRange(teamtypes);
             scriptElements.AddRange(tags);
             scriptElements.AddRange(triggers);
+            scriptElements.AddRange(aiTriggers);
             scriptElements = scriptElements.OrderBy(se => se.GetInternalID()).ToList();
 
             tfs.ForEach(tf => LoadedINI.RemoveSection(tf.ININame));
             scripts.ForEach(s => LoadedINI.RemoveSection(s.ININame));
             teamtypes.ForEach(tt => LoadedINI.RemoveSection(tt.ININame));
-            // Our map writing system takes care of the tags and triggers, no need to manually remove their INI entries
+            // Our map writing system takes care of tags, triggers, and AITriggers, no need to manually remove their INI entries
             // (they don't have sections)
 
             // Build dictionary of old ID to scripting element for "ID swizzling" to correct triggers' references to other scripting elements
