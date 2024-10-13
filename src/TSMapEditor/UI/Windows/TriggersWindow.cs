@@ -1358,11 +1358,8 @@ namespace TSMapEditor.UI.Windows
         public void SelectTrigger(Trigger trigger)
         {
             lbTriggers.SelectedIndex = lbTriggers.Items.FindIndex(item => item.Tag == trigger);
-
-            if (lbTriggers.LastIndex < lbTriggers.SelectedIndex)
-                lbTriggers.ScrollToBottom(); // TODO we don't actually have a good way to scroll the listbox into a specific place right now
-            else if (lbTriggers.TopIndex > lbTriggers.SelectedIndex)
-                lbTriggers.TopIndex = lbTriggers.SelectedIndex;
+            if (lbTriggers.SelectedItem != null)
+                lbTriggers.ScrollToSelectedElement();
         }
 
         private void EventWindowDarkeningPanel_Hidden(object sender, EventArgs e)
