@@ -1,15 +1,25 @@
-﻿using Rampastring.XNAUI;
+﻿using Microsoft.Xna.Framework;
+using Rampastring.XNAUI;
 using Rampastring.XNAUI.XNAControls;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using TSMapEditor.Misc;
 using TSMapEditor.Models;
 using TSMapEditor.UI.Controls;
 
 namespace TSMapEditor.UI.Windows
 {
+    public enum TaskForceSortMode
+    {
+        ID,
+        Name,
+        Color,
+        ColorThenName,
+    }
+
     /// <summary>
     /// A window that allows the user to edit the map's TaskForces.
     /// </summary>
@@ -22,6 +32,7 @@ namespace TSMapEditor.UI.Windows
 
         private readonly Map map;
 
+        private EditorSuggestionTextBox tbFilter;
         private EditorListBox lbTaskForces;
         private EditorTextBox tbTaskForceName;
         private EditorNumberTextBox tbGroup;
@@ -35,6 +46,19 @@ namespace TSMapEditor.UI.Windows
 
         private TaskForce editedTaskForce;
 
+        private TaskForceSortMode _taskForceSortMode;
+        private TaskForceSortMode TaskForceSortMode
+        {
+            get => _taskForceSortMode;
+            set
+            {
+                if (value != _taskForceSortMode)
+                {
+                    _taskForceSortMode = value;
+                    ListTaskForces();
+                }
+            }
+        }
 
         public override void Initialize()
         {
@@ -42,6 +66,7 @@ namespace TSMapEditor.UI.Windows
 
             base.Initialize();
 
+            tbFilter = FindChild<EditorSuggestionTextBox>(nameof(tbFilter));
             lbTaskForces = FindChild<EditorListBox>(nameof(lbTaskForces));
             tbTaskForceName = FindChild<EditorTextBox>(nameof(tbTaskForceName));
             tbGroup = FindChild<EditorNumberTextBox>(nameof(tbGroup));
@@ -70,6 +95,8 @@ namespace TSMapEditor.UI.Windows
 
             ListUnits();
 
+            tbFilter.TextChanged += (s, e) => ListTaskForces();
+
             lbTaskForces.SelectedIndexChanged += LbTaskForces_SelectedIndexChanged;
             lbUnitEntries.SelectedIndexChanged += LbUnitEntries_SelectedIndexChanged;
 
@@ -81,6 +108,31 @@ namespace TSMapEditor.UI.Windows
 
             tbTaskForceName.TextChanged += TbTaskForceName_TextChanged;
             tbGroup.TextChanged += TbGroup_TextChanged;
+
+            var sortContextMenu = new EditorContextMenu(WindowManager);
+            sortContextMenu.Name = nameof(sortContextMenu);
+            sortContextMenu.Width = lbTaskForces.Width;
+            sortContextMenu.AddItem("Sort by ID", () => TaskForceSortMode = TaskForceSortMode.ID);
+            sortContextMenu.AddItem("Sort by Name", () => TaskForceSortMode = TaskForceSortMode.Name);
+            sortContextMenu.AddItem("Sort by Color", () => TaskForceSortMode = TaskForceSortMode.Color);
+            sortContextMenu.AddItem("Sort by Color, then by Name", () => TaskForceSortMode = TaskForceSortMode.ColorThenName);
+            AddChild(sortContextMenu);
+
+            FindChild<EditorButton>("btnSortOptions").LeftClick += (s, e) => sortContextMenu.Open(GetCursorPoint());
+
+            var taskForceContextMenu = new EditorContextMenu(WindowManager);
+            taskForceContextMenu.Name = nameof(taskForceContextMenu);
+            taskForceContextMenu.Width = lbTaskForces.Width;
+            taskForceContextMenu.AddItem("View References", ShowTaskForceReferences);
+            AddChild(taskForceContextMenu);
+
+            lbTaskForces.AllowRightClickUnselect = false;
+            lbTaskForces.RightClick += (s, e) =>
+            {
+                lbTaskForces.SelectedIndex = lbTaskForces.HoveredIndex;
+                if (editedTaskForce != null)
+                    taskForceContextMenu.Open(GetCursorPoint());
+            };
 
             unitListContextMenu = new XNAContextMenu(WindowManager);
             unitListContextMenu.Name = nameof(unitListContextMenu);
@@ -198,9 +250,10 @@ namespace TSMapEditor.UI.Windows
             if (editedTaskForce == null)
                 return;
 
-            map.TaskForces.Add(editedTaskForce.Clone(map.GetNewUniqueInternalId()));
-            AddTaskForceToList(map.TaskForces[map.TaskForces.Count - 1]);
-            SelectLastTaskForce();
+            var newTaskForce = editedTaskForce.Clone(map.GetNewUniqueInternalId());
+            map.TaskForces.Add(newTaskForce);
+            ListTaskForces();
+            SelectTaskForce(newTaskForce);
         }
 
         private void BtnDeleteTaskForce_LeftClick(object sender, System.EventArgs e)
@@ -238,15 +291,35 @@ namespace TSMapEditor.UI.Windows
 
         private void BtnNewTaskForce_LeftClick(object sender, System.EventArgs e)
         {
-            map.TaskForces.Add(new TaskForce(map.GetNewUniqueInternalId()) { Name = "New TaskForce" });
-            AddTaskForceToList(map.TaskForces[map.TaskForces.Count - 1]);
-            SelectLastTaskForce();
+            var taskForce = new TaskForce(map.GetNewUniqueInternalId()) { Name = "New TaskForce" };
+            map.TaskForces.Add(taskForce);
+            ListTaskForces();
+            SelectTaskForce(taskForce);
         }
 
-        private void SelectLastTaskForce()
+        private void ShowTaskForceReferences()
         {
-            lbTaskForces.SelectedIndex = lbTaskForces.Items.Count - 1;
-            lbTaskForces.ScrollToBottom();
+            if (editedTaskForce == null)
+                return;
+
+            var referringLocalTeamTypes = map.TeamTypes.FindAll(tt => tt.TaskForce == editedTaskForce);
+            var referringGlobalTeamTypes = map.Rules.TeamTypes.FindAll(tt => tt.Script.ININame == editedTaskForce.ININame);
+
+            if (referringLocalTeamTypes.Count == 0 && referringGlobalTeamTypes.Count == 0)
+            {
+                EditorMessageBox.Show(WindowManager, "No references found",
+                    $"The selected TaskForce \"{editedTaskForce.Name}\" ({editedTaskForce.ININame}) is not used by any TeamTypes, either local (map) or global (AI.ini).", MessageBoxButtons.OK);
+            }
+            else
+            {
+                var stringBuilder = new StringBuilder();
+                referringLocalTeamTypes.ForEach(tt => stringBuilder.AppendLine($"- Local TeamType \"{tt.Name}\" ({tt.ININame})"));
+                referringGlobalTeamTypes.ForEach(tt => stringBuilder.AppendLine($"- Global TeamType \"{tt.Name}\" ({tt.ININame})"));
+
+                EditorMessageBox.Show(WindowManager, "TaskForce References",
+                    $"The selected TaskForce \"{editedTaskForce.Name}\" ({editedTaskForce.ININame}) is used by the following TeamTypes:" + Environment.NewLine + Environment.NewLine +
+                    stringBuilder.ToString(), MessageBoxButtons.OK);
+            }
         }
 
         private void TbGroup_TextChanged(object sender, System.EventArgs e)
@@ -393,8 +466,11 @@ namespace TSMapEditor.UI.Windows
         {
             int index = lbTaskForces.Items.FindIndex(lbi => lbi.Tag == taskForce);
 
-            if (index > -1)
-                lbTaskForces.SelectedIndex = index;
+            if (index < 0)
+                return;
+
+            lbTaskForces.SelectedIndex = index;
+            lbTaskForces.ScrollToSelectedElement();
         }
 
         private void ListTaskForces()
@@ -402,17 +478,55 @@ namespace TSMapEditor.UI.Windows
             lbTaskForces.SelectedIndexChanged -= LbTaskForces_SelectedIndexChanged;
             lbTaskForces.Clear();
 
-            foreach (TaskForce taskForce in map.TaskForces)
+            bool shouldViewTop = false; // when filtering the scroll bar should update so we use a flag here
+            IEnumerable<TaskForce> sortedTaskForces = map.TaskForces;
+            if (tbFilter.Text != string.Empty && tbFilter.Text != tbFilter.Suggestion)
             {
-                AddTaskForceToList(taskForce);
+                sortedTaskForces = sortedTaskForces.Where(script => script.Name.Contains(tbFilter.Text, StringComparison.CurrentCultureIgnoreCase));
+                shouldViewTop = true;
             }
 
+            switch (TaskForceSortMode)
+            {
+                case TaskForceSortMode.Color:
+                    sortedTaskForces = sortedTaskForces.OrderBy(taskForce => GetTaskForceColor(taskForce).ToString()).ThenBy(taskForce => taskForce.ININame);
+                    break;
+                case TaskForceSortMode.Name:
+                    sortedTaskForces = sortedTaskForces.OrderBy(taskForce => taskForce.Name).ThenBy(taskForce => taskForce.ININame);
+                    break;
+                case TaskForceSortMode.ColorThenName:
+                    sortedTaskForces = sortedTaskForces.OrderBy(taskForce => GetTaskForceColor(taskForce).ToString()).ThenBy(taskForce => taskForce.Name);
+                    break;
+                case TaskForceSortMode.ID:
+                default:
+                    sortedTaskForces = sortedTaskForces.OrderBy(taskForce => taskForce.ININame);
+                    break;
+            }
+
+            foreach (var taskForce in sortedTaskForces)
+            {
+                lbTaskForces.AddItem(new XNAListBoxItem()
+                {
+                    Text = taskForce.Name,
+                    Tag = taskForce,
+                    TextColor = GetTaskForceColor(taskForce)
+                });
+            }
+
+            if (shouldViewTop)
+                lbTaskForces.TopIndex = 0;
+
             lbTaskForces.SelectedIndexChanged += LbTaskForces_SelectedIndexChanged;
+            LbTaskForces_SelectedIndexChanged(this, EventArgs.Empty);
         }
 
-        private void AddTaskForceToList(TaskForce taskForce)
+        private Color GetTaskForceColor(TaskForce taskForce)
         {
-            lbTaskForces.AddItem(new XNAListBoxItem() { Text = taskForce.Name, Tag = taskForce });
+            var usage = map.TeamTypes.Find(tt => tt.TaskForce == taskForce);
+            if (usage == null)
+                return UISettings.ActiveSettings.AltColor;
+
+            return usage.GetXNAColor();
         }
 
         private void EditTaskForce(TaskForce taskForce)
