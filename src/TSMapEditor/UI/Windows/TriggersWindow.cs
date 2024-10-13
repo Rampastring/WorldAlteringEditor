@@ -591,12 +591,12 @@ namespace TSMapEditor.UI.Windows
                 "This will re-generate the internal IDs (01000000, 01000001 etc.) for ALL* of your map's script elements" + Environment.NewLine +
                 "that start their ID with 0100 (all editor-generated script elements do)." + Environment.NewLine + Environment.NewLine +
                 "It might make the list more sensible in case there are deleted triggers. However, this feature is" + Environment.NewLine +
-                "experimental and if it goes wrong, it can destroy all of your scripting. Do you want to continue?" + Environment.NewLine + Environment.NewLine +
-                "* AITriggers are not yet handled by the editor, so you might need to update them manually afterwards.",
+                "experimental and if it goes wrong, it can destroy all of your scripting. Do you want to continue?",
                 MessageBoxButtons.YesNo);
 
             messageBox.YesClickedAction = _ => map.RegenerateInternalIds();
             ListTriggers();
+            LbTriggers_SelectedIndexChanged(this, EventArgs.Empty);
         }
 
         private void CloneForEasierDifficulties()
