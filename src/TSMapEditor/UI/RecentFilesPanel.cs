@@ -35,7 +35,7 @@ namespace TSMapEditor.UI
                 fileLabel.Name = nameof(fileLabel) + i.ToString(CultureInfo.InvariantCulture);
                 fileLabel.X = Constants.UIEmptySideSpace;
                 fileLabel.Y = y;
-                fileLabel.Text = (i + 1).ToString(CultureInfo.InvariantCulture) + ") " + string.Join(Environment.NewLine, Renderer.GetFixedTextLines(path, fileLabel.FontIndex, Width - fileLabel.X - Constants.UIEmptySideSpace));
+                fileLabel.Text = (i + 1).ToString(CultureInfo.InvariantCulture) + ") " + path;
                 fileLabel.Tag = entries[i];
                 fileLabel.LeftClick += (s, e) => FileSelected?.Invoke(this, new FileSelectedEventArgs(path));
                 AddChild(fileLabel);

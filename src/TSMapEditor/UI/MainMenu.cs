@@ -114,50 +114,12 @@ namespace TSMapEditor.UI
             AddChild(btnBrowseMapPath);
             btnBrowseMapPath.LeftClick += BtnBrowseMapPath_LeftClick;
 
-            var lblDirectoryListing = new XNALabel(WindowManager);
-            lblDirectoryListing.Name = nameof(lblDirectoryListing);
-            lblDirectoryListing.X = Constants.UIEmptySideSpace;
-            lblDirectoryListing.Y = tbMapPath.Bottom + Constants.UIVerticalSpacing * 2;
-            lblDirectoryListing.Text = "Alternatively, select a map file below:";
-            AddChild(lblDirectoryListing);
-
-            lbFileList = new FileBrowserListBox(WindowManager);
-            lbFileList.Name = nameof(lbFileList);
-            lbFileList.X = Constants.UIEmptySideSpace;
-            lbFileList.Y = lblDirectoryListing.Bottom + Constants.UIVerticalSpacing;
-            lbFileList.Width = Width - (Constants.UIEmptySideSpace * 2);
-            lbFileList.Height = 420;
-            lbFileList.FileSelected += LbFileList_FileSelected;
-            lbFileList.FileDoubleLeftClick += LbFileList_FileDoubleLeftClick;
-            AddChild(lbFileList);
-
-            if (hasRecentFiles)
-            {
-                const int recentFilesHeight = 150;
-                lbFileList.Height -= recentFilesHeight + Constants.UIVerticalSpacing;
-
-                var lblRecentFiles = new XNALabel(WindowManager);
-                lblRecentFiles.Name = nameof(lblRecentFiles);
-                lblRecentFiles.X = lbFileList.X;
-                lblRecentFiles.Y = lbFileList.Bottom + Constants.UIVerticalSpacing;
-                lblRecentFiles.Text = "Recent files:";
-                AddChild(lblRecentFiles);
-
-                var recentFilesPanel = new RecentFilesPanel(WindowManager);
-                recentFilesPanel.X = lblRecentFiles.X;
-                recentFilesPanel.Y = lblRecentFiles.Bottom + Constants.UIVerticalSpacing;
-                recentFilesPanel.Width = lbFileList.Width;
-                recentFilesPanel.Height = recentFilesHeight - lblRecentFiles.Height - (Constants.UIVerticalSpacing * 2);
-                recentFilesPanel.FileSelected += RecentFilesPanel_FileSelected;
-                AddChild(recentFilesPanel);
-            }
-
             btnLoad = new EditorButton(WindowManager);
             btnLoad.Name = nameof(btnLoad);
             btnLoad.Width = 150;
             btnLoad.Text = "Load";
             btnLoad.Y = Height - btnLoad.Height - Constants.UIEmptyBottomSpace;
-            btnLoad.X = lbFileList.Right - btnLoad.Width;
+            btnLoad.X = Width - btnLoad.Width - Constants.UIEmptySideSpace;
             AddChild(btnLoad);
             btnLoad.LeftClick += BtnLoad_LeftClick;
 
@@ -165,7 +127,7 @@ namespace TSMapEditor.UI
             btnCreateNewMap.Name = nameof(btnCreateNewMap);
             btnCreateNewMap.Width = 150;
             btnCreateNewMap.Text = "New Map...";
-            btnCreateNewMap.X = lbFileList.X;
+            btnCreateNewMap.X = Constants.UIEmptySideSpace;
             btnCreateNewMap.Y = btnLoad.Y;
             AddChild(btnCreateNewMap);
             btnCreateNewMap.LeftClick += BtnCreateNewMap_LeftClick;
@@ -177,6 +139,47 @@ namespace TSMapEditor.UI
             AddChild(lblCopyright);
             lblCopyright.CenterOnControlVertically(btnCreateNewMap);
             lblCopyright.X = btnCreateNewMap.Right + ((btnLoad.X - btnCreateNewMap.Right) - lblCopyright.Width) / 2;
+
+            int directoryListingY = tbMapPath.Bottom + Constants.UIVerticalSpacing * 2;
+
+            if (hasRecentFiles)
+            {
+                const int recentFilesHeight = 150;
+
+                var lblRecentFiles = new XNALabel(WindowManager);
+                lblRecentFiles.Name = nameof(lblRecentFiles);
+                lblRecentFiles.X = Constants.UIEmptySideSpace;
+                lblRecentFiles.Y = directoryListingY;
+                lblRecentFiles.Text = "Recent files:";
+                AddChild(lblRecentFiles);
+
+                var recentFilesPanel = new RecentFilesPanel(WindowManager);
+                recentFilesPanel.X = lblRecentFiles.X;
+                recentFilesPanel.Y = lblRecentFiles.Bottom + Constants.UIVerticalSpacing;
+                recentFilesPanel.Width = Width - (Constants.UIEmptySideSpace * 2);
+                recentFilesPanel.Height = recentFilesHeight - lblRecentFiles.Height - (Constants.UIVerticalSpacing * 2);
+                recentFilesPanel.FileSelected += RecentFilesPanel_FileSelected;
+                AddChild(recentFilesPanel);
+
+                directoryListingY = recentFilesPanel.Bottom + Constants.UIVerticalSpacing;
+            }
+
+            var lblDirectoryListing = new XNALabel(WindowManager);
+            lblDirectoryListing.Name = nameof(lblDirectoryListing);
+            lblDirectoryListing.X = Constants.UIEmptySideSpace;
+            lblDirectoryListing.Y = directoryListingY;
+            lblDirectoryListing.Text = "Alternatively, select a map file below:";
+            AddChild(lblDirectoryListing);
+
+            lbFileList = new FileBrowserListBox(WindowManager);
+            lbFileList.Name = nameof(lbFileList);
+            lbFileList.X = Constants.UIEmptySideSpace;
+            lbFileList.Y = lblDirectoryListing.Bottom + Constants.UIVerticalSpacing;
+            lbFileList.Width = Width - (Constants.UIEmptySideSpace * 2);
+            lbFileList.Height = btnLoad.Y - Constants.UIEmptyTopSpace - lbFileList.Y;
+            lbFileList.FileSelected += LbFileList_FileSelected;
+            lbFileList.FileDoubleLeftClick += LbFileList_FileDoubleLeftClick;
+            AddChild(lbFileList);
 
             settingsPanel = new SettingsPanel(WindowManager);
             settingsPanel.Name = nameof(settingsPanel);
