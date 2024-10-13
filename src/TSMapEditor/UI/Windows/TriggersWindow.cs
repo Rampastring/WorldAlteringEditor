@@ -189,26 +189,33 @@ namespace TSMapEditor.UI.Windows
             lbEvents.AllowMultiLineItems = false;
             lbActions.AllowMultiLineItems = false;
 
+            var triggerContextMenu = new EditorContextMenu(WindowManager);
+            triggerContextMenu.Name = nameof(triggerContextMenu);
+            triggerContextMenu.Width = 270;
+            triggerContextMenu.AddItem("Place CellTag", PlaceCellTag);
+            triggerContextMenu.AddItem("Clear CellTags", ClearCellTags);
+            triggerContextMenu.AddItem("Attach to Objects", AttachTagToObjects);
+            triggerContextMenu.AddItem("View References", ShowReferences);
+            if (!Constants.IsRA2YR)
+            {
+                triggerContextMenu.AddItem("Wrap in EVA disable/enable actions", WrapInEVADisableAndEnableActions);
+            }
+            triggerContextMenu.AddItem("Clone for Easier Diffs", CloneForEasierDifficulties);
+            triggerContextMenu.AddItem("Clone for Easier Diffs (No Dependencies)", CloneForEasierDifficultiesWithoutDependencies);
+            AddChild(triggerContextMenu);
+
             FindChild<EditorButton>("btnNewTrigger").LeftClick += BtnNewTrigger_LeftClick;
             FindChild<EditorButton>("btnDeleteTrigger").LeftClick += BtnDeleteTrigger_LeftClick;
             FindChild<EditorButton>("btnCloneTrigger").LeftClick += BtnCloneTrigger_LeftClick;
             ddActions = FindChild<XNADropDown>(nameof(ddActions));
             ddActions.AddItem("Advanced...");
-            ddActions.AddItem(new XNADropDownItem() { Text = "Place CellTag", Tag = new Action(PlaceCellTag) });
-            ddActions.AddItem(new XNADropDownItem() { Text = "Clear CellTags", Tag = new Action(ClearCellTags) });
-            ddActions.AddItem(new XNADropDownItem() { Text = "Attach to Objects", Tag = new Action(AttachTagToObjects) });
-            ddActions.AddItem(new XNADropDownItem() { Text = "View Attached Objects", Tag = new Action(ShowAttachedObjects) });
-
-            if (!Constants.IsRA2YR)
+            // Add context menu options to Advanced menu for backwards compatibility
+            for (int i = 0; i < triggerContextMenu.Items.Count; i++)
             {
-                ddActions.AddItem(new XNADropDownItem() { Text = string.Empty, Selectable = false });
-                ddActions.AddItem(new XNADropDownItem() { Text = "Wrap in EVA disable/enable actions", Tag = new Action(WrapInEVADisableAndEnableActions) });
+                var contextMenuOption = triggerContextMenu.Items[i];
+                ddActions.AddItem(new XNADropDownItem() { Text = contextMenuOption.Text, Tag = contextMenuOption.SelectAction });
             }
-
-            ddActions.AddItem(new XNADropDownItem() { Text = string.Empty, Selectable = false });
             ddActions.AddItem(new XNADropDownItem() { Text = "Re-generate Trigger IDs", Tag = new Action(RegenerateIDs) });
-            ddActions.AddItem(new XNADropDownItem() { Text = "Clone for Easier Difficulties", Tag = new Action(CloneForEasierDifficulties) });
-            ddActions.AddItem(new XNADropDownItem() { Text = "Clone (no dependencies)", Tag = new Action(CloneForEasierDifficultiesWithoutDependencies) });
 
             ddActions.SelectedIndex = 0;
             ddActions.SelectedIndexChanged += DdActions_SelectedIndexChanged;
@@ -333,7 +340,8 @@ namespace TSMapEditor.UI.Windows
 
             FindChild<EditorButton>("btnSortOptions").LeftClick += (s, e) => sortContextMenu.Open(GetCursorPoint());
 
-            lbTriggers.AllowRightClickUnselect = true;
+            lbTriggers.AllowRightClickUnselect = false;
+            lbTriggers.RightClick += (s, e) => { lbTriggers.SelectedIndex = lbTriggers.HoveredIndex; if (lbTriggers.SelectedItem != null) triggerContextMenu.Open(GetCursorPoint()); };
             lbTriggers.SelectedIndexChanged += LbTriggers_SelectedIndexChanged;
         }
 
@@ -422,7 +430,7 @@ namespace TSMapEditor.UI.Windows
 
         #region Viewing linked objects
 
-        private void ShowAttachedObjects()
+        private void ShowReferences()
         {
             if (editedTrigger == null)
                 return;
