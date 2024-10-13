@@ -9,7 +9,12 @@ namespace TSMapEditor.CCEngine
     /// </summary>
     public class TmpFile
     {
-        public TmpFile() { }
+        public TmpFile(string fileName)
+        {
+            this.fileName = fileName;
+        }
+
+        private readonly string fileName;
 
         private TmpFileHeader tmpFileHeader;
         private List<TmpImage> tmpImages = new List<TmpImage>();
@@ -61,7 +66,7 @@ namespace TSMapEditor.CCEngine
                     else
                     {
                         memoryStream.Position = tmpHeaderOffsets[i];
-                        TmpImage tmpImage = new TmpImage(memoryStream);
+                        TmpImage tmpImage = new TmpImage(memoryStream, fileName);
                         tmpImages.Add(tmpImage);
                     }
                 }
@@ -100,12 +105,12 @@ namespace TSMapEditor.CCEngine
     {
         public const int IMAGE_HEADER_SIZE = 48;
 
-        public TmpImage(Stream stream)
+        public TmpImage(Stream stream, string fileName)
         {
             long expectedLength = stream.Position + IMAGE_HEADER_SIZE + Constants.TileColorBufferSize;
             if (stream.Length < expectedLength)
             {
-                throw new ArgumentException($"TMP file buffer ran out unexpectedly: " +
+                throw new ArgumentException($"TMP file buffer ran out unexpectedly while reading ${fileName}: " +
                     $"expected length of at least {expectedLength}, actual length: {stream.Length}");
             }
 

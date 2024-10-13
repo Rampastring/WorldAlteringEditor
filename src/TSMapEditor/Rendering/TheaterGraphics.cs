@@ -516,6 +516,7 @@ namespace TSMapEditor.Rendering
                             baseName = baseName + ((char)('a' + (v - 1)));
                         }
 
+                        string fileName = baseName + Theater.FileExtension;
                         byte[] data = fileManager.LoadFile(baseName + Theater.FileExtension);
 
                         if (data == null)
@@ -531,7 +532,7 @@ namespace TSMapEditor.Rendering
                             }
                         }
 
-                        var tmpFile = new TmpFile();
+                        var tmpFile = new TmpFile(fileName);
                         tmpFile.ParseFromBuffer(data);
 
                         var tmpImages = new List<MGTMPImage>();
