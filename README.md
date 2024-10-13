@@ -2,7 +2,11 @@
 [![Donate on Patreon](https://img.shields.io/badge/Donate-Patreon-red.svg)](https://www.patreon.com/rampastring)
 [![GitHub Releases](https://img.shields.io/github/downloads/Rampastring/WorldAlteringEditor/total.svg)](https://github.com/Rampastring/WorldAlteringEditor/releases)
 
-# C&C World-Altering Editor (WAE)
+# Archive of C&C World-Altering Editor (WAE)
+
+## This is an archival repository of the World-Altering Editor (WAE) before I transferred it under ownership of CnCNet.
+
+**For the latest updates to the application, see** https://github.com/CnCNet/WorldAlteringEditor
 
 Modern open-source map and scenario editor for
 
