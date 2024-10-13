@@ -457,6 +457,7 @@ namespace TSMapEditor.UI
             if (!createNew)
             {
                 UserSettings.Instance.LastScenarioPath.UserDefinedValue = loadMapFilePath;
+                UserSettings.Instance.RecentFiles.PutEntry(loadMapFilePath);
                 _ = UserSettings.Instance.SaveSettingsAsync();
             }
 

@@ -110,6 +110,7 @@ namespace TSMapEditor.UI.Windows
             if (UserSettings.Instance.LastScenarioPath != path)
             {
                 UserSettings.Instance.LastScenarioPath.UserDefinedValue = path;
+                UserSettings.Instance.RecentFiles.PutEntry(path);
                 _ = UserSettings.Instance.SaveSettingsAsync();
             }
 

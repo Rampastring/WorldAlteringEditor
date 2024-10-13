@@ -47,6 +47,8 @@ namespace TSMapEditor.Settings
 
             foreach (var setting in settings)
                 setting.LoadValue(UserSettingsIni);
+
+            RecentFiles.ReadFromIniFile(UserSettingsIni);
         }
 
         public IniFile UserSettingsIni { get; }
@@ -57,6 +59,8 @@ namespace TSMapEditor.Settings
             {
                 setting.WriteValue(UserSettingsIni, false);
             }
+
+            RecentFiles.WriteToIniFile(UserSettingsIni);
 
             UserSettingsIni.WriteIniFile();
         }
@@ -92,5 +96,7 @@ namespace TSMapEditor.Settings
         public StringSetting LastScenarioPath = new StringSetting(General, nameof(LastScenarioPath), "Maps/Custom/");
 
         public StringSetting TextEditorPath = new StringSetting(General, "TextEditorPath", string.Empty);
+
+        public RecentFiles RecentFiles = new RecentFiles();
     }
 }

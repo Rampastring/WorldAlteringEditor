@@ -41,8 +41,11 @@ namespace TSMapEditor.UI
 
         public override void Initialize()
         {
+            bool hasRecentFiles = UserSettings.Instance.RecentFiles.GetEntries().Count > 0;
+
             Name = nameof(MainMenu);
             Width = 570;
+            Height = WindowManager.RenderResolutionY;
 
             var lblGameDirectory = new XNALabel(WindowManager);
             lblGameDirectory.Name = nameof(lblGameDirectory);
@@ -122,17 +125,38 @@ namespace TSMapEditor.UI
             lbFileList.Name = nameof(lbFileList);
             lbFileList.X = Constants.UIEmptySideSpace;
             lbFileList.Y = lblDirectoryListing.Bottom + Constants.UIVerticalSpacing;
-            lbFileList.Width = Width - Constants.UIEmptySideSpace * 2;
+            lbFileList.Width = Width - (Constants.UIEmptySideSpace * 2);
             lbFileList.Height = 420;
             lbFileList.FileSelected += LbFileList_FileSelected;
             lbFileList.FileDoubleLeftClick += LbFileList_FileDoubleLeftClick;
             AddChild(lbFileList);
 
+            if (hasRecentFiles)
+            {
+                const int recentFilesHeight = 150;
+                lbFileList.Height -= recentFilesHeight + Constants.UIVerticalSpacing;
+
+                var lblRecentFiles = new XNALabel(WindowManager);
+                lblRecentFiles.Name = nameof(lblRecentFiles);
+                lblRecentFiles.X = lbFileList.X;
+                lblRecentFiles.Y = lbFileList.Bottom + Constants.UIVerticalSpacing;
+                lblRecentFiles.Text = "Recent files:";
+                AddChild(lblRecentFiles);
+
+                var recentFilesPanel = new RecentFilesPanel(WindowManager);
+                recentFilesPanel.X = lblRecentFiles.X;
+                recentFilesPanel.Y = lblRecentFiles.Bottom + Constants.UIVerticalSpacing;
+                recentFilesPanel.Width = lbFileList.Width;
+                recentFilesPanel.Height = recentFilesHeight - lblRecentFiles.Height - (Constants.UIVerticalSpacing * 2);
+                recentFilesPanel.FileSelected += RecentFilesPanel_FileSelected;
+                AddChild(recentFilesPanel);
+            }
+
             btnLoad = new EditorButton(WindowManager);
             btnLoad.Name = nameof(btnLoad);
             btnLoad.Width = 150;
             btnLoad.Text = "Load";
-            btnLoad.Y = lbFileList.Bottom + Constants.UIEmptyTopSpace;
+            btnLoad.Y = Height - btnLoad.Height - Constants.UIEmptyBottomSpace;
             btnLoad.X = lbFileList.Right - btnLoad.Width;
             AddChild(btnLoad);
             btnLoad.LeftClick += BtnLoad_LeftClick;
@@ -146,7 +170,13 @@ namespace TSMapEditor.UI
             AddChild(btnCreateNewMap);
             btnCreateNewMap.LeftClick += BtnCreateNewMap_LeftClick;
 
-            Height = btnLoad.Bottom + Constants.UIEmptyBottomSpace;
+            var lblCopyright = new XNALabel(WindowManager);
+            lblCopyright.Name = nameof(lblCopyright);
+            lblCopyright.Text = "Created by Rampastring";
+            lblCopyright.TextColor = UISettings.ActiveSettings.SubtleTextColor;
+            AddChild(lblCopyright);
+            lblCopyright.CenterOnControlVertically(btnCreateNewMap);
+            lblCopyright.X = btnCreateNewMap.Right + ((btnLoad.X - btnCreateNewMap.Right) - lblCopyright.Width) / 2;
 
             settingsPanel = new SettingsPanel(WindowManager);
             settingsPanel.Name = nameof(settingsPanel);
@@ -189,6 +219,12 @@ namespace TSMapEditor.UI
                     loadingStage++;
                 }
             }
+        }
+
+        private void RecentFilesPanel_FileSelected(object sender, FileSelectedEventArgs e)
+        {
+            tbMapPath.Text = e.FilePath;
+            BtnLoad_LeftClick(this, EventArgs.Empty);
         }
 
         private void LbFileList_FileSelected(object sender, FileSelectionEventArgs e)
@@ -290,17 +326,12 @@ namespace TSMapEditor.UI
 
             UserSettings.Instance.GameDirectory.UserDefinedValue = tbGameDirectory.Text;
             UserSettings.Instance.LastScenarioPath.UserDefinedValue = tbMapPath.Text;
+            UserSettings.Instance.RecentFiles.PutEntry(tbMapPath.Text);
 
             bool fullscreenWindowed = UserSettings.Instance.FullscreenWindowed.GetValue();
             bool borderless = UserSettings.Instance.Borderless.GetValue();
             if (fullscreenWindowed && !borderless)
                 throw new InvalidOperationException("Borderless= cannot be set to false if FullscreenWindowed= is enabled.");
-
-            var gameForm = (System.Windows.Forms.Form)System.Windows.Forms.Form.FromHandle(Game.Window.Handle);
-
-            double renderScale = UserSettings.Instance.RenderScale.GetValue();
-
-
 
             WindowManager.CenterControlOnScreen(this);
 
@@ -337,6 +368,7 @@ namespace TSMapEditor.UI
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     tbMapPath.Text = openFileDialog.FileName;
+                    BtnLoad_LeftClick(this, new EventArgs());
                 }
             }
 #endif

@@ -71,6 +71,7 @@ namespace TSMapEditor.UI
     {
         public SettingsPanel(WindowManager windowManager) : base(windowManager)
         {
+            BackgroundTexture = AssetLoader.CreateTexture(UISettings.ActiveSettings.BackgroundColor, 2, 2);
         }
 
         private XNADropDown ddRenderScale;
@@ -80,6 +81,12 @@ namespace TSMapEditor.UI
         private XNACheckBox chkUseBoldFont;
         private XNACheckBox chkGraphicsLevel;
         private EditorTextBox tbTextEditorPath;
+
+        public override void Kill()
+        {
+            BackgroundTexture?.Dispose();
+            base.Kill();
+        }
 
         public override void Initialize()
         {

@@ -480,6 +480,7 @@ namespace TSMapEditor.UI.TopBar
 
                     if (UserSettings.Instance.LastScenarioPath.GetValue() != saveFileDialog.FileName)
                     {
+                        UserSettings.Instance.RecentFiles.PutEntry(saveFileDialog.FileName);
                         UserSettings.Instance.LastScenarioPath.UserDefinedValue = saveFileDialog.FileName;
                         _ = UserSettings.Instance.SaveSettingsAsync();
                     }

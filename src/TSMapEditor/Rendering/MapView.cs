@@ -120,8 +120,6 @@ namespace TSMapEditor.Rendering
 
         private ulong refreshIndex;
 
-        private bool debugRenderDepthBuffer = false;
-
         private AircraftRenderer aircraftRenderer;
         private AnimRenderer animRenderer;
         private BuildingRenderer buildingRenderer;
