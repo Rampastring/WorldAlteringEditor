@@ -305,9 +305,10 @@ namespace TSMapEditor.UI.Windows
 
         private void BtnAddScript_LeftClick(object sender, EventArgs e)
         {
-            map.Scripts.Add(new Script(map.GetNewUniqueInternalId()) { Name = "New script" });
+            var newScript = new Script(map.GetNewUniqueInternalId()) { Name = "New script" };
+            map.Scripts.Add(newScript);
             ListScripts();
-            SelectLastScript();
+            SelectScript(newScript);
         }
 
         private void BtnDeleteScript_LeftClick(object sender, EventArgs e)
@@ -351,15 +352,10 @@ namespace TSMapEditor.UI.Windows
             if (editedScript == null)
                 return;
 
-            map.Scripts.Add(editedScript.Clone(map.GetNewUniqueInternalId()));
+            var newScript = editedScript.Clone(map.GetNewUniqueInternalId());
+            map.Scripts.Add(newScript);
             ListScripts();
-            SelectLastScript();
-        }
-
-        private void SelectLastScript()
-        {
-            lbScriptTypes.SelectedIndex = map.Scripts.Count - 1;
-            lbScriptTypes.ScrollToBottom();
+            SelectScript(newScript);
         }
 
         private void BtnAddAction_LeftClick(object sender, EventArgs e)
@@ -609,8 +605,11 @@ namespace TSMapEditor.UI.Windows
         {
             int index = lbScriptTypes.Items.FindIndex(lbi => lbi.Tag == script);
 
-            if (index > -1)
-                lbScriptTypes.SelectedIndex = index;
+            if (index < 0)
+                return;
+
+            lbScriptTypes.SelectedIndex = index;
+            lbScriptTypes.ScrollToSelectedElement();
         }
 
         private void ListScripts()
@@ -619,7 +618,7 @@ namespace TSMapEditor.UI.Windows
 
             IEnumerable<Script> sortedScripts = map.Scripts;
 
-            var shouldViewTop = false; // when filtering the scroll bar should update so we use a flag here
+            bool shouldViewTop = false; // when filtering the scroll bar should update so we use a flag here
             if (tbFilter.Text != string.Empty && tbFilter.Text != tbFilter.Suggestion)
             {
                 sortedScripts = sortedScripts.Where(script => script.Name.Contains(tbFilter.Text, StringComparison.CurrentCultureIgnoreCase));
